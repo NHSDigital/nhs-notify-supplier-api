@@ -1,22 +1,17 @@
-# NHS Notify Repository Template
+# NHS Notify Supplier API
 
-[![CI/CD Pull Request](https://github.com/nhs-england-tools/repository-template/actions/workflows/cicd-1-pull-request.yaml/badge.svg)](https://github.com/nhs-england-tools/repository-template/actions/workflows/cicd-1-pull-request.yaml)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=repository-template&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=repository-template)
+[![1. CI/CD pull request](https://github.com/NHSDigital/nhs-notify-supplier-api/actions/workflows/cicd-1-pull-request.yaml/badge.svg)](https://github.com/NHSDigital/nhs-notify-supplier-api/actions/workflows/cicd-1-pull-request.yaml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nhs-notify-supplier-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=nhs-notify-supplier-api)
 
-Start with an overview or a brief description of what the project is about and what it does. For example -
+The NHS Notify Supplier API is intended primarily for print suppliers to integrate with the NHS Notify message request queueing system.
 
-Welcome to our repository template designed to streamline your project setup! This robust template provides a reliable starting point for your new projects, covering an essential tech stack and encouraging best practices in documenting.
+It models the concepts needed to configure production of letters and other printed materials to specific specifications, provide proofs of these materials, receive batch production requests, provide details of returned letters and correspondence, and to report on the status of these artifacts and associated management information such as volumes and assocated costs.
 
-This repository template aims to foster a user-friendly development environment by ensuring that every included file is concise and adequately self-documented. By adhering to this standard, we can promote increased clarity and maintainability throughout your project's lifecycle. Bundled within this template are resources that pave the way for seamless repository creation. Currently supported technologies are:
-
-- Terraform
-- Docker
-
-Make use of this repository template to expedite your project setup and enhance your productivity right from the get-go. Enjoy the advantage of having a well-structured, self-documented project that reduces overhead and increases focus on what truly matters - coding!
+This repository documents the Supplier API specification and provides an SDK with examples and reference client implementations for interacting with it.
 
 ## Table of Contents
 
-- [NHS Notify Repository Template](#nhs-notify-repository-template)
+- [NHS Notify Supplier API](#nhs-notify-supplier-api)
   - [Table of Contents](#table-of-contents)
   - [Documentation](#documentation)
   - [Setup](#setup)
@@ -38,6 +33,8 @@ Make use of this repository template to expedite your project setup and enhance 
 
 ## Setup
 
+> TODO
+
 By including preferably a one-liner or if necessary a set of clear CLI instructions we improve user experience. This should be a frictionless installation process that works on various operating systems (macOS, Linux, Windows WSL) and handles all the dependencies.
 
 Clone the repository
@@ -48,6 +45,8 @@ cd nhs-england-tools/repository-template
 ```
 
 ### Prerequisites
+
+> TODO
 
 The following software packages, or their equivalents, are expected to be installed and configured:
 
@@ -75,6 +74,8 @@ The following software packages, or their equivalents, are expected to be instal
 
 ### Configuration
 
+> TODO
+
 Installation and configuration of the toolchain dependencies
 
 ```shell
@@ -83,15 +84,21 @@ make config
 
 ## Usage
 
+> TODO
+
 After a successful installation, provide an informative example of how this project can be used. Additional code snippets, screenshots and demos work well in this space. You may also link to the other documentation resources, e.g. the [User Guide](./docs/user-guide.md) to demonstrate more use cases and to show more features.
 
 ### Testing
+
+> TODO
 
 There are `make` tasks for you to configure to run your tests.  Run `make test` to see how they work.  You should be able to use the same entry points for local development as in your CI pipeline.
 
 ## Design
 
 ### Diagrams
+
+> TODO
 
 The [C4 model](https://c4model.com/) is a simple and intuitive way to create software architecture diagrams that are clear, consistent, scalable and most importantly collaborative. This should result in documenting all the system interfaces, external dependencies and integration points.
 
@@ -111,9 +118,13 @@ sequenceDiagram
 
 ### Modularity
 
+> TODO
+
 Most of the projects are built with customisability and extendability in mind. At a minimum, this can be achieved by implementing service level configuration options and settings. The intention of this section is to show how this can be used. If the system processes data, you could mention here for example how the input is prepared for testing - anonymised, synthetic or live data.
 
 ## Contributing
+
+> TODO
 
 Describe or link templates on how to raise an issue, feature request or make a contribution to the codebase. Reference the other documentation files, like
 
@@ -125,11 +136,11 @@ Describe or link templates on how to raise an issue, feature request or make a c
 
 ## Contacts
 
+> TODO
+
 Provide a way to contact the owners of this project. It can be a team, an individual or information on the means of getting in touch via active communication channels, e.g. opening a GitHub discussion, raising an issue, etc.
 
 ## Licence
-
-> The [LICENCE.md](./LICENCE.md) file will need to be updated with the correct year and owner
 
 Unless stated otherwise, the codebase is released under the MIT License. This covers both the codebase and any sample code in the documentation.
 
