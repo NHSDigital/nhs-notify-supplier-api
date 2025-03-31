@@ -1,0 +1,720 @@
+openapi: 3.1.0
+info:
+  version: 0.0.1
+  title: NHS Notify Supplier API
+  description: API for communication suppliers to integrate with NHS Notify
+security:
+  - authorization: [ ]
+paths:
+  /batch:
+    parameters:
+      - $ref: '#/components/parameters/requestId'
+      - $ref: '#/components/parameters/correlationId'
+    get:
+      summary: Retrieve a list of available letter batches
+      operationId: get-batches
+  '/batch/{id}':
+    parameters:
+      - $ref: '#/components/parameters/requestId'
+      - $ref: '#/components/parameters/correlationId'
+      - $ref: '#/components/parameters/id'
+    get:
+      summary: Retrieve a batch of letters
+      description: Get details about a batch of letters
+      operationId: get-batch-id
+      responses:
+        '200':
+          description: Batch of letters found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/LettersResponse'
+              examples:
+                example-1:
+                  value:
+                    data:
+                      type: Letters
+                      id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                      attributes:
+                        download:
+                          link: 'http://s3-presigned-url'
+                          expiry: '2024-11-09T10:31:59Z'
+                        letters:
+                          - messageId: 2WL5f8j4XVxUPgd3OOqXVYvVFIW
+                            fileName: 2WL5f8j4XVxUPgd3OOqXVYvVFIW.pdf
+                          - messageId: 2WL5f8j4XVxUPgd3OOqXVYvVIOP
+                            fileName: 2WL5f8j4XVxUPgd3OOqXVYvVIOP.pdf
+        '404':
+          description: No batch of letters available
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                error-1:
+                  value:
+                    errors:
+                      - id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
+                        code: CM_NO_BATCH_AVAILABLE
+                        links:
+                          about: 'https://digital.nhs.uk/developer/api-catalogue/nhs-notify'
+                        status: '404'
+                        title: No batch of letters available
+                        detail: There are no batches of letters left assigned to this supplier
+        '429':
+          description: Too many requests
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                error-1:
+                  value:
+                    errors:
+                      - id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
+                        code: CM_QUOTA
+                        links:
+                          about: 'https://digital.nhs.uk/developer/api-catalogue/nhs-notify'
+                        status: '429'
+                        title: Too many requests
+                        detail: You have made too many requests. Please try again later.
+        '500':
+          description: Server error
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                error-1:
+                  value:
+                    errors:
+                      - id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
+                        code: CM_INTERNAL_SERVER_ERROR
+                        links:
+                          about: 'https://digital.nhs.uk/developer/api-catalogue/nhs-notify'
+                        status: '500'
+                        title: Internal Server Error
+                        detail: 'An unexpected error occurred, please contact support'
+    patch:
+      summary: Update the status of a batch of letters
+      description: Update the status of a batch of letters by providing the new status in the request body.
+      operationId: patch-letters-batch
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/LetterBatchUpdateRequest'
+      responses:
+        '200':
+          description: Letters resources updated successfully
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/LetterBatchUpdateResponse'
+              examples:
+                example-1:
+                  value:
+                    data:
+                      type: Letter
+                      id: 2WL5f8j4XVxUPgd3OOqXVYvVFIW
+                      attributes:
+                        status: ACKNOWLEDGED
+        '400':
+          description: 'Bad request, invalid input data'
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                error-1:
+                  value:
+                    errors:
+                      - id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
+                        code: CM_INVALID_REQUEST
+                        links:
+                          about: 'https://digital.nhs.uk/developer/api-catalogue/nhs-notify'
+                        status: '400'
+                        title: Invalid request
+                        detail: 'Invalid request, please refer to the API specifications'
+        '404':
+          description: Letter resource not found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                error-1:
+                  value:
+                    errors:
+                      - id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
+                        code: CM_LETTER_NOT_FOUND
+                        links:
+                          about: 'https://digital.nhs.uk/developer/api-catalogue/nhs-notify'
+                        status: '404'
+                        title: Letter not found
+                        detail: No letter found with that ID
+        '429':
+          description: Too many requests
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                error-1:
+                  value:
+                    errors:
+                      - id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
+                        code: CM_QUOTA
+                        links:
+                          about: 'https://digital.nhs.uk/developer/api-catalogue/nhs-notify'
+                        status: '429'
+                        title: Too many requests
+                        detail: You have made too many requests. Please try again later.
+        '500':
+          description: Server error
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                error-1:
+                  value:
+                    errors:
+                      - id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
+                        code: CM_INTERNAL_SERVER_ERROR
+                        links:
+                          about: 'https://digital.nhs.uk/developer/api-catalogue/nhs-notify'
+                        status: '500'
+                        title: Internal Server Error
+                        detail: 'An unexpected error occurred, please contact support'
+  /letter:
+    parameters:
+      - $ref: '#/components/parameters/requestId'
+      - $ref: '#/components/parameters/correlationId'
+    post:
+      summary: Update the status of multiple letters
+  '/letter/{id}':
+    parameters:
+      - $ref: '#/components/parameters/requestId'
+      - $ref: '#/components/parameters/correlationId'
+      - $ref: '#/components/parameters/id'
+    get:
+      summary: Retrieve the status of a letter
+      description: Get details the status of a letter.
+      operationId: get-letter-status
+      responses:
+        '200':
+          description: Letter status
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/LetterStatusResponse'
+              examples:
+                example-1:
+                  value:
+                    data:
+                      type: Letter
+                      id: 2WL5f8j4XVxUPgd3OOqXVYvVFIW
+                      attributes:
+                        status: ACKNOWLEDGED
+        '404':
+          description: Could not find letter
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                error-1:
+                  value:
+                    errors:
+                      - id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
+                        code: CM_NOT_FOUND
+                        links:
+                          about: 'https://digital.nhs.uk/developer/api-catalogue/nhs-notify'
+                        status: '404'
+                        title: No letter found
+                        detail: There are no batches of letters left assigned to this supplier
+        '429':
+          description: Too many requests
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                error-1:
+                  value:
+                    errors:
+                      - id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
+                        code: CM_QUOTA
+                        links:
+                          about: 'https://digital.nhs.uk/developer/api-catalogue/nhs-notify'
+                        status: '429'
+                        title: Too many requests
+                        detail: You have made too many requests. Please try again later.
+        '500':
+          description: Server error
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                error-1:
+                  value:
+                    errors:
+                      - id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
+                        code: CM_INTERNAL_SERVER_ERROR
+                        links:
+                          about: 'https://digital.nhs.uk/developer/api-catalogue/nhs-notify'
+                        status: '500'
+                        detail: 'An unexpected error occurred, please contact support'
+                        title: Internal Server Error
+    patch:
+      summary: Update the status of a letter
+      description: Update the status of a letter by providing the new status in the request body.
+      operationId: patch-letters
+      requestBody:
+        required: true
+        content:
+          application/vnd.api+json:
+            schema:
+              $ref: '#/components/schemas/LetterUpdateRequest'
+      responses:
+        '200':
+          description: Letter resource updated successfully
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/LetterUpdateResponse'
+              examples:
+                example-1:
+                  value:
+                    data:
+                      type: Letter
+                      id: 2WL5f8j4XVxUPgd3OOqXVYvVFIW
+                      attributes:
+                        status: ACKNOWLEDGED
+        '400':
+          description: 'Bad request, invalid input data'
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                error-1:
+                  value:
+                    errors:
+                      - id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
+                        code: CM_INVALID_REQUEST
+                        links:
+                          about: 'https://digital.nhs.uk/developer/api-catalogue/nhs-notify'
+                        status: '400'
+                        title: Invalid request
+                        detail: 'Invalid request, please refer to the API specifications'
+        '404':
+          description: Letter resource not found
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                error-1:
+                  value:
+                    errors:
+                      - id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
+                        code: CM_LETTER_NOT_FOUND
+                        links:
+                          about: 'https://digital.nhs.uk/developer/api-catalogue/nhs-notify'
+                        status: '404'
+                        title: Letter not found
+                        detail: No letter found with that ID
+        '429':
+          description: Too many requests
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                error-1:
+                  value:
+                    errors:
+                      - id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
+                        code: CM_QUOTA
+                        links:
+                          about: 'https://digital.nhs.uk/developer/api-catalogue/nhs-notify'
+                        status: '429'
+                        title: Too many requests
+                        detail: You have made too many requests. Please try again later.
+        '500':
+          description: Server error
+          content:
+            application/vnd.api+json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                error-1:
+                  value:
+                    errors:
+                      - id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
+                        code: CM_INTERNAL_SERVER_ERROR
+                        links:
+                          about: 'https://digital.nhs.uk/developer/api-catalogue/nhs-notify'
+                        status: '500'
+                        title: Internal Server Error
+                        detail: 'An unexpected error occurred, please contact support'
+  /cancellation:
+    parameters:
+      - $ref: '#/components/parameters/requestId'
+      - $ref: '#/components/parameters/correlationId'
+    get:
+      summary: Get a list of cancelled letters
+  /mi:
+    parameters:
+      - $ref: '#/components/parameters/requestId'
+      - $ref: '#/components/parameters/correlationId'
+    get:
+      summary: List MI records
+      operationId: list-mi
+    post:
+      summary: Create a new MI record
+      operationId: create-mi
+  /mi/{id}:
+    parameters:
+      - $ref: '#/components/parameters/requestId'
+      - $ref: '#/components/parameters/correlationId'
+      - $ref: '#/components/parameters/id'
+    get:
+      summary: Fetch a specific MI record
+      operationId: get-mi
+  /specification:
+    parameters:
+      - $ref: '#/components/parameters/requestId'
+      - $ref: '#/components/parameters/correlationId'
+    get:
+      summary: List specifications
+      operationId: list-specification
+    post:
+      summary: Create a new specification record
+      operationId: create-specification
+  /specification/{id}:
+    parameters:
+      - $ref: '#/components/parameters/requestId'
+      - $ref: '#/components/parameters/correlationId'
+      - $ref: '#/components/parameters/id'
+    get:
+      summary: Fetch metadata about a specific specification
+      operationId: get-specification
+    patch:
+      summary: Update metadata about a specific specification
+      operationId: patch-specification
+  /proof:
+    parameters:
+      - $ref: '#/components/parameters/requestId'
+      - $ref: '#/components/parameters/correlationId'
+    get:
+      summary: List proof files
+      operationId: list-proof
+    post:
+      summary: Create a new proof metadata record
+      operationId: create-proof
+  /proof/{id}:
+    parameters:
+      - $ref: '#/components/parameters/requestId'
+      - $ref: '#/components/parameters/correlationId'
+      - $ref: '#/components/parameters/id'
+    get:
+      summary: Fetch metadata about a specific proof file
+      operationId: get-proof
+    patch:
+      summary: Update metadata about a specific proof file
+      operationId: patch-proof
+  /artwork:
+    parameters:
+      - $ref: '#/components/parameters/requestId'
+      - $ref: '#/components/parameters/correlationId'
+    get:
+      summary: List artwork files
+      operationId: list-artwork
+    post:
+      summary: Create a new artwork metadata record
+      operationId: create-artwork
+  /artwork/{id}:
+    parameters:
+      - $ref: '#/components/parameters/requestId'
+      - $ref: '#/components/parameters/correlationId'
+      - $ref: '#/components/parameters/id'
+    get:
+      summary: Fetch metadata about a specific artwork file
+      operationId: get-artwork
+    patch:
+      summary: Update metadata about a specific artwork file
+      operationId: patch-artwork
+  /return:
+    parameters:
+      - $ref: '#/components/parameters/requestId'
+      - $ref: '#/components/parameters/correlationId'
+    get:
+      summary: List batches of returned letters
+      operationId: list-return
+    post:
+      summary: Create a new returned letter batch
+      operationId: create-return
+  /return/{id}:
+    parameters:
+      - $ref: '#/components/parameters/requestId'
+      - $ref: '#/components/parameters/correlationId'
+      - $ref: '#/components/parameters/id'
+    get:
+      summary: Fetch metadata about a specific return batch
+      operationId: get-return
+  /data:
+    parameters:
+      - $ref: '#/components/parameters/requestId'
+      - $ref: '#/components/parameters/correlationId'
+    post:
+      summary: Request a URL to upload a new data file
+      operationId: post-data
+  /data/{id}:
+    parameters:
+      - $ref: '#/components/parameters/requestId'
+      - $ref: '#/components/parameters/correlationId'
+      - $ref: '#/components/parameters/id'
+    get:
+      summary: Fetch metadata about an existing data file
+      operationId: get-data
+components:
+  parameters:
+    requestId:
+      name: X-Request-ID
+      in: header
+      description: 'Unique request identifier, in the format of a GUID'
+      required: true
+      schema:
+        type: string
+        examples:
+          - dcb9c8dc-c2f4-4d5f-8674-a2e913e040b2
+    correlationId:
+      name: X-Correlation-ID
+      in: header
+      description: |-
+        An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place.
+        The ID will be returned in a response header.
+      required: false
+      schema:
+        type: string
+        examples:
+          - 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
+    id:
+      name: id
+      in: path
+      description: Unique identifier of this resource
+      required: true
+      schema:
+        type: string
+  securitySchemes:
+    authorization:
+      type: oauth2
+      description: |-
+        An [OAuth 2.0 bearer token](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation/application-restricted-restful-apis-signed-jwt-authentication).
+        Required in all environments except sandbox.
+      flows:
+        authorizationCode:
+          authorizationUrl: ''
+          tokenUrl: ''
+  schemas:
+    LettersResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/LetterData'
+    LetterData:
+      type: object
+      properties:
+        type:
+          const: Letters
+        id:
+          type: string
+          examples:
+            - 2WL5eYSWGzCHlGmzNxuqVusPxDg
+        attributes:
+          $ref: '#/components/schemas/LetterAttributes'
+    LetterAttributes:
+      type: object
+      properties:
+        download:
+          $ref: '#/components/schemas/Download'
+        letters:
+          type: array
+          items:
+            $ref: '#/components/schemas/Letter'
+    Download:
+      type: object
+      properties:
+        link:
+          type: string
+          format: uri
+          examples:
+            - 'http://s3-presigned-url'
+        expiry:
+          type: string
+          format: date-time
+          examples:
+            - '2024-11-09T10:31:59Z'
+    Letter:
+      type: object
+      properties:
+        messageId:
+          type: string
+          examples:
+            - 2WL5f8j4XVxUPgd3OOqXVYvVFIW
+        fileName:
+          type: string
+          examples:
+            - 2WL5f8j4XVxUPgd3OOqXVYvVFIW.pdf
+    ErrorResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/ErrorData'
+    ErrorData:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorItem'
+    ErrorItem:
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+          enum:
+            - CM_NO_BATCH_AVAILABLE
+            - CM_INTERNAL_SERVER_ERROR
+            - CM_INVALID_REQUEST
+            - CM_LETTER_NOT_FOUND
+        links:
+          type: object
+          properties:
+            about:
+              type: string
+              format: uri
+        status:
+          type: string
+        title:
+          type: string
+        detail:
+          type: string
+    LetterBatchUpdateRequest:
+      $ref: '#/components/schemas/LetterBatchUpdateData'
+    LetterBatchUpdateData:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            type:
+              const: Letter
+            id:
+              type: string
+              examples:
+                - 2WL5eYSWGzCHlGmzNxuqVusPxDg
+            attributes:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - ACKNOWLEDGED
+                    - PENDING
+                    - HOLD
+                    - CANCELLED
+                    - PROCESSING
+                    - PRINTED
+                    - FAILED
+                    - DISPATCHED
+                  description: New status to be applied to the batch of letters
+                reasonCode:
+                  type: number
+                  description: Reason code for the given status
+                  examples:
+                    - 100
+                reasonText:
+                  type: string
+                  description: Reason code for the given status
+                  examples:
+                    - failed validation
+    LetterBatchUpdateResponse:
+      $ref: '#/components/schemas/LetterBatchUpdateData'
+    LetterUpdateRequest:
+      $ref: '#/components/schemas/LetterUpdateData'
+    LetterUpdateData:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            type:
+              const: Letter
+            id:
+              type: string
+              examples:
+                - 2WL5eYSWGzCHlGmzNxuqVusPxDg
+            attributes:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - ACKNOWLEDGED
+                    - PENDING
+                    - HOLD
+                    - CANCELLED
+                    - PROCESSING
+                    - PRINTED
+                    - FAILED
+                    - DISPATCHED
+                  description: New status to be applied to the letter
+                reasonCode:
+                  type: number
+                  description: Reason code for the given status
+                  examples:
+                    - 100
+                reasonText:
+                  type: string
+                  description: Reason code for the given status
+                  examples:
+                    - failed validation
+    LetterUpdateResponse:
+      $ref: '#/components/schemas/LetterUpdateData'
+    LetterStatusResponse:
+      $ref: '#/components/schemas/LetterStatuData'
+    LetterStatuData:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            type:
+              const: Letter
+            id:
+              type: string
+              examples:
+                - 2WL5eYSWGzCHlGmzNxuqVusPxDg
+            attributes:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - ACKNOWLEDGED
+                    - PENDING
+                    - HOLD
+                    - CANCELLED
+                    - PROCESSING
+                    - PRINTED
+                    - FAILED
+                    - DISPATCHED
+                  description: New status to be applied to the letter

@@ -11,3 +11,5 @@ version.json
 !project.code-workspace
 
 # Please, add your custom content below!
+node_modules
+.idea
