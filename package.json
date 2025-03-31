@@ -17,10 +17,10 @@
   "scripts": {
     "generate": "pnpm generate:ts && pnpm generate:python && pnpm generate:sandbox",
     "generate:python": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/specification/api/notify-supplier.yml -g python -o /local/sdk/python --skip-validate-spec",
-    "generate:ts": "npx orval",
-    "generate:sandbox-types": "openapi-typescript specification/api/notify-supplier.yml -o sandbox/types/api.d.ts",
-    "generate:sandbox-server": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/specification/api/notify-supplier.yml -g nodejs-express-server -o /local/sandbox --skip-validate-spec",
     "generate:sandbox": "pnpm generate:sandbox-types && pnpm generate:sandbox-server",
+    "generate:sandbox-server": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/specification/api/notify-supplier.yml -g nodejs-express-server -o /local/sandbox --skip-validate-spec",
+    "generate:sandbox-types": "openapi-typescript specification/api/notify-supplier.yml -o sandbox/types/api.d.ts",
+    "generate:ts": "npx orval",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "version": "1.0.0"

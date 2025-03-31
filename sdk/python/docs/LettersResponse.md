@@ -5,7 +5,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**data** | [**LetterData**](LetterData.md) |  | [optional] 
+**data** | [**LetterData**](LetterData.md) |  | [optional]
 
 ## Example
 
@@ -25,5 +25,3 @@ letters_response_dict = letters_response_instance.to_dict()
 letters_response_from_dict = LettersResponse.from_dict(letters_response_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

@@ -5,9 +5,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**status** | **str** | New status to be applied to the letter | [optional] 
-**reason_code** | **float** | Reason code for the given status | [optional] 
-**reason_text** | **str** | Reason code for the given status | [optional] 
+**status** | **str** | New status to be applied to the letter | [optional]
+**reason_code** | **float** | Reason code for the given status | [optional]
+**reason_text** | **str** | Reason code for the given status | [optional]
 
 ## Example
 
@@ -27,5 +27,3 @@ letter_update_data_data_attributes_dict = letter_update_data_data_attributes_ins
 letter_update_data_data_attributes_from_dict = LetterUpdateDataDataAttributes.from_dict(letter_update_data_data_attributes_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

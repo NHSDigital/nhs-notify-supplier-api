@@ -87,5 +87,3 @@ class LetterUpdateData(BaseModel):
             "data": LetterUpdateDataData.from_dict(obj["data"]) if obj.get("data") is not None else None
         })
         return _obj
-
-

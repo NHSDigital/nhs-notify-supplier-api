@@ -5,9 +5,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**type** | **object** |  | [optional] 
-**id** | **str** |  | [optional] 
-**attributes** | [**LetterStatuDataDataAttributes**](LetterStatuDataDataAttributes.md) |  | [optional] 
+**type** | **object** |  | [optional]
+**id** | **str** |  | [optional]
+**attributes** | [**LetterStatuDataDataAttributes**](LetterStatuDataDataAttributes.md) |  | [optional]
 
 ## Example
 
@@ -27,5 +27,3 @@ letter_statu_data_data_dict = letter_statu_data_data_instance.to_dict()
 letter_statu_data_data_from_dict = LetterStatuDataData.from_dict(letter_statu_data_data_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

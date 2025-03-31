@@ -83,5 +83,3 @@ class ErrorItemLinks(BaseModel):
             "about": obj.get("about")
         })
         return _obj
-
-

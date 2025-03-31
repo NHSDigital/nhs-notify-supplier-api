@@ -5,7 +5,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**errors** | [**List[ErrorItem]**](ErrorItem.md) |  | [optional] 
+**errors** | [**List[ErrorItem]**](ErrorItem.md) |  | [optional]
 
 ## Example
 
@@ -25,5 +25,3 @@ error_data_dict = error_data_instance.to_dict()
 error_data_from_dict = ErrorData.from_dict(error_data_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

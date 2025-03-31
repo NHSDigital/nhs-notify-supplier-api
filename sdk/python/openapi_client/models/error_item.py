@@ -107,5 +107,3 @@ class ErrorItem(BaseModel):
             "detail": obj.get("detail")
         })
         return _obj
-
-

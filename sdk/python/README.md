@@ -151,12 +151,8 @@ Authentication schemes defined for the API:
 
 - **Type**: OAuth
 - **Flow**: accessCode
-- **Authorization URL**: 
+- **Authorization URL**:
 - **Scopes**: N/A
 
 
 ## Author
-
-
-
-

@@ -97,5 +97,3 @@ class LetterAttributes(BaseModel):
             "letters": [Letter.from_dict(_item) for _item in obj["letters"]] if obj.get("letters") is not None else None
         })
         return _obj
-
-

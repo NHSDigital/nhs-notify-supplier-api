@@ -5,7 +5,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**data** | [**LetterUpdateDataData**](LetterUpdateDataData.md) |  | [optional] 
+**data** | [**LetterUpdateDataData**](LetterUpdateDataData.md) |  | [optional]
 
 ## Example
 
@@ -25,5 +25,3 @@ letter_update_data_dict = letter_update_data_instance.to_dict()
 letter_update_data_from_dict = LetterUpdateData.from_dict(letter_update_data_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

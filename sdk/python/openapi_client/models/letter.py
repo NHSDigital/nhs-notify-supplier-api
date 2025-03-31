@@ -85,5 +85,3 @@ class Letter(BaseModel):
             "fileName": obj.get("fileName")
         })
         return _obj
-
-

@@ -511,7 +511,7 @@ const patchArtwork = ({ xRequestID, id, xCorrelationID }) => new Promise(
 *
 * xRequestID String Unique request identifier, in the format of a GUID
 * id String Unique identifier of this resource
-* body LetterUpdateData 
+* body LetterUpdateData
 * xCorrelationID String An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header. (optional)
 * returns LetterUpdateData
 * */
@@ -538,7 +538,7 @@ const patchLetters = ({ xRequestID, id, body, xCorrelationID }) => new Promise(
 *
 * xRequestID String Unique request identifier, in the format of a GUID
 * id String Unique identifier of this resource
-* body LetterBatchUpdateData 
+* body LetterBatchUpdateData
 * xCorrelationID String An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header. (optional)
 * returns LetterBatchUpdateData
 * */

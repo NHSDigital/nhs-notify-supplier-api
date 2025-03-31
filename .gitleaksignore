@@ -4,3 +4,5 @@ cd9c0efec38c5d63053dd865e5d4e207c0760d91:docs/guides/Perform_static_analysis.md:
 cd9c0efec38c5d63053dd865e5d4e207c0760d91:docs/guides/Perform_static_analysis.md:sonar-api-token:37
 96096685ab3d6876671e2bc9a6ff4d48fc56e521:src/helloworld/helloworld.sln:ipv4:4
 4f4e8c15629b2cb09356a7fed4d72953590227ce:docs/Gemfile.lock:ipv4:4
+b1f85a7faf54eaf66074d7a6daa093aefe6b3ebe:sdk/python/test-requirements.txt:ipv4:5
+b1f85a7faf54eaf66074d7a6daa093aefe6b3ebe:sdk/python/pyproject.toml:ipv4:25

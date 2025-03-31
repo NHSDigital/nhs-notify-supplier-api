@@ -1,18 +1,4 @@
 {
-  "name":  "nhs-notify-supplier-api",
-  "version": "0.0.1",
-  "description": "API for communication suppliers to integrate with NHS Notify",
-  "main": "index.js",
-  "scripts": {
-    "prestart": "npm install",
-    "start": "node index.js"
-  },
-  "keywords": [
-    "openapi-generator",
-    "openapi"
-  ],
-  "license": "Unlicense",
-  "private": true,
   "dependencies": {
     "body-parser": "^1.19.0",
     "camelcase": "^5.3.1",
@@ -26,6 +12,7 @@
     "swagger-ui-express": "^4.0.2",
     "winston": "^3.2.1"
   },
+  "description": "API for communication suppliers to integrate with NHS Notify",
   "devDependencies": {
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
@@ -38,5 +25,18 @@
     "env": {
       "node": true
     }
-  }
+  },
+  "keywords": [
+    "openapi-generator",
+    "openapi"
+  ],
+  "license": "Unlicense",
+  "main": "index.js",
+  "name": "nhs-notify-supplier-api",
+  "private": true,
+  "scripts": {
+    "prestart": "npm install",
+    "start": "node index.js"
+  },
+  "version": "0.0.1"
 }
