@@ -5,8 +5,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**download** | [**Download**](Download.md) |  | [optional]
-**letters** | [**List[Letter]**](Letter.md) |  | [optional]
+**download** | [**Download**](Download.md) |  | [optional] 
+**letters** | [**List[Letter]**](Letter.md) |  | [optional] 
 
 ## Example
 
@@ -26,3 +26,5 @@ letter_attributes_dict = letter_attributes_instance.to_dict()
 letter_attributes_from_dict = LetterAttributes.from_dict(letter_attributes_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+

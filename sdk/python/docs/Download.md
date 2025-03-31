@@ -5,8 +5,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**link** | **str** |  | [optional]
-**expiry** | **datetime** |  | [optional]
+**link** | **str** |  | [optional] 
+**expiry** | **datetime** |  | [optional] 
 
 ## Example
 
@@ -26,3 +26,5 @@ download_dict = download_instance.to_dict()
 download_from_dict = Download.from_dict(download_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+

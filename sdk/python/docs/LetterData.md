@@ -5,9 +5,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**type** | **object** |  | [optional]
-**id** | **str** |  | [optional]
-**attributes** | [**LetterAttributes**](LetterAttributes.md) |  | [optional]
+**type** | **object** |  | [optional] 
+**id** | **str** |  | [optional] 
+**attributes** | [**LetterAttributes**](LetterAttributes.md) |  | [optional] 
 
 ## Example
 
@@ -27,3 +27,5 @@ letter_data_dict = letter_data_instance.to_dict()
 letter_data_from_dict = LetterData.from_dict(letter_data_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+

@@ -5,9 +5,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**status** | **str** | New status to be applied to the batch of letters | [optional]
-**reason_code** | **float** | Reason code for the given status | [optional]
-**reason_text** | **str** | Reason code for the given status | [optional]
+**status** | **str** | New status to be applied to the batch of letters | [optional] 
+**reason_code** | **float** | Reason code for the given status | [optional] 
+**reason_text** | **str** | Reason code for the given status | [optional] 
 
 ## Example
 
@@ -27,3 +27,5 @@ letter_batch_update_data_data_attributes_dict = letter_batch_update_data_data_at
 letter_batch_update_data_data_attributes_from_dict = LetterBatchUpdateDataDataAttributes.from_dict(letter_batch_update_data_data_attributes_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+

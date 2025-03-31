@@ -5,9 +5,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**type** | **object** |  | [optional]
-**id** | **str** |  | [optional]
-**attributes** | [**LetterBatchUpdateDataDataAttributes**](LetterBatchUpdateDataDataAttributes.md) |  | [optional]
+**type** | **object** |  | [optional] 
+**id** | **str** |  | [optional] 
+**attributes** | [**LetterBatchUpdateDataDataAttributes**](LetterBatchUpdateDataDataAttributes.md) |  | [optional] 
 
 ## Example
 
@@ -27,3 +27,5 @@ letter_batch_update_data_data_dict = letter_batch_update_data_data_instance.to_d
 letter_batch_update_data_data_from_dict = LetterBatchUpdateDataData.from_dict(letter_batch_update_data_data_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+
