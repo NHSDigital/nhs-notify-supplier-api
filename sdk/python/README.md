@@ -55,10 +55,10 @@ import openapi_client
 from openapi_client.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost
+# Defining the host is optional and defaults to http://127.0.0.1:3000
 # See configuration.py for a list of all supported configuration parameters.
 configuration = openapi_client.Configuration(
-    host = "http://localhost"
+    host = "http://127.0.0.1:3000"
 )
 
 # The client must configure the authentication and authorization parameters
@@ -72,73 +72,72 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 # Enter a context with an instance of the API client
 with openapi_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
-    api_instance = openapi_client.DefaultApi(api_client)
+    api_instance = openapi_client.ArtworkApi(api_client)
     x_request_id = 'x_request_id_example' # str | Unique request identifier, in the format of a GUID
     x_correlation_id = 'x_correlation_id_example' # str | An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header. (optional)
 
     try:
-        # Get a list of cancelled letters
-        api_instance.cancellation_get(x_request_id, x_correlation_id=x_correlation_id)
+        # Create a new artwork metadata record
+        api_instance.create_artwork(x_request_id, x_correlation_id=x_correlation_id)
     except ApiException as e:
-        print("Exception when calling DefaultApi->cancellation_get: %s\n" % e)
+        print("Exception when calling ArtworkApi->create_artwork: %s\n" % e)
 
 ```
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *http://localhost*
+All URIs are relative to *http://127.0.0.1:3000*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*DefaultApi* | [**cancellation_get**](docs/DefaultApi.md#cancellation_get) | **GET** /cancellation | Get a list of cancelled letters
-*DefaultApi* | [**create_artwork**](docs/DefaultApi.md#create_artwork) | **POST** /artwork | Create a new artwork metadata record
-*DefaultApi* | [**create_mi**](docs/DefaultApi.md#create_mi) | **POST** /mi | Create a new MI record
-*DefaultApi* | [**create_proof**](docs/DefaultApi.md#create_proof) | **POST** /proof | Create a new proof metadata record
-*DefaultApi* | [**create_return**](docs/DefaultApi.md#create_return) | **POST** /return | Create a new returned letter batch
-*DefaultApi* | [**create_specification**](docs/DefaultApi.md#create_specification) | **POST** /specification | Create a new specification record
-*DefaultApi* | [**get_artwork**](docs/DefaultApi.md#get_artwork) | **GET** /artwork/{id} | Fetch metadata about a specific artwork file
-*DefaultApi* | [**get_batch_id**](docs/DefaultApi.md#get_batch_id) | **GET** /batch/{id} | Retrieve a batch of letters
-*DefaultApi* | [**get_batches**](docs/DefaultApi.md#get_batches) | **GET** /batch | Retrieve a list of available letter batches
-*DefaultApi* | [**get_data**](docs/DefaultApi.md#get_data) | **GET** /data/{id} | Fetch metadata about an existing data file
-*DefaultApi* | [**get_letter_status**](docs/DefaultApi.md#get_letter_status) | **GET** /letter/{id} | Retrieve the status of a letter
-*DefaultApi* | [**get_mi**](docs/DefaultApi.md#get_mi) | **GET** /mi/{id} | Fetch a specific MI record
-*DefaultApi* | [**get_proof**](docs/DefaultApi.md#get_proof) | **GET** /proof/{id} | Fetch metadata about a specific proof file
-*DefaultApi* | [**get_return**](docs/DefaultApi.md#get_return) | **GET** /return/{id} | Fetch metadata about a specific return batch
-*DefaultApi* | [**get_specification**](docs/DefaultApi.md#get_specification) | **GET** /specification/{id} | Fetch metadata about a specific specification
-*DefaultApi* | [**letter_post**](docs/DefaultApi.md#letter_post) | **POST** /letter | Update the status of multiple letters
-*DefaultApi* | [**list_artwork**](docs/DefaultApi.md#list_artwork) | **GET** /artwork | List artwork files
-*DefaultApi* | [**list_mi**](docs/DefaultApi.md#list_mi) | **GET** /mi | List MI records
-*DefaultApi* | [**list_proof**](docs/DefaultApi.md#list_proof) | **GET** /proof | List proof files
-*DefaultApi* | [**list_return**](docs/DefaultApi.md#list_return) | **GET** /return | List batches of returned letters
-*DefaultApi* | [**list_specification**](docs/DefaultApi.md#list_specification) | **GET** /specification | List specifications
-*DefaultApi* | [**patch_artwork**](docs/DefaultApi.md#patch_artwork) | **PATCH** /artwork/{id} | Update metadata about a specific artwork file
-*DefaultApi* | [**patch_letters**](docs/DefaultApi.md#patch_letters) | **PATCH** /letter/{id} | Update the status of a letter
-*DefaultApi* | [**patch_letters_batch**](docs/DefaultApi.md#patch_letters_batch) | **PATCH** /batch/{id} | Update the status of a batch of letters
-*DefaultApi* | [**patch_proof**](docs/DefaultApi.md#patch_proof) | **PATCH** /proof/{id} | Update metadata about a specific proof file
-*DefaultApi* | [**patch_specification**](docs/DefaultApi.md#patch_specification) | **PATCH** /specification/{id} | Update metadata about a specific specification
-*DefaultApi* | [**post_data**](docs/DefaultApi.md#post_data) | **POST** /data | Request a URL to upload a new data file
+*ArtworkApi* | [**create_artwork**](docs/ArtworkApi.md#create_artwork) | **POST** /artwork | Create a new artwork metadata record
+*ArtworkApi* | [**get_artwork**](docs/ArtworkApi.md#get_artwork) | **GET** /artwork/{id} | Fetch metadata about a specific artwork file
+*ArtworkApi* | [**list_artwork**](docs/ArtworkApi.md#list_artwork) | **GET** /artwork | List artwork files
+*ArtworkApi* | [**patch_artwork**](docs/ArtworkApi.md#patch_artwork) | **PATCH** /artwork/{id} | Update metadata about a specific artwork file
+*BatchApi* | [**get_batch_id**](docs/BatchApi.md#get_batch_id) | **GET** /batch/{id} | Retrieve a batch of letters
+*BatchApi* | [**get_batches**](docs/BatchApi.md#get_batches) | **GET** /batch | Retrieve a list of available letter batches
+*BatchApi* | [**patch_letters_batch**](docs/BatchApi.md#patch_letters_batch) | **PATCH** /batch/{id} | Update the status of a batch of letters
+*DataApi* | [**get_data**](docs/DataApi.md#get_data) | **GET** /data/{id} | Fetch metadata about an existing data file
+*DataApi* | [**post_data**](docs/DataApi.md#post_data) | **POST** /data | Request a URL to upload a new data file
+*LetterApi* | [**get_a_list_of_letters**](docs/LetterApi.md#get_a_list_of_letters) | **GET** /letter | Get a list of letters
+*LetterApi* | [**get_letter_status**](docs/LetterApi.md#get_letter_status) | **GET** /letter/{id} | Retrieve the status of a letter
+*LetterApi* | [**patch_letters**](docs/LetterApi.md#patch_letters) | **PATCH** /letter/{id} | Update the status of a letter
+*LetterApi* | [**post_letter**](docs/LetterApi.md#post_letter) | **POST** /letter | Update the status of multiple letters
+*MiApi* | [**create_mi**](docs/MiApi.md#create_mi) | **POST** /mi | Create a new MI record
+*MiApi* | [**get_mi**](docs/MiApi.md#get_mi) | **GET** /mi/{id} | Fetch a specific MI record
+*MiApi* | [**list_mi**](docs/MiApi.md#list_mi) | **GET** /mi | List MI records
+*ProofApi* | [**create_proof**](docs/ProofApi.md#create_proof) | **POST** /proof | Create a new proof metadata record
+*ProofApi* | [**get_proof**](docs/ProofApi.md#get_proof) | **GET** /proof/{id} | Fetch metadata about a specific proof file
+*ProofApi* | [**list_proof**](docs/ProofApi.md#list_proof) | **GET** /proof | List proof files
+*ProofApi* | [**patch_proof**](docs/ProofApi.md#patch_proof) | **PATCH** /proof/{id} | Update metadata about a specific proof file
+*ReturnApi* | [**create_return**](docs/ReturnApi.md#create_return) | **POST** /return | Create a new returned letter batch
+*ReturnApi* | [**get_return**](docs/ReturnApi.md#get_return) | **GET** /return/{id} | Fetch metadata about a specific return batch
+*ReturnApi* | [**list_return**](docs/ReturnApi.md#list_return) | **GET** /return | List batches of returned letters
+*SpecificationApi* | [**create_specification**](docs/SpecificationApi.md#create_specification) | **POST** /specification | Create a new specification record
+*SpecificationApi* | [**get_specification**](docs/SpecificationApi.md#get_specification) | **GET** /specification/{id} | Fetch metadata about a specific specification
+*SpecificationApi* | [**list_specification**](docs/SpecificationApi.md#list_specification) | **GET** /specification | List specifications
+*SpecificationApi* | [**patch_specification**](docs/SpecificationApi.md#patch_specification) | **PATCH** /specification/{id} | Update metadata about a specific specification
 
 
 ## Documentation For Models
 
+ - [BatchResponse](docs/BatchResponse.md)
+ - [BatchResponseData](docs/BatchResponseData.md)
+ - [BatchResponseDataAttributes](docs/BatchResponseDataAttributes.md)
  - [Download](docs/Download.md)
  - [ErrorData](docs/ErrorData.md)
  - [ErrorItem](docs/ErrorItem.md)
  - [ErrorItemLinks](docs/ErrorItemLinks.md)
  - [ErrorResponse](docs/ErrorResponse.md)
  - [Letter](docs/Letter.md)
- - [LetterAttributes](docs/LetterAttributes.md)
  - [LetterBatchUpdateData](docs/LetterBatchUpdateData.md)
  - [LetterBatchUpdateDataData](docs/LetterBatchUpdateDataData.md)
  - [LetterBatchUpdateDataDataAttributes](docs/LetterBatchUpdateDataDataAttributes.md)
- - [LetterData](docs/LetterData.md)
- - [LetterStatuData](docs/LetterStatuData.md)
- - [LetterStatuDataData](docs/LetterStatuDataData.md)
- - [LetterStatuDataDataAttributes](docs/LetterStatuDataDataAttributes.md)
+ - [LetterStatus](docs/LetterStatus.md)
+ - [LetterStatusData](docs/LetterStatusData.md)
+ - [LetterStatusDataData](docs/LetterStatusDataData.md)
+ - [LetterStatusDataDataAttributes](docs/LetterStatusDataDataAttributes.md)
  - [LetterUpdateData](docs/LetterUpdateData.md)
- - [LetterUpdateDataData](docs/LetterUpdateDataData.md)
- - [LetterUpdateDataDataAttributes](docs/LetterUpdateDataDataAttributes.md)
- - [LettersResponse](docs/LettersResponse.md)
 
 
 <a id="documentation-for-authorization"></a>
@@ -151,8 +150,12 @@ Authentication schemes defined for the API:
 
 - **Type**: OAuth
 - **Flow**: accessCode
-- **Authorization URL**:
+- **Authorization URL**: 
 - **Scopes**: N/A
 
 
 ## Author
+
+
+
+

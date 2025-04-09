@@ -19,7 +19,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict
 from typing import Any, ClassVar, Dict, List, Optional
-from openapi_client.models.letter_update_data_data import LetterUpdateDataData
+from openapi_client.models.letter_batch_update_data_data import LetterBatchUpdateDataData
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -27,7 +27,7 @@ class LetterUpdateData(BaseModel):
     """
     LetterUpdateData
     """ # noqa: E501
-    data: Optional[LetterUpdateDataData] = None
+    data: Optional[LetterBatchUpdateDataData] = None
     __properties: ClassVar[List[str]] = ["data"]
 
     model_config = ConfigDict(
@@ -84,6 +84,8 @@ class LetterUpdateData(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "data": LetterUpdateDataData.from_dict(obj["data"]) if obj.get("data") is not None else None
+            "data": LetterBatchUpdateDataData.from_dict(obj["data"]) if obj.get("data") is not None else None
         })
         return _obj
+
+

@@ -5,7 +5,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**about** | **str** |  | [optional]
+**about** | **str** |  | [optional] 
 
 ## Example
 
@@ -25,3 +25,5 @@ error_item_links_dict = error_item_links_instance.to_dict()
 error_item_links_from_dict = ErrorItemLinks.from_dict(error_item_links_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+

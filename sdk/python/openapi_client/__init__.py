@@ -17,7 +17,14 @@
 __version__ = "1.0.0"
 
 # import apis into sdk package
-from openapi_client.api.default_api import DefaultApi
+from openapi_client.api.artwork_api import ArtworkApi
+from openapi_client.api.batch_api import BatchApi
+from openapi_client.api.data_api import DataApi
+from openapi_client.api.letter_api import LetterApi
+from openapi_client.api.mi_api import MiApi
+from openapi_client.api.proof_api import ProofApi
+from openapi_client.api.return_api import ReturnApi
+from openapi_client.api.specification_api import SpecificationApi
 
 # import ApiClient
 from openapi_client.api_response import ApiResponse
@@ -31,21 +38,20 @@ from openapi_client.exceptions import ApiAttributeError
 from openapi_client.exceptions import ApiException
 
 # import models into sdk package
+from openapi_client.models.batch_response import BatchResponse
+from openapi_client.models.batch_response_data import BatchResponseData
+from openapi_client.models.batch_response_data_attributes import BatchResponseDataAttributes
 from openapi_client.models.download import Download
 from openapi_client.models.error_data import ErrorData
 from openapi_client.models.error_item import ErrorItem
 from openapi_client.models.error_item_links import ErrorItemLinks
 from openapi_client.models.error_response import ErrorResponse
 from openapi_client.models.letter import Letter
-from openapi_client.models.letter_attributes import LetterAttributes
 from openapi_client.models.letter_batch_update_data import LetterBatchUpdateData
 from openapi_client.models.letter_batch_update_data_data import LetterBatchUpdateDataData
 from openapi_client.models.letter_batch_update_data_data_attributes import LetterBatchUpdateDataDataAttributes
-from openapi_client.models.letter_data import LetterData
-from openapi_client.models.letter_statu_data import LetterStatuData
-from openapi_client.models.letter_statu_data_data import LetterStatuDataData
-from openapi_client.models.letter_statu_data_data_attributes import LetterStatuDataDataAttributes
+from openapi_client.models.letter_status import LetterStatus
+from openapi_client.models.letter_status_data import LetterStatusData
+from openapi_client.models.letter_status_data_data import LetterStatusDataData
+from openapi_client.models.letter_status_data_data_attributes import LetterStatusDataDataAttributes
 from openapi_client.models.letter_update_data import LetterUpdateData
-from openapi_client.models.letter_update_data_data import LetterUpdateDataData
-from openapi_client.models.letter_update_data_data_attributes import LetterUpdateDataDataAttributes
-from openapi_client.models.letters_response import LettersResponse

@@ -19,7 +19,7 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -27,9 +27,9 @@ class Download(BaseModel):
     """
     Download
     """ # noqa: E501
-    link: Optional[StrictStr] = None
-    expiry: Optional[datetime] = None
-    __properties: ClassVar[List[str]] = ["link", "expiry"]
+    expiry: datetime
+    url: StrictStr
+    __properties: ClassVar[List[str]] = ["expiry", "url"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -82,7 +82,9 @@ class Download(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "link": obj.get("link"),
-            "expiry": obj.get("expiry")
+            "expiry": obj.get("expiry"),
+            "url": obj.get("url")
         })
         return _obj
+
+

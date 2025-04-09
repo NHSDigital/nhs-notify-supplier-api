@@ -17,8 +17,9 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr, field_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
+from openapi_client.models.letter_status import LetterStatus
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -26,20 +27,10 @@ class LetterBatchUpdateDataDataAttributes(BaseModel):
     """
     LetterBatchUpdateDataDataAttributes
     """ # noqa: E501
-    status: Optional[StrictStr] = Field(default=None, description="New status to be applied to the batch of letters")
+    status: Optional[LetterStatus] = Field(default=None, description="New status to be applied to the batch of letters")
     reason_code: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Reason code for the given status", alias="reasonCode")
-    reason_text: Optional[StrictStr] = Field(default=None, description="Reason code for the given status", alias="reasonText")
+    reason_text: Optional[StrictStr] = Field(default=None, description="Reason text for the given status", alias="reasonText")
     __properties: ClassVar[List[str]] = ["status", "reasonCode", "reasonText"]
-
-    @field_validator('status')
-    def status_validate_enum(cls, value):
-        """Validates the enum"""
-        if value is None:
-            return value
-
-        if value not in set(['ACKNOWLEDGED', 'PENDING', 'HOLD', 'CANCELLED', 'PROCESSING', 'PRINTED', 'FAILED', 'DISPATCHED']):
-            raise ValueError("must be one of enum values ('ACKNOWLEDGED', 'PENDING', 'HOLD', 'CANCELLED', 'PROCESSING', 'PRINTED', 'FAILED', 'DISPATCHED')")
-        return value
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -97,3 +88,5 @@ class LetterBatchUpdateDataDataAttributes(BaseModel):
             "reasonText": obj.get("reasonText")
         })
         return _obj
+
+

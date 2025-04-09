@@ -1,27 +1,15 @@
 {
   "author": "Crown Copyright",
-  "dependencies": {
-    "axios": "^1.8.4"
-  },
   "description": "",
-  "devDependencies": {
-    "@openapitools/openapi-generator-cli": "^2.18.4",
-    "openapi-typescript": "^7.6.1",
-    "orval": "^7.8.0"
-  },
   "keywords": [],
   "license": "MIT",
   "main": "index.js",
   "name": "nhs-notify-supplier-api",
   "packageManager": "pnpm@10.4.1",
   "scripts": {
-    "generate": "pnpm generate:ts && pnpm generate:python && pnpm generate:sandbox",
+    "generate": "pnpm generate:python && pnpm -r --changed-run generate",
     "generate:python": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/specification/api/notify-supplier.yml -g python -o /local/sdk/python --skip-validate-spec",
-    "generate:sandbox": "pnpm generate:sandbox-types && pnpm generate:sandbox-server",
-    "generate:sandbox-server": "docker run --rm -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/specification/api/notify-supplier.yml -g nodejs-express-server -o /local/sandbox --skip-validate-spec",
-    "generate:sandbox-types": "openapi-typescript specification/api/notify-supplier.yml -o sandbox/types/api.d.ts",
-    "generate:ts": "npx orval",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "version": "1.0.0"
+  "version": "0.0.1"
 }

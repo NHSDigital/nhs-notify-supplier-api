@@ -87,3 +87,5 @@ class ErrorResponse(BaseModel):
             "data": ErrorData.from_dict(obj["data"]) if obj.get("data") is not None else None
         })
         return _obj
+
+
