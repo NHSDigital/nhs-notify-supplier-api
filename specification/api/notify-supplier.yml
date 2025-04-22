@@ -3,7 +3,6 @@ info:
   version: 0.0.1
   title: NHS Notify Supplier API
   description: API for communication suppliers to integrate with NHS Notify
-  x-fiddle-import-file: true
 security:
   - authorization: []
 paths:
@@ -90,7 +89,7 @@ paths:
           content:
             application/vnd.api+json:
               schema:
-                $ref: '#/components/schemas/BatchResponse'
+                $ref: '#/components/schemas/LetterBatchResponse'
               examples:
                 example-1:
                   value:
@@ -440,6 +439,12 @@ components:
   schemas:
     Download:
       type: object
+      required:
+        - expiry
+        - url
+        - sha256
+        - signature
+        - key
       properties:
         expiry:
           type: string
@@ -451,11 +456,39 @@ components:
           format: uri
           examples:
             - 'http://s3-presigned-url'
-      required:
-        - expiry
-        - url
-    Letter:
+        sha256:
+          $ref: '#/components/schemas/Sha256'
+        signature:
+          $ref: '#/components/schemas/EcdsaSignature'
+        key:
+          $ref: '#/components/schemas/EcdsaKey'
+    PersonalisedLetter:
       type: object
+      x-stoplight:
+        id: b692619fe3678
+      required:
+        - messageId
+      properties:
+        messageId:
+          type: string
+          examples:
+            - 2WL5f8j4XVxUPgd3OOqXVYvVFIW
+        personalisation:
+          type: object
+          x-stoplight:
+            id: dft0vhjzeqbm4
+          additionalProperties:
+            x-stoplight:
+              id: 66q6lm6h9vj4v
+            type: string
+    PrerenderedLetter:
+      type: object
+      x-stoplight:
+        id: 7gylnxnf8h4w3
+      required:
+        - messageId
+        - fileName
+        - sha256
       properties:
         messageId:
           type: string
@@ -465,7 +498,8 @@ components:
           type: string
           examples:
             - 2WL5f8j4XVxUPgd3OOqXVYvVFIW.pdf
-      required: []
+        sha256:
+          $ref: '#/components/schemas/Sha256'
     ErrorResponse:
       type: object
       properties:
@@ -511,9 +545,7 @@ components:
           type: object
           properties:
             type:
-              const: Letter
-              enum:
-                - Batch
+              const: Batch
             id:
               type: string
               examples:
@@ -614,6 +646,8 @@ components:
         - PENDING
         - ACCEPTED
         - REJECTED
+        - PRINTED
+        - ENCLOSED
         - CANCELLED
         - DISPATCHED
         - FAILED
@@ -638,11 +672,19 @@ components:
       examples:
         - ACTIVE
       title: ProductionStatus
-    BatchResponse:
+    LetterBatchResponse:
       type: object
+      x-stoplight:
+        id: e6650543dba07
+      required:
+        - data
       properties:
         data:
           type: object
+          required:
+            - type
+            - id
+            - attributes
           properties:
             type:
               const: Letters
@@ -652,23 +694,49 @@ components:
                 - 2WL5eYSWGzCHlGmzNxuqVusPxDg
             attributes:
               type: object
+              required:
+                - prerendered
               properties:
+                prerendered:
+                  type: boolean
+                  x-stoplight:
+                    id: qimmzekah31du
                 download:
                   $ref: '#/components/schemas/Download'
-                letters:
+                personalisedLetters:
                   type: array
                   items:
-                    $ref: '#/components/schemas/Letter'
-              required:
-                - download
-                - letters
-          required:
-            - attributes
-            - type
-            - id
-      required:
-        - data
-      description: ''
+                    $ref: '#/components/schemas/PersonalisedLetter'
+                    x-stoplight:
+                      id: 1s1ff8b7cjr9q
+                prerenderedLetters:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/PrerenderedLetter'
+                    x-stoplight:
+                      id: dp6rixhwmmnby
+    Sha256:
+      title: Sha256
+      x-stoplight:
+        id: ul241al5tpyrm
+      type: string
+      examples:
+        - 9bf1619f5c5d60f18c14578994b6310ee3339f435b6b6424fde1bb7d91b5ab71
+      description: SHA 256 Hash of a file or other resource used to verify the expected content
+    EcdsaKey:
+      title: EcdsaKey
+      type: string
+      examples:
+        - c374556584db050001c2c9265b546e66d3dbbe8239d17427c176d834a19638dc
+      description: Public ECDSA Key corresponding to a signature used to verify the originator of a file. This public key should correspond to one published by NHS Notify.
+    EcdsaSignature:
+      title: EcdsaSignature
+      x-stoplight:
+        id: y4t72k7ltybkm
+      type: string
+      examples:
+        - d034c98af3274ad93f3c8ce944bbc17b11b6aa170c5f097ed98687fa0d93347c
+      description: ECDSA Signature of a file or other resource used to verify the originator
   responses:
     BadRequest:
       description: 'Bad request, invalid input data'
