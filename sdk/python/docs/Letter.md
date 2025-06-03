@@ -5,8 +5,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**message_id** | **str** |  | [optional] 
-**file_name** | **str** |  | [optional] 
+**message_id** | **str** |  |
+**file_name** | **str** |  |
+**sha256** | **str** | SHA 256 Hash of a file or other resource used to verify the expected content |
 
 ## Example
 
@@ -26,5 +27,3 @@ letter_dict = letter_instance.to_dict()
 letter_from_dict = Letter.from_dict(letter_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

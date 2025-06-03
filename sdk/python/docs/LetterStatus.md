@@ -1,6 +1,6 @@
 # LetterStatus
 
-The status of an individual letter
+The supplier status of an individual letter
 
 ## Enum
 
@@ -9,6 +9,10 @@ The status of an individual letter
 * `ACCEPTED` (value: `'ACCEPTED'`)
 
 * `REJECTED` (value: `'REJECTED'`)
+
+* `PRINTED` (value: `'PRINTED'`)
+
+* `ENCLOSED` (value: `'ENCLOSED'`)
 
 * `CANCELLED` (value: `'CANCELLED'`)
 
@@ -20,6 +24,6 @@ The status of an individual letter
 
 * `DESTROYED` (value: `'DESTROYED'`)
 
+* `FORWARDED` (value: `'FORWARDED'`)
+
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

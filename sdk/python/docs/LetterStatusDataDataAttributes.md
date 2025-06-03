@@ -5,9 +5,10 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**status** | [**LetterStatus**](LetterStatus.md) |  | 
-**reason_code** | **float** | Reason code for the given status | [optional] 
-**reason_text** | **str** | Reason text for the given status | [optional] 
+**status** | [**LetterStatus**](LetterStatus.md) |  | [default to LetterStatus.PENDING]
+**requested_production_status** | [**ProductionStatus**](ProductionStatus.md) |  |
+**reason_code** | **float** | Reason code for the given status | [optional]
+**reason_text** | **str** | Reason text for the given status | [optional]
 
 ## Example
 
@@ -27,5 +28,3 @@ letter_status_data_data_attributes_dict = letter_status_data_data_attributes_ins
 letter_status_data_data_attributes_from_dict = LetterStatusDataDataAttributes.from_dict(letter_status_data_data_attributes_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

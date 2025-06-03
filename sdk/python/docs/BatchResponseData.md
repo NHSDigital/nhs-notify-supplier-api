@@ -5,9 +5,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**type** | **object** |  | 
-**id** | **str** |  | 
-**attributes** | [**BatchResponseDataAttributes**](BatchResponseDataAttributes.md) |  | 
+**type** | **str** |  |
+**id** | **str** |  |
+**attributes** | [**Batch**](Batch.md) |  |
 
 ## Example
 
@@ -27,5 +27,3 @@ batch_response_data_dict = batch_response_data_instance.to_dict()
 batch_response_data_from_dict = BatchResponseData.from_dict(batch_response_data_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-

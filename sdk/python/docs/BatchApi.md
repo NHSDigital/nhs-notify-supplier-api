@@ -63,9 +63,9 @@ with openapi_client.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **str**| Unique identifier of this resource | 
- **x_request_id** | **str**| Unique request identifier, in the format of a GUID | 
- **x_correlation_id** | **str**| An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding &#x60;.&#x60; characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header. | [optional] 
+ **id** | **str**| Unique identifier of this resource |
+ **x_request_id** | **str**| Unique request identifier, in the format of a GUID |
+ **x_correlation_id** | **str**| An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding &#x60;.&#x60; characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header. | [optional]
 
 ### Return type
 
@@ -85,14 +85,14 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Batch of letters found |  -  |
-**404** | No batch of letters available |  -  |
+**404** | Resource not found |  -  |
 **429** | Too many requests |  -  |
 **500** | Server error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_batches**
-> get_batches(x_request_id, x_correlation_id=x_correlation_id)
+> GetBatches200Response get_batches(x_request_id, x_correlation_id=x_correlation_id)
 
 Retrieve a list of available letter batches
 
@@ -102,6 +102,7 @@ Retrieve a list of available letter batches
 
 ```python
 import openapi_client
+from openapi_client.models.get_batches200_response import GetBatches200Response
 from openapi_client.rest import ApiException
 from pprint import pprint
 
@@ -127,7 +128,9 @@ with openapi_client.ApiClient(configuration) as api_client:
 
     try:
         # Retrieve a list of available letter batches
-        api_instance.get_batches(x_request_id, x_correlation_id=x_correlation_id)
+        api_response = api_instance.get_batches(x_request_id, x_correlation_id=x_correlation_id)
+        print("The response of BatchApi->get_batches:\n")
+        pprint(api_response)
     except Exception as e:
         print("Exception when calling BatchApi->get_batches: %s\n" % e)
 ```
@@ -139,12 +142,12 @@ with openapi_client.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **x_request_id** | **str**| Unique request identifier, in the format of a GUID | 
- **x_correlation_id** | **str**| An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding &#x60;.&#x60; characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header. | [optional] 
+ **x_request_id** | **str**| Unique request identifier, in the format of a GUID |
+ **x_correlation_id** | **str**| An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding &#x60;.&#x60; characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header. | [optional]
 
 ### Return type
 
-void (empty response body)
+[**GetBatches200Response**](GetBatches200Response.md)
 
 ### Authorization
 
@@ -153,13 +156,18 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/vnd.api+json
 
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **patch_letters_batch**
-> LetterBatchUpdateData patch_letters_batch(id, x_request_id, body, x_correlation_id=x_correlation_id)
+> BatchUpdateData patch_letters_batch(id, x_request_id, body, x_correlation_id=x_correlation_id)
 
 Update the status of a batch of letters
 
@@ -171,7 +179,7 @@ Update the status of a batch of letters by providing the new status in the reque
 
 ```python
 import openapi_client
-from openapi_client.models.letter_batch_update_data import LetterBatchUpdateData
+from openapi_client.models.batch_update_data import BatchUpdateData
 from openapi_client.rest import ApiException
 from pprint import pprint
 
@@ -194,7 +202,7 @@ with openapi_client.ApiClient(configuration) as api_client:
     api_instance = openapi_client.BatchApi(api_client)
     id = 'id_example' # str | Unique identifier of this resource
     x_request_id = 'x_request_id_example' # str | Unique request identifier, in the format of a GUID
-    body = openapi_client.LetterBatchUpdateData() # LetterBatchUpdateData | 
+    body = openapi_client.BatchUpdateData() # BatchUpdateData |
     x_correlation_id = 'x_correlation_id_example' # str | An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header. (optional)
 
     try:
@@ -213,14 +221,14 @@ with openapi_client.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **str**| Unique identifier of this resource | 
- **x_request_id** | **str**| Unique request identifier, in the format of a GUID | 
- **body** | **LetterBatchUpdateData**|  | 
- **x_correlation_id** | **str**| An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding &#x60;.&#x60; characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header. | [optional] 
+ **id** | **str**| Unique identifier of this resource |
+ **x_request_id** | **str**| Unique request identifier, in the format of a GUID |
+ **body** | **BatchUpdateData**|  |
+ **x_correlation_id** | **str**| An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding &#x60;.&#x60; characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header. | [optional]
 
 ### Return type
 
-[**LetterBatchUpdateData**](LetterBatchUpdateData.md)
+[**BatchUpdateData**](BatchUpdateData.md)
 
 ### Authorization
 
@@ -237,9 +245,8 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **200** | Letters resources updated successfully |  -  |
 **400** | Bad request, invalid input data |  -  |
-**404** | Letter resource not found |  -  |
+**404** | Resource not found |  -  |
 **429** | Too many requests |  -  |
 **500** | Server error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
