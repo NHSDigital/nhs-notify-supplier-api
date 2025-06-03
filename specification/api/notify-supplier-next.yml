@@ -1,10 +1,14 @@
 openapi: 3.1.0
 info:
-  version: 0.1.0
+  version: next
   title: NHS Notify Supplier API
-  description: API for communication suppliers to integrate with NHS Notify
+  description: |
+    API for communication suppliers to integrate with NHS Notify.
+
+    This specification represents the in-development 'next' version of the API schema
+    and should be treated as unstable.
 security:
-  - authorization: []
+  - authorization: [ ]
 paths:
   /batch:
     parameters:
@@ -33,10 +37,10 @@ paths:
                     data:
                       - type: batches
                         id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
-                        attributes: {}
+                        attributes: { }
                       - type: batches
                         id: 2WL5f8j4XVxUPgd3OOqXVYvVIOP
-                        attributes: {}
+                        attributes: { }
                 properties:
                   links:
                     type: object
@@ -293,6 +297,93 @@ paths:
       operationId: get-mi
       tags:
         - mi
+  /specification:
+    parameters:
+      - $ref: '#/components/parameters/requestId'
+      - $ref: '#/components/parameters/correlationId'
+    get:
+      summary: List specifications
+      operationId: list-specification
+      tags:
+        - specification
+    post:
+      summary: Create a new specification record
+      operationId: create-specification
+      tags:
+        - specification
+  '/specification/{id}':
+    parameters:
+      - $ref: '#/components/parameters/requestId'
+      - $ref: '#/components/parameters/correlationId'
+      - $ref: '#/components/parameters/id'
+    get:
+      summary: Fetch metadata about a specific specification
+      operationId: get-specification
+      tags:
+        - specification
+    patch:
+      summary: Update metadata about a specific specification
+      operationId: patch-specification
+      tags:
+        - specification
+  /proof:
+    parameters:
+      - $ref: '#/components/parameters/requestId'
+      - $ref: '#/components/parameters/correlationId'
+    get:
+      summary: List proof files
+      operationId: list-proof
+      tags:
+        - proof
+    post:
+      summary: Create a new proof metadata record
+      operationId: create-proof
+      tags:
+        - proof
+  '/proof/{id}':
+    parameters:
+      - $ref: '#/components/parameters/requestId'
+      - $ref: '#/components/parameters/correlationId'
+      - $ref: '#/components/parameters/id'
+    get:
+      summary: Fetch metadata about a specific proof file
+      operationId: get-proof
+      tags:
+        - proof
+    patch:
+      summary: Update metadata about a specific proof file
+      operationId: patch-proof
+      tags:
+        - proof
+  /artwork:
+    parameters:
+      - $ref: '#/components/parameters/requestId'
+      - $ref: '#/components/parameters/correlationId'
+    post:
+      summary: Create a new artwork metadata record
+      operationId: create-artwork
+      tags:
+        - artwork
+    get:
+      summary: List artwork files
+      operationId: list-artwork
+      tags:
+        - artwork
+  '/artwork/{id}':
+    parameters:
+      - $ref: '#/components/parameters/requestId'
+      - $ref: '#/components/parameters/correlationId'
+      - $ref: '#/components/parameters/id'
+    get:
+      summary: Fetch metadata about a specific artwork file
+      operationId: get-artwork
+      tags:
+        - artwork
+    patch:
+      summary: Update metadata about a specific artwork file
+      operationId: patch-artwork
+      tags:
+        - artwork
   /whitemail:
     parameters:
       - $ref: '#/components/parameters/requestId'
@@ -811,9 +902,15 @@ tags:
     description: ''
   - name: batch
     description: ''
+  - name: specification
+    description: ''
   - name: whitemail
     description: ''
+  - name: proof
+    description: ''
   - name: mi
+    description: ''
+  - name: artwork
     description: ''
   - name: data
     description: ''
