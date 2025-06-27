@@ -5,9 +5,10 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**status** | **str** | New status to be applied to the letter | [optional]
+**status** | [**LetterStatus**](LetterStatus.md) |  | [optional] [default to LetterStatus.PENDING]
+**requested_production_status** | [**ProductionStatus**](ProductionStatus.md) | The requested production status for this letter. May only be set by NHS Notify. | [optional]
 **reason_code** | **float** | Reason code for the given status | [optional]
-**reason_text** | **str** | Reason code for the given status | [optional]
+**reason_text** | **str** | Reason text for the given status | [optional]
 
 ## Example
 

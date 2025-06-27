@@ -5,7 +5,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**type** | **object** |  | [optional]
+**type** | **str** |  | [optional]
 **id** | **str** |  | [optional]
 **attributes** | [**LetterUpdateDataDataAttributes**](LetterUpdateDataDataAttributes.md) |  | [optional]
 

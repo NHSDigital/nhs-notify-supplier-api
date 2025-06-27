@@ -5,8 +5,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**message_id** | **str** |  | [optional]
-**file_name** | **str** |  | [optional]
+**message_id** | **str** |  |
+**file_name** | **str** |  |
+**sha256** | **str** | SHA 256 Hash of a file or other resource used to verify the expected content |
 
 ## Example
 

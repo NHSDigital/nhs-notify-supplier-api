@@ -1,12 +1,24 @@
 {
   "author": "Crown Copyright",
+  "dependencies": {
+    "@hey-api/client-fetch": "^0.10.0"
+  },
   "description": "",
+  "devDependencies": {
+    "@hey-api/openapi-ts": "^0.66.3",
+    "@types/node": "^22.14.0",
+    "typescript": "^5.8.3"
+  },
   "keywords": [],
   "license": "MIT",
-  "main": "index.js",
+  "main": "dist/index.js",
   "name": "nhs-notify-supplier-api-client",
   "packageManager": "pnpm@10.4.1",
   "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "generate": "pnpm generate:ts",
+    "generate:ts": "openapi-ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "version": "0.0.1"
