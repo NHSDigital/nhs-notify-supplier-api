@@ -5,7 +5,7 @@
   },
   "description": "",
   "devDependencies": {
-    "@hey-api/openapi-ts": "^0.66.3",
+    "@hey-api/openapi-ts": "^0.77.0",
     "@types/node": "^22.14.0",
     "typescript": "^5.8.3"
   },
