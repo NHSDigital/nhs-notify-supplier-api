@@ -6,7 +6,7 @@
   "description": "",
   "devDependencies": {
     "@hey-api/openapi-ts": "^0.66.3",
-    "@types/node": "^22.14.0",
+    "@types/node": "^24.0.7",
     "typescript": "^5.8.3"
   },
   "keywords": [],
