@@ -32,7 +32,7 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.19.3"
   },
-  "name": "nhs-notify-repository-template",
+  "name": "nhs-notify-supplier-api",
   "overrides": {
     "pretty-format": {
       "react-is": "19.0.0"
