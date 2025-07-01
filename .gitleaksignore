@@ -10,3 +10,5 @@ b1f85a7faf54eaf66074d7a6daa093aefe6b3ebe:sdk/python/pyproject.toml:ipv4:25
 # Example ECDA key in OAPI spec
 4118582e5009685c1ac31fc664371649602a8a0e:specification/api/notify-supplier.yml:generic-api-key:115
 4118582e5009685c1ac31fc664371649602a8a0e:specification/api/notify-supplier-next.yml:generic-api-key:119
+28aa8bcf42e1af50ab2541a345be851b53dd0f00:specification/api/notify-supplier-next.yml:generic-api-key:119
+28aa8bcf42e1af50ab2541a345be851b53dd0f00:specification/api/notify-supplier.yml:generic-api-key:115
