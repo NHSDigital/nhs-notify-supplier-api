@@ -22,6 +22,7 @@ This repository documents the Supplier API specification and provides an SDK wit
   - [Documentation](#documentation)
   - [Setup](#setup)
     - [Prerequisites and Configuration](#prerequisites-and-configuration)
+  - [Build](#build)
   - [Licence](#licence)
 
 ## Documentation
@@ -33,7 +34,22 @@ This repository documents the Supplier API specification and provides an SDK wit
 
 ### Prerequisites and Configuration
 
-Utilised the devcontainer, for pre reqs and configuration.
+- Utilised the devcontainer, for pre reqs and configuration.
+- You should open in a devcontainer or a Github workspaces.
+- By default it will run `make config` when the container is first setup
+- The [SDK](sdk) folder is excluded from all pre reqs
+- DO NOT make manual changes to the [SDK](sdk), instead [build](#build) it
+
+## Build
+
+To generate the SDK folder from changes to the [specification/api/notify-supplier.yml](specification/api/notify-supplier.yml) OAS specification:
+
+```bash
+make clean
+make build
+```
+
+Currently these are include in Git. TODO: gitignore these and have the build pipeline generate artifacts that can be downloaded from GitHub.
 
 ## Licence
 
