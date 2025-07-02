@@ -11,6 +11,7 @@ dependencies: # Install dependencies needed to build and test the project @Pipel
 	# TODO: Implement installation of your project dependencies
 
 build: # Build the project artefact @Pipeline
+	npm run build
 	(cd docs && make build)
 
 publish: # Publish the project artefact @Pipeline
@@ -21,10 +22,13 @@ deploy: # Deploy the project artefact to the target environment @Pipeline
 
 clean:: # Clean-up project resources (main) @Operations
 	rm -f .version
+	rm -rf sdk/*/
 	# TODO: Implement project resources clean-up step
 
 config:: _install-dependencies version # Configure development environment (main) @Configuration
-	(cd docs && make install)
+	npm install
+	(cd docs && make install && cd ..)
+
 
 version:
 	rm -f .version

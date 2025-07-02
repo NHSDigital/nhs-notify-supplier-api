@@ -32,7 +32,7 @@ set -euo pipefail
 # ==============================================================================
 
 function main() {
-
+  echo "CHECKING MARKDOWN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
   cd "$(git rev-parse --show-toplevel)"
 
   check=${check:-working-tree-changes}
@@ -64,7 +64,7 @@ function main() {
 # Arguments (provided as environment variables):
 #   files=[files to check]
 function run-markdownlint-natively() {
-
+  echo "RUNNING MARKDOWN LINT NATIVELY"
   # shellcheck disable=SC2086
   markdownlint \
     $files \
@@ -75,18 +75,25 @@ function run-markdownlint-natively() {
 # Arguments (provided as environment variables):
 #   files=[files to check]
 function run-markdownlint-in-docker() {
-
+  echo "RUNNING MARKDOWN LINT IN DOCKER"
   # shellcheck disable=SC1091
   source ./scripts/docker/docker.lib.sh
 
   # shellcheck disable=SC2155
   local image=$(name=ghcr.io/igorshubovych/markdownlint-cli docker-get-image-version-and-pull)
   # shellcheck disable=SC2086
+
+  echo "Config:"
+  cat scripts/config/markdownlint.yaml
+
+  set -x
   docker run --rm --platform linux/amd64 \
     --volume "$PWD":/workdir \
     "$image" \
       $files \
       --config /workdir/scripts/config/markdownlint.yaml
+
+  set +x
 }
 
 # ==============================================================================

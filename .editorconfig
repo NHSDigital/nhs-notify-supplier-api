@@ -29,3 +29,31 @@ trim_trailing_whitespace = unset
 indent_style = unset
 indent_size = unset
 generated_code = true
+
+[package-lock.json]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset
+generated_code = true
+
+[package.json]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset
+generated_code = true
+
+[*/sdk/**]
+generated_code = true
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset
+generated_code = true

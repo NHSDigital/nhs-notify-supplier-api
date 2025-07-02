@@ -1,25 +1,40 @@
 {
-  "author": "Crown Copyright",
+  "author": "OpenAPI-Generator Contributors",
   "dependencies": {
-    "@hey-api/client-fetch": "^0.10.0"
+    "es6-promise": "^4.2.4",
+    "whatwg-fetch": "^3.0.0"
   },
-  "description": "",
+  "description": "OpenAPI client for ",
   "devDependencies": {
-    "@hey-api/openapi-ts": "^0.66.3",
-    "@types/node": "^22.14.0",
-    "typescript": "^5.8.3"
+    "typescript": "^4.0"
   },
-  "keywords": [],
-  "license": "MIT",
-  "main": "dist/index.js",
-  "name": "nhs-notify-supplier-api-client",
-  "packageManager": "pnpm@10.4.1",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "fetch",
+    "typescript",
+    "openapi-client",
+    "openapi-generator"
+  ],
+  "license": "Unlicense",
+  "main": "./dist/index.js",
+  "name": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GIT_USER_ID/GIT_REPO_ID.git"
+  },
   "scripts": {
     "build": "tsc",
-    "dev": "tsc --watch",
-    "generate": "pnpm generate:ts",
-    "generate:ts": "openapi-ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prepare": "npm run build"
   },
-  "version": "0.0.1"
+  "type": "commonjs",
+  "typings": "./dist/index.d.ts",
+  "version": ""
 }

@@ -28,9 +28,11 @@
     "jest-html-reporter": "^3.10.2",
     "jest-mock-extended": "^3.0.7",
     "lcov-result-merger": "^5.0.1",
+    "openapi-typescript": "^7.8.0",
     "ts-jest": "^29.3.0",
     "ts-node": "^10.9.2",
-    "tsx": "^4.19.3"
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.3"
   },
   "name": "nhs-notify-supplier-api",
   "overrides": {
@@ -40,7 +42,11 @@
     "react": "^19.0.0"
   },
   "scripts": {
+    "build": "npm run generate",
+    "generate": "npm run generate:ts && npm run generate:python",
     "generate-dependencies": "npm run generate-dependencies --workspaces --if-present",
+    "generate:python": "docker run --rm --user 1000 -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/specification/api/notify-supplier.yml -g python -o /local/sdk/python --skip-validate-spec",
+    "generate:ts": "docker run --rm --user 1000 -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/specification/api/notify-supplier.yml -g typescript -o /local/sdk/typescript --skip-validate-spec",
     "lint": "npm run lint --workspaces",
     "lint:fix": "npm run lint:fix --workspaces",
     "start": "npm run start --workspace frontend",

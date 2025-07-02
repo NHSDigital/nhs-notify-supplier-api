@@ -25,7 +25,7 @@ set -euo pipefail
 # ==============================================================================
 
 function main() {
-
+  echo "IN IT"
   cd "$(git rev-parse --show-toplevel)"
 
   check=${check:-working-tree-changes}
@@ -58,7 +58,7 @@ function main() {
 # Arguments (provided as environment variables):
 #   filter=[git command to filter the files to check]
 function run-vale-natively() {
-
+  echo "RUNNING NATIVE"
   # shellcheck disable=SC2046
   vale \
     --config "$PWD/scripts/config/vale/vale.ini" \
@@ -69,23 +69,30 @@ function run-vale-natively() {
 # Arguments (provided as environment variables):
 #   filter=[git command to filter the files to check]
 function run-vale-in-docker() {
-
+  echo "RUNNING DOCKER"
   # shellcheck disable=SC1091
   source ./scripts/docker/docker.lib.sh
 
   # shellcheck disable=SC2155
   local image=$(name=jdkato/vale docker-get-image-version-and-pull)
+
+  echo "Image is: $image"
+  echo "Filter is: $filter"
   # We use /dev/null here to stop `vale` from complaining that it's
   # not been called correctly if the $filter happens to return an
   # empty list. As long as there's a filename, even if it's one that
   # will be ignored, `vale` is happy.
   # shellcheck disable=SC2046,SC2086
+
+  set -x
   docker run --rm --platform linux/amd64 \
     --volume "$PWD:/workdir" \
     --workdir /workdir \
     "$image" \
       --config /workdir/scripts/config/vale/vale.ini \
       $($filter) /dev/null
+
+  set +x
 }
 
 # ==============================================================================

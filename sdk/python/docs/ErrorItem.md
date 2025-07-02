@@ -5,12 +5,12 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**id** | **str** |  | [optional] 
-**code** | **str** |  | [optional] 
-**links** | [**ErrorItemLinks**](ErrorItemLinks.md) |  | [optional] 
-**status** | **str** |  | [optional] 
-**title** | **str** |  | [optional] 
-**detail** | **str** |  | [optional] 
+**id** | **str** |  | [optional]
+**code** | **str** |  | [optional]
+**links** | [**ErrorItemLinks**](ErrorItemLinks.md) |  | [optional]
+**status** | **str** |  | [optional]
+**title** | **str** |  | [optional]
+**detail** | **str** |  | [optional]
 
 ## Example
 
@@ -30,5 +30,3 @@ error_item_dict = error_item_instance.to_dict()
 error_item_from_dict = ErrorItem.from_dict(error_item_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
-
-
