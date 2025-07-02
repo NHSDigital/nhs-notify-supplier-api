@@ -38,12 +38,12 @@ class TestErrorResponse(unittest.TestCase):
                 data = openapi_client.models.error_data.ErrorData(
                     errors = [
                         openapi_client.models.error_item.ErrorItem(
-                            id = '',
-                            code = 'NOTIFY_NO_BATCH_AVAILABLE',
+                            id = '', 
+                            code = 'NOTIFY_NO_BATCH_AVAILABLE', 
                             links = openapi_client.models.error_item_links.ErrorItem_links(
-                                about = '', ),
-                            status = '',
-                            title = '',
+                                about = '', ), 
+                            status = '', 
+                            title = '', 
                             detail = '', )
                         ], )
             )

@@ -98,3 +98,5 @@ class BatchResponseData(BaseModel):
             "attributes": Batch.from_dict(obj["attributes"]) if obj.get("attributes") is not None else None
         })
         return _obj
+
+

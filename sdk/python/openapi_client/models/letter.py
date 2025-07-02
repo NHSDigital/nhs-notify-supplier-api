@@ -87,3 +87,5 @@ class Letter(BaseModel):
             "sha256": obj.get("sha256")
         })
         return _obj
+
+

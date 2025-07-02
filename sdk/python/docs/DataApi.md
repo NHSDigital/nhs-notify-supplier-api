@@ -40,7 +40,7 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with openapi_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = openapi_client.DataApi(api_client)
-    id = 'id_example' # str |
+    id = 'id_example' # str | 
     id2 = 'id_example' # str | Unique identifier of this resource
     x_request_id = 'x_request_id_example' # str | Unique request identifier, in the format of a GUID
     x_correlation_id = 'x_correlation_id_example' # str | An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header. (optional)
@@ -59,10 +59,10 @@ with openapi_client.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **str**|  |
- **id2** | **str**| Unique identifier of this resource |
- **x_request_id** | **str**| Unique request identifier, in the format of a GUID |
- **x_correlation_id** | **str**| An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding &#x60;.&#x60; characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header. | [optional]
+ **id** | **str**|  | 
+ **id2** | **str**| Unique identifier of this resource | 
+ **x_request_id** | **str**| Unique request identifier, in the format of a GUID | 
+ **x_correlation_id** | **str**| An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding &#x60;.&#x60; characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header. | [optional] 
 
 ### Return type
 
@@ -116,7 +116,7 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with openapi_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = openapi_client.DataApi(api_client)
-    id = 'id_example' # str |
+    id = 'id_example' # str | 
     id2 = 'id_example' # str | Unique identifier of this resource
     x_request_id = 'x_request_id_example' # str | Unique request identifier, in the format of a GUID
     x_correlation_id = 'x_correlation_id_example' # str | An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header. (optional)
@@ -135,10 +135,10 @@ with openapi_client.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **id** | **str**|  |
- **id2** | **str**| Unique identifier of this resource |
- **x_request_id** | **str**| Unique request identifier, in the format of a GUID |
- **x_correlation_id** | **str**| An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding &#x60;.&#x60; characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header. | [optional]
+ **id** | **str**|  | 
+ **id2** | **str**| Unique identifier of this resource | 
+ **x_request_id** | **str**| Unique request identifier, in the format of a GUID | 
+ **x_correlation_id** | **str**| An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding &#x60;.&#x60; characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header. | [optional] 
 
 ### Return type
 
@@ -204,8 +204,8 @@ with openapi_client.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **x_request_id** | **str**| Unique request identifier, in the format of a GUID |
- **x_correlation_id** | **str**| An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding &#x60;.&#x60; characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header. | [optional]
+ **x_request_id** | **str**| Unique request identifier, in the format of a GUID | 
+ **x_correlation_id** | **str**| An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding &#x60;.&#x60; characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header. | [optional] 
 
 ### Return type
 
@@ -222,3 +222,4 @@ void (empty response body)
 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+

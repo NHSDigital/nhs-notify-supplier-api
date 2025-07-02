@@ -5,8 +5,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**links** | [**GetBatches200ResponseLinks**](GetBatches200ResponseLinks.md) |  | [optional]
-**data** | [**List[GetBatches200ResponseDataInner]**](GetBatches200ResponseDataInner.md) |  | [optional]
+**links** | [**GetBatches200ResponseLinks**](GetBatches200ResponseLinks.md) |  | [optional] 
+**data** | [**List[GetBatches200ResponseDataInner]**](GetBatches200ResponseDataInner.md) |  | [optional] 
 
 ## Example
 
@@ -26,3 +26,5 @@ get_batches200_response_dict = get_batches200_response_instance.to_dict()
 get_batches200_response_from_dict = GetBatches200Response.from_dict(get_batches200_response_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+

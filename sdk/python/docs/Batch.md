@@ -6,10 +6,10 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **status** | [**BatchStatus**](BatchStatus.md) |  | [default to BatchStatus.PENDING]
-**data** | [**DataReference**](DataReference.md) |  | [optional]
-**letters** | [**List[Letter]**](Letter.md) |  |
-**reason_code** | **float** |  | [optional]
-**reason_text** | **str** |  | [optional]
+**data** | [**DataReference**](DataReference.md) |  | [optional] 
+**letters** | [**List[Letter]**](Letter.md) |  | 
+**reason_code** | **float** |  | [optional] 
+**reason_text** | **str** |  | [optional] 
 
 ## Example
 
@@ -29,3 +29,5 @@ batch_dict = batch_instance.to_dict()
 batch_from_dict = Batch.from_dict(batch_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+

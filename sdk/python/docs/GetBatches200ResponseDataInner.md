@@ -5,8 +5,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**type** | **str** |  |
-**id** | **str** | ID of a batch which can be fetched from the /batch/{id} endpoint |
+**type** | **str** |  | 
+**id** | **str** | ID of a batch which can be fetched from the /batch/{id} endpoint | 
 
 ## Example
 
@@ -26,3 +26,5 @@ get_batches200_response_data_inner_dict = get_batches200_response_data_inner_ins
 get_batches200_response_data_inner_from_dict = GetBatches200ResponseDataInner.from_dict(get_batches200_response_data_inner_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+

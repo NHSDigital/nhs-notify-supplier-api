@@ -5,9 +5,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**type** | **object** |  | [optional]
-**id** | **str** |  | [optional]
-**attributes** | [**BatchUpdateDataDataAttributes**](BatchUpdateDataDataAttributes.md) |  | [optional]
+**type** | **object** |  | [optional] 
+**id** | **str** |  | [optional] 
+**attributes** | [**BatchUpdateDataDataAttributes**](BatchUpdateDataDataAttributes.md) |  | [optional] 
 
 ## Example
 
@@ -27,3 +27,5 @@ batch_update_data_data_dict = batch_update_data_data_instance.to_dict()
 batch_update_data_data_from_dict = BatchUpdateDataData.from_dict(batch_update_data_data_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+

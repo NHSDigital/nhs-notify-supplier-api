@@ -37,14 +37,14 @@ class TestBatch(unittest.TestCase):
             return Batch(
                 status = 'PENDING',
                 data = openapi_client.models.data_reference.DataReference(
-                    id = '',
-                    sha256 = '',
-                    signature = '',
+                    id = '', 
+                    sha256 = '', 
+                    signature = '', 
                     key = '', ),
                 letters = [
                     openapi_client.models.letter.Letter(
-                        message_id = '',
-                        file_name = '',
+                        message_id = '', 
+                        file_name = '', 
                         sha256 = '', )
                     ],
                 reason_code = 1.337,
@@ -55,8 +55,8 @@ class TestBatch(unittest.TestCase):
                 status = 'PENDING',
                 letters = [
                     openapi_client.models.letter.Letter(
-                        message_id = '',
-                        file_name = '',
+                        message_id = '', 
+                        file_name = '', 
                         sha256 = '', )
                     ],
         )

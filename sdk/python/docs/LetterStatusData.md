@@ -5,7 +5,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**data** | [**LetterStatusDataData**](LetterStatusDataData.md) |  | [optional]
+**data** | [**LetterStatusDataData**](LetterStatusDataData.md) |  | [optional] 
 
 ## Example
 
@@ -25,3 +25,5 @@ letter_status_data_dict = letter_status_data_instance.to_dict()
 letter_status_data_from_dict = LetterStatusData.from_dict(letter_status_data_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+

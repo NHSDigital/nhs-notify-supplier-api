@@ -287,9 +287,9 @@ class LetterApi:
         # process the path parameters
         # process the query parameters
         if status is not None:
-
+            
             _query_params.append(('status', status.value))
-
+            
         # process the header parameters
         if x_request_id is not None:
             _header_params['X-Request-ID'] = x_request_id
@@ -1214,3 +1214,5 @@ class LetterApi:
             _host=_host,
             _request_auth=_request_auth
         )
+
+

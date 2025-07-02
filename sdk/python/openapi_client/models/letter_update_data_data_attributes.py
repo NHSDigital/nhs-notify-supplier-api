@@ -91,3 +91,5 @@ class LetterUpdateDataDataAttributes(BaseModel):
             "reasonText": obj.get("reasonText")
         })
         return _obj
+
+

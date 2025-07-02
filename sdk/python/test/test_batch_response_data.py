@@ -38,19 +38,19 @@ class TestBatchResponseData(unittest.TestCase):
                 type = 'Batch',
                 id = '',
                 attributes = openapi_client.models.batch.Batch(
-                    status = 'PENDING',
+                    status = 'PENDING', 
                     data = openapi_client.models.data_reference.DataReference(
-                        id = '',
-                        sha256 = '',
-                        signature = '',
-                        key = '', ),
+                        id = '', 
+                        sha256 = '', 
+                        signature = '', 
+                        key = '', ), 
                     letters = [
                         openapi_client.models.letter.Letter(
-                            message_id = '',
-                            file_name = '',
+                            message_id = '', 
+                            file_name = '', 
                             sha256 = '', )
-                        ],
-                    reason_code = 1.337,
+                        ], 
+                    reason_code = 1.337, 
                     reason_text = '', )
             )
         else:
@@ -58,19 +58,19 @@ class TestBatchResponseData(unittest.TestCase):
                 type = 'Batch',
                 id = '',
                 attributes = openapi_client.models.batch.Batch(
-                    status = 'PENDING',
+                    status = 'PENDING', 
                     data = openapi_client.models.data_reference.DataReference(
-                        id = '',
-                        sha256 = '',
-                        signature = '',
-                        key = '', ),
+                        id = '', 
+                        sha256 = '', 
+                        signature = '', 
+                        key = '', ), 
                     letters = [
                         openapi_client.models.letter.Letter(
-                            message_id = '',
-                            file_name = '',
+                            message_id = '', 
+                            file_name = '', 
                             sha256 = '', )
-                        ],
-                    reason_code = 1.337,
+                        ], 
+                    reason_code = 1.337, 
                     reason_text = '', ),
         )
         """

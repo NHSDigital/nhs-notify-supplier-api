@@ -36,14 +36,14 @@ class TestGetBatches200Response(unittest.TestCase):
         if include_optional:
             return GetBatches200Response(
                 links = openapi_client.models.get_batches_200_response_links.get_batches_200_response_links(
-                    self = '',
-                    first = '',
-                    last = '',
-                    prev = '',
+                    self = '', 
+                    first = '', 
+                    last = '', 
+                    prev = '', 
                     next = '', ),
                 data = [
                     openapi_client.models.get_batches_200_response_data_inner.get_batches_200_response_data_inner(
-                        type = 'Batch',
+                        type = 'Batch', 
                         id = '', )
                     ]
             )

@@ -38,8 +38,8 @@ class TestBatchUpdateDataData(unittest.TestCase):
                 type = None,
                 id = '',
                 attributes = openapi_client.models.batch_update_data_data_attributes.BatchUpdateData_data_attributes(
-                    status = 'PENDING',
-                    reason_code = 1.337,
+                    status = 'PENDING', 
+                    reason_code = 1.337, 
                     reason_text = '', )
             )
         else:

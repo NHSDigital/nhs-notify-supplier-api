@@ -101,3 +101,5 @@ class LetterStatusDataData(BaseModel):
             "attributes": LetterStatusDataDataAttributes.from_dict(obj["attributes"]) if obj.get("attributes") is not None else None
         })
         return _obj
+
+

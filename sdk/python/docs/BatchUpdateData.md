@@ -5,7 +5,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**data** | [**BatchUpdateDataData**](BatchUpdateDataData.md) |  | [optional]
+**data** | [**BatchUpdateDataData**](BatchUpdateDataData.md) |  | [optional] 
 
 ## Example
 
@@ -25,3 +25,5 @@ batch_update_data_dict = batch_update_data_instance.to_dict()
 batch_update_data_from_dict = BatchUpdateData.from_dict(batch_update_data_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+

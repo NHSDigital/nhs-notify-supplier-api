@@ -1,0 +1,94 @@
+{
+  "customizations": {
+    "codespaces": {
+      "openFiles": [
+        "README.md",
+        ".github/SECURITY.md",
+        "docs/index.md"
+      ]
+    },
+    "vscode": {
+      "extensions": [
+        "alefragnani.bookmarks",
+        "AmazonWebServices.aws-toolkit-vscode",
+        "chdsbd.github-code-owners",
+        "davidanson.vscode-markdownlint",
+        "dbaeumer.vscode-eslint",
+        "donjayamanne.githistory",
+        "editorconfig.editorconfig",
+        "esbenp.prettier-vscode",
+        "fvclaus.sort-json-array",
+        "github.codespaces",
+        "github.github-vscode-theme",
+        "github.remotehub",
+        "github.vscode-github-actions",
+        "github.vscode-pull-request-github",
+        "hediet.vscode-drawio",
+        "johnpapa.vscode-peacock",
+        "joshx.workspace-terminals",
+        "maattdd.gitless",
+        "mhutchie.git-graph",
+        "ms-azuretools.vscode-docker",
+        "ms-vscode-remote.remote-containers",
+        "ms-vscode-remote.remote-wsl",
+        "ms-vscode.hexeditor",
+        "ms-vscode.live-server",
+        "ms-vsliveshare.vsliveshare",
+        "redhat.vscode-xml",
+        "streetsidesoftware.code-spell-checker-british-english",
+        "takumii.markdowntable",
+        "tamasfe.even-better-toml",
+        "tomoki1207.pdf",
+        "vscode-icons-team.vscode-icons",
+        "vstirbu.vscode-mermaid-preview",
+        "wayou.vscode-todo-highlight",
+        "yzane.markdown-pdf",
+        "yzhang.dictionary-completion",
+        "yzhang.markdown-all-in-one",
+        "zoma.vscode-auto-open-workspace"
+      ],
+      "settings": {
+        "[makefile]": {
+          "editor.detectIndentation": false,
+          "editor.insertSpaces": false
+        },
+        "autoOpenWorkspace.enableAutoOpenIfSingleWorkspace": true,
+        "editor.formatOnSave": true,
+        "extensions.ignoreRecommendations": true,
+        "files.insertFinalNewline": true
+      }
+    }
+  },
+  "features": {
+    "ghcr.io/azutake/devcontainer-features/go-packages-install:0": {
+      "PACKAGES": "github.com/asdf-vm/asdf/cmd/asdf@v0.18.0"
+    },
+    "ghcr.io/devcontainers-extra/features/zsh-plugins:0": {
+      "omzPlugins": "https://github.com/zsh-users/zsh-autosuggestions.git https://github.com/zsh-users/zsh-syntax-highlighting.git",
+      "plugins": "zsh-autosuggestions zsh-syntax-highlighting"
+    },
+    "ghcr.io/devcontainers/features/common-utils": {
+      "configureZshAsDefaultShell": true,
+      "installOhMyZsh": true,
+      "installOhMyZshConfig": true,
+      "installZsh": true
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "azureDnsAutoDetection": true,
+      "dockerDashComposeVersion": "v2",
+      "installDockerBuildx": true,
+      "installDockerComposeSwitch": true,
+      "moby": true,
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/go:1": {},
+    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/devcontainers/features/python:1": {}
+  },
+  "image": "mcr.microsoft.com/devcontainers/base:noble",
+  "mounts": [
+    "source=${localEnv:HOME}/.gnupg,target=/home/vscode/.gnupg,type=bind,consistency=cached"
+  ],
+  "name": "Ubuntu",
+  "postCreateCommand": "pipx install pre-commit && make config && echo 'export GPG_TTY=$TTY' | cat - ~/.zshrc > temp && mv temp ~/.zshrc"
+}

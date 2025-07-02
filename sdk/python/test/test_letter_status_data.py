@@ -36,12 +36,12 @@ class TestLetterStatusData(unittest.TestCase):
         if include_optional:
             return LetterStatusData(
                 data = openapi_client.models.letter_status_data_data.LetterStatusData_data(
-                    type = 'Letter',
-                    id = '',
+                    type = 'Letter', 
+                    id = '', 
                     attributes = openapi_client.models.letter_status_data_data_attributes.LetterStatusData_data_attributes(
-                        status = 'PENDING',
-                        requested_production_status = 'ACTIVE',
-                        reason_code = 1.337,
+                        status = 'PENDING', 
+                        requested_production_status = 'ACTIVE', 
+                        reason_code = 1.337, 
                         reason_text = '', ), )
             )
         else:

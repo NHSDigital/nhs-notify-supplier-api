@@ -5,11 +5,11 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**var_self** | **str** |  |
-**first** | **str** |  |
-**last** | **str** |  |
-**prev** | **str** |  | [optional]
-**next** | **str** |  | [optional]
+**var_self** | **str** |  | 
+**first** | **str** |  | 
+**last** | **str** |  | 
+**prev** | **str** |  | [optional] 
+**next** | **str** |  | [optional] 
 
 ## Example
 
@@ -29,3 +29,5 @@ get_batches200_response_links_dict = get_batches200_response_links_instance.to_d
 get_batches200_response_links_from_dict = GetBatches200ResponseLinks.from_dict(get_batches200_response_links_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+

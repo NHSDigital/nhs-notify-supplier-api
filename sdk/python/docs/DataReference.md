@@ -5,10 +5,10 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**id** | **str** | ID of a data file which can be requested from the /data/{id} endpoint |
-**sha256** | **str** | SHA 256 Hash of a file or other resource used to verify the expected content |
-**signature** | **str** | ECDSA Signature of a file or other resource used to verify the originator |
-**key** | **str** | Public ECDSA Key corresponding to a signature used to verify the originator of a file. This public key should correspond to one published by NHS Notify. |
+**id** | **str** | ID of a data file which can be requested from the /data/{id} endpoint | 
+**sha256** | **str** | SHA 256 Hash of a file or other resource used to verify the expected content | 
+**signature** | **str** | ECDSA Signature of a file or other resource used to verify the originator | 
+**key** | **str** | Public ECDSA Key corresponding to a signature used to verify the originator of a file. This public key should correspond to one published by NHS Notify. | 
 
 ## Example
 
@@ -28,3 +28,5 @@ data_reference_dict = data_reference_instance.to_dict()
 data_reference_from_dict = DataReference.from_dict(data_reference_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+
