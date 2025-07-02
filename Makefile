@@ -22,6 +22,7 @@ deploy: # Deploy the project artefact to the target environment @Pipeline
 
 clean:: # Clean-up project resources (main) @Operations
 	rm -f .version
+	rm -rf sdk/*/
 	# TODO: Implement project resources clean-up step
 
 config:: _install-dependencies version # Configure development environment (main) @Configuration
