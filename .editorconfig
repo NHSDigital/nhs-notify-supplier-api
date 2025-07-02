@@ -30,7 +30,8 @@ indent_style = unset
 indent_size = unset
 generated_code = true
 
-[/sdk/**]
+[*/sdk/**]
+generated_code = true
 charset = unset
 end_of_line = unset
 insert_final_newline = unset
