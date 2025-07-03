@@ -177,13 +177,18 @@ jobs:
       - name: "Get the artefacts"
         uses: actions/download-artifact@v4
         with:
-          path: .
-          name: artifacts/sdk-ts-${{ inputs.version }}
+          path: ./artifacts
+          name: sdk-ts-${{ inputs.version }}
       - uses: actions/setup-node@v4
         with:
           node-version: '24.3'
           registry-url: 'https://npm.pkg.github.com'
 
+      - run: ls -la
+      - run: ls -la artifacts
+      - run: ls -la artifacts/sdk-ts-${{ inputs.version }}
+      - run: cp -r artifacts/sdk-ts-${{ inputs.version }}/* .
+      - run: rm -rf artifacts
       - run: ls -la
       - run: npm cache clear --force
       - run: npm i
