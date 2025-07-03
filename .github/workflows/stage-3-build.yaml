@@ -44,37 +44,50 @@ jobs:
         uses: ./.github/actions/build-docs
         with:
           version: "${{ inputs.version }}"
-  artefact-1:
-    name: "Artefact 1"
+
+  artefact-sdks:
+    name: "Build SDKs"
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
-      - name: "Build artefact 1"
-        run: |
-          echo "Building artefact 1 ..."
-      - name: "Check artefact 1"
-        run: |
-          echo "Checking artefact 1 ..."
-      - name: "Upload artefact 1"
-        run: |
-          echo "Uploading artefact 1 ..."
-          # TODO: Use either action/cache or action/upload-artifact
-  artefact-n:
-    name: "Artefact n"
-    runs-on: ubuntu-latest
-    timeout-minutes: 3
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v4
-      - name: "Build artefact n"
-        run: |
-          echo "Building artefact n ..."
-      - name: "Check artefact n"
-        run: |
-          echo "Checking artefact n ..."
-      - name: "Upload artefact n"
-        run: |
-          echo "Uploading artefact n ..."
-          # TODO: Use either action/cache or action/upload-artifact
+      - name: "Build sdks"
+        uses: ./.github/actions/build-sdk
+        with:
+          version: "${{ inputs.version }}"
+
+  # artefact-1:
+  #   name: "Artefact 1"
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 3
+  #   steps:
+  #     - name: "Checkout code"
+  #       uses: actions/checkout@v4
+  #     - name: "Build artefact 1"
+  #       run: |
+  #         echo "Building artefact 1 ..."
+  #     - name: "Check artefact 1"
+  #       run: |
+  #         echo "Checking artefact 1 ..."
+  #     - name: "Upload artefact 1"
+  #       run: |
+  #         echo "Uploading artefact 1 ..."
+  #         # TODO: Use either action/cache or action/upload-artifact
+  # artefact-n:
+  #   name: "Artefact n"
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 3
+  #   steps:
+  #     - name: "Checkout code"
+  #       uses: actions/checkout@v4
+  #     - name: "Build artefact n"
+  #       run: |
+  #         echo "Building artefact n ..."
+  #     - name: "Check artefact n"
+  #       run: |
+  #         echo "Checking artefact n ..."
+  #     - name: "Upload artefact n"
+  #       run: |
+  #         echo "Uploading artefact n ..."
+  #         # TODO: Use either action/cache or action/upload-artifact

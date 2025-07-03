@@ -1,0 +1,36 @@
+name: "Build SDKs"
+description: "build sdks"
+inputs:
+  version:
+    description: "Version number"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 18
+
+    - name: Make Config
+      working-directory: .
+      run: make config
+      shell: bash
+
+    - name: Build sdks
+      working-directory: ./sdk
+      shell: bash
+      run: make build
+
+    - name: Upload ts artifact
+      uses: actions/upload-artifact@v4
+      with:
+        path: "sdk/typescript"
+        name: sdk-ts-${{ inputs.version }}
+
+    - name: Upload python artifact
+      uses: actions/upload-artifact@v4
+      with:
+        path: "sdk/python"
+        name: sdk-python-${{ inputs.version }}
