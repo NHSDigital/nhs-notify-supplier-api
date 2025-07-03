@@ -33,6 +33,11 @@ runs:
       shell: bash
       run: mkdir python
 
+    - name: make swagger folder
+      working-directory: ./sdk
+      shell: bash
+      run: mkdir swagger
+
     - name: Build sdks
       working-directory: ./sdk
       shell: bash
@@ -43,6 +48,12 @@ runs:
       with:
         path: "sdk/html"
         name: sdk-html-${{ inputs.version }}
+
+    - name: Upload swagger artifact
+      uses: actions/upload-artifact@v4
+      with:
+        path: "sdk/swagger"
+        name: sdk-swagger-${{ inputs.version }}
 
     - name: Upload ts artifact
       uses: actions/upload-artifact@v4
@@ -68,3 +79,9 @@ runs:
       with:
         path: "sdk/html/"
         name: sdk-html-docs-${{ inputs.version }}
+
+    - name: Upload swagger pages artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: "sdk/swagger/"
+        name: sdk-swagger-docs-${{ inputs.version }}

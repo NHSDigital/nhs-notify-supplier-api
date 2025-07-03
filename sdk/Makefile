@@ -4,6 +4,7 @@ SHELL = /bin/bash
 
 build: version # Build the project artefact @Pipeline
 	cd .. && npm run build && cd sdk
+	./swagger-static.sh
 
 clean: # Clean-up project resources (main) @Operations
 	rm -rf */

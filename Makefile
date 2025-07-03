@@ -27,6 +27,8 @@ clean:: # Clean-up project resources (main) @Operations
 serve:
 	npm run serve
 
+serve-swagger:
+	npm run serve-swagger-docs
 
 config:: _install-dependencies version # Configure development environment (main) @Configuration
 	npm install
