@@ -1,4 +1,4 @@
-openapi: 3.1.0
+openapi: 3.1.1
 info:
   version: next
   title: NHS Notify Supplier API
@@ -414,7 +414,8 @@ paths:
         - whitemail
       x-stoplight:
         id: lmbg85kro8iwy
-  /data:
+
+  '/data':
     parameters:
       - $ref: '#/components/parameters/requestId'
       - $ref: '#/components/parameters/correlationId'
@@ -423,19 +424,17 @@ paths:
       operationId: post-data
       tags:
         - data
+
+  '/data2/{id}':
+    parameters:
+      - $ref: '#/components/parameters/id'
+    get:
+      operationId: getdata2
+
   '/data/{id}':
     parameters:
-      - schema:
-          type: string
-        name: id
-        in: path
-        required: true
-      - name: id
-        in: path
-        description: Unique identifier of this resource
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/id'
+
       - name: X-Request-ID
         in: header
         description: 'Unique request identifier, in the format of a GUID'
@@ -444,6 +443,7 @@ paths:
           type: string
           examples:
             - dcb9c8dc-c2f4-4d5f-8674-a2e913e040b2
+
       - name: X-Correlation-ID
         in: header
         description: |-
@@ -462,6 +462,8 @@ paths:
       x-stoplight:
         id: 98lwlebl1vxeq
       responses:
+        '404':
+          description: Not Found
         '303':
           description: See Other
           headers:
@@ -473,7 +475,9 @@ paths:
       summary: Fetch data file metadata
       tags:
         - data
-      responses: {}
+      responses:
+        200:
+          description: OK
       operationId: head-data-id
       x-stoplight:
         id: tdjs72iaaavub
@@ -500,8 +504,8 @@ components:
         examples:
           - 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
     id:
-      name: id
       in: path
+      name: id
       description: Unique identifier of this resource
       required: true
       schema:

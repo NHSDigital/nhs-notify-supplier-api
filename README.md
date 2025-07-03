@@ -19,23 +19,44 @@ This repository documents the Supplier API specification and provides an SDK wit
 - [NHS Notify Supplier API](#nhs-notify-supplier-api)
   - [OAS Specifications](#oas-specifications)
   - [Table of Contents](#table-of-contents)
-  - [Documentation](#documentation)
-  - [Setup](#setup)
-    - [Prerequisites and Configuration](#prerequisites-and-configuration)
-  - [Build](#build)
-  - [GitHub Actions CI/CD](#github-actions-cicd)
-    - [CI (Automatic)](#ci-automatic)
-    - [CD (Manual)](#cd-manual)
+  - [API Consumers - Getting Started](#api-consumers---getting-started)
+  - [API Developers](#api-developers)
+    - [Documentation](#documentation)
+    - [Setup](#setup)
+      - [Prerequisites and Configuration](#prerequisites-and-configuration)
+    - [Build](#build)
+    - [GitHub Actions CI/CD](#github-actions-cicd)
+      - [CI (Automatic)](#ci-automatic)
+      - [CD (Manual)](#cd-manual)
   - [Licence](#licence)
 
-## Documentation
+## API Consumers - Getting Started
+
+- View the [latest SDK documentation](https://nhsdigital.github.io/nhs-notify-supplier-api/)
+- Download SDKs from the [latest releases](https://github.com/NHSDigital/nhs-notify-supplier-api/releases)
+  - Python `sdk-python-[Version].zip`
+  - TypeScript `sdk-ts-[Version].zip`
+- Download the OAS Specification File from the [latest releases](https://github.com/NHSDigital/nhs-notify-supplier-api/releases)
+  - OAS JSON files `api-oas-specification-[Version].zip`
+- Download local versions of the API docs from the [latest releases](https://github.com/NHSDigital/nhs-notify-supplier-api/releases)
+  - HTML `sdk-html-[Version].zip`
+  - Swagger `sdk-swagger-[Version].zip`
+
+TODO: Links to example clients.
+
+## API Developers
+
+New developer of the NHS Notify Supplier API
+should understand the below.
+
+### Documentation
 
 - [Built](/)
 - [Source](/docs/README.md)
 
-## Setup
+### Setup
 
-### Prerequisites and Configuration
+#### Prerequisites and Configuration
 
 - Utilised the devcontainer, for pre reqs and configuration.
 - You should open in a devcontainer or a Github workspaces.
@@ -46,7 +67,7 @@ This repository documents the Supplier API specification and provides an SDK wit
   and will be built as part of the CI/CD pipeline and released as a GitHub
   release.
 
-## Build
+### Build
 
 To generate the SDK folder from changes to the [specification/api/notify-supplier.yml](specification/api/notify-supplier.yml) OAS specification:
 
@@ -71,9 +92,9 @@ by default they will be available at [http://localhost:3050](http://localhost:30
 
 These are generated using [https://hub.docker.com/r/openapitools/openapi-generator-cli](https://hub.docker.com/r/openapitools/openapi-generator-cli)
 
-## GitHub Actions CI/CD
+### GitHub Actions CI/CD
 
-### CI (Automatic)
+#### CI (Automatic)
 
 PRs will run the [CI workflow](https://github.com/NHSDigital/nhs-notify-supplier-api/actions/workflows/cicd-1-pull-request.yaml)
 for testing.
@@ -83,7 +104,7 @@ will generate a
 [pre-release](https://github.com/NHSDigital/nhs-notify-supplier-api/releases)
 based on the date and the commit hash.
 
-### CD (Manual)
+#### CD (Manual)
 
 Deployments can be made of any [release](https://github.com/NHSDigital/nhs-notify-supplier-api/releases)
 (including the GitHub pages) by running the CD pipeline

@@ -43,6 +43,12 @@ runs:
       shell: bash
       run: make build
 
+    - name: Upload API OAS specification artifact
+      uses: actions/upload-artifact@v4
+      with:
+        path: "specification/api"
+        name: api-oas-specification-${{ inputs.version }}
+
     - name: Upload html artifact
       uses: actions/upload-artifact@v4
       with:

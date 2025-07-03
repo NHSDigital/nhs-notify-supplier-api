@@ -146,6 +146,41 @@ jobs:
           asset_name: sdk-python-${{ inputs.version }}.zip
           asset_content_type: "application/gzip"
 
+      - name: "Upload api OAS specification release asset"
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: "${{ steps.create_release.outputs.upload_url }}"
+          asset_path: ./artifacts/api-oas-specification-${{ inputs.version }}.zip
+          asset_name: api-oas-specification-${{ inputs.version }}.zip
+          asset_content_type: "application/gzip"
+
+
+### Publish NPM
+
+  publishnpm:
+    name: "Publish npm packages to npm.pkg.github.com"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Get the artefacts"
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          registry-url: 'https://npm.pkg.github.com'
+
+      - run: npm ci
+        working-directory: ./artifacts/sdk-ts-${{ inputs.version }}
+      - run: npm publish
+        working-directory: ./artifacts/sdk-ts-${{ inputs.version }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+
 
       # - name: "Upload other release asset 1"
       #   uses: actions/upload-release-asset@v1
