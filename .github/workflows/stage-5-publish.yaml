@@ -187,7 +187,7 @@ jobs:
       - run: ls -la artifacts
       - run: ls -la artifacts/sdk-ts-${{ inputs.version }}
       - run: cp -r artifacts/sdk-ts-${{ inputs.version }}/* .
-      - run: rm -f artifacts
+      - run: rm -rf artifacts
       - run: ls -la
       - run: npm cache clear --force
       - run: npm i
