@@ -176,10 +176,13 @@ jobs:
           path: ./artifacts
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '24.3'
           registry-url: 'https://npm.pkg.github.com'
 
-      - run: npm ci
+
+      - run: npm init -y
+        working-directory: ./artifacts/sdk-ts-${{ inputs.version }}
+      - run: npm i
         working-directory: ./artifacts/sdk-ts-${{ inputs.version }}
       - run: npm publish
         working-directory: ./artifacts/sdk-ts-${{ inputs.version }}
