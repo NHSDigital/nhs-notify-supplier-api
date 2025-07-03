@@ -1,5 +1,8 @@
 {
   "//": "PLEASE UPDATE THE NAME AND WORKSPACES APPROPRIATELY.",
+  "dependencies": {
+    "serve": "^14.2.4"
+  },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.2",
     "@types/jest": "^29.5.14",
@@ -50,6 +53,7 @@
     "generate:ts": "docker run --rm --user $(id -u) -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/specification/api/notify-supplier.yml -g typescript -o /local/sdk/typescript --skip-validate-spec",
     "lint": "npm run lint --workspaces",
     "lint:fix": "npm run lint:fix --workspaces",
+    "serve-html-docs": "npx serve sdk/html -p 3050",
     "start": "npm run start --workspace frontend",
     "test:unit": "npm run test:unit --workspaces",
     "typecheck": "npm run typecheck --workspaces"

@@ -39,6 +39,9 @@ This repository documents the Supplier API specification and provides an SDK wit
 - By default it will run `make config` when the container is first setup
 - The [SDK](sdk) folder is excluded from all pre reqs
 - DO NOT make manual changes to the [SDK](sdk), instead [build](#build) it
+- The SDK folder is excluded from git commits,
+  and will be built as part of the CI/CD pipeline and released as a GitHub
+  release.
 
 ## Build
 
@@ -48,6 +51,20 @@ To generate the SDK folder from changes to the [specification/api/notify-supplie
 make clean
 make build
 ```
+
+This will generate:
+
+- Python SDK
+- TypeScript SDK
+- HTML Docs
+
+To view HTML docs:
+
+```bash
+npm run serve-html-docs
+```
+
+by default they will be available at [http://localhost:3050](http://localhost:3050)
 
 Currently these are include in Git. TODO: gitignore these and have the build pipeline generate artifacts that can be downloaded from GitHub.
 

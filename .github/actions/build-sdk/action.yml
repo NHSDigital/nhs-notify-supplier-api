@@ -24,7 +24,7 @@ runs:
       run: mkdir typescript
 
     - name: make html folder
-      working-directory: ./html
+      working-directory: ./sdk
       shell: bash
       run: mkdir html
 
