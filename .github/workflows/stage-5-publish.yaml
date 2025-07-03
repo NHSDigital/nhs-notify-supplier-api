@@ -194,7 +194,7 @@ jobs:
       - run: ls -la
         working-directory: ./artifacts/sdk-ts-${{ inputs.version }}
 
-      - run: npm publish
+      - run: npm publish --verbose
         working-directory: ./artifacts/sdk-ts-${{ inputs.version }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
