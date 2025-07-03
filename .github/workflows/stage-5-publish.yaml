@@ -179,11 +179,21 @@ jobs:
           node-version: '24.3'
           registry-url: 'https://npm.pkg.github.com'
 
+      - run: ls -la
+        working-directory: ./artifacts/sdk-ts-${{ inputs.version }}
+
+      - run: npm cache clear --force
+        working-directory: ./artifacts/sdk-ts-${{ inputs.version }}
+
+      - run: npm i
+        working-directory: ./artifacts/sdk-ts-${{ inputs.version }}
+
+      - run: npm pkg fix
+        working-directory: ./artifacts/sdk-ts-${{ inputs.version }}
 
       - run: ls -la
         working-directory: ./artifacts/sdk-ts-${{ inputs.version }}
-      - run: npm i
-        working-directory: ./artifacts/sdk-ts-${{ inputs.version }}
+
       - run: npm publish
         working-directory: ./artifacts/sdk-ts-${{ inputs.version }}
         env:
