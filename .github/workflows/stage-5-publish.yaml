@@ -191,7 +191,7 @@ jobs:
       - run: npm i
         working-directory: ./artifacts/sdk-ts-${{ inputs.version }}
 
-      - run: npm pkg fix
+      - run: npm run build
         working-directory: ./artifacts/sdk-ts-${{ inputs.version }}
 
       - run: ls -la
