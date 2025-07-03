@@ -24,6 +24,8 @@ clean:: # Clean-up project resources (main) @Operations
 	rm -f .version
 	(cd sdk && make clean)
 
+serve:
+	npm run serve
 
 config:: _install-dependencies version # Configure development environment (main) @Configuration
 	npm install

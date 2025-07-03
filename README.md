@@ -61,12 +61,12 @@ This will generate:
 To view HTML docs:
 
 ```bash
-npm run serve-html-docs
+make serve
 ```
 
 by default they will be available at [http://localhost:3050](http://localhost:3050)
 
-Currently these are include in Git. TODO: gitignore these and have the build pipeline generate artifacts that can be downloaded from GitHub.
+These are generated using [https://hub.docker.com/r/openapitools/openapi-generator-cli](https://hub.docker.com/r/openapitools/openapi-generator-cli)
 
 ## Licence
 
