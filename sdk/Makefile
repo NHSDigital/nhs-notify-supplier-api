@@ -8,6 +8,9 @@ build: version # Build the project artefact @Pipeline
 clean: # Clean-up project resources (main) @Operations
 	rm -rf */
 
+swagger:
+	./swagger.sh
+
 version:
 	touch _config.version.yml
 	if [[ $(VERSION) == "" ]]; then \

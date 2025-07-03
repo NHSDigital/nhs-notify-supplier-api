@@ -72,6 +72,16 @@ jobs:
           asset_name: jekyll-docs-${{ inputs.version }}.tar
           asset_content_type: "application/gzip"
 
+      - name: "Upload sdk html docs release asset"
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: "${{ steps.create_release.outputs.upload_url }}"
+          asset_path: ./artifacts/sdk-html-docs-${{ inputs.version }}/artifact.tar
+          asset_name: sdk-html-docs-${{ inputs.version }}.tar
+          asset_content_type: "application/gzip"
+
       #- name: "tar gz jekyll docs release asset"
       #   # Git hub pages needs a single tar called artifact inside the zip.
       #  working-directory: ./artifacts/jekyll-docs-${{ inputs.version }}
