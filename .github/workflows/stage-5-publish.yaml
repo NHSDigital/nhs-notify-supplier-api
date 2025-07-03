@@ -183,6 +183,7 @@ jobs:
         with:
           node-version: '24.3'
           registry-url: 'https://npm.pkg.github.com'
+          scope: '@NHSDigital'
 
       - run: ls -la
       - run: npm cache clear --force
