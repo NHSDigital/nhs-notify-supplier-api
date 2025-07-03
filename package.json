@@ -50,7 +50,7 @@
     "generate-dependencies": "npm run generate-dependencies --workspaces --if-present",
     "generate:html": "docker run --rm --user $(id -u) -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/specification/api/notify-supplier.yml -g html -o /local/sdk/html --skip-validate-spec",
     "generate:python": "docker run --rm --user $(id -u) -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/specification/api/notify-supplier.yml -g python -o /local/sdk/python --skip-validate-spec",
-    "generate:ts": "docker run --rm --user $(id -u) -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/specification/api/notify-supplier.yml -g typescript -o /local/sdk/typescript --skip-validate-spec",
+    "generate:ts": "docker run --rm --user $(id -u) -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/specification/api/notify-supplier.yml -g typescript --additional-properties=npmRepository=https://github.com/NHSDigital/nhs-notify-supplier-api.git,npmName=nhsnotifysupplier,npmVersion=0.1 -o /local/sdk/typescript --skip-validate-spec",
     "lint": "npm run lint --workspaces",
     "lint:fix": "npm run lint:fix --workspaces",
     "serve": "npm run serve-html-docs",
