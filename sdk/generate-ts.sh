@@ -7,7 +7,7 @@ docker run \
  -v ${PWD}:/local openapitools/openapi-generator-cli generate \
  -i /local/specification/api/notify-supplier.yml \
  -g typescript \
- --additional-properties=npmRepository=https://github.com/NHSDigital/nhs-notify-supplier-api.git,npmName=nhsnotifysupplier,npmVersion=0.1,licenseName=MIT \
+ --additional-properties=npmRepository=https://github.com/NHSDigital/nhs-notify-supplier-api.git,npmName=nhsnotifysupplier,npmVersion=0.1.0,licenseName=MIT \
  -o /local/sdk/typescript \
  --skip-validate-spec
 
