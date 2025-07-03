@@ -43,8 +43,9 @@
   },
   "scripts": {
     "build": "npm run generate",
-    "generate": "npm run generate:ts && npm run generate:python",
+    "generate": "npm run generate:html && npm run generate:ts && npm run generate:python",
     "generate-dependencies": "npm run generate-dependencies --workspaces --if-present",
+    "generate:html": "docker run --rm --user $(id -u) -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/specification/api/notify-supplier.yml -g html -o /local/sdk/html --skip-validate-spec",
     "generate:python": "docker run --rm --user $(id -u) -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/specification/api/notify-supplier.yml -g python -o /local/sdk/python --skip-validate-spec",
     "generate:ts": "docker run --rm --user $(id -u) -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/specification/api/notify-supplier.yml -g typescript -o /local/sdk/typescript --skip-validate-spec",
     "lint": "npm run lint --workspaces",

@@ -23,6 +23,11 @@ runs:
       shell: bash
       run: mkdir typescript
 
+    - name: make html folder
+      working-directory: ./html
+      shell: bash
+      run: mkdir html
+
     - name: make python folder
       working-directory: ./sdk
       shell: bash
@@ -32,6 +37,12 @@ runs:
       working-directory: ./sdk
       shell: bash
       run: make build
+
+    - name: Upload html artifact
+      uses: actions/upload-artifact@v4
+      with:
+        path: "sdk/html"
+        name: sdk-html-${{ inputs.version }}
 
     - name: Upload ts artifact
       uses: actions/upload-artifact@v4
@@ -44,3 +55,16 @@ runs:
       with:
         path: "sdk/python"
         name: sdk-python-${{ inputs.version }}
+
+    # - name: Upload artifact
+    #   # Automatically uploads an artifact from the './_site' directory by default
+    #   uses: actions/upload-pages-artifact@v3
+    #   with:
+    #     path: "docs/_site/"
+    #     name: jekyll-docs-${{ inputs.version }}
+
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: "sdk/html/"
+        name: sdk-html-docs-${{ inputs.version }}

@@ -78,10 +78,26 @@ jobs:
       #  run: zip jekyll-docs-${{ inputs.version }}.zip ./artifact.tar
       #  shell: bash
 
+      - name: "zip html release asset"
+        # Git hub pages needs a single tar called artifact inside the zip.
+        working-directory: ./artifacts/sdk-html-${{ inputs.version }}
+        run: zip -r sdk-html-${{ inputs.version }}.zip .
+        shell: bash
+
+      - name: "Upload sdk html release asset"
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: "${{ steps.create_release.outputs.upload_url }}"
+          asset_path: ./artifacts/sdk-html-${{ inputs.version }}.zip
+          asset_name: sdk-html-${{ inputs.version }}.zip
+          asset_content_type: "application/gzip"
+
       - name: "zip sdk ts release asset"
         # Git hub pages needs a single tar called artifact inside the zip.
-        working-directory: ./artifacts
-        run: zip -r -j sdk-ts-${{ inputs.version }}.zip ./sdk-ts-${{ inputs.version }}
+        working-directory: ./artifacts/sdk-ts-${{ inputs.version }}
+        run: zip -r sdk-ts-${{ inputs.version }}.zip .
         shell: bash
 
       - name: "Upload sdk ts release asset"
@@ -96,8 +112,8 @@ jobs:
 
       - name: "zip sdk python release asset"
         # Git hub pages needs a single tar called artifact inside the zip.
-        working-directory: ./artifacts
-        run: zip -r -j sdk-python-${{ inputs.version }}.zip ./sdk-python-${{ inputs.version }}
+        working-directory: ./artifacts/sdk-python-${{ inputs.version }}
+        run: zip -r sdk-python-${{ inputs.version }}.zip .
         shell: bash
 
       - name: "Upload sdk python release asset"
