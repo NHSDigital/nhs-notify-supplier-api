@@ -180,7 +180,7 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
 
 
-      - run: npm init -y
+      - run: ls -la
         working-directory: ./artifacts/sdk-ts-${{ inputs.version }}
       - run: npm i
         working-directory: ./artifacts/sdk-ts-${{ inputs.version }}
