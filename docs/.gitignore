@@ -7,3 +7,6 @@ vendor
 *Zone.Identifier
 node_modules
 _config.version.yml
+
+
+sdk/*/
