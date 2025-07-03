@@ -23,6 +23,9 @@ This repository documents the Supplier API specification and provides an SDK wit
   - [Setup](#setup)
     - [Prerequisites and Configuration](#prerequisites-and-configuration)
   - [Build](#build)
+  - [GitHub Actions CI/CD](#github-actions-cicd)
+    - [CI (Automatic)](#ci-automatic)
+    - [CD (Manual)](#cd-manual)
   - [Licence](#licence)
 
 ## Documentation
@@ -67,6 +70,24 @@ make serve
 by default they will be available at [http://localhost:3050](http://localhost:3050)
 
 These are generated using [https://hub.docker.com/r/openapitools/openapi-generator-cli](https://hub.docker.com/r/openapitools/openapi-generator-cli)
+
+## GitHub Actions CI/CD
+
+### CI (Automatic)
+
+PRs will run the [CI workflow](https://github.com/NHSDigital/nhs-notify-supplier-api/actions/workflows/cicd-1-pull-request.yaml)
+for testing.
+
+PRs that are merged to main will run the same [CI workflow](https://github.com/NHSDigital/nhs-notify-supplier-api/actions/workflows/cicd-1-pull-request.yaml)
+will generate a
+[pre-release](https://github.com/NHSDigital/nhs-notify-supplier-api/releases)
+based on the date and the commit hash.
+
+### CD (Manual)
+
+Deployments can be made of any [release](https://github.com/NHSDigital/nhs-notify-supplier-api/releases)
+(including the GitHub pages) by running the CD pipeline
+[cicd-3-deploy.yaml](https://github.com/NHSDigital/nhs-notify-supplier-api/actions/workflows/cicd-3-deploy.yaml)
 
 ## Licence
 
