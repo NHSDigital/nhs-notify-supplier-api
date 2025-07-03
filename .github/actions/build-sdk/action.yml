@@ -13,9 +13,9 @@ runs:
       with:
         node-version: 18
 
-    - name: Make Config
+    - name: Npm install
       working-directory: .
-      run: make config
+      run: npm ci
       shell: bash
 
     - name: Build sdks
