@@ -18,6 +18,16 @@ runs:
       run: npm ci
       shell: bash
 
+    - name: make ts folder
+      working-directory: ./sdk
+      shell: bash
+      run: mkdir typescript
+
+    - name: make python folder
+      working-directory: ./sdk
+      shell: bash
+      run: mkdir python
+
     - name: Build sdks
       working-directory: ./sdk
       shell: bash
