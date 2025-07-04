@@ -27,8 +27,11 @@ This repository documents the Supplier API specification and provides an SDK wit
     - [Examples](#examples)
   - [API Developers](#api-developers)
     - [Documentation](#documentation-1)
+    - [pre built servers](#pre-built-servers)
     - [Setup](#setup)
       - [Prerequisites and Configuration](#prerequisites-and-configuration)
+        - [SDKs](#sdks)
+        - [Servers](#servers)
     - [Build](#build)
     - [GitHub Actions CI/CD](#github-actions-cicd)
       - [CI (Automatic)](#ci-automatic)
@@ -76,6 +79,11 @@ should understand the below.
 - [Built](/)
 - [Source](/docs/README.md)
 
+### pre built servers
+
+- Docker (csharp) `docker run -p 3000:3000 ghcr.io/nhsdigital/nhsnotifysupplierserver:latest`
+- CSharp `server-csharp-[Version].zip`
+
 ### Setup
 
 #### Prerequisites and Configuration
@@ -83,11 +91,19 @@ should understand the below.
 - Utilised the devcontainer, for pre reqs and configuration.
 - You should open in a devcontainer or a Github workspaces.
 - By default it will run `make config` when the container is first setup
+
+##### SDKs
+
 - The [SDK](sdk) folder is excluded from all pre reqs
 - DO NOT make manual changes to the [SDK](sdk), instead [build](#build) it
 - The SDK folder is excluded from git commits,
   and will be built as part of the CI/CD pipeline and released as a GitHub
   release.
+
+##### Servers
+
+- Servers folder is being built at build time from OAS specs.
+- TODO: Build actual servers
 
 ### Build
 
