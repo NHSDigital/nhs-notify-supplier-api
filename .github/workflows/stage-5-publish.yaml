@@ -209,11 +209,16 @@ jobs:
       packages: write
       contents: read
     steps:
-      - name: "Get the artefacts"
+      - name: "Get the artefacts csharp docker"
         uses: actions/download-artifact@v4
         with:
           path: .
           name: server-csharp-docker-${{ inputs.version }}
+      - name: "Get the artefacts csharp server"
+        uses: actions/download-artifact@v4
+        with:
+          path: .
+          name: server-csharp-${{ inputs.version }}
       - run: ls -la
       - run: |
           docker build . -t ghcr.io/nhsdigital/nhsnotifysupplierserver:latest
