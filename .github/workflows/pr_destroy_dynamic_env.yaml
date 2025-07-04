@@ -24,7 +24,7 @@ jobs:
             --arg infraRepoName "${this_repo_name}" \
             --arg releaseVersion "main" \
             --arg targetEnvironment "pr${{ github.event.number }}" \
-            --arg targetAccountGroup "nhs-notify-suppliers-api-dev" \
+            --arg targetAccountGroup "nhs-notify-supplier-api-dev" \
             --arg targetComponent "branch" \
             --arg terraformAction "destroy" \
             '{ "ref": "main",
