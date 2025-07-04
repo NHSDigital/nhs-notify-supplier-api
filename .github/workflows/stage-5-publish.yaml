@@ -218,11 +218,18 @@ jobs:
           TEST_NUGET_VERSION="$(echo $NUGET_VERSION | sed -E 's/.([^.]*)$/\1/')"
           TEST_NUGET_VERSION="$(echo $TEST_NUGET_VERSION | sed -E 's/.([^.]*)$/\1/')"
           echo $TEST_NUGET_VERSION
+          echo "TEST_NUGET_VERSION=$TEST_NUGET_VERSION" >> "$GITHUB_OUTPUT"
+        name: Set the nuget version
+        id: set-nuget-version
+
       - run: |
           dotnet nuget push \
           nhsnotifysupplier.${TEST_NUGET_VERSION}.nupkg \
           --source github \
-          --api-key ${{ secrets.GITHUB_TOKEN }}
+          --api-key $GITHUB_TOKEN
+        env:
+          TEST_NUGET_VERSION: ${{ steps.set-nuget-version.outputs.TEST_NUGET_VERSION }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 ### Publish NPM
 
