@@ -216,9 +216,9 @@ jobs:
           name: server-csharp-docker-${{ inputs.version }}
       - run: ls -la
       - run: |
-          docker build . -t ghcr.io/NHSDigital/nhsnotifysupplierserver:latest
-          echo $CR_PAT | docker login ghcr.io -u NHSDigital --password-stdin
-          docker push ghcr.io/NHSDigital/nhsnotifysupplierserver:latest
+          docker build . -t ghcr.io/nhsdigital/nhsnotifysupplierserver:latest
+          echo $CR_PAT | docker login ghcr.io -u nhs-notify-supplier-api --password-stdin
+          docker push ghcr.io/nhsdigital/nhsnotifysupplierserver:latest
 
         env:
           CR_PAT: ${{ secrets.GITHUB_TOKEN }}
