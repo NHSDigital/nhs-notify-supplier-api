@@ -1,6 +1,7 @@
 #!/bin/sh
 # run this from directory above, or with npm run generate:ts from parent directory.
 
+VERSION=${1:-"$(cat .version)"}
 
 generate () {
   set -x
@@ -51,8 +52,6 @@ pack(){
 }
 prepare(){
   mkdir -p sdk/csharp
-
-  VERSION="$(cat .version)"
   echo $VERSION
 
   SHORT_VERSION="$(echo $VERSION | rev | cut -d"." -f2-  | rev)"
@@ -62,14 +61,8 @@ prepare(){
   echo $NUGET_VERSION
 }
 
+echo $VERSION
 prepare
 generate
 build
 pack
-
-# sed -i -e 's|https://github.com/GIT_USER_ID/GIT_REPO_ID.git|https://github.com/NHSDigital/nhs-notify-supplier-api.git|g'  ./sdk/typescript/package.json
-
-# sed -i -e 's|OpenAPI client for nhsnotifysupplier|NHS Notify Supplier SDK|g'  ./sdk/typescript/package.json
-# sed -i -e 's|OpenAPI-Generator Contributors|NHS Notify|g'  ./sdk/typescript/package.json
-
-# echo $VERSION
