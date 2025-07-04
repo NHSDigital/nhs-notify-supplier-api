@@ -24,6 +24,7 @@ deploy: # Deploy the project artefact to the target environment @Pipeline
 clean:: # Clean-up project resources (main) @Operations
 	rm -f .version
 	(cd sdk && make clean)
+	(cd server && make clean)
 
 serve:
 	npm run serve

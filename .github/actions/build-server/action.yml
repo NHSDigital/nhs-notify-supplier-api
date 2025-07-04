@@ -34,3 +34,9 @@ runs:
       with:
         path: "server/csharp-server"
         name: server-csharp-${{ inputs.version }}
+
+    - name: Upload csharp-server docker artifact
+      uses: actions/upload-artifact@v4
+      with:
+        path: "server/Dockerfile"
+        name: server-csharp-docker-${{ inputs.version }}
