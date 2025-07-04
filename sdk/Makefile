@@ -3,15 +3,11 @@ VERSION ?= ""
 SHELL = /bin/bash
 
 build: version # Build the project artefact @Pipeline
-	echo "HELLO"
-	cat ../.version
-	echo "$$(cat ../.version)"
-	cd .. && npm run build -- "$$(cat .version)" && cd sdk
+	VER=$$(cat .version) && cd .. && npm run build -- $$VER && cd sdk
 	./swagger-static.sh
 
 clean: # Clean-up project resources (main) @Operations
 	rm -rf */
-
 swagger:
 	./swagger.sh
 
