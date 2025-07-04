@@ -37,6 +37,8 @@ generate_nuget_version(){
 }
 
 pack(){
+
+
   generate_nuget_version
 
   dotnet \

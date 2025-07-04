@@ -46,7 +46,9 @@ runs:
     - name: Build sdks
       working-directory: ./sdk
       shell: bash
-      run: make build
+      run: |
+        make build VERSION="${{ inputs.version }}"
+
 
     - name: Upload API OAS specification artifact
       uses: actions/upload-artifact@v4

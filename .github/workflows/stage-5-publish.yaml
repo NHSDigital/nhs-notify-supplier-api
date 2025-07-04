@@ -205,6 +205,11 @@ jobs:
           --name github \
           "https://nuget.pkg.github.com/NHSDigital/index.json"
       - run: |
+          echo "ROOT .version file is: $(cat .version)"
+          echo "GH variable version is: ${{ inputs.version }}"
+        name: Showing the base versions
+
+      - run: |
           VERSION=${{ inputs.version }}
           SHORT_VERSION="$(echo $VERSION | rev | cut -d"." -f2-  | rev)"
           NUGET_VERSION="$(echo "$VERSION" | tr + .)"
