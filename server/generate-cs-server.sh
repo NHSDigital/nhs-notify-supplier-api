@@ -21,7 +21,7 @@ generate () {
 }
 
 build () {
-  dotnet build sdk/csharp-server/src/nhsnotifysupplierserver --configuration Release
+  dotnet build csharp-server/src/nhsnotifysupplierserver --configuration Release
 }
 
 generate_nuget_version(){
