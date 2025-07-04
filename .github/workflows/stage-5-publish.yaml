@@ -222,7 +222,7 @@ jobs:
           dotnet nuget push \
           nhsnotifysupplier.${TEST_NUGET_VERSION}.nupkg \
           --source github \
-          --api-key ${GITHUB_TOKEN}
+          --api-key ${{ secrets.GITHUB_TOKEN }}
 
 ### Publish NPM
 
