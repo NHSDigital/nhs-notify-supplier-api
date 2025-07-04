@@ -60,6 +60,7 @@ If packages are unavailable the latest SDKs can be downloaded directly from:
 - Download SDKs from the [latest releases](https://github.com/NHSDigital/nhs-notify-supplier-api/releases)
   - Python `sdk-python-[Version].zip`
   - TypeScript `sdk-ts-[Version].zip`
+  - CSharp `sdk-csharp-[Version].zip`
 
 ### Examples
 

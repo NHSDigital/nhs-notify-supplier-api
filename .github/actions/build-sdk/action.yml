@@ -38,6 +38,11 @@ runs:
       shell: bash
       run: mkdir swagger
 
+    - name: make csharp folder
+      working-directory: ./sdk
+      shell: bash
+      run: mkdir csharp
+
     - name: Build sdks
       working-directory: ./sdk
       shell: bash
@@ -72,6 +77,12 @@ runs:
       with:
         path: "sdk/python"
         name: sdk-python-${{ inputs.version }}
+
+    - name: Upload csharp artifact
+      uses: actions/upload-artifact@v4
+      with:
+        path: "sdk/typescript"
+        name: sdk-csharp-${{ inputs.version }}
 
     # - name: Upload artifact
     #   # Automatically uploads an artifact from the './_site' directory by default

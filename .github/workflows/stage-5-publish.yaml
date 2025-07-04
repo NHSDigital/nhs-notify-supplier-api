@@ -147,6 +147,25 @@ jobs:
           asset_name: sdk-python-${{ inputs.version }}.zip
           asset_content_type: "application/gzip"
 
+
+
+
+      - name: "zip sdk csharp release asset"
+        # Git hub pages needs a single tar called artifact inside the zip.
+        working-directory: ./artifacts/sdk-csharp-${{ inputs.version }}
+        run: zip -r ../sdk-csharp-${{ inputs.version }}.zip .
+        shell: bash
+
+      - name: "Upload sdk csharp release asset"
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: "${{ steps.create_release.outputs.upload_url }}"
+          asset_path: ./artifacts/sdk-csharp-${{ inputs.version }}.zip
+          asset_name: sdk-csharp-${{ inputs.version }}.zip
+          asset_content_type: "application/gzip"
+
       - name: "zip api OAS specification release asset"
         # Git hub pages needs a single tar called artifact inside the zip.
         working-directory: ./artifacts/api-oas-specification-${{ inputs.version }}
