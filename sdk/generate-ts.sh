@@ -1,7 +1,7 @@
 #!/bin/sh
 # run this from directory above, or with npm run generate:ts from parent directory.
 
-VERSION="$(cat .version)"
+VERSION=${1:-"$(cat .version)"}
 echo $VERSION
 
 set -x
