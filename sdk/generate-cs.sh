@@ -8,7 +8,7 @@ generate () {
   --rm \
   --user $(id -u) \
   -v ${PWD}:/local \
-  -e VERSION="$VERSION" \
+  -e VERSION="$SHORT_VERSION" \
   openapitools/openapi-generator-cli \
   generate \
   -i /local/specification/api/notify-supplier.yml \
@@ -20,9 +20,33 @@ generate () {
 }
 
 build () {
-  dotnet build sdk/csharp/src/nhsnotifysupplier
+  dotnet build sdk/csharp/src/nhsnotifysupplier --configuration Release
 }
 
+generate_nuget_version(){
+  echo $VERSION
+  echo $SHORT_VERSION
+  echo $NUGET_VERSION
+  SHORT_NUGET_VERSION="$(echo $NUGET_VERSION | rev | cut -d"." -f2-  | rev)"
+  echo $SHORT_NUGET_VERSION
+  SHORTER_NUGET_VERSION="$(echo $SHORT_NUGET_VERSION | rev | cut -d"." -f2-  | rev)"
+  echo $SHORTER_NUGET_VERSION
+  TEST_NUGET_VERSION="$(echo $NUGET_VERSION | sed -E 's/.([^.]*)$/\1/')"
+  TEST_NUGET_VERSION="$(echo $TEST_NUGET_VERSION | sed -E 's/.([^.]*)$/\1/')"
+  echo $TEST_NUGET_VERSION
+}
+
+pack(){
+  generate_nuget_version
+
+  dotnet \
+  pack sdk/csharp/src/nhsnotifysupplier \
+  --configuration Release \
+  /p:Version=${TEST_NUGET_VERSION} \
+  --no-build \
+  --output sdk/csharp
+
+}
 prepare(){
   mkdir -p sdk/csharp
 
@@ -31,11 +55,15 @@ prepare(){
 
   SHORT_VERSION="$(echo $VERSION | rev | cut -d"." -f2-  | rev)"
   echo $SHORT_VERSION
+
+  NUGET_VERSION="$(echo "$VERSION" | tr + .)"
+  echo $NUGET_VERSION
 }
 
 prepare
 generate
 build
+pack
 
 # sed -i -e 's|https://github.com/GIT_USER_ID/GIT_REPO_ID.git|https://github.com/NHSDigital/nhs-notify-supplier-api.git|g'  ./sdk/typescript/package.json
 
