@@ -20,8 +20,13 @@ This repository documents the Supplier API specification and provides an SDK wit
   - [OAS Specifications](#oas-specifications)
   - [Table of Contents](#table-of-contents)
   - [API Consumers - Getting Started](#api-consumers---getting-started)
-  - [API Developers](#api-developers)
+    - [OAS Specification](#oas-specification)
+    - [Packages](#packages)
     - [Documentation](#documentation)
+    - [SDK Assets](#sdk-assets)
+    - [Examples](#examples)
+  - [API Developers](#api-developers)
+    - [Documentation](#documentation-1)
     - [Setup](#setup)
       - [Prerequisites and Configuration](#prerequisites-and-configuration)
     - [Build](#build)
@@ -32,15 +37,31 @@ This repository documents the Supplier API specification and provides an SDK wit
 
 ## API Consumers - Getting Started
 
-- View the [latest SDK documentation](https://nhsdigital.github.io/nhs-notify-supplier-api/)
-- Download SDKs from the [latest releases](https://github.com/NHSDigital/nhs-notify-supplier-api/releases)
-  - Python `sdk-python-[Version].zip`
-  - TypeScript `sdk-ts-[Version].zip`
+### OAS Specification
+
 - Download the OAS Specification File from the [latest releases](https://github.com/NHSDigital/nhs-notify-supplier-api/releases)
   - OAS JSON files `api-oas-specification-[Version].zip`
+
+### Packages
+
+- [NPM package](https://github.com/NHSDigital/nhs-notify-supplier-api/pkgs/npm/nhsnotifysupplier)
+
+### Documentation
+
+- View the [latest SDK documentation](https://nhsdigital.github.io/nhs-notify-supplier-api/)
 - Download local versions of the API docs from the [latest releases](https://github.com/NHSDigital/nhs-notify-supplier-api/releases)
   - HTML `sdk-html-[Version].zip`
   - Swagger `sdk-swagger-[Version].zip`
+
+### SDK Assets
+
+If packages are unavailable the latest SDKs can be downloaded directly from:
+
+- Download SDKs from the [latest releases](https://github.com/NHSDigital/nhs-notify-supplier-api/releases)
+  - Python `sdk-python-[Version].zip`
+  - TypeScript `sdk-ts-[Version].zip`
+
+### Examples
 
 TODO: Links to example clients.
 
