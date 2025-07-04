@@ -81,7 +81,7 @@ runs:
     - name: Upload csharp artifact
       uses: actions/upload-artifact@v4
       with:
-        path: "sdk/typescript"
+        path: "sdk/csharp"
         name: sdk-csharp-${{ inputs.version }}
 
     # - name: Upload artifact
