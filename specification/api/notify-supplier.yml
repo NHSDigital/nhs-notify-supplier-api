@@ -362,11 +362,6 @@ paths:
 
   '/data/{id}':
     parameters:
-      - schema:
-          type: string
-        name: id
-        in: path
-        required: true
       - name: id
         in: path
         description: Unique identifier of this resource

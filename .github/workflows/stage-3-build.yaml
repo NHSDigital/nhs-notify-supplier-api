@@ -64,7 +64,7 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
-      - name: "Build sdks"
+      - name: "Build servers"
         uses: ./.github/actions/build-server
         with:
           version: "${{ inputs.version }}"
