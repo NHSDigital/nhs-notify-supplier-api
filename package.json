@@ -45,13 +45,14 @@
     "react": "^19.0.0"
   },
   "scripts": {
-    "build": "npm run generate",
-    "generate": "npm run generate:cs && npm run generate:html && npm run generate:ts && npm run generate:python",
+    "build": "npm run generate --buildver=$npm_config_buildver",
+    "generate": "npm run generate:cs --buildver=$npm_config_buildver && npm run generate:html && npm run generate:ts && npm run generate:python",
     "generate-dependencies": "npm run generate-dependencies --workspaces --if-present",
-    "generate:cs": "./sdk/generate-cs.sh",
+    "generate:cs": "./sdk/generate-cs.sh $npm_config_buildver",
     "generate:html": "docker run --rm --user $(id -u) -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/specification/api/notify-supplier.yml -g html -o /local/sdk/html --skip-validate-spec",
     "generate:python": "docker run --rm --user $(id -u) -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/specification/api/notify-supplier.yml -g python -o /local/sdk/python --skip-validate-spec",
     "generate:ts": "./sdk/generate-ts.sh",
+    "hello": "echo Hello $npm_config_buildver!",
     "lint": "npm run lint --workspaces",
     "lint:fix": "npm run lint:fix --workspaces",
     "serve": "npm run serve-html-docs",
