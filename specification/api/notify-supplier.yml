@@ -194,6 +194,9 @@ paths:
       operationId: postLetter
       tags:
         - letter
+      responses:
+        '200':
+          description: TODO Make a response OK
     get:
       summary: Get a list of letters
       operationId: getAListOfLetters
@@ -202,6 +205,9 @@ paths:
       parameters:
         - $ref: '#/components/parameters/status'
       description: The key use of this endpoint is to query letters which have been cancelled using the `status=CANCELLED` query
+      responses:
+        '200':
+          description: TODO Make a response OK
   '/letter/{id}':
     parameters:
       - $ref: '#/components/parameters/requestId'
@@ -278,11 +284,17 @@ paths:
       operationId: list-mi
       tags:
         - mi
+      responses:
+        '200':
+          description: TODO Make a response OK
     post:
       summary: Create a new MI record
       operationId: create-mi
       tags:
         - mi
+      responses:
+        '200':
+          description: TODO Make a response OK
   '/mi/{id}':
     parameters:
       - $ref: '#/components/parameters/requestId'
@@ -293,6 +305,9 @@ paths:
       operationId: get-mi
       tags:
         - mi
+      responses:
+        '200':
+          description: TODO Make a response OK
   /whitemail:
     parameters:
       - $ref: '#/components/parameters/requestId'
@@ -304,6 +319,9 @@ paths:
         - whitemail
       x-stoplight:
         id: tpzuuj1eovmtc
+      responses:
+        '200':
+          description: TODO Make a response OK
     post:
       summary: Create a new whitemail letter batch
       operationId: create-whitemail
@@ -311,6 +329,9 @@ paths:
         - whitemail
       x-stoplight:
         id: wun7ud7savffm
+      responses:
+        '200':
+          description: TODO Make a response OK
   '/whitemail/{id}':
     parameters:
       - $ref: '#/components/parameters/requestId'
@@ -323,6 +344,9 @@ paths:
         - whitemail
       x-stoplight:
         id: lmbg85kro8iwy
+      responses:
+        '200':
+          description: TODO Make a response OK
   /data:
     parameters:
       - $ref: '#/components/parameters/requestId'
@@ -332,6 +356,10 @@ paths:
       operationId: post-data
       tags:
         - data
+      responses:
+        '200':
+          description: Created OK
+
   '/data/{id}':
     parameters:
       - schema:
@@ -382,7 +410,10 @@ paths:
       summary: Fetch data file metadata
       tags:
         - data
-      responses: {}
+      responses:
+        '200':
+          description: Todo
+
       operationId: head-data-id
       x-stoplight:
         id: tdjs72iaaavub

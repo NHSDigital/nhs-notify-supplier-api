@@ -9,6 +9,7 @@
     },
     "vscode": {
       "extensions": [
+        "ms-dotnettools.csdevkit",
         "42crunch.vscode-openapi",
         "alefragnani.bookmarks",
         "AmazonWebServices.aws-toolkit-vscode",
@@ -81,6 +82,11 @@
       "installDockerComposeSwitch": true,
       "moby": true,
       "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/dotnet:2": {
+      "aspNetCoreRuntimeVersions": "8.0",
+      "dotnetRuntimeVersions": "8.0",
+      "version": "8.0"
     },
     "ghcr.io/devcontainers/features/go:1": {},
     "ghcr.io/devcontainers/features/node:1": {},
