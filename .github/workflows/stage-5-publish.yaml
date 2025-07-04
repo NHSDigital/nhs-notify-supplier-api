@@ -213,7 +213,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: .
-          name: sdk-csharp-docker-${{ inputs.version }}
+          name: server-csharp-docker-${{ inputs.version }}
       - run: ls -la
       - run: |
           docker build . -t ghcr.io/NHSDigital/nhsnotifysupplierserver:latest
