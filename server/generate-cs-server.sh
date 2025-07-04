@@ -1,5 +1,5 @@
 #!/bin/sh
-# run this from directory above, or with npm run generate:ts from parent directory.
+# run this from THIS DIRECTORY.
 
 VERSION=${1:-"$(cat .version)"}
 
@@ -8,7 +8,7 @@ generate () {
   docker run \
   --rm \
   --user $(id -u) \
-  -v ${PWD}:/local \
+  -v ${PWD}/../:/local \
   -e VERSION="$SHORT_VERSION" \
   openapitools/openapi-generator-cli \
   generate \

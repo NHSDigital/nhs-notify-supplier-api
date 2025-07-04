@@ -32,5 +32,5 @@ runs:
     - name: Upload csharp-server  artifact
       uses: actions/upload-artifact@v4
       with:
-        path: "server/csharp-server "
+        path: "server/csharp-server"
         name: server-csharp-${{ inputs.version }}
