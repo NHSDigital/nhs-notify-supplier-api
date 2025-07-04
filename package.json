@@ -1,5 +1,4 @@
 {
-  "//": "PLEASE UPDATE THE NAME AND WORKSPACES APPROPRIATELY.",
   "dependencies": {
     "serve": "^14.2.4"
   },
@@ -62,6 +61,6 @@
     "typecheck": "npm run typecheck --workspaces"
   },
   "workspaces": [
-    "lambdas/example-lambda"
+    "lambdas/api-handler"
   ]
 }
