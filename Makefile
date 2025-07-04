@@ -11,6 +11,7 @@ dependencies: # Install dependencies needed to build and test the project @Pipel
 	# TODO: Implement installation of your project dependencies
 
 build: # Build the project artefact @Pipeline
+	(cd server && make build)
 	(cd sdk && make build)
 	(cd docs && make build)
 

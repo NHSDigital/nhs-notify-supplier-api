@@ -3,7 +3,7 @@ VERSION ?= ""
 SHELL = /bin/bash
 
 build: version # Build the project artefact @Pipeline
-	VER=$$(cat .version) && ./generate-cs-server.sh --buildver=$$VER
+	VER=$$(cat .version) && ./generate-cs-server.sh $$VER
 
 clean: # Clean-up project resources (main) @Operations
 	rm -rf */

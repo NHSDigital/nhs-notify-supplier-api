@@ -3,13 +3,13 @@
 
 VERSION=${1:-"$(cat .version)"}
 
-generate () {
+generate (){
   set -x
+  echo $SHORT_VERSION
   docker run \
   --rm \
   --user $(id -u) \
   -v ${PWD}/../:/local \
-  -e VERSION="$SHORT_VERSION" \
   openapitools/openapi-generator-cli \
   generate \
   -i /local/specification/api/notify-supplier.yml \
@@ -38,8 +38,6 @@ generate_nuget_version(){
 }
 
 pack(){
-
-
   generate_nuget_version
 
   dotnet \
@@ -48,7 +46,6 @@ pack(){
   /p:Version=${TEST_NUGET_VERSION} \
   --no-build \
   --output sdk/csharp
-
 }
 
 prepare(){
