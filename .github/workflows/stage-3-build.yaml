@@ -57,6 +57,18 @@ jobs:
         with:
           version: "${{ inputs.version }}"
 
+  artefact-servers:
+    name: "Build servers"
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+      - name: "Build sdks"
+        uses: ./.github/actions/build-server
+        with:
+          version: "${{ inputs.version }}"
+
   # artefact-1:
   #   name: "Artefact 1"
   #   runs-on: ubuntu-latest

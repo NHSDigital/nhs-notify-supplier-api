@@ -1,0 +1,36 @@
+name: "Build servers"
+description: "build servers"
+inputs:
+  version:
+    description: "Version number"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24
+
+    - name: Npm install
+      working-directory: .
+      run: npm ci
+      shell: bash
+
+    - name: make csharp-server folder
+      working-directory: ./server
+      shell: bash
+      run: mkdir csharp-server
+
+    - name: Build servers
+      working-directory: ./server
+      shell: bash
+      run: |
+        make build VERSION="${{ inputs.version }}"
+
+    - name: Upload csharp-server  artifact
+      uses: actions/upload-artifact@v4
+      with:
+        path: "server/csharp-server "
+        name: server-csharp-${{ inputs.version }}

@@ -182,6 +182,24 @@ jobs:
           asset_name: api-oas-specification-${{ inputs.version }}.zip
           asset_content_type: "application/gzip"
 
+
+      - name: "zip csharp server release asset"
+        # Git hub pages needs a single tar called artifact inside the zip.
+        working-directory: ./artifacts/server-csharp-${{ inputs.version }}
+        run: zip -r ../server-csharp-${{ inputs.version }}.zip .
+        shell: bash
+
+      - name: "Upload csharp server release asset"
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: "${{ steps.create_release.outputs.upload_url }}"
+          asset_path: ./artifacts/server-csharp-${{ inputs.version }}.zip
+          asset_name: server-csharp-${{ inputs.version }}.zip
+          asset_content_type: "application/gzip"
+
+
 ### PUBLISH NUGET
   publishnuget:
     name: "Publish nuget packages to nuget.pkg.github.com"
