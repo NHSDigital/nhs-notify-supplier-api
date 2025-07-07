@@ -19,7 +19,7 @@ describe('Authorizer Lambda Function', () => {
   });
 
   it('Should allow access when headers match', () => {
-    mockEvent.headers = { HeaderAuth1: 'headerValue1' };
+    mockEvent.headers = { headerauth1: 'headervalue1' };
 
     handler(mockEvent, mockContext, mockCallback);
 
@@ -35,7 +35,7 @@ describe('Authorizer Lambda Function', () => {
   });
 
   it('Should deny access when headers do not match', () => {
-    mockEvent.headers = { HeaderAuth1: 'wrongValue' };
+    mockEvent.headers = { headerauth1: 'wrongValue' };
 
     handler(mockEvent, mockContext, mockCallback);
 
@@ -67,7 +67,7 @@ describe('Authorizer Lambda Function', () => {
   });
 
   it('Should handle defined headers correctly', () => {
-    mockEvent.headers = { HeaderAuth1: 'headerValue1' };
+    mockEvent.headers = { headerauth1: 'headervalue1' };
 
     handler(mockEvent, mockContext, mockCallback);
 
