@@ -10,7 +10,7 @@
     "jest-mock-extended": "^3.0.7",
     "typescript": "^5.8.2"
   },
-  "name": "nhs-notify-supplier-api-handler",
+  "name": "nhs-notify-supplier-authorizer",
   "private": true,
   "scripts": {
     "lambda-build": "rm -rf dist && npx esbuild --bundle --minify --sourcemap --target=es2020 --platform=node --loader:.node=file --entry-names=[name] --outdir=dist src/index.ts",
