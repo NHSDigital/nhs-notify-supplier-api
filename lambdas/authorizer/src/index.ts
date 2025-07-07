@@ -37,7 +37,7 @@ export const handler = (
   // Perform authorization to return the Allow policy for correct parameters and
   // the 'Unauthorized' error, otherwise.
   if (
-    headers['HeaderAuth1'] === 'headerValue1'
+    headers['headerauth1'] === 'headervalue1'
   ) {
     callback(null, generateAllow('me', event.methodArn));
   } else {

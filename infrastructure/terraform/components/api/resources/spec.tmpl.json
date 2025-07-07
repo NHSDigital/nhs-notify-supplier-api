@@ -11,7 +11,7 @@
           "authorizerUri": "arn:aws:apigateway:${AWS_REGION}:lambda:path/2015-03-31/functions/${AUTHORIZER_LAMBDA_ARN}/invocations",
           "authorizerCredentials": "${APIG_EXECUTION_ROLE_ARN}",
           "identitySource": "method.request.header.Authorization",
-          "authorizerResultTtlInSeconds": 300
+          "authorizerResultTtlInSeconds": 0
         }
       }
     }
