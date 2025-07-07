@@ -9,136 +9,144 @@ It models the concepts needed to configure production of letters and other print
 
 This repository documents the Supplier API specification and provides an SDK with examples and reference client implementations for interacting with it.
 
+## OAS Specifications
+
+- [Current Version](specification/api/notify-supplier.yml)
+- [vNext](specification/api/notify-supplier-next.yml)
+
 ## Table of Contents
 
 - [NHS Notify Supplier API](#nhs-notify-supplier-api)
+  - [OAS Specifications](#oas-specifications)
   - [Table of Contents](#table-of-contents)
-  - [Documentation](#documentation)
-  - [Setup](#setup)
-    - [Prerequisites](#prerequisites)
-    - [Configuration](#configuration)
-  - [Usage](#usage)
-    - [Testing](#testing)
-  - [Design](#design)
-    - [Diagrams](#diagrams)
-    - [Modularity](#modularity)
-  - [Contributing](#contributing)
-  - [Contacts](#contacts)
+  - [API Consumers - Getting Started](#api-consumers---getting-started)
+    - [OAS Specification](#oas-specification)
+    - [Packages](#packages)
+    - [Documentation](#documentation)
+    - [SDK Assets](#sdk-assets)
+    - [Examples](#examples)
+  - [API Developers](#api-developers)
+    - [Documentation](#documentation-1)
+    - [pre built servers](#pre-built-servers)
+    - [Setup](#setup)
+      - [Prerequisites and Configuration](#prerequisites-and-configuration)
+        - [SDKs](#sdks)
+        - [Servers](#servers)
+    - [Build](#build)
+    - [GitHub Actions CI/CD](#github-actions-cicd)
+      - [CI (Automatic)](#ci-automatic)
+      - [CD (Manual)](#cd-manual)
   - [Licence](#licence)
 
-## Documentation
+## API Consumers - Getting Started
+
+### OAS Specification
+
+- Download the OAS Specification File from the [latest releases](https://github.com/NHSDigital/nhs-notify-supplier-api/releases)
+  - OAS JSON files `api-oas-specification-[Version].zip`
+
+### Packages
+
+- [NPM package](https://github.com/NHSDigital/nhs-notify-supplier-api/pkgs/npm/nhsnotifysupplier)
+
+### Documentation
+
+- View the [latest SDK documentation](https://nhsdigital.github.io/nhs-notify-supplier-api/)
+- Download local versions of the API docs from the [latest releases](https://github.com/NHSDigital/nhs-notify-supplier-api/releases)
+  - HTML `sdk-html-[Version].zip`
+  - Swagger `sdk-swagger-[Version].zip`
+
+### SDK Assets
+
+If packages are unavailable the latest SDKs can be downloaded directly from:
+
+- Download SDKs from the [latest releases](https://github.com/NHSDigital/nhs-notify-supplier-api/releases)
+  - Python `sdk-python-[Version].zip`
+  - TypeScript `sdk-ts-[Version].zip`
+  - CSharp `sdk-csharp-[Version].zip`
+
+### Examples
+
+TODO: Links to example clients.
+
+## API Developers
+
+New developer of the NHS Notify Supplier API
+should understand the below.
+
+### Documentation
 
 - [Built](/)
 - [Source](/docs/README.md)
 
-## Setup
+### pre built servers
 
-> TODO
+- Docker (csharp) `docker run -p 3000:3000 ghcr.io/nhsdigital/nhsnotifysupplierserver:latest`
+- CSharp `server-csharp-[Version].zip`
 
-By including preferably a one-liner or if necessary a set of clear CLI instructions we improve user experience. This should be a frictionless installation process that works on various operating systems (macOS, Linux, Windows WSL) and handles all the dependencies.
+### Setup
 
-Clone the repository
+#### Prerequisites and Configuration
 
-```shell
-git clone https://github.com/nhs-england-tools/repository-template.git
-cd nhs-england-tools/repository-template
+- Utilised the devcontainer, for pre reqs and configuration.
+- You should open in a devcontainer or a Github workspaces.
+- By default it will run `make config` when the container is first setup
+
+##### SDKs
+
+- The [SDK](sdk) folder is excluded from all pre reqs
+- DO NOT make manual changes to the [SDK](sdk), instead [build](#build) it
+- The SDK folder is excluded from git commits,
+  and will be built as part of the CI/CD pipeline and released as a GitHub
+  release.
+
+##### Servers
+
+- Servers folder is being built at build time from OAS specs.
+- TODO: Build actual servers
+
+### Build
+
+To generate the SDK folder from changes to the [specification/api/notify-supplier.yml](specification/api/notify-supplier.yml) OAS specification:
+
+```bash
+make clean
+make build
 ```
 
-### Prerequisites
+This will generate:
 
-> TODO
+- Python SDK
+- TypeScript SDK
+- HTML Docs
 
-The following software packages, or their equivalents, are expected to be installed and configured:
+To view HTML docs:
 
-- [Docker](https://www.docker.com/) container runtime or a compatible tool, e.g. [Podman](https://podman.io/),
-- [asdf](https://asdf-vm.com/) version manager,
-- [GNU make](https://www.gnu.org/software/make/) 3.82 or later,
-
-> [!NOTE]<br>
-> The version of GNU make available by default on macOS is earlier than 3.82. You will need to upgrade it or certain `make` tasks will fail. On macOS, you will need [Homebrew](https://brew.sh/) installed, then to install `make`, like so:
->
-> ```shell
-> brew install make
-> ```
->
-> You will then see instructions to fix your [`$PATH`](https://github.com/nhs-england-tools/dotfiles/blob/main/dot_path.tmpl) variable to make the newly installed version available. If you are using [dotfiles](https://github.com/nhs-england-tools/dotfiles), this is all done for you.
-
-- [GNU sed](https://www.gnu.org/software/sed/) and [GNU grep](https://www.gnu.org/software/grep/) are required for the scripted command-line output processing,
-- [GNU coreutils](https://www.gnu.org/software/coreutils/) and [GNU binutils](https://www.gnu.org/software/binutils/) may be required to build dependencies like Python, which may need to be compiled during installation,
-
-> [!NOTE]<br>
-> For macOS users, installation of the GNU toolchain has been scripted and automated as part of the `dotfiles` project. Please see this [script](https://github.com/nhs-england-tools/dotfiles/blob/main/assets/20-install-base-packages.macos.sh) for details.
-
-- [Python](https://www.python.org/) required to run Git hooks,
-- [`jq`](https://jqlang.github.io/jq/) a lightweight and flexible command-line JSON processor.
-
-### Configuration
-
-> TODO
-
-Installation and configuration of the toolchain dependencies
-
-```shell
-make config
+```bash
+make serve
 ```
 
-## Usage
+by default they will be available at [http://localhost:3050](http://localhost:3050)
 
-> TODO
+These are generated using [https://hub.docker.com/r/openapitools/openapi-generator-cli](https://hub.docker.com/r/openapitools/openapi-generator-cli)
 
-After a successful installation, provide an informative example of how this project can be used. Additional code snippets, screenshots and demos work well in this space. You may also link to the other documentation resources, e.g. the [User Guide](./docs/user-guide.md) to demonstrate more use cases and to show more features.
+### GitHub Actions CI/CD
 
-### Testing
+#### CI (Automatic)
 
-> TODO
+PRs will run the [CI workflow](https://github.com/NHSDigital/nhs-notify-supplier-api/actions/workflows/cicd-1-pull-request.yaml)
+for testing.
 
-There are `make` tasks for you to configure to run your tests.  Run `make test` to see how they work.  You should be able to use the same entry points for local development as in your CI pipeline.
+PRs that are merged to main will run the same [CI workflow](https://github.com/NHSDigital/nhs-notify-supplier-api/actions/workflows/cicd-1-pull-request.yaml)
+will generate a
+[pre-release](https://github.com/NHSDigital/nhs-notify-supplier-api/releases)
+based on the date and the commit hash.
 
-## Design
+#### CD (Manual)
 
-### Diagrams
-
-> TODO
-
-The [C4 model](https://c4model.com/) is a simple and intuitive way to create software architecture diagrams that are clear, consistent, scalable and most importantly collaborative. This should result in documenting all the system interfaces, external dependencies and integration points.
-
-![Repository Template](./docs/diagrams/Repository_Template_GitHub_Generic.png)
-
-The source for diagrams should be in Git for change control and review purposes. Recommendations are [draw.io](https://app.diagrams.net/) (example above in [docs](.docs/diagrams/) folder) and [Mermaids](https://github.com/mermaid-js/mermaid). Here is an example Mermaids sequence diagram:
-
-```mermaid
-sequenceDiagram
-    User->>+Service: GET /users?params=...
-    Service->>Service: auth request
-    Service->>Database: get all users
-    Database-->>Service: list of users
-    Service->>Service: filter users
-    Service-->>-User: list[User]
-```
-
-### Modularity
-
-> TODO
-
-Most of the projects are built with customisability and extendability in mind. At a minimum, this can be achieved by implementing service level configuration options and settings. The intention of this section is to show how this can be used. If the system processes data, you could mention here for example how the input is prepared for testing - anonymised, synthetic or live data.
-
-## Contributing
-
-> TODO
-
-Describe or link templates on how to raise an issue, feature request or make a contribution to the codebase. Reference the other documentation files, like
-
-- Environment setup for contribution, i.e. `CONTRIBUTING.md`
-- Coding standards, branching, linting, practices for development and testing
-- Release process, versioning, changelog
-- Backlog, board, roadmap, ways of working
-- High-level requirements, guiding principles, decision records, etc.
-
-## Contacts
-
-> TODO
-
-Provide a way to contact the owners of this project. It can be a team, an individual or information on the means of getting in touch via active communication channels, e.g. opening a GitHub discussion, raising an issue, etc.
+Deployments can be made of any [release](https://github.com/NHSDigital/nhs-notify-supplier-api/releases)
+(including the GitHub pages) by running the CD pipeline
+[cicd-3-deploy.yaml](https://github.com/NHSDigital/nhs-notify-supplier-api/actions/workflows/cicd-3-deploy.yaml)
 
 ## Licence
 

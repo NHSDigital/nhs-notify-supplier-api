@@ -4,11 +4,13 @@ bot
 Cognito
 Cyber
 Dependabot
+devcontainer
 draw.io
 drawio
 endcapture
 endfor
 endraw
+env
 Git[Hh]ub
 Gitleaks
 Grype
@@ -18,10 +20,13 @@ OAuth
 Octokit
 onboarding
 Podman
+pre
 Python
 rawContent
+SDK
 sed
 Syft
 Terraform
 toolchain
 Trufflehog
+vNext

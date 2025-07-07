@@ -1,0 +1,32 @@
+name: Github Release Created
+
+on:
+  release:
+    types: ["published"] # Inherits all input defaults
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy-main:
+    name: Deploy changes to main in nonprod AWS Account
+
+    permissions:
+      id-token: write
+      contents: read
+
+    strategy:
+      max-parallel: 1
+      matrix:
+        component: [api]
+
+    uses: ./.github/workflows/reusable_internal_repo_build.yaml
+    secrets: inherit
+    with:
+      releaseVersion: ${{ github.event.release.tag_name }}
+      targetWorkflow: "dispatch-deploy-static-notify-supliers-api-env.yaml"
+      targetEnvironment: "main"
+      targetAccountGroup: "nhs-notify-supliers-api-nonprod"
+      targetComponent: ${{ matrix.component }}
+      terraformAction: "apply"

@@ -1,0 +1,106 @@
+name: "Build SDKs"
+description: "build sdks"
+inputs:
+  version:
+    description: "Version number"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 18
+
+    - name: Npm install
+      working-directory: .
+      run: npm ci
+      shell: bash
+
+    - name: make ts folder
+      working-directory: ./sdk
+      shell: bash
+      run: mkdir typescript
+
+    - name: make html folder
+      working-directory: ./sdk
+      shell: bash
+      run: mkdir html
+
+    - name: make python folder
+      working-directory: ./sdk
+      shell: bash
+      run: mkdir python
+
+    - name: make swagger folder
+      working-directory: ./sdk
+      shell: bash
+      run: mkdir swagger
+
+    - name: make csharp folder
+      working-directory: ./sdk
+      shell: bash
+      run: mkdir csharp
+
+    - name: Build sdks
+      working-directory: ./sdk
+      shell: bash
+      run: |
+        make build VERSION="${{ inputs.version }}"
+
+
+    - name: Upload API OAS specification artifact
+      uses: actions/upload-artifact@v4
+      with:
+        path: "specification/api"
+        name: api-oas-specification-${{ inputs.version }}
+
+    - name: Upload html artifact
+      uses: actions/upload-artifact@v4
+      with:
+        path: "sdk/html"
+        name: sdk-html-${{ inputs.version }}
+
+    - name: Upload swagger artifact
+      uses: actions/upload-artifact@v4
+      with:
+        path: "sdk/swagger"
+        name: sdk-swagger-${{ inputs.version }}
+
+    - name: Upload ts artifact
+      uses: actions/upload-artifact@v4
+      with:
+        path: "sdk/typescript"
+        name: sdk-ts-${{ inputs.version }}
+
+    - name: Upload python artifact
+      uses: actions/upload-artifact@v4
+      with:
+        path: "sdk/python"
+        name: sdk-python-${{ inputs.version }}
+
+    - name: Upload csharp artifact
+      uses: actions/upload-artifact@v4
+      with:
+        path: "sdk/csharp"
+        name: sdk-csharp-${{ inputs.version }}
+
+    # - name: Upload artifact
+    #   # Automatically uploads an artifact from the './_site' directory by default
+    #   uses: actions/upload-pages-artifact@v3
+    #   with:
+    #     path: "docs/_site/"
+    #     name: jekyll-docs-${{ inputs.version }}
+
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: "sdk/html/"
+        name: sdk-html-docs-${{ inputs.version }}
+
+    - name: Upload swagger pages artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: "sdk/swagger/"
+        name: sdk-swagger-docs-${{ inputs.version }}

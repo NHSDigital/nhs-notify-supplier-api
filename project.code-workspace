@@ -89,6 +89,8 @@
   },
   "extensions": {
     "recommendations": [
+  "ms-dotnettools.csdevkit",
+  "42crunch.vscode-openapi",
   "alefragnani.bookmarks",
   "AmazonWebServices.aws-toolkit-vscode",
   "chdsbd.github-code-owners",

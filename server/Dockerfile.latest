@@ -1,0 +1,32 @@
+# Gets from the latest pre release
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+RUN apt-get update && \
+    apt-get install -y \
+    jq \
+    curl \
+    unzip
+
+RUN releases=$(curl https://api.github.com/repos/NHSDigital/nhs-notify-supplier-api/releases) && \
+    latest=$(echo $releases | jq -r 'map(select(.prerelease)) | first | .tag_name') && \
+    encoded=$(jq -rn --arg x $latest '$x|@uri') && \
+    echo $latest && \
+    url="https://github.com/NHSDigital/nhs-notify-supplier-api/releases/download/$encoded/server-csharp-$latest.zip" && \
+    echo $url && \
+    echo $encoded && \
+    curl -Lo ./server.zip $url && \
+    unzip server.zip && \
+    cd src/nhsnotifysupplierserver && \
+    dotnet build --configuration Release && \
+    ls -la bin/Release/net8.0
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+
+WORKDIR /App
+COPY --from=build /src/nhsnotifysupplierserver/bin/Release/net8.0 .
+RUN mkdir -p /src/nhsnotifysupplierserver/wwwroot
+COPY --from=build src/nhsnotifysupplierserver/wwwroot/* /src/nhsnotifysupplierserver/wwwroot
+RUN    ls -la /src/nhsnotifysupplierserver/wwwroot && \
+    pwd
+ENV ASPNETCORE_ENVIRONMENT="Development"
+ENTRYPOINT ["dotnet", "nhsnotifysupplierserver.dll"]
