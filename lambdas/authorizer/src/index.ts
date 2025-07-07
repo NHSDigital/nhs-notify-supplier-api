@@ -20,12 +20,7 @@ export const handler = (
 ): void => {
   console.log('Received event:', JSON.stringify(event, null, 2));
 
-  // Retrieve request parameters from the Lambda function input:
   const headers = event.headers || {};
-  const pathParameters = event.pathParameters || {};
-  const stageVariables = event.stageVariables || {};
-
-  // Parse the input for the parameter values
   const tmp = event.methodArn.split(':');
   const apiGatewayArnTmp = tmp[5].split('/');
   const awsAccountId = tmp[4];
@@ -34,6 +29,7 @@ export const handler = (
   const stage = apiGatewayArnTmp[1];
   const method = apiGatewayArnTmp[2];
   let resource = '/'; // root resource
+
   if (apiGatewayArnTmp[3]) {
     resource += apiGatewayArnTmp[3];
   }
@@ -41,8 +37,7 @@ export const handler = (
   // Perform authorization to return the Allow policy for correct parameters and
   // the 'Unauthorized' error, otherwise.
   if (
-    headers['HeaderAuth1'] === 'headerValue1' &&
-    stageVariables['StageVar1'] === 'stageValue1'
+    headers['HeaderAuth1'] === 'headerValue1'
   ) {
     callback(null, generateAllow('me', event.methodArn));
   } else {

@@ -63,6 +63,12 @@ variable "log_retention_in_days" {
   default     = 0
 }
 
+variable "log_level" {
+  type        = string
+  description = "The log level to be used in lambda functions within the component. Any log with a lower severity than the configured value will not be logged: https://docs.python.org/3/library/logging.html#levels"
+  default     = "INFO"
+}
+
 variable "force_lambda_code_deploy" {
   type        = bool
   description = "If the lambda package in s3 has the same commit id tag as the terraform build branch, the lambda will not update automatically. Set to True if making changes to Lambda code from on the same commit for example during development"

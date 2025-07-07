@@ -1,6 +1,19 @@
 {
   "components": {
     "securitySchemes": {
+      "LambdaAuthorizer": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header",
+        "x-amazon-apigateway-authtype": "custom",
+        "x-amazon-apigateway-authorizer": {
+          "type": "request",
+          "authorizerUri": "arn:aws:apigateway:${AWS_REGION}:lambda:path/2015-03-31/functions/${AUTHORIZER_LAMBDA_ARN}/invocations",
+          "authorizerCredentials": "${APIG_EXECUTION_ROLE_ARN}",
+          "identitySource": "method.request.header.HeaderAuth1",
+          "authorizerResultTtlInSeconds": 300
+        }
+      }
     }
   },
   "info": {
@@ -32,7 +45,12 @@
           "timeoutInMillis": 29000,
           "type": "AWS_PROXY",
           "uri": "arn:aws:apigateway:${AWS_REGION}:lambda:path/2015-03-31/functions/${HELLO_WORLD_LAMBDA_ARN}/invocations"
-        }
+        },
+        "security": [
+          {
+            "LambdaAuthorizer": []
+          }
+        ]
       }
     }
   }

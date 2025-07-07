@@ -1,29 +1,29 @@
-# module "authorizer_lambda" {
-#   source = "git::https://github.com/NHSDigital/nhs-notify-shared-modules.git//infrastructure/modules/lambda?ref=v2.0.4"
+module "authorizer_lambda" {
+  source = "git::https://github.com/NHSDigital/nhs-notify-shared-modules.git//infrastructure/modules/lambda?ref=v2.0.4"
 
-#   aws_account_id = var.aws_account_id
-#   component      = var.component
-#   environment    = var.environment
-#   project        = var.project
-#   region         = var.region
-#   group          = var.group
+  aws_account_id = var.aws_account_id
+  component      = var.component
+  environment    = var.environment
+  project        = var.project
+  region         = var.region
+  group          = var.group
 
-#   log_retention_in_days = var.log_retention_in_days
-#   kms_key_arn = var.kms_key_arn
+  log_retention_in_days = var.log_retention_in_days
+  kms_key_arn           = module.kms.key_arn
 
-#   function_name = "authorizer"
-#   description   = "Authorizer for Suppliers API"
+  function_name = "authorizer"
+  description   = "Authorizer for Suppliers API"
 
-#   memory  = 512
-#   timeout = 20
-#   runtime = "nodejs22.x"
+  memory  = 512
+  timeout = 20
+  runtime = "nodejs22.x"
 
-#   function_s3_bucket      = local.acct.s3_buckets["lambda_function_artefacts"]["id"]
-#   function_code_base_path = local.aws_lambda_functions_dir_path
-#   function_code_dir       = "authorizer/dist"
-#   function_module_name  = "index"
-#   handler_function_name = "handler"
+  function_s3_bucket      = local.acct.s3_buckets["lambda_function_artefacts"]["id"]
+  function_code_base_path = local.aws_lambda_functions_dir_path
+  function_code_dir       = "authorizer/dist"
+  function_module_name    = "index"
+  handler_function_name   = "handler"
 
-#   enable_lambda_insights   = false
-#   force_lambda_code_deploy = var.force_lambda_code_deploy
-# }
+  enable_lambda_insights   = false
+  force_lambda_code_deploy = var.force_lambda_code_deploy
+}
