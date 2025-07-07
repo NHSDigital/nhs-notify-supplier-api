@@ -25,7 +25,6 @@ set -euo pipefail
 # ==============================================================================
 
 function main() {
-  echo "IN IT"
   cd "$(git rev-parse --show-toplevel)"
 
   check=${check:-working-tree-changes}
@@ -58,7 +57,6 @@ function main() {
 # Arguments (provided as environment variables):
 #   filter=[git command to filter the files to check]
 function run-vale-natively() {
-  echo "RUNNING NATIVE"
   # shellcheck disable=SC2046
   vale \
     --config "$PWD/scripts/config/vale/vale.ini" \
@@ -69,7 +67,6 @@ function run-vale-natively() {
 # Arguments (provided as environment variables):
 #   filter=[git command to filter the files to check]
 function run-vale-in-docker() {
-  echo "RUNNING DOCKER"
   # shellcheck disable=SC1091
   source ./scripts/docker/docker.lib.sh
 
