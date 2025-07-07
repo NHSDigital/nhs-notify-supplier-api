@@ -1,6 +1,6 @@
 resource "aws_api_gateway_deployment" "main" {
   rest_api_id = aws_api_gateway_rest_api.main.id
-  description = "Suppliersv UI API deployment"
+  description = "Suppliers UI API deployment"
 
   triggers = {
     openapi_hash = sha1(jsonencode(local.openapi_spec)),
