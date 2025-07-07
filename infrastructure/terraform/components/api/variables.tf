@@ -51,6 +51,12 @@ variable "default_tags" {
 # Variables specific to the component
 ##
 
+variable "kms_deletion_window" {
+  type        = string
+  description = "When a kms key is deleted, how long should it wait in the pending deletion state?"
+  default     = "30"
+}
+
 variable "log_retention_in_days" {
   type        = number
   description = "The retention period in days for the Cloudwatch Logs events to be retained, default of 0 is indefinite"
@@ -61,4 +67,10 @@ variable "force_lambda_code_deploy" {
   type        = bool
   description = "If the lambda package in s3 has the same commit id tag as the terraform build branch, the lambda will not update automatically. Set to True if making changes to Lambda code from on the same commit for example during development"
   default     = false
+}
+
+variable "parent_acct_environment" {
+  type        = string
+  description = "Name of the environment responsible for the acct resources used, affects things like DNS zone. Useful for named dev environments"
+  default     = "main"
 }

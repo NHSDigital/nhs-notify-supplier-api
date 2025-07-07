@@ -1,0 +1,39 @@
+{
+  "components": {
+    "securitySchemes": {
+    }
+  },
+  "info": {
+    "description": "NHS Notify Supplier API",
+    "title": "NHS Notify - Suppliers - Supplier API",
+    "version": "v1"
+  },
+  "openapi": "3.0.1",
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Health check",
+        "description": "Returns 200 OK if the API is up.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "contentHandling": "CONVERT_TO_TEXT",
+          "credentials": "${APIG_EXECUTION_ROLE_ARN}",
+          "httpMethod": "POST",
+          "passthroughBehavior": "WHEN_NO_TEMPLATES",
+          "responses": {
+            ".*": {
+              "statusCode": "200"
+            }
+          },
+          "timeoutInMillis": 29000,
+          "type": "AWS_PROXY",
+          "uri": "arn:aws:apigateway:${AWS_REGION}:lambda:path/2015-03-31/functions/${HELLO_WORLD_LAMBDA_ARN}/invocations"
+        }
+      }
+    }
+  }
+}
