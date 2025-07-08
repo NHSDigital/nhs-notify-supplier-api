@@ -27,13 +27,13 @@ runs:
     - name: Upload abstractions artifact
       uses: actions/upload-artifact@v4
       with:
-        path: "src/server/abstractions/bin/Release
+        path: "src/server/abstractions/bin/Release"
         name: libs-abstractions-${{ inputs.version }}
 
     - name: Upload data artifact
       uses: actions/upload-artifact@v4
       with:
-        path: "src/server/data/bin/Release
+        path: "src/server/data/bin/Release"
         name: libs-data-${{ inputs.version }}
 
     - name: Upload letter artifact
@@ -45,5 +45,5 @@ runs:
     - name: Upload host artifact
       uses: actions/upload-artifact@v4
       with:
-        path: "src/server/host/bin/Release
+        path: "src/server/host/bin/Release"
         name: libs-host-${{ inputs.version }}
