@@ -49,7 +49,7 @@ jobs:
     secrets: inherit
     with:
       releaseVersion: main
-      targetWorkflow: "dispatch-deploy-static-notify-web-supplier-api-env.yaml"
+      targetWorkflow: "dispatch-deploy-static-notify-supplier-api-env.yaml"
       targetEnvironment: "main"
       targetAccountGroup: "nhs-notify-supplier-api-dev"
       targetComponent: ${{ matrix.component }}
