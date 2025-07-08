@@ -3,6 +3,7 @@
     "serve": "^14.2.4"
   },
   "devDependencies": {
+    "@redocly/cli": "^1.34.3",
     "@tsconfig/node22": "^22.0.2",
     "@types/jest": "^29.5.14",
     "@typescript-eslint/eslint-plugin": "^8.27.0",
@@ -54,6 +55,7 @@
     "generate:ts": "./sdk/generate-ts.sh $npm_config_buildver",
     "lint": "npm run lint --workspaces",
     "lint:fix": "npm run lint:fix --workspaces",
+    "lint_oas": "redocly lint specification/api/notify-supplier.yml",
     "serve": "npm run serve-html-docs",
     "serve-html-docs": "npx serve sdk/html -p 3050",
     "serve-swagger-docs": "npx serve sdk/swagger -p 3051",
