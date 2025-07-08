@@ -16,7 +16,8 @@ repos:
         exclude: |
             (?x)^(
                 sdk/.* |
-                someotherdir/.*
+                someotherdir/.* |
+                src/server/host/Properties/launchSettings.json
             )$
 
     # -   id: ...

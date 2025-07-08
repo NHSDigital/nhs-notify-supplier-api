@@ -1,0 +1,49 @@
+name: "Build libraries"
+description: "build libraries"
+inputs:
+  version:
+    description: "Version number"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24
+
+    - name: Npm install
+      working-directory: .
+      run: npm ci
+      shell: bash
+
+    - name: Build servers
+      working-directory: ./src/server
+      shell: bash
+      run: |
+        make build VERSION="${{ inputs.version }}"
+
+    - name: Upload abstractions artifact
+      uses: actions/upload-artifact@v4
+      with:
+        path: "src/server/abstractions/bin/Release
+        name: libs-abstractions-${{ inputs.version }}
+
+    - name: Upload data artifact
+      uses: actions/upload-artifact@v4
+      with:
+        path: "src/server/data/bin/Release
+        name: libs-data-${{ inputs.version }}
+
+    - name: Upload letter artifact
+      uses: actions/upload-artifact@v4
+      with:
+        path: "src/server/letter/bin/Release"
+        name: libs-letter-${{ inputs.version }}
+
+    - name: Upload host artifact
+      uses: actions/upload-artifact@v4
+      with:
+        path: "src/server/host/bin/Release
+        name: libs-host-${{ inputs.version }}

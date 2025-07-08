@@ -1,0 +1,41 @@
+{
+  "tasks": [
+    {
+      "args": [
+        "build",
+        "${workspaceFolder}/host.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary;ForceNoAlign"
+      ],
+      "command": "dotnet",
+      "label": "build",
+      "problemMatcher": "$msCompile",
+      "type": "process"
+    },
+    {
+      "args": [
+        "publish",
+        "${workspaceFolder}/host.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary;ForceNoAlign"
+      ],
+      "command": "dotnet",
+      "label": "publish",
+      "problemMatcher": "$msCompile",
+      "type": "process"
+    },
+    {
+      "args": [
+        "watch",
+        "run",
+        "--project",
+        "${workspaceFolder}/host.csproj"
+      ],
+      "command": "dotnet",
+      "label": "watch",
+      "problemMatcher": "$msCompile",
+      "type": "process"
+    }
+  ],
+  "version": "2.0.0"
+}
