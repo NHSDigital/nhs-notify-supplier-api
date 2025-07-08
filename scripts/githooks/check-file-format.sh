@@ -89,7 +89,6 @@ function run-editorconfig-natively() {
 #   dry_run_opt=[dry run option]
 #   filter=[git command to filter the files to check]
 function run-editorconfig-in-docker() {
-  echo "RUNNING EDITOR CHECK IN DOCKER"
   # shellcheck disable=SC1091
   source ./scripts/docker/docker.lib.sh
 

@@ -1,1 +1,3 @@
-# Define the outputs for the component. The outputs may well be referenced by other component in the same or different environments using terraform_remote_state data sources...
+output "api_urll" {
+  value = aws_api_gateway_stage.main.invoke_url
+}
