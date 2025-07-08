@@ -14,7 +14,7 @@ build: # Build the project artefact @Pipeline
 	(cd server && make build)
 	(cd sdk && make build)
 	(cd docs && make build)
-
+	(cd libs && make build)
 publish: # Publish the project artefact @Pipeline
 	# TODO: Implement the artefact publishing step
 

@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <PublishTrimmed>false</PublishTrimmed>
     <AssemblyName>nhs.notify.suppliers.api.abstractions</AssemblyName>
+    <NoDefaultExcludes>true</NoDefaultExcludes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,5 +17,9 @@
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.6" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.6" />
   </ItemGroup>
-
+  <ItemGroup>
+    <Content Include="../.version">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

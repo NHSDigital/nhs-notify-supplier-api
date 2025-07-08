@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>nhs.notify.suppliers.api.letter</AssemblyName>
+    <NoDefaultExcludes>true</NoDefaultExcludes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,5 +18,9 @@
   <ItemGroup>
     <ProjectReference Include="..\abstractions\abstractions.csproj" />
   </ItemGroup>
-
+  <ItemGroup>
+    <Content Include="../.version">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 </Project>
