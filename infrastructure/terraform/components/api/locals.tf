@@ -8,5 +8,5 @@ locals {
     HELLO_WORLD_LAMBDA_ARN  = module.hello_world.function_arn
   })
 
-  destination_arn = "arn:aws:logs:${var.region}:${var.shared_infra_account_id}:destination:nhs-main-obs-firehose-logs"
+  destination_arn = "arn:aws:logs:${var.region}:${var.shared_infra_account_id}:destination:nhs-${var.parent_acct_environment}-obs-firehose-logs"
 }
