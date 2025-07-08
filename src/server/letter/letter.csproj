@@ -18,9 +18,5 @@
   <ItemGroup>
     <ProjectReference Include="..\abstractions\abstractions.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="../.version">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+
 </Project>

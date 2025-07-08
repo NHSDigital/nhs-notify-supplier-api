@@ -24,9 +24,7 @@
     <Content Include="run.sh">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="../.version">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+
 
     <Content Update="appsettings.*.json" CopyToPublishDirectory="Never" />
     <Content Update="appsettings.json" CopyToPublishDirectory="Never" />
