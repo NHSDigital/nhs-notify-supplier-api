@@ -29,7 +29,7 @@ runs:
       run: |
         make build VERSION="${{ inputs.version }}"
 
-    - name: Upload csharp-server  artifact
+    - name: Upload csharp-server artifact
       uses: actions/upload-artifact@v4
       with:
         path: "server/csharp-server"
