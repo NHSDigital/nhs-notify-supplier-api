@@ -11,10 +11,11 @@ builder.Services.AddSuppliersApi(
   builder.Configuration,
   suppliersApiBuilder =>
   {
-    suppliersApiBuilder.FromAssemblies();
-    suppliersApiBuilder.ConfigureOptions(suppliersOptions =>
-    {
-    });
+    suppliersApiBuilder
+      .FromAssemblies()
+      .ConfigureOptions(suppliersOptions =>
+      {
+      });
   });
 
 var app = builder.Build();
