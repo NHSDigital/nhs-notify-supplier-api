@@ -26,4 +26,8 @@ module "authorizer_lambda" {
 
   enable_lambda_insights   = false
   force_lambda_code_deploy = var.force_lambda_code_deploy
+
+  send_to_firehose          = true
+  log_destination_arn       = local.destination_arn
+  log_subscription_role_arn = local.acct.log_subscription_role_arn
 }

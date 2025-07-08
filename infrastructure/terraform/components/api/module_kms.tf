@@ -2,7 +2,7 @@ module "kms" {
   source = "git::https://github.com/NHSDigital/nhs-notify-shared-modules.git//infrastructure/modules/kms?ref=v2.0.10"
 
   providers = {
-    aws = aws
+    aws           = aws
     aws.us-east-1 = aws.us-east-1
   }
 

@@ -5,3 +5,11 @@ resource "aws_cloudwatch_log_group" "api_gateway_execution" {
   )
   retention_in_days = var.log_retention_in_days
 }
+
+resource "aws_cloudwatch_log_subscription_filter" "api_gateway_execution" {
+  name            = replace(aws.cloudwatch_log_group.api_gateway_access.name, "/", "-")
+  role_arn        = local.acct.log_subscription_role_arn
+  log_group_name  = aws_cloudwatch_log_group.api_gateway_access.name
+  filter_pattern  = ""
+  destination_arn = local.destination_arn
+}
