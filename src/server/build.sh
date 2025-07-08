@@ -21,38 +21,46 @@ generate_nuget_version(){
 generate_nuget_version
 
 echo "Building Abstractions."
-cd abstractions && \
-cp ../.version . && \
-dotnet restore && \
-dotnet build --no-restore --configuration=Release && \
-dotnet publish --no-restore --configuration=Release /p:Version=${TEST_NUGET_VERSION} && \
-dotnet pack --configuration Release /p:Version=${TEST_NUGET_VERSION} --no-build && \
+cd abstractions
+cp ../.version .
+ls -la
+dotnet clean
+dotnet restore
+dotnet build --no-restore --configuration=Release
+dotnet publish --no-restore --configuration=Release /p:Version=${TEST_NUGET_VERSION}
+dotnet pack --configuration Release /p:Version=${TEST_NUGET_VERSION} --no-build
 cd ..
 
 
 echo "Building Data."
-cd data && \
-cp ../.version . && \
-dotnet restore && \
-dotnet build --no-restore --configuration=Release && \
-dotnet publish --no-restore --no-build --configuration=Release /p:Version=${TEST_NUGET_VERSION} && \
-dotnet pack --configuration Release /p:Version=${TEST_NUGET_VERSION} --no-build && \
+cd data
+cp ../.version .
+ls -la
+dotnet clean
+dotnet restore
+dotnet build --no-restore --configuration=Release
+dotnet publish --no-restore --no-build --configuration=Release /p:Version=${TEST_NUGET_VERSION}
+dotnet pack --configuration Release /p:Version=${TEST_NUGET_VERSION} --no-build
 cd ..
 
 echo "Building Letter."
-cd letter && \
-cp ../.version . && \
-dotnet restore && \
-dotnet build --no-restore --configuration=Release && \
-dotnet publish --no-restore --no-build --configuration=Release /p:Version=${TEST_NUGET_VERSION} && \
-dotnet pack --configuration Release /p:Version=${TEST_NUGET_VERSION} --no-build && \
+cd letter
+cp ../.version .
+ls -la
+dotnet clean
+dotnet restore
+dotnet build --no-restore --configuration=Release
+dotnet publish --no-restore --no-build --configuration=Release /p:Version=${TEST_NUGET_VERSION}
+dotnet pack --configuration Release /p:Version=${TEST_NUGET_VERSION} --no-build
 cd ..
 
 echo "Building Host."
-cd host && \
-cp ../.version . && \
-dotnet restore && \
-dotnet build --no-restore --configuration=Release && \
-dotnet publish --no-restore --no-build --configuration=Release /p:Version=${TEST_NUGET_VERSION} && \
-dotnet pack --configuration Release /p:Version=${TEST_NUGET_VERSION} --no-build && \
+cd host
+cp ../.version .
+ls -la
+dotnet clean
+dotnet restore
+dotnet build --no-restore --configuration=Release
+dotnet publish --no-restore --no-build --configuration=Release /p:Version=${TEST_NUGET_VERSION}
+dotnet pack --configuration Release /p:Version=${TEST_NUGET_VERSION} --no-build
 cd ..

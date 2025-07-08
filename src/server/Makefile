@@ -5,7 +5,7 @@ SHELL = /bin/bash
 
 build: version #VER=$$(cat .version) # Build the project artefact @Pipeline
 	VER=$$(cat .version) && \
-	echo $$VER
+	echo $$VER && \
 	./build.sh $$VER
 
 version:
