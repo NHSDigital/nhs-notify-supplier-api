@@ -16,4 +16,7 @@ b1f85a7faf54eaf66074d7a6daa093aefe6b3ebe:sdk/python/pyproject.toml:ipv4:25
 28aa8bcf42e1af50ab2541a345be851b53dd0f00:specification/api/notify-supplier.yml:generic-api-key:115
 93e54b6baa390529aab08d9fd956837f7bb3f30:src/src.sln:ipv4:3
 493e54b6baa390529aab08d9fd956837f7bb3f30:src/src.sln:ipv4:3
+<<<<<<< HEAD
 d8aaf7e033bf78fff491caa148897be266b60f67:src/src.sln:ipv4:3
+=======
+>>>>>>> origin/main
