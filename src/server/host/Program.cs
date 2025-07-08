@@ -11,11 +11,18 @@ builder.Services.AddSuppliersApi(
   builder.Configuration,
   suppliersApiBuilder =>
   {
+<<<<<<< HEAD
     suppliersApiBuilder
       .FromAssemblies()
       .ConfigureOptions(suppliersOptions =>
       {
       });
+=======
+    suppliersApiBuilder.FromAssemblies();
+    suppliersApiBuilder.ConfigureOptions(suppliersOptions =>
+    {
+    });
+>>>>>>> d8aaf7e (Robu6/libs nuget example (#57))
   });
 
 var app = builder.Build();
