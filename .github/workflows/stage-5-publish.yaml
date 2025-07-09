@@ -48,56 +48,56 @@ jobs:
       - name: "Get the artefacts 1"
         uses: actions/download-artifact@v4
         with:
-          path: ./artifacts
-          name: ./artifacts/jekyll-docs-${{ inputs.version }}
+          path: ./artifacts/jekyll-docs-${{ inputs.version }}
+          name: jekyll-docs-${{ inputs.version }}
 
       - name: "Get the artefacts 2"
         uses: actions/download-artifact@v4
         with:
-          path: ./artifacts
-          name: ./artifacts/sdk-html-docs-${{ inputs.version }}
+          path: ./artifacts/sdk-html-docs-${{ inputs.version }}
+          name: sdk-html-docs-${{ inputs.version }}
 
       - name: "Get the artefacts 3"
         uses: actions/download-artifact@v4
         with:
-          path: ./artifacts
-          name: ./artifacts/sdk-swagger-docs-${{ inputs.version }}
+          path: ./artifacts/sdk-swagger-docs-${{ inputs.version }}
+          name: sdk-swagger-docs-${{ inputs.version }}
 
       - name: "Get the artefacts 4"
         uses: actions/download-artifact@v4
         with:
-          path: ./artifacts
-          name: ./artifacts/sdk-html-${{ inputs.version }}
+          path: ./artifacts/sdk-html-${{ inputs.version }}
+          name: sdk-html-${{ inputs.version }}
 
       - name: "Get the artefacts 5"
         uses: actions/download-artifact@v4
         with:
-          path: ./artifacts
-          name: ./artifacts/sdk-ts-${{ inputs.version }}
+          path: ./artifacts/sdk-ts-${{ inputs.version }}
+          name: sdk-ts-${{ inputs.version }}
 
       - name: "Get the artefacts 6"
         uses: actions/download-artifact@v4
         with:
-          path: ./artifacts
-          name: ./artifacts/sdk-python-${{ inputs.version }}
+          path: ./artifacts/sdk-python-${{ inputs.version }}
+          name: sdk-python-${{ inputs.version }}
 
       - name: "Get the artefacts 7"
         uses: actions/download-artifact@v4
         with:
-          path: ./artifacts
-          name: ./artifacts/sdk-csharp-${{ inputs.version }}
+          path: ./artifacts/sdk-csharp-${{ inputs.version }}
+          name: sdk-csharp-${{ inputs.version }}
 
       - name: "Get the artefacts 8"
         uses: actions/download-artifact@v4
         with:
-          path: ./artifacts
-          name: ./artifacts/api-oas-specification-${{ inputs.version }}
+          path: ./artifacts/api-oas-specification-${{ inputs.version }}
+          name: api-oas-specification-${{ inputs.version }}
 
       - name: "Get the artefacts 9"
         uses: actions/download-artifact@v4
         with:
-          path: ./artifacts
-          name: ./artifacts/server-csharp-${{ inputs.version }}
+          path: ./artifacts/server-csharp-${{ inputs.version }}
+          name: server-csharp-${{ inputs.version }}
 
       - name: "Create release"
         id: create_release
