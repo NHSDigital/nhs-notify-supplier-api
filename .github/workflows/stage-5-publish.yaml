@@ -515,7 +515,7 @@ jobs:
 
 ### PUBLISH LIBS data NUGET
   publishlibhostnuget:
-    name: "Publish libs host packages to nuget.pkg.github.com"
+    name: "Publish libs data packages to nuget.pkg.github.com"
     runs-on: ubuntu-latest
     needs: [publish]
     permissions:
@@ -526,7 +526,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: .
-          name: libs-host-${{ inputs.version }}
+          name: libs-data-${{ inputs.version }}
       - run: |
           ls -la
           find . -name ".version"
@@ -645,7 +645,8 @@ jobs:
           name: libs-host-docker-${{ inputs.version }}
 
       - run: |
-          docker load --input ${{ runner.temp }}/myimage/myimage.tar
+          ls -la
+          docker load myimage.tar
           docker image ls -a
           echo $CR_PAT | docker login ghcr.io -u nhs-notify-supplier-api --password-stdin
           docker push ghcr.io/nhsdigital/libshostdocker:latest
