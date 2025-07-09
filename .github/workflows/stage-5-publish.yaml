@@ -645,7 +645,7 @@ jobs:
           name: libs-host-docker-${{ inputs.version }}
 
       - run: |
-          ls -la
+          ls -Rla
           docker load myimage.tar
           docker image ls -a
           echo $CR_PAT | docker login ghcr.io -u nhs-notify-supplier-api --password-stdin
