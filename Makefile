@@ -14,7 +14,7 @@ build: # Build the project artefact @Pipeline
 	(cd server && make build)
 	(cd sdk && make build)
 	(cd docs && make build)
-	(cd libs && make build)
+	(cd src/server && make build)
 publish: # Publish the project artefact @Pipeline
 	# TODO: Implement the artefact publishing step
 
@@ -25,7 +25,7 @@ clean:: # Clean-up project resources (main) @Operations
 	rm -f .version
 	(cd sdk && make clean)
 	(cd server && make clean)
-
+	(cd src/server && make clean)
 serve:
 	npm run serve
 
