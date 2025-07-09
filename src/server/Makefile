@@ -2,8 +2,11 @@ BASE_URL ?= "/"
 VERSION ?= ""
 SHELL = /bin/bash
 
+clean:
+	find . -type d -name 'bin' -exec rm -rf "{}" +
+	find . -type d -name 'obj' -exec rm -rf "{}" +
 
-build: version #VER=$$(cat .version) # Build the project artefact @Pipeline
+build: clean version #VER=$$(cat .version) # Build the project artefact @Pipeline
 	VER=$$(cat .version) && \
 	echo $$VER && \
 	./build.sh $$VER

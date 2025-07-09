@@ -18,81 +18,38 @@ generate_nuget_version(){
   echo "TEST NUGET VERSION: $TEST_NUGET_VERSION"
 }
 
+
+build(){
+  echo "0000 $0"
+  echo "1111 $1"
+  name=$1
+  echo "Building $name"
+  cd $name
+  pwd
+  cp ../.version .
+  echo "Root Dir:"
+  ls -la
+  echo "Cleaning..."
+  dotnet clean
+  echo "Restoring..."
+  dotnet restore /p:Version=${TEST_NUGET_VERSION}
+  echo "Building..."
+  dotnet build --no-restore --configuration Release /p:Version=${TEST_NUGET_VERSION}
+  echo "Publishing..."
+  dotnet publish --no-restore --no-build --configuration Release /p:Version=${TEST_NUGET_VERSION}
+  echo "Packing..."
+  dotnet pack --configuration Release /p:Version=${TEST_NUGET_VERSION} --no-build
+  echo "Release Dir :"
+  ls -la bin/Release
+  echo "net8.0 Dir :"
+  ls -la bin/Release/net8.0
+  echo "publish Dir :"
+  ls -la bin/Release/net8.0/publish
+  cd ..
+}
+
 generate_nuget_version
-
-echo "Building Abstractions."
-cd abstractions
-pwd
-cp ../.version .
-echo "Root Dir:"
-ls -la
-dotnet clean
-dotnet restore
-dotnet build --no-restore --configuration=Release
-dotnet publish --no-restore --configuration=Release /p:Version=${TEST_NUGET_VERSION}
-dotnet pack --configuration Release /p:Version=${TEST_NUGET_VERSION} --no-build
-echo "Release Dir :"
-ls -la bin/Release
-echo "net8.0 Dir :"
-ls -la bin/Release/net8.0
-echo "publish Dir :"
-ls -la bin/Release/net8.0/publish
-cd ..
-
-
-echo "Building Data."
-cd data
-pwd
-cp ../.version .
-echo "Root Dir:"
-ls -la
-dotnet clean
-dotnet restore
-dotnet build --no-restore --configuration=Release
-dotnet publish --no-restore --no-build --configuration=Release /p:Version=${TEST_NUGET_VERSION}
-dotnet pack --configuration Release /p:Version=${TEST_NUGET_VERSION} --no-build
-echo "Release Dir :"
-ls -la bin/Release
-echo "net8.0 Dir :"
-ls -la bin/Release/net8.0
-echo "publish Dir :"
-ls -la bin/Release/net8.0/publish
-cd ..
-
-echo "Building Letter."
-cd letter
-pwd
-cp ../.version .
-echo "Root Dir:"
-ls -la
-dotnet clean
-dotnet restore
-dotnet build --no-restore --configuration=Release
-dotnet publish --no-restore --no-build --configuration=Release /p:Version=${TEST_NUGET_VERSION}
-dotnet pack --configuration Release /p:Version=${TEST_NUGET_VERSION} --no-build
-echo "Release Dir :"
-ls -la bin/Release
-echo "net8.0 Dir :"
-ls -la bin/Release/net8.0
-echo "publish Dir :"
-ls -la bin/Release/net8.0/publish
-cd ..
-
-echo "Building Host."
-cd host
-pwd
-cp ../.version .
-echo "Root Dir:"
-ls -la
-dotnet clean
-dotnet restore
-dotnet build --no-restore --configuration=Release
-dotnet publish --no-restore --no-build --configuration=Release /p:Version=${TEST_NUGET_VERSION}
-dotnet pack --configuration Release /p:Version=${TEST_NUGET_VERSION} --no-build
-echo "Release Dir :"
-ls -la bin/Release
-echo "net8.0 Dir :"
-ls -la bin/Release/net8.0
-echo "publish Dir :"
-ls -la bin/Release/net8.0/publish
-cd ..
+build "abstractions"
+build "data"
+build "letter"
+build "host"
