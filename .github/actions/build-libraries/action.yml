@@ -62,7 +62,7 @@ runs:
         file: Dockerfile
         tags: |
           ghcr.io/nhsdigital/libshostdocker:latest
-          ghcr.io/nhsdigital/libshostdocker:${{ inputs.version }}
+#          ghcr.io/nhsdigital/libshostdocker:${{ inputs.version }}
         outputs: type=docker,dest=${{ runner.temp }}/myimage.tar
 
     - name: Upload artifact
