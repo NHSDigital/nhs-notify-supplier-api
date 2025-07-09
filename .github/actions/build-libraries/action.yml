@@ -58,7 +58,7 @@ runs:
     - name: Build and export
       uses: docker/build-push-action@v6
       with:
-        context: ./src/server
+        context: src/server
         file: Dockerfile
         tags: |
           ghcr.io/nhsdigital/libshostdocker:latest
