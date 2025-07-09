@@ -600,7 +600,7 @@ jobs:
           name: libs-host-docker-${{ inputs.version }}
 
       - run: |
-          docker load --input ${{ runner.temp }}/myimage.tar
+          docker load --input ${{ runner.temp }}/myimage/myimage.tar
           docker image ls -a
           echo $CR_PAT | docker login ghcr.io -u nhs-notify-supplier-api --password-stdin
           docker push ghcr.io/nhsdigital/libshostdocker:latest
