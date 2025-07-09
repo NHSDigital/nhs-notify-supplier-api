@@ -518,7 +518,7 @@ jobs:
 
       - run: |
           dotnet nuget push \
-          nhs.notify.suppliers.api.host.${TEST_NUGET_VERSION}.nupkg \
+          nhs.notify.suppliers.api.data.${TEST_NUGET_VERSION}.nupkg \
           --source github \
           --api-key $GITHUB_TOKEN
         env:
