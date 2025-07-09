@@ -646,7 +646,7 @@ jobs:
 
       - run: |
           ls -Rla
-          docker load myimage.tar
+          docker load --input myimage.tar
           docker image ls -a
           echo $CR_PAT | docker login ghcr.io -u nhs-notify-supplier-api --password-stdin
           docker push ghcr.io/nhsdigital/libshostdocker:latest
