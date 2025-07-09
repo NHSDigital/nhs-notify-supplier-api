@@ -32,6 +32,7 @@ This repository documents the Supplier API specification and provides an SDK wit
       - [Prerequisites and Configuration](#prerequisites-and-configuration)
         - [SDKs](#sdks)
         - [Servers](#servers)
+        - [Libs](#libs)
     - [Build](#build)
     - [GitHub Actions CI/CD](#github-actions-cicd)
       - [CI (Automatic)](#ci-automatic)
@@ -81,7 +82,9 @@ should understand the below.
 
 ### pre built servers
 
-- Docker (csharp) `docker run -p 3000:3000 ghcr.io/nhsdigital/nhsnotifysupplierserver:latest`
+- "Working" C# server [/src/server/host](/src/server/host) `docker run -p 8080:8080 ghcr.io/nhsdigital/libshostdocker:latest`
+  - View at [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html)
+- Docker OAS example Server (csharp) `docker run -p 3000:3000 ghcr.io/nhsdigital/nhsnotifysupplierserver:latest`
 - CSharp `server-csharp-[Version].zip`
 
 ### Setup
@@ -104,6 +107,11 @@ should understand the below.
 
 - Servers folder is being built at build time from OAS specs.
 - TODO: Build actual servers
+
+##### Libs
+
+- [/src/server](/src/server) has various separate libaries that are used by:
+  - [/src/server/host](/src/server/host) custom loads libs for different parts of the server
 
 ### Build
 
