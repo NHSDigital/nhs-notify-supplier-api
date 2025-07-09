@@ -51,3 +51,22 @@ runs:
         path: "src/server/host/bin/Release"
         name: libs-host-${{ inputs.version }}
         include-hidden-files: true
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build and export
+      uses: docker/build-push-action@v6
+      with:
+        context: ./src/server
+        file: Dockerfile
+        tags: |
+          ghcr.io/nhsdigital/libshostdocker:latest
+          ghcr.io/nhsdigital/libshostdocker:${{ inputs.version }}
+        outputs: type=docker,dest=${{ runner.temp }}/myimage.tar
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: libs-host-docker-${{ inputs.version }}
+        path: ${{ runner.temp }}/myimage.tar
