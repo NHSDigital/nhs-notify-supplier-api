@@ -44,10 +44,60 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
-      - name: "Get the artefacts"
+
+      - name: "Get the artefacts 1"
         uses: actions/download-artifact@v4
         with:
           path: ./artifacts
+          name: ./artifacts/jekyll-docs-${{ inputs.version }}
+
+      - name: "Get the artefacts 2"
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+          name: ./artifacts/sdk-html-docs-${{ inputs.version }}
+
+      - name: "Get the artefacts 3"
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+          name: ./artifacts/sdk-swagger-docs-${{ inputs.version }}
+
+      - name: "Get the artefacts 4"
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+          name: ./artifacts/sdk-html-${{ inputs.version }}
+
+      - name: "Get the artefacts 5"
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+          name: ./artifacts/sdk-ts-${{ inputs.version }}
+
+      - name: "Get the artefacts 6"
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+          name: ./artifacts/sdk-python-${{ inputs.version }}
+
+      - name: "Get the artefacts 7"
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+          name: ./artifacts/sdk-csharp-${{ inputs.version }}
+
+      - name: "Get the artefacts 8"
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+          name: ./artifacts/api-oas-specification-${{ inputs.version }}
+
+      - name: "Get the artefacts 9"
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+          name: ./artifacts/server-csharp-${{ inputs.version }}
 
       - name: "Create release"
         id: create_release
@@ -93,11 +143,6 @@ jobs:
           asset_name: sdk-swagger-docs-${{ inputs.version }}.tar
           asset_content_type: "application/gzip"
 
-      #- name: "tar gz jekyll docs release asset"
-      #   # Git hub pages needs a single tar called artifact inside the zip.
-      #  working-directory: ./artifacts/jekyll-docs-${{ inputs.version }}
-      #  run: zip jekyll-docs-${{ inputs.version }}.zip ./artifact.tar
-      #  shell: bash
 
       - name: "zip html release asset"
         # Git hub pages needs a single tar called artifact inside the zip.
