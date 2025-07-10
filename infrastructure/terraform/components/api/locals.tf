@@ -1,7 +1,8 @@
 locals {
   aws_lambda_functions_dir_path = "../../../../lambdas"
   root_domain_name              = "${var.environment}.${local.acct.route53_zone_names["supplier-api"]}" # e.g. [main|dev|abxy0].supplier-api.[dev|nonprod|prod].nhsnotify.national.nhs.uk
-  root_domain_nameservers       = "${var.environment}.${local.acct.route53_zone_nameservers["supplier-api"]}"
+  root_domain_id                = local.acct.route53_zone_ids["supplier-api"]
+  root_domain_nameservers       = local.acct.route53_zone_nameservers["supplier-api"]
 
   openapi_spec = templatefile("${path.module}/resources/spec.tmpl.json", {
     APIG_EXECUTION_ROLE_ARN = aws_iam_role.api_gateway_execution_role.arn
