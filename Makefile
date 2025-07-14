@@ -29,6 +29,16 @@ clean:: # Clean-up project resources (main) @Operations
 serve:
 	npm run serve
 
+
+lint-oas:
+	npm run lint-oas
+
+publish-oas:
+	npm run publish-oas
+
+serve-oas:
+	npm run serve-oas
+
 serve-swagger:
 	npm run serve-swagger-docs
 

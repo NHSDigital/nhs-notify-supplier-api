@@ -1,0 +1,83 @@
+openapi: 3.0.3
+info:
+  version: 0.0.1
+  title: Hello World API For nhs notify
+  description: |
+    ## Overview
+    Just a basic hello world get request
+
+
+    ## Environments and testing
+
+    | Environment                                    | Base URL                                                     |
+    | -----------------------------------------------|--------------------------------------------------------------|
+    | Sandbox                                        | https://sandbox.api.service.nhs.uk/nhs-notify-supplier      |
+    ### Sandbox testing
+    This API is for learning purposes and is only available in our sandbox environment. Our [sandbox environment](https://digital.nhs.uk/developer/guides-and-documentation/testing#sandbox-testing):
+      - is for early developer testing
+      - only covers a limited set of scenarios
+      - is stateless, so it does not actually persist any updates
+
+    For more details on sandbox testing, or to try out the sandbox using our \"Try this API\" feature, see the documentation for each endpoint.
+    Alternatively, you can try out the sandbox using our Postman collection:
+    [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/426d37cb9cfe17b8b96d)
+
+
+servers:
+  - url: https://sandbox.api.service.nhs.uk/nhs-notify-supplier
+    description: Sandbox environment.
+paths:
+  /:
+    get:
+      summary: Get a "Hello world!" response from an open-access endpoint
+      operationId: getHello
+      description: |
+        ## Overview
+        Basic get request
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Hello world!
+              example:
+                message: Hello world!
+      security:
+        - app-level0: []
+components:
+  securitySchemes:
+    nhs-login-p0:
+      $ref: https://proxygen.ptl.api.platform.nhs.uk/components/securitySchemes/nhs-login-p0
+    nhs-login-p5:
+      $ref: https://proxygen.ptl.api.platform.nhs.uk/components/securitySchemes/nhs-login-p5
+    nhs-login-p9:
+      $ref: https://proxygen.ptl.api.platform.nhs.uk/components/securitySchemes/nhs-login-p9
+    nhs-cis2-aal1:
+      $ref: https://proxygen.ptl.api.platform.nhs.uk/components/securitySchemes/nhs-cis2-aal1
+    nhs-cis2-aal3:
+      $ref: https://proxygen.ptl.api.platform.nhs.uk/components/securitySchemes/nhs-cis2-aal3
+    app-level0:
+      $ref: https://proxygen.ptl.api.platform.nhs.uk/components/securitySchemes/app-level0
+    app-level3:
+      $ref: https://proxygen.ptl.api.platform.nhs.uk/components/securitySchemes/app-level3
+x-nhsd-apim:
+  temporary: false
+  monitoring: false
+  access:
+  - title: Application Restricted
+    grants:
+      app-level0: []
+      app-level3: []
+  target:
+    type: external
+    healthcheck: /_status
+    url: https://smg16ccfqj.execute-api.eu-west-2.amazonaws.com/main
+    security:
+      type: apikey
+      header: nhsd-apim-apikey
+      secret: nhs-notify-supplier-key
