@@ -1,0 +1,9 @@
+description: ManahementInformation
+content:
+  application/vnd.api+json:
+    schema:
+      $ref: "../schemas/MIResponse.yml"
+    examples:
+      get-mi:
+        value:
+          $ref: ../examples/getMI/responses/getMI.json

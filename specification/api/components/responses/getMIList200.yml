@@ -1,0 +1,9 @@
+description: List Management Information
+content:
+  application/vnd.api+json:
+    schema:
+      $ref: "../schemas/MIListResponse.yml"
+    examples:
+      list-mi:
+        value:
+          $ref: "../examples/listMI/responses/listMI.json"

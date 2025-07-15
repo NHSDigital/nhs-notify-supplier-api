@@ -1,0 +1,17 @@
+type: object
+properties:
+  type:
+    type: string
+    const: WhitemailData
+  attributes:
+    type: object
+    properties:
+      url:
+        type: string
+        example: "http://example.com/filelocation"
+      contentType:
+        type: string
+        example: 'application/pdf'
+      size:
+        type: integer
+        example: 256

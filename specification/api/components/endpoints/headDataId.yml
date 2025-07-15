@@ -1,0 +1,7 @@
+summary: Check for the existance of a data file
+tags:
+  - data
+responses:
+  200:
+    description: OK
+operationId: head-data-id
