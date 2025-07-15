@@ -1,0 +1,9 @@
+description: Too many requests
+content:
+  application/vnd.api+json:
+    schema:
+      $ref: "../../schemas/ErrorResponse.yml"
+    examples:
+      error-too-many-requests:
+        value:
+          $ref: ../../examples/errors/responses/TooManyRequests.json

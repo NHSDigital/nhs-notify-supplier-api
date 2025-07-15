@@ -1,0 +1,12 @@
+required: true
+content:
+  application/vnd.api+json:
+    schema:
+      type: object
+      properties:
+        data:
+          $ref: ../schemas/PostDataItem.yml
+    examples:
+      post-data:
+        value:
+          $ref: ../examples/postData/requests/postData.json

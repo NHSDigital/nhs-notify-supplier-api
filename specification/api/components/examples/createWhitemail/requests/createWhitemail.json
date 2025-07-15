@@ -1,0 +1,17 @@
+{
+  "data": {
+    "attributes": {
+      "data": {
+        "attributes": {
+          "contentType": "application/pdf",
+          "size": 256,
+          "url": "http://example.com/filelocation"
+        },
+        "type": "WhitemailData"
+      },
+      "messageReference": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+      "status": "PENDING"
+    },
+    "type": "Whitemail"
+  }
+}

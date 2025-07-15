@@ -1,0 +1,9 @@
+description: Management Information created successfully
+content:
+  application/vnd.api+json:
+    schema:
+      $ref: "../schemas/MIItem.yml"
+    examples:
+      create-mi:
+        value:
+          $ref: "../examples/createMI/responses/createMI.json"

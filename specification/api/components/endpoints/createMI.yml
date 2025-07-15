@@ -1,0 +1,15 @@
+summary: Create a new MI record
+operationId: create-mi
+tags:
+  - mi
+requestBody:
+    $ref: '../requests/PostMIRequest.yml'
+responses:
+  '201':
+    $ref: "../responses/postMI201.yml"
+  '404':
+    $ref: "../responses/errors/ResourceNotFound.yml"
+  '429':
+    $ref: "../responses/errors/TooManyRequests.yml"
+  '500':
+    $ref: "../responses/errors/ServerError.yml"

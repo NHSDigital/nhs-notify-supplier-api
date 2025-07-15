@@ -1,0 +1,23 @@
+type: object
+properties:
+  id:
+    type: string
+  code:
+    type: string
+    enum:
+      - NOTIFY_NO_BATCH_AVAILABLE
+      - NOTIFY_INTERNAL_SERVER_ERROR
+      - NOTIFY_INVALID_REQUEST
+      - NOTIFY_LETTER_NOT_FOUND
+  links:
+    type: object
+    properties:
+      about:
+        type: string
+        format: uri
+  status:
+    type: string
+  title:
+    type: string
+  detail:
+    type: string

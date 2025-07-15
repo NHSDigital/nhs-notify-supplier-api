@@ -1,0 +1,12 @@
+{
+  "data": {
+    "attributes": {
+      "reasonCode": 100,
+      "reasonText": "failed validation",
+      "requestedProductionStatus": "ACTIVE",
+      "status": "REJECTED"
+    },
+    "id": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+    "type": "Letter"
+  }
+}

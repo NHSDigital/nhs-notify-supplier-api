@@ -1,0 +1,9 @@
+description: Get pre signed url for upload
+content:
+  application/vnd.api+json:
+    schema:
+      $ref: "../schemas/DataItem.yml"
+    examples:
+      post-data:
+        value:
+          $ref: ../examples/postData/responses/postData.json

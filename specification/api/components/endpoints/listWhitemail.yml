@@ -1,0 +1,14 @@
+summary: List batches of whitemail letters
+operationId: list-whitemail
+tags:
+  - whitemail
+description: Get a list of previously created whitemail records
+responses:
+  '200':
+    $ref: "../responses/getWhitemailList200.yml"
+  '404':
+    $ref: "../responses/errors/ResourceNotFound.yml"
+  '429':
+    $ref: "../responses/errors/TooManyRequests.yml"
+  '500':
+    $ref: "../responses/errors/ServerError.yml"

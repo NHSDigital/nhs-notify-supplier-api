@@ -1,0 +1,13 @@
+summary: List MI Records
+operationId: list-mi
+responses:
+  "200":
+    $ref: "../responses/getMIList200.yml"
+  "404":
+    $ref: "../responses/errors/ResourceNotFound.yml"
+  "429":
+    $ref: "../responses/errors/TooManyRequests.yml"
+  "500":
+    $ref: "../responses/errors/ServerError.yml"
+tags:
+  - mi
