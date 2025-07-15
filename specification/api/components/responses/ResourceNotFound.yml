@@ -1,0 +1,16 @@
+description: Resource not found
+content:
+  application/vnd.api+json:
+    schema:
+      $ref: "../schemas/ErrorResponse.yml"
+    examples:
+      error-1:
+        value:
+          errors:
+            - id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
+              code: NOTIFY_RESOURCE_NOT_FOUND
+              links:
+                about: "https://digital.nhs.uk/developer/api-catalogue/nhs-notify"
+              status: "404"
+              title: Resource not found
+              detail: No resource found with that ID
