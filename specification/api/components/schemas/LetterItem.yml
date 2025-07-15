@@ -1,0 +1,8 @@
+properties:
+  type:
+    type: string
+    const: Letter
+  id:
+    type: string
+    examples:
+      - 2WL5eYSWGzCHlGmzNxuqVusPxDg

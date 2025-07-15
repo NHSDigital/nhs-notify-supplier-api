@@ -1,0 +1,8 @@
+name: X-Request-ID
+in: header
+description: 'Unique request identifier, in the format of a GUID'
+required: true
+schema:
+  type: string
+  examples:
+    - dcb9c8dc-c2f4-4d5f-8674-a2e913e040b2
