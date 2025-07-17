@@ -1,4 +1,4 @@
-# NHS Notify Supplier API
+# NHS Notify Supplier APIs
 
 [![1. CI/CD pull request](https://github.com/NHSDigital/nhs-notify-supplier-api/actions/workflows/cicd-1-pull-request.yaml/badge.svg)](https://github.com/NHSDigital/nhs-notify-supplier-api/actions/workflows/cicd-1-pull-request.yaml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nhs-notify-supplier-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=nhs-notify-supplier-api)
@@ -16,7 +16,7 @@ This repository documents the Supplier API specification and provides an SDK wit
 
 ## Table of Contents
 
-- [NHS Notify Supplier API](#nhs-notify-supplier-api)
+- [NHS Notify Supplier APIs](#nhs-notify-supplier-apis)
   - [OAS Specifications](#oas-specifications)
   - [Table of Contents](#table-of-contents)
   - [API Consumers - Getting Started](#api-consumers---getting-started)
