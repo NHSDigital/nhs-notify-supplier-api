@@ -39,7 +39,7 @@ print("access token:", access_token)
 
 # Make a request to a protected endpoint
 response = requests.get(
-    "https://internal-dev.api.service.nhs.uk/nhs-notify-supplier/",
+    "https://proxygen.prod.api.platform.nhs.uk/apis/nhs-notify-supplier/",
     headers={"Authorization": f"Bearer {access_token}"},
 )
 
