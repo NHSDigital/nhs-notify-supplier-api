@@ -2,9 +2,8 @@
 import { Handler, APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 export const getLetters: Handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  const path = event.path || '/';
 
-  if (path === '/') {
+  if (event.path === '/letters') {
     return {
       statusCode: 200,
       body: 'Here are some letters: [L1, L2, L3]',

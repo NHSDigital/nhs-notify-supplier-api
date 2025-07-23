@@ -1,13 +1,13 @@
-import { helloWorld } from '../../index';
+import { getLetters } from '../../index';
 import type { Context } from 'aws-lambda';
 import { mockDeep } from 'jest-mock-extended';
 
 describe('API Lambda handler', () => {
   it('returns 200 OK with "Here are some letters: [L1, L2, L3]" for the root path', async () => {
-    const event = { path: '/' };
+    const event = { path: '/letters' };
     const context = mockDeep<Context>();
     const callback = jest.fn();
-    const result = await helloWorld(event, context, callback);
+    const result = await getLetters(event, context, callback);
 
     expect(result).toEqual({
       statusCode: 200,
@@ -19,7 +19,7 @@ describe('API Lambda handler', () => {
     const event = { path: '/unknown' };
     const context = mockDeep<Context>();
     const callback = jest.fn();
-    const result = await helloWorld(event, context, callback);
+    const result = await getLetters(event, context, callback);
 
     expect(result).toEqual({
       statusCode: 404,
