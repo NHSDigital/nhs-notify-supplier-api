@@ -1,8 +1,8 @@
-module "hello_world" {
+module "get_letters" {
   source = "git::https://github.com/NHSDigital/nhs-notify-shared-modules.git//infrastructure/modules/lambda?ref=v2.0.10"
 
-  function_name = "hello_world"
-  description   = "An example api handler"
+  function_name = "get_letters"
+  description   = "Get some letters ids"
 
   aws_account_id = var.aws_account_id
   component      = var.component
@@ -15,14 +15,14 @@ module "hello_world" {
   kms_key_arn           = module.kms.key_arn
 
   iam_policy_document = {
-    body = data.aws_iam_policy_document.hello_world_lambda.json
+    body = data.aws_iam_policy_document.get_letters_lambda.json
   }
 
   function_s3_bucket      = local.acct.s3_buckets["lambda_function_artefacts"]["id"]
   function_code_base_path = local.aws_lambda_functions_dir_path
   function_code_dir       = "api-handler/dist"
   function_include_common = true
-  handler_function_name   = "index.helloWorld"
+  handler_function_name   = "index.getLetters"
   runtime                 = "nodejs22.x"
   memory                  = 128
   timeout                 = 5
@@ -39,7 +39,7 @@ module "hello_world" {
   }
 }
 
-data "aws_iam_policy_document" "hello_world_lambda" {
+data "aws_iam_policy_document" "get_letters_lambda" {
   statement {
     sid    = "KMSPermissions"
     effect = "Allow"

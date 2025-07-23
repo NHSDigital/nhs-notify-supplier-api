@@ -1,4 +1,4 @@
-import { handler } from '../index';
+import { helloWorld } from '../../index';
 import type { Context } from 'aws-lambda';
 import { mockDeep } from 'jest-mock-extended';
 
@@ -7,7 +7,7 @@ describe('API Lambda handler', () => {
     const event = { path: '/' };
     const context = mockDeep<Context>();
     const callback = jest.fn();
-    const result = await handler(event, context, callback);
+    const result = await helloWorld(event, context, callback);
 
     expect(result).toEqual({
       statusCode: 200,
@@ -19,7 +19,7 @@ describe('API Lambda handler', () => {
     const event = {}; // No path provided
     const context = mockDeep<Context>();
     const callback = jest.fn();
-    const result = await handler(event as any, context, callback);
+    const result = await helloWorld(event as any, context, callback);
 
     expect(result).toEqual({
       statusCode: 200,
@@ -31,7 +31,7 @@ describe('API Lambda handler', () => {
     const event = { path: '/unknown' };
     const context = mockDeep<Context>();
     const callback = jest.fn();
-    const result = await handler(event, context, callback);
+    const result = await helloWorld(event, context, callback);
 
     expect(result).toEqual({
       statusCode: 404,
