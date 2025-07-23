@@ -22,7 +22,7 @@ module "get_letters" {
   function_code_base_path = local.aws_lambda_functions_dir_path
   function_code_dir       = "api-handler/dist"
   function_include_common = true
-  handler_function_name   = "index.getLetters"
+  handler_function_name   = "getLetters"
   runtime                 = "nodejs22.x"
   memory                  = 128
   timeout                 = 5
