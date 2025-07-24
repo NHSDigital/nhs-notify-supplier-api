@@ -12,7 +12,7 @@ generate () {
   -e VERSION="$SHORT_VERSION" \
   openapitools/openapi-generator-cli \
   generate \
-  -i /local/specification/api/notify-supplier.yml \
+  -i /local/build/notify-supplier.yml \
   -g csharp \
   --additional-properties="packageName=nhsnotifysupplier,packageVersion=$SHORT_VERSION,licenseId=MIT,targetFramework=net8.0" \
   -o /local/sdk/csharp \
