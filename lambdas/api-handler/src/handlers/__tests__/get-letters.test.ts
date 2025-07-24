@@ -26,7 +26,7 @@ describe('API Lambda handler', () => {
 
     expect(result).toEqual({
       statusCode: 200,
-      body: JSON.stringify(expected),
+      body: JSON.stringify(expected, null, 2),
     });
   });
 

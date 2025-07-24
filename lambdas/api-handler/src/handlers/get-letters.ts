@@ -10,7 +10,7 @@ export const getLetters: Handler = async (event: APIGatewayProxyEvent): Promise<
 
     return {
       statusCode: 200,
-      body: JSON.stringify(response)
+      body: JSON.stringify(response, null, 2)
     };
   }
 
