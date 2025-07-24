@@ -2,7 +2,7 @@ module "get_letters" {
   source = "git::https://github.com/NHSDigital/nhs-notify-shared-modules.git//infrastructure/modules/lambda?ref=v2.0.10"
 
   function_name = "get_letters"
-  description   = "Get some letters ids"
+  description   = "Get paginated letter ids"
 
   aws_account_id = var.aws_account_id
   component      = var.component

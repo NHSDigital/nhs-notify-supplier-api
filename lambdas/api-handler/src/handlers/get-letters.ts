@@ -20,7 +20,7 @@ export const getLetters: Handler = async (event: APIGatewayProxyEvent): Promise<
   };
 };
 
-interface Link {
+interface GetLettersLinks {
   self: string;
   first: string;
   last: string;
@@ -34,7 +34,7 @@ interface Resource {
 }
 
 interface GetLettersResponse {
-  links: Link;
+  links: GetLettersLinks;
   data: Resource[];
 }
 

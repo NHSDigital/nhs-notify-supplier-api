@@ -55,7 +55,7 @@
     },
     "/letters": {
       "get": {
-        "description": "Returns 200 OK with some letter ids.",
+        "description": "Returns 200 OK with paginated letter ids.",
         "responses": {
           "200": {
             "description": "OK"
