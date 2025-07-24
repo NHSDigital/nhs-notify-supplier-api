@@ -12,7 +12,7 @@ generate (){
   -v ${PWD}/../:/local \
   openapitools/openapi-generator-cli \
   generate \
-  -i /local/specification/api/notify-supplier.yml \
+  -i /local/build/notify-supplier.yml \
   -g aspnetcore \
   --additional-properties="aspnetCoreVersion=8.0,buildTarget=program,packageName=nhsnotifysupplierserver,packageVersion=$SHORT_VERSION,licenseId=MIT,targetFramework=net8.0" \
   -o /local/server/csharp-server \
