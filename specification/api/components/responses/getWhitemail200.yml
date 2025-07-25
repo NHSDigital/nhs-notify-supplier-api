@@ -1,0 +1,9 @@
+description: Letter status
+content:
+  application/vnd.api+json:
+    schema:
+      $ref: "../schemas/getWhitemailResponse.yml"
+    examples:
+      get-whitemail:
+        value:
+          $ref: ../examples/getWhitemail/responses/getWhitemail.json

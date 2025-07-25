@@ -12,7 +12,7 @@ docker run \
  -e VERSION="$VERSION" \
  openapitools/openapi-generator-cli \
  generate \
- -i /local/specification/api/notify-supplier.yml \
+ -i /local/build/notify-supplier.yml \
  -g typescript \
  --additional-properties="npmRepository=https://npm.pkg.github.com,npmName=@NHSDigital/nhsnotifysupplier,npmVersion=$VERSION,licenseName=MIT" \
  -o /local/sdk/typescript \

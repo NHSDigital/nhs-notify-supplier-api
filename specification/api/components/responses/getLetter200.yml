@@ -1,0 +1,9 @@
+description: Letter status
+content:
+  application/vnd.api+json:
+    schema:
+      $ref: "../schemas/LetterStatusData.yml"
+    examples:
+      get-letters:
+        value:
+          $ref: ../examples/getLetter/responses/getLetter.json

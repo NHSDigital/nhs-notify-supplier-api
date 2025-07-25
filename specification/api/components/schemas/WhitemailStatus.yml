@@ -1,0 +1,17 @@
+type: string
+enum:
+  - PENDING
+  - ACCEPTED
+  - REJECTED
+  - PRINTED
+  - ENCLOSED
+  - CANCELLED
+  - DISPATCHED
+  - FAILED
+  - RETURNED
+  - DESTROYED
+  - FORWARDED
+description: The status of an individual whitemail item
+examples:
+  - PENDING
+default: PENDING

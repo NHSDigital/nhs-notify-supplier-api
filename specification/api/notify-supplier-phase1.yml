@@ -1,0 +1,125 @@
+openapi: 3.1.1
+info:
+  version: next
+  title: NHS Notify Supplier API
+  description: |
+    API for communication suppliers to integrate with NHS Notify.
+
+    This specification represents the in-development 'next' version of the API schema
+    and should be treated as unstable.
+security:
+  - authorization: [ ]
+paths:
+  /letter:
+    parameters:
+      - $ref: 'components/parameters/requestId.yml'
+      - $ref: 'components/parameters/correlationId.yml'
+    post:
+      $ref: 'components/endpoints/postLetters.yml'
+    get:
+      $ref: 'components/endpoints/listLetters.yml'
+  '/letter/{id}':
+    parameters:
+      - $ref: 'components/parameters/requestId.yml'
+      - $ref: 'components/parameters/correlationId.yml'
+      - $ref: 'components/parameters/resourceId.yml'
+    get:
+      $ref: 'components/endpoints/getLetterStatus.yml'
+    patch:
+      $ref: 'components/endpoints/patchLetter.yml'
+  /mi:
+    parameters:
+      - $ref: 'components/parameters/requestId.yml'
+      - $ref: 'components/parameters/correlationId.yml'
+    get:
+      $ref: 'components/endpoints/listMI.yml'
+    post:
+      $ref: 'components/endpoints/createMI.yml'
+
+  '/mi/{id}':
+    parameters:
+      - $ref: 'components/parameters/requestId.yml'
+      - $ref: 'components/parameters/correlationId.yml'
+      - $ref: 'components/parameters/resourceId.yml'
+    get:
+      $ref: 'components/endpoints/getMI.yml'
+  /whitemail:
+    parameters:
+      - $ref: 'components/parameters/requestId.yml'
+      - $ref: 'components/parameters/correlationId.yml'
+    get:
+      $ref: 'components/endpoints/listWhitemail.yml'
+    post:
+      $ref: 'components/endpoints/createWhitemail.yml'
+  '/whitemail/{id}':
+    parameters:
+      - $ref: 'components/parameters/requestId.yml'
+      - $ref: 'components/parameters/correlationId.yml'
+      - $ref: 'components/parameters/resourceId.yml'
+    get:
+      $ref: 'components/endpoints/getWhitemail.yml'
+
+  '/data':
+    parameters:
+      - $ref: 'components/parameters/requestId.yml'
+      - $ref: 'components/parameters/correlationId.yml'
+    post:
+      $ref: 'components/endpoints/postData.yml'
+
+  '/data/{id}':
+    parameters:
+      - $ref: 'components/parameters/resourceId.yml'
+      - $ref: 'components/parameters/requestId.yml'
+      - $ref: 'components/parameters/correlationId.yml'
+    get:
+      $ref: 'components/endpoints/getDataId.yml'
+    head:
+      $ref: 'components/endpoints/headDataId.yml'
+components:
+  securitySchemes:
+    authorization:
+      type: oauth2
+      description: |-
+        An [OAuth 2.0 bearer token](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation/application-restricted-restful-apis-signed-jwt-authentication).
+        Required in all environments except local and sandbox.
+      flows:
+        authorizationCode:
+          authorizationUrl: ''
+          tokenUrl: ''
+          scopes: []
+tags:
+  - name: letter
+    description: ''
+  - name: specification
+    description: ''
+  - name: whitemail
+    description: ''
+  - name: proof
+    description: ''
+  - name: mi
+    description: ''
+  - name: artwork
+    description: ''
+  - name: data
+    description: ''
+servers:
+  - url: 'http://127.0.0.1:3000'
+    description: Local development server
+  - url: 'https://sandbox-server.nhs.uk/nhs-notify-supplier-api'
+    description: Public sandbox
+x-nhsd-apim:
+  temporary: false
+  monitoring: false
+  access:
+  - title: Application Restricted
+    grants:
+      app-level0: []
+      app-level3: []
+  target:
+    type: external
+    healthcheck: /_status
+    url: https://jct1kdzzma.execute-api.eu-west-2.amazonaws.com/main/
+    security:
+      type: apikey
+      header: nhsd-apim-apikey
+      secret: nhs-notify-supplier-key

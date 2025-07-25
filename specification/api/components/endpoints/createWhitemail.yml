@@ -1,0 +1,15 @@
+summary: Create a record capturing metadata for a scanned 'whitemail' correspondence
+operationId: create-whitemail
+tags:
+  - whitemail
+requestBody:
+  $ref: '../requests/PostWhitemailRequest.yml'
+responses:
+  '201':
+    $ref: "../responses/postWhitemail201.yml"
+  '404':
+    $ref: "../responses/errors/ResourceNotFound.yml"
+  '429':
+    $ref: "../responses/errors/TooManyRequests.yml"
+  '500':
+    $ref: "../responses/errors/ServerError.yml"

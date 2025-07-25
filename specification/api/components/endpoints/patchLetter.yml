@@ -1,0 +1,18 @@
+summary: Update the status of a letter
+description: Update the status of a letter by providing the new status in the request body.
+operationId: patch-letters
+requestBody:
+  $ref: "../requests/LetterUpdateRequest.yml"
+responses:
+  "200":
+    $ref: "../responses/patchLetter200.yml"
+  "400":
+    $ref: "../responses/errors/BadRequest.yml"
+  "404":
+    $ref: "../responses/errors/ResourceNotFound.yml"
+  "429":
+    $ref: "../responses/errors/TooManyRequests.yml"
+  "500":
+    $ref: "../responses/errors/ServerError.yml"
+tags:
+  - letter
