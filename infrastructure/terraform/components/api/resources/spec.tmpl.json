@@ -2,17 +2,17 @@
   "components": {
     "securitySchemes": {
       "LambdaAuthorizer": {
-        "type": "apiKey",
-        "name": "Authorization",
         "in": "header",
-        "x-amazon-apigateway-authtype": "custom",
+        "name": "Authorization",
+        "type": "apiKey",
         "x-amazon-apigateway-authorizer": {
-          "type": "request",
-          "authorizerUri": "arn:aws:apigateway:${AWS_REGION}:lambda:path/2015-03-31/functions/${AUTHORIZER_LAMBDA_ARN}/invocations",
           "authorizerCredentials": "${APIG_EXECUTION_ROLE_ARN}",
+          "authorizerResultTtlInSeconds": 0,
+          "authorizerUri": "arn:aws:apigateway:${AWS_REGION}:lambda:path/2015-03-31/functions/${AUTHORIZER_LAMBDA_ARN}/invocations",
           "identitySource": "method.request.header.Authorization",
-          "authorizerResultTtlInSeconds": 0
-        }
+          "type": "request"
+        },
+        "x-amazon-apigateway-authtype": "custom"
       }
     }
   },
@@ -25,13 +25,18 @@
   "paths": {
     "/": {
       "get": {
-        "summary": "Health check",
         "description": "Returns 200 OK if the API is up.",
         "responses": {
           "200": {
             "description": "OK"
           }
         },
+        "security": [
+          {
+            "LambdaAuthorizer": []
+          }
+        ],
+        "summary": "Health check",
         "x-amazon-apigateway-integration": {
           "contentHandling": "CONVERT_TO_TEXT",
           "credentials": "${APIG_EXECUTION_ROLE_ARN}",
@@ -45,12 +50,37 @@
           "timeoutInMillis": 29000,
           "type": "AWS_PROXY",
           "uri": "arn:aws:apigateway:${AWS_REGION}:lambda:path/2015-03-31/functions/${HELLO_WORLD_LAMBDA_ARN}/invocations"
+        }
+      }
+    },
+    "/letters": {
+      "get": {
+        "description": "Returns 200 OK with paginated letter ids.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
         },
         "security": [
           {
             "LambdaAuthorizer": []
           }
-        ]
+        ],
+        "summary": "Get letters",
+        "x-amazon-apigateway-integration": {
+          "contentHandling": "CONVERT_TO_TEXT",
+          "credentials": "${APIG_EXECUTION_ROLE_ARN}",
+          "httpMethod": "POST",
+          "passthroughBehavior": "WHEN_NO_TEMPLATES",
+          "responses": {
+            ".*": {
+              "statusCode": "200"
+            }
+          },
+          "timeoutInMillis": 29000,
+          "type": "AWS_PROXY",
+          "uri": "arn:aws:apigateway:${AWS_REGION}:lambda:path/2015-03-31/functions/${GET_LETTERS_LAMBDA_ARN}/invocations"
+        }
       }
     }
   }
