@@ -1,6 +1,9 @@
 # Files and folders to merge when syncing nhs-notify-repository-template back in to this repository
+.github/workflows/cicd-*.yaml
+.github/workflows/stage-*.yaml
 scripts/config/.repository-template-sync-ignore
 scripts/config/.repository-template-sync-merge
+scripts/config/pre-commit.yaml
 .tool-versions
 .gitignore
 scripts/config/vale/vale.ini
