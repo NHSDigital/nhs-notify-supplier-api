@@ -98,5 +98,5 @@
     "source=${localEnv:HOME}/.gnupg,target=/home/vscode/.gnupg,type=bind,consistency=cached"
   ],
   "name": "Ubuntu",
-  "postCreateCommand": "pipx install pre-commit && make config && echo 'export GPG_TTY=$TTY' | cat - ~/.zshrc > temp && mv temp ~/.zshrc"
+  "postCreateCommand": "scripts/devcontainer/postcreatecommand.sh"
 }

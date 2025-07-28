@@ -1,0 +1,16 @@
+[project]
+python = "^3.12"
+name = "nhs-notify-supplier-api"
+
+[tool.poetry]
+name = "nhs-notify-supplier-api"
+version = "0.0.1-alpha"
+description = "EPS Prescription Status Update API"
+license = "MIT"
+authors = ["David Wass <david.wass@nhs.net>"]
+repository = "https://github.com/NHSDigital/nhs-notify-supplier-api"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+gitpython = "^3.1.44"
+semver = "^3.0.4"
