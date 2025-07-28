@@ -17,8 +17,6 @@ properties:
         $ref: "./LetterStatus.yml"
       requestedProductionStatus:
         $ref: "./ProductionStatus.yml"
-        x-stoplight:
-          id: kqs13rn7s4wv3
       reasonCode:
         type: number
         description: Reason code for the given status

@@ -1,6 +1,4 @@
 type: string
-x-stoplight:
-  id: lvub504h38th0
 enum:
   - ACTIVE
   - HOLD

@@ -2,8 +2,6 @@ summary: Fetch a data file
 operationId: get-data-id
 tags:
   - data
-x-stoplight:
-  id: 98lwlebl1vxeq
 responses:
   "303":
     description: See Other

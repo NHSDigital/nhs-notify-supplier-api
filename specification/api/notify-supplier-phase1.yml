@@ -1,4 +1,4 @@
-openapi: 3.1.1
+openapi: 3.0.3
 info:
   version: next
   title: NHS Notify Supplier API
@@ -8,7 +8,7 @@ info:
     This specification represents the in-development 'next' version of the API schema
     and should be treated as unstable.
 security:
-  - authorization: [ ]
+  - app-level0: [ ]
 paths:
   /letter:
     parameters:
@@ -77,16 +77,10 @@ paths:
       $ref: 'components/endpoints/headDataId.yml'
 components:
   securitySchemes:
-    authorization:
-      type: oauth2
-      description: |-
-        An [OAuth 2.0 bearer token](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation/application-restricted-restful-apis-signed-jwt-authentication).
-        Required in all environments except local and sandbox.
-      flows:
-        authorizationCode:
-          authorizationUrl: ''
-          tokenUrl: ''
-          scopes: []
+    nhs-login-p0:
+      $ref: https://proxygen.ptl.api.platform.nhs.uk/components/securitySchemes/nhs-login-p0
+    app-level0:
+      $ref: https://proxygen.ptl.api.platform.nhs.uk/components/securitySchemes/app-level0
 tags:
   - name: letter
     description: ''

@@ -27,6 +27,7 @@ jobs:
       version: ${{ steps.variables.outputs.version }}
       is_version_prerelease: ${{ steps.variables.outputs.is_version_prerelease }}
       does_pull_request_exist: ${{ steps.pr_exists.outputs.does_pull_request_exist }}
+      pr_number: ${{ steps.pr_exists.outputs.pr_number }}
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
@@ -56,6 +57,8 @@ jobs:
           if gh pr list --head $branch_name | grep -q .; then
             echo "Pull request exists"
             echo "does_pull_request_exist=true" >> $GITHUB_OUTPUT
+            PR_NUMBER=$(gh pr list --head "$branch_name" --state open --json number -q '.[0].number')
+            echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
           else
             echo "Pull request doesn't exist"
             echo "does_pull_request_exist=false" >> $GITHUB_OUTPUT
@@ -72,6 +75,7 @@ jobs:
           export VERSION="${{ steps.variables.outputs.version }}"
           export DOES_PULL_REQUEST_EXIST="${{ steps.pr_exists.outputs.does_pull_request_exist }}"
           export IS_VERSION_PRERELEASE="${{ steps.variables.outputs.is_version_prerelease }}"
+          export PR_NUMBER="${{ steps.pr_exists.outputs.pr_number }}"
           make list-variables
   commit-stage: # Recommended maximum execution time is 2 minutes
     name: "Commit stage"
@@ -112,6 +116,7 @@ jobs:
       python_version: "${{ needs.metadata.outputs.python_version }}"
       terraform_version: "${{ needs.metadata.outputs.terraform_version }}"
       version: "${{ needs.metadata.outputs.version }}"
+      pr_number: "${{ needs.metadata.outputs.pr_number }}"
     secrets: inherit
   acceptance-stage: # Recommended maximum execution time is 10 minutes
     name: "Acceptance stage"
