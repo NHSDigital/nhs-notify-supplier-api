@@ -28,6 +28,8 @@ jobs:
             --arg targetAccountGroup "nhs-notify-supplier-api-dev" \
             --arg targetComponent "api" \
             --arg terraformAction "destroy" \
+            --arg overrideProjectName "nhs" \
+            --arg overrideRoleName "nhs-main-acct-supplier-api-github-deploy" \
             '{ "ref": "main",
               "inputs": {
                 "infraRepoName": $infraRepoName,
@@ -37,6 +39,8 @@ jobs:
                 "targetAccountGroup", $targetAccountGroup,
                 "targetComponent", $targetComponent,
                 "terraformAction", $terraformAction,
+                "overrideProjectName", $overrideProjectName,
+                "overrideRoleName", $overrideRoleName,
               }
             }')
 
