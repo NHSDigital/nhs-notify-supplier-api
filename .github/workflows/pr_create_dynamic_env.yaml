@@ -29,9 +29,11 @@ jobs:
             --arg targetComponent "api" \
             --arg terraformAction "apply" \
             --arg overrides "branch_name=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" \
+            --arg overrideProjectName "nhs" \
+            --arg overrideRoleName "nhs-main-acct-supplier-api-github-deploy" \
             '{ "ref": "main",
               "inputs": {
-                "infraRepoName": $infraRepoName,
+                "infraRepoName", $infraRepoName,
                 "releaseVersion", $releaseVersion,
                 "targetProject", $targetProject,
                 "targetEnvironment", $targetEnvironment,
@@ -39,6 +41,8 @@ jobs:
                 "targetComponent", $targetComponent,
                 "terraformAction", $terraformAction,
                 "overrides", $overrides,
+                "overrideProjectName", $overrideProjectName,
+                "overrideRoleName", $overrideRoleName,
               }
             }')
 
