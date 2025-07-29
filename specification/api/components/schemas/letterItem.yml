@@ -1,0 +1,33 @@
+type: object
+properties:
+  type:
+    type: string
+    const: Letter
+  id:
+    type: string
+    examples:
+      - 2WL5eYSWGzCHlGmzNxuqVusPxDg
+  attributes:
+    type: object
+    required:
+      - specificationId
+      - status
+    properties:
+      specificationId:
+        type: string
+        examples:
+          - 2WL5eYSWGzCHlGmzNxuqVusPxDg
+      status:
+        $ref: "./letterStatus.yml"
+      requestedProductionStatus:
+        $ref: "./productionStatus.yml"
+      reasonCode:
+        type: number
+        description: Reason code for the given status
+        examples:
+          - 100
+      reasonText:
+        type: string
+        description: Reason text for the given status
+        examples:
+          - failed validation

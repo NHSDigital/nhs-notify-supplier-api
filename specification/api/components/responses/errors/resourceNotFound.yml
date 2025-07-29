@@ -1,0 +1,9 @@
+description: Resource not found
+content:
+  application/vnd.api+json:
+    schema:
+      $ref: "../../schemas/errorResponse.yml"
+    examples:
+      error-not-found:
+        value:
+          $ref: ../../examples/errors/responses/resourceNotFound.json

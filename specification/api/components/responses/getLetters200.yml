@@ -2,7 +2,7 @@ description: "List of letters to process"
 content:
   application/vnd.api+json:
     schema:
-      $ref: "../schemas/Letters.yml"
+      $ref: "../schemas/lettersListResponse.yml"
     examples:
       get-letters:
         value:

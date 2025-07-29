@@ -3,8 +3,9 @@
     "attributes": {
       "cost": 10.25,
       "lineItem": "Letter",
-      "messageReference": "da0b1495-c7cb-468c-9d81-07dee089d728",
       "quantity": 22,
+      "specificationId": "da0b1495-c7cb-468c-9d81-07dee089d728",
+      "stockRemaining": 2000,
       "timestamp": "2023-11-17T14:27:51.413Z"
     },
     "id": "2WL5eYSWGzCHlGmzNxuqVusPxDg",

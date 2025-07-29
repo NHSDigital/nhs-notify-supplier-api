@@ -2,8 +2,8 @@ description: Letter resource updated successfully
 content:
   application/vnd.api+json:
     schema:
-      $ref: "../schemas/LetterStatusData.yml"
+      $ref: "../schemas/letterStatusData.yml"
     examples:
       patch_letter-response:
         value:
-          $ref: ../examples/patchLetter/responses/PatchLetter.json
+          $ref: ../examples/patchLetter/responses/patchLetter.json

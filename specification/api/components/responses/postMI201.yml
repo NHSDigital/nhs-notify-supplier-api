@@ -2,7 +2,7 @@ description: Management Information created successfully
 content:
   application/vnd.api+json:
     schema:
-      $ref: "../schemas/MIItem.yml"
+      $ref: "../schemas/miItem.yml"
     examples:
       create-mi:
         value:

@@ -1,9 +1,0 @@
-description: "List of letters to process"
-content:
-  application/vnd.api+json:
-    schema:
-      $ref: "../schemas/Whitemail.yml"
-    examples:
-      get-whitemail:
-        value:
-          $ref: ../examples/listWhitemail/responses/listWhitemail.json

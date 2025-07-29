@@ -3,4 +3,4 @@ in: query
 description: Status of a letter
 required: true
 schema:
-  $ref: '../schemas/LetterStatus.yml'
+  $ref: '../schemas/letterStatus.yml'

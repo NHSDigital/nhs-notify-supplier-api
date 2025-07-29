@@ -8,15 +8,15 @@ set -x
 docker run \
 --rm \
 --user $(id -u) \
- -v ${PWD}:/local \
- -e VERSION="$VERSION" \
- openapitools/openapi-generator-cli \
- generate \
- -i /local/build/notify-supplier.yml \
- -g typescript \
- --additional-properties="npmRepository=https://npm.pkg.github.com,npmName=@NHSDigital/nhsnotifysupplier,npmVersion=$VERSION,licenseName=MIT" \
- -o /local/sdk/typescript \
- --skip-validate-spec
+-v ${PWD}:/local \
+-e VERSION="$VERSION" \
+openapitools/openapi-generator-cli \
+generate \
+-i /local/build/notify-supplier.yml \
+-g typescript \
+--additional-properties="npmRepository=https://npm.pkg.github.com,npmName=@NHSDigital/nhsnotifysupplier,npmVersion=$VERSION,licenseName=MIT" \
+-o /local/sdk/typescript \
+--skip-validate-spec
 set +x
 
 sed -i -e 's|https://github.com/GIT_USER_ID/GIT_REPO_ID.git|https://github.com/NHSDigital/nhs-notify-supplier-api.git|g'  ./sdk/typescript/package.json

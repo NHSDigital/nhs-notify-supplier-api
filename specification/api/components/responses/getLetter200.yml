@@ -2,7 +2,7 @@ description: Letter status
 content:
   application/vnd.api+json:
     schema:
-      $ref: "../schemas/LetterStatusData.yml"
+      $ref: "../schemas/letterStatusData.yml"
     examples:
       get-letters:
         value:
