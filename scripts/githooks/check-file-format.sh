@@ -89,6 +89,7 @@ function run-editorconfig-natively() {
 #   dry_run_opt=[dry run option]
 #   filter=[git command to filter the files to check]
 function run-editorconfig-in-docker() {
+
   # shellcheck disable=SC1091
   source ./scripts/docker/docker.lib.sh
 
@@ -97,12 +98,10 @@ function run-editorconfig-in-docker() {
   # We use /dev/null here as a backstop in case there are no files in the state
   # we choose. If the filter comes back empty, adding `/dev/null` onto it has
   # the effect of preventing `ec` from treating "no files" as "all the files".
-  set -x
   docker run --rm --platform linux/amd64 \
     --volume "$PWD":/check \
     "$image" \
-      sh -c "ec --exclude '.git/' --config .editorconfig-checker.json $dry_run_opt \$($filter) /dev/null"
-  set +x
+      sh -c "ec --exclude '.git/' $dry_run_opt \$($filter) /dev/null"
 }
 
 # ==============================================================================
