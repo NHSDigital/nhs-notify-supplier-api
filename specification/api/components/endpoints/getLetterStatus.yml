@@ -1,0 +1,14 @@
+summary: Retrieve the status of a letter
+description: Get details the status of a letter.
+operationId: get-letter-status
+responses:
+  "200":
+    $ref: "../responses/getLetter200.yml"
+  "404":
+    $ref: "../responses/errors/resourceNotFound.yml"
+  "429":
+    $ref: "../responses/errors/tooManyRequests.yml"
+  "500":
+    $ref: "../responses/errors/serverError.yml"
+tags:
+  - letter

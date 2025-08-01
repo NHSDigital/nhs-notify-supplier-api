@@ -1,0 +1,64 @@
+name: "Build Proxies"
+description: "Build Proxies"
+inputs:
+  version:
+    description: "Version number"
+    required: true
+runs:
+  using: composite
+
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24
+
+    - name: Npm install
+      working-directory: .
+      run: npm ci
+      shell: bash
+
+    - name: Build oas
+      working-directory: .
+      shell: bash
+      run: |
+        make publish-oas
+
+    - name: Setup Proxy Name
+      shell: bash
+      run: |
+
+        if [ -z $PR_NUMBER ]
+        then
+          echo "INSTANCE=$PROXYGEN_API_NAME" >> $GITHUB_ENV
+        else
+          echo "INSTANCE=$PROXYGEN_API_NAME-PR-$PR_NUMBER" >> $GITHUB_ENV
+        fi
+
+
+    - name: Install Proxygen client
+      shell: bash
+      run: |
+        # Install proxygen cli
+        pip install pipx
+        pipx install proxygen-cli
+
+        # Setup proxygen auth and settings
+        mkdir -p ${HOME}/.proxygen
+        echo -n $PROXYGEN_PRIVATE_KEY | base64 --decode > ${HOME}/.proxygen/key
+        envsubst < ./.github/proxygen-credentials-template.yaml > ${HOME}/.proxygen/credentials.yaml
+        envsubst < ./.github/proxygen-credentials-template.yaml | cat
+        envsubst < ./.github/proxygen-settings.yaml > ${HOME}/.proxygen/settings.yaml
+        envsubst < ./.github/proxygen-settings.yaml | cat
+
+
+    - name: Deploy to Internal Dev
+      shell: bash
+      run: |
+        proxygen instance deploy internal-dev $INSTANCE build/notify-supplier.json --no-confirm
+
+    - name: Deploy to Internal Dev Sandbox
+      shell: bash
+      run: |
+        proxygen instance deploy internal-dev-sandbox $INSTANCE build/notify-supplier.json --no-confirm

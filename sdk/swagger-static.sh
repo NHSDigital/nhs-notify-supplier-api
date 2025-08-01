@@ -9,6 +9,6 @@ unzip swagger.zip "swagger-ui-$VERSION/dist/*" -d swagger
 mv swagger/swagger-ui-$VERSION/dist/* swagger
 rm -r swagger/swagger-ui-$VERSION
 cp swagger-initializer.js swagger/swagger-initializer.js
-cp ../specification/api/notify-supplier.yml swagger/swagger.json
+cp ../specification/api/notify-supplier-phase1.yml swagger/swagger.json
 cp ../specification/api/notify-supplier-next.yml swagger/swagger-vnext.json
 rm swagger.zip

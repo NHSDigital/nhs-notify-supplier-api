@@ -1,0 +1,18 @@
+type: string
+enum:
+  - PENDING
+  - ACCEPTED
+  - REJECTED
+  - PRINTED
+  - ENCLOSED
+  - CANCELLED
+  - DISPATCHED
+  - DELIVERED
+  - FAILED
+  - RETURNED
+  - DESTROYED
+  - FORWARDED
+description: The supplier status of an individual letter
+examples:
+  - PENDING
+default: PENDING

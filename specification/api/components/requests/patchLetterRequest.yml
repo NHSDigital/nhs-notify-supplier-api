@@ -1,0 +1,12 @@
+required: true
+content:
+  application/vnd.api+json:
+    schema:
+      type: object
+      properties:
+        data:
+          $ref: ../schemas/letterUpdateItem.yml
+    examples:
+      patch-letter-request:
+        value:
+          $ref: ../examples/patchLetter/requests/patchLetter.json

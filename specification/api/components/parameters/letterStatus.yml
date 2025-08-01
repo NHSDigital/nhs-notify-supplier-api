@@ -1,0 +1,6 @@
+name: status
+in: query
+description: Status of a letter
+required: true
+schema:
+  $ref: '../schemas/letterStatus.yml'

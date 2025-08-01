@@ -1,0 +1,15 @@
+type: object
+properties:
+  type:
+    type: string
+    const: Data
+  id:
+    type: string
+    examples:
+      - 2WL5eYSWGzCHlGmzNxuqVusPxDg
+  attributes:
+    type: object
+    properties:
+      url:
+        type: string
+        example: https://examples3bucket.com/filelocation
