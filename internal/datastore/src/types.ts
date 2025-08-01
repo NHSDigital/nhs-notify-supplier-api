@@ -11,15 +11,16 @@ export const SupplierSchema = z.object({
 }).describe('Supplier');
 
 export type Supplier = z.infer<typeof SupplierSchema>;
-export type SupplierId = Supplier['id'];
 
 export const LetterStatus = z.enum([
   'PENDING', 'ACCEPTED', 'DISPATCHED', 'FAILED',
   'REJECTED', 'DELIVERED', 'CANCELLED']);
 
 export const LetterSchema = z.object({
-  supplierId: idRef(SupplierSchema),
   id: z.string(),
+  supplierId: idRef(SupplierSchema),
+  specificationId: z.string(),
+  groupId: z.string(),
   url: z.url(),
   status: LetterStatus,
   createdAt: z.string(),
@@ -27,7 +28,6 @@ export const LetterSchema = z.object({
 }).describe('Letter');
 
 export type Letter = z.infer<typeof LetterSchema>;
-export type LetterId = Letter['id'];
 
 export const LetterDBSchema = LetterSchema.extend({
   supplierStatus: z.string().describe('Secondary index PK'),

@@ -1,11 +1,15 @@
 import { createTables, DBContext, deleteTables, setupDynamoDBContainer } from './db';
 import { LetterRepository } from '../letter-repository';
 import { Letter } from '../types';
+import { Logger } from 'pino';
+import { createTestLogger, LogStream } from './logs';
 
 function createLetter(supplierId: string, letterId: string, status: Letter['status'] = 'PENDING'): Letter {
   return {
-    supplierId: supplierId,
     id: letterId,
+    supplierId: supplierId,
+    specificationId: 'specification1',
+    groupId: 'group1',
     url: `s3://bucket/${letterId}.pdf`,
     status: status,
     createdAt: new Date().toISOString(),
@@ -13,12 +17,15 @@ function createLetter(supplierId: string, letterId: string, status: Letter['stat
   };
 }
 
+// Database tests can take longer, especially with setup and teardown
 jest.setTimeout(30000);
 
 describe('LetterRepository', () => {
 
   let db: DBContext;
   let letterRepository: LetterRepository;
+  let logStream: LogStream;
+  let logger: Logger;
 
   beforeAll(async () => {
     db = await setupDynamoDBContainer();
@@ -26,7 +33,11 @@ describe('LetterRepository', () => {
 
   beforeEach(async () => {
     await createTables(db);
-    letterRepository = new LetterRepository(db.docClient, db.config);
+    (
+      { logStream, logger } = createTestLogger()
+    );
+
+    letterRepository = new LetterRepository(db.docClient, logger, db.config);
   });
 
   afterEach(async () => {
@@ -124,11 +135,12 @@ describe('LetterRepository', () => {
     expect(firstPage.letters[0].id).toBe('letter001');
     expect(firstPage.letters[49].id).toBe('letter050');
 
-    const secondPage = await letterRepository.getLettersByStatus('supplier1', 'PENDING', firstPage.lastEvaluatedKey);
+    const secondPage = await letterRepository.getLettersByStatus('supplier1', 'PENDING', {
+      exclusiveStartKey: firstPage.lastEvaluatedKey
+    });
     expect(secondPage.letters).toHaveLength(49);
     expect(secondPage.lastEvaluatedKey).toBeUndefined(); // No more pages
     expect(secondPage.letters[0].id).toBe('letter051');
     expect(secondPage.letters[48].id).toBe('letter099');
   });
-
 });

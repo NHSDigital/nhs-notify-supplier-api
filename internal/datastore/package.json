@@ -2,6 +2,7 @@
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.858.0",
     "@aws-sdk/lib-dynamodb": "^3.858.0",
+    "pino": "^9.7.0",
     "zod": "^4.0.14"
   },
   "devDependencies": {

@@ -6,10 +6,21 @@ import {
   UpdateCommand,
   UpdateCommandOutput
 } from '@aws-sdk/lib-dynamodb';
-import { Letter, LetterDB, LetterDBSchema, LetterSchema } from './types';
+import { Letter, LetterDB, LetterSchema } from './types';
+import { Logger } from 'pino';
+
+export type PagingOptions = Partial<{
+  exclusiveStartKey: Record<string, any>,
+  pageSize: number
+}>
+
+const defaultPagingOptions = {
+  pageSize: 50
+};
 
 export class LetterRepository {
   constructor(readonly ddbClient: DynamoDBDocumentClient,
+              readonly log: Logger,
               readonly config: { lettersTableName: string }) {
   }
 
@@ -42,10 +53,13 @@ export class LetterRepository {
     return LetterSchema.parse(result.Item);
   }
 
-  async getLettersByStatus(supplierId: string, status: Letter['status'], exclusiveStartKey?: Record<string, any>, pageSize: number = 50): Promise<{
+  async getLettersByStatus(supplierId: string, status: Letter['status'], options?: PagingOptions): Promise<{
     letters: Letter[],
     lastEvaluatedKey?: Record<string, any>
   }> {
+
+    const extendedOptions = { ...defaultPagingOptions, ...options };
+
     const result = await this.ddbClient.send(new QueryCommand({
       TableName: this.config.lettersTableName,
       IndexName: 'supplierStatus-index',
@@ -55,21 +69,28 @@ export class LetterRepository {
           AttributeValueList: [`${supplierId}#${status}`]
         }
       },
-      Limit: pageSize,
-      ExclusiveStartKey: exclusiveStartKey
+      Limit: extendedOptions.pageSize,
+      ExclusiveStartKey: extendedOptions.exclusiveStartKey
     }));
 
     if (!result.Items) {
       throw new Error(`No letters found for supplier ${supplierId} with status ${status}`);
     }
     return {
-      letters: result.Items.map(item => LetterSchema.parse(item)),
+      letters: result.Items.map(item => LetterSchema.safeParse(item))
+        .filter((result) => {
+          if (!result.success) {
+            this.log.warn(`Invalid letter data: ${result.error}`);
+          }
+          return result.success;
+        })
+        .map(result => result.data),
       lastEvaluatedKey: result.LastEvaluatedKey
     }
   }
 
   async updateLetterStatus(supplierId: string, letterId: string, status: Letter['status']): Promise<Letter> {
-    console.debug(`Updating letter ${letterId} to status ${status}`);
+    this.log.debug(`Updating letter ${letterId} to status ${status}`);
     let result: UpdateCommandOutput;
     try {
       result = await this.ddbClient.send(new UpdateCommand({
@@ -100,7 +121,7 @@ export class LetterRepository {
     if (!result.Attributes) {
       throw new Error(`Letter with id ${letterId} not found for supplier ${supplierId}`);
     }
-    console.debug(`Updated letter ${letterId} to status ${status}`);
+    this.log.debug(`Updated letter ${letterId} to status ${status}`);
     return LetterSchema.parse(result.Attributes);
   }
 }
