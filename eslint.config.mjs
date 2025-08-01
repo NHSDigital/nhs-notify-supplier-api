@@ -12,7 +12,7 @@ import unicorn from 'eslint-plugin-unicorn';
 import { defineConfig, globalIgnores } from 'eslint/config';
 import js from '@eslint/js';
 import html from 'eslint-plugin-html';
-import tseslint from 'typescript-eslint';
+import tseslint from '@typescript-eslint/parser';
 import sortDestructureKeys from 'eslint-plugin-sort-destructure-keys';
 import {
   configs as airbnbConfigs,
