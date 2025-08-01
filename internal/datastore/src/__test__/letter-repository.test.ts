@@ -81,13 +81,13 @@ describe('LetterRepository', () => {
 
   test('throws an error when fetching a letter that does not exist', async () => {
     await expect(letterRepository.getLetterById('supplier1', 'letter1'))
-      .rejects.toThrow("Letter with id letter1 not found for supplier supplier1");
+      .rejects.toThrow('Letter with id letter1 not found for supplier supplier1');
   });
 
   test('throws an error when creating a letter which already exists', async () => {
     await letterRepository.putLetter(createLetter('supplier1', 'letter1'));
     await expect(letterRepository.putLetter(createLetter('supplier1', 'letter1')))
-      .rejects.toThrow("Letter with id letter1 already exists for supplier supplier1");
+      .rejects.toThrow('Letter with id letter1 already exists for supplier supplier1');
   });
 
   test('rethrows errors from DynamoDB when creating a letter', async () => {
@@ -130,7 +130,7 @@ describe('LetterRepository', () => {
       ...db.config,
       lettersTableName: 'nonexistent-table'
     });
-    await expect(misconfiguredRepository.updateLetterStatus(createLetter('supplier1', 'letter1', 'DELIVERED')))
+    await expect(misconfiguredRepository.updateLetterStatus('supplier1', 'letter1', 'DELIVERED'))
       .rejects.toThrow('Cannot do operations on a non-existent table');
   });
 
