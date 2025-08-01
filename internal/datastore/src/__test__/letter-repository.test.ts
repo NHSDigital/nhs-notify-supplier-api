@@ -3,6 +3,7 @@ import { LetterRepository } from '../letter-repository';
 import { Letter } from '../types';
 import { Logger } from 'pino';
 import { createTestLogger, LogStream } from './logs';
+import { PutCommand } from '@aws-sdk/lib-dynamodb';
 
 function createLetter(supplierId: string, letterId: string, status: Letter['status'] = 'PENDING'): Letter {
   return {
@@ -142,5 +143,30 @@ describe('LetterRepository', () => {
     expect(secondPage.lastEvaluatedKey).toBeUndefined(); // No more pages
     expect(secondPage.letters[0].id).toBe('letter051');
     expect(secondPage.letters[48].id).toBe('letter099');
+  });
+
+  test('letter list should warn about invalid data', async () => {
+    await letterRepository.putLetter(createLetter('supplier1', 'letter1'));
+    await db.docClient.send(new PutCommand({
+      TableName: db.config.lettersTableName,
+      Item: {
+        supplierId: 'supplier1',
+        id: 'invalid-letter',
+        // specificationId: 'specification1', // Missing required field
+        groupId: 'group1',
+        url: 's3://bucket/invalid-letter.pdf',
+        status: 'PENDING',
+        supplierStatus: 'supplier1#PENDING',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+    }));
+
+    const pendingLetters = await letterRepository.getLettersByStatus('supplier1', 'PENDING');
+    expect(pendingLetters.letters).toHaveLength(1);
+    expect(pendingLetters.letters[0].id).toBe('letter1');
+
+    expect(logStream.logs).toContainEqual(expect.stringMatching(/.*Invalid letter data:.*/));
+    expect(logStream.logs).toContainEqual(expect.stringMatching(/.*specificationId.*Invalid input: expected string.*/));
   });
 });
