@@ -1,11 +1,3 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "5.81.0"
-    }
-  }
-}
 resource "aws_dynamodb_table" "letters" {
   name         = "${local.csi}-letters"
   billing_mode = "PAY_PER_REQUEST"
@@ -33,6 +25,10 @@ resource "aws_dynamodb_table" "letters" {
   attribute {
     name = "supplierStatus"
     type = "string"
+  }
+
+  point_in_time_recovery {
+    enabled = true
   }
 
   tags = var.default_tags

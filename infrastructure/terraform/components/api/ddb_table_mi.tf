@@ -15,5 +15,9 @@ resource "aws_dynamodb_table" "mi" {
     type = "string"
   }
 
+  point_in_time_recovery {
+    enabled = true
+  }
+
   tags = var.default_tags
 }
