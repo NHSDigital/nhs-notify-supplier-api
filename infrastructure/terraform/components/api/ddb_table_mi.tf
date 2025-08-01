@@ -1,0 +1,19 @@
+resource "aws_dynamodb_table" "mi" {
+  name         = "${local.csi}-mi"
+  billing_mode = "PAY_PER_REQUEST"
+
+  hash_key  = "supplierId"
+  range_key = "id"
+
+  attribute {
+    name = "id"
+    type = "string"
+  }
+
+  attribute {
+    name = "supplierId"
+    type = "string"
+  }
+
+  tags = var.default_tags
+}

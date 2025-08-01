@@ -4,7 +4,9 @@
 
 ## Requirements
 
-No requirements.
+| Name | Version |
+|------|---------|
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | 5.81.0 |
 ## Inputs
 
 | Name | Description | Type | Default | Required |
