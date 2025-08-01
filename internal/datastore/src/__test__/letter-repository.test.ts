@@ -64,8 +64,39 @@ describe('LetterRepository', () => {
 
   test('adds a letter to the database', async () => {
     await letterRepository.putLetter(createLetter('supplier1', 'letter1'));
-
     await checkLetterExists('supplier1', 'letter1');
+  });
+
+  test('fetches a letter by id', async () => {
+    await letterRepository.putLetter(createLetter('supplier1', 'letter1'));
+    const letter = await letterRepository.getLetterById('supplier1', 'letter1');
+    expect(letter).toEqual(expect.objectContaining({
+      id: 'letter1',
+      supplierId: 'supplier1',
+      specificationId: 'specification1',
+      groupId: 'group1',
+      status: 'PENDING'
+    }));
+  });
+
+  test('throws an error when fetching a letter that does not exist', async () => {
+    await expect(letterRepository.getLetterById('supplier1', 'letter1'))
+      .rejects.toThrow("Letter with id letter1 not found for supplier supplier1");
+  });
+
+  test('throws an error when creating a letter which already exists', async () => {
+    await letterRepository.putLetter(createLetter('supplier1', 'letter1'));
+    await expect(letterRepository.putLetter(createLetter('supplier1', 'letter1')))
+      .rejects.toThrow("Letter with id letter1 already exists for supplier supplier1");
+  });
+
+  test('rethrows errors from DynamoDB when creating a letter', async () => {
+    const misconfiguredRepository = new LetterRepository(db.docClient, logger, {
+      ...db.config,
+      lettersTableName: 'nonexistent-table'
+    });
+    await expect(misconfiguredRepository.putLetter(createLetter('supplier1', 'letter1')))
+      .rejects.toThrow('Cannot do operations on a non-existent table');
   });
 
   test('updates a letter\'s status in the database', async () => {
@@ -90,9 +121,17 @@ describe('LetterRepository', () => {
   });
 
   test('can\t update a letter that does not exist', async () => {
-    await expect(async () => {
-      await letterRepository.updateLetterStatus('supplier1', 'letter1', 'DELIVERED');
-    }).rejects.toThrow('Letter with id letter1 not found for supplier supplier1');
+    await expect(letterRepository.updateLetterStatus('supplier1', 'letter1', 'DELIVERED'))
+      .rejects.toThrow('Letter with id letter1 not found for supplier supplier1');
+  });
+
+  test('update letter status rethrows errors from DynamoDB', async () => {
+    const misconfiguredRepository = new LetterRepository(db.docClient, logger, {
+      ...db.config,
+      lettersTableName: 'nonexistent-table'
+    });
+    await expect(misconfiguredRepository.updateLetterStatus(createLetter('supplier1', 'letter1', 'DELIVERED')))
+      .rejects.toThrow('Cannot do operations on a non-existent table');
   });
 
   test('should return a list of letters matching status', async () => {
@@ -143,6 +182,12 @@ describe('LetterRepository', () => {
     expect(secondPage.lastEvaluatedKey).toBeUndefined(); // No more pages
     expect(secondPage.letters[0].id).toBe('letter051');
     expect(secondPage.letters[48].id).toBe('letter099');
+  });
+
+  test('letter list should return empty when no letters match status', async () => {
+    const page = await letterRepository.getLettersByStatus('supplier1', 'PENDING');
+    expect(page.letters).toHaveLength(0);
+    expect(page.lastEvaluatedKey).toBeUndefined();
   });
 
   test('letter list should warn about invalid data', async () => {

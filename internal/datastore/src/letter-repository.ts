@@ -29,12 +29,18 @@ export class LetterRepository {
       ...letter,
       supplierStatus: `${letter.supplierId}#${letter.status}`
     };
-    await this.ddbClient.send(new PutCommand({
-      TableName: this.config.lettersTableName,
-      Item: letterDb,
-      ConditionExpression: 'attribute_not_exists(id)', // Ensure id is unique
-    }));
-
+    try {
+      await this.ddbClient.send(new PutCommand({
+        TableName: this.config.lettersTableName,
+        Item: letterDb,
+        ConditionExpression: 'attribute_not_exists(id)', // Ensure id is unique
+      }));
+    } catch (error) {
+      if (error instanceof Error && error.name === 'ConditionalCheckFailedException') {
+        throw new Error(`Letter with id ${letter.id} already exists for supplier ${letter.supplierId}`);
+      }
+      throw error;
+    }
     return letterDb;
   }
 
@@ -73,11 +79,9 @@ export class LetterRepository {
       ExclusiveStartKey: extendedOptions.exclusiveStartKey
     }));
 
-    if (!result.Items) {
-      throw new Error(`No letters found for supplier ${supplierId} with status ${status}`);
-    }
     return {
-      letters: result.Items.map(item => LetterSchema.safeParse(item))
+      // Items is an empty array if no items match the query
+      letters: result.Items!.map(item => LetterSchema.safeParse(item))
         .filter((result) => {
           if (!result.success) {
             this.log.warn(`Invalid letter data: ${result.error}`);
@@ -118,9 +122,6 @@ export class LetterRepository {
       throw error;
     }
 
-    if (!result.Attributes) {
-      throw new Error(`Letter with id ${letterId} not found for supplier ${supplierId}`);
-    }
     this.log.debug(`Updated letter ${letterId} to status ${status}`);
     return LetterSchema.parse(result.Attributes);
   }
