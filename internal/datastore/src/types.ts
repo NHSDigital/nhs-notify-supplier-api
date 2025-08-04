@@ -24,13 +24,14 @@ export const LetterSchema = z.object({
   url: z.url(),
   status: LetterStatus,
   createdAt: z.string(),
-  updatedAt: z.string(),
+  updatedAt: z.string()
 }).describe('Letter');
 
 export type Letter = z.infer<typeof LetterSchema>;
 
 export const LetterDBSchema = LetterSchema.extend({
   supplierStatus: z.string().describe('Secondary index PK'),
+  ttl: z.int()
 });
 
 /**

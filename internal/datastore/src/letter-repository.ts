@@ -18,16 +18,22 @@ const defaultPagingOptions = {
   pageSize: 50
 };
 
+export type LetterRepositoryConfig = {
+  lettersTableName: string,
+  ttlHours: number
+}
+
 export class LetterRepository {
   constructor(readonly ddbClient: DynamoDBDocumentClient,
               readonly log: Logger,
-              readonly config: { lettersTableName: string }) {
+              readonly config: LetterRepositoryConfig) {
   }
 
-  async putLetter(letter: Letter): Promise<LetterDB> {
+  async putLetter(letter: Letter): Promise<Letter> {
     const letterDb: LetterDB = {
       ...letter,
-      supplierStatus: `${letter.supplierId}#${letter.status}`
+      supplierStatus: `${letter.supplierId}#${letter.status}`,
+      ttl: Math.floor(Date.now() / 1000 + 60 * 60 * this.config.ttlHours)
     };
     try {
       await this.ddbClient.send(new PutCommand({
@@ -41,7 +47,7 @@ export class LetterRepository {
       }
       throw error;
     }
-    return letterDb;
+    return LetterSchema.parse(letterDb);
   }
 
   async getLetterById(supplierId: string, letterId: string): Promise<Letter> {
@@ -103,15 +109,17 @@ export class LetterRepository {
           supplierId: supplierId,
           id: letterId
         },
-        UpdateExpression: 'set #status = :status, updatedAt = :updatedAt, supplierStatus = :supplierStatus',
+        UpdateExpression: 'set #status = :status, updatedAt = :updatedAt, supplierStatus = :supplierStatus, #ttl = :ttl',
         ConditionExpression: 'attribute_exists(id)', // Ensure letter exists
         ExpressionAttributeNames: {
           '#status': 'status',
+          '#ttl': 'ttl'
         },
         ExpressionAttributeValues: {
           ':status': status,
           ':updatedAt': new Date().toISOString(),
-          ':supplierStatus': `${supplierId}#${status}`
+          ':supplierStatus': `${supplierId}#${status}`,
+          ':ttl': Math.floor(Date.now() / 1000 + 60 * 60 * this.config.ttlHours)
         },
         ReturnValues: 'ALL_NEW'
       }));

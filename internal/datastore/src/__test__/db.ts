@@ -1,5 +1,10 @@
 import { GenericContainer } from 'testcontainers';
-import { CreateTableCommand, DeleteTableCommand, DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import {
+  CreateTableCommand,
+  DeleteTableCommand,
+  DynamoDBClient,
+  UpdateTimeToLiveCommand
+} from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { DatastoreConfig } from '../config';
 
@@ -24,7 +29,8 @@ export async function setupDynamoDBContainer() {
   const config : DatastoreConfig = {
     region: 'us-west-2',
     endpoint,
-    lettersTableName: 'letters'
+    lettersTableName: 'letters',
+    ttlHours: 1
   };
 
   return {
@@ -66,7 +72,16 @@ export async function createTables(context: DBContext) {
       { AttributeName: 'supplierStatus', AttributeType: 'S' }
     ]
   }));
+
+  await ddbClient.send(new UpdateTimeToLiveCommand({
+    TableName: 'letters',
+    TimeToLiveSpecification: {
+      AttributeName: 'ttl',
+      Enabled: true
+    }
+  }));
 }
+
 
 export async function deleteTables(context: DBContext) {
   const { ddbClient } = context;
