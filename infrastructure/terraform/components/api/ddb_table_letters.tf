@@ -32,11 +32,6 @@ resource "aws_dynamodb_table" "letters" {
     type = "string"
   }
 
-  attribute {
-    name = "ttl"
-    type = "number"
-  }
-
   point_in_time_recovery {
     enabled = true
   }
