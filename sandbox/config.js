@@ -2,8 +2,8 @@ const path = require('path');
 
 const config = {
   ROOT_DIR: __dirname,
-  URL_PORT: 8080,
-  URL_PATH: 'http://localhost',
+  URL_PORT: 9000,
+  URL_PATH: 'http://127.0.0.1',
   BASE_VERSION: '',
   CONTROLLER_DIRECTORY: path.join(__dirname, 'controllers'),
   PROJECT_DIR: __dirname,

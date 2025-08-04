@@ -1,5 +1,5 @@
 summary: List MI Records
-operationId: list-mi
+operationId: listMi
 responses:
   "200":
     $ref: "../responses/getMIList200.yml"

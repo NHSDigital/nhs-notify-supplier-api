@@ -3,6 +3,7 @@
     "serve": "^14.2.4"
   },
   "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.21.4",
     "@redocly/cli": "^1.34.5",
     "@tsconfig/node22": "^22.0.2",
     "@types/jest": "^29.5.14",
@@ -49,6 +50,7 @@
     "bundle-oas": "mkdir -p build && redocly bundle specification/api/notify-supplier-phase1.yml --dereferenced -k --remove-unused-components --ext yml > build/notify-supplier.yml",
     "generate": "npm run generate:cs --buildver=$npm_config_buildver && npm run generate:html && npm run generate:ts --buildver=$npm_config_buildver && npm run generate:python",
     "generate-dependencies": "npm run generate-dependencies --workspaces --if-present",
+    "generate-sandbox": "openapi-generator-cli generate -g nodejs-express-server -i build/notify-supplier.yml --skip-validate-spec -o sandbox",
     "generate:cs": "./sdk/generate-cs.sh $npm_config_buildver",
     "generate:cs-server": "./server/generate-cs-server.sh $npm_config_buildver",
     "generate:html": "docker run --rm --user $(id -u) -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/build/notify-supplier.yml -g html -o /local/sdk/html --skip-validate-spec",
