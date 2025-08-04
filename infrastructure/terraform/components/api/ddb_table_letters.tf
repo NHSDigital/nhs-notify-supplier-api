@@ -5,6 +5,11 @@ resource "aws_dynamodb_table" "letters" {
   hash_key  = "supplierId"
   range_key = "id"
 
+  ttl {
+    attribute_name = "ttl"
+    enabled        = true
+  }
+
   global_secondary_index {
     name            = "supplierStatus-index"
     hash_key        = "supplierStatus"
@@ -25,6 +30,11 @@ resource "aws_dynamodb_table" "letters" {
   attribute {
     name = "supplierStatus"
     type = "string"
+  }
+
+  attribute {
+    name = "ttl"
+    type = "number"
   }
 
   point_in_time_recovery {

@@ -5,6 +5,11 @@ resource "aws_dynamodb_table" "mi" {
   hash_key  = "supplierId"
   range_key = "id"
 
+  ttl {
+    attribute_name = "ttl"
+    enabled        = true
+  }
+
   attribute {
     name = "id"
     type = "string"
@@ -13,6 +18,11 @@ resource "aws_dynamodb_table" "mi" {
   attribute {
     name = "supplierId"
     type = "string"
+  }
+
+  attribute {
+    name = "ttl"
+    type = "number"
   }
 
   point_in_time_recovery {
