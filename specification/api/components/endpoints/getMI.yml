@@ -1,5 +1,5 @@
 summary: Fetch a specific MI record
-operationId: get-mi
+operationId: getMi
 responses:
   "200":
     $ref: "../responses/getMI200.yml"

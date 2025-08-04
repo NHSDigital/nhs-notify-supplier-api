@@ -26,6 +26,13 @@ clean:: # Clean-up project resources (main) @Operations
 	(cd sdk && make clean)
 	(cd server && make clean)
 	(cd src/server && make clean)
+
+guard-%:
+	@ if [ "${${*}}" = "" ]; then \
+		echo "Variable $* not set"; \
+		echo "Usage: make <target> APIM_ENV=<env>"
+		exit 1; \
+	fi
 serve:
 	npm run serve
 
@@ -35,6 +42,13 @@ lint-oas:
 
 publish-oas:
 	npm run publish-oas
+
+construct-spec: guard-APIM_ENV
+	cd specification/api/components/x-nhsd-apim
+	cp access-$(APIM_ENV).yml access.yml
+	cp target-$(APIM_ENV).yml target.yml
+	cd -
+	$(MAKE) publish-oas
 
 serve-oas:
 	npm run serve-oas

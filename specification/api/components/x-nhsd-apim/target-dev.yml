@@ -1,0 +1,7 @@
+type: external
+healthcheck: /_status
+url: https://jct1kdzzma.execute-api.eu-west-2.amazonaws.com/main/
+security:
+  type: apikey
+  header: nhsd-apim-apikey
+  secret: nhs-notify-supplier-key

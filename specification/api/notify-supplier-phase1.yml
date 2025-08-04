@@ -53,6 +53,15 @@ paths:
       $ref: 'components/endpoints/getDataId.yml'
     head:
       $ref: 'components/endpoints/headDataId.yml'
+  '/_status':
+      get:
+        summary: Health check endpoint
+        description: Returns 200 OK if the service is up.
+        operationId: getStatus
+        responses:
+          '200':
+            description: Service is healthy
+
 components:
   securitySchemes:
     nhs-login-p0:
@@ -72,18 +81,9 @@ servers:
   - url: 'https://sandbox-server.nhs.uk/nhs-notify-supplier-api'
     description: Public sandbox
 x-nhsd-apim:
-  temporary: false
+  temporary: true
   monitoring: false
   access:
-  - title: Application Restricted
-    grants:
-      app-level0: []
-      app-level3: []
+    $ref: ./components/x-nhsd-apim/access.yml
   target:
-    type: external
-    healthcheck: /_status
-    url: https://jct1kdzzma.execute-api.eu-west-2.amazonaws.com/main/
-    security:
-      type: apikey
-      header: nhsd-apim-apikey
-      secret: nhs-notify-supplier-key
+    $ref: ./components/x-nhsd-apim/target.yml

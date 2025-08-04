@@ -1,0 +1,4 @@
+- title: Application Restricted
+  grants:
+    app-level0: []
+    app-level3: []

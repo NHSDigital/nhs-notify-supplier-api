@@ -1,5 +1,5 @@
 summary: Get a list of letters
-operationId: list-letters
+operationId: listLetters
 tags:
   - letter
 parameters:

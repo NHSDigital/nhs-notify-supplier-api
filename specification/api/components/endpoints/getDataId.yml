@@ -1,5 +1,5 @@
 summary: Fetch a data file
-operationId: get-data-id
+operationId: getDataId
 tags:
   - data
 responses:
