@@ -23,36 +23,6 @@
   },
   "openapi": "3.0.1",
   "paths": {
-    "/": {
-      "get": {
-        "description": "Returns 200 OK if the API is up.",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "LambdaAuthorizer": []
-          }
-        ],
-        "summary": "Health check",
-        "x-amazon-apigateway-integration": {
-          "contentHandling": "CONVERT_TO_TEXT",
-          "credentials": "${APIG_EXECUTION_ROLE_ARN}",
-          "httpMethod": "POST",
-          "passthroughBehavior": "WHEN_NO_TEMPLATES",
-          "responses": {
-            ".*": {
-              "statusCode": "200"
-            }
-          },
-          "timeoutInMillis": 29000,
-          "type": "AWS_PROXY",
-          "uri": "arn:aws:apigateway:${AWS_REGION}:lambda:path/2015-03-31/functions/${HELLO_WORLD_LAMBDA_ARN}/invocations"
-        }
-      }
-    },
     "/letters": {
       "get": {
         "description": "Returns 200 OK with paginated letter ids.",
@@ -80,6 +50,184 @@
           "timeoutInMillis": 29000,
           "type": "AWS_PROXY",
           "uri": "arn:aws:apigateway:${AWS_REGION}:lambda:path/2015-03-31/functions/${GET_LETTERS_LAMBDA_ARN}/invocations"
+        }
+      }
+    },
+    "/letters/{id}": {
+      "parameters": [
+        {
+          "description": "Unique identifier of this resource",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "patch": {
+        "description": "Update the status of a letter by providing the new status in the request body.",
+        "requestBody": {
+          "content": {
+            "application/vnd.api+json": {
+              "schema": {
+                "properties": {
+                  "data": {
+                    "properties": {
+                      "attributes": {
+                        "properties": {
+                          "reasonCode": {
+                            "description": "Reason code for the given status",
+                            "type": "number"
+                          },
+                          "reasonText": {
+                            "description": "Reason text for the given status",
+                            "type": "string"
+                          },
+                          "requestedProductionStatus": {
+                            "description": "The requested production status for this letter.\nMay only be set by NHS Notify.",
+                            "enum": [
+                              "ACTIVE",
+                              "HOLD",
+                              "CANCEL"
+                            ],
+                            "title": "ProductionStatus",
+                            "type": "string"
+                          },
+                          "status": {
+                            "default": "PENDING",
+                            "description": "The supplier status of an individual letter",
+                            "enum": [
+                              "PENDING",
+                              "ACCEPTED",
+                              "REJECTED",
+                              "PRINTED",
+                              "ENCLOSED",
+                              "CANCELLED",
+                              "DISPATCHED",
+                              "FAILED",
+                              "RETURNED",
+                              "DESTROYED",
+                              "FORWARDED"
+                            ],
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "id": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "const": "Letter",
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "attributes": {
+                          "properties": {
+                            "reasonCode": {
+                              "description": "Reason code for the given status",
+                              "type": "number"
+                            },
+                            "reasonText": {
+                              "description": "Reason text for the given status",
+                              "type": "string"
+                            },
+                            "requestedProductionStatus": {
+                              "description": "A requested status for the production of a letter",
+                              "enum": [
+                                "ACTIVE",
+                                "HOLD",
+                                "CANCEL"
+                              ],
+                              "title": "ProductionStatus",
+                              "type": "string"
+                            },
+                            "status": {
+                              "default": "PENDING",
+                              "description": "The supplier status of an individual letter",
+                              "enum": [
+                                "PENDING",
+                                "ACCEPTED",
+                                "REJECTED",
+                                "PRINTED",
+                                "ENCLOSED",
+                                "CANCELLED",
+                                "DISPATCHED",
+                                "FAILED",
+                                "RETURNED",
+                                "DESTROYED",
+                                "FORWARDED"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "status",
+                            "requestedProductionStatus"
+                          ],
+                          "type": "object"
+                        },
+                        "id": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "const": "Letter",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Letter resource updated successfully"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "404": {
+            "description": "Resource not found"
+          }
+        },
+        "security": [
+          {
+            "LambdaAuthorizer": []
+          }
+        ],
+        "summary": "Update the status of a letter",
+        "x-amazon-apigateway-integration": {
+          "contentHandling": "CONVERT_TO_TEXT",
+          "credentials": "${APIG_EXECUTION_ROLE_ARN}",
+          "httpMethod": "POST",
+          "passthroughBehavior": "WHEN_NO_TEMPLATES",
+          "responses": {
+            ".*": {
+              "statusCode": "200"
+            }
+          },
+          "timeoutInMillis": 29000,
+          "type": "AWS_PROXY",
+          "uri": "arn:aws:apigateway:${AWS_REGION}:lambda:path/2015-03-31/functions/${PATCH_LETTERS_LAMBDA_ARN}/invocations"
         }
       }
     }

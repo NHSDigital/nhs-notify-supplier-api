@@ -30,6 +30,7 @@ No requirements.
 | <a name="module_get_letters"></a> [get\_letters](#module\_get\_letters) | git::https://github.com/NHSDigital/nhs-notify-shared-modules.git//infrastructure/modules/lambda | v2.0.10 |
 | <a name="module_hello_world"></a> [hello\_world](#module\_hello\_world) | git::https://github.com/NHSDigital/nhs-notify-shared-modules.git//infrastructure/modules/lambda | v2.0.10 |
 | <a name="module_kms"></a> [kms](#module\_kms) | git::https://github.com/NHSDigital/nhs-notify-shared-modules.git//infrastructure/modules/kms | v2.0.10 |
+| <a name="module_patch_letters"></a> [patch\_letters](#module\_patch\_letters) | git::https://github.com/NHSDigital/nhs-notify-shared-modules.git//infrastructure/modules/lambda | v2.0.10 |
 ## Outputs
 
 | Name | Description |
