@@ -1,0 +1,53 @@
+name: "Build Proxies"
+description: "Build Proxies"
+inputs:
+  version:
+    description: "Version number"
+    required: true
+runs:
+  using: composite
+
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24
+
+    - name: Npm install
+      working-directory: .
+      run: npm ci
+      shell: bash
+
+    - name: Build sandbox oas
+      working-directory: .
+      shell: bash
+      run: |
+        make construct-spec APIM_ENV=sandbox
+
+
+    - name: Install Proxygen client
+      shell: bash
+      run: |
+        # Install proxygen cli
+        pip install pipx
+        pipx install proxygen-cli
+
+        # Setup proxygen auth and settings
+        mkdir -p ${HOME}/.proxygen
+        echo -n $PROXYGEN_PRIVATE_KEY | base64 --decode > ${HOME}/.proxygen/key
+        envsubst < ./.github/proxygen-credentials-template.yaml > ${HOME}/.proxygen/credentials.yaml
+        envsubst < ./.github/proxygen-credentials-template.yaml | cat
+        envsubst < ./.github/proxygen-settings.yaml > ${HOME}/.proxygen/settings.yaml
+        envsubst < ./.github/proxygen-settings.yaml | cat
+
+    - name: Build and publish sandbox Docker image
+      shell: bash
+      working-directory: ./sandbox
+      run: |
+          docker build -t nhs-notify-supplier:latest .
+          proxygen docker get-login | bash
+          docker build -t nhs-notify-supplier:latest .
+          IMAGE_ID=$(docker images -q nhs-notify-supplier:latest)
+          docker tag $IMAGE_ID 958002497996.dkr.ecr.eu-west-2.amazonaws.com/nhs-notify-supplier:latest
+          docker push 958002497996.dkr.ecr.eu-west-2.amazonaws.com/nhs-notify-supplier:latest
