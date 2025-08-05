@@ -120,7 +120,7 @@ describe('LetterRepository', () => {
     expect(updatedLetter.updatedAt).toBe('2020-02-02T00:00:00.000Z');
   });
 
-  test('can\t update a letter that does not exist', async () => {
+  test('can\'t update a letter that does not exist', async () => {
     await expect(letterRepository.updateLetterStatus('supplier1', 'letter1', 'DELIVERED'))
       .rejects.toThrow('Letter with id letter1 not found for supplier supplier1');
   });
