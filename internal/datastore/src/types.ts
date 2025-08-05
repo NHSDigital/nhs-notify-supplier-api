@@ -24,18 +24,28 @@ export const LetterSchema = z.object({
   url: z.url(),
   status: LetterStatus,
   createdAt: z.string(),
-  updatedAt: z.string()
-}).describe('Letter');
-
-export type Letter = z.infer<typeof LetterSchema>;
-
-export const LetterDBSchema = LetterSchema.extend({
+  updatedAt: z.string(),
   supplierStatus: z.string().describe('Secondary index PK'),
   ttl: z.int()
-});
+}).describe('Letter');
 
 /**
- * LetterDB is the type used for storing letters in the database.
- * It extends the LetterSchema with a secondary index for supplierStatus.
+ * Letter is the type used for storing letters in the database.
+ * The supplierStatus is a composite key combining supplierId and status.
+ * The ttl is used for automatic deletion of old letters.
  */
-export type LetterDB = z.infer<typeof LetterDBSchema>;
+export type Letter = z.infer<typeof LetterSchema>;
+
+export const MISchema = z.object({
+  id: z.string(),
+  supplierId: idRef(SupplierSchema),
+  specificationId: z.string(),
+  groupId: z.string(),
+  lineItem: z.string(),
+  quantity: z.number(),
+  stockRemaining: z.number(),
+  createdAt: z.string(),
+  updatedAt: z.string()
+}).describe('MI');
+
+export type MI = z.infer<typeof MISchema>;

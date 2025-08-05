@@ -5,7 +5,7 @@ import { Logger } from 'pino';
 import { createTestLogger, LogStream } from './logs';
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
 
-function createLetter(supplierId: string, letterId: string, status: Letter['status'] = 'PENDING'): Letter {
+function createLetter(supplierId: string, letterId: string, status: Letter['status'] = 'PENDING'): Omit<Letter, 'ttl' | 'supplierStatus'> {
   return {
     id: letterId,
     supplierId: supplierId,
@@ -114,6 +114,8 @@ describe('LetterRepository', () => {
     const originalLetter = await letterRepository.getLetterById('supplier1', 'letter1');
     expect(originalLetter.updatedAt).toBe('2020-02-01T00:00:00.000Z');
 
+    // Month is zero-indexed in JavaScript Date
+    // Day is one-indexed
     jest.setSystemTime(new Date(2020, 1, 2));
     await letterRepository.updateLetterStatus('supplier1', 'letter1', 'DELIVERED');
     const updatedLetter = await letterRepository.getLetterById('supplier1', 'letter1');
@@ -185,6 +187,7 @@ describe('LetterRepository', () => {
   });
 
   test('letter list should return empty when no letters match status', async () => {
+    await letterRepository.putLetter(createLetter('supplier1', 'letter1', 'ACCEPTED'));
     const page = await letterRepository.getLettersByStatus('supplier1', 'PENDING');
     expect(page.letters).toHaveLength(0);
     expect(page.lastEvaluatedKey).toBeUndefined();

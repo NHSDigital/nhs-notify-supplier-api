@@ -1,5 +1,10 @@
+# Data Store Schemas
 
-# Letter schema
+This document contains the mermaid diagrams for the data store schemas used in the application.
+
+The schemas are generated from Zod definitions and provide a visual representation of the data structure.
+
+## Letter schema
 
 ```mermaid
 erDiagram
@@ -12,14 +17,30 @@ erDiagram
         string status "enum: PENDING, ACCEPTED, DISPATCHED, FAILED, REJECTED, DELIVERED, CANCELLED"
         string createdAt
         string updatedAt
+        string supplierStatus
+        number ttl "min: -9007199254740991, max: 9007199254740991"
     }
     Supplier {
-    }
-    Supplier {
-        string id
-        string name
-        string apimId
-        string status "enum: ENABLED, DISABLED"
     }
     Letter }o--|| Supplier : "supplierId"
+```
+
+## MI schema
+
+```mermaid
+erDiagram
+    MI {
+        string id
+        string supplierId "ref: Supplier"
+        string specificationId
+        string groupId
+        string lineItem
+        number quantity
+        number stockRemaining
+        string createdAt
+        string updatedAt
+    }
+    Supplier {
+    }
+    MI }o--|| Supplier : "supplierId"
 ```

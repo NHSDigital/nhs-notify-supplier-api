@@ -26,7 +26,7 @@
   "name": "datastore",
   "private": true,
   "scripts": {
-    "diagrams": "ts-node src/__test__/genmermaid.ts",
+    "diagrams": "ts-node src/cli/diagrams.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test:unit": "jest",

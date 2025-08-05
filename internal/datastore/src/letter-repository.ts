@@ -6,7 +6,7 @@ import {
   UpdateCommand,
   UpdateCommandOutput
 } from '@aws-sdk/lib-dynamodb';
-import { Letter, LetterDB, LetterSchema } from './types';
+import { Letter, LetterSchema } from './types';
 import { Logger } from 'pino';
 
 export type PagingOptions = Partial<{
@@ -29,8 +29,8 @@ export class LetterRepository {
               readonly config: LetterRepositoryConfig) {
   }
 
-  async putLetter(letter: Letter): Promise<Letter> {
-    const letterDb: LetterDB = {
+  async putLetter(letter: Omit<Letter, 'ttl' | 'supplierStatus'>): Promise<Letter> {
+    const letterDb: Letter = {
       ...letter,
       supplierStatus: `${letter.supplierId}#${letter.status}`,
       ttl: Math.floor(Date.now() / 1000 + 60 * 60 * this.config.ttlHours)
