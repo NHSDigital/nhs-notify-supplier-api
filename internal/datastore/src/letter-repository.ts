@@ -75,12 +75,8 @@ export class LetterRepository {
     const result = await this.ddbClient.send(new QueryCommand({
       TableName: this.config.lettersTableName,
       IndexName: 'supplierStatus-index',
-      KeyConditions: {
-        supplierStatus: {
-          ComparisonOperator: 'EQ',
-          AttributeValueList: [`${supplierId}#${status}`]
-        }
-      },
+      KeyConditionExpression: 'supplierStatus = :supplierStatus',
+      ExpressionAttributeValues: { ':supplierStatus': `${supplierId}#${status}` },
       Limit: extendedOptions.pageSize,
       ExclusiveStartKey: extendedOptions.exclusiveStartKey
     }));
