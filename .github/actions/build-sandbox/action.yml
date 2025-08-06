@@ -25,6 +25,12 @@ runs:
       run: |
         make construct-spec APIM_ENV=sandbox
 
+    - name: Remove sandbox security
+      working-directory: ./build
+      shell: bash
+      run: |
+        jq '.security = []' notify-supplier.json > tmp.json && mv tmp.json notify-supplier.json
+
 
     - name: Install Proxygen client
       shell: bash
@@ -45,7 +51,6 @@ runs:
       shell: bash
       working-directory: ./sandbox
       run: |
-          docker build -t nhs-notify-supplier:latest .
           proxygen docker get-login | bash
           docker build -t nhs-notify-supplier:latest .
           IMAGE_ID=$(docker images -q nhs-notify-supplier:latest)
