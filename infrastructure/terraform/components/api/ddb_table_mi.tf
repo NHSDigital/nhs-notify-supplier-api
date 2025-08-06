@@ -12,12 +12,12 @@ resource "aws_dynamodb_table" "mi" {
 
   attribute {
     name = "id"
-    type = "string"
+    type = "S"
   }
 
   attribute {
     name = "supplierId"
-    type = "string"
+    type = "S"
   }
 
   point_in_time_recovery {

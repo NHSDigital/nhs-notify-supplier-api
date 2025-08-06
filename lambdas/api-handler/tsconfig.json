@@ -1,4 +1,10 @@
 {
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "noUncheckedIndexedAccess": true,
+    "strict": true,
+    "strictNullChecks": true
+  },
   "extends": "@tsconfig/node22/tsconfig.json",
   "include": [
     "src/**/*",
