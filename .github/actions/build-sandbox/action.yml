@@ -47,12 +47,23 @@ runs:
         envsubst < ./.github/proxygen-settings.yaml > ${HOME}/.proxygen/settings.yaml
         envsubst < ./.github/proxygen-settings.yaml | cat
 
+    - name: Setup Proxy Name and target
+      shell: bash
+      run: |
+        if [ -z $PR_NUMBER ]
+        then
+          echo "SANDBOX_TAG=latest" >> $GITHUB_ENV
+        else
+          echo "SANDBOX_TAG=pr$PR_NUMBER" >> $GITHUB_ENV
+        fi
+
     - name: Build and publish sandbox Docker image
       shell: bash
       working-directory: ./sandbox
       run: |
           proxygen docker get-login | bash
-          docker build -t nhs-notify-supplier:latest .
-          IMAGE_ID=$(docker images -q nhs-notify-supplier:latest)
-          docker tag $IMAGE_ID 958002497996.dkr.ecr.eu-west-2.amazonaws.com/nhs-notify-supplier:latest
-          docker push 958002497996.dkr.ecr.eu-west-2.amazonaws.com/nhs-notify-supplier:latest
+          docker build -t nhs-notify-supplier:$SANDBOX_TAG .
+          DOCKER_REGISTRY=$(proxygen docker registry | tail -1)
+          IMAGE_ID=$(docker images -q nhs-notify-supplier:$SANDBOX_TAG)
+          docker tag $IMAGE_ID $DOCKER_REGISTRY/nhs-notify-supplier:$SANDBOX_TAG
+          docker push $DOCKER_REGISTRY/nhs-notify-supplier:$SANDBOX_TAG

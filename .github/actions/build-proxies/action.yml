@@ -27,9 +27,11 @@ runs:
         then
           echo "INSTANCE=$PROXYGEN_API_NAME" >> $GITHUB_ENV
           echo "TARGET=https://suppliers.dev.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
+          echo "SANDBOX_TAG=latest" >> $GITHUB_ENV
         else
           echo "TARGET=https://pr$PR_NUMBER.suppliers.dev.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
           echo "INSTANCE=$PROXYGEN_API_NAME-PR-$PR_NUMBER" >> $GITHUB_ENV
+          echo "SANDBOX_TAG=pr$PR_NUMBER" >> $GITHUB_ENV
         fi
 
 
@@ -70,6 +72,11 @@ runs:
       shell: bash
       run: |
         make build-json-oas-spec APIM_ENV=sandbox
+
+    - name: Set docker tag
+      shell: bash
+      run: |
+        jq --arg newtag "$SANDBOX_TAG" '.["x-nhsd-apim"].target.containers[0].image.tag = $newtag' build/notify-supplier.json > build/notify-supplier_target.json && mv build/notify-supplier_target.json build/notify-supplier.json
 
     - name: Deploy to Internal Dev Sandbox
       shell: bash
