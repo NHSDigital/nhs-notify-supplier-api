@@ -4,7 +4,7 @@ containers:
   - name: nhs-notify-supplier
     image:
       name: nhs-notify-supplier
-      tag: latest
+      tag: pr99
     environment:
       LOG_LEVEL: info
       NODE_ENV: development

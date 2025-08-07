@@ -19,19 +19,6 @@ runs:
       run: npm ci
       shell: bash
 
-    - name: Build sandbox oas
-      working-directory: .
-      shell: bash
-      run: |
-        make build-json-oas-spec APIM_ENV=sandbox
-
-    - name: Remove sandbox security
-      working-directory: ./build
-      shell: bash
-      run: |
-        jq '.security = []' notify-supplier.json > tmp.json && mv tmp.json notify-supplier.json
-
-
     - name: Install Proxygen client
       shell: bash
       run: |
@@ -47,7 +34,7 @@ runs:
         envsubst < ./.github/proxygen-settings.yaml > ${HOME}/.proxygen/settings.yaml
         envsubst < ./.github/proxygen-settings.yaml | cat
 
-    - name: Setup Proxy Name and target
+    - name: Setup Sandbox tag
       shell: bash
       run: |
         if [ -z $PR_NUMBER ]
