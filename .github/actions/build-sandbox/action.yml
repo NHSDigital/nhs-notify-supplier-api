@@ -1,5 +1,5 @@
-name: "Build Proxies"
-description: "Build Proxies"
+name: "Build Sandbox"
+description: "Build Sandbox"
 inputs:
   version:
     description: "Version number"
@@ -23,7 +23,7 @@ runs:
       working-directory: .
       shell: bash
       run: |
-        make construct-spec APIM_ENV=sandbox
+        make build-json-oas-spec APIM_ENV=sandbox
 
     - name: Remove sandbox security
       working-directory: ./build

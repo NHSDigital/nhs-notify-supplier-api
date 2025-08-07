@@ -12,7 +12,8 @@ servers:
   url: http://127.0.0.1:3000
 - description: Public sandbox
   url: https://sandbox-server.nhs.uk/nhs-notify-supplier-api
-security: []
+security:
+- app-level0: []
 tags:
 - description: ""
   name: letter
@@ -1235,7 +1236,7 @@ components:
       name: apikey
       type: apiKey
 x-nhsd-apim:
-  temporary: false
+  temporary: true
   monitoring: false
   access: []
   target:
@@ -1248,4 +1249,4 @@ x-nhsd-apim:
         tag: latest
       environment:
         LOG_LEVEL: info
-        NODE_ENV: production
+        NODE_ENV: development

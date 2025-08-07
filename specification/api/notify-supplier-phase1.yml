@@ -53,15 +53,6 @@ paths:
       $ref: 'components/endpoints/getDataId.yml'
     head:
       $ref: 'components/endpoints/headDataId.yml'
-  '/_status':
-      get:
-        summary: Health check endpoint
-        description: Returns 200 OK if the service is up.
-        operationId: getStatus
-        responses:
-          '200':
-            description: Service is healthy
-
 components:
   securitySchemes:
     nhs-login-p0:

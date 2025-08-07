@@ -19,12 +19,6 @@ runs:
       run: npm ci
       shell: bash
 
-    - name: Build oas
-      working-directory: .
-      shell: bash
-      run: |
-        make publish-oas
-
     - name: Setup Proxy Name and target
       shell: bash
       run: |
@@ -58,8 +52,8 @@ runs:
       working-directory: .
       shell: bash
       run: |
-        make construct-spec APIM_ENV=dev
-        
+        make build-json-oas-spec APIM_ENV=dev
+
     - name: Set target
       shell: bash
       run: |
@@ -75,7 +69,7 @@ runs:
       working-directory: .
       shell: bash
       run: |
-        make construct-spec APIM_ENV=sandbox
+        make build-json-oas-spec APIM_ENV=sandbox
 
     - name: Deploy to Internal Dev Sandbox
       shell: bash

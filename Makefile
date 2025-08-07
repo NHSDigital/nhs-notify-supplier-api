@@ -48,13 +48,25 @@ construct-spec: guard-APIM_ENV
 	cp access-$(APIM_ENV).yml access.yml
 	cp target-$(APIM_ENV).yml target.yml
 	cd -
+
+build-json-oas-spec: guard-APIM_ENV
+	$(MAKE) construct-spec APIM_ENV=$$APIM_ENV
 	$(MAKE) publish-oas
+
+build-yml-oas-spec: guard-APIM_ENV
+	$(MAKE) construct-spec APIM_ENV=$$APIM_ENV
+	$(MAKE) bundle-oas
 
 serve-oas:
 	npm run serve-oas
 
 bundle-oas:
 	npm run bundle-oas
+
+generate-sandbox:
+	$(MAKE) build-json-oas-spec APIM_ENV=sandbox
+	jq --slurpfile status sandbox/HealthcheckEndpoint.json '.paths += $status[0]' build/notify-supplier.json > tmp.json && mv tmp.json build/notify-supplier.json
+	npm run generate-sandbox
 
 serve-swagger:
 	npm run serve-swagger-docs
