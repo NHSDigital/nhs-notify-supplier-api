@@ -217,4 +217,42 @@ describe('LetterRepository', () => {
     expect(logStream.logs).toContainEqual(expect.stringMatching(/.*Invalid letter data:.*/));
     expect(logStream.logs).toContainEqual(expect.stringMatching(/.*specificationId.*Invalid input: expected string.*/));
   });
+
+  test('should return all letter ids for a supplier', async () => {
+    await letterRepository.putLetter(createLetter('supplier1', 'letter1'));
+    await letterRepository.putLetter(createLetter('supplier1', 'letter2'));
+    await letterRepository.putLetter(createLetter('supplier1', 'letter3'));
+    await letterRepository.putLetter(createLetter('supplier2', 'letter4'));
+    await letterRepository.putLetter(createLetter('supplier2', 'letter5'));
+
+    const letters = await letterRepository.getLetterIdsBySupplier('supplier1');
+    expect(letters).toEqual(['letter1', 'letter2', 'letter3']);
+  });
+
+  test('should return empty if no letters exist for a supplier', async () => {
+    await letterRepository.putLetter(createLetter('supplier1', 'letter1'));
+    await letterRepository.putLetter(createLetter('supplier1', 'letter2'));
+
+    const letters = await letterRepository.getLetterIdsBySupplier('supplier2');
+    expect(letters).toEqual([]);
+  });
+
+  test('should return empty if no letters exist for a supplier', async () => {
+    await letterRepository.putLetter(createLetter('supplier1', 'letter1'));
+    await letterRepository.putLetter(createLetter('supplier1', 'letter2'));
+
+    const letters = await letterRepository.getLetterIdsBySupplier('supplier2');
+    expect(letters).toEqual([]);
+  });
+
+  test('should return empty if query result Items is null', async () => {
+    await letterRepository.putLetter(createLetter('supplier1', 'letter1'));
+
+    const mockSend = jest.fn().mockResolvedValue({ Items: null });
+    const mockDdbClient = { send: mockSend } as any;
+    const repo = new LetterRepository(mockDdbClient, { debug: jest.fn() } as any, { lettersTableName: 'letters', ttlHours: 1 });
+
+    const result = await repo.getLetterIdsBySupplier('supplier1');
+    expect(result).toEqual([]);
+  });
 });

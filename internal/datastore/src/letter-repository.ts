@@ -129,4 +129,16 @@ export class LetterRepository {
     this.log.debug(`Updated letter ${letterId} to status ${status}`);
     return LetterSchema.parse(result.Attributes);
   }
+
+  async getLetterIdsBySupplier(supplierId: string): Promise<string[]> {
+    const result = await this.ddbClient.send(new QueryCommand({
+      TableName: this.config.lettersTableName,
+      KeyConditionExpression: 'supplierId = :supplierId',
+      ExpressionAttributeValues: {
+        ':supplierId': supplierId
+      },
+      ProjectionExpression: 'id'
+    }));
+    return (result.Items ?? []).map(item => item.id);
+  }
 }

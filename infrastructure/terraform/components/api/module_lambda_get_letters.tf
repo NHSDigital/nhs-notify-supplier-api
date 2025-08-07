@@ -36,7 +36,8 @@ module "get_letters" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = {
-    LETTERS_TABLE_NAME = aws_dynamodb_table.letters.name
+    LETTERS_TABLE_NAME = aws_dynamodb_table.letters.name,
+    LETTER_TTL_HOURS = 24
   }
 }
 
