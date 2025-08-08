@@ -16,7 +16,6 @@ repos:
         exclude: |
             (?x)^(
                 sdk/.* |
-                sandbox/.eslintrc.json |
                 someotherdir/.* |
                 src/server/host/Properties/launchSettings.json
             )$
