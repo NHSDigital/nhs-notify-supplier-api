@@ -43,11 +43,19 @@ lint-oas:
 publish-oas:
 	npm run publish-oas
 
+set-target: guard-APIM_ENV
+	@ TARGET=target-$$APIM_ENV.yml \
+	envsubst '$${TARGET}' \
+	< specification/api/components/x-nhsd-apim/target-template.yml > specification/api/components/x-nhsd-apim/target.yml
+
+set-access: guard-APIM_ENV
+	@ ACCESS=access-$$APIM_ENV.yml \
+	envsubst '$${ACCESS}' \
+	< specification/api/components/x-nhsd-apim/access-template.yml > specification/api/components/x-nhsd-apim/access.yml
+
 construct-spec: guard-APIM_ENV
-	cd specification/api/components/x-nhsd-apim
-	cp access-$(APIM_ENV).yml access.yml
-	cp target-$(APIM_ENV).yml target.yml
-	cd -
+	$(MAKE) set-target APIM_ENV=$$APIM_ENV
+	$(MAKE) set-access APIM_ENV=$$APIM_ENV
 
 build-json-oas-spec: guard-APIM_ENV
 	$(MAKE) construct-spec APIM_ENV=$$APIM_ENV
