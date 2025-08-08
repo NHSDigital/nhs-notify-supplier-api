@@ -1,6 +1,6 @@
 summary: Retrieve the status of a letter
 description: Get details the status of a letter.
-operationId: get-letter-status
+operationId: getLetterStatus
 responses:
   "200":
     $ref: "../responses/getLetter200.yml"

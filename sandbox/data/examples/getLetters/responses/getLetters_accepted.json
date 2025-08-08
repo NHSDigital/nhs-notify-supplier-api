@@ -1,0 +1,13 @@
+{
+  "data": [
+    {
+      "attributes": {
+        "requestedProductionStatus": "ACTIVE",
+        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+        "status": "ACCEPTED"
+      },
+      "id": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+      "type": "Letter"
+    }
+  ]
+}

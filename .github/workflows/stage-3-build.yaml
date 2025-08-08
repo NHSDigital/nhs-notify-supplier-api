@@ -96,18 +96,28 @@ jobs:
       PROXYGEN_API_NAME: nhs-notify-supplier
       PR_NUMBER: ${{ inputs.pr_number }}
     steps:
-      - name: Verify environment variables
-        shell: bash
-        run: |
-          echo "PROXYGEN_PRIVATE_KEY is set: [${{ secrets.PROXYGEN_ENCODED_NOTIFY_SUPPLIER_PRIVATE_KEY != '' }}]"
-          echo "PROXYGEN_KID: $PROXYGEN_KID"
-          echo "PROXYGEN_CLIENT_ID: $PROXYGEN_CLIENT_ID"
-          echo "PROXYGEN_API_NAME: $PROXYGEN_API_NAME"
-          echo "PR_NUMBER: $PR_NUMBER"
       - name: "Checkout code"
         uses: actions/checkout@v4
       - name: "Build proxies"
         uses: ./.github/actions/build-proxies
+        with:
+          version: "${{ inputs.version }}"
+
+  artefact-sandbox:
+    name: "Build sandbox"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PROXYGEN_PRIVATE_KEY: ${{ secrets.PROXYGEN_ENCODED_NOTIFY_SUPPLIER_PRIVATE_KEY }}
+      PROXYGEN_KID: notify-supplier-key-1
+      PROXYGEN_CLIENT_ID: nhs-notify-supplier-client
+      PROXYGEN_API_NAME: nhs-notify-supplier
+      PR_NUMBER: ${{ inputs.pr_number }}
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+      - name: "Build sandbox"
+        uses: ./.github/actions/build-sandbox
         with:
           version: "${{ inputs.version }}"
 

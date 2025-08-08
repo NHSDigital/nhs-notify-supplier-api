@@ -1,5 +1,5 @@
 summary: Create a new MI record
-operationId: create-mi
+operationId: createMI
 tags:
   - mi
 requestBody:
