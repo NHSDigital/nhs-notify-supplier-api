@@ -1,6 +1,14 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
+import { createLetterRepository } from '../infrastructure/letter-repo-factory';
+import { patchLetterStatus } from '../services/letter-operations';
+import { LetterApiDocument } from '../contracts/letter-api';
+import { NotFoundError, ValidationError } from '../errors';
 
+const letterRepo = createLetterRepository();
 export const patchLetters: APIGatewayProxyHandler = async (event) => {
+
+    // TODO CCM-11188: default to supplier1 for now
+  const supplierId = event.headers['nhsd-apim-apikey'] ?? "supplier1";
 
   const pathParameters = event.pathParameters || {};
   const letterId = pathParameters["id"];
@@ -11,37 +19,41 @@ export const patchLetters: APIGatewayProxyHandler = async (event) => {
     {
       return {
         statusCode: 400,
-        body: "Bad Request"
+        body: "Bad Request: Missing request body"
       }
     }
 
-    const body: PatchLetterRequestBody = JSON.parse(event.body);
+    const patchLetterRequest: LetterApiDocument = JSON.parse(event.body);
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify(body, null, 2)
-    };
+    try {
+
+      // TODO CCM-11188: Is it worth retrieving the letter first to check if the status is different?
+
+      const result = await patchLetterStatus(patchLetterRequest.data, letterId, supplierId, letterRepo);
+
+      return {
+        statusCode: 200,
+        body: JSON.stringify(result, null, 2)
+      };
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        return {
+          statusCode: 400,
+          body: error.message
+        };
+      } else if (error instanceof NotFoundError) {
+        return {
+          statusCode: 404,
+          body: error.message
+        };
+      }
+      throw error;
+    }
   }
 
+  // TODO CCM-11188: Is this reachable with the API GW?
   return {
     statusCode: 404,
-    body: 'Not Found',
+    body: 'Not Found: The requested resource does not exist',
   };
 };
-
-export interface LetterAttributes {
-  reasonCode: number;
-  reasonText: string;
-  requestedProductionStatus: 'ACTIVE' | 'HOLD' | 'CANCEL';
-  status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'PRINTED' | 'ENCLOSED' | 'CANCELLED' | 'DISPATCHED' | 'FAILED' | 'RETURNED' | 'DESTROYED' | 'FORWARDED';
-}
-
-export interface LetterData {
-  id: string;
-  type: 'Letter';
-  attributes: LetterAttributes;
-}
-
-export interface PatchLetterRequestBody {
-  data: LetterData;
-}

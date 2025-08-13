@@ -1,24 +1,14 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { LetterRepository } from '../../../../internal/datastore'
-import pino from 'pino';
-import { getLetterIdsForSupplier } from '../services/get-letter-ids';
+import { getLetterIdsForSupplier } from '../services/letter-operations';
+import { createLetterRepository } from '../infrastructure/letter-repo-factory';
 
-const ddbClient = new DynamoDBClient({});
-const docClient = DynamoDBDocumentClient.from(ddbClient);
-const log = pino();
-const config = {
-  lettersTableName: process.env.LETTERS_TABLE_NAME!,
-  ttlHours: parseInt(process.env.LETTER_TTL_HOURS!),
-};
-
-const letterRepo = new LetterRepository(docClient, log, config);
+const letterRepo = createLetterRepository();
 
 export const getLetters: APIGatewayProxyHandler = async (event) => {
 
   if (event.path === '/letters') {
 
+    // default to supplier1 for now
     const supplierId = event.headers['nhsd-apim-apikey'] ?? "supplier1";
 
     const letterIds = await getLetterIdsForSupplier(supplierId, letterRepo);

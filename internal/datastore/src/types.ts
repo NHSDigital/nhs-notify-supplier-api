@@ -13,8 +13,9 @@ export const SupplierSchema = z.object({
 export type Supplier = z.infer<typeof SupplierSchema>;
 
 export const LetterStatus = z.enum([
-  'PENDING', 'ACCEPTED', 'DISPATCHED', 'FAILED',
-  'REJECTED', 'DELIVERED', 'CANCELLED']);
+  'PENDING', 'ACCEPTED', 'REJECTED', 'PRINTED',
+  'ENCLOSED', 'CANCELLED', 'DISPATCHED', 'FAILED',
+  'RETURNED', 'DESTROYED', 'FORWARDED']);
 
 export const LetterSchema = z.object({
   id: z.string(),

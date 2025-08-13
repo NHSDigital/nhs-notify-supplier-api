@@ -2,9 +2,9 @@ import { getLetters } from '../../index';
 import type { Context } from 'aws-lambda';
 import { mockDeep } from 'jest-mock-extended';
 import { makeApiGwEvent } from './utils/test-utils';
-import * as letterService from '../../services/get-letter-ids'; // <- what we're mocking
+import * as letterService from '../../services/letter-operations';
 
-jest.mock('../../services/get-letter-ids');
+jest.mock('../../services/letter-operations');
 
 describe('API Lambda handler', () => {
 
