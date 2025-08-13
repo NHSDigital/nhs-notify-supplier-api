@@ -19,12 +19,6 @@ runs:
       run: npm ci
       shell: bash
 
-    - name: Build oas
-      working-directory: .
-      shell: bash
-      run: |
-        make publish-oas
-
     - name: Setup Proxy Name and target
       shell: bash
       run: |
@@ -33,9 +27,11 @@ runs:
         then
           echo "INSTANCE=$PROXYGEN_API_NAME" >> $GITHUB_ENV
           echo "TARGET=https://suppliers.dev.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
+          echo "SANDBOX_TAG=latest" >> $GITHUB_ENV
         else
           echo "TARGET=https://pr$PR_NUMBER.suppliers.dev.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
           echo "INSTANCE=$PROXYGEN_API_NAME-PR-$PR_NUMBER" >> $GITHUB_ENV
+          echo "SANDBOX_TAG=pr$PR_NUMBER" >> $GITHUB_ENV
         fi
 
 
@@ -54,6 +50,12 @@ runs:
         envsubst < ./.github/proxygen-settings.yaml > ${HOME}/.proxygen/settings.yaml
         envsubst < ./.github/proxygen-settings.yaml | cat
 
+    - name: Build internal dev oas
+      working-directory: .
+      shell: bash
+      run: |
+        make build-json-oas-spec APIM_ENV=dev
+
     - name: Set target
       shell: bash
       run: |
@@ -64,6 +66,17 @@ runs:
       shell: bash
       run: |
         proxygen instance deploy internal-dev $INSTANCE build/notify-supplier.json --no-confirm
+
+    - name: Build sandbox oas
+      working-directory: .
+      shell: bash
+      run: |
+        make build-json-oas-spec APIM_ENV=sandbox
+
+    - name: Set docker tag
+      shell: bash
+      run: |
+        jq --arg newtag "$SANDBOX_TAG" '.["x-nhsd-apim"].target.containers[0].image.tag = $newtag' build/notify-supplier.json > build/notify-supplier_target.json && mv build/notify-supplier_target.json build/notify-supplier.json
 
     - name: Deploy to Internal Dev Sandbox
       shell: bash

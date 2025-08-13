@@ -1,5 +1,5 @@
 summary: Update the status of multiple letters
-operationId: postLetter
+operationId: postLetters
 tags:
   - letter
 requestBody:

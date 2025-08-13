@@ -4,4 +4,4 @@ tags:
 responses:
   200:
     description: OK
-operationId: head-data-id
+operationId: headDataId

@@ -41,6 +41,7 @@
         "takumii.markdowntable",
         "tamasfe.even-better-toml",
         "tomoki1207.pdf",
+        "vscjava.vscode-java-pack",
         "vscode-icons-team.vscode-icons",
         "vstirbu.vscode-mermaid-preview",
         "wayou.vscode-todo-highlight",
@@ -89,6 +90,9 @@
       "version": "8.0"
     },
     "ghcr.io/devcontainers/features/go:1": {},
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "17"
+    },
     "ghcr.io/devcontainers/features/node:1": {},
     "ghcr.io/devcontainers/features/python:1": {},
     "ghcr.io/devcontainers/features/ruby:1": {}

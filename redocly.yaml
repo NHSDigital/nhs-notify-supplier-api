@@ -1,0 +1,4 @@
+resolve:
+  http:
+    headers: []  # OK to leave empty
+  external: false  # ← ensures remote URLs are not dereferenced
