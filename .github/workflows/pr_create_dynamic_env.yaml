@@ -45,7 +45,7 @@ jobs:
               }
             }')
 
-          curl --fail -L -s \
+          curl --fail -L \
             -X POST \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.PR_TRIGGER_PAT }}" \
@@ -91,7 +91,7 @@ jobs:
           # Wait for workflow completion
           while true; do
             sleep 10
-            response=$(curl -s -L \
+            response=$(curl -L \
               -H "Authorization: Bearer ${{ secrets.PR_TRIGGER_PAT }}" \
               -H "Accept: application/vnd.github+json" \
               $workflow_run_url)
