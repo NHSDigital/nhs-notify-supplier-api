@@ -1,0 +1,14 @@
+{
+  "/_status": {
+    "get": {
+      "description": "Returns 200 OK if the service is up.",
+      "operationId": "getStatus",
+      "responses": {
+        "200": {
+          "description": "Service is healthy"
+        }
+      },
+      "summary": "Health check endpoint"
+    }
+  }
+}
