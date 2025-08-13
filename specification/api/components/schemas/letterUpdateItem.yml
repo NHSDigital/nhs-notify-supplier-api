@@ -10,6 +10,10 @@ properties:
   attributes:
     type: object
     properties:
+      specificationId:
+        type: string
+        examples:
+          - 2WL5eYSWGzCHlGmzNxuqVusPxDg
       status:
         $ref: "./letterStatus.yml"
       requestedProductionStatus:

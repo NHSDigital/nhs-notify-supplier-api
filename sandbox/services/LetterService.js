@@ -38,10 +38,10 @@ const getLetterStatus = ({ xRequestID, id, xCorrelationID }) => new Promise(
 * xCorrelationID String An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header. (optional)
 * returns listLetters_200_response
 * */
-const listLetters = ({ xRequestID, status, xCorrelationID }) => new Promise(
+const listLetters = ({ xRequestID, status, xCorrelationID, page }) => new Promise(
   async (resolve, reject) => {
     try {
-      const fileData = await ResponseProvider.loadByStatus(status);
+      const fileData = await ResponseProvider.getLettersResponse(status, page);
 
       resolve(Service.successResponse({
         xRequestID,
@@ -66,14 +66,16 @@ const listLetters = ({ xRequestID, status, xCorrelationID }) => new Promise(
 * xCorrelationID String An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header. (optional)
 * returns getLetterStatus_200_response
 * */
-const patchLetters = ({ xRequestID, id, patchLettersRequest, xCorrelationID }) => new Promise(
+const patchLetters = ({ xRequestID, id, body, xCorrelationID }) => new Promise(
   async (resolve, reject) => {
+
     try {
+      const fileData = await ResponseProvider.patchLettersResponse(body);
+
       resolve(Service.successResponse({
         xRequestID,
-        id,
-        patchLettersRequest,
         xCorrelationID,
+        data: fileData,
       }));
     } catch (e) {
       reject(Service.rejectResponse(

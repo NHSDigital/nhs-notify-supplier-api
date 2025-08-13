@@ -66,7 +66,7 @@
   ],
   "links": {
     "last": "https://api.service.nhs.uk/nhs-notify-supplier/letters?status=PENDING&page=10",
-    "next": "https://api.service.nhs.uk/nhs-notify-supplier/letters?status=PENDING&page=2",
-    "self": "https://api.service.nhs.uk/nhs-notify-supplier/letters?status=PENDING&page=1"
+    "prev": "https://api.service.nhs.uk/nhs-notify-supplier/letters?status=PENDING&page=9",
+    "self": "https://api.service.nhs.uk/nhs-notify-supplier/letters?status=PENDING&page=10"
   }
 }

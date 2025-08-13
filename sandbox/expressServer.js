@@ -11,6 +11,8 @@ const bodyParser = require('body-parser');
 const OpenApiValidator = require('express-openapi-validator');
 const logger = require('./logger');
 const config = require('./config');
+const getRawBody = require('raw-body');
+const contentType = require('content-type');
 
 class ExpressServer {
   constructor(port, openApiYaml) {
@@ -29,8 +31,11 @@ class ExpressServer {
     // this.setupAllowedMedia();
     this.app.use(cors());
     this.app.use(bodyParser.json({ limit: '14MB' }));
-    this.app.use(express.json());
-    this.app.use(express.urlencoded({ extended: false }));
+    this.app.use(express.json({
+      type: ['application/json', 'application/vnd.api+json']
+    }));
+    this.app.use(express.urlencoded({ extended: true }));
+
     this.app.use(cookieParser());
     // Simple test to see that the server is up and responding
     this.app.get('/hello', (req, res) => res.send(`Hello World. path: ${this.openApiPath}`));
@@ -53,6 +58,21 @@ class ExpressServer {
         fileUploader: { dest: config.FILE_UPLOAD_PATH },
       }),
     );
+    this.app.use((err, req, res, next) => {
+      // Log full error
+      console.error('OpenAPI validation error:', err);
+
+      // Handle OpenAPI validation errors
+      if (err.status && err.errors) {
+        res.status(err.status).json({
+          message: err.message,
+          errors: err.errors,
+        });
+      } else {
+        // Fallback error handler
+        next(err);
+      }
+    });
   }
 
   launch() {
