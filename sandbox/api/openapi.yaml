@@ -69,6 +69,18 @@ paths:
           - FORWARDED
           type: string
         style: form
+      - description: |-
+          The ordinal number of the page of results to be retrieved. If omitted, the
+          first page of results will be returned. Use the links section in the response
+          body to determine whether any further pages of results exist.
+        explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          example: 1
+          type: number
+        style: form
       responses:
         "200":
           content:
@@ -197,7 +209,7 @@ paths:
                       id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
                       type: Letter
               schema:
-                $ref: "#/components/schemas/listLetters_200_response"
+                $ref: "#/components/schemas/postLetters_200_response"
           description: Letter Resources Updated successfully
         "404":
           content:
@@ -972,6 +984,38 @@ paths:
       x-eov-operation-handler: controllers/DefaultController
 components:
   schemas:
+    listLetters_200_response_links:
+      additionalProperties: false
+      description: Contains links to other data pages
+      properties:
+        last:
+          description: URI of final page of data
+          example: https://dev.api.service.nhs.uk/nhs-notify-supplier/letters?status=PENDING&page=10
+          format: uri
+          type: string
+        next:
+          description: URI of next page of data
+          example: https://dev.api.service.nhs.uk/nhs-notify-supplier/letters?status=PENDING&page=5
+          format: uri
+          type: string
+        prev:
+          description: URI of prev page of data
+          example: https://dev.api.service.nhs.uk/nhs-notify-supplier/letters?status=PENDING&page=7
+          format: uri
+          type: string
+        self:
+          description: URI of current page of data
+          example: https://dev.api.service.nhs.uk/nhs-notify-supplier/letters?status=PENDING&page=6
+          format: uri
+          type: string
+      type: object
+    postLetters_200_response:
+      properties:
+        data:
+          items:
+            $ref: "#/components/schemas/listLetters_200_response_data_inner"
+          type: array
+      type: object
     createMI_request_data:
       properties:
         type:
@@ -1086,6 +1130,8 @@ components:
           items:
             $ref: "#/components/schemas/listLetters_200_response_data_inner"
           type: array
+        links:
+          $ref: "#/components/schemas/listLetters_200_response_links"
       type: object
     getLetterStatus_200_response:
       properties:
@@ -1094,6 +1140,8 @@ components:
       type: object
     postLetters_request_data_inner_attributes:
       properties:
+        specificationId:
+          type: string
         status:
           default: PENDING
           description: The supplier status of an individual letter

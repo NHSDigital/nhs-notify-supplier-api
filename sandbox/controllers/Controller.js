@@ -61,7 +61,7 @@ class Controller {
     if (codeGenDefinedBodyName !== undefined) {
       return codeGenDefinedBodyName;
     }
-    const refObjectPath = request.openapi.schema.requestBody.content['application/json'].schema.$ref;
+    const refObjectPath = request.openapi.schema.requestBody.content['application/vnd.api+json'].schema.$ref;
     if (refObjectPath !== undefined && refObjectPath.length > 0) {
       return (refObjectPath.substr(refObjectPath.lastIndexOf('/') + 1));
     }
@@ -72,7 +72,7 @@ class Controller {
     const requestParams = {};
     if (request.openapi.schema.requestBody !== null) {
       const { content } = request.openapi.schema.requestBody;
-      if (content['application/json'] !== undefined) {
+      if (content['application/vnd.api+json'] !== undefined) {
         const requestBodyName = camelCase(this.getRequestBodyName(request));
         requestParams[requestBodyName] = request.body;
       } else if (content['multipart/form-data'] !== undefined) {

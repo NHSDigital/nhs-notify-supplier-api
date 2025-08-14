@@ -74,7 +74,7 @@ bundle-oas:
 
 generate-sandbox:
 	$(MAKE) build-json-oas-spec APIM_ENV=sandbox
-	jq --slurpfile status sandbox/HealthcheckEndpoint.json '.paths += $status[0]' build/notify-supplier.json > tmp.json && mv tmp.json build/notify-supplier.json
+	jq --slurpfile status sandbox/HealthcheckEndpoint.json '.paths += $$status[0]' build/notify-supplier.json > tmp.json && mv tmp.json build/notify-supplier.json
 	npm run generate-sandbox
 
 serve-swagger:

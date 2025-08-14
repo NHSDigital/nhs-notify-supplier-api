@@ -4,6 +4,7 @@ tags:
   - letter
 parameters:
   - $ref: "../parameters/letterStatus.yml"
+  - $ref: "../parameters/pageNumber.yml"
 description: The key use of this endpoint is to query letters which are ready to be printed
 responses:
   '200':
