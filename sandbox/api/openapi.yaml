@@ -12,8 +12,6 @@ servers:
   url: http://127.0.0.1:3000
 - description: Public sandbox
   url: https://sandbox-server.nhs.uk/nhs-notify-supplier-api
-security:
-- app-level0: []
 tags:
 - description: ""
   name: letter
