@@ -15,4 +15,4 @@ export interface LetterApiDocument {
   data: LetterApiResource;
 }
 
-export type LetterApiStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'PRINTED' | 'ENCLOSED' | 'CANCELLED' | 'DISPATCHED' | 'FAILED' | 'RETURNED' | 'DESTROYED' | 'FORWARDED';
+export type LetterApiStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'PRINTED' | 'ENCLOSED' | 'CANCELLED' | 'DISPATCHED' | 'FAILED' | 'RETURNED' | 'DESTROYED' | 'FORWARDED' | 'DELIVERED';
