@@ -1,10 +1,23 @@
 import { getLetters } from '../../index';
 import type { Context } from 'aws-lambda';
 import { mockDeep } from 'jest-mock-extended';
+import { makeApiGwEvent } from './utils/test-utils';
+import * as letterService from '../../services/letter-operations';
+
+jest.mock('../../services/letter-operations');
 
 describe('API Lambda handler', () => {
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
   it('returns 200 OK with basic paginated resources', async () => {
-    const event = { path: '/letters' };
+
+    const mockedGetLetterIds = letterService.getLetterIdsForSupplier as jest.Mock;
+    mockedGetLetterIds.mockResolvedValue(['l1', 'l2', 'l3']);
+
+    const event = makeApiGwEvent({path: '/letters'});
     const context = mockDeep<Context>();
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
@@ -31,7 +44,7 @@ describe('API Lambda handler', () => {
   });
 
   it('returns 404 Not Found for an unknown path', async () => {
-    const event = { path: '/unknown' };
+    const event = makeApiGwEvent({ path: '/unknown' });
     const context = mockDeep<Context>();
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
