@@ -3,7 +3,7 @@
     "serve": "^14.2.4"
   },
   "devDependencies": {
-    "@openapitools/openapi-generator-cli": "^2.21.4",
+    "@openapitools/openapi-generator-cli": "^2.22.0",
     "@redocly/cli": "^1.34.5",
     "@tsconfig/node22": "^22.0.2",
     "@types/jest": "^29.5.14",
