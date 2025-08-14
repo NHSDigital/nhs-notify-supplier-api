@@ -62,13 +62,9 @@ data "aws_iam_policy_document" "get_letters_lambda" {
 
     actions = [
       "dynamodb:BatchGetItem",
-      "dynamodb:BatchWriteItem",
-      "dynamodb:DeleteItem",
       "dynamodb:GetItem",
-      "dynamodb:PutItem",
       "dynamodb:Query",
       "dynamodb:Scan",
-      "dynamodb:UpdateItem",
     ]
 
     resources = [

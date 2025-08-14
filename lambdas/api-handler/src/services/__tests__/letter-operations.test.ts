@@ -1,7 +1,6 @@
-import { Letter, LetterStatus } from '../../../../../internal/datastore/src';
+import { Letter } from '../../../../../internal/datastore/src';
 import { LetterApiResource, LetterApiStatus } from '../../contracts/letter-api';
 import { getLetterIdsForSupplier, patchLetterStatus } from '../letter-operations';
-import { z } from 'zod';
 
 function makeLetterApiResource(id: string, status: LetterApiStatus) : LetterApiResource {
   return {
@@ -16,7 +15,7 @@ function makeLetterApiResource(id: string, status: LetterApiStatus) : LetterApiR
   };
 }
 
-function makeLetter(id: string, status: z.infer<typeof LetterStatus>) : Letter {
+function makeLetter(id: string, status: Letter['status']) : Letter {
   return {
       id,
       status,
