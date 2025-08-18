@@ -54,7 +54,7 @@ runs:
       working-directory: .
       shell: bash
       run: |
-        make build-json-oas-spec APIM_ENV=dev
+        make build-json-oas-spec APIM_ENV=internal-dev
 
     - name: Set target
       shell: bash
