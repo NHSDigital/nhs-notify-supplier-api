@@ -70,6 +70,7 @@
   },
   "workspaces": [
     "lambdas/api-handler",
-    "lambdas/authorizer"
+    "lambdas/authorizer",
+    "internal/datastore"
   ]
 }

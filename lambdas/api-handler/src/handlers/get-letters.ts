@@ -1,12 +1,19 @@
-import { Handler, APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { APIGatewayProxyHandler } from 'aws-lambda';
+import { getLetterIdsForSupplier } from '../services/letter-operations';
+import { createLetterRepository } from '../infrastructure/letter-repo-factory';
 
-const storedLetters: string[] = ["l1", "l2", "l3"];
+const letterRepo = createLetterRepository();
 
-export const getLetters: Handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const getLetters: APIGatewayProxyHandler = async (event) => {
 
   if (event.path === '/letters') {
 
-    const response = createGetLettersResponse(event.path, storedLetters);
+    // default to supplier1 for now
+    const supplierId = event.headers['nhsd-apim-apikey'] ?? "supplier1";
+
+    const letterIds = await getLetterIdsForSupplier(supplierId, letterRepo);
+
+    const response = createGetLettersResponse(event.path, letterIds);
 
     return {
       statusCode: 200,
