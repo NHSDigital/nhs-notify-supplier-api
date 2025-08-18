@@ -37,7 +37,7 @@ variable "group" {
 # then to the environment from where all other variables come.
 variable "component" {
   type        = string
-  description = "The variable encapsulating the name of this component"
+  description = "The variable encapsulating the name of this component blah"
   default     = "supapi"
 }
 
