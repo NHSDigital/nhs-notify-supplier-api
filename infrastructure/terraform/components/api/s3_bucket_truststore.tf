@@ -48,15 +48,15 @@ resource "aws_s3_bucket_logging" "truststore" {
   bucket = aws_s3_bucket.truststore.id
 
   target_bucket = var.truststore_s3_bucket_config.bucket_logs_bucket_name
-  target_prefix = "truststore/${aws_s3_bucket.truststore[0].bucket}/"
+  target_prefix = "truststore/${aws_s3_bucket.truststore.bucket}/"
 }
 
-# If Environment is to be Manually configured, need to create a placeholder truststore file for mtls
+# In manually configured (e.g. dev main, nonprod main, prod main) add lifecycle policy to permit manual management of cert
 resource "aws_s3_object" "placeholder_truststore" {
   count   = var.manually_configure_mtls_truststore ? 1 : 0
   bucket  = aws_s3_bucket.truststore.bucket
   key     = "truststore.pem"
-  content = tls_self_signed_cert.placeholder_cert.cert_pem
+  content = module.supplier_ssl[0].cacert_pem
 
   depends_on = [
     aws_s3_bucket_versioning.truststore
@@ -69,14 +69,13 @@ resource "aws_s3_object" "placeholder_truststore" {
   }
 }
 
-# If env is not manually configured, use the certs generated from the ssl module
-# Having a duplicate resource here as lifcycle rules can't be dynamic or variable
-# We don't want to ignore content in nonprod, but we do for prod as we will manually update certs and not via ssl module
+# In non-manually configured env (e.g. PR) exclude lifecycle policy so resources are managed
+# Requires duplicate block as lifecycle policies cannot be dynamic
 resource "aws_s3_object" "placeholder_truststore_nonprod" {
   count   = var.manually_configure_mtls_truststore ? 0 : 1
   bucket  = aws_s3_bucket.truststore.bucket
   key     = "truststore.pem"
-  content = module.supplier_ssl.cacert_pem
+  content = module.supplier_ssl[0].cacert_pem
 
   depends_on = [
     aws_s3_bucket_versioning.truststore,
