@@ -3,6 +3,7 @@ module "supplier_ssl" {
 
   count = var.manually_configure_mtls_truststore ? 0 : 1
 
+  name           = "sapi_trust"
   aws_account_id = var.aws_account_id
   default_tags   = local.default_tags
   component      = var.component
