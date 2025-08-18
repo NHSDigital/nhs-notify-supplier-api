@@ -9,6 +9,5 @@ module "supplier_ssl" {
   environment    = var.environment
   project        = var.project
   region         = var.region
-  group          = var.group
   subject_common_name = local.root_domain_name
 }
