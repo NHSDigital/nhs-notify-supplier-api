@@ -7,8 +7,14 @@ import { NotFoundError, ValidationError } from '../errors';
 const letterRepo = createLetterRepository();
 export const patchLetters: APIGatewayProxyHandler = async (event) => {
 
-    // TODO CCM-11188: default to supplier1 for now
-  const supplierId = event.headers['nhsd-apim-apikey'] ?? "supplier1";
+  const supplierId = event.headers['app-supplier-id'];
+
+  if (!supplierId) {
+    return {
+      statusCode: 400,
+      body: "Bad Request: Missing supplier ID"
+    };
+  }
 
   const pathParameters = event.pathParameters || {};
   const letterId = pathParameters["id"];

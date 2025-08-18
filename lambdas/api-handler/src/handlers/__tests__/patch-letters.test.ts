@@ -33,7 +33,8 @@ describe('patchLetters API Handler', () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
       body: requestBody,
-      pathParameters: {id: "id1"}});
+      pathParameters: {id: "id1"},
+      headers: {'app-supplier-id': 'supplier1'}});
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
@@ -51,7 +52,8 @@ describe('patchLetters API Handler', () => {
   it('returns 400 Bad Request as there is no body', async () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
-      pathParameters: {id: "id1"}});
+      pathParameters: {id: "id1"},
+      headers: {'app-supplier-id': 'supplier1'}});
     const context = mockDeep<Context>();
     const callback = jest.fn();
     const result = await patchLetters(event, context, callback);
@@ -66,7 +68,8 @@ describe('patchLetters API Handler', () => {
     const event = makeApiGwEvent({
       path: '/unknown',
       body: requestBody,
-      pathParameters: {id: "id1"}});
+      pathParameters: {id: "id1"},
+      headers: {'app-supplier-id': 'supplier1'}});
     const context = mockDeep<Context>();
     const callback = jest.fn();
     const result = await patchLetters(event, context, callback);
@@ -80,7 +83,8 @@ describe('patchLetters API Handler', () => {
   it('returns 404 Not Found as path parameter is not found', async () => {
     const event = makeApiGwEvent({
       path: '/letters',
-      body: requestBody});
+      body: requestBody,
+      headers: {'app-supplier-id': 'supplier1'}});
     const context = mockDeep<Context>();
     const callback = jest.fn();
     const result = await patchLetters(event, context, callback);
@@ -98,7 +102,8 @@ describe('patchLetters API Handler', () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
       body: requestBody,
-      pathParameters: { id: "id1" }
+      pathParameters: {id: "id1"},
+      headers: {'app-supplier-id': 'supplier1'}
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
@@ -118,7 +123,8 @@ describe('patchLetters API Handler', () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
       body: requestBody,
-      pathParameters: { id: "id1" }
+      pathParameters: {id: "id1"},
+      headers: {'app-supplier-id': 'supplier1'}
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
@@ -138,11 +144,27 @@ describe('patchLetters API Handler', () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
       body: requestBody,
-      pathParameters: { id: "id1" }
+      pathParameters: {id: "id1"},
+      headers: {'app-supplier-id': 'supplier1'}
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
     await expect(patchLetters(event, context, callback)).rejects.toThrow('Unexpected error');
+  });
+
+  it('returns 400 Bad Request: Missing supplier ID if header app-supplier-id ', async () => {
+    const event = makeApiGwEvent({
+      path: '/letters/id1',
+      body: requestBody,
+      pathParameters: {id: "id1"}});
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+    const result = await patchLetters(event, context, callback);
+
+    expect(result).toEqual({
+      statusCode: 400,
+      body: 'Bad Request: Missing supplier ID',
+    });
   });
 });

@@ -17,7 +17,7 @@ describe('API Lambda handler', () => {
     const mockedGetLetterIds = letterService.getLetterIdsForSupplier as jest.Mock;
     mockedGetLetterIds.mockResolvedValue(['l1', 'l2', 'l3']);
 
-    const event = makeApiGwEvent({path: '/letters'});
+    const event = makeApiGwEvent({path: '/letters', headers: {'app-supplier-id': 'supplier1'}});
     const context = mockDeep<Context>();
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
@@ -52,6 +52,18 @@ describe('API Lambda handler', () => {
     expect(result).toEqual({
       statusCode: 404,
       body: 'Not Found',
+    });
+  });
+
+  it('returns 400 Bad Request: Missing supplier ID if header app-supplier-id ', async () => {
+    const event = makeApiGwEvent({path: '/letters'});
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+    const result = await getLetters(event, context, callback);
+
+    expect(result).toEqual({
+      statusCode: 400,
+      body: 'Bad Request: Missing supplier ID',
     });
   });
 });
