@@ -16,50 +16,47 @@ export const patchLetters: APIGatewayProxyHandler = async (event) => {
     };
   }
 
-  const pathParameters = event.pathParameters || {};
-  const letterId = pathParameters["id"];
+  const letterId = event.pathParameters?.id;
 
-  if (event.path.includes('/letters/') && letterId) {
+  if (!letterId) {
+    return {
+      statusCode: 404,
+      body: "Not Found: The requested resource does not exist"
+    };
+  }
 
-    if (!event.body)
-    {
-      return {
-        statusCode: 400,
-        body: "Bad Request: Missing request body"
-      }
-    }
-
-    const patchLetterRequest: LetterApiDocument = JSON.parse(event.body);
-
-    try {
-
-      // TODO CCM-11188: Is it worth retrieving the letter first to check if the status is different?
-
-      const result = await patchLetterStatus(patchLetterRequest.data, letterId, supplierId, letterRepo);
-
-      return {
-        statusCode: 200,
-        body: JSON.stringify(result, null, 2)
-      };
-    } catch (error) {
-      if (error instanceof ValidationError) {
-        return {
-          statusCode: 400,
-          body: error.message
-        };
-      } else if (error instanceof NotFoundError) {
-        return {
-          statusCode: 404,
-          body: error.message
-        };
-      }
-      throw error;
+  if (!event.body)
+  {
+    return {
+      statusCode: 400,
+      body: "Bad Request: Missing request body"
     }
   }
 
-  // TODO CCM-11188: Is this reachable with the API GW?
-  return {
-    statusCode: 404,
-    body: 'Not Found: The requested resource does not exist',
-  };
+  const patchLetterRequest: LetterApiDocument = JSON.parse(event.body);
+
+  try {
+
+    // TODO CCM-11188: Is it worth retrieving the letter first to check if the status is different?
+
+    const result = await patchLetterStatus(patchLetterRequest.data, letterId, supplierId, letterRepo);
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify(result, null, 2)
+    };
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      return {
+        statusCode: 400,
+        body: error.message
+      };
+    } else if (error instanceof NotFoundError) {
+      return {
+        statusCode: 404,
+        body: error.message
+      };
+    }
+    throw error;
+  }
 };

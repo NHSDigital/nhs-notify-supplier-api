@@ -64,25 +64,9 @@ describe('patchLetters API Handler', () => {
     });
   });
 
-  it('returns 404 Not Found as path is unknown', async () => {
-    const event = makeApiGwEvent({
-      path: '/unknown',
-      body: requestBody,
-      pathParameters: {id: "id1"},
-      headers: {'app-supplier-id': 'supplier1'}});
-    const context = mockDeep<Context>();
-    const callback = jest.fn();
-    const result = await patchLetters(event, context, callback);
-
-    expect(result).toEqual({
-      statusCode: 404,
-      body: 'Not Found: The requested resource does not exist',
-    });
-  });
-
   it('returns 404 Not Found as path parameter is not found', async () => {
     const event = makeApiGwEvent({
-      path: '/letters',
+      path: '/letters/',
       body: requestBody,
       headers: {'app-supplier-id': 'supplier1'}});
     const context = mockDeep<Context>();
