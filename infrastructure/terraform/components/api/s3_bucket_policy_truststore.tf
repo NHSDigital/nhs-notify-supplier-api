@@ -1,6 +1,6 @@
 resource "aws_s3_bucket_policy" "truststore" {
-  bucket = aws_s3_bucket.truststore[0].id
-  policy = data.aws_iam_policy_document.truststore[0].json
+  bucket = aws_s3_bucket.truststore.id
+  policy = data.aws_iam_policy_document.truststore.json
 }
 
 data "aws_iam_policy_document" "truststore" {
@@ -8,8 +8,8 @@ data "aws_iam_policy_document" "truststore" {
     effect  = "Deny"
     actions = ["s3:*"]
     resources = [
-      aws_s3_bucket.truststore[0].arn,
-      "${aws_s3_bucket.truststore[0].arn}/*",
+      aws_s3_bucket.truststore.arn,
+      "${aws_s3_bucket.truststore.arn}/*",
     ]
 
     principals {
