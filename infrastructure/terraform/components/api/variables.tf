@@ -86,3 +86,29 @@ variable "shared_infra_account_id" {
   description = "The AWS Account ID of the shared infrastructure account"
   default     = "000000000000"
 }
+
+variable "manually_configure_mtls_truststore" {
+  type        = bool
+  description = "Manually manage the truststore used for API Gateway mTLS (e.g. for prod environment)"
+  default     = false
+}
+
+variable "enable_backups" {
+  type        = bool
+  description = "Enable backups"
+  default     = false
+}
+
+variable "truststore_s3_bucket_config" {
+  type = object({
+    kms_key_id              = string
+    kms_key_arn             = string
+    bucket_logs_bucket_name = string
+  })
+  description = "Parameters for configuring the Notify Supplier API truststore bucket"
+  default = {
+    bucket_logs_bucket_name = ""
+    kms_key_arn             = ""
+    kms_key_id              = ""
+  }
+}
