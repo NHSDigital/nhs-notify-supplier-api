@@ -14,7 +14,7 @@ resource "aws_api_gateway_domain_name" "main" {
 
   mutual_tls_authentication {
       truststore_uri     = "s3://${aws_s3_bucket.truststore.id}/${aws_s3_object.placeholder_truststore[0].id}"
-      truststore_version = aws_s3_object.placeholder_truststore.version_id
+      truststore_version = aws_s3_object.placeholder_truststore[0].version_id
   }
 
   lifecycle {
