@@ -23,6 +23,14 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "logging" {
   }
 }
 
+resource "aws_s3_bucket_versioning" "logging" {
+  bucket = aws_s3_bucket.logging.id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
 resource "aws_s3_bucket_public_access_block" "logging" {
   depends_on = [
     aws_s3_bucket_policy.logging
