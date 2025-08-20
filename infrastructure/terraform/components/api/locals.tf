@@ -17,7 +17,7 @@ locals {
 
   csi_s3 = replace(
     format(
-      "%s-%s-%s-%s",
+      "%s-%s-%s",
       var.project,
       var.aws_account_id,
       var.environment
