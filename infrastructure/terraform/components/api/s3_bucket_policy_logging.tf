@@ -25,4 +25,20 @@ data "aws_iam_policy_document" "logging" {
       ]
     }
   }
+
+  statement {
+      sid    = "s3-log-delivery"
+      effect = "Allow"
+
+      principals {
+        type        = "Service"
+        identifiers = ["logging.s3.amazonaws.com"]
+      }
+
+      actions = ["s3:PutObject"]
+
+      resources = [
+        "${aws_s3_bucket.logging.arn}/*",
+      ]
+    }
 }

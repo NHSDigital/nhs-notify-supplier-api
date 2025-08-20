@@ -44,5 +44,5 @@ resource "aws_s3_bucket_logging" "truststore" {
   bucket = aws_s3_bucket.truststore.id
 
   target_bucket = aws_s3_bucket.logging.bucket
-  target_prefix = "truststore/${aws_s3_bucket.truststore.bucket}/"
+  target_prefix = "${aws_s3_bucket.truststore.bucket}/"
 }
