@@ -44,13 +44,6 @@ resource "aws_s3_bucket_public_access_block" "truststore" {
   restrict_public_buckets = true
 }
 
-resource "aws_s3_bucket_logging" "truststore" {
-  bucket = aws_s3_bucket.truststore.id
-
-  target_bucket = "${local.csi_s3}-bucket-logs"
-  target_prefix = "truststore/${aws_s3_bucket.truststore.bucket}/"
-}
-
 # In manually configured (e.g. dev main, nonprod main, prod main) add lifecycle policy to permit manual management of cert
 resource "aws_s3_object" "placeholder_truststore" {
   count   = var.manually_configure_mtls_truststore ? 1 : 0
