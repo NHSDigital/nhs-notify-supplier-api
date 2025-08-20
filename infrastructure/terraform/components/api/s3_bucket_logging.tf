@@ -36,13 +36,47 @@ resource "aws_s3_bucket_public_access_block" "logging" {
   restrict_public_buckets = true
 }
 
-###
-# Bucket logging definitions past here
-###
+data "aws_iam_policy_document" "logging" {
+  statement {
+    effect  = "Deny"
+    actions = ["s3:*"]
+    resources = [
+      aws_s3_bucket.logging.arn,
+      "${aws_s3_bucket.logging.arn}/*",
+    ]
 
-resource "aws_s3_bucket_logging" "truststore" {
-  bucket = aws_s3_bucket.truststore.id
+    principals {
+      type        = "AWS"
+      identifiers = ["*"]
+    }
 
-  target_bucket = aws_s3_bucket.logging.bucket
-  target_prefix = "${aws_s3_bucket.truststore.bucket}/"
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values = [
+        false
+      ]
+    }
+  }
+
+  statement {
+      sid    = "s3-log-delivery"
+      effect = "Allow"
+
+      principals {
+        type        = "Service"
+        identifiers = ["logging.s3.amazonaws.com"]
+      }
+
+      actions = ["s3:PutObject"]
+
+      resources = [
+        "${aws_s3_bucket.logging.arn}/*",
+      ]
+    }
+}
+
+resource "aws_s3_bucket_policy" "logging" {
+  bucket = aws_s3_bucket.logging.id
+  policy = data.aws_iam_policy_document.logging.json
 }
