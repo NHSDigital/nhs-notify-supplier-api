@@ -98,17 +98,3 @@ variable "enable_backups" {
   description = "Enable backups"
   default     = false
 }
-
-variable "truststore_s3_bucket_config" {
-  type = object({
-    kms_key_id              = string
-    kms_key_arn             = string
-    bucket_logs_bucket_name = string
-  })
-  description = "Parameters for configuring the Notify Supplier API truststore bucket"
-  default = {
-    bucket_logs_bucket_name = ""
-    kms_key_arn             = ""
-    kms_key_id              = ""
-  }
-}

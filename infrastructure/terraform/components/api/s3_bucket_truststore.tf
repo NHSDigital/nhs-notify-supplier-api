@@ -17,7 +17,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "truststore" {
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm     = "aws:kms"
-      kms_master_key_id = var.truststore_s3_bucket_config.kms_key_id
+      kms_master_key_id = module.kms.key_id
     }
     bucket_key_enabled = true
   }
@@ -47,7 +47,7 @@ resource "aws_s3_bucket_public_access_block" "truststore" {
 resource "aws_s3_bucket_logging" "truststore" {
   bucket = aws_s3_bucket.truststore.id
 
-  target_bucket = var.truststore_s3_bucket_config.bucket_logs_bucket_name
+  target_bucket = "${local.csi_s3}-bucket-logs"
   target_prefix = "truststore/${aws_s3_bucket.truststore.bucket}/"
 }
 
