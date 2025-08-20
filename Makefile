@@ -53,9 +53,16 @@ set-access: guard-APIM_ENV
 	envsubst '$${ACCESS}' \
 	< specification/api/components/x-nhsd-apim/access-template.yml > specification/api/components/x-nhsd-apim/access.yml
 
+set-security: guard-APIM_ENV
+	@ SECURITY=security-$$APIM_ENV.yml \
+	envsubst '$${SECURITY}' \
+	< specification/api/components/security/security-template.yml > specification/api/components/security/security.yml
+
 construct-spec: guard-APIM_ENV
 	$(MAKE) set-target APIM_ENV=$$APIM_ENV
 	$(MAKE) set-access APIM_ENV=$$APIM_ENV
+	$(MAKE) set-security APIM_ENV=$$APIM_ENV
+
 
 
 build-json-oas-spec: guard-APIM_ENV
