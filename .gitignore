@@ -25,3 +25,6 @@ dist
 .reports
 /sandbox/*.log
 /sandbox-staging
+/specification/components/x-nhsd-apim/access.yml
+/specification/components/x-nhsd-apim/target.yml
+/specification/components/security/security.yml

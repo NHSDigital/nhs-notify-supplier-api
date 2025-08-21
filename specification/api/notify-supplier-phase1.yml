@@ -79,3 +79,5 @@ x-nhsd-apim:
     $ref: ./components/x-nhsd-apim/access.yml
   target:
     $ref: ./components/x-nhsd-apim/target.yml
+  target-attributes:
+    $ref: ./components/x-nhsd-apim/target-attributes.yml
