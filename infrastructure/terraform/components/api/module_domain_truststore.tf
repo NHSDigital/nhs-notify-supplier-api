@@ -13,11 +13,10 @@ module "domain_truststore" {
 
   bucket_logging_target = {
     bucket = module.logging_bucket.bucket
-    prefix = "${name}/"
+    prefix = "${local.csi_s3}-truststore/"
   }
 
   policy_documents = [
-    aws_iam_policy_document.truststore.json
   ]
 
 }

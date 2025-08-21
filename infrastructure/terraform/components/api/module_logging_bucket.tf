@@ -12,7 +12,7 @@ module "logging_bucket" {
   kms_key_arn = module.kms.key_id
 
   policy_documents = [
-    aws_iam_policy_document.logging.json
+    data.aws_iam_policy_document.logging.json
   ]
 }
 
@@ -29,7 +29,7 @@ data "aws_iam_policy_document" "logging" {
       actions = ["s3:PutObject"]
 
       resources = [
-        "${aws_s3_bucket.logging.arn}/*",
+        "${module.logging_bucket.arn}/*",
       ]
     }
 }
