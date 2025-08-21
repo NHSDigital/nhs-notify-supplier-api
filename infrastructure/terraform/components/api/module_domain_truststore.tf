@@ -8,7 +8,7 @@ module "domain_truststore" {
   project        = var.project
   region         = var.region
 
-  default_tags   = merge(local.default_tags, { "Enable-Backup" = var.enable_backups }, { "Enable-S3-Continuous-Backup" = var.enable_backups }, { "SKIP_S3_AUDIT" = "true" })
+  default_tags   = local.default_tags
   kms_key_arn = module.kms.key_id
 
   bucket_logging_target = {
