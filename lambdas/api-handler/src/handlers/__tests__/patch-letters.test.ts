@@ -1,11 +1,10 @@
 import { patchLetters } from '../../index';
-import type { APIGatewayProxyResult, Context } from 'aws-lambda';
+import { APIGatewayProxyResult, Context } from 'aws-lambda';
 import { mockDeep } from 'jest-mock-extended';
 import { makeApiGwEvent } from './utils/test-utils';
 import * as letterService from '../../services/letter-operations';
-import { NotFoundError, ValidationError } from '../../errors';
 import { LetterApiDocument, LetterApiStatus } from '../../contracts/letter-api';
-import { ErrorResponse, mapErrorToResponse } from '../../mappers/error-mapper';
+import { mapErrorToResponse } from '../../mappers/error-mapper';
 
 jest.mock('../../services/letter-operations');
 jest.mock('../../mappers/error-mapper');
@@ -115,5 +114,53 @@ describe('patchLetters API Handler', () => {
     const result = await patchLetters(event, context, callback);
 
     expect(result).toEqual(expectedErrorResponse);
+  });
+
+  it('returns error when request body does not have correct shape', async () => {
+    const event = makeApiGwEvent({
+      path: '/letters/id1',
+      body: '{test: "test"}',
+      pathParameters: {id: "id1"},
+      headers: {'nhsd-supplier-id': 'supplier1'}});
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+
+    const result = await patchLetters(event, context, callback);
+
+    expect(result).toEqual(expectedErrorResponse);
+  });
+
+  it('returns error when request body is not json', async () => {
+    const event = makeApiGwEvent({
+      path: '/letters/id1',
+      body: '{#invalidJSON',
+      pathParameters: {id: "id1"},
+      headers: {'nhsd-supplier-id': 'supplier1'}});
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+
+    const result = await patchLetters(event, context, callback);
+
+    expect(result).toEqual(expectedErrorResponse);
+  });
+
+  it('returns error if unexpected error is thrown', async () => {
+    const event = makeApiGwEvent({
+      path: '/letters/id1',
+      body: '{#invalidJSON',
+      pathParameters: {id: "id1"},
+      headers: {'nhsd-supplier-id': 'supplier1'}});
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+
+    const spy = jest.spyOn(JSON, "parse").mockImplementation(() => {
+      throw "Unexpected error";
+    });
+
+    const result = await patchLetters(event, context, callback);
+
+    expect(result).toEqual(expectedErrorResponse);
+
+    spy.mockRestore();
   });
 });

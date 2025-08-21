@@ -1,7 +1,7 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { createLetterRepository } from '../infrastructure/letter-repo-factory';
 import { patchLetterStatus } from '../services/letter-operations';
-import { LetterApiDocument } from '../contracts/letter-api';
+import { LetterApiDocument, LetterApiDocumentSchema } from '../contracts/letter-api';
 import * as errors from '../contracts/errors';
 import { ValidationError } from '../errors';
 import { mapErrorToResponse } from '../mappers/error-mapper';
@@ -14,7 +14,16 @@ export const patchLetters: APIGatewayProxyHandler = async (event) => {
     const letterId = assertNotEmpty( event.pathParameters?.id, errors.ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter);
     const body = assertNotEmpty(event.body, errors.ApiErrorDetail.InvalidRequestMissingBody);
 
-    const patchLetterRequest: LetterApiDocument = JSON.parse(body);
+    let patchLetterRequest: LetterApiDocument;
+
+    try {
+      patchLetterRequest = LetterApiDocumentSchema.parse(JSON.parse(body));
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new ValidationError(errors.ApiErrorDetail.InvalidRequestBody, error.message, error);
+      }
+      else throw error;
+    }
 
     const result = await patchLetterStatus(patchLetterRequest.data, letterId!, supplierId!, letterRepo);
 

@@ -1,17 +1,13 @@
 import { ApiErrorDetail } from "../contracts/errors";
 
-export class NotFoundError extends Error {
+class ApiError extends Error {
   detail: ApiErrorDetail;
-  constructor(detail: ApiErrorDetail) {
-    super(detail);
+  constructor(detail: ApiErrorDetail, message?: string, cause?: Error) {
+    super(message ?? detail, { cause });
     this.detail = detail;
   }
 }
 
-export class ValidationError extends Error {
-  detail: ApiErrorDetail;
-  constructor(detail: ApiErrorDetail) {
-    super(detail);
-    this.detail = detail;
-  }
-}
+export class NotFoundError extends ApiError {}
+
+export class ValidationError extends ApiError {}

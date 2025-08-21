@@ -1,18 +1,41 @@
-export interface LetterApiAttributes {
-  reasonCode: number;
-  reasonText: string;
-  requestedProductionStatus: 'ACTIVE' | 'HOLD' | 'CANCEL';
-  status: LetterApiStatus;
-}
+import { z } from "zod";
 
-export interface LetterApiResource {
-  id: string;
-  type: 'Letter';
-  attributes: LetterApiAttributes;
-}
+export const LetterApiStatusSchema = z.enum([
+  "PENDING",
+  "ACCEPTED",
+  "REJECTED",
+  "PRINTED",
+  "ENCLOSED",
+  "CANCELLED",
+  "DISPATCHED",
+  "FAILED",
+  "RETURNED",
+  "DESTROYED",
+  "FORWARDED",
+  "DELIVERED",
+]);
 
-export interface LetterApiDocument {
-  data: LetterApiResource;
-}
+export type LetterApiStatus = z.infer<typeof LetterApiStatusSchema>;
 
-export type LetterApiStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'PRINTED' | 'ENCLOSED' | 'CANCELLED' | 'DISPATCHED' | 'FAILED' | 'RETURNED' | 'DESTROYED' | 'FORWARDED' | 'DELIVERED';
+export const LetterApiAttributesSchema = z.object({
+  reasonCode: z.number(),
+  reasonText: z.string(),
+  requestedProductionStatus: z.enum(["ACTIVE", "HOLD", "CANCEL"]),
+  status: LetterApiStatusSchema,
+});
+
+export type LetterApiAttributes = z.infer<typeof LetterApiAttributesSchema>;
+
+export const LetterApiResourceSchema = z.object({
+  id: z.string(),
+  type: z.literal("Letter"),
+  attributes: LetterApiAttributesSchema,
+});
+
+export type LetterApiResource = z.infer<typeof LetterApiResourceSchema>;
+
+export const LetterApiDocumentSchema = z.object({
+  data: LetterApiResourceSchema,
+});
+
+export type LetterApiDocument = z.infer<typeof LetterApiDocumentSchema>;
