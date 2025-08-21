@@ -1,7 +1,7 @@
 module "logging_bucket" {
   source = "git::https://github.com/NHSDigital/nhs-notify-shared-modules.git//infrastructure/modules/s3bucket?ref=v2.0.17"
 
-  name           = "${local.csi_s3}-bucket-logs"
+  name           = "bucket-logs"
   aws_account_id = var.aws_account_id
   component      = var.component
   environment    = var.environment

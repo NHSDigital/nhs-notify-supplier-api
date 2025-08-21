@@ -14,16 +14,4 @@ locals {
   })
 
   destination_arn = "arn:aws:logs:${var.region}:${var.shared_infra_account_id}:destination:nhs-main-obs-firehose-logs"
-
-  csi_s3 = replace(
-    format(
-      "%s-%s-%s-%s",
-      var.project,
-      var.aws_account_id,
-      var.region,
-      var.environment
-    ),
-    "_",
-    "",
-  )
 }
