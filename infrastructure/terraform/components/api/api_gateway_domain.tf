@@ -9,12 +9,12 @@ resource "aws_api_gateway_domain_name" "main" {
   }
 
   depends_on = [
-    aws_s3_bucket.truststore,
+    module.domain_truststore,
     aws_s3_object.placeholder_truststore
   ]
 
   mutual_tls_authentication {
-      truststore_uri     = "s3://${aws_s3_bucket.truststore.id}/${aws_s3_object.placeholder_truststore[0].key}"
+      truststore_uri     = "s3://${module.domain_truststore.id}/${aws_s3_object.placeholder_truststore[0].key}"
       truststore_version = aws_s3_object.placeholder_truststore[0].version_id
   }
 
@@ -36,12 +36,12 @@ resource "aws_api_gateway_domain_name" "main_nonprod" {
   }
 
   depends_on = [
-    aws_s3_bucket.truststore,
+    module.domain_truststore,
     aws_s3_object.placeholder_truststore_nonprod
   ]
 
   mutual_tls_authentication {
-      truststore_uri     = "s3://${aws_s3_bucket.truststore.id}/${aws_s3_object.placeholder_truststore_nonprod[0].key}"
+      truststore_uri     = "s3://${module.domain_truststore.id}/${aws_s3_object.placeholder_truststore_nonprod[0].key}"
       truststore_version = aws_s3_object.placeholder_truststore_nonprod[0].version_id
   }
 }
