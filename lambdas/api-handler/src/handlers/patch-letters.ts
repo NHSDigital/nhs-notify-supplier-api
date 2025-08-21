@@ -5,12 +5,13 @@ import { LetterApiDocument, LetterApiDocumentSchema } from '../contracts/letter-
 import * as errors from '../contracts/errors';
 import { ValidationError } from '../errors';
 import { mapErrorToResponse } from '../mappers/error-mapper';
+import { lambdaConfig } from "../config/lambda-config";
 
 const letterRepo = createLetterRepository();
 export const patchLetters: APIGatewayProxyHandler = async (event) => {
 
   try {
-    const supplierId = assertNotEmpty(event.headers['nhsd-supplier-id'], errors.ApiErrorDetail.InvalidRequestMissingSupplierId);
+    const supplierId = assertNotEmpty(event.headers[lambdaConfig.SUPPLIER_ID_HEADER], errors.ApiErrorDetail.InvalidRequestMissingSupplierId);
     const letterId = assertNotEmpty( event.pathParameters?.id, errors.ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter);
     const body = assertNotEmpty(event.body, errors.ApiErrorDetail.InvalidRequestMissingBody);
 

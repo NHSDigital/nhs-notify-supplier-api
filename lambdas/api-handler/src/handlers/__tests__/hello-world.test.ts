@@ -2,6 +2,12 @@ import { helloWorld } from '../../index';
 import type { Context } from 'aws-lambda';
 import { mockDeep } from 'jest-mock-extended';
 
+jest.mock("../../config/lambda-config", () => ({
+  lambdaConfig: {
+    SUPPLIER_ID_HEADER: "nhsd-supplier-id"
+  }
+}));
+
 describe('API Lambda handler', () => {
   it('returns 200 OK with "Hello World" for the root path', async () => {
     const event = { path: '/' };

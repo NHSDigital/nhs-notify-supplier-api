@@ -6,6 +6,12 @@ import * as letterService from '../../services/letter-operations';
 
 jest.mock('../../services/letter-operations');
 
+jest.mock("../../config/lambda-config", () => ({
+  lambdaConfig: {
+    SUPPLIER_ID_HEADER: "nhsd-supplier-id"
+  }
+}));
+
 describe('API Lambda handler', () => {
 
   beforeEach(() => {

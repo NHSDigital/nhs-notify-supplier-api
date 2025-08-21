@@ -9,6 +9,12 @@ import { mapErrorToResponse } from '../../mappers/error-mapper';
 jest.mock('../../services/letter-operations');
 jest.mock('../../mappers/error-mapper');
 
+jest.mock("../../config/lambda-config", () => ({
+  lambdaConfig: {
+    SUPPLIER_ID_HEADER: "nhsd-supplier-id"
+  }
+}));
+
 const mockedMapErrorToResponse = jest.mocked(mapErrorToResponse);
 const expectedErrorResponse: APIGatewayProxyResult = {
   statusCode: 400,
