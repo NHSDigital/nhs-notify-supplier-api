@@ -10,7 +10,7 @@ const letterRepo = createLetterRepository();
 export const patchLetters: APIGatewayProxyHandler = async (event) => {
 
   try {
-    const supplierId = assertNotEmpty(event.headers['app-supplier-id'], errors.ApiErrorDetail.InvalidRequestMissingSupplierId);
+    const supplierId = assertNotEmpty(event.headers['nhsd-supplier-id'], errors.ApiErrorDetail.InvalidRequestMissingSupplierId);
     const letterId = assertNotEmpty( event.pathParameters?.id, errors.ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter);
     const body = assertNotEmpty(event.body, errors.ApiErrorDetail.InvalidRequestMissingBody);
 

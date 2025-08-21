@@ -8,7 +8,7 @@ export const getLetters: APIGatewayProxyHandler = async (event) => {
 
   if (event.path === '/letters') {
 
-    const supplierId = event.headers['app-supplier-id'];
+    const supplierId = event.headers['nhsd-supplier-id'];
 
     if (!supplierId) {
       return {

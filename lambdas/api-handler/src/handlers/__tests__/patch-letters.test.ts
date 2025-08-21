@@ -48,7 +48,7 @@ describe('patchLetters API Handler', () => {
       path: '/letters/id1',
       body: requestBody,
       pathParameters: {id: "id1"},
-      headers: {'app-supplier-id': 'supplier1'}});
+      headers: {'nhsd-supplier-id': 'supplier1'}});
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
@@ -66,7 +66,7 @@ describe('patchLetters API Handler', () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
       pathParameters: {id: "id1"},
-      headers: {'app-supplier-id': 'supplier1'}});
+      headers: {'nhsd-supplier-id': 'supplier1'}});
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
@@ -79,7 +79,7 @@ describe('patchLetters API Handler', () => {
     const event = makeApiGwEvent({
       path: '/letters/',
       body: requestBody,
-      headers: {'app-supplier-id': 'supplier1'}});
+      headers: {'nhsd-supplier-id': 'supplier1'}});
     const context = mockDeep<Context>();
     const callback = jest.fn();
     const result = await patchLetters(event, context, callback);
@@ -94,7 +94,7 @@ describe('patchLetters API Handler', () => {
       path: '/letters/id1',
       body: requestBody,
       pathParameters: {id: "id1"},
-      headers: {'app-supplier-id': 'supplier1'}
+      headers: {'nhsd-supplier-id': 'supplier1'}
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
@@ -104,7 +104,7 @@ describe('patchLetters API Handler', () => {
     expect(result).toEqual(expectedErrorResponse);
   });
 
-  it('returns error when app-supplier-id is missing', async () => {
+  it('returns error when nhsd-supplier-id is missing', async () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
       body: requestBody,
