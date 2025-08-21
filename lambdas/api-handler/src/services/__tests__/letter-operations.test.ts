@@ -60,7 +60,7 @@ describe('patchLetterStatus function', () => {
   });
 
   it('should throw validationError when letterIds differ', async () => {
-    await expect(patchLetterStatus(letterResource, 'letter2', "supplier1", {} as any)).rejects.toThrow("Bad Request: Letter ID in body does not match path parameter");
+    await expect(patchLetterStatus(letterResource, 'letter2', "supplier1", {} as any)).rejects.toThrow("The letter ID in the request body does not match the letter ID path parameter");
   });
 
   it('should throw notFoundError when letter does not exist', async () => {
@@ -68,7 +68,7 @@ describe('patchLetterStatus function', () => {
       updateLetterStatus: jest.fn().mockRejectedValue(new Error('not found'))
     };
 
-    await expect(patchLetterStatus(letterResource, 'letter1', 'supplier1', mockRepo as any)).rejects.toThrow("Not Found: Letter with ID letter1 does not exist");
+    await expect(patchLetterStatus(letterResource, 'letter1', 'supplier1', mockRepo as any)).rejects.toThrow("The provided letter ID does not exist");
   });
 
   it('should throw unexpected error', async () => {
@@ -79,5 +79,4 @@ describe('patchLetterStatus function', () => {
 
     await expect(patchLetterStatus(letterResource, 'letter1', 'supplier1', mockRepo as any)).rejects.toThrow("unexpected error");
   });
-
 });
