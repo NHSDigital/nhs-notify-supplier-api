@@ -36,7 +36,8 @@ module "get_letters" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = {
-    LETTERS_TABLE_NAME = aws_dynamodb_table.letters.name
+    LETTERS_TABLE_NAME = aws_dynamodb_table.letters.name,
+    LETTER_TTL_HOURS = 24
   }
 }
 
@@ -61,13 +62,9 @@ data "aws_iam_policy_document" "get_letters_lambda" {
 
     actions = [
       "dynamodb:BatchGetItem",
-      "dynamodb:BatchWriteItem",
-      "dynamodb:DeleteItem",
       "dynamodb:GetItem",
-      "dynamodb:PutItem",
       "dynamodb:Query",
       "dynamodb:Scan",
-      "dynamodb:UpdateItem",
     ]
 
     resources = [

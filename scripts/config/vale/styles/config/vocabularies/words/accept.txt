@@ -30,3 +30,4 @@ Terraform
 toolchain
 Trufflehog
 vNext
+Zod

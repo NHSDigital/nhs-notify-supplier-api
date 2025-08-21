@@ -54,7 +54,12 @@ runs:
       working-directory: .
       shell: bash
       run: |
-        make build-json-oas-spec APIM_ENV=dev
+        if [ -z $PR_NUMBER ]
+        then
+          make build-json-oas-spec APIM_ENV=dev
+        else
+          make build-json-oas-spec APIM_ENV=dev-pr
+        fi
 
     - name: Set target
       shell: bash
