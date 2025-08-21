@@ -3,7 +3,7 @@ resource "aws_s3_object" "placeholder_truststore" {
   count   = var.manually_configure_mtls_truststore ? 1 : 0
   bucket  = module.domain_truststore.bucket
   key     = "truststore.pem"
-  content = module.supplier_ssl[0].cacert_pem
+  content = module.supplier_ssl.cacert_pem
 
   depends_on = [
     module.domain_truststore,
@@ -23,7 +23,7 @@ resource "aws_s3_object" "placeholder_truststore_nonprod" {
   count   = !var.manually_configure_mtls_truststore ? 1 : 0
   bucket  = module.domain_truststore.bucket
   key     = "truststore.pem"
-  content = module.supplier_ssl[0].cacert_pem
+  content = module.supplier_ssl.cacert_pem
 
   depends_on = [
     module.domain_truststore,
