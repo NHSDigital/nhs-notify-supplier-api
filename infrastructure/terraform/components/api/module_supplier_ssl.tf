@@ -1,8 +1,6 @@
 module "supplier_ssl" {
   source = "git::https://github.com/NHSDigital/nhs-notify-shared-modules.git//infrastructure/modules/ssl?ref=v2.0.17"
 
-  count = var.manually_configure_mtls_truststore ? 0 : 1
-
   name           = "sapi_trust"
   aws_account_id = var.aws_account_id
   default_tags   = local.default_tags
