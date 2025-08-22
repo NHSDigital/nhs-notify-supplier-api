@@ -35,7 +35,7 @@ module "patch_letters" {
   log_destination_arn       = local.destination_arn
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
-  lambda_env_vars = merge(locals.common_db_access_lambda_env_vars, {})
+  lambda_env_vars = merge(local.common_db_access_lambda_env_vars, {})
 }
 
 data "aws_iam_policy_document" "patch_letters_lambda" {
