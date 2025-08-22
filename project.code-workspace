@@ -35,6 +35,10 @@
     {
       "name": "Dev Container",
       "path": ".devcontainer"
+    },
+    {
+      "name": "Lambdas Api Handler",
+      "path": "./lambdas/api-handler"
     }
   ],
   "settings": {
