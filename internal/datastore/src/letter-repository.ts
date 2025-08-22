@@ -115,7 +115,7 @@ export class LetterRepository {
           ':status': status,
           ':updatedAt': new Date().toISOString(),
           ':supplierStatus': `${supplierId}#${status}`,
-          ':ttl': Math.floor(Date.now() / 1000 + 60 * 60 * this.config.ttlHours)
+          ':ttl': Math.floor(Date.now() / 1000 + 60 * 60 * this.config.ttlHours) // TODO CCM-11188: refresh TTL on update?
         },
         ReturnValues: 'ALL_NEW'
       }));

@@ -18,9 +18,10 @@ export const LetterApiStatusSchema = z.enum([
 export type LetterApiStatus = z.infer<typeof LetterApiStatusSchema>;
 
 export const LetterApiAttributesSchema = z.object({
-  reasonCode: z.number(),
-  reasonText: z.string(),
-  requestedProductionStatus: z.enum(["ACTIVE", "HOLD", "CANCEL"]),
+  reasonCode: z.number().optional(),
+  reasonText: z.string().optional(),
+  requestedProductionStatus: z.enum(["ACTIVE", "HOLD", "CANCEL"]).optional(),
+  specificationId: z.string(),
   status: LetterApiStatusSchema,
 });
 

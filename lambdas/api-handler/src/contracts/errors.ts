@@ -43,7 +43,7 @@ export function buildApiError(params: {
   detail: ApiErrorDetail | string;
 }): ApiError {
   return {
-    id: randomUUID(),
+    id: randomUUID(), // TODO CCM-11188: correlation ID?
     code: params.code,
     links: { about: 'https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier' },
     status: params.status,

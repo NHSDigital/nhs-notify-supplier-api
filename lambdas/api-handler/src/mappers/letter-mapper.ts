@@ -7,9 +7,10 @@ export function toApiLetter(letter: Letter): LetterApiDocument {
       id: letter.id,
       type: 'Letter',
       attributes: {
-        reasonCode: 123, // TODO CCM-11188: map from DB if stored
-        reasonText: 'Reason text', // TODO CCM-11188: map from DB if stored
-        requestedProductionStatus: 'ACTIVE', // TODO CCM-11188: map from DB if stored
+        reasonCode: 123, // TODO CCM-11188
+        reasonText: 'Reason text', // TODO CCM-11188
+        requestedProductionStatus: 'ACTIVE', // TODO CCM-11188
+        specificationId: letter.specificationId,
         status: letter.status
       }
     }

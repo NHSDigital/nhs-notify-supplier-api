@@ -67,9 +67,27 @@
       ],
       "patch": {
         "description": "Update the status of a letter by providing the new status in the request body.",
+        "operationId": "patchLetters",
         "requestBody": {
           "content": {
             "application/vnd.api+json": {
+              "examples": {
+                "patch-letter-request": {
+                  "value": {
+                    "data": {
+                      "attributes": {
+                        "reasonCode": 100,
+                        "reasonText": "failed validation",
+                        "requestedProductionStatus": "ACTIVE",
+                        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+                        "status": "REJECTED"
+                      },
+                      "id": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+                      "type": "Letter"
+                    }
+                  }
+                }
+              },
               "schema": {
                 "properties": {
                   "data": {
@@ -78,10 +96,16 @@
                         "properties": {
                           "reasonCode": {
                             "description": "Reason code for the given status",
+                            "examples": [
+                              100
+                            ],
                             "type": "number"
                           },
                           "reasonText": {
                             "description": "Reason text for the given status",
+                            "examples": [
+                              "failed validation"
+                            ],
                             "type": "string"
                           },
                           "requestedProductionStatus": {
@@ -91,7 +115,16 @@
                               "HOLD",
                               "CANCEL"
                             ],
+                            "examples": [
+                              "ACTIVE"
+                            ],
                             "title": "ProductionStatus",
+                            "type": "string"
+                          },
+                          "specificationId": {
+                            "examples": [
+                              "2WL5eYSWGzCHlGmzNxuqVusPxDg"
+                            ],
                             "type": "string"
                           },
                           "status": {
@@ -105,11 +138,14 @@
                               "ENCLOSED",
                               "CANCELLED",
                               "DISPATCHED",
+                              "DELIVERED",
                               "FAILED",
                               "RETURNED",
                               "DESTROYED",
-                              "FORWARDED",
-                              "DELIVERED"
+                              "FORWARDED"
+                            ],
+                            "examples": [
+                              "PENDING"
                             ],
                             "type": "string"
                           }
@@ -117,6 +153,9 @@
                         "type": "object"
                       },
                       "id": {
+                        "examples": [
+                          "2WL5eYSWGzCHlGmzNxuqVusPxDg"
+                        ],
                         "type": "string"
                       },
                       "type": {
@@ -137,6 +176,23 @@
           "200": {
             "content": {
               "application/vnd.api+json": {
+                "examples": {
+                  "patch_letter-response": {
+                    "value": {
+                      "data": {
+                        "attributes": {
+                          "reasonCode": 100,
+                          "reasonText": "failed validation",
+                          "requestedProductionStatus": "ACTIVE",
+                          "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+                          "status": "REJECTED"
+                        },
+                        "id": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+                        "type": "Letter"
+                      }
+                    }
+                  }
+                },
                 "schema": {
                   "properties": {
                     "data": {
@@ -145,10 +201,16 @@
                           "properties": {
                             "reasonCode": {
                               "description": "Reason code for the given status",
+                              "examples": [
+                                100
+                              ],
                               "type": "number"
                             },
                             "reasonText": {
                               "description": "Reason text for the given status",
+                              "examples": [
+                                "failed validation"
+                              ],
                               "type": "string"
                             },
                             "requestedProductionStatus": {
@@ -158,7 +220,16 @@
                                 "HOLD",
                                 "CANCEL"
                               ],
+                              "examples": [
+                                "ACTIVE"
+                              ],
                               "title": "ProductionStatus",
+                              "type": "string"
+                            },
+                            "specificationId": {
+                              "examples": [
+                                "2WL5eYSWGzCHlGmzNxuqVusPxDg"
+                              ],
                               "type": "string"
                             },
                             "status": {
@@ -172,22 +243,28 @@
                                 "ENCLOSED",
                                 "CANCELLED",
                                 "DISPATCHED",
+                                "DELIVERED",
                                 "FAILED",
                                 "RETURNED",
                                 "DESTROYED",
-                                "FORWARDED",
-                                "DELIVERED"
+                                "FORWARDED"
+                              ],
+                              "examples": [
+                                "PENDING"
                               ],
                               "type": "string"
                             }
                           },
                           "required": [
-                            "status",
-                            "requestedProductionStatus"
+                            "specificationId",
+                            "status"
                           ],
                           "type": "object"
                         },
                         "id": {
+                          "examples": [
+                            "2WL5eYSWGzCHlGmzNxuqVusPxDg"
+                          ],
                           "type": "string"
                         },
                         "type": {
@@ -205,10 +282,272 @@
             "description": "Letter resource updated successfully"
           },
           "400": {
-            "description": "Bad request"
+            "content": {
+              "application/vnd.api+json": {
+                "examples": {
+                  "error-bad-request": {
+                    "value": {
+                      "errors": [
+                        {
+                          "code": "NOTIFY_INVALID_REQUEST",
+                          "detail": "Invalid request, please refer to the API specifications",
+                          "id": "rrt-1931948104716186917-c-geu2-10664-3111479-3.0",
+                          "links": {
+                            "about": "https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier"
+                          },
+                          "status": "400",
+                          "title": "Invalid request"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "schema": {
+                  "properties": {
+                    "errors": {
+                      "items": {
+                        "properties": {
+                          "code": {
+                            "enum": [
+                              "NOTIFY_INTERNAL_SERVER_ERROR",
+                              "NOTIFY_INVALID_REQUEST",
+                              "NOTIFY_LETTER_NOT_FOUND"
+                            ],
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "links": {
+                            "properties": {
+                              "about": {
+                                "format": "uri",
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad request, invalid input data"
           },
           "404": {
+            "content": {
+              "application/vnd.api+json": {
+                "examples": {
+                  "error-not-found": {
+                    "value": {
+                      "errors": [
+                        {
+                          "code": "NOTIFY_RESOURCE_NOT_FOUND",
+                          "detail": "No resource found with that ID",
+                          "id": "rrt-1931948104716186917-c-geu2-10664-3111479-3.0",
+                          "links": {
+                            "about": "https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier"
+                          },
+                          "status": "404",
+                          "title": "Resource not found"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "schema": {
+                  "properties": {
+                    "errors": {
+                      "items": {
+                        "properties": {
+                          "code": {
+                            "enum": [
+                              "NOTIFY_INTERNAL_SERVER_ERROR",
+                              "NOTIFY_INVALID_REQUEST",
+                              "NOTIFY_LETTER_NOT_FOUND"
+                            ],
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "links": {
+                            "properties": {
+                              "about": {
+                                "format": "uri",
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
             "description": "Resource not found"
+          },
+          "429": {
+            "content": {
+              "application/vnd.api+json": {
+                "examples": {
+                  "error-too-many-requests": {
+                    "value": {
+                      "errors": [
+                        {
+                          "code": "NOTIFY_QUOTA",
+                          "detail": "You have made too many requests. Please try again later.",
+                          "id": "rrt-1931948104716186917-c-geu2-10664-3111479-3.0",
+                          "links": {
+                            "about": "https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier"
+                          },
+                          "status": "429",
+                          "title": "Too many requests"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "schema": {
+                  "properties": {
+                    "errors": {
+                      "items": {
+                        "properties": {
+                          "code": {
+                            "enum": [
+                              "NOTIFY_INTERNAL_SERVER_ERROR",
+                              "NOTIFY_INVALID_REQUEST",
+                              "NOTIFY_LETTER_NOT_FOUND"
+                            ],
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "links": {
+                            "properties": {
+                              "about": {
+                                "format": "uri",
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Too many requests"
+          },
+          "500": {
+            "content": {
+              "application/vnd.api+json": {
+                "examples": {
+                  "error-server-error": {
+                    "value": {
+                      "errors": [
+                        {
+                          "code": "NOTIFY_INTERNAL_SERVER_ERROR",
+                          "detail": "An unexpected error occurred, please contact support",
+                          "id": "rrt-1931948104716186917-c-geu2-10664-3111479-3.0",
+                          "links": {
+                            "about": "https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier"
+                          },
+                          "status": "500",
+                          "title": "Internal server error"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "schema": {
+                  "properties": {
+                    "errors": {
+                      "items": {
+                        "properties": {
+                          "code": {
+                            "enum": [
+                              "NOTIFY_INTERNAL_SERVER_ERROR",
+                              "NOTIFY_INVALID_REQUEST",
+                              "NOTIFY_LETTER_NOT_FOUND"
+                            ],
+                            "type": "string"
+                          },
+                          "detail": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "links": {
+                            "properties": {
+                              "about": {
+                                "format": "uri",
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Server error"
           }
         },
         "security": [
@@ -217,6 +556,9 @@
           }
         ],
         "summary": "Update the status of a letter",
+        "tags": [
+          "letter"
+        ],
         "x-amazon-apigateway-integration": {
           "contentHandling": "CONVERT_TO_TEXT",
           "credentials": "${APIG_EXECUTION_ROLE_ARN}",
