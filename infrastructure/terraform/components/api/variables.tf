@@ -86,3 +86,15 @@ variable "shared_infra_account_id" {
   description = "The AWS Account ID of the shared infrastructure account"
   default     = "000000000000"
 }
+
+variable "manually_configure_mtls_truststore" {
+  type        = bool
+  description = "Manually manage the truststore used for API Gateway mTLS (e.g. for prod environment)"
+  default     = false
+}
+
+variable "enable_backups" {
+  type        = bool
+  description = "Enable backups"
+  default     = false
+}
