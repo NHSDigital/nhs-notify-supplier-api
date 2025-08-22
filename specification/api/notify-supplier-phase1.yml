@@ -8,7 +8,7 @@ info:
     This specification represents the in-development 'next' version of the API schema
     and should be treated as unstable.
 security:
-  - app-level0: [ ]
+  - $ref: 'components/security/security.yml'
 paths:
   /letters:
     parameters:
@@ -55,10 +55,11 @@ paths:
       $ref: 'components/endpoints/headDataId.yml'
 components:
   securitySchemes:
-    nhs-login-p0:
-      $ref: https://proxygen.ptl.api.platform.nhs.uk/components/securitySchemes/nhs-login-p0
+    app-level3:
+      $ref: https://proxygen.ptl.api.platform.nhs.uk/components/securitySchemes/app-level3
     app-level0:
       $ref: https://proxygen.ptl.api.platform.nhs.uk/components/securitySchemes/app-level0
+
 tags:
   - name: letter
     description: ''
@@ -78,3 +79,5 @@ x-nhsd-apim:
     $ref: ./components/x-nhsd-apim/access.yml
   target:
     $ref: ./components/x-nhsd-apim/target.yml
+  target-attributes:
+    $ref: ./components/x-nhsd-apim/target-attributes.yml
