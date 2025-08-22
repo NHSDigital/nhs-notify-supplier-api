@@ -108,7 +108,8 @@
                               "FAILED",
                               "RETURNED",
                               "DESTROYED",
-                              "FORWARDED"
+                              "FORWARDED",
+                              "DELIVERED"
                             ],
                             "type": "string"
                           }
@@ -174,7 +175,8 @@
                                 "FAILED",
                                 "RETURNED",
                                 "DESTROYED",
-                                "FORWARDED"
+                                "FORWARDED",
+                                "DELIVERED"
                               ],
                               "type": "string"
                             }
