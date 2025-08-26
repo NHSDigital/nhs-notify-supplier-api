@@ -98,3 +98,10 @@ variable "enable_backups" {
   description = "Enable backups"
   default     = false
 }
+
+
+variable "ca_pem_filename" {
+  type        = string
+  description = "Filename for the CA truststore file within the s3 bucket"
+  default     = null
+}
