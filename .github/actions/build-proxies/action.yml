@@ -19,6 +19,16 @@ runs:
       run: npm ci
       shell: bash
 
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::820178564574:role/nhs-main-acct-supplier-api-github-deploy
+        role-session-name: ${{ github.run_id }}
+        aws-region: eu-west-2
+        role-skip-session-tagging: true
+
+
+
     - name: Setup Proxy Name and target
       shell: bash
       run: |
@@ -28,11 +38,26 @@ runs:
           echo "INSTANCE=$PROXYGEN_API_NAME" >> $GITHUB_ENV
           echo "TARGET=https://suppliers.dev.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
           echo "SANDBOX_TAG=latest" >> $GITHUB_ENV
+          echo "MTLS_CRT=/nhs/ssl/ca-crt" >> $GITHUB_ENV
+          echo "MTLS_KEY=/nhs/ssl/ca-key" >> $GITHUB_ENV
+          echo "MTLS_NAME=notify-supplier-mtls" >> $GITHUB_ENV
         else
           echo "TARGET=https://pr$PR_NUMBER.suppliers.dev.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
           echo "INSTANCE=$PROXYGEN_API_NAME-PR-$PR_NUMBER" >> $GITHUB_ENV
           echo "SANDBOX_TAG=pr$PR_NUMBER" >> $GITHUB_ENV
+          echo "MTLS_CRT=/nhs/pr$PR_NUMBER/ssl/ca-crt" >> $GITHUB_ENV
+          echo "MTLS_KEY=/nhs/pr$PR_NUMBER/ssl/ca-key" >> $GITHUB_ENV
+          echo "MTLS_NAME=notify-supplier-mtls-pr$PR_NUMBER" >> $GITHUB_ENV
+
         fi
+
+    - name: Download MTLS Credentials
+      shell: bash
+      run: |
+        mkdir -p ${HOME}/.proxygen
+        aws ssm get-parameter --name $MTLS_CRT --with-decryption --query "Parameter.Value" --output text > ${HOME}/.proxygen/mtls.crt
+        aws ssm get-parameter --name $MTLS_KEY --with-decryption --query "Parameter.Value" --output text > ${HOME}/.proxygen/mtls.key
+
 
 
     - name: Install Proxygen client
@@ -50,22 +75,27 @@ runs:
         envsubst < ./.github/proxygen-settings.yaml > ${HOME}/.proxygen/settings.yaml
         envsubst < ./.github/proxygen-settings.yaml | cat
 
+    - name: Register MTLS cert with proxygen
+      shell: bash
+      run: |
+        proxygen secret put --mtls-cert ${HOME}/.proxygen/mtls.crt --mtls-key ${HOME}/.proxygen/mtls.key internal-dev $MTLS_NAME
+
     - name: Build internal dev oas
       working-directory: .
       shell: bash
       run: |
         if [ -z $PR_NUMBER ]
         then
-          make build-json-oas-spec APIM_ENV=dev
+          make build-json-oas-spec APIM_ENV=internal-dev
         else
-          make build-json-oas-spec APIM_ENV=dev-pr
+          make build-json-oas-spec APIM_ENV=internal-dev-pr
         fi
 
-    - name: Set target
+    - name: Set target and cert
       shell: bash
       run: |
         jq --arg newurl "$TARGET" '.["x-nhsd-apim"].target.url = $newurl' build/notify-supplier.json > build/notify-supplier_target.json && mv build/notify-supplier_target.json build/notify-supplier.json
-
+        jq --arg newmtls "$MTLS_NAME" '.["x-nhsd-apim"].target.security.secret = $newmtls' build/notify-supplier.json > build/notify-supplier_target.json && mv build/notify-supplier_target.json build/notify-supplier.json
 
     - name: Deploy to Internal Dev
       shell: bash
