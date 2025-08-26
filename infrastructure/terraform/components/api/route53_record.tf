@@ -1,5 +1,5 @@
 resource "aws_route53_record" "main" {
-  name    = var.manually_configure_mtls_truststore ? aws_api_gateway_domain_name.main[0].regional_domain_name : aws_api_gateway_domain_name.main_nonprod[0].regional_domain_name
+  name    = var.manually_configure_mtls_truststore ? aws_api_gateway_domain_name.main[0].domain_name : aws_api_gateway_domain_name.main_nonprod[0].domain_name
   type    = "A"
   zone_id = local.root_domain_id
 
