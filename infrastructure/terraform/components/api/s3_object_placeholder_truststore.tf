@@ -3,8 +3,8 @@ resource "aws_s3_object" "placeholder_truststore" {
   count   = var.manually_configure_mtls_truststore ? 0 : 1
 
   bucket  = local.acct.s3_buckets["truststore"]["id"]
-  key     = "truststore.pem"
-  content = module.supplier_ssl.cacert_pem
+  key     = "${local.csi}/truststore.pem"
+  content = module.supplier_ssl[0].cacert_pem
 
   lifecycle {
     ignore_changes = [
