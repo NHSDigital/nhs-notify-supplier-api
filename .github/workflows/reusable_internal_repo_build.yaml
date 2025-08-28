@@ -42,7 +42,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Trigger nhs-notify-internal static environment workflow deployment
         shell: bash
