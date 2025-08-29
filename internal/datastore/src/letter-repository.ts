@@ -131,15 +131,25 @@ export class LetterRepository {
     return LetterSchema.parse(result.Attributes);
   }
 
-  async getLettersBySupplier(supplierId: string, status: string, size: number, cursor?: string): Promise<Letter[]> {
+  async getLettersBySupplier(supplierId: string, status: string, size: number, cursor?: string): Promise<{
+    nextCursor: string;
+    letters: Letter[]}> {
+    const supplierStatus = `${supplierId}#${status}`;
     const result = await this.ddbClient.send(new QueryCommand({
       TableName: this.config.lettersTableName,
       IndexName: 'supplierStatus-index',
       KeyConditionExpression: 'supplierStatus = :supplierStatus',
       Limit: size,
       ExpressionAttributeValues: {
-        ':supplierStatus': `${supplierId}#${status}`
-      }
+        ':supplierStatus': supplierStatus
+      },
+      ...(cursor != undefined ? {
+        LastEvaluatedKey: {
+          id: cursor,
+          supplierStatus,
+          supplierId,
+        }
+      } : {})
     }));
     this.log.info({
       description: 'items',
@@ -149,6 +159,9 @@ export class LetterRepository {
       cursor,
       result,
     })
-    return z.array(LetterSchema).parse(result.Items);
+    return {
+      nextCursor: result.LastEvaluatedKey.id,
+      letters: z.array(LetterSchema).parse(result.Items)
+    };
   }
 }

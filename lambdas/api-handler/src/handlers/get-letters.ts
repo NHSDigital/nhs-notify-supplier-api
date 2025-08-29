@@ -35,9 +35,9 @@ export const getLetters: APIGatewayProxyHandler = async (event) => {
 
     const cursor = event.queryStringParameters?.cursor;
 
-    const letters = await getLettersForSupplier(supplierId, status, Number(size), letterRepo, cursor);
+    const {nextCursor, letters} = await getLettersForSupplier(supplierId, status, Number(size), letterRepo, cursor);
 
-    const response = createGetLettersResponse(event.path, letters, supplierId);
+    const response = createGetLettersResponse(event.path, letters, supplierId, status, size, cursor, nextCursor);
 
     return {
       statusCode: 200,
@@ -54,7 +54,7 @@ export const getLetters: APIGatewayProxyHandler = async (event) => {
 interface GetLettersLinks {
   self: string;
   first: string;
-  last: string;
+  last?: string;
   next?: string;
   prev?: string;
 }
@@ -77,14 +77,18 @@ function createGetLettersResponse(
   baseUrl: string,
   letters: Letter[],
   supplierId: string,
+  status: string,
+  size: string,
+  cursor?: string,
+  nextCursor?: string
 ): GetLettersResponse {
+  const cursorParam = cursor != undefined ? `&cursor=${cursor}` : '';
+  const nextCursorParam = nextCursor != undefined ? `&cursor=${nextCursor}` : '';
   return {
     links: {
-      self: `${baseUrl}?page=1`,
-      first: `${baseUrl}?page=1`,
-      last: `${baseUrl}?page=1`,
-      next: `${baseUrl}?page=1`,
-      prev: `${baseUrl}?page=1`
+      self: `${baseUrl}?status=${status}&size=${size}${cursorParam}`,
+      first: `${baseUrl}?status=${status}&size=${size}`,
+      next: `${baseUrl}?status=${status}&size=${size}${nextCursorParam}`
     },
     data: {
       type: 'Letters',
