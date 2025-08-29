@@ -27,7 +27,7 @@ runs:
         if [ -z $PR_NUMBER ]
         then
           echo "INSTANCE=$PROXYGEN_API_NAME" >> $GITHUB_ENV
-          echo "TARGET=https://suppliers.dev.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
+          echo "TARGET=https://main.suppliers.dev.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
           echo "SANDBOX_TAG=latest" >> $GITHUB_ENV
           echo "MTLS_NAME=notify-supplier-mtls" >> $GITHUB_ENV
         else
