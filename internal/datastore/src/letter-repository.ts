@@ -143,6 +143,10 @@ export class LetterRepository {
     }));
     this.log.info({
       description: 'items',
+      supplierId,
+      status,
+      size,
+      cursor,
       result,
     })
     return z.array(LetterSchema).parse(result.Items);
