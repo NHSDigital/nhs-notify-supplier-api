@@ -9,7 +9,7 @@ export const getLetters: APIGatewayProxyHandler = async (event) => {
   if (event.path === '/letters') {
 
     // default to supplier1 for now
-    const supplierId = event.headers['nhsd-apim-apikey'] ?? "supplier1";
+    const supplierId = event.headers['nhsd-apim-apikey'];
 
     const letterIds = await getLetterIdsForSupplier(supplierId, letterRepo);
 
