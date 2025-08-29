@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { getLetterIdsForSupplier } from '../services/letter-operations';
+import { getLettersForSupplier } from '../services/letter-operations';
 import { createLetterRepository } from '../infrastructure/letter-repo-factory';
 import { Letter } from '../../../../internal/datastore/src';
 
@@ -35,7 +35,7 @@ export const getLetters: APIGatewayProxyHandler = async (event) => {
 
     const cursor = event.queryStringParameters?.cursor;
 
-    const letters = await getLetterIdsForSupplier(supplierId, status, Number(size), letterRepo, cursor);
+    const letters = await getLettersForSupplier(supplierId, status, Number(size), letterRepo, cursor);
 
     const response = createGetLettersResponse(event.path, letters, supplierId);
 
