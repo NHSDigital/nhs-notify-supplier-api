@@ -19,7 +19,7 @@ export const LetterStatus = z.enum([
 
 export const LetterSchema = z.object({
   id: z.string(),
-  supplierId: idRef(SupplierSchema),
+  supplierId: z.string(),
   specificationId: z.string(),
   groupId: z.string(),
   url: z.url(),
@@ -29,6 +29,8 @@ export const LetterSchema = z.object({
   supplierStatus: z.string().describe('Secondary index PK'),
   ttl: z.int()
 }).describe('Letter');
+
+export const LettersSchema = z.array(LetterSchema);
 
 /**
  * Letter is the type used for storing letters in the database.
