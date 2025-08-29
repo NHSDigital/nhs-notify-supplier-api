@@ -144,7 +144,7 @@ export class LetterRepository {
         ':supplierStatus': supplierStatus
       },
       ...(cursor != undefined ? {
-        LastEvaluatedKey: {
+        ExclusiveStartKey: {
           id: cursor,
           supplierStatus,
           supplierId,
