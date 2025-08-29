@@ -6,8 +6,9 @@ import {
   UpdateCommand,
   UpdateCommandOutput
 } from '@aws-sdk/lib-dynamodb';
-import { Letter, LetterSchema } from './types';
+import { Letter, LetterSchema, LettersSchema } from './types';
 import { Logger } from 'pino';
+import { z } from 'zod';
 
 export type PagingOptions = Partial<{
   exclusiveStartKey: Record<string, any>,
@@ -130,15 +131,37 @@ export class LetterRepository {
     return LetterSchema.parse(result.Attributes);
   }
 
-  async getLetterIdsBySupplier(supplierId: string): Promise<string[]> {
+  async getLettersBySupplier(supplierId: string, status: string, size: number, cursor?: string): Promise<{
+    nextCursor: string;
+    letters: Letter[]}> {
+    const supplierStatus = `${supplierId}#${status}`;
     const result = await this.ddbClient.send(new QueryCommand({
       TableName: this.config.lettersTableName,
-      KeyConditionExpression: 'supplierId = :supplierId',
+      IndexName: 'supplierStatus-index',
+      KeyConditionExpression: 'supplierStatus = :supplierStatus',
+      Limit: size,
       ExpressionAttributeValues: {
-        ':supplierId': supplierId
+        ':supplierStatus': supplierStatus
       },
-      ProjectionExpression: 'id'
+      ...(cursor != undefined ? {
+        ExclusiveStartKey: {
+          id: cursor,
+          supplierStatus,
+          supplierId,
+        }
+      } : {})
     }));
-    return (result.Items ?? []).map(item => item.id);
+    this.log.info({
+      description: 'items',
+      supplierId,
+      status,
+      size,
+      cursor,
+      result,
+    })
+    return {
+      nextCursor: result.LastEvaluatedKey.id,
+      letters: z.array(LetterSchema).parse(result.Items)
+    };
   }
 }

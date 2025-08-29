@@ -19,7 +19,7 @@ export const LetterStatus = z.enum([
 
 export const LetterSchema = z.object({
   id: z.string(),
-  supplierId: idRef(SupplierSchema),
+  supplierId: z.string(),
   specificationId: z.string(),
   groupId: z.string(),
   url: z.url(),

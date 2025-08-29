@@ -1,6 +1,7 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { getLetterIdsForSupplier } from '../services/letter-operations';
+import { getLettersForSupplier } from '../services/letter-operations';
 import { createLetterRepository } from '../infrastructure/letter-repo-factory';
+import { Letter } from '../../../../internal/datastore/src';
 
 const letterRepo = createLetterRepository();
 
@@ -8,12 +9,35 @@ export const getLetters: APIGatewayProxyHandler = async (event) => {
 
   if (event.path === '/letters') {
 
-    // default to supplier1 for now
-    const supplierId = event.headers['nhsd-apim-apikey'] ?? "supplier1";
+    const supplierId = event.headers['nhsd-supplier-id'];
 
-    const letterIds = await getLetterIdsForSupplier(supplierId, letterRepo);
+    if (!supplierId) {
+      return {
+        statusCode: 400,
+        body: "Bad Request: Missing supplier ID"
+      };
+    }
 
-    const response = createGetLettersResponse(event.path, letterIds);
+    const status = event.queryStringParameters?.status;
+
+    if (!status) {
+      return {
+        statusCode: 400,
+        body: "Bad Request: Missing required query parameter 'status'",
+      };
+    }
+
+    let size = event.queryStringParameters?.size;
+
+    if (!size) {
+      size = '10';
+    }
+
+    const cursor = event.queryStringParameters?.cursor;
+
+    const {nextCursor, letters} = await getLettersForSupplier(supplierId, status, Number(size), letterRepo, cursor);
+
+    const response = createGetLettersResponse(event.path, letters, supplierId, status, size, cursor, nextCursor);
 
     return {
       statusCode: 200,
@@ -30,36 +54,56 @@ export const getLetters: APIGatewayProxyHandler = async (event) => {
 interface GetLettersLinks {
   self: string;
   first: string;
-  last: string;
+  last?: string;
   next?: string;
   prev?: string;
 }
 
-interface Resource {
-  type: string;
-  id: string;
-}
+type LetterResponse = Omit<Letter, "supplierId" | "supplierStatus" | "ttl">;
+
 
 interface GetLettersResponse {
   links: GetLettersLinks;
-  data: Resource[];
+  data: {
+    type: 'Letters';
+    supplierId: string;
+    attributes: {
+      letters: Array<LetterResponse>;
+    }
+  };
 }
 
 function createGetLettersResponse(
   baseUrl: string,
-  letters: string[]
+  letters: Letter[],
+  supplierId: string,
+  status: string,
+  size: string,
+  cursor?: string,
+  nextCursor?: string
 ): GetLettersResponse {
+  const cursorParam = cursor != undefined ? `&cursor=${cursor}` : '';
+  const nextCursorParam = nextCursor != undefined ? `&cursor=${nextCursor}` : '';
   return {
     links: {
-      self: `${baseUrl}?page=1`,
-      first: `${baseUrl}?page=1`,
-      last: `${baseUrl}?page=1`,
-      next: `${baseUrl}?page=1`,
-      prev: `${baseUrl}?page=1`
+      self: `${baseUrl}?status=${status}&size=${size}${cursorParam}`,
+      first: `${baseUrl}?status=${status}&size=${size}`,
+      next: `${baseUrl}?status=${status}&size=${size}${nextCursorParam}`
     },
-    data: letters.map((letterId) => ({
-      type: "letter",
-      id: letterId,
-    })),
+    data: {
+      type: 'Letters',
+      supplierId,
+      attributes: {
+        letters: letters.map((letter) => ({
+          id: letter.id,
+          specificationId: letter.specificationId,
+          groupId: letter.groupId,
+          url: letter.url,
+          status: letter.status,
+          createdAt: letter.createdAt,
+          updatedAt: letter.updatedAt,
+        })),
+      }
+  }
   };
 }
