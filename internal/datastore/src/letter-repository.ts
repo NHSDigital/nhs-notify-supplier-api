@@ -8,6 +8,7 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { Letter, LetterSchema, LettersSchema } from './types';
 import { Logger } from 'pino';
+import { z } from 'zod';
 
 export type PagingOptions = Partial<{
   exclusiveStartKey: Record<string, any>,
@@ -140,6 +141,10 @@ export class LetterRepository {
         ':supplierStatus': `${supplierId}#${status}`
       }
     }));
-    return LettersSchema.parse(result.Items);
+    this.log({
+      description: 'items',
+      result,
+    })
+    return z.array(LetterSchema).parse(result.Items);
   }
 }

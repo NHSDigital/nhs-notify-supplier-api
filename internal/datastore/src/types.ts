@@ -30,8 +30,6 @@ export const LetterSchema = z.object({
   ttl: z.int()
 }).describe('Letter');
 
-export const LettersSchema = z.array(LetterSchema);
-
 /**
  * Letter is the type used for storing letters in the database.
  * The supplierStatus is a composite key combining supplierId and status.
