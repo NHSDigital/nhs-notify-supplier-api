@@ -141,7 +141,7 @@ export class LetterRepository {
         ':supplierStatus': `${supplierId}#${status}`
       }
     }));
-    this.log({
+    this.log.info({
       description: 'items',
       result,
     })
