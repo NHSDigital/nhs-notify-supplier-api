@@ -8,7 +8,7 @@
         "about": "https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier"
       },
       "status": "500",
-      "title": "Internal Server Error"
+      "title": "Internal server error"
     }
   ]
 }
