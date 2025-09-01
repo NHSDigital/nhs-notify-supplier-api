@@ -29,7 +29,6 @@ jobs:
             --releaseVersion "${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" \
             --targetWorkflow "dispatch-deploy-dynamic-env.yaml" \
             --targetEnvironment "pr${{ github.event.number }}" \
-            --targetComponent "branch" \
+            --targetComponent "api" \
             --targetAccountGroup "nhs-notify-supplier-api-dev" \
-            --terraformAction "apply" \
-            --overrides "branch_name=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}"
+            --terraformAction "apply"

@@ -26,6 +26,5 @@ jobs:
             --releaseVersion "main" \
             --targetWorkflow "dispatch-deploy-dynamic-env.yaml" \
             --targetEnvironment "pr${{ github.event.number }}" \
-            --targetComponent "branch" \
-            --targetAccountGroup "nhs-notify-supplier-api-dev" \
-            --terraformAction "destroy"
+            --targetComponent "api" \
+            --targetAccountGroup "nhs-notify-supplier-api-dev"
