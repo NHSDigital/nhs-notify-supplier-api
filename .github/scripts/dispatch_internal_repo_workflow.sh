@@ -11,19 +11,26 @@
 #     --targetComponent <component> \
 #     --targetAccountGroup <group> \
 #     --terraformAction <action> \
-#     --internalRef <ref>
+#     --internalRef <ref> \
+#     --overrides <overrides> \
+#     --overrideProjectName <name> \
+#     --overrideRoleName <name>
+
 #
 # All arguments are required except terraformAction, and internalRef.
 # Example:
 #   ./dispatch_internal_repo_workflow.sh \
-#     --infraRepoName "nhs-notify-iam-webauth" \
+#     --infraRepoName "nhs-notify-web-template-management" \
 #     --releaseVersion "v1.2.3" \
 #     --targetWorkflow "deploy.yaml" \
 #     --targetEnvironment "prod" \
 #     --targetComponent "web" \
 #     --targetAccountGroup "core" \
 #     --terraformAction "apply" \
-#     --internalRef "main"
+#     --internalRef "main" \
+#     --overrides "tf_var=someString" \
+#     --overrideProjectName nhs \
+#     --overrideRoleName nhs-service-iam-role
 
 set -e
 
@@ -65,6 +72,14 @@ while [[ $# -gt 0 ]]; do
       overrides="$2"
       shift 2
       ;;
+    --overrideProjectName) # Override the project name (optional)
+      overrideProjectName="$2"
+      shift 2
+      ;;
+    --overrideRoleName) # Override the role name (optional)
+      overrideRoleName="$2"
+      shift 2
+      ;;
     *)
     echo "[ERROR] Unknown argument: $1"
       exit 1
@@ -96,6 +111,9 @@ echo "  targetAccountGroup: $targetAccountGroup"
 echo "  terraformAction:    $terraformAction"
 echo "  internalRef:        $internalRef"
 echo "  overrides:          $overrides"
+echo "  overrideProjectName: $overrideProjectName"
+echo "  overrideRoleName:   $overrideRoleName"
+echo "  targetProject:      $targetProject"
 
 DISPATCH_EVENT=$(jq -ncM \
   --arg infraRepoName "$infraRepoName" \
@@ -106,11 +124,17 @@ DISPATCH_EVENT=$(jq -ncM \
   --arg terraformAction "$terraformAction" \
   --arg targetWorkflow "$targetWorkflow" \
   --arg overrides "$overrides" \
+  --arg overrideProjectName "$overrideProjectName" \
+  --arg overrideRoleName "$overrideRoleName" \
+  --arg targetProject "$targetProject" \
   '{
     "ref": "'"$internalRef"'",
     "inputs": (
       (if $infraRepoName != "" then { "infraRepoName": $infraRepoName } else {} end) +
       (if $terraformAction != "" then { "terraformAction": $terraformAction } else {} end) +
+      (if $overrideProjectName != "" then { "overrideProjectName": $overrideProjectName } else {} end) +
+      (if $overrideRoleName != "" then { "overrideRoleName": $overrideRoleName } else {} end) +
+      (if $targetProject != "" then { "targetProject": $targetProject } else {} end) +
       {
         "releaseVersion": $releaseVersion,
         "targetEnvironment": $targetEnvironment,
@@ -123,7 +147,6 @@ DISPATCH_EVENT=$(jq -ncM \
 
 echo "[INFO] Triggering workflow '$targetWorkflow' in nhs-notify-internal..."
 
-set -x
 trigger_response=$(curl -s -L \
   --fail \
   -X POST \
@@ -132,7 +155,6 @@ trigger_response=$(curl -s -L \
   -H "X-GitHub-Api-Version: 2022-11-28" \
   "https://api.github.com/repos/NHSDigital/nhs-notify-internal/actions/workflows/$targetWorkflow/dispatches" \
   -d "$DISPATCH_EVENT" 2>&1)
-set +x
 
 if [[ $? -ne 0 ]]; then
   echo "[ERROR] Failed to trigger workflow. Response: $trigger_response"
@@ -147,6 +169,7 @@ sleep 10 # Wait a few seconds before checking for the presence of the api to acc
 workflow_run_url=""
 
 for _ in {1..18}; do
+
   response=$(curl -s -L \
     -H "Accept: application/vnd.github+json" \
     -H "Authorization: Bearer ${PR_TRIGGER_PAT}" \

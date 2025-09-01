@@ -27,4 +27,7 @@ jobs:
             --targetWorkflow "dispatch-deploy-dynamic-env.yaml" \
             --targetEnvironment "pr${{ github.event.number }}" \
             --targetComponent "api" \
-            --targetAccountGroup "nhs-notify-supplier-api-dev"
+            --targetAccountGroup "nhs-notify-supplier-api-dev" \
+            --terraformAction "destroy" \
+            --overrideProjectName "nhs" \
+            --overrideRoleName "nhs-main-acct-supplier-api-github-deploy"

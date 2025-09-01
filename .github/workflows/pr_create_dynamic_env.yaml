@@ -31,4 +31,6 @@ jobs:
             --targetEnvironment "pr${{ github.event.number }}" \
             --targetComponent "api" \
             --targetAccountGroup "nhs-notify-supplier-api-dev" \
-            --terraformAction "apply"
+            --terraformAction "apply" \
+            --overrideProjectName "nhs" \
+            --overrideRoleName "nhs-main-acct-supplier-api-github-deploy"
