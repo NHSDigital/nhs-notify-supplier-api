@@ -38,15 +38,16 @@ const getLetterStatus = ({ xRequestID, id, xCorrelationID }) => new Promise(
 * xCorrelationID String An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header. (optional)
 * returns listLetters_200_response
 * */
-const listLetters = ({ xRequestID, status, xCorrelationID, page }) => new Promise(
+const listLetters = ({ xRequestID, xCorrelationID, status, cursor }) => new Promise(
   async (resolve, reject) => {
     try {
-      const fileData = await ResponseProvider.getLettersResponse(status, page);
+      const fileData = await ResponseProvider.getLettersResponse(status, cursor);
 
       resolve(Service.successResponse({
         xRequestID,
         xCorrelationID,
-        data: fileData,
+        data: fileData.data,
+        links: fileData.links
       }));
     } catch (e) {
       reject(Service.rejectResponse(

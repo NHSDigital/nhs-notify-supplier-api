@@ -160,7 +160,7 @@ export class LetterRepository {
       result,
     })
     return {
-      nextCursor: result.LastEvaluatedKey.id,
+      nextCursor: result.LastEvaluatedKey?.id,
       letters: z.array(LetterSchema).parse(result.Items)
     };
   }

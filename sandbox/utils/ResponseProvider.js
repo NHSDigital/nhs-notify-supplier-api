@@ -33,22 +33,11 @@ function mapExampleGetResponse(parameterValue, exampleResponseMap) {
 
 
 module.exports = {
-  async getLettersResponse(status, page) {
-    const getLettersfileMap = {
-      PENDING: 'data/examples/getLetters/responses/getLetters_pending.json',
-      PENDING1: 'data/examples/getLetters/responses/getLetters_pending.json',
-      PENDING5: 'data/examples/getLetters/responses/getLetters_pending-5.json',
-      PENDING10: 'data/examples/getLetters/responses/getLetters_pending-10.json',
-      ACCEPTED: 'data/examples/getLetters/responses/getLetters_accepted.json',
-    };
+  async getLettersResponse(status, cursor) {
+    const filename = !cursor ? `getLetters_${status.toLowerCase()}.json` : `getLetters_${status.toLowerCase()}_${cursor}.json`;
+    const fullPath = `data/examples/getLetters/responses/${filename}`;
 
-    const mapkey = page ? `${status}${page}` : status;
-    const filename = mapExampleGetResponse(mapkey, getLettersfileMap);
-    if (!filename) {
-      throw { message: `Not found: ${status}`, status: 404 };
-    }
-
-    const content = await fs.readFile(filename, 'utf8');
+    const content = await fs.readFile(fullPath, 'utf8');
     return JSON.parse(content);
   },
 

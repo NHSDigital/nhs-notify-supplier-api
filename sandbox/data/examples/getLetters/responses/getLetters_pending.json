@@ -1,72 +1,105 @@
 {
-  "data": [
-    {
-      "attributes": {
-        "requestedProductionStatus": "ACTIVE",
-        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
-        "status": "PENDING"
-      },
-      "id": "31B68ctLKWlhxsoil13zANnOXDs",
-      "type": "Letter"
+  "data": {
+    "attributes": {
+      "letters": [
+        {
+          "createdAt": "2025-09-01T09:56:54.483053",
+          "groupId": "45dcd4b9-f649-4315-ac49-2d9350d9305a",
+          "id": "1756720614483_00003",
+          "specificationId": "bb389023-8865-4a1e-b4da-049ae6bdca59",
+          "status": "PENDING",
+          "updatedAt": "2025-09-01T09:56:54.483070",
+          "url": "https://someurl.com"
+        },
+        {
+          "createdAt": "2025-09-01T09:56:54.502664",
+          "groupId": "9189c721-0f71-4cc2-bd07-d81592c3ce00",
+          "id": "1756720614502_00004",
+          "specificationId": "bfdb03e8-52a8-497d-b737-02f13ec0a245",
+          "status": "PENDING",
+          "updatedAt": "2025-09-01T09:56:54.502679",
+          "url": "https://someurl.com"
+        },
+        {
+          "createdAt": "2025-09-01T09:56:54.581557",
+          "groupId": "2583ef04-8613-4b4a-993a-35b9cbdfc6a8",
+          "id": "1756720614581_00008",
+          "specificationId": "7a7795ed-6594-4e3a-82d4-7c468534c71c",
+          "status": "PENDING",
+          "updatedAt": "2025-09-01T09:56:54.581573",
+          "url": "https://someurl.com"
+        },
+        {
+          "createdAt": "2025-09-01T09:56:54.600503",
+          "groupId": "d96966ec-04b3-4050-9430-b6b508770569",
+          "id": "1756720614600_00009",
+          "specificationId": "c8ed344c-24df-4a9c-a8f2-6878710f5690",
+          "status": "PENDING",
+          "updatedAt": "2025-09-01T09:56:54.600518",
+          "url": "https://someurl.com"
+        },
+        {
+          "createdAt": "2025-09-01T09:56:54.619032",
+          "groupId": "a3c4fcbc-a372-4969-929b-e1f114ebaaff",
+          "id": "1756720614619_00010",
+          "specificationId": "c8e7adcb-a8b9-416f-9f81-dc7943fdb52a",
+          "status": "PENDING",
+          "updatedAt": "2025-09-01T09:56:54.619045",
+          "url": "https://someurl.com"
+        },
+        {
+          "createdAt": "2025-09-01T09:56:54.659383",
+          "groupId": "3c51f68c-8907-4f3f-9391-2fb6ee44fd97",
+          "id": "1756720614659_00012",
+          "specificationId": "08e7781b-f483-4a0d-b595-50eefec2c262",
+          "status": "PENDING",
+          "updatedAt": "2025-09-01T09:56:54.659408",
+          "url": "https://someurl.com"
+        },
+        {
+          "createdAt": "2025-09-01T09:56:54.698009",
+          "groupId": "0bf3515d-4ed1-41d0-8227-ac189e7539f5",
+          "id": "1756720614698_00014",
+          "specificationId": "3041fbeb-bf2d-44c2-a531-3695e44fd431",
+          "status": "PENDING",
+          "updatedAt": "2025-09-01T09:56:54.698025",
+          "url": "https://someurl.com"
+        },
+        {
+          "createdAt": "2025-09-01T09:56:54.717251",
+          "groupId": "aff49848-c4ce-43ce-abab-782f1d9f2803",
+          "id": "1756720614717_00015",
+          "specificationId": "36361100-ce83-4008-b566-c16f0b2138e4",
+          "status": "PENDING",
+          "updatedAt": "2025-09-01T09:56:54.717267",
+          "url": "https://someurl.com"
+        },
+        {
+          "createdAt": "2025-09-01T09:56:54.830848",
+          "groupId": "08529964-e25a-42ea-a3ea-8bf85ab51b8b",
+          "id": "1756720614830_00021",
+          "specificationId": "3e34ce6e-a309-48d4-b5d8-23a0b9469e72",
+          "status": "PENDING",
+          "updatedAt": "2025-09-01T09:56:54.830866",
+          "url": "https://someurl.com"
+        },
+        {
+          "createdAt": "2025-09-01T09:56:54.851174",
+          "groupId": "0bae37d7-6e47-4bf1-b17d-2e31aea55ea1",
+          "id": "1756720614851_00022",
+          "specificationId": "851862de-162a-481d-b224-0510e1bb9d71",
+          "status": "PENDING",
+          "updatedAt": "2025-09-01T09:56:54.851196",
+          "url": "https://someurl.com"
+        }
+      ]
     },
-    {
-      "attributes": {
-        "requestedProductionStatus": "ACTIVE",
-        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
-        "status": "PENDING"
-      },
-      "id": "31B68hADL5mBayE3gDOnQeQ7RGr",
-      "type": "Letter"
-    },
-    {
-      "attributes": {
-        "requestedProductionStatus": "ACTIVE",
-        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
-        "status": "PENDING"
-      },
-      "id": "31B68hesrGUpMmPzvBErnZ3Nx1s",
-      "type": "Letter"
-    },
-    {
-      "attributes": {
-        "requestedProductionStatus": "ACTIVE",
-        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
-        "status": "PENDING"
-      },
-      "id": "31B68gtwhetFGlca6JdckCLduQJ",
-      "type": "Letter"
-    },
-    {
-      "attributes": {
-        "requestedProductionStatus": "ACTIVE",
-        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
-        "status": "PENDING"
-      },
-      "id": "31B68fX5yazsb8XtbIKvnH7lyFV",
-      "type": "Letter"
-    },
-    {
-      "attributes": {
-        "requestedProductionStatus": "ACTIVE",
-        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
-        "status": "PENDING"
-      },
-      "id": "31B68cdGh1HVxxqsSTVezoulItF",
-      "type": "Letter"
-    },
-    {
-      "attributes": {
-        "requestedProductionStatus": "ACTIVE",
-        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
-        "status": "PENDING"
-      },
-      "id": "31B68ctCLllXxrmkrrcent290Jv",
-      "type": "Letter"
-    }
-  ],
+    "supplierId": "70735ec9-3ba5-4fb0-bb01-b56d2df24ebb",
+    "type": "Letters"
+  },
   "links": {
-    "last": "https://api.service.nhs.uk/nhs-notify-supplier/letters?status=PENDING&page=10",
-    "next": "https://api.service.nhs.uk/nhs-notify-supplier/letters?status=PENDING&page=2",
-    "self": "https://api.service.nhs.uk/nhs-notify-supplier/letters?status=PENDING&page=1"
+    "first": "/letters?status=PENDING&size=10",
+    "next": "/letters?status=PENDING&size=10&cursor=1756720614851_00022",
+    "self": "/letters?status=PENDING&size=10"
   }
 }
