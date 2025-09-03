@@ -15,8 +15,10 @@ paths:
       - $ref: 'components/parameters/requestId.yml'
       - $ref: 'components/parameters/correlationId.yml'
     post:
+      x-eov-operation-handler: controllers/LetterController
       $ref: 'components/endpoints/postLetters.yml'
     get:
+      x-eov-operation-handler: controllers/LetterController
       $ref: 'components/endpoints/listLetters.yml'
   '/letters/{id}':
     parameters:
@@ -24,35 +26,38 @@ paths:
       - $ref: 'components/parameters/correlationId.yml'
       - $ref: 'components/parameters/resourceId.yml'
     get:
+      x-eov-operation-handler: controllers/LetterController
       $ref: 'components/endpoints/getLetterStatus.yml'
     patch:
+      x-eov-operation-handler: controllers/LetterController
       $ref: 'components/endpoints/patchLetter.yml'
+  '/letters/{id}/data':
+    parameters:
+      - $ref: 'components/parameters/resourceId.yml'
+      - $ref: 'components/parameters/requestId.yml'
+      - $ref: 'components/parameters/correlationId.yml'
+    get:
+      x-eov-operation-handler: controllers/DataController
+      $ref: 'components/endpoints/getDataId.yml'
+    head:
+      x-eov-operation-handler: controllers/DataController
+      $ref: 'components/endpoints/headDataId.yml'
   /mi:
     parameters:
       - $ref: 'components/parameters/requestId.yml'
       - $ref: 'components/parameters/correlationId.yml'
-    get:
-      $ref: 'components/endpoints/listMI.yml'
     post:
+      x-eov-operation-handler: controllers/MiController
       $ref: 'components/endpoints/createMI.yml'
-
-  '/mi/{id}':
-    parameters:
-      - $ref: 'components/parameters/requestId.yml'
-      - $ref: 'components/parameters/correlationId.yml'
-      - $ref: 'components/parameters/resourceId.yml'
+  /_status:
     get:
-      $ref: 'components/endpoints/getMI.yml'
-
-  '/data/{id}':
-    parameters:
-      - $ref: 'components/parameters/resourceId.yml'
-      - $ref: 'components/parameters/requestId.yml'
-      - $ref: 'components/parameters/correlationId.yml'
-    get:
-      $ref: 'components/endpoints/getDataId.yml'
-    head:
-      $ref: 'components/endpoints/headDataId.yml'
+      x-eov-operation-handler: controllers/DefaultController
+      description: Returns 200 OK if the service is up.
+      operationId: getStatus
+      responses:
+        "200":
+          description: Service is healthy
+      summary: Health check endpoint
 components:
   securitySchemes:
     app-level3:

@@ -11,4 +11,4 @@ content:
     examples:
       post-letter-request:
         value:
-          $ref: ../examples/postLetter/requests/postLetter.json
+          $ref: ../examples/postLetter/requests/postLetters.json
