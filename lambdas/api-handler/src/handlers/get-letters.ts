@@ -7,7 +7,7 @@ const letterRepo = createLetterRepository();
 
 export const getLetters: APIGatewayProxyHandler = async (event) => {
   if (event.path === "/letters") {
-    const supplierId = event.headers["nhsd-supplier-id"];
+    const supplierId = event.headers ? event.headers["NHSD-Supplier-ID"] : undefined;
 
     if (!supplierId) {
       return {

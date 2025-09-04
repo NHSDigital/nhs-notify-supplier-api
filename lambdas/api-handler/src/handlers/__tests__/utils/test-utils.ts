@@ -8,7 +8,7 @@ export function makeApiGwEvent(
     path: '/',
     httpMethod: 'GET',
     headers: {
-      'nhsd-supplier-id': 'supplier1'
+      'NHSD-Supplier-ID': 'supplier1'
     },
     multiValueHeaders: {},
     queryStringParameters: null,

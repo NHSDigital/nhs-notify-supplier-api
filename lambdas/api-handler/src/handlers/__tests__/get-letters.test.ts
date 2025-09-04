@@ -76,8 +76,20 @@ describe('API Lambda handler', () => {
     });
   });
 
-  it('returns 400 for missing supplier ID', async () => {
+  it('returns 400 for missing supplier ID (empty headers)', async () => {
     const event = makeApiGwEvent({ path: "/letters", headers: {} });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+    const result = await getLetters(event, context, callback);
+
+    expect(result).toEqual({
+      statusCode: 400,
+      body: 'Bad Request: Missing supplier ID',
+    });
+  });
+
+  it('returns 400 for missing supplier ID (undefined headers)', async () => {
+    const event = makeApiGwEvent({ path: "/letters", headers: undefined });
     const context = mockDeep<Context>();
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
