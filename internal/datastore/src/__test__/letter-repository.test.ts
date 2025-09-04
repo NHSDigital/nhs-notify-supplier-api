@@ -79,7 +79,7 @@ describe('LetterRepository', () => {
     }));
   });
 
-  test('throws an error when fetching a letter that does not e ist', async () => {
+  test('throws an error when fetching a letter that does not exit', async () => {
     await expect(letterRepository.getLetterById('supplier1', 'letter1'))
       .rejects.toThrow('Letter with id letter1 not found for supplier supplier1');
   });
