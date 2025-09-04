@@ -2,14 +2,19 @@ import { APIGatewayProxyHandler } from "aws-lambda";
 import { getLettersForSupplier } from "../services/letter-operations";
 import { createLetterRepository } from "../infrastructure/letter-repo-factory";
 import { LetterBase } from "../../../../internal/datastore/src";
+import pino from 'pino';
 
 const letterRepo = createLetterRepository();
+const log = pino();
 
 export const getLetters: APIGatewayProxyHandler = async (event) => {
   if (event.path === "/letters") {
     const supplierId = event.headers ? event.headers["NHSD-Supplier-ID"] : undefined;
 
     if (!supplierId) {
+      log.info({
+        description: 'Supplier ID not provided'
+      });
       return {
         statusCode: 400,
         body: "Bad Request: Missing supplier ID",
@@ -34,11 +39,24 @@ export const getLetters: APIGatewayProxyHandler = async (event) => {
 
     const response = createGetLettersResponse(letters);
 
+    log.info({
+      description: 'Pending letters successfully fetched',
+      supplierId,
+      size,
+      status,
+      lettersCount: letters.length
+    });
+
     return {
       statusCode: 200,
       body: JSON.stringify(response, null, 2),
     };
   }
+
+  log.warn({
+    description: 'Unsupported event path',
+    path: event.path
+  });
 
   return {
     statusCode: 404,
