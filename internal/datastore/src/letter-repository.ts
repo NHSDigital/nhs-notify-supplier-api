@@ -6,7 +6,7 @@ import {
   UpdateCommand,
   UpdateCommandOutput
 } from '@aws-sdk/lib-dynamodb';
-import { Letter, LetterSchema, LettersSchema } from './types';
+import { Letter, LetterBase, LetterSchema, LetterSchemaBase } from './types';
 import { Logger } from 'pino';
 import { z } from 'zod';
 
@@ -30,10 +30,11 @@ export class LetterRepository {
               readonly config: LetterRepositoryConfig) {
   }
 
-  async putLetter(letter: Omit<Letter, 'ttl' | 'supplierStatus'>): Promise<Letter> {
+  async putLetter(letter: Omit<Letter, 'ttl' | 'supplierStatus' | 'supplierStatusSk'>): Promise<Letter> {
     const letterDb: Letter = {
       ...letter,
       supplierStatus: `${letter.supplierId}#${letter.status}`,
+      supplierStatusSk: letter.id,
       ttl: Math.floor(Date.now() / 1000 + 60 * 60 * this.config.ttlHours)
     };
     try {
@@ -131,37 +132,21 @@ export class LetterRepository {
     return LetterSchema.parse(result.Attributes);
   }
 
-  async getLettersBySupplier(supplierId: string, status: string, size: number, cursor?: string): Promise<{
-    nextCursor: string;
-    letters: Letter[]}> {
+  async getLettersBySupplier(supplierId: string, status: string, size: number): Promise<LetterBase[]> {
     const supplierStatus = `${supplierId}#${status}`;
     const result = await this.ddbClient.send(new QueryCommand({
       TableName: this.config.lettersTableName,
       IndexName: 'supplierStatus-index',
       KeyConditionExpression: 'supplierStatus = :supplierStatus',
       Limit: size,
+      ExpressionAttributeNames: {
+        '#status': 'status' // reserved keyword
+      },
       ExpressionAttributeValues: {
         ':supplierStatus': supplierStatus
       },
-      ...(cursor != undefined ? {
-        ExclusiveStartKey: {
-          id: cursor,
-          supplierStatus,
-          supplierId,
-        }
-      } : {})
+      ProjectionExpression: 'id, #status, specificationId, reasonCode, reasonText'
     }));
-    this.log.info({
-      description: 'items',
-      supplierId,
-      status,
-      size,
-      cursor,
-      result,
-    })
-    return {
-      nextCursor: result.LastEvaluatedKey?.id,
-      letters: z.array(LetterSchema).parse(result.Items)
-    };
+    return z.array(LetterSchemaBase).parse(result.Items ?? []);
   }
 }

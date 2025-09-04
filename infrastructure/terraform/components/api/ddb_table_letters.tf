@@ -13,7 +13,7 @@ resource "aws_dynamodb_table" "letters" {
   global_secondary_index {
     name            = "supplierStatus-index"
     hash_key        = "supplierStatus"
-    range_key       = "id"
+    range_key       = "supplierStatusSk"
     projection_type = "ALL"
   }
 
@@ -29,6 +29,11 @@ resource "aws_dynamodb_table" "letters" {
 
   attribute {
     name = "supplierStatus"
+    type = "S"
+  }
+
+  attribute {
+    name = "supplierStatusSk"
     type = "S"
   }
 
