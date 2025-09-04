@@ -33,8 +33,8 @@ function mapExampleGetResponse(parameterValue, exampleResponseMap) {
 
 
 module.exports = {
-  async getLettersResponse(status, cursor) {
-    const filename = !cursor ? `getLetters_${status.toLowerCase()}.json` : `getLetters_${status.toLowerCase()}_${cursor}.json`;
+  async getLettersResponse(status) {
+    const filename = `getLetters_${status.toLowerCase()}.json`;
     const fullPath = `data/examples/getLetters/responses/${filename}`;
 
     const content = await fs.readFile(fullPath, 'utf8');

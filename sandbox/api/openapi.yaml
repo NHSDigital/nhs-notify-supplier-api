@@ -44,40 +44,6 @@ paths:
         schema:
           type: string
         style: simple
-      - description: Status of a letter
-        explode: true
-        in: query
-        name: status
-        required: true
-        schema:
-          default: PENDING
-          description: The supplier status of an individual letter
-          enum:
-          - PENDING
-          - ACCEPTED
-          - REJECTED
-          - PRINTED
-          - ENCLOSED
-          - CANCELLED
-          - DISPATCHED
-          - DELIVERED
-          - FAILED
-          - RETURNED
-          - DESTROYED
-          - FORWARDED
-          type: string
-        style: form
-      - description: |-
-          Cursor pointing at the last Letter ID from the previous page. Use the links section in the response
-          body to determine whether any further pages of results exist.
-        explode: true
-        in: query
-        name: cursor
-        required: false
-        schema:
-          example: 1756720614483_00003
-          type: string
-        style: form
       - description: |-
           Size of the page to fetched.
         explode: true
@@ -97,7 +63,6 @@ paths:
                   value:
                     data:
                     - attributes:
-                        requestedProductionStatus: ACTIVE
                         specificationId: 2WL5eYSWGzCHlGmzNxuqVusPxDg
                         status: PENDING
                       id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
