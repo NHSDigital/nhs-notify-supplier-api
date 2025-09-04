@@ -8,8 +8,8 @@ module "domain_truststore" {
   project        = var.project
   region         = var.region
 
-  default_tags   = local.default_tags
-  kms_key_arn = module.kms.key_id
+  default_tags = local.default_tags
+  kms_key_arn  = module.kms.key_id
 
   bucket_logging_target = {
     bucket = module.logging_bucket.bucket

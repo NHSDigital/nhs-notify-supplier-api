@@ -8,8 +8,8 @@ resource "aws_api_gateway_domain_name" "main" {
   }
 
   mutual_tls_authentication {
-      truststore_uri     = var.manually_configure_mtls_truststore ? "s3://${local.acct.s3_buckets["truststore"]["id"]}/${var.ca_pem_filename}" : "s3://${local.acct.s3_buckets["truststore"]["id"]}/${aws_s3_object.placeholder_truststore[0].key}"
-      truststore_version = var.manually_configure_mtls_truststore ? data.aws_s3_object.external_ca_cert[0].version_id : aws_s3_object.placeholder_truststore[0].version_id
+    truststore_uri     = var.manually_configure_mtls_truststore ? "s3://${local.acct.s3_buckets["truststore"]["id"]}/${var.ca_pem_filename}" : "s3://${local.acct.s3_buckets["truststore"]["id"]}/${aws_s3_object.placeholder_truststore[0].key}"
+    truststore_version = var.manually_configure_mtls_truststore ? data.aws_s3_object.external_ca_cert[0].version_id : aws_s3_object.placeholder_truststore[0].version_id
   }
 }
 
@@ -17,5 +17,5 @@ data "aws_s3_object" "external_ca_cert" {
   count = var.manually_configure_mtls_truststore ? 1 : 0
 
   bucket = local.acct.s3_buckets["truststore"]["id"]
-  key = "${local.csi}/${var.ca_pem_filename}"
+  key    = "${local.csi}/${var.ca_pem_filename}"
 }
