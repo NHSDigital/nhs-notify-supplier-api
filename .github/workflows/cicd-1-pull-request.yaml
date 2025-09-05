@@ -46,8 +46,6 @@ jobs:
           echo "terraform_version=$(grep "^terraform\s" .tool-versions | cut -f2 -d' ')" >> $GITHUB_OUTPUT
           echo "version=$(echo $version)" >> $GITHUB_OUTPUT
           echo "is_version_prerelease=$(if [[ $version == *-* ]]; then echo "true"; else echo "false"; fi)" >> $GITHUB_OUTPUT
-          does_pull_request_exist: ${{ steps.pr_exists.outputs.does_pull_request_exist }}
-          pr_number: ${{ steps.pr_exists.outputs.pr_number }}
       - name: "Check if pull request exists for this branch"
         id: pr_exists
         env:
