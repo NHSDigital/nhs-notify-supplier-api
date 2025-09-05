@@ -45,10 +45,10 @@ paths:
           type: string
         style: simple
       - description: |-
-          Size of the page to fetched.
+          Limit maximum number of items to be fetched
         explode: true
         in: query
-        name: size
+        name: limit
         required: false
         schema:
           example: 10

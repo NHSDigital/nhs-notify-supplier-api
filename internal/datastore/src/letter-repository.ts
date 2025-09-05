@@ -132,13 +132,13 @@ export class LetterRepository {
     return LetterSchema.parse(result.Attributes);
   }
 
-  async getLettersBySupplier(supplierId: string, status: string, size: number): Promise<LetterBase[]> {
+  async getLettersBySupplier(supplierId: string, status: string, limit: number): Promise<LetterBase[]> {
     const supplierStatus = `${supplierId}#${status}`;
     const result = await this.ddbClient.send(new QueryCommand({
       TableName: this.config.lettersTableName,
       IndexName: 'supplierStatus-index',
       KeyConditionExpression: 'supplierStatus = :supplierStatus',
-      Limit: size,
+      Limit: limit,
       ExpressionAttributeNames: {
         '#status': 'status' // reserved keyword
       },

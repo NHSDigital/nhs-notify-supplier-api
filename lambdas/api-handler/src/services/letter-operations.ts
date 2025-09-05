@@ -4,9 +4,9 @@ import { LetterApiResource, LetterApiDocument } from '../contracts/letter-api';
 import { toApiLetter } from '../mappers/letter-mapper';
 
 
-export const getLettersForSupplier = async (supplierId: string, status: string, size: number, letterRepo: LetterRepository): Promise<LetterBase[]> => {
+export const getLettersForSupplier = async (supplierId: string, status: string, limit: number, letterRepo: LetterRepository): Promise<LetterBase[]> => {
 
-  return await letterRepo.getLettersBySupplier(supplierId, status, size);
+  return await letterRepo.getLettersBySupplier(supplierId, status, limit);
 }
 
 export const patchLetterStatus = async (letterToUpdate: LetterApiResource, letterId: string, supplierId: string, letterRepo: LetterRepository): Promise<LetterApiDocument> => {

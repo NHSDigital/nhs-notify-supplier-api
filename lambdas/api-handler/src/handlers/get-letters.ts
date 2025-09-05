@@ -24,16 +24,16 @@ export const getLetters: APIGatewayProxyHandler = async (event) => {
     // The endpoint should only return pending letters for now
     const status = "PENDING";
 
-    let size = event.queryStringParameters?.size;
+    let limit = event.queryStringParameters?.limit;
 
-    if (!size) {
-      size = "10";
+    if (!limit) {
+      limit = "10";
     }
 
     const letters = await getLettersForSupplier(
       supplierId,
       status,
-      Number(size),
+      Number(limit),
       letterRepo,
     );
 
@@ -42,7 +42,7 @@ export const getLetters: APIGatewayProxyHandler = async (event) => {
     log.info({
       description: 'Pending letters successfully fetched',
       supplierId,
-      size,
+      limit,
       status,
       lettersCount: letters.length
     });
