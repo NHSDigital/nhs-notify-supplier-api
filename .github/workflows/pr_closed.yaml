@@ -56,10 +56,8 @@ jobs:
         run: |
           bash .github/scripts/dispatch_internal_repo_workflow.sh \
             --releaseVersion "main" \
-            --targetWorkflow "dispatch-deploy-static-notify-supplier-api-env.yaml " \
+            --targetWorkflow "dispatch-deploy-static-notify-supplier-api-env.yaml" \
             --targetEnvironment "main" \
             --targetAccountGroup "nhs-notify-supplier-api-dev" \
             --targetComponent "${{ matrix.component }}" \
-            --terraformAction "apply" \
-            --overrideProjectName "nhs" \
-            --overrideRoleName "nhs-main-acct-supplier-api-github-deploy"
+            --terraformAction "apply"
