@@ -36,6 +36,7 @@ No requirements.
 | <a name="module_kms"></a> [kms](#module\_kms) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.20/terraform-kms.zip | n/a |
 | <a name="module_logging_bucket"></a> [logging\_bucket](#module\_logging\_bucket) | git::https://github.com/NHSDigital/nhs-notify-shared-modules.git//infrastructure/modules/s3bucket | v2.0.17 |
 | <a name="module_patch_letters"></a> [patch\_letters](#module\_patch\_letters) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.20/terraform-lambda.zip | n/a |
+| <a name="module_s3bucket_test_letters"></a> [s3bucket\_test\_letters](#module\_s3bucket\_test\_letters) | git::https://github.com/NHSDigital/nhs-notify-shared-modules.git//infrastructure/modules/s3bucket | v2.0.20 |
 | <a name="module_supplier_ssl"></a> [supplier\_ssl](#module\_supplier\_ssl) | git::https://github.com/NHSDigital/nhs-notify-shared-modules.git//infrastructure/modules/ssl | v2.0.17 |
 ## Outputs
 
