@@ -30,10 +30,34 @@ export const getLetters: APIGatewayProxyHandler = async (event) => {
       limit = "10";
     }
 
+    let limitNumber = Number(limit);
+
+    if (isNaN(limitNumber)) {
+      log.info({
+        description: "limit parameter is not a number",
+        limit,
+      });
+      return {
+        statusCode: 400,
+        body: "Bad Request: limit parameter is not a number",
+      };
+    }
+
+    if (limitNumber < 0) {
+      log.info({
+        description: "limit parameter is not positive",
+        limit,
+      });
+      return {
+        statusCode: 400,
+        body: "Bad Request: limit parameter is not positive",
+      };
+    }
+
     const letters = await getLettersForSupplier(
       supplierId,
       status,
-      Number(limit),
+      limitNumber,
       letterRepo,
     );
 

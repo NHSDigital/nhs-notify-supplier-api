@@ -76,6 +76,36 @@ describe('API Lambda handler', () => {
     });
   });
 
+  it("returns 400 if the limit parameter is not a number", async () => {
+    const event = makeApiGwEvent({
+      path: "/letters",
+      queryStringParameters: { limit: "1%" },
+    });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+    const result = await getLetters(event, context, callback);
+
+    expect(result).toEqual({
+      statusCode: 400,
+      body: "Bad Request: limit parameter is not a number",
+    });
+  });
+
+  it("returns 400 if the limit parameter is not positive", async () => {
+    const event = makeApiGwEvent({
+      path: "/letters",
+      queryStringParameters: { limit: "-1" },
+    });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+    const result = await getLetters(event, context, callback);
+
+    expect(result).toEqual({
+      statusCode: 400,
+      body: "Bad Request: limit parameter is not positive",
+    });
+  });
+
   it('returns 400 for missing supplier ID (empty headers)', async () => {
     const event = makeApiGwEvent({ path: "/letters", headers: {} });
     const context = mockDeep<Context>();
