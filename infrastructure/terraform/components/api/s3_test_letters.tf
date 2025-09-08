@@ -10,7 +10,7 @@ module "s3bucket_test_letters" {
   component      = var.component
 
   acl           = "private"
-  force_destroy = var.force_s3_destroy
+  force_destroy = var.force_destroy
   versioning    = false
 
   bucket_logging_target = {

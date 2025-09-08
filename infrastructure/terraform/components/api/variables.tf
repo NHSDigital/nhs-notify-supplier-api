@@ -105,3 +105,9 @@ variable "ca_pem_filename" {
   description = "Filename for the CA truststore file within the s3 bucket"
   default     = null
 }
+
+variable "force_destroy" {
+  type        = bool
+  description = "Flag to force deletion of S3 buckets"
+  default     = false
+}
