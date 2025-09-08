@@ -1,5 +1,5 @@
 module "get_letters" {
-  source = "git::https://github.com/NHSDigital/nhs-notify-shared-modules.git//infrastructure/modules/lambda?ref=v2.0.10"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.20/terraform-lambda.zip"
 
   function_name = "get_letters"
   description   = "Get paginated letter ids"
@@ -37,7 +37,7 @@ module "get_letters" {
 
   lambda_env_vars = {
     LETTERS_TABLE_NAME = aws_dynamodb_table.letters.name,
-    LETTER_TTL_HOURS = 24
+    LETTER_TTL_HOURS   = 24
   }
 }
 
