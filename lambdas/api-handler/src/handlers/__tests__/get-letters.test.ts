@@ -19,16 +19,19 @@ describe('API Lambda handler', () => {
       {
         id: "l1",
         specificationId: "s1",
+        groupId: 'g1',
         status: "PENDING",
       },
       {
         id: "l2",
         specificationId: "s1",
+        groupId: 'g1',
         status: "PENDING",
       },
       {
         id: "l3",
         specificationId: "s1",
+        groupId: 'g1',
         status: "PENDING",
       },
     ]);
@@ -43,17 +46,17 @@ describe('API Lambda handler', () => {
         {
           id: "l1",
           type: "Letter",
-          attributes: { specificationId: "s1", status: "PENDING" },
+          attributes: { specificationId: "s1", groupId: 'g1', status: "PENDING" },
         },
         {
           id: "l2",
           type: "Letter",
-          attributes: { specificationId: "s1", status: "PENDING" },
+          attributes: { specificationId: "s1", groupId: 'g1', status: "PENDING" },
         },
         {
           id: "l3",
           type: "Letter",
-          attributes: { specificationId: "s1", status: "PENDING" },
+          attributes: { specificationId: "s1", groupId: 'g1', status: "PENDING" },
         },
       ],
     };

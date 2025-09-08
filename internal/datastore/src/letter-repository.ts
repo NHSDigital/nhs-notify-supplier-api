@@ -145,7 +145,7 @@ export class LetterRepository {
       ExpressionAttributeValues: {
         ':supplierStatus': supplierStatus
       },
-      ProjectionExpression: 'id, #status, specificationId, reasonCode, reasonText'
+      ProjectionExpression: 'id, #status, specificationId, groupId, reasonCode, reasonText'
     }));
     return z.array(LetterSchemaBase).parse(result.Items ?? []);
   }

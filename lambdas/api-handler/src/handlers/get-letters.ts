@@ -94,6 +94,7 @@ interface GetLettersResponse {
     id: string;
     attributes: {
       specificationId: string;
+      groupId: string;
       status: string;
       reasonCode?: number;
       reasonText?: string;
@@ -108,6 +109,7 @@ function createGetLettersResponse(letters: LetterBase[]): GetLettersResponse {
       type: "Letter",
       attributes: {
         specificationId: letter.specificationId,
+        groupId: letter.groupId,
         status: letter.status,
         reasonCode: letter.reasonCode,
         reasonText: letter.reasonText,

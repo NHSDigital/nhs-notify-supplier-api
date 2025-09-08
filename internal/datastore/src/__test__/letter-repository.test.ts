@@ -238,16 +238,19 @@ describe('LetterRepository', () => {
       {
         id: "letter1",
         specificationId: "specification1",
+        groupId: 'group1',
         status: "PENDING",
       },
       {
         id: "letter2",
         specificationId: "specification1",
+        groupId: 'group1',
         status: "PENDING",
       },
       {
         id: "letter3",
         specificationId: "specification1",
+        groupId: 'group1',
         status: "PENDING",
       },
     ]);

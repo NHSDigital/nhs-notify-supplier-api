@@ -21,13 +21,13 @@ export const LetterSchemaBase = z.object({
   id: z.string(),
   status: LetterStatus,
   specificationId: z.string(),
+  groupId: z.string(),
   reasonCode: z.number().optional(),
   reasonText: z.string().optional()
 });
 
 export const LetterSchema = LetterSchemaBase.extend({
   supplierId: z.string(),
-  groupId: z.string(),
   url: z.url(),
   createdAt: z.string(),
   updatedAt: z.string(),
