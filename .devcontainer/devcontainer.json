@@ -79,12 +79,8 @@
     "ghcr.io/devcontainers/features/ruby:1": {}
   },
   "mounts": [
-    "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached",
-    "source=${localEnv:HOME}/.gitconfig,target=/home/vscode/.gitconfig,type=bind,consistency=cached"
+    "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"
   ],
   "name": "Devcontainer",
-  "postCreateCommand": "scripts/devcontainer/postcreatecommand.sh",
-  "runArgs": [
-    "--platform=linux/amd64"
-  ]
+  "postCreateCommand": "scripts/devcontainer/postcreatecommand.sh"
 }
