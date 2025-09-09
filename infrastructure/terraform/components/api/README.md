@@ -29,12 +29,14 @@ No requirements.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_authorizer_lambda"></a> [authorizer\_lambda](#module\_authorizer\_lambda) | git::https://github.com/NHSDigital/nhs-notify-shared-modules.git//infrastructure/modules/lambda | v2.0.4 |
+| <a name="module_authorizer_lambda"></a> [authorizer\_lambda](#module\_authorizer\_lambda) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.20/terraform-lambda.zip | n/a |
 | <a name="module_domain_truststore"></a> [domain\_truststore](#module\_domain\_truststore) | git::https://github.com/NHSDigital/nhs-notify-shared-modules.git//infrastructure/modules/s3bucket | v2.0.17 |
 | <a name="module_get_letters"></a> [get\_letters](#module\_get\_letters) | git::https://github.com/NHSDigital/nhs-notify-shared-modules.git//infrastructure/modules/lambda | v2.0.10 |
 | <a name="module_kms"></a> [kms](#module\_kms) | git::https://github.com/NHSDigital/nhs-notify-shared-modules.git//infrastructure/modules/kms | v2.0.10 |
+| <a name="module_get_letters"></a> [get\_letters](#module\_get\_letters) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.20/terraform-lambda.zip | n/a |
+| <a name="module_kms"></a> [kms](#module\_kms) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.20/terraform-kms.zip | n/a |
 | <a name="module_logging_bucket"></a> [logging\_bucket](#module\_logging\_bucket) | git::https://github.com/NHSDigital/nhs-notify-shared-modules.git//infrastructure/modules/s3bucket | v2.0.17 |
-| <a name="module_patch_letters"></a> [patch\_letters](#module\_patch\_letters) | git::https://github.com/NHSDigital/nhs-notify-shared-modules.git//infrastructure/modules/lambda | v2.0.10 |
+| <a name="module_patch_letters"></a> [patch\_letters](#module\_patch\_letters) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.20/terraform-lambda.zip | n/a |
 | <a name="module_supplier_ssl"></a> [supplier\_ssl](#module\_supplier\_ssl) | git::https://github.com/NHSDigital/nhs-notify-shared-modules.git//infrastructure/modules/ssl | v2.0.17 |
 ## Outputs
 
