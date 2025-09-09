@@ -1,7 +1,5 @@
 #!/bin/bash
 
-pipx install pre-commit
-
 rm -Rf ~/.asdf
 git clone https://github.com/asdf-vm/asdf.git ~/.asdf;
 chmod +x ~/.asdf/asdf.sh;
