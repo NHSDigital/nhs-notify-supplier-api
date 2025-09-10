@@ -1,10 +1,12 @@
-summary: Get a list of letters
+summary: Get a list of PENDING letters
 operationId: listLetters
 tags:
   - letter
+# We have disabled pagination and will only return PENDING letters via this endpoint for now
 parameters:
-  - $ref: "../parameters/letterStatus.yml"
-  - $ref: "../parameters/pageNumber.yml"
+#  - $ref: "../parameters/letterStatus.yml"
+#  - $ref: "../parameters/pageNumber.yml"
+  - $ref: "../parameters/limit.yml"
 description: The key use of this endpoint is to query letters which are ready to be printed
 responses:
   '200':

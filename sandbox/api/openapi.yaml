@@ -32,6 +32,7 @@ paths:
         name: X-Request-ID
         required: true
         schema:
+          example: dcb9c8dc-c2f4-4d5f-8674-a2e913e040b2
           type: string
         style: simple
       - description: |-
@@ -42,16 +43,16 @@ paths:
         name: X-Correlation-ID
         required: false
         schema:
+          example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
           type: string
         style: simple
-      - description: |-
-          Limit maximum number of items to be fetched
+      - description: The maximum number of items to return in a single request
         explode: true
         in: query
         name: limit
         required: false
         schema:
-          example: 10
+          example: 100
           type: number
         style: form
       responses:
@@ -121,7 +122,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/listLetters_404_response"
           description: Server error
-      summary: Get a list of letters
+      summary: Get a list of PENDING letters
       tags:
       - letter
       x-eov-operation-handler: controllers/LetterController
@@ -134,6 +135,7 @@ paths:
         name: X-Request-ID
         required: true
         schema:
+          example: dcb9c8dc-c2f4-4d5f-8674-a2e913e040b2
           type: string
         style: simple
       - description: |-
@@ -144,6 +146,7 @@ paths:
         name: X-Correlation-ID
         required: false
         schema:
+          example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
           type: string
         style: simple
       requestBody:
@@ -156,7 +159,6 @@ paths:
                   - attributes:
                       reasonCode: 100
                       reasonText: failed validation
-                      requestedProductionStatus: ACTIVE
                       specificationId: 2WL5eYSWGzCHlGmzNxuqVusPxDg
                       status: REJECTED
                     id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
@@ -175,13 +177,12 @@ paths:
                     - attributes:
                         reasonCode: 100
                         reasonText: failed validation
-                        requestedProductionStatus: ACTIVE
                         specificationId: 2WL5eYSWGzCHlGmzNxuqVusPxDg
                         status: REJECTED
                       id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
                       type: Letter
               schema:
-                $ref: "#/components/schemas/postLetters_200_response"
+                $ref: "#/components/schemas/listLetters_200_response"
           description: Letter Resources Updated successfully
         "404":
           content:
@@ -249,6 +250,7 @@ paths:
         name: X-Request-ID
         required: true
         schema:
+          example: dcb9c8dc-c2f4-4d5f-8674-a2e913e040b2
           type: string
         style: simple
       - description: |-
@@ -259,6 +261,7 @@ paths:
         name: X-Correlation-ID
         required: false
         schema:
+          example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
           type: string
         style: simple
       - description: Unique identifier of this resource
@@ -281,7 +284,6 @@ paths:
                       attributes:
                         reasonCode: 100
                         reasonText: failed validation
-                        requestedProductionStatus: ACTIVE
                         specificationId: 2WL5eYSWGzCHlGmzNxuqVusPxDg
                         status: REJECTED
                       id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
@@ -355,6 +357,7 @@ paths:
         name: X-Request-ID
         required: true
         schema:
+          example: dcb9c8dc-c2f4-4d5f-8674-a2e913e040b2
           type: string
         style: simple
       - description: |-
@@ -365,6 +368,7 @@ paths:
         name: X-Correlation-ID
         required: false
         schema:
+          example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
           type: string
         style: simple
       - description: Unique identifier of this resource
@@ -386,7 +390,6 @@ paths:
                     attributes:
                       reasonCode: 100
                       reasonText: failed validation
-                      requestedProductionStatus: ACTIVE
                       specificationId: 2WL5eYSWGzCHlGmzNxuqVusPxDg
                       status: REJECTED
                     id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
@@ -405,7 +408,6 @@ paths:
                       attributes:
                         reasonCode: 100
                         reasonText: failed validation
-                        requestedProductionStatus: ACTIVE
                         specificationId: 2WL5eYSWGzCHlGmzNxuqVusPxDg
                         status: REJECTED
                       id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
@@ -485,333 +487,7 @@ paths:
       tags:
       - letter
       x-eov-operation-handler: controllers/LetterController
-  /mi:
-    get:
-      operationId: listMi
-      parameters:
-      - description: "Unique request identifier, in the format of a GUID"
-        explode: false
-        in: header
-        name: X-Request-ID
-        required: true
-        schema:
-          type: string
-        style: simple
-      - description: |-
-          An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place.
-          The ID will be returned in a response header.
-        explode: false
-        in: header
-        name: X-Correlation-ID
-        required: false
-        schema:
-          type: string
-        style: simple
-      responses:
-        "200":
-          content:
-            application/vnd.api+json:
-              examples:
-                list-mi:
-                  value:
-                    data:
-                    - attributes:
-                        cost: 10.25
-                        lineItem: Letter
-                        quantity: 22
-                        specificationId: da0b1495-c7cb-468c-9d81-07dee089d728
-                        stockRemaining: 2000
-                        timestamp: 2023-11-17T14:27:51.413Z
-                      id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
-                      type: ManagementInformation
-                    - attributes:
-                        cost: 10.25
-                        lineItem: Letter
-                        quantity: 22
-                        specificationId: 1234569-c7cb-468c-9d81-07dee089d728
-                        stockRemaining: 2000
-                        timestamp: 2023-11-17T14:27:51.413Z
-                      id: 4823ju56dglGmzNxuqVusPxDg
-                      type: ManagementInformation
-              schema:
-                $ref: "#/components/schemas/listMi_200_response"
-          description: List Management Information
-        "404":
-          content:
-            application/vnd.api+json:
-              examples:
-                error-not-found:
-                  value:
-                    errors:
-                    - code: NOTIFY_RESOURCE_NOT_FOUND
-                      detail: No resource found with that ID
-                      id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
-                      links:
-                        about: https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier
-                      status: "404"
-                      title: Resource not found
-              schema:
-                $ref: "#/components/schemas/listLetters_404_response"
-          description: Resource not found
-        "429":
-          content:
-            application/vnd.api+json:
-              examples:
-                error-too-many-requests:
-                  value:
-                    errors:
-                    - code: NOTIFY_QUOTA
-                      detail: You have made too many requests. Please try again later.
-                      id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
-                      links:
-                        about: https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier
-                      status: "429"
-                      title: Too many requests
-              schema:
-                $ref: "#/components/schemas/listLetters_404_response"
-          description: Too many requests
-        "500":
-          content:
-            application/vnd.api+json:
-              examples:
-                error-server-error:
-                  value:
-                    errors:
-                    - code: NOTIFY_INTERNAL_SERVER_ERROR
-                      detail: "An unexpected error occurred, please contact support"
-                      id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
-                      links:
-                        about: https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier
-                      status: "500"
-                      title: Internal Server Error
-              schema:
-                $ref: "#/components/schemas/listLetters_404_response"
-          description: Server error
-      summary: List MI Records
-      tags:
-      - mi
-      x-eov-operation-handler: controllers/MiController
-    post:
-      operationId: createMI
-      parameters:
-      - description: "Unique request identifier, in the format of a GUID"
-        explode: false
-        in: header
-        name: X-Request-ID
-        required: true
-        schema:
-          type: string
-        style: simple
-      - description: |-
-          An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place.
-          The ID will be returned in a response header.
-        explode: false
-        in: header
-        name: X-Correlation-ID
-        required: false
-        schema:
-          type: string
-        style: simple
-      requestBody:
-        content:
-          application/vnd.api+json:
-            examples:
-              create-mi:
-                value:
-                  data:
-                    attributes:
-                      cost: 10.25
-                      lineItem: Letter
-                      quantity: 22
-                      specificationId: da0b1495-c7cb-468c-9d81-07dee089d728
-                      stockRemaining: 2000
-                      timestamp: 2023-11-17T14:27:51.413Z
-                    type: ManagementInformation
-            schema:
-              $ref: "#/components/schemas/createMI_request"
-        required: true
-      responses:
-        "201":
-          content:
-            application/vnd.api+json:
-              examples:
-                create-mi:
-                  value:
-                    data:
-                      attributes:
-                        cost: 10.25
-                        lineItem: Letter
-                        quantity: 22
-                        specificationId: da0b1495-c7cb-468c-9d81-07dee089d728
-                        stockRemaining: 2000
-                        timestamp: 2023-11-17T14:27:51.413Z
-                      id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
-                      type: ManagementInformation
-              schema:
-                $ref: "#/components/schemas/listMi_200_response_data_inner"
-          description: Management Information created successfully
-        "404":
-          content:
-            application/vnd.api+json:
-              examples:
-                error-not-found:
-                  value:
-                    errors:
-                    - code: NOTIFY_RESOURCE_NOT_FOUND
-                      detail: No resource found with that ID
-                      id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
-                      links:
-                        about: https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier
-                      status: "404"
-                      title: Resource not found
-              schema:
-                $ref: "#/components/schemas/listLetters_404_response"
-          description: Resource not found
-        "429":
-          content:
-            application/vnd.api+json:
-              examples:
-                error-too-many-requests:
-                  value:
-                    errors:
-                    - code: NOTIFY_QUOTA
-                      detail: You have made too many requests. Please try again later.
-                      id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
-                      links:
-                        about: https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier
-                      status: "429"
-                      title: Too many requests
-              schema:
-                $ref: "#/components/schemas/listLetters_404_response"
-          description: Too many requests
-        "500":
-          content:
-            application/vnd.api+json:
-              examples:
-                error-server-error:
-                  value:
-                    errors:
-                    - code: NOTIFY_INTERNAL_SERVER_ERROR
-                      detail: "An unexpected error occurred, please contact support"
-                      id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
-                      links:
-                        about: https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier
-                      status: "500"
-                      title: Internal Server Error
-              schema:
-                $ref: "#/components/schemas/listLetters_404_response"
-          description: Server error
-      summary: Create a new MI record
-      tags:
-      - mi
-      x-eov-operation-handler: controllers/MiController
-  /mi/{id}:
-    get:
-      operationId: getMi
-      parameters:
-      - description: "Unique request identifier, in the format of a GUID"
-        explode: false
-        in: header
-        name: X-Request-ID
-        required: true
-        schema:
-          type: string
-        style: simple
-      - description: |-
-          An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place.
-          The ID will be returned in a response header.
-        explode: false
-        in: header
-        name: X-Correlation-ID
-        required: false
-        schema:
-          type: string
-        style: simple
-      - description: Unique identifier of this resource
-        explode: false
-        in: path
-        name: id
-        required: true
-        schema:
-          example: 24L5eYSWGzCHlGmzNxuqVusPxDg
-          type: string
-        style: simple
-      responses:
-        "200":
-          content:
-            application/vnd.api+json:
-              examples:
-                get-mi:
-                  value:
-                    data:
-                      attributes:
-                        cost: 10.25
-                        lineItem: Letter
-                        quantity: 22
-                        specificationId: da0b1495-c7cb-468c-9d81-07dee089d728
-                        stockRemaining: 2000
-                        timestamp: 2023-11-17T14:27:51.413Z
-                      id: 24L5eYSWGzCHlGmzNxuqVusPxDg
-                      type: ManagementInformation
-              schema:
-                $ref: "#/components/schemas/getMi_200_response"
-          description: ManagementInformation
-        "404":
-          content:
-            application/vnd.api+json:
-              examples:
-                error-not-found:
-                  value:
-                    errors:
-                    - code: NOTIFY_RESOURCE_NOT_FOUND
-                      detail: No resource found with that ID
-                      id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
-                      links:
-                        about: https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier
-                      status: "404"
-                      title: Resource not found
-              schema:
-                $ref: "#/components/schemas/listLetters_404_response"
-          description: Resource not found
-        "429":
-          content:
-            application/vnd.api+json:
-              examples:
-                error-too-many-requests:
-                  value:
-                    errors:
-                    - code: NOTIFY_QUOTA
-                      detail: You have made too many requests. Please try again later.
-                      id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
-                      links:
-                        about: https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier
-                      status: "429"
-                      title: Too many requests
-              schema:
-                $ref: "#/components/schemas/listLetters_404_response"
-          description: Too many requests
-        "500":
-          content:
-            application/vnd.api+json:
-              examples:
-                error-server-error:
-                  value:
-                    errors:
-                    - code: NOTIFY_INTERNAL_SERVER_ERROR
-                      detail: "An unexpected error occurred, please contact support"
-                      id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
-                      links:
-                        about: https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier
-                      status: "500"
-                      title: Internal Server Error
-              schema:
-                $ref: "#/components/schemas/listLetters_404_response"
-          description: Server error
-      summary: Fetch a specific MI record
-      tags:
-      - mi
-      x-eov-operation-handler: controllers/MiController
-  /data/{id}:
+  /letters/{id}/data:
     get:
       operationId: getDataId
       parameters:
@@ -830,6 +506,7 @@ paths:
         name: X-Request-ID
         required: true
         schema:
+          example: dcb9c8dc-c2f4-4d5f-8674-a2e913e040b2
           type: string
         style: simple
       - description: |-
@@ -840,6 +517,7 @@ paths:
         name: X-Correlation-ID
         required: false
         schema:
+          example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
           type: string
         style: simple
       responses:
@@ -926,6 +604,7 @@ paths:
         name: X-Request-ID
         required: true
         schema:
+          example: dcb9c8dc-c2f4-4d5f-8674-a2e913e040b2
           type: string
         style: simple
       - description: |-
@@ -936,15 +615,133 @@ paths:
         name: X-Correlation-ID
         required: false
         schema:
+          example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
           type: string
         style: simple
       responses:
         "200":
           description: OK
-      summary: Check for the existance of a data file
+      summary: Check for the existence of a data file
       tags:
       - data
       x-eov-operation-handler: controllers/DataController
+  /mi:
+    post:
+      operationId: createMI
+      parameters:
+      - description: "Unique request identifier, in the format of a GUID"
+        explode: false
+        in: header
+        name: X-Request-ID
+        required: true
+        schema:
+          example: dcb9c8dc-c2f4-4d5f-8674-a2e913e040b2
+          type: string
+        style: simple
+      - description: |-
+          An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place.
+          The ID will be returned in a response header.
+        explode: false
+        in: header
+        name: X-Correlation-ID
+        required: false
+        schema:
+          example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/vnd.api+json:
+            examples:
+              create-mi-request:
+                value:
+                  data:
+                    attributes:
+                      cost: 10.25
+                      lineItem: Letter
+                      quantity: 22
+                      specificationId: da0b1495-c7cb-468c-9d81-07dee089d728
+                      stockRemaining: 2000
+                      timestamp: 2023-11-17T14:27:51.413Z
+                    type: ManagementInformation
+            schema:
+              $ref: "#/components/schemas/createMI_request"
+        required: true
+      responses:
+        "201":
+          content:
+            application/vnd.api+json:
+              examples:
+                create-mi-response:
+                  value:
+                    data:
+                      attributes:
+                        cost: 10.25
+                        lineItem: Letter
+                        quantity: 22
+                        specificationId: da0b1495-c7cb-468c-9d81-07dee089d728
+                        stockRemaining: 2000
+                        timestamp: 2023-11-17T14:27:51.413Z
+                      id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                      type: ManagementInformation
+              schema:
+                $ref: "#/components/schemas/createMI_201_response"
+          description: Management Information created successfully
+        "404":
+          content:
+            application/vnd.api+json:
+              examples:
+                error-not-found:
+                  value:
+                    errors:
+                    - code: NOTIFY_RESOURCE_NOT_FOUND
+                      detail: No resource found with that ID
+                      id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
+                      links:
+                        about: https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier
+                      status: "404"
+                      title: Resource not found
+              schema:
+                $ref: "#/components/schemas/listLetters_404_response"
+          description: Resource not found
+        "429":
+          content:
+            application/vnd.api+json:
+              examples:
+                error-too-many-requests:
+                  value:
+                    errors:
+                    - code: NOTIFY_QUOTA
+                      detail: You have made too many requests. Please try again later.
+                      id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
+                      links:
+                        about: https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier
+                      status: "429"
+                      title: Too many requests
+              schema:
+                $ref: "#/components/schemas/listLetters_404_response"
+          description: Too many requests
+        "500":
+          content:
+            application/vnd.api+json:
+              examples:
+                error-server-error:
+                  value:
+                    errors:
+                    - code: NOTIFY_INTERNAL_SERVER_ERROR
+                      detail: "An unexpected error occurred, please contact support"
+                      id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
+                      links:
+                        about: https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier
+                      status: "500"
+                      title: Internal Server Error
+              schema:
+                $ref: "#/components/schemas/listLetters_404_response"
+          description: Server error
+      summary: Create a new MI record
+      tags:
+      - mi
+      x-eov-operation-handler: controllers/MiController
   /_status:
     get:
       description: Returns 200 OK if the service is up.
@@ -956,53 +753,19 @@ paths:
       x-eov-operation-handler: controllers/DefaultController
 components:
   schemas:
-    listLetters_200_response_links:
-      additionalProperties: false
-      description: Contains links to other data pages
-      properties:
-        last:
-          description: URI of final page of data
-          example: https://dev.api.service.nhs.uk/nhs-notify-supplier/letters?status=PENDING&page=10
-          format: uri
-          type: string
-        next:
-          description: URI of next page of data
-          example: https://dev.api.service.nhs.uk/nhs-notify-supplier/letters?status=PENDING&page=5
-          format: uri
-          type: string
-        prev:
-          description: URI of prev page of data
-          example: https://dev.api.service.nhs.uk/nhs-notify-supplier/letters?status=PENDING&page=7
-          format: uri
-          type: string
-        self:
-          description: URI of current page of data
-          example: https://dev.api.service.nhs.uk/nhs-notify-supplier/letters?status=PENDING&page=6
-          format: uri
-          type: string
-      type: object
-    postLetters_200_response:
-      properties:
-        data:
-          items:
-            $ref: "#/components/schemas/listLetters_200_response_data_inner"
-          type: array
-      type: object
     createMI_request_data:
       properties:
         type:
+          enum:
+          - ManagementInformation
           type: string
         attributes:
           $ref: "#/components/schemas/createMI_request_data_attributes"
       type: object
-    getMi_200_response:
-      properties:
-        data:
-          $ref: "#/components/schemas/listMi_200_response_data_inner"
-      type: object
     listLetters_200_response_data_inner_attributes:
       properties:
         specificationId:
+          example: 2WL5eYSWGzCHlGmzNxuqVusPxDg
           type: string
         status:
           default: PENDING
@@ -1020,20 +783,15 @@ components:
           - RETURNED
           - DESTROYED
           - FORWARDED
-          type: string
-        requestedProductionStatus:
-          description: A requested status for the production of a letter
-          enum:
-          - ACTIVE
-          - HOLD
-          - CANCEL
-          title: ProductionStatus
+          example: PENDING
           type: string
         reasonCode:
           description: Reason code for the given status
+          example: 100
           type: number
         reasonText:
           description: Reason text for the given status
+          example: failed validation
           type: string
       required:
       - specificationId
@@ -1049,30 +807,7 @@ components:
         data:
           $ref: "#/components/schemas/postLetters_request_data_inner"
       type: object
-    listMi_200_response_data_inner:
-      properties:
-        type:
-          type: string
-        id:
-          example: 2WL5eYSWGzCHlGmzNxuqVusPxDg
-          type: string
-        attributes:
-          $ref: "#/components/schemas/listMi_200_response_data_inner_attributes"
-      type: object
-    listLetters_404_response_data:
-      properties:
-        errors:
-          items:
-            $ref: "#/components/schemas/listLetters_404_response_data_errors_inner"
-          type: array
-      type: object
-    listLetters_404_response_data_errors_inner_links:
-      properties:
-        about:
-          format: uri
-          type: string
-      type: object
-    listMi_200_response_data_inner_attributes:
+    createMI_201_response_data_attributes:
       properties:
         messageReference:
           example: da0b1495-c7cb-468c-9d81-07dee089d728
@@ -1096,14 +831,30 @@ components:
           example: 20000
           type: number
       type: object
+    listLetters_404_response_data:
+      properties:
+        errors:
+          items:
+            $ref: "#/components/schemas/listLetters_404_response_data_errors_inner"
+          type: array
+      type: object
+    listLetters_404_response_data_errors_inner_links:
+      properties:
+        about:
+          format: uri
+          type: string
+      type: object
+    createMI_201_response:
+      properties:
+        data:
+          $ref: "#/components/schemas/createMI_201_response_data"
+      type: object
     listLetters_200_response:
       properties:
         data:
           items:
             $ref: "#/components/schemas/listLetters_200_response_data_inner"
           type: array
-        links:
-          $ref: "#/components/schemas/listLetters_200_response_links"
       type: object
     getLetterStatus_200_response:
       properties:
@@ -1113,6 +864,7 @@ components:
     postLetters_request_data_inner_attributes:
       properties:
         specificationId:
+          example: 2WL5eYSWGzCHlGmzNxuqVusPxDg
           type: string
         status:
           default: PENDING
@@ -1130,29 +882,25 @@ components:
           - RETURNED
           - DESTROYED
           - FORWARDED
-          type: string
-        requestedProductionStatus:
-          description: |-
-            The requested production status for this letter.
-            May only be set by NHS Notify.
-          enum:
-          - ACTIVE
-          - HOLD
-          - CANCEL
-          title: ProductionStatus
+          example: PENDING
           type: string
         reasonCode:
           description: Reason code for the given status
+          example: 100
           type: number
         reasonText:
           description: Reason text for the given status
+          example: failed validation
           type: string
       type: object
     listLetters_200_response_data_inner:
       properties:
         type:
+          enum:
+          - Letter
           type: string
         id:
+          example: 2WL5eYSWGzCHlGmzNxuqVusPxDg
           type: string
         attributes:
           $ref: "#/components/schemas/listLetters_200_response_data_inner_attributes"
@@ -1160,18 +908,14 @@ components:
     postLetters_request_data_inner:
       properties:
         type:
+          enum:
+          - Letter
           type: string
         id:
+          example: 2WL5eYSWGzCHlGmzNxuqVusPxDg
           type: string
         attributes:
           $ref: "#/components/schemas/postLetters_request_data_inner_attributes"
-      type: object
-    listMi_200_response:
-      properties:
-        data:
-          items:
-            $ref: "#/components/schemas/listMi_200_response_data_inner"
-          type: array
       type: object
     postLetters_request:
       properties:
@@ -1184,6 +928,18 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/createMI_request_data"
+      type: object
+    createMI_201_response_data:
+      properties:
+        type:
+          enum:
+          - ManagementInformation
+          type: string
+        id:
+          example: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+          type: string
+        attributes:
+          $ref: "#/components/schemas/createMI_201_response_data_attributes"
       type: object
     listLetters_404_response_data_errors_inner:
       properties:
@@ -1229,21 +985,17 @@ components:
           type: number
       type: object
   securitySchemes:
-    nhs-login-p0:
+    app-level3:
       description: |
-        # NHS Login P0 authentication
+        # Application level 3 authentication
 
-        This is a user-restricted authentication pattern for Patient Access to
-        NHS Digital APIs.  For a full description of our authentication and
-        authorization patterns please see the [Security and authorisation page](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation).
+        This is an application-restricted authentication pattern for access
+        to NHS England APIs.  For a full description of our authentication
+        and authorization patterns please see the [Security and authorisation page](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation).
       flows:
-        authorizationCode:
-          authorizationUrl: /oauth2/authorize
+        clientCredentials:
           scopes: {}
           tokenUrl: /oauth2/token
-        x-tokenExchange:
-          tokenUrl: /oauth2/token
-          scopes: {}
       type: oauth2
     app-level0:
       description: |
@@ -1270,3 +1022,7 @@ x-nhsd-apim:
       environment:
         LOG_LEVEL: info
         NODE_ENV: development
+  target-attributes:
+  - name: NHSD-Supplier-ID
+    header: NHSD-Supplier-ID
+    required: false

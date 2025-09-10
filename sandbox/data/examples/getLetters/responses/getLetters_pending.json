@@ -2,7 +2,8 @@
   "data": [
     {
       "attributes": {
-        "specificationId": "05464f16-24fa-4e63-84f0-4a86b08d906d",
+        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+        "groupId": "c5d93f917f5546d08beccf770a915d96",
         "status": "PENDING"
       },
       "id": "fcfd849ceec940e8832b41f4fc161e09",
@@ -10,7 +11,8 @@
     },
     {
       "attributes": {
-        "specificationId": "b3893282-1efc-484e-b35b-7150440eeefe",
+        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+        "groupId": "c5d93f917f5546d08beccf770a915d96",
         "status": "PENDING"
       },
       "id": "7d64bd6a49e14213b47abbf6357eba0c",
@@ -18,7 +20,8 @@
     },
     {
       "attributes": {
-        "specificationId": "8612a482-1f0f-4cab-8f79-d17c4bed740b",
+        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+        "groupId": "c5d93f917f5546d08beccf770a915d96",
         "status": "PENDING"
       },
       "id": "2c06e7e32db4445fbbf56e7af223e0a2",
@@ -26,7 +29,8 @@
     },
     {
       "attributes": {
-        "specificationId": "b05cb6f8-6f22-4a2f-8e37-5697d893a592",
+        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+        "groupId": "c5d93f917f5546d08beccf770a915d96",
         "status": "PENDING"
       },
       "id": "3b302a6122854695b5c514a4d28d18d5",
@@ -34,7 +38,8 @@
     },
     {
       "attributes": {
-        "specificationId": "2188b8ea-7767-49ae-8c29-dc72b15d21dd",
+        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+        "groupId": "c5d93f917f5546d08beccf770a915d96",
         "status": "PENDING"
       },
       "id": "fbe3a53aac764a17a834699b8779958c",
@@ -42,7 +47,8 @@
     },
     {
       "attributes": {
-        "specificationId": "b2e72958-6369-41bf-8cc9-2e1cfbb5eb27",
+        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+        "groupId": "c5d93f917f5546d08beccf770a915d96",
         "status": "PENDING"
       },
       "id": "393056c7cdc649deb29ee8d2651f29dd",
@@ -50,7 +56,8 @@
     },
     {
       "attributes": {
-        "specificationId": "d18b3be7-bebc-448c-9621-13fc8e046a8c",
+        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+        "groupId": "c5d93f917f5546d08beccf770a915d96",
         "status": "PENDING"
       },
       "id": "c6d0d4243f004b4e844003fbf80a9105",
@@ -59,6 +66,7 @@
     {
       "attributes": {
         "specificationId": "853817f0-d797-4eb2-bf40-2879a9b58117",
+        "groupId": "c5d93f917f5546d08beccf770a915d96",
         "status": "PENDING"
       },
       "id": "03aa3fb76d544ad483984bdd7fcd900b",
@@ -67,6 +75,7 @@
     {
       "attributes": {
         "specificationId": "9e5d5da7-5991-4ac9-9cee-559769912ca5",
+        "groupId": "c5d93f917f5546d08beccf770a915d96",
         "status": "PENDING"
       },
       "id": "7c9b698bf434479cabd0af946cc93f95",
@@ -75,6 +84,7 @@
     {
       "attributes": {
         "specificationId": "634bcc87-fcc3-41fe-b6f9-c6a2125758e6",
+        "groupId": "c5d93f917f5546d08beccf770a915d96",
         "status": "PENDING"
       },
       "id": "987276fd0dc94ddbab607d4a24693db2",

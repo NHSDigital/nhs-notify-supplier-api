@@ -3,11 +3,10 @@
     "attributes": {
       "reasonCode": 100,
       "reasonText": "failed validation",
-      "requestedProductionStatus": "ACTIVE",
       "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
-      "status": "REJECTED"
+      "status": "PENDING"
     },
-    "id": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+    "id": "24L5eYSWGzCHlGmzNxuqVusPxDg",
     "type": "Letter"
   }
 }
