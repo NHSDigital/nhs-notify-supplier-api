@@ -1,0 +1,31 @@
+{
+  "author": "",
+  "dependencies": {
+    "allure-js-commons": "^3.3.3",
+    "charenc": "^0.0.2",
+    "crypt": "^0.0.2",
+    "dotenv": "^17.2.2",
+    "fsevents": "^2.3.2",
+    "is-buffer": "^1.1.6",
+    "md5": "^2.3.0",
+    "playwright": "^1.54.2",
+    "playwright-core": "^1.54.2",
+    "undici-types": "^7.10.0"
+  },
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^24.3.1",
+    "allure-commandline": "^2.34.1",
+    "allure-playwright": "^3.3.3"
+  },
+  "keywords": [],
+  "license": "ISC",
+  "main": "index.js",
+  "name": "tests",
+  "scripts": {
+    "clean": "rimraf $(pwd)/target",
+    "test": "playwright test tests --config=config/main.config.ts --max-failures=10"
+  },
+  "version": "1.0.0"
+}
