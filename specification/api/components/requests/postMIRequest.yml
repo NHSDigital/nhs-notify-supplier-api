@@ -4,6 +4,6 @@ content:
     schema:
       $ref: ../schemas/miData.yml
     examples:
-      create-mi:
+      create-mi-request:
         value:
-          $ref: "../examples/createMI/requests/createMI.json"
+          $ref: "../examples/createMI/requests/createMIRequest.json"

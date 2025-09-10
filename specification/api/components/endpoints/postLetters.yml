@@ -3,7 +3,7 @@ operationId: postLetters
 tags:
   - letter
 requestBody:
-  $ref: '../requests/postLetterRequest.yml'
+  $ref: '../requests/postLettersRequest.yml'
 responses:
   '200':
     $ref: "../responses/postLetters200.yml"

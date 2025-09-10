@@ -1,9 +1,0 @@
-type: string
-enum:
-  - ACTIVE
-  - HOLD
-  - CANCEL
-description: A requested status for the production of a letter
-examples:
-  - ACTIVE
-title: ProductionStatus

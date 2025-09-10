@@ -1,5 +1,5 @@
 /* eslint-disable no-throw-literal */
-const { Console } = require('console');
+const {Console} = require('console');
 const fs = require('fs/promises');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const lodash = require('lodash');
@@ -21,7 +21,7 @@ function mapExampleResponse(requestBody, exampleResponseMap) {
 
 function mapExampleGetResponse(parameterValue, exampleResponseMap) {
   const match = Object.entries(exampleResponseMap).find(([requestParameter, response]) => {
-    try{
+    try {
       return parameterValue === requestParameter;
     } catch (err) {
       console.error(`Failed to process ${parameterValue}:`, err);
@@ -31,38 +31,49 @@ function mapExampleGetResponse(parameterValue, exampleResponseMap) {
   return match ? match[1] : null;
 }
 
+async function getLetterStatusResponse(id) {
+  console.log(`GET /letters/${id}`)
+
+  const filename = `data/examples/getLetter/responses/getLetter-${id}.json`
+  if (!filename) {
+    throw {message: `Not found: ${id}`, status: 404};
+  }
+
+  const content = await fs.readFile(filename, 'utf8');
+  return JSON.parse(content);
+}
+
+async function getLettersResponse(status, limit) {
+  const getLettersfileMap = {
+    PENDING: 'data/examples/getLetters/responses/getLetters_pending.json',
+  };
+
+  const filename = mapExampleGetResponse(status, getLettersfileMap);
+  if (!filename) {
+    throw {message: `Not found: ${status}`, status: 404};
+  }
+
+  const content = await fs.readFile(filename, 'utf8');
+  const response = JSON.parse(content);
+  response.data.splice(limit);
+  return response;
+}
+
+async function patchLettersResponse(request) {
+  const patchLettersFileMap = {
+    'data/examples/patchLetter/requests/patchLetter.json': 'data/examples/patchLetter/responses/patchLetter.json',
+  };
+  const filename = mapExampleResponse(request, patchLettersFileMap);
+  if (!filename) {
+    throw {message: 'Not found: ', status: 404};
+  }
+
+  const content = await fs.readFile(filename, 'utf8');
+  return JSON.parse(content);
+}
 
 module.exports = {
-  async getLettersResponse(status, page) {
-    const getLettersfileMap = {
-      PENDING: 'data/examples/getLetters/responses/getLetters_pending.json',
-      PENDING1: 'data/examples/getLetters/responses/getLetters_pending.json',
-      PENDING5: 'data/examples/getLetters/responses/getLetters_pending-5.json',
-      PENDING10: 'data/examples/getLetters/responses/getLetters_pending-10.json',
-      ACCEPTED: 'data/examples/getLetters/responses/getLetters_accepted.json',
-    };
-
-    const mapkey = page ? `${status}${page}` : status;
-    const filename = mapExampleGetResponse(mapkey, getLettersfileMap);
-    if (!filename) {
-      throw { message: `Not found: ${status}`, status: 404 };
-    }
-
-    const content = await fs.readFile(filename, 'utf8');
-    return JSON.parse(content);
-  },
-
-  async patchLettersResponse(request) {
-
-    const patchLettersFileMap = {
-      'data/examples/patchLetter/requests/patchLetter.json': 'data/examples/patchLetter/responses/patchLetter.json',
-    };
-    const filename = mapExampleResponse(request, patchLettersFileMap);
-    if (!filename) {
-      throw { message: 'Not found: ', status: 404 };
-    }
-
-    const content = await fs.readFile(filename, 'utf8');
-    return JSON.parse(content);
-  },
+  getLetterStatusResponse,
+  getLettersResponse,
+  patchLettersResponse
 };
