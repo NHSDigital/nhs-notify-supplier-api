@@ -6,5 +6,4 @@ description: |-
 required: false
 schema:
   type: string
-  examples:
-    - 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
+  example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA

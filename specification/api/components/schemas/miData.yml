@@ -5,13 +5,16 @@ properties:
     properties:
       type:
         type: string
-        const: ManagementInformation
+        enum: [ManagementInformation]
       attributes:
         type: object
         properties:
           specificationId:
             type: string
             example: da0b1495-c7cb-468c-9d81-07dee089d728
+          groupId:
+            type: string
+            example: abc123
           timestamp:
             type: string
             format: date-time

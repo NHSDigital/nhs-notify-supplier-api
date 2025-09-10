@@ -16,10 +16,11 @@ const ResponseProvider = require('../utils/ResponseProvider');
 const getLetterStatus = ({ xRequestID, id, xCorrelationID }) => new Promise(
   async (resolve, reject) => {
     try {
+      const fileData = await ResponseProvider.getLetterStatusResponse(id);
       resolve(Service.successResponse({
         xRequestID,
-        id,
         xCorrelationID,
+        data: fileData,
       }));
     } catch (e) {
       reject(Service.rejectResponse(
@@ -30,18 +31,18 @@ const getLetterStatus = ({ xRequestID, id, xCorrelationID }) => new Promise(
   },
 );
 /**
-* Get a list of letters
+* Get a list of PENDING letters
 * The key use of this endpoint is to query letters which are ready to be printed
 *
 * xRequestID String Unique request identifier, in the format of a GUID
-* status String Status of a letter
 * xCorrelationID String An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header. (optional)
+* limit BigDecimal The maximum number of items to return in a single request (optional)
 * returns listLetters_200_response
 * */
-const listLetters = ({ xRequestID, status, xCorrelationID, page }) => new Promise(
+const listLetters = ({ xRequestID, xCorrelationID, limit }) => new Promise(
   async (resolve, reject) => {
     try {
-      const fileData = await ResponseProvider.getLettersResponse(status, page);
+      const fileData = await ResponseProvider.getLettersResponse('PENDING', limit);
 
       resolve(Service.successResponse({
         xRequestID,
@@ -66,11 +67,11 @@ const listLetters = ({ xRequestID, status, xCorrelationID, page }) => new Promis
 * xCorrelationID String An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header. (optional)
 * returns getLetterStatus_200_response
 * */
-const patchLetters = ({ xRequestID, id, body, xCorrelationID }) => new Promise(
+const patchLetters = ({ xRequestID, id, patchLettersRequest, xCorrelationID }) => new Promise(
   async (resolve, reject) => {
 
     try {
-      const fileData = await ResponseProvider.patchLettersResponse(body);
+      const fileData = await ResponseProvider.patchLettersResponse(patchLettersRequest);
 
       resolve(Service.successResponse({
         xRequestID,

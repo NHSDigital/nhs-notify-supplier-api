@@ -12,17 +12,7 @@ const createMI = async (request, response) => {
   await Controller.handleRequest(request, response, service.createMI);
 };
 
-const getMi = async (request, response) => {
-  await Controller.handleRequest(request, response, service.getMi);
-};
-
-const listMi = async (request, response) => {
-  await Controller.handleRequest(request, response, service.listMi);
-};
-
 
 module.exports = {
   createMI,
-  getMi,
-  listMi,
 };
