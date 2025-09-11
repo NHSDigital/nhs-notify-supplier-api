@@ -3,9 +3,6 @@ name: Deploy proxy to internal-dev
 on:
   workflow_dispatch:
     inputs:
-    version:
-      description: "Version number"
-      required: true
     pr_number:
       description: "PR Number for PR Environment"
       required: false
