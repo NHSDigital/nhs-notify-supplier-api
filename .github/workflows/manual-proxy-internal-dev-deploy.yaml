@@ -10,15 +10,19 @@ on:
       description: "PR Number for PR Environment"
       required: false
 
+permissions:
+  contents: read
+
 
 jobs:
-  runs-on: ubuntu-latest
   deploy-internal-dev:
+    runs-on: ubuntu-latest
     name: Deploy to Internal Dev
     env:
       PROXYGEN_API_NAME: notify-supplier-api
       PROXYGEN_PRIVATE_KEY: ${{ secrets.PROXYGEN_PRIVATE_KEY }}
       PR_NUMBER: ${{ github.event.inputs.pr_number }}
+
   steps:
     - name: Checkout
       uses: actions/checkout@v4

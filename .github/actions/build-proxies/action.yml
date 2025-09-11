@@ -1,12 +1,6 @@
 name: "Build Proxies"
 description: "Build Proxies"
 
-on:
-  workflow_dispatch:
-
-permissions:
-  contents: read
-
 inputs:
   version:
     description: "Version number"
