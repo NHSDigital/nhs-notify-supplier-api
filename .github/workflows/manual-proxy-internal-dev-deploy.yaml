@@ -15,8 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy to Internal Dev
     env:
-      PROXYGEN_API_NAME: notify-supplier-api
-      PROXYGEN_PRIVATE_KEY: ${{ secrets.PROXYGEN_PRIVATE_KEY }}
+      PROXYGEN_PRIVATE_KEY: ${{ secrets.PROXYGEN_ENCODED_NOTIFY_SUPPLIER_PRIVATE_KEY }}
+      PROXYGEN_KID: notify-supplier-key-1
+      PROXYGEN_CLIENT_ID: nhs-notify-supplier-client
+      PROXYGEN_API_NAME: nhs-notify-supplier
     steps:
       - name: Checkout
         uses: actions/checkout@v4
