@@ -36,7 +36,6 @@ runs:
           echo "INSTANCE=$PROXYGEN_API_NAME-PR-$PR_NUMBER" >> $GITHUB_ENV
           echo "SANDBOX_TAG=pr$PR_NUMBER" >> $GITHUB_ENV
           echo "MTLS_NAME=notify-supplier-mtls-pr$PR_NUMBER" >> $GITHUB_ENV
-
         fi
 
     - name: Install Proxygen client
