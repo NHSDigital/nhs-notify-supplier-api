@@ -1,23 +1,28 @@
-name: "Build Proxies"
-description: "Build Proxies"
+name: Deploy proxy to internal-dev
 
 on:
   workflow_dispatch:
+    inputs:
+    version:
+      description: "Version number"
+      required: true
+    pr_number:
+      description: "PR Number for PR Environment"
+      required: false
 
-permissions:
-  contents: read
 
-inputs:
-  version:
-    description: "Version number"
-    required: true
-
-runs:
-  using: composite
-
+jobs:
+  runs-on: ubuntu-latest
+  deploy-internal-dev:
+    name: Deploy to Internal Dev
+    env:
+      PROXYGEN_API_NAME: notify-supplier-api
+      PROXYGEN_PRIVATE_KEY: ${{ secrets.PROXYGEN_PRIVATE_KEY }}
+      PR_NUMBER: ${{ github.event.inputs.pr_number }}
   steps:
     - name: Checkout
       uses: actions/checkout@v4
+
     - uses: actions/setup-node@v4
       with:
         node-version: 24
@@ -30,7 +35,6 @@ runs:
     - name: Setup Proxy Name and target
       shell: bash
       run: |
-
         if [ -z $PR_NUMBER ]
         then
           echo "INSTANCE=$PROXYGEN_API_NAME" >> $GITHUB_ENV
@@ -42,7 +46,6 @@ runs:
           echo "INSTANCE=$PROXYGEN_API_NAME-PR-$PR_NUMBER" >> $GITHUB_ENV
           echo "SANDBOX_TAG=pr$PR_NUMBER" >> $GITHUB_ENV
           echo "MTLS_NAME=notify-supplier-mtls-pr$PR_NUMBER" >> $GITHUB_ENV
-
         fi
 
     - name: Install Proxygen client
@@ -60,18 +63,24 @@ runs:
         envsubst < ./.github/proxygen-settings.yaml > ${HOME}/.proxygen/settings.yaml
         envsubst < ./.github/proxygen-settings.yaml | cat
 
-    - name: Build sandbox oas
+    - name: Build internal dev oas
       working-directory: .
       shell: bash
       run: |
-        make build-json-oas-spec APIM_ENV=sandbox
+        if [ -z $PR_NUMBER ]
+        then
+          make build-json-oas-spec APIM_ENV=internal-dev
+        else
+          make build-json-oas-spec APIM_ENV=internal-dev-pr
+        fi
 
-    - name: Set docker tag
+    - name: Set target and cert
       shell: bash
       run: |
-        jq --arg newtag "$SANDBOX_TAG" '.["x-nhsd-apim"].target.containers[0].image.tag = $newtag' build/notify-supplier.json > build/notify-supplier_target.json && mv build/notify-supplier_target.json build/notify-supplier.json
+        jq --arg newurl "$TARGET" '.["x-nhsd-apim"].target.url = $newurl' build/notify-supplier.json > build/notify-supplier_target.json && mv build/notify-supplier_target.json build/notify-supplier.json
+        jq --arg newmtls "$MTLS_NAME" '.["x-nhsd-apim"].target.security.secret = $newmtls' build/notify-supplier.json > build/notify-supplier_target.json && mv build/notify-supplier_target.json build/notify-supplier.json
 
-    - name: Deploy to Internal Dev Sandbox
+    - name: Deploy to Internal Dev
       shell: bash
       run: |
-        proxygen instance deploy internal-dev-sandbox $INSTANCE build/notify-supplier.json --no-confirm
+        proxygen instance deploy internal-dev $INSTANCE build/notify-supplier.json --no-confirm
