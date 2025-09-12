@@ -1,12 +1,31 @@
 import { patchLetters } from '../../index';
-import type { Context } from 'aws-lambda';
+import { APIGatewayProxyResult, Context } from 'aws-lambda';
 import { mockDeep } from 'jest-mock-extended';
 import { makeApiGwEvent } from './utils/test-utils';
 import * as letterService from '../../services/letter-operations';
-import { NotFoundError, ValidationError } from '../../errors';
 import { LetterApiDocument, LetterApiStatus } from '../../contracts/letter-api';
+import { mapErrorToResponse } from '../../mappers/error-mapper';
 
 jest.mock('../../services/letter-operations');
+jest.mock('../../mappers/error-mapper');
+
+jest.mock("../../config/lambda-config", () => ({
+  lambdaConfig: {
+    SUPPLIER_ID_HEADER: "nhsd-supplier-id"
+  }
+}));
+
+const mockedMapErrorToResponse = jest.mocked(mapErrorToResponse);
+const expectedErrorResponse: APIGatewayProxyResult = {
+  statusCode: 400,
+  body: "Error"
+};
+mockedMapErrorToResponse.mockReturnValue(expectedErrorResponse);
+
+const mockedPatchLetterStatus = jest.mocked(letterService.patchLetterStatus);
+
+const letterApiDocument = makeLetterApiDocument("id1", "REJECTED");
+const requestBody = JSON.stringify(letterApiDocument, null, 2);
 
 function makeLetterApiDocument(id: string, status: LetterApiStatus) : LetterApiDocument {
   return {
@@ -15,6 +34,7 @@ function makeLetterApiDocument(id: string, status: LetterApiStatus) : LetterApiD
         reasonCode: 123,
         reasonText: "Reason text",
         requestedProductionStatus: "ACTIVE",
+        specificationId: "spec1",
         status
       },
       id,
@@ -23,21 +43,21 @@ function makeLetterApiDocument(id: string, status: LetterApiStatus) : LetterApiD
   };
 }
 
-const letterApiDocument = makeLetterApiDocument("id1", "REJECTED");
-
-const requestBody = JSON.stringify(letterApiDocument, null, 2);
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('patchLetters API Handler', () => {
-  it('returns 200 OK with updated resource', async () => {
 
+  it('returns 200 OK with updated resource', async () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
       body: requestBody,
-      pathParameters: {id: "id1"}});
+      pathParameters: {id: "id1"},
+      headers: {'nhsd-supplier-id': 'supplier1'}});
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const mockedPatchLetterStatus = letterService.patchLetterStatus as jest.Mock;
     mockedPatchLetterStatus.mockResolvedValue(letterApiDocument);
 
     const result = await patchLetters(event, context, callback);
@@ -48,101 +68,106 @@ describe('patchLetters API Handler', () => {
     });
   });
 
-  it('returns 400 Bad Request as there is no body', async () => {
+  it('returns error response when there is no body', async () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
+      pathParameters: {id: "id1"},
+      headers: {'nhsd-supplier-id': 'supplier1'}});
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+
+    const result = await patchLetters(event, context, callback);
+
+    expect(result).toEqual(expectedErrorResponse);
+  });
+
+  it('returns error response when path parameter letterId is not found', async () => {
+    const event = makeApiGwEvent({
+      path: '/letters/',
+      body: requestBody,
+      headers: {'nhsd-supplier-id': 'supplier1'}});
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+    const result = await patchLetters(event, context, callback);
+
+    expect(result).toEqual(expectedErrorResponse);
+  });
+
+  it('returns error response when error is thrown by service', async () => {
+    mockedPatchLetterStatus.mockRejectedValue(new Error('Service error'));
+
+    const event = makeApiGwEvent({
+      path: '/letters/id1',
+      body: requestBody,
+      pathParameters: {id: "id1"},
+      headers: {'nhsd-supplier-id': 'supplier1'}
+    });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+
+    const result = await patchLetters(event, context, callback);
+
+    expect(result).toEqual(expectedErrorResponse);
+  });
+
+  it('returns error when nhsd-supplier-id is missing', async () => {
+    const event = makeApiGwEvent({
+      path: '/letters/id1',
+      body: requestBody,
       pathParameters: {id: "id1"}});
     const context = mockDeep<Context>();
     const callback = jest.fn();
+
     const result = await patchLetters(event, context, callback);
 
-    expect(result).toEqual({
-      statusCode: 400,
-      body: 'Bad Request: Missing request body',
-    });
+    expect(result).toEqual(expectedErrorResponse);
   });
 
-  it('returns 404 Not Found as path is unknown', async () => {
-    const event = makeApiGwEvent({
-      path: '/unknown',
-      body: requestBody,
-      pathParameters: {id: "id1"}});
-    const context = mockDeep<Context>();
-    const callback = jest.fn();
-    const result = await patchLetters(event, context, callback);
-
-    expect(result).toEqual({
-      statusCode: 404,
-      body: 'Not Found: The requested resource does not exist',
-    });
-  });
-
-  it('returns 404 Not Found as path parameter is not found', async () => {
-    const event = makeApiGwEvent({
-      path: '/letters',
-      body: requestBody});
-    const context = mockDeep<Context>();
-    const callback = jest.fn();
-    const result = await patchLetters(event, context, callback);
-
-    expect(result).toEqual({
-      statusCode: 404,
-      body: 'Not Found: The requested resource does not exist',
-    });
-  });
-
-  it('returns 400 Bad Request when ValidationError is thrown by service', async () => {
-    const mockedPatchLetterStatus = letterService.patchLetterStatus as jest.Mock;
-    mockedPatchLetterStatus.mockRejectedValue(new ValidationError('Validation failed'));
-
+  it('returns error when request body does not have correct shape', async () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
-      body: requestBody,
-      pathParameters: { id: "id1" }
-    });
+      body: '{test: "test"}',
+      pathParameters: {id: "id1"},
+      headers: {'nhsd-supplier-id': 'supplier1'}});
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
     const result = await patchLetters(event, context, callback);
 
-    expect(result).toEqual({
-      statusCode: 400,
-      body: 'Validation failed'
-    });
+    expect(result).toEqual(expectedErrorResponse);
   });
 
-  it('returns 404 Not Found when NotFoundError is thrown by service', async () => {
-    const mockedPatchLetterStatus = letterService.patchLetterStatus as jest.Mock;
-    mockedPatchLetterStatus.mockRejectedValue(new NotFoundError('Letter not found'));
-
+  it('returns error when request body is not json', async () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
-      body: requestBody,
-      pathParameters: { id: "id1" }
-    });
+      body: '{#invalidJSON',
+      pathParameters: {id: "id1"},
+      headers: {'nhsd-supplier-id': 'supplier1'}});
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
     const result = await patchLetters(event, context, callback);
 
-    expect(result).toEqual({
-      statusCode: 404,
-      body: 'Letter not found'
-    });
+    expect(result).toEqual(expectedErrorResponse);
   });
 
-  it('throws unexpected errors from service', async () => {
-    const mockedPatchLetterStatus = letterService.patchLetterStatus as jest.Mock;
-    mockedPatchLetterStatus.mockRejectedValue(new Error('Unexpected error'));
-
+  it('returns error if unexpected error is thrown', async () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
-      body: requestBody,
-      pathParameters: { id: "id1" }
-    });
+      body: '{#invalidJSON',
+      pathParameters: {id: "id1"},
+      headers: {'nhsd-supplier-id': 'supplier1'}});
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    await expect(patchLetters(event, context, callback)).rejects.toThrow('Unexpected error');
+    const spy = jest.spyOn(JSON, "parse").mockImplementation(() => {
+      throw "Unexpected error";
+    });
+
+    const result = await patchLetters(event, context, callback);
+
+    expect(result).toEqual(expectedErrorResponse);
+
+    spy.mockRestore();
   });
 });

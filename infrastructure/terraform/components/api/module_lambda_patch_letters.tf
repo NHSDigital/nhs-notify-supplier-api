@@ -35,10 +35,7 @@ module "patch_letters" {
   log_destination_arn       = local.destination_arn
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
-  lambda_env_vars = {
-    LETTERS_TABLE_NAME = aws_dynamodb_table.letters.name,
-    LETTER_TTL_HOURS   = 24
-  }
+  lambda_env_vars = merge(local.common_db_access_lambda_env_vars, {})
 }
 
 data "aws_iam_policy_document" "patch_letters_lambda" {
