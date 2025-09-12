@@ -2,7 +2,6 @@
   "data": [
     {
       "attributes": {
-        "requestedProductionStatus": "ACTIVE",
         "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
         "status": "PENDING"
       },
@@ -11,7 +10,6 @@
     },
     {
       "attributes": {
-        "requestedProductionStatus": "ACTIVE",
         "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
         "status": "PENDING"
       },
@@ -20,7 +18,6 @@
     },
     {
       "attributes": {
-        "requestedProductionStatus": "ACTIVE",
         "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
         "status": "PENDING"
       },
@@ -29,7 +26,6 @@
     },
     {
       "attributes": {
-        "requestedProductionStatus": "ACTIVE",
         "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
         "status": "PENDING"
       },
@@ -38,7 +34,6 @@
     },
     {
       "attributes": {
-        "requestedProductionStatus": "ACTIVE",
         "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
         "status": "PENDING"
       },
@@ -47,7 +42,6 @@
     },
     {
       "attributes": {
-        "requestedProductionStatus": "ACTIVE",
         "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
         "status": "PENDING"
       },
@@ -56,17 +50,11 @@
     },
     {
       "attributes": {
-        "requestedProductionStatus": "ACTIVE",
         "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
         "status": "PENDING"
       },
       "id": "31B68ctCLllXxrmkrrcent290Jv",
       "type": "Letter"
     }
-  ],
-  "links": {
-    "last": "https://api.service.nhs.uk/nhs-notify-supplier/letters?status=PENDING&page=10",
-    "next": "https://api.service.nhs.uk/nhs-notify-supplier/letters?status=PENDING&page=2",
-    "self": "https://api.service.nhs.uk/nhs-notify-supplier/letters?status=PENDING&page=1"
-  }
+  ]
 }

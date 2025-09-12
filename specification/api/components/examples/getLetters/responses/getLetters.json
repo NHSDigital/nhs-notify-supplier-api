@@ -2,7 +2,7 @@
   "data": [
     {
       "attributes": {
-        "requestedProductionStatus": "ACTIVE",
+        "groupId": "abc123",
         "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
         "status": "PENDING"
       },
