@@ -1,9 +1,11 @@
 name: "Build Proxies"
 description: "Build Proxies"
+
 inputs:
   version:
     description: "Version number"
     required: true
+
 runs:
   using: composite
 
@@ -26,14 +28,15 @@ runs:
         if [ -z $PR_NUMBER ]
         then
           echo "INSTANCE=$PROXYGEN_API_NAME" >> $GITHUB_ENV
-          echo "TARGET=https://suppliers.dev.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
+          echo "TARGET=https://main.suppliers.dev.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
           echo "SANDBOX_TAG=latest" >> $GITHUB_ENV
+          echo "MTLS_NAME=notify-supplier-mtls" >> $GITHUB_ENV
         else
           echo "TARGET=https://pr$PR_NUMBER.suppliers.dev.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
           echo "INSTANCE=$PROXYGEN_API_NAME-PR-$PR_NUMBER" >> $GITHUB_ENV
           echo "SANDBOX_TAG=pr$PR_NUMBER" >> $GITHUB_ENV
+          echo "MTLS_NAME=notify-supplier-mtls-pr$PR_NUMBER" >> $GITHUB_ENV
         fi
-
 
     - name: Install Proxygen client
       shell: bash
@@ -49,28 +52,6 @@ runs:
         envsubst < ./.github/proxygen-credentials-template.yaml | cat
         envsubst < ./.github/proxygen-settings.yaml > ${HOME}/.proxygen/settings.yaml
         envsubst < ./.github/proxygen-settings.yaml | cat
-
-    - name: Build internal dev oas
-      working-directory: .
-      shell: bash
-      run: |
-        if [ -z $PR_NUMBER ]
-        then
-          make build-json-oas-spec APIM_ENV=dev
-        else
-          make build-json-oas-spec APIM_ENV=dev-pr
-        fi
-
-    - name: Set target
-      shell: bash
-      run: |
-        jq --arg newurl "$TARGET" '.["x-nhsd-apim"].target.url = $newurl' build/notify-supplier.json > build/notify-supplier_target.json && mv build/notify-supplier_target.json build/notify-supplier.json
-
-
-    - name: Deploy to Internal Dev
-      shell: bash
-      run: |
-        proxygen instance deploy internal-dev $INSTANCE build/notify-supplier.json --no-confirm
 
     - name: Build sandbox oas
       working-directory: .

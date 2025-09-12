@@ -11,5 +11,5 @@
     //".devcontainer": true,
     ".github": false,
     ".vscode": false
-  }
+  },
 }
