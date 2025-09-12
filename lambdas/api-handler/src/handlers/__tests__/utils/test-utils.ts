@@ -7,7 +7,9 @@ export function makeApiGwEvent(
     resource: '/{proxy+}',
     path: '/',
     httpMethod: 'GET',
-    headers: {},
+    headers: {
+      'NHSD-Supplier-ID': 'supplier1'
+    },
     multiValueHeaders: {},
     queryStringParameters: null,
     multiValueQueryStringParameters: null,
