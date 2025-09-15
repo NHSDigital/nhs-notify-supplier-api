@@ -47,7 +47,7 @@ const listLetters = ({ xRequestID, xCorrelationID, limit }) => new Promise(
       resolve(Service.successResponse({
         xRequestID,
         xCorrelationID,
-        data: fileData,
+        data: fileData.data,
       }));
     } catch (e) {
       reject(Service.rejectResponse(

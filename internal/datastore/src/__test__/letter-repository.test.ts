@@ -5,7 +5,7 @@ import { Logger } from 'pino';
 import { createTestLogger, LogStream } from './logs';
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
 
-function createLetter(supplierId: string, letterId: string, status: Letter['status'] = 'PENDING'): Omit<Letter, 'ttl' | 'supplierStatus'> {
+function createLetter(supplierId: string, letterId: string, status: Letter['status'] = 'PENDING'): Omit<Letter, 'ttl' | 'supplierStatus' | 'supplierStatusSk'> {
   return {
     id: letterId,
     supplierId: supplierId,
@@ -205,6 +205,7 @@ describe('LetterRepository', () => {
         url: 's3://bucket/invalid-letter.pdf',
         status: 'PENDING',
         supplierStatus: 'supplier1#PENDING',
+        supplierStatusSk: Date.now().toString(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       }
@@ -218,30 +219,48 @@ describe('LetterRepository', () => {
     expect(logStream.logs).toContainEqual(expect.stringMatching(/.*specificationId.*Invalid input: expected string.*/));
   });
 
-  test('should return all letter ids for a supplier', async () => {
-    await letterRepository.putLetter(createLetter('supplier1', 'letter1'));
-    await letterRepository.putLetter(createLetter('supplier1', 'letter2'));
-    await letterRepository.putLetter(createLetter('supplier1', 'letter3'));
-    await letterRepository.putLetter(createLetter('supplier2', 'letter4'));
-    await letterRepository.putLetter(createLetter('supplier2', 'letter5'));
+  test("should return all letters for a supplier status", async () => {
+    await letterRepository.putLetter(createLetter("supplier1", "letter1"));
+    await letterRepository.putLetter(createLetter("supplier1", "letter2"));
+    await letterRepository.putLetter(createLetter("supplier1", "letter3"));
+    await letterRepository.putLetter(
+      createLetter("supplier1", "letter4", "REJECTED"),
+    );
+    await letterRepository.putLetter(createLetter("supplier2", "letter1"));
+    await letterRepository.putLetter(createLetter("supplier2", "letter2"));
 
-    const letters = await letterRepository.getLetterIdsBySupplier('supplier1');
-    expect(letters).toEqual(['letter1', 'letter2', 'letter3']);
+    const letters = await letterRepository.getLettersBySupplier(
+      "supplier1",
+      "PENDING",
+      10,
+    );
+    expect(letters).toEqual([
+      {
+        id: "letter1",
+        specificationId: "specification1",
+        groupId: 'group1',
+        status: "PENDING",
+      },
+      {
+        id: "letter2",
+        specificationId: "specification1",
+        groupId: 'group1',
+        status: "PENDING",
+      },
+      {
+        id: "letter3",
+        specificationId: "specification1",
+        groupId: 'group1',
+        status: "PENDING",
+      },
+    ]);
   });
 
   test('should return empty if no letters exist for a supplier', async () => {
     await letterRepository.putLetter(createLetter('supplier1', 'letter1'));
     await letterRepository.putLetter(createLetter('supplier1', 'letter2'));
 
-    const letters = await letterRepository.getLetterIdsBySupplier('supplier2');
-    expect(letters).toEqual([]);
-  });
-
-  test('should return empty if no letters exist for a supplier', async () => {
-    await letterRepository.putLetter(createLetter('supplier1', 'letter1'));
-    await letterRepository.putLetter(createLetter('supplier1', 'letter2'));
-
-    const letters = await letterRepository.getLetterIdsBySupplier('supplier2');
+    const letters = await letterRepository.getLettersBySupplier('supplier2', 'PENDING', 10);
     expect(letters).toEqual([]);
   });
 
@@ -252,7 +271,7 @@ describe('LetterRepository', () => {
     const mockDdbClient = { send: mockSend } as any;
     const repo = new LetterRepository(mockDdbClient, { debug: jest.fn() } as any, { lettersTableName: 'letters', ttlHours: 1 });
 
-    const result = await repo.getLetterIdsBySupplier('supplier1');
-    expect(result).toEqual([]);
+    const letters = await repo.getLettersBySupplier('supplier1', 'PENDING', 10);
+    expect(letters).toEqual([]);
   });
 });

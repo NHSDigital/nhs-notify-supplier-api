@@ -1,13 +1,13 @@
-import { LetterRepository } from '../../../../internal/datastore/src'
+import { LetterBase, LetterRepository } from '../../../../internal/datastore/src'
 import { NotFoundError, ValidationError } from '../errors';
 import { LetterApiResource, LetterApiDocument } from '../contracts/letter-api';
 import { toApiLetter } from '../mappers/letter-mapper';
 import { ApiErrorDetail } from '../contracts/errors';
 
 
-export const getLetterIdsForSupplier = async (supplierId: string, letterRepo: LetterRepository): Promise<string[]> => {
+export const getLettersForSupplier = async (supplierId: string, status: string, limit: number, letterRepo: LetterRepository): Promise<LetterBase[]> => {
 
-  return await letterRepo.getLetterIdsBySupplier(supplierId);
+  return await letterRepo.getLettersBySupplier(supplierId, status, limit);
 }
 
 export const patchLetterStatus = async (letterToUpdate: LetterApiResource, letterId: string, supplierId: string, letterRepo: LetterRepository): Promise<LetterApiDocument> => {

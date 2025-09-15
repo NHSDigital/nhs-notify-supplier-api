@@ -20,8 +20,27 @@ describe('API Lambda handler', () => {
 
   it('returns 200 OK with basic paginated resources', async () => {
 
-    const mockedGetLetterIds = letterService.getLetterIdsForSupplier as jest.Mock;
-    mockedGetLetterIds.mockResolvedValue(['l1', 'l2', 'l3']);
+    const mockedGetLetters = letterService.getLettersForSupplier as jest.Mock;
+    mockedGetLetters.mockResolvedValue([
+      {
+        id: "l1",
+        specificationId: "s1",
+        groupId: 'g1',
+        status: "PENDING",
+      },
+      {
+        id: "l2",
+        specificationId: "s1",
+        groupId: 'g1',
+        status: "PENDING",
+      },
+      {
+        id: "l3",
+        specificationId: "s1",
+        groupId: 'g1',
+        status: "PENDING",
+      },
+    ]);
 
     const event = makeApiGwEvent({path: '/letters', headers: {'nhsd-supplier-id': 'supplier1'}});
     const context = mockDeep<Context>();
@@ -29,19 +48,24 @@ describe('API Lambda handler', () => {
     const result = await getLetters(event, context, callback);
 
     const expected = {
-      "links": {
-        "self": "/letters?page=1",
-        "first": "/letters?page=1",
-        "last": "/letters?page=1",
-        "next": "/letters?page=1",
-        "prev": "/letters?page=1"
-      },
-      "data": [
-        { "type": "letter", "id": "l1" },
-        { "type": "letter", "id": "l2" },
-        { "type": "letter", "id": "l3" }
-      ]
-    }
+      data: [
+        {
+          id: "l1",
+          type: "Letter",
+          attributes: { specificationId: "s1", groupId: 'g1', status: "PENDING" },
+        },
+        {
+          id: "l2",
+          type: "Letter",
+          attributes: { specificationId: "s1", groupId: 'g1', status: "PENDING" },
+        },
+        {
+          id: "l3",
+          type: "Letter",
+          attributes: { specificationId: "s1", groupId: 'g1', status: "PENDING" },
+        },
+      ],
+    };
 
     expect(result).toEqual({
       statusCode: 200,
@@ -61,8 +85,50 @@ describe('API Lambda handler', () => {
     });
   });
 
-  it('returns 400 Bad Request: Missing supplier ID if header nhsd-supplier-id ', async () => {
-    const event = makeApiGwEvent({path: '/letters'});
+  it("returns 400 if the limit parameter is not a number", async () => {
+    const event = makeApiGwEvent({
+      path: "/letters",
+      queryStringParameters: { limit: "1%" },
+    });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+    const result = await getLetters(event, context, callback);
+
+    expect(result).toEqual({
+      statusCode: 400,
+      body: "Bad Request: limit parameter is not a number",
+    });
+  });
+
+  it("returns 400 if the limit parameter is not positive", async () => {
+    const event = makeApiGwEvent({
+      path: "/letters",
+      queryStringParameters: { limit: "-1" },
+    });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+    const result = await getLetters(event, context, callback);
+
+    expect(result).toEqual({
+      statusCode: 400,
+      body: "Bad Request: limit parameter is not positive",
+    });
+  });
+
+  it('returns 400 for missing supplier ID (empty headers)', async () => {
+    const event = makeApiGwEvent({ path: "/letters", headers: {} });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+    const result = await getLetters(event, context, callback);
+
+    expect(result).toEqual({
+      statusCode: 400,
+      body: 'Bad Request: Missing supplier ID',
+    });
+  });
+
+  it('returns 400 for missing supplier ID (undefined headers)', async () => {
+    const event = makeApiGwEvent({ path: "/letters", headers: undefined });
     const context = mockDeep<Context>();
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);

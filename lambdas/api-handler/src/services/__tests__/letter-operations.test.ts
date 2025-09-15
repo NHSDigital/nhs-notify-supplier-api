@@ -1,6 +1,6 @@
 import { Letter } from '../../../../../internal/datastore/src';
 import { LetterApiResource, LetterApiStatus } from '../../contracts/letter-api';
-import { getLetterIdsForSupplier, patchLetterStatus } from '../letter-operations';
+import { getLettersForSupplier, patchLetterStatus } from '../letter-operations';
 
 function makeLetterApiResource(id: string, status: LetterApiStatus) : LetterApiResource {
   return {
@@ -27,20 +27,36 @@ function makeLetter(id: string, status: Letter['status']) : Letter {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       supplierStatus: `supplier1#${status}`,
+      supplierStatusSk: Date.now().toString(),
       ttl: 123
   };
 }
 
-describe('getLetterIdsForSupplier', () => {
-  it('returns letter IDs from the repository', async () => {
+describe("getLetterIdsForSupplier", () => {
+  it("returns letter IDs from the repository", async () => {
     const mockRepo = {
-      getLetterIdsBySupplier: jest.fn().mockResolvedValue(['id1', 'id2'])
+      getLettersBySupplier: jest.fn().mockResolvedValue([
+        { id: "id1", status: "PENDING", specificationId: "s1" },
+        { id: "id2", status: "PENDING", specificationId: "s1" },
+      ]),
     };
 
-    const result = await getLetterIdsForSupplier('supplier1', mockRepo as any);
+    const result = await getLettersForSupplier(
+      "supplier1",
+      "PENDING",
+      10,
+      mockRepo as any,
+    );
 
-    expect(mockRepo.getLetterIdsBySupplier).toHaveBeenCalledWith('supplier1');
-    expect(result).toEqual(['id1', 'id2']);
+    expect(mockRepo.getLettersBySupplier).toHaveBeenCalledWith(
+      "supplier1",
+      "PENDING",
+      10,
+    );
+    expect(result).toEqual([
+      { id: "id1", status: "PENDING", specificationId: "s1" },
+      { id: "id2", status: "PENDING", specificationId: "s1" },
+    ]);
   });
 });
 

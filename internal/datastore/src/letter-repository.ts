@@ -6,8 +6,9 @@ import {
   UpdateCommand,
   UpdateCommandOutput
 } from '@aws-sdk/lib-dynamodb';
-import { Letter, LetterSchema } from './types';
+import { Letter, LetterBase, LetterSchema, LetterSchemaBase } from './types';
 import { Logger } from 'pino';
+import { z } from 'zod';
 
 export type PagingOptions = Partial<{
   exclusiveStartKey: Record<string, any>,
@@ -29,10 +30,11 @@ export class LetterRepository {
               readonly config: LetterRepositoryConfig) {
   }
 
-  async putLetter(letter: Omit<Letter, 'ttl' | 'supplierStatus'>): Promise<Letter> {
+  async putLetter(letter: Omit<Letter, 'ttl' | 'supplierStatus' | 'supplierStatusSk'>): Promise<Letter> {
     const letterDb: Letter = {
       ...letter,
       supplierStatus: `${letter.supplierId}#${letter.status}`,
+      supplierStatusSk: Date.now().toString(),
       ttl: Math.floor(Date.now() / 1000 + 60 * 60 * this.config.ttlHours)
     };
     try {
@@ -130,15 +132,21 @@ export class LetterRepository {
     return LetterSchema.parse(result.Attributes);
   }
 
-  async getLetterIdsBySupplier(supplierId: string): Promise<string[]> {
+  async getLettersBySupplier(supplierId: string, status: string, limit: number): Promise<LetterBase[]> {
+    const supplierStatus = `${supplierId}#${status}`;
     const result = await this.ddbClient.send(new QueryCommand({
       TableName: this.config.lettersTableName,
-      KeyConditionExpression: 'supplierId = :supplierId',
-      ExpressionAttributeValues: {
-        ':supplierId': supplierId
+      IndexName: 'supplierStatus-index',
+      KeyConditionExpression: 'supplierStatus = :supplierStatus',
+      Limit: limit,
+      ExpressionAttributeNames: {
+        '#status': 'status' // reserved keyword
       },
-      ProjectionExpression: 'id'
+      ExpressionAttributeValues: {
+        ':supplierStatus': supplierStatus
+      },
+      ProjectionExpression: 'id, #status, specificationId, groupId, reasonCode, reasonText'
     }));
-    return (result.Items ?? []).map(item => item.id);
+    return z.array(LetterSchemaBase).parse(result.Items ?? []);
   }
 }
