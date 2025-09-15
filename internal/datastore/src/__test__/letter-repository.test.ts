@@ -205,7 +205,7 @@ describe('LetterRepository', () => {
         url: 's3://bucket/invalid-letter.pdf',
         status: 'PENDING',
         supplierStatus: 'supplier1#PENDING',
-        supplierStatusSk: 'supplier1',
+        supplierStatusSk: Date.now().toString(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       }
@@ -219,7 +219,7 @@ describe('LetterRepository', () => {
     expect(logStream.logs).toContainEqual(expect.stringMatching(/.*specificationId.*Invalid input: expected string.*/));
   });
 
-  test("should return all letters for a supplier a status", async () => {
+  test("should return all letters for a supplier status", async () => {
     await letterRepository.putLetter(createLetter("supplier1", "letter1"));
     await letterRepository.putLetter(createLetter("supplier1", "letter2"));
     await letterRepository.putLetter(createLetter("supplier1", "letter3"));

@@ -26,7 +26,7 @@ function makeLetter(id: string, status: Letter['status']) : Letter {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       supplierStatus: `supplier1#${status}`,
-      supplierStatusSk: 'supplier1',
+      supplierStatusSk: Date.now().toString(),
       ttl: 123
   };
 }

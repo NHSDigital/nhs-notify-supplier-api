@@ -14,7 +14,7 @@ describe('toApiLetter', () => {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       supplierStatus: 'supplier1#PENDING',
-      supplierStatusSk: 'supplier1',
+      supplierStatusSk: Date.now().toString(),
       ttl: 123
     };
 

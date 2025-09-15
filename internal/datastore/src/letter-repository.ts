@@ -34,7 +34,7 @@ export class LetterRepository {
     const letterDb: Letter = {
       ...letter,
       supplierStatus: `${letter.supplierId}#${letter.status}`,
-      supplierStatusSk: letter.id,
+      supplierStatusSk: Date.now().toString(),
       ttl: Math.floor(Date.now() / 1000 + 60 * 60 * this.config.ttlHours)
     };
     try {
