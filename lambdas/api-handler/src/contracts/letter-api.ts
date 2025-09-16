@@ -18,11 +18,11 @@ export const LetterApiStatusSchema = z.enum([
 export type LetterApiStatus = z.infer<typeof LetterApiStatusSchema>;
 
 export const LetterApiAttributesSchema = z.object({
-  reasonCode: z.number().optional(),
-  reasonText: z.string().optional(),
-  requestedProductionStatus: z.enum(["ACTIVE", "HOLD", "CANCEL"]).optional(),
   specificationId: z.string(),
   status: LetterApiStatusSchema,
+  reasonCode: z.number().optional(),
+  reasonText: z.string().optional(),
+  groupId: z.string().optional()
 });
 
 export type LetterApiAttributes = z.infer<typeof LetterApiAttributesSchema>;
@@ -36,7 +36,13 @@ export const LetterApiResourceSchema = z.object({
 export type LetterApiResource = z.infer<typeof LetterApiResourceSchema>;
 
 export const LetterApiDocumentSchema = z.object({
-  data: LetterApiResourceSchema,
+  data: LetterApiResourceSchema
+});
+
+export const LettersApiDocumentSchema = z.object({
+  data: z.array(LetterApiResourceSchema)
 });
 
 export type LetterApiDocument = z.infer<typeof LetterApiDocumentSchema>;
+
+export type LettersApiDocument = z.infer<typeof LettersApiDocumentSchema>;

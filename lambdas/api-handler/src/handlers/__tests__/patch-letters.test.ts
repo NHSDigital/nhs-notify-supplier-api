@@ -33,7 +33,6 @@ function makeLetterApiDocument(id: string, status: LetterApiStatus) : LetterApiD
       attributes: {
         reasonCode: 123,
         reasonText: "Reason text",
-        requestedProductionStatus: "ACTIVE",
         specificationId: "spec1",
         status
       },

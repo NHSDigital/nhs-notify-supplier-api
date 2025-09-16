@@ -7,9 +7,9 @@ function makeLetterApiResource(id: string, status: LetterApiStatus) : LetterApiR
       attributes: {
         reasonCode: 123,
         reasonText: "Reason text",
-        requestedProductionStatus: "ACTIVE",
         specificationId: "spec123",
-        status
+        status,
+        groupId: 'group123'
       },
       id,
       type: "Letter"

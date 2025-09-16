@@ -1,7 +1,7 @@
 import { LetterBase, LetterRepository } from '../../../../internal/datastore/src'
 import { NotFoundError, ValidationError } from '../errors';
 import { LetterApiResource, LetterApiDocument } from '../contracts/letter-api';
-import { toApiLetter } from '../mappers/letter-mapper';
+import { mapLetterBaseToApiDocument } from '../mappers/letter-mapper';
 import { ApiErrorDetail } from '../contracts/errors';
 
 
@@ -19,7 +19,7 @@ export const patchLetterStatus = async (letterToUpdate: LetterApiResource, lette
   try {
     const updatedLetter =  await letterRepo.updateLetterStatus(supplierId, letterId, letterToUpdate.attributes.status);
 
-    return toApiLetter(updatedLetter);
+    return mapLetterBaseToApiDocument(updatedLetter);
 
   } catch (error) {
     if (error instanceof Error && error.message.includes('not found')) {

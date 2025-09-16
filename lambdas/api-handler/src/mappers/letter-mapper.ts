@@ -1,18 +1,32 @@
-import { Letter } from "../../../../internal/datastore";
-import { LetterApiDocument } from '../contracts/letter-api';
+import { LetterBase } from "../../../../internal/datastore";
+import { LetterApiDocument, LetterApiResource } from '../contracts/letter-api';
 
-export function toApiLetter(letter: Letter): LetterApiDocument {
+export function mapLetterBaseToApiDocument(letterBase: LetterBase): LetterApiDocument {
   return {
     data: {
-      id: letter.id,
+      id: letterBase.id,
       type: 'Letter',
       attributes: {
         reasonCode: 123, // TODO CCM-11188
         reasonText: 'Reason text', // TODO CCM-11188
-        requestedProductionStatus: 'ACTIVE', // TODO CCM-11188
-        specificationId: letter.specificationId,
-        status: letter.status
+        specificationId: letterBase.specificationId,
+        status: letterBase.status,
+        groupId: letterBase.groupId
       }
     }
+  };
+}
+
+export function mapLetterBaseToApiResource(letterBase: LetterBase): LetterApiResource {
+  return {
+      id: letterBase.id,
+      type: 'Letter',
+      attributes: {
+        reasonCode: 123, // TODO CCM-11188
+        reasonText: 'Reason text', // TODO CCM-11188
+        specificationId: letterBase.specificationId,
+        status: letterBase.status,
+        groupId: letterBase.groupId
+      }
   };
 }

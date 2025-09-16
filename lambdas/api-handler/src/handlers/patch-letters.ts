@@ -6,6 +6,7 @@ import * as errors from '../contracts/errors';
 import { ValidationError } from '../errors';
 import { mapErrorToResponse } from '../mappers/error-mapper';
 import { lambdaConfig } from "../config/lambda-config";
+import { assertNotEmpty } from '../utils/validation';
 
 const letterRepo = createLetterRepository();
 export const patchLetters: APIGatewayProxyHandler = async (event) => {
@@ -37,10 +38,3 @@ export const patchLetters: APIGatewayProxyHandler = async (event) => {
     return mapErrorToResponse(error);
   }
 };
-
-function assertNotEmpty(value: string | null | undefined, detail: errors.ApiErrorDetail): string {
-  if (!value || value.trim() === '') {
-    throw new ValidationError(detail);
-  }
-  return value;
-}

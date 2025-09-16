@@ -1,58 +1,26 @@
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { APIGatewayProxyEventQueryStringParameters, APIGatewayProxyHandler } from "aws-lambda";
 import { getLettersForSupplier } from "../services/letter-operations";
 import { createLetterRepository } from "../infrastructure/letter-repo-factory";
 import { LetterBase } from "../../../../internal/datastore/src";
+import { assertNotEmpty } from "../utils/validation";
+import * as errors from '../contracts/errors';
+import { lambdaConfig } from "../config/lambda-config";
 import pino from 'pino';
+import { mapErrorToResponse } from "../mappers/error-mapper";
+import { ValidationError } from "../errors";
+import { mapLetterBaseToApiDocument, mapLetterBaseToApiResource } from "../mappers/letter-mapper";
 
 const letterRepo = createLetterRepository();
 const log = pino();
 
+// The endpoint should only return pending letters for now
+const status = "PENDING";
+
 export const getLetters: APIGatewayProxyHandler = async (event) => {
-  if (event.path === "/letters") {
-    const supplierId = event.headers ? event.headers["NHSD-Supplier-ID"] : undefined;
 
-    if (!supplierId) {
-      log.info({
-        description: 'Supplier ID not provided'
-      });
-      return {
-        statusCode: 400,
-        body: "Bad Request: Missing supplier ID",
-      };
-    }
-
-    // The endpoint should only return pending letters for now
-    const status = "PENDING";
-
-    let limit = event.queryStringParameters?.limit;
-
-    if (!limit) {
-      limit = "10";
-    }
-
-    let limitNumber = Number(limit);
-
-    if (isNaN(limitNumber)) {
-      log.info({
-        description: "limit parameter is not a number",
-        limit,
-      });
-      return {
-        statusCode: 400,
-        body: "Bad Request: limit parameter is not a number",
-      };
-    }
-
-    if (limitNumber < 0) {
-      log.info({
-        description: "limit parameter is not positive",
-        limit,
-      });
-      return {
-        statusCode: 400,
-        body: "Bad Request: limit parameter is not positive",
-      };
-    }
+  try {
+    const supplierId = assertNotEmpty(event.headers[lambdaConfig.SUPPLIER_ID_HEADER], errors.ApiErrorDetail.InvalidRequestMissingSupplierId);
+    const limitNumber = validateLimit(event.queryStringParameters);
 
     const letters = await getLettersForSupplier(
       supplierId,
@@ -61,12 +29,14 @@ export const getLetters: APIGatewayProxyHandler = async (event) => {
       letterRepo,
     );
 
-    const response = createGetLettersResponse(letters);
+    const response = {
+      data: letters.map((letter: LetterBase) => (mapLetterBaseToApiResource(letter)))
+    };
 
     log.info({
       description: 'Pending letters successfully fetched',
       supplierId,
-      limit,
+      limitNumber,
       status,
       lettersCount: letters.length
     });
@@ -76,44 +46,43 @@ export const getLetters: APIGatewayProxyHandler = async (event) => {
       body: JSON.stringify(response, null, 2),
     };
   }
-
-  log.warn({
-    description: 'Unsupported event path',
-    path: event.path
-  });
-
-  return {
-    statusCode: 404,
-    body: "Not Found",
-  };
+  catch (error) {
+    return mapErrorToResponse(error);
+  }
 };
 
-interface GetLettersResponse {
-  data: Array<{
-    type: "Letter";
-    id: string;
-    attributes: {
-      specificationId: string;
-      groupId: string;
-      status: string;
-      reasonCode?: number;
-      reasonText?: string;
-    };
-  }>;
+function validateLimit(queryStringParameters: APIGatewayProxyEventQueryStringParameters | null) : number {
+
+  let limit = queryStringParameters?.limit;
+
+  if (!limit) {
+    limit = "10";
+  }
+
+  let limitNumber = Number(limit);
+
+  assertIsNumber(limitNumber, limit);
+  assertIsPositive(limitNumber, limit);
+
+  return limitNumber;
 }
 
-function createGetLettersResponse(letters: LetterBase[]): GetLettersResponse {
-  return {
-    data: letters.map((letter) => ({
-      id: letter.id,
-      type: "Letter",
-      attributes: {
-        specificationId: letter.specificationId,
-        groupId: letter.groupId,
-        status: letter.status,
-        reasonCode: letter.reasonCode,
-        reasonText: letter.reasonText,
-      },
-    })),
-  };
+function assertIsNumber(limitNumber: number, limit: string) {
+  if (isNaN(limitNumber)) {
+    log.info({
+      description: "limit parameter is not a number",
+      limit,
+    });
+    throw new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotANumber);
+  }
+}
+
+function assertIsPositive(limitNumber: number, limit?: string) {
+  if (limitNumber < 0) {
+    log.info({
+      description: "limit parameter is not positive",
+      limit,
+    });
+    throw new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotPositive);
+  }
 }

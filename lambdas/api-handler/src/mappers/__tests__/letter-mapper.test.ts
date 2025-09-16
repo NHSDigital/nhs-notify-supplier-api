@@ -1,8 +1,8 @@
-import { toApiLetter } from '../letter-mapper';
+import { mapLetterBaseToApiDocument } from '../letter-mapper';
 import { Letter } from '../../../../../internal/datastore';
 import { LetterApiDocument } from '../../contracts/letter-api';
 
-describe('toApiLetter', () => {
+describe('mapLetterBaseToApiDocument', () => {
   it('maps a Letter to LetterApiDocument', () => {
     const letter: Letter = {
       id: 'abc123',
@@ -18,7 +18,7 @@ describe('toApiLetter', () => {
       ttl: 123
     };
 
-    const result: LetterApiDocument = toApiLetter(letter);
+    const result: LetterApiDocument = mapLetterBaseToApiDocument(letter);
 
     expect(result).toEqual({
       data: {
@@ -27,9 +27,9 @@ describe('toApiLetter', () => {
         attributes: {
           reasonCode: 123,
           reasonText: 'Reason text',
-          requestedProductionStatus: 'ACTIVE',
           specificationId: 'spec123',
-          status: 'PENDING'
+          status: 'PENDING',
+          groupId: 'group123'
         }
       }
     });

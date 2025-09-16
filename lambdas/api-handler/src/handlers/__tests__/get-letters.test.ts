@@ -1,8 +1,17 @@
 import { getLetters } from '../../index';
-import type { Context } from 'aws-lambda';
+import type { APIGatewayProxyResult, Context } from 'aws-lambda';
 import { mockDeep } from 'jest-mock-extended';
 import { makeApiGwEvent } from './utils/test-utils';
 import * as letterService from '../../services/letter-operations';
+import { mapErrorToResponse } from '../../mappers/error-mapper';
+
+jest.mock('../../mappers/error-mapper');
+const mockedMapErrorToResponse = jest.mocked(mapErrorToResponse);
+const expectedErrorResponse: APIGatewayProxyResult = {
+  statusCode: 400,
+  body: "Error"
+};
+mockedMapErrorToResponse.mockReturnValue(expectedErrorResponse);
 
 jest.mock('../../services/letter-operations');
 
@@ -15,7 +24,7 @@ jest.mock("../../config/lambda-config", () => ({
 describe('API Lambda handler', () => {
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('returns 200 OK with basic paginated resources', async () => {
@@ -52,18 +61,18 @@ describe('API Lambda handler', () => {
         {
           id: "l1",
           type: "Letter",
-          attributes: { specificationId: "s1", groupId: 'g1', status: "PENDING" },
+          attributes: { reasonCode: 123, reasonText: "Reason text", specificationId: "s1", status: "PENDING", groupId: 'g1' },
         },
         {
           id: "l2",
           type: "Letter",
-          attributes: { specificationId: "s1", groupId: 'g1', status: "PENDING" },
+          attributes: { reasonCode: 123, reasonText: "Reason text", specificationId: "s1", status: "PENDING", groupId: 'g1' },
         },
         {
           id: "l3",
           type: "Letter",
-          attributes: { specificationId: "s1", groupId: 'g1', status: "PENDING" },
-        },
+          attributes: { reasonCode: 123, reasonText: "Reason text", specificationId: "s1", status: "PENDING", groupId: 'g1' },
+        }
       ],
     };
 
@@ -73,46 +82,30 @@ describe('API Lambda handler', () => {
     });
   });
 
-  it('returns 404 Not Found for an unknown path', async () => {
-    const event = makeApiGwEvent({ path: '/unknown' });
-    const context = mockDeep<Context>();
-    const callback = jest.fn();
-    const result = await getLetters(event, context, callback);
-
-    expect(result).toEqual({
-      statusCode: 404,
-      body: 'Not Found',
-    });
-  });
-
   it("returns 400 if the limit parameter is not a number", async () => {
     const event = makeApiGwEvent({
       path: "/letters",
       queryStringParameters: { limit: "1%" },
-    });
+      headers: {'nhsd-supplier-id': 'supplier1'}});
+
     const context = mockDeep<Context>();
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
 
-    expect(result).toEqual({
-      statusCode: 400,
-      body: "Bad Request: limit parameter is not a number",
-    });
+    expect(result).toEqual(expectedErrorResponse);
   });
 
   it("returns 400 if the limit parameter is not positive", async () => {
     const event = makeApiGwEvent({
       path: "/letters",
       queryStringParameters: { limit: "-1" },
-    });
+      headers: {'nhsd-supplier-id': 'supplier1'}});
+
     const context = mockDeep<Context>();
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
 
-    expect(result).toEqual({
-      statusCode: 400,
-      body: "Bad Request: limit parameter is not positive",
-    });
+    expect(result).toEqual(expectedErrorResponse);
   });
 
   it('returns 400 for missing supplier ID (empty headers)', async () => {
@@ -121,10 +114,7 @@ describe('API Lambda handler', () => {
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
 
-    expect(result).toEqual({
-      statusCode: 400,
-      body: 'Bad Request: Missing supplier ID',
-    });
+    expect(result).toEqual(expectedErrorResponse);
   });
 
   it('returns 400 for missing supplier ID (undefined headers)', async () => {
@@ -133,9 +123,6 @@ describe('API Lambda handler', () => {
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
 
-    expect(result).toEqual({
-      statusCode: 400,
-      body: 'Bad Request: Missing supplier ID',
-    });
+    expect(result).toEqual(expectedErrorResponse);
   });
 });
