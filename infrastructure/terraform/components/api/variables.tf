@@ -111,7 +111,7 @@ variable "letter_table_ttl_hours" {
   default     = 24
 }
 
-variable "default_get_limit" {
+variable "max_get_limit" {
   type        = number
   description = "Default limit to apply to GET requests that support pagination"
   default     = 2500

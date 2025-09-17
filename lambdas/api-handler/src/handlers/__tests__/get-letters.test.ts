@@ -3,14 +3,27 @@ import type { Context } from 'aws-lambda';
 import { mockDeep } from 'jest-mock-extended';
 import { makeApiGwEvent } from './utils/test-utils';
 import * as letterService from '../../services/letter-operations';
+import { getEnvars } from '../get-letters';
 
 jest.mock('../../services/letter-operations');
 
 describe('API Lambda handler', () => {
 
+  const originalEnv = process.env;
+
   beforeEach(() => {
     jest.resetAllMocks();
-    process.env.DEFAULT_LIMIT = '100';
+    jest.resetModules();
+    process.env = { ...originalEnv };
+    process.env.MAX_LIMIT = '2500';
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  it('uses process.env.MAX_LIMIT for max limit set', async () => {
+    expect(getEnvars().maxLimit).toBe(2500);
   });
 
   it('returns 200 OK with basic paginated resources', async () => {

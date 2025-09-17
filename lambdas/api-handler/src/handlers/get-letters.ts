@@ -6,9 +6,15 @@ import pino from 'pino';
 
 const letterRepo = createLetterRepository();
 const log = pino();
-const DEFAULT_LIMIT = process.env.DEFAULT_LIMIT || '2500';
+
+export const getEnvars = (): { maxLimit: number } => ({
+  maxLimit: parseInt(process.env.MAX_LIMIT!)
+});
 
 export const getLetters: APIGatewayProxyHandler = async (event) => {
+
+  const { maxLimit } = getEnvars();
+
   if (event.path === "/letters") {
     const supplierId = event.headers ? event.headers["NHSD-Supplier-ID"] : undefined;
 
@@ -42,25 +48,29 @@ export const getLetters: APIGatewayProxyHandler = async (event) => {
       };
     }
 
-    let limit = event.queryStringParameters?.limit || DEFAULT_LIMIT;
+    let limitNumber;
 
-    let limitNumber = Number(limit);
-
-    if (isNaN(limitNumber)) {
-      log.info({
-        description: "limit parameter is not a number",
-        limit,
-      });
-      return {
-        statusCode: 400,
-        body: "Invalid Request: limit parameter must be a positive number not greater than 2500",
-      };
+    if (event.queryStringParameters?.limit) {
+      let limitParam = event.queryStringParameters?.limit;
+      limitNumber = Number(limitParam);
+      if (isNaN(limitNumber)) {
+        log.info({
+          description: "limit parameter is not a number",
+          limitParam,
+        });
+        return {
+          statusCode: 400,
+          body: "Invalid Request: limit parameter must be a positive number not greater than 2500",
+        };
+      }
+    } else {
+      limitNumber = maxLimit;
     }
 
-    if (limitNumber < 0 || limitNumber > 2500) {
+    if (limitNumber < 0 || limitNumber > maxLimit) {
       log.info({
         description: "Limit value is invalid",
-        limit,
+        limitNumber,
       });
       return {
         statusCode: 400,
@@ -80,7 +90,7 @@ export const getLetters: APIGatewayProxyHandler = async (event) => {
     log.info({
       description: 'Pending letters successfully fetched',
       supplierId,
-      limit,
+      limitNumber,
       status,
       lettersCount: letters.length
     });
