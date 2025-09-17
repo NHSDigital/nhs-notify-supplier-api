@@ -16,15 +16,17 @@ export const patchLetterStatus = async (letterToUpdate: LetterApiResource, lette
     throw new ValidationError(ApiErrorDetail.InvalidRequestLetterIdsMismatch);
   }
 
+  let updatedLetter;
+
   try {
-    const updatedLetter =  await letterRepo.updateLetterStatus(supplierId, letterId, letterToUpdate.attributes.status);
-
-    return mapLetterBaseToApiDocument(updatedLetter);
-
+    updatedLetter =  await letterRepo.updateLetterStatus(supplierId, letterId, letterToUpdate.attributes.status,
+      letterToUpdate.attributes.reasonCode, letterToUpdate.attributes.reasonText);
   } catch (error) {
     if (error instanceof Error && error.message.includes('not found')) {
       throw new NotFoundError(ApiErrorDetail.NotFoundLetterId);
     }
     throw error;
   }
+
+  return mapLetterBaseToApiDocument(updatedLetter);
 }

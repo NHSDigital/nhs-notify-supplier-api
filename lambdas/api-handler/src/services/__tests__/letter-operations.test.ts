@@ -5,11 +5,11 @@ import { getLettersForSupplier, patchLetterStatus } from '../letter-operations';
 function makeLetterApiResource(id: string, status: LetterApiStatus) : LetterApiResource {
   return {
       attributes: {
-        reasonCode: 123,
-        reasonText: "Reason text",
         specificationId: "spec123",
         status,
-        groupId: 'group123'
+        groupId: 'group123',
+        reasonCode: 123,
+        reasonText: "Reason text"
       },
       id,
       type: "Letter"
@@ -28,7 +28,9 @@ function makeLetter(id: string, status: Letter['status']) : Letter {
       updatedAt: new Date().toISOString(),
       supplierStatus: `supplier1#${status}`,
       supplierStatusSk: Date.now().toString(),
-      ttl: 123
+      ttl: 123,
+      reasonCode: 123,
+      reasonText: "Reason text"
   };
 }
 
@@ -62,9 +64,9 @@ describe("getLetterIdsForSupplier", () => {
 
 describe('patchLetterStatus function', () => {
 
-  const letterResource = makeLetterApiResource("letter1", "ACCEPTED");
+  const letterResource = makeLetterApiResource("letter1", "REJECTED");
 
-  const updatedLetter = makeLetter("letter1", "ACCEPTED");
+  const updatedLetter = makeLetter("letter1", "REJECTED");
 
   it('should update the letter status successfully', async () => {
     const mockRepo = {

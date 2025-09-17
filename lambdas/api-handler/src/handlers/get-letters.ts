@@ -8,7 +8,7 @@ import { lambdaConfig } from "../config/lambda-config";
 import pino from 'pino';
 import { mapErrorToResponse } from "../mappers/error-mapper";
 import { ValidationError } from "../errors";
-import { mapLetterBaseToApiDocument, mapLetterBaseToApiResource } from "../mappers/letter-mapper";
+import { mapLetterBaseToApiResource } from "../mappers/letter-mapper";
 
 const letterRepo = createLetterRepository();
 const log = pino();
