@@ -67,14 +67,14 @@ export const getLetters: APIGatewayProxyHandler = async (event) => {
       limitNumber = maxLimit;
     }
 
-    if (limitNumber < 0 || limitNumber > maxLimit) {
+    if (limitNumber <= 0 || limitNumber > maxLimit) {
       log.info({
         description: "Limit value is invalid",
         limitNumber,
       });
       return {
         statusCode: 400,
-        body: "Invalid Request: limit parameter must be a positive number not greater than 2500",
+        body: `Invalid Request: limit parameter must be a positive number not greater than ${maxLimit}`,
       };
     }
 

@@ -123,6 +123,21 @@ describe('API Lambda handler', () => {
     });
   });
 
+  it("returns 400 if the limit parameter is zero", async () => {
+    const event = makeApiGwEvent({
+      path: "/letters",
+      queryStringParameters: { limit: "0" },
+    });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+    const result = await getLetters(event, context, callback);
+
+    expect(result).toEqual({
+      statusCode: 400,
+      body: "Invalid Request: limit parameter must be a positive number not greater than 2500",
+    });
+  });
+
   it("returns 400 if the limit parameter is out of range", async () => {
     const event = makeApiGwEvent({
       path: "/letters",
