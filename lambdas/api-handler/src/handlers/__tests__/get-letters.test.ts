@@ -136,7 +136,7 @@ describe('API Lambda handler', () => {
 
     expect(result).toEqual({
       statusCode: 400,
-      body: "Invalid Request: Only 'limit' query parameter is allowed",
+      body: "Invalid Request: Only 'limit' query parameter is supported",
     });
   });
 
