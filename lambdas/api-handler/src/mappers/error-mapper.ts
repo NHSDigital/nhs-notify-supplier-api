@@ -1,7 +1,9 @@
 import { APIGatewayProxyResult } from "aws-lambda";
 import { NotFoundError, ValidationError } from "../errors";
 import { buildApiError, ApiErrorCode, ApiErrorDetail, ApiErrorTitle, ApiError, ApiErrorStatus } from "../contracts/errors";
+import pino from "pino";
 
+const logger = pino();
 export interface ErrorResponse {
   errors: ApiError[];
 }
@@ -12,9 +14,12 @@ export function mapErrorToResponse(error: unknown): APIGatewayProxyResult {
   } else if (error instanceof NotFoundError) {
     return buildResponseFromErrorCode(ApiErrorCode.NotFound, error.detail);
   } else if (error instanceof Error) {
+    logger.error({ err: error }, "Internal server error");
     return buildResponseFromErrorCode(ApiErrorCode.InternalServerError, error.message);
-  } else
-  return buildResponseFromErrorCode(ApiErrorCode.InternalServerError, "Unexpected error");
+  } else {
+    logger.error({ err: error }, "Internal server error (non-Error thrown)");
+    return buildResponseFromErrorCode(ApiErrorCode.InternalServerError, "Unexpected error");
+  }
 }
 
 function buildResponseFromErrorCode(code: ApiErrorCode, detail: ApiErrorDetail | string): APIGatewayProxyResult {
