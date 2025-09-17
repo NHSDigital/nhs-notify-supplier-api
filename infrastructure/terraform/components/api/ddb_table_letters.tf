@@ -37,16 +37,6 @@ resource "aws_dynamodb_table" "letters" {
     type = "S"
   }
 
-  attribute {
-    name = "reasonCode"
-    type = "N"
-  }
-
-    attribute {
-    name = "reasonText"
-    type = "S"
-  }
-
   point_in_time_recovery {
     enabled = true
   }
