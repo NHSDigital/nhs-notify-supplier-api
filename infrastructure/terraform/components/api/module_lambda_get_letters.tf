@@ -37,7 +37,8 @@ module "get_letters" {
 
   lambda_env_vars = {
     LETTERS_TABLE_NAME = aws_dynamodb_table.letters.name,
-    LETTER_TTL_HOURS   = 24
+    LETTER_TTL_HOURS   = var.letter_table_ttl_hours,
+    DEFAULT_LIMIT      = var.default_get_limit,
   }
 }
 

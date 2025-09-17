@@ -10,6 +10,7 @@ describe('API Lambda handler', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    process.env.DEFAULT_LIMIT = '100';
   });
 
   it('returns 200 OK with basic paginated resources', async () => {
@@ -90,11 +91,11 @@ describe('API Lambda handler', () => {
 
     expect(result).toEqual({
       statusCode: 400,
-      body: "Bad Request: limit parameter is not a number",
+      body: "Invalid Request: limit parameter must be a positive number not greater than 2500",
     });
   });
 
-  it("returns 400 if the limit parameter is not positive", async () => {
+  it("returns 400 if the limit parameter is negative", async () => {
     const event = makeApiGwEvent({
       path: "/letters",
       queryStringParameters: { limit: "-1" },
@@ -105,7 +106,37 @@ describe('API Lambda handler', () => {
 
     expect(result).toEqual({
       statusCode: 400,
-      body: "Bad Request: limit parameter is not positive",
+      body: "Invalid Request: limit parameter must be a positive number not greater than 2500",
+    });
+  });
+
+  it("returns 400 if the limit parameter is out of range", async () => {
+    const event = makeApiGwEvent({
+      path: "/letters",
+      queryStringParameters: { limit: "2501" },
+    });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+    const result = await getLetters(event, context, callback);
+
+    expect(result).toEqual({
+      statusCode: 400,
+      body: "Invalid Request: limit parameter must be a positive number not greater than 2500",
+    });
+  });
+
+  it("returns 400 if unknown parameters are present", async () => {
+    const event = makeApiGwEvent({
+      path: "/letters",
+      queryStringParameters: { max: "2000" },
+    });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+    const result = await getLetters(event, context, callback);
+
+    expect(result).toEqual({
+      statusCode: 400,
+      body: "Invalid Request: Only 'limit' query parameter is allowed",
     });
   });
 
@@ -117,7 +148,7 @@ describe('API Lambda handler', () => {
 
     expect(result).toEqual({
       statusCode: 400,
-      body: 'Bad Request: Missing supplier ID',
+      body: 'Invalid Request: Missing supplier ID',
     });
   });
 
@@ -129,7 +160,7 @@ describe('API Lambda handler', () => {
 
     expect(result).toEqual({
       statusCode: 400,
-      body: 'Bad Request: Missing supplier ID',
+      body: 'Invalid Request: Missing supplier ID',
     });
   });
 });

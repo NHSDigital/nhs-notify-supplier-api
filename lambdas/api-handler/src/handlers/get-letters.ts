@@ -6,6 +6,7 @@ import pino from 'pino';
 
 const letterRepo = createLetterRepository();
 const log = pino();
+const DEFAULT_LIMIT = process.env.DEFAULT_LIMIT || '2500';
 
 export const getLetters: APIGatewayProxyHandler = async (event) => {
   if (event.path === "/letters") {
@@ -17,18 +18,31 @@ export const getLetters: APIGatewayProxyHandler = async (event) => {
       });
       return {
         statusCode: 400,
-        body: "Bad Request: Missing supplier ID",
+        body: "Invalid Request: Missing supplier ID",
       };
     }
 
     // The endpoint should only return pending letters for now
     const status = "PENDING";
 
-    let limit = event.queryStringParameters?.limit;
+    if (
+      event.queryStringParameters &&
+      Object.keys(event.queryStringParameters).some(
+        (key) => key !== "limit"
+      )
+    ) {
+      log.info({
+        description: "Unexpected query parameter(s) present",
+        queryStringParameters: event.queryStringParameters,
+      });
 
-    if (!limit) {
-      limit = "10";
+      return {
+        statusCode: 400,
+        body: "Invalid Request: Only 'limit' query parameter is supported",
+      };
     }
+
+    let limit = event.queryStringParameters?.limit || DEFAULT_LIMIT;
 
     let limitNumber = Number(limit);
 
@@ -39,18 +53,18 @@ export const getLetters: APIGatewayProxyHandler = async (event) => {
       });
       return {
         statusCode: 400,
-        body: "Bad Request: limit parameter is not a number",
+        body: "Invalid Request: limit parameter must be a positive number not greater than 2500",
       };
     }
 
-    if (limitNumber < 0) {
+    if (limitNumber < 0 || limitNumber > 2500) {
       log.info({
-        description: "limit parameter is not positive",
+        description: "Limit value is invalid",
         limit,
       });
       return {
         statusCode: 400,
-        body: "Bad Request: limit parameter is not positive",
+        body: "Invalid Request: limit parameter must be a positive number not greater than 2500",
       };
     }
 
