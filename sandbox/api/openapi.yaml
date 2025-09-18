@@ -9,7 +9,7 @@ info:
   version: next
 servers:
 - description: Local development server
-  url: http://127.0.0.1:3000
+  url: http://127.0.0.1:9000
 - description: Public sandbox
   url: https://sandbox-server.nhs.uk/nhs-notify-supplier-api
 tags:
@@ -64,6 +64,7 @@ paths:
                   value:
                     data:
                     - attributes:
+                        groupId: abc123
                         specificationId: 2WL5eYSWGzCHlGmzNxuqVusPxDg
                         status: PENDING
                       id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
@@ -159,7 +160,6 @@ paths:
                   - attributes:
                       reasonCode: 100
                       reasonText: failed validation
-                      specificationId: 2WL5eYSWGzCHlGmzNxuqVusPxDg
                       status: REJECTED
                     id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
                     type: Letter
@@ -175,6 +175,7 @@ paths:
                   value:
                     data:
                     - attributes:
+                        groupId: abc123
                         reasonCode: 100
                         reasonText: failed validation
                         specificationId: 2WL5eYSWGzCHlGmzNxuqVusPxDg
@@ -270,7 +271,6 @@ paths:
         name: id
         required: true
         schema:
-          example: 24L5eYSWGzCHlGmzNxuqVusPxDg
           type: string
         style: simple
       responses:
@@ -282,6 +282,7 @@ paths:
                   value:
                     data:
                       attributes:
+                        groupId: abc123
                         reasonCode: 100
                         reasonText: failed validation
                         specificationId: 2WL5eYSWGzCHlGmzNxuqVusPxDg
@@ -377,22 +378,121 @@ paths:
         name: id
         required: true
         schema:
-          example: 24L5eYSWGzCHlGmzNxuqVusPxDg
           type: string
         style: simple
       requestBody:
         content:
           application/vnd.api+json:
             examples:
-              patch-letter-request:
+              patch-letter-request-default:
+                summary: Request for default (PENDING) update
+                value:
+                  data:
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+              patch-letter-request-pending:
+                summary: Request for PENDING update
+                value:
+                  data:
+                    attributes:
+                      status: PENDING
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+              patch-letter-request-accepted:
+                summary: Request for ACCEPTED update
+                value:
+                  data:
+                    attributes:
+                      status: ACCEPTED
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+              patch-letter-request-rejected:
+                summary: Request for REJECTED update
                 value:
                   data:
                     attributes:
                       reasonCode: 100
                       reasonText: failed validation
-                      specificationId: 2WL5eYSWGzCHlGmzNxuqVusPxDg
                       status: REJECTED
                     id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+              patch-letter-request-printed:
+                summary: Request for PRINTED update
+                value:
+                  data:
+                    attributes:
+                      status: PRINTED
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+              patch-letter-request-enclosed:
+                summary: Request for ENCLOSED update
+                value:
+                  data:
+                    attributes:
+                      status: ENCLOSED
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+              patch-letter-request-cancelled:
+                summary: Request for CANCELLED update
+                value:
+                  data:
+                    attributes:
+                      reasonCode: 100
+                      reasonText: failed validation
+                      status: CANCELLED
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+              patch-letter-request-dispatched:
+                summary: Request for DISPATCHED update
+                value:
+                  data:
+                    attributes:
+                      status: DISPATCHED
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+              patch-letter-request-delivered:
+                summary: Request for DELIVERED update
+                value:
+                  data:
+                    attributes:
+                      status: DELIVERED
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+              patch-letter-request-failed:
+                summary: Request for FAILED update
+                value:
+                  data:
+                    attributes:
+                      reasonCode: 100
+                      reasonText: failed validation
+                      status: FAILED
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+              patch-letter-request-returned:
+                summary: Request for RETURNED update
+                value:
+                  data:
+                    attributes:
+                      reasonCode: 100
+                      reasonText: failed validation
+                      status: REJECTED
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+              patch-letter-request-invalid:
+                summary: Request for an invalid update
+                value:
+                  data:
+                    attributes:
+                      status: INVALID_STATUS
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+              patch-letter-request-not-found:
+                summary: Request for a non existant letter
+                value:
+                  data:
+                    attributes:
+                      status: ACCEPTED
+                    id: "123654789"
                     type: Letter
             schema:
               $ref: "#/components/schemas/patchLetters_request"
@@ -406,6 +506,7 @@ paths:
                   value:
                     data:
                       attributes:
+                        groupId: abc123
                         reasonCode: 100
                         reasonText: failed validation
                         specificationId: 2WL5eYSWGzCHlGmzNxuqVusPxDg
@@ -497,7 +598,6 @@ paths:
         name: id
         required: true
         schema:
-          example: 24L5eYSWGzCHlGmzNxuqVusPxDg
           type: string
         style: simple
       - description: "Unique request identifier, in the format of a GUID"
@@ -595,7 +695,6 @@ paths:
         name: id
         required: true
         schema:
-          example: 24L5eYSWGzCHlGmzNxuqVusPxDg
           type: string
         style: simple
       - description: "Unique request identifier, in the format of a GUID"
@@ -658,6 +757,7 @@ paths:
                   data:
                     attributes:
                       cost: 10.25
+                      groupId: abc123
                       lineItem: Letter
                       quantity: 22
                       specificationId: da0b1495-c7cb-468c-9d81-07dee089d728
@@ -677,6 +777,7 @@ paths:
                     data:
                       attributes:
                         cost: 10.25
+                        groupId: abc123
                         lineItem: Letter
                         quantity: 22
                         specificationId: da0b1495-c7cb-468c-9d81-07dee089d728
@@ -767,6 +868,9 @@ components:
         specificationId:
           example: 2WL5eYSWGzCHlGmzNxuqVusPxDg
           type: string
+        groupId:
+          example: abc123
+          type: string
         status:
           default: PENDING
           description: The supplier status of an individual letter
@@ -807,30 +911,6 @@ components:
         data:
           $ref: "#/components/schemas/postLetters_request_data_inner"
       type: object
-    createMI_201_response_data_attributes:
-      properties:
-        messageReference:
-          example: da0b1495-c7cb-468c-9d81-07dee089d728
-          type: string
-        timestamp:
-          example: 2023-11-17T14:27:51.413Z
-          format: date-time
-          type: string
-        lineItem:
-          example: Letter
-          type: string
-        quantity:
-          example: 22
-          type: number
-        cost:
-          description: Total Amount
-          example: 10.25
-          type: number
-        stockRemaining:
-          description: Stock remaining for this line item
-          example: 20000
-          type: number
-      type: object
     listLetters_404_response_data:
       properties:
         errors:
@@ -863,9 +943,6 @@ components:
       type: object
     postLetters_request_data_inner_attributes:
       properties:
-        specificationId:
-          example: 2WL5eYSWGzCHlGmzNxuqVusPxDg
-          type: string
         status:
           default: PENDING
           description: The supplier status of an individual letter
@@ -939,7 +1016,7 @@ components:
           example: 2WL5eYSWGzCHlGmzNxuqVusPxDg
           type: string
         attributes:
-          $ref: "#/components/schemas/createMI_201_response_data_attributes"
+          $ref: "#/components/schemas/createMI_request_data_attributes"
       type: object
     listLetters_404_response_data_errors_inner:
       properties:
@@ -964,6 +1041,9 @@ components:
       properties:
         specificationId:
           example: da0b1495-c7cb-468c-9d81-07dee089d728
+          type: string
+        groupId:
+          example: abc123
           type: string
         timestamp:
           example: 2023-11-17T14:27:51.413Z

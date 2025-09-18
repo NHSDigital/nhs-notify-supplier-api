@@ -2,6 +2,7 @@
   "data": [
     {
       "attributes": {
+        "groupId": "abc123",
         "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
         "groupId": "c5d93f917f5546d08beccf770a915d96",
         "status": "PENDING"
@@ -11,6 +12,7 @@
     },
     {
       "attributes": {
+        "groupId": "abc123",
         "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
         "groupId": "c5d93f917f5546d08beccf770a915d96",
         "status": "PENDING"
@@ -20,6 +22,7 @@
     },
     {
       "attributes": {
+        "groupId": "abc123",
         "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
         "groupId": "c5d93f917f5546d08beccf770a915d96",
         "status": "PENDING"
@@ -29,6 +32,7 @@
     },
     {
       "attributes": {
+        "groupId": "abc123",
         "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
         "groupId": "c5d93f917f5546d08beccf770a915d96",
         "status": "PENDING"
@@ -38,6 +42,7 @@
     },
     {
       "attributes": {
+        "groupId": "abc123",
         "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
         "groupId": "c5d93f917f5546d08beccf770a915d96",
         "status": "PENDING"
@@ -47,6 +52,7 @@
     },
     {
       "attributes": {
+        "groupId": "abc123",
         "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
         "groupId": "c5d93f917f5546d08beccf770a915d96",
         "status": "PENDING"
@@ -56,6 +62,7 @@
     },
     {
       "attributes": {
+        "groupId": "abc123",
         "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
         "groupId": "c5d93f917f5546d08beccf770a915d96",
         "status": "PENDING"
@@ -88,6 +95,123 @@
         "status": "PENDING"
       },
       "id": "987276fd0dc94ddbab607d4a24693db2",
+      "type": "Letter"
+    },
+    {
+      "attributes": {
+        "groupId": "abc123",
+        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+        "status": "PENDING"
+      },
+      "id": "32mAKk67isO29atr37M40VV8h4t",
+      "type": "Letter"
+    },
+    {
+      "attributes": {
+        "groupId": "abc123",
+        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+        "status": "PENDING"
+      },
+      "id": "32mAKiDtfmA1SCybeljxWaXsTO4",
+      "type": "Letter"
+    },
+    {
+      "attributes": {
+        "groupId": "abc123",
+        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+        "status": "PENDING"
+      },
+      "id": "32mAKeUmf6fBK2aCc5tK2AV8NLo",
+      "type": "Letter"
+    },
+    {
+      "attributes": {
+        "groupId": "abc123",
+        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+        "status": "PENDING"
+      },
+      "id": "32mAKg0opQaKuPrBaA11MGPTX1p",
+      "type": "Letter"
+    },
+    {
+      "attributes": {
+        "groupId": "abc123",
+        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+        "status": "PENDING"
+      },
+      "id": "32mAKjTJgMPTE4HdpgTvJcUmmW7",
+      "type": "Letter"
+    },
+    {
+      "attributes": {
+        "groupId": "abc123",
+        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+        "status": "PENDING"
+      },
+      "id": "32mAKfx3DNyUmzXMZ4zby3vh5gi",
+      "type": "Letter"
+    },
+    {
+      "attributes": {
+        "groupId": "abc123",
+        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+        "status": "PENDING"
+      },
+      "id": "32mAKlVCTgh4h1sTw6aiVcFdIwv",
+      "type": "Letter"
+    },
+    {
+      "attributes": {
+        "groupId": "abc123",
+        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+        "status": "PENDING"
+      },
+      "id": "32mAKirJUuWKB3aoGr6KkFObelC",
+      "type": "Letter"
+    },
+    {
+      "attributes": {
+        "groupId": "abc123",
+        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+        "status": "PENDING"
+      },
+      "id": "32mAKiUtgkjc3rS0xIYsqDOYYT4",
+      "type": "Letter"
+    },
+    {
+      "attributes": {
+        "groupId": "abc123",
+        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+        "status": "PENDING"
+      },
+      "id": "32mAKiQJZr3k2TBYboLgUWlR5NO",
+      "type": "Letter"
+    },
+    {
+      "attributes": {
+        "groupId": "abc123",
+        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+        "status": "PENDING"
+      },
+      "id": "32mAfv3V8RlfqSXOOtIZzNdjBFK",
+      "type": "Letter"
+    },
+    {
+      "attributes": {
+        "groupId": "abc123",
+        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+        "status": "PENDING"
+      },
+      "id": "32mAft7hTg2lKQhXhAxbPQTBudU",
+      "type": "Letter"
+    },
+    {
+      "attributes": {
+        "groupId": "abc123",
+        "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+        "status": "PENDING"
+      },
+      "id": "32mAfv2nn1a9Kbfh4z19OyZw8Fo",
       "type": "Letter"
     }
   ]
