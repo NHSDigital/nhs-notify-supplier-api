@@ -99,7 +99,6 @@ variable "enable_backups" {
   default     = false
 }
 
-
 variable "ca_pem_filename" {
   type        = string
   description = "Filename for the CA truststore file within the s3 bucket"
@@ -110,4 +109,16 @@ variable "force_destroy" {
   type        = bool
   description = "Flag to force deletion of S3 buckets"
   default     = false
+}
+
+variable "letter_table_ttl_hours" {
+  type        = number
+  description = "Number of hours to set as TTL on letters table"
+  default     = 24
+}
+
+variable "max_get_limit" {
+  type        = number
+  description = "Default limit to apply to GET requests that support pagination"
+  default     = 2500
 }

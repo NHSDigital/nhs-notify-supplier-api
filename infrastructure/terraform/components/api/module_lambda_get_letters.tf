@@ -37,7 +37,8 @@ module "get_letters" {
 
   lambda_env_vars = {
     LETTERS_TABLE_NAME = aws_dynamodb_table.letters.name,
-    LETTER_TTL_HOURS   = 24
+    LETTER_TTL_HOURS   = var.letter_table_ttl_hours,
+    MAX_LIMIT          = var.max_get_limit,
   }
 }
 
@@ -69,6 +70,7 @@ data "aws_iam_policy_document" "get_letters_lambda" {
 
     resources = [
       aws_dynamodb_table.letters.arn,
+      "${aws_dynamodb_table.letters.arn}/index/supplierStatus-index"
     ]
   }
 }

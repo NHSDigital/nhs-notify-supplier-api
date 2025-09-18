@@ -68,7 +68,7 @@ If packages are unavailable the latest SDKs can be downloaded directly from:
 
 ### Examples
 
-TODO: Links to example clients.
+TODO:CCM-11209 Links to example clients.
 
 ## API Developers
 
@@ -106,7 +106,7 @@ should understand the below.
 ##### Servers
 
 - Servers folder is being built at build time from OAS specs.
-- TODO: Build actual servers
+- TODO:CCM-12139 Build actual servers
 
 ##### Libs
 
