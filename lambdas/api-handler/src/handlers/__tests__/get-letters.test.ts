@@ -73,7 +73,7 @@ describe('API Lambda handler', () => {
         {
           id: "l3",
           type: "Letter",
-          attributes: { status: "PENDING", specificationId: "s1", groupId: 'g1', reasonCode: 123, reasonText: "Reason text" },
+          attributes: { status: "PENDING", specificationId: "s1", groupId: 'g1', reasonCode: 123, reasonText: "Reason text" }
         }
       ],
     };
