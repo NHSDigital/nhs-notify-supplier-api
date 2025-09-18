@@ -1,0 +1,11 @@
+{
+  "data": {
+    "attributes": {
+      "reasonCode": 100,
+      "reasonText": "failed validation",
+      "status": "FAILED"
+    },
+    "id": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+    "type": "Letter"
+  }
+}

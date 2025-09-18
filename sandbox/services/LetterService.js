@@ -16,12 +16,15 @@ const ResponseProvider = require('../utils/ResponseProvider');
 const getLetterStatus = ({ xRequestID, id, xCorrelationID }) => new Promise(
   async (resolve, reject) => {
     try {
-      const fileData = await ResponseProvider.getLetterStatusResponse(id);
+      const responseData = await ResponseProvider.getLetterStatusResponse(id);
+      const content = await fs.readFile(responseData.responsePath);
+
+      const fileData = JSON.parse(content);
       resolve(Service.successResponse({
         xRequestID,
         xCorrelationID,
         data: fileData,
-      }));
+      }, responseData.responseCode));
     } catch (e) {
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
@@ -39,16 +42,24 @@ const getLetterStatus = ({ xRequestID, id, xCorrelationID }) => new Promise(
 * limit BigDecimal The maximum number of items to return in a single request (optional)
 * returns listLetters_200_response
 * */
-const listLetters = ({ xRequestID, xCorrelationID, limit }) => new Promise(
+const listLetters = ({ xRequestID, xCorrelationID, limit = 10 }) => new Promise(
   async (resolve, reject) => {
     try {
-      const fileData = await ResponseProvider.getLettersResponse('PENDING', limit);
+      const responseData = await ResponseProvider.getLettersResponse(limit);
+      const content = await fs.readFile(responseData.responsePath);
+
+      const fileData = JSON.parse(content);
+
+      if (responseData.responseCode === 200)
+      {
+        fileData.data.splice(limit);
+      }
 
       resolve(Service.successResponse({
         xRequestID,
         xCorrelationID,
-        data: fileData.data,
-      }));
+        data: fileData,
+      }, responseData.responseCode));
     } catch (e) {
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
@@ -67,17 +78,19 @@ const listLetters = ({ xRequestID, xCorrelationID, limit }) => new Promise(
 * xCorrelationID String An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header. (optional)
 * returns getLetterStatus_200_response
 * */
-const patchLetters = ({ xRequestID, id, patchLettersRequest, xCorrelationID }) => new Promise(
+const patchLetters = ({ xRequestID, id, body, xCorrelationID }) => new Promise(
   async (resolve, reject) => {
-
     try {
-      const fileData = await ResponseProvider.patchLettersResponse(patchLettersRequest);
+      const responseData = await ResponseProvider.patchLettersResponse(body);
+      const content  = await fs.readFile(responseData.responsePath);
+      const fileData = JSON.parse(content);
+
 
       resolve(Service.successResponse({
         xRequestID,
         xCorrelationID,
         data: fileData,
-      }));
+      }, responseData.responseCode));
     } catch (e) {
       reject(Service.rejectResponse(
         e.message || 'Invalid input',

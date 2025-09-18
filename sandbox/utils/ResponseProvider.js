@@ -1,14 +1,18 @@
 /* eslint-disable no-throw-literal */
 const {Console} = require('console');
+const e = require('express');
 const fs = require('fs/promises');
+const futil = require('fs');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const lodash = require('lodash');
 
-function mapExampleResponse(requestBody, exampleResponseMap) {
+function mapExampleResponse1(requestBody, exampleResponseMap) {
   const match = Object.entries(exampleResponseMap).find(async ([requestBodyPath, response]) => {
     try {
       const requestBodyContent = await fs.readFile(requestBodyPath, 'utf8');
       const exampleRequestBody = JSON.parse(requestBodyContent);
+      console.log('requestBody', requestBody);
+      console.log('exampleRequestBody', exampleRequestBody);
       return lodash.isEqual(requestBody, exampleRequestBody);
     } catch (err) {
       console.error(`Failed to process ${requestBodyPath}:`, err);
@@ -16,7 +20,39 @@ function mapExampleResponse(requestBody, exampleResponseMap) {
     }
   });
 
+  console.log('match:', match);
   return match ? match[1] : null; // Return the matched response, or undefined if no match
+}
+async function mapExampleResponse(requestBody, exampleResponseMap) {
+  console.log("\nrequestBody:", requestBody, "\n");
+
+  const entries = Object.entries(exampleResponseMap);
+
+  // Read and compare all in parallel
+  const checks = await Promise.all(
+    entries.map(async ([requestBodyPath, response]) => {
+      if (requestBodyPath)
+      {
+        try {
+          const exampleRequestBody = JSON.parse(await fs.readFile(requestBodyPath));
+          console.log("\nexampleRquestBody:", exampleRequestBody);
+
+          if (lodash.isEqual(requestBody, exampleRequestBody)) {
+            console.log('returning:', response);
+            return response; // match found
+          }
+        } catch (err) {
+          console.error(`Failed to process ${requestBodyPath}:`, err);
+          throw err;
+        }
+      }
+      return null; // no match
+    })
+  );
+
+  console.log('checks:', checks);
+  // Find the first non-null result
+  return checks.find(result => result !== null) ?? null;
 }
 
 function mapExampleGetResponse(parameterValue, exampleResponseMap) {
@@ -32,48 +68,56 @@ function mapExampleGetResponse(parameterValue, exampleResponseMap) {
 }
 
 async function getLetterStatusResponse(id) {
-  console.log(`GET /letters/${id}`)
 
-  const filename = `data/examples/getLetter/responses/getLetter-${id}.json`
-  if (!filename) {
-    throw {message: `Not found: ${id}`, status: 404};
+  let filename = `data/examples/getLetter/responses/getLetter-${id}.json`
+  let responseCode = 200;
+  if (!futil.existsSync(filename))
+  {
+    filename = 'data/examples/errors/responses/resourceNotFound.json'
+    responseCode = 400
   }
 
-  const content = await fs.readFile(filename, 'utf8');
-  return JSON.parse(content);
+  return {responsePath: filename, responseCode: responseCode}
+
 }
 
-async function getLettersResponse(status, limit) {
-  const getLettersfileMap = {
-    PENDING: 'data/examples/getLetters/responses/getLetters_pending.json',
-  };
 
-  const filename = mapExampleGetResponse(status, getLettersfileMap);
-  if (!filename) {
-    throw {message: `Not found: ${status}`, status: 404};
+async function getLettersResponse(limit) {
+
+  let status = 'SUCCESS';
+  if (limit < 0)
+  {
+    status = 'INVALID_REQUEST';
   }
 
-  const content = await fs.readFile(filename, 'utf8');
-  const response = JSON.parse(content);
-  response.data.splice(limit);
-  return response;
+  const getLettersfileMap = {
+    SUCCESS: {responsePath: 'data/examples/getLetters/responses/getLetters_pending.json', responseCode: 200},
+    INVALID_REQUEST: {responsePath:'data/examples/errors/responses/badRequest.json', responseCode: 400},
+  };
+  return mapExampleGetResponse(status, getLettersfileMap);
 }
 
 async function patchLettersResponse(request) {
   const patchLettersFileMap = {
-    'data/examples/patchLetter/requests/patchLetter.json': 'data/examples/patchLetter/responses/patchLetter.json',
+    'data/examples/patchLetter/requests/patchLetter_DEFAULT.json': {responsePath: 'data/examples/patchLetter/responses/patchLetter_PENDING.json', responseCode: 200},
+    'data/examples/patchLetter/requests/patchLetter_PENDING.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_PENDING.json',responseCode: 200},
+    'data/examples/patchLetter/requests/patchLetter_ACCEPTED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_ACCEPTED.json',responseCode: 200},
+    'data/examples/patchLetter/requests/patchLetter_REJECTED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_REJECTED.json',responseCode: 200},
+    'data/examples/patchLetter/requests/patchLetter_PRINTED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_PRINTED.json',responseCode: 200},
+    'data/examples/patchLetter/requests/patchLetter_ENCLOSED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_ENCLOSED.json',responseCode: 200},
+    'data/examples/patchLetter/requests/patchLetter_CANCELLED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_CANCELLED.json',responseCode: 200},
+    'data/examples/patchLetter/requests/patchLetter_DISPATCHED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_DISPATCHED.json',responseCode: 200},
+    'data/examples/patchLetter/requests/patchLetter_DELIVERED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_DELIVERED.json',responseCode: 200},
+    'data/examples/patchLetter/requests/patchLetter_FAILED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_FAILED.json',responseCode: 200},
+    'data/examples/patchLetter/requests/patchLetter_RETURNED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_RETURNED.json',responseCode: 200},
+    'data/examples/patchLetter/requests/patchLetter_INVALID.json': {responsePath:'data/examples/errors/responses/badRequest.json',responseCode: 400},
+    'data/examples/patchLetter/requests/patchLetter_NOTFOUND.json': {responsePath:'data/examples/errors/responses/resourceNotFound.json',responseCode: 404},
   };
-  const filename = mapExampleResponse(request, patchLettersFileMap);
-  if (!filename) {
-    throw {message: 'Not found: ', status: 404};
-  }
-
-  const content = await fs.readFile(filename, 'utf8');
-  return JSON.parse(content);
+  return await mapExampleResponse(request, patchLettersFileMap);
 }
 
 module.exports = {
   getLetterStatusResponse,
   getLettersResponse,
-  patchLettersResponse
+  patchLettersResponse,
 };

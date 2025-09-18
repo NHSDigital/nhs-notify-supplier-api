@@ -32,7 +32,7 @@ class ExpressServer {
     this.app.use(cors());
     this.app.use(bodyParser.json({ limit: '14MB' }));
     this.app.use(express.json({
-      type: ['application/json', 'application/vnd.api+json']
+      type: ['application/json', 'application/vnd.api+json'],
     }));
     this.app.use(express.urlencoded({ extended: true }));
 
