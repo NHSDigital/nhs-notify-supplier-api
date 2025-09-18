@@ -60,6 +60,7 @@ export class LetterRepository {
       lettersDb.push({
         ...letters[i],
         supplierStatus: `${letters[i].supplierId}#${letters[i].status}`,
+        supplierStatusSk: Date.now().toString(),
         ttl: Math.floor(Date.now() / 1000 + 60 * 60 * this.config.ttlHours)
       });
 
