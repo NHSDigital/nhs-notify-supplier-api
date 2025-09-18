@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "serve": "^14.2.4"
+    "serve": "^14.2.5"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.21.4",
