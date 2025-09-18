@@ -28,7 +28,7 @@ export enum ApiErrorStatus {
 }
 
 export enum ApiErrorDetail {
-  NotFoundLetterId = 'The provided letter ID does not exist',
+  NotFoundLetterId = 'The provided letter ID does not exist for the supplier',
   InvalidRequestMissingSupplierId = 'The supplier ID is missing from the request',
   InvalidRequestMissingBody = 'The request is missing the body',
   InvalidRequestMissingLetterIdPathParameter = 'The request is missing the letter id path parameter',
