@@ -22,7 +22,7 @@ export const patchLetterStatus = async (letterToUpdate: LetterApiResource, lette
     updatedLetter =  await letterRepo.updateLetterStatus(supplierId, letterId, letterToUpdate.attributes.status,
       letterToUpdate.attributes.reasonCode, letterToUpdate.attributes.reasonText);
   } catch (error) {
-    if (error instanceof Error && error.message.includes('not found')) {
+    if (error instanceof Error && /^Letter with id \w+ not found for supplier \w+$/.test(error.message)) {
       throw new NotFoundError(ApiErrorDetail.NotFoundLetterId);
     }
     throw error;

@@ -123,7 +123,6 @@ export class LetterRepository {
         expressionAttributeValues[':reasonText'] = reasonText;
       }
 
-      // , reasonCode = :reasonCode, reasonText = :reasonText'
       result = await this.ddbClient.send(new UpdateCommand({
         TableName: this.config.lettersTableName,
         Key: {
