@@ -59,7 +59,7 @@ export async function createTables(context: DBContext) {
         IndexName: 'supplierStatus-index',
         KeySchema: [
           { AttributeName: 'supplierStatus', KeyType: 'HASH' }, // Partition key for GSI
-          { AttributeName: 'id', KeyType: 'RANGE' }              // Sort key for GSI
+          { AttributeName: 'supplierStatusSk', KeyType: 'RANGE' }              // Sort key for GSI
         ],
         Projection: {
           ProjectionType: 'ALL'
@@ -69,7 +69,8 @@ export async function createTables(context: DBContext) {
     AttributeDefinitions: [
       { AttributeName: 'supplierId', AttributeType: 'S' },
       { AttributeName: 'id', AttributeType: 'S' },
-      { AttributeName: 'supplierStatus', AttributeType: 'S' }
+      { AttributeName: 'supplierStatus', AttributeType: 'S' },
+      { AttributeName: 'supplierStatusSk', AttributeType: 'S' },
     ]
   }));
 

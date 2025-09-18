@@ -3,19 +3,52 @@ import type { Context } from 'aws-lambda';
 import { mockDeep } from 'jest-mock-extended';
 import { makeApiGwEvent } from './utils/test-utils';
 import * as letterService from '../../services/letter-operations';
+import { getEnvars } from '../get-letters';
 
 jest.mock('../../services/letter-operations');
 
 describe('API Lambda handler', () => {
 
+  const originalEnv = process.env;
+
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.resetModules();
+    process.env = { ...originalEnv };
+    process.env.MAX_LIMIT = '2500';
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  it('uses process.env.MAX_LIMIT for max limit set', async () => {
+    expect(getEnvars().maxLimit).toBe(2500);
   });
 
   it('returns 200 OK with basic paginated resources', async () => {
 
-    const mockedGetLetterIds = letterService.getLetterIdsForSupplier as jest.Mock;
-    mockedGetLetterIds.mockResolvedValue(['l1', 'l2', 'l3']);
+    const mockedGetLetters = letterService.getLettersForSupplier as jest.Mock;
+    mockedGetLetters.mockResolvedValue([
+      {
+        id: "l1",
+        specificationId: "s1",
+        groupId: 'g1',
+        status: "PENDING",
+      },
+      {
+        id: "l2",
+        specificationId: "s1",
+        groupId: 'g1',
+        status: "PENDING",
+      },
+      {
+        id: "l3",
+        specificationId: "s1",
+        groupId: 'g1',
+        status: "PENDING",
+      },
+    ]);
 
     const event = makeApiGwEvent({path: '/letters'});
     const context = mockDeep<Context>();
@@ -23,19 +56,24 @@ describe('API Lambda handler', () => {
     const result = await getLetters(event, context, callback);
 
     const expected = {
-      "links": {
-        "self": "/letters?page=1",
-        "first": "/letters?page=1",
-        "last": "/letters?page=1",
-        "next": "/letters?page=1",
-        "prev": "/letters?page=1"
-      },
-      "data": [
-        { "type": "letter", "id": "l1" },
-        { "type": "letter", "id": "l2" },
-        { "type": "letter", "id": "l3" }
-      ]
-    }
+      data: [
+        {
+          id: "l1",
+          type: "Letter",
+          attributes: { specificationId: "s1", groupId: 'g1', status: "PENDING" },
+        },
+        {
+          id: "l2",
+          type: "Letter",
+          attributes: { specificationId: "s1", groupId: 'g1', status: "PENDING" },
+        },
+        {
+          id: "l3",
+          type: "Letter",
+          attributes: { specificationId: "s1", groupId: 'g1', status: "PENDING" },
+        },
+      ],
+    };
 
     expect(result).toEqual({
       statusCode: 200,
@@ -52,6 +90,105 @@ describe('API Lambda handler', () => {
     expect(result).toEqual({
       statusCode: 404,
       body: 'Not Found',
+    });
+  });
+
+  it("returns 400 if the limit parameter is not a number", async () => {
+    const event = makeApiGwEvent({
+      path: "/letters",
+      queryStringParameters: { limit: "1%" },
+    });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+    const result = await getLetters(event, context, callback);
+
+    expect(result).toEqual({
+      statusCode: 400,
+      body: "Invalid Request: limit parameter must be a positive number not greater than 2500",
+    });
+  });
+
+  it("returns 400 if the limit parameter is negative", async () => {
+    const event = makeApiGwEvent({
+      path: "/letters",
+      queryStringParameters: { limit: "-1" },
+    });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+    const result = await getLetters(event, context, callback);
+
+    expect(result).toEqual({
+      statusCode: 400,
+      body: "Invalid Request: limit parameter must be a positive number not greater than 2500",
+    });
+  });
+
+  it("returns 400 if the limit parameter is zero", async () => {
+    const event = makeApiGwEvent({
+      path: "/letters",
+      queryStringParameters: { limit: "0" },
+    });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+    const result = await getLetters(event, context, callback);
+
+    expect(result).toEqual({
+      statusCode: 400,
+      body: "Invalid Request: limit parameter must be a positive number not greater than 2500",
+    });
+  });
+
+  it("returns 400 if the limit parameter is out of range", async () => {
+    const event = makeApiGwEvent({
+      path: "/letters",
+      queryStringParameters: { limit: "2501" },
+    });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+    const result = await getLetters(event, context, callback);
+
+    expect(result).toEqual({
+      statusCode: 400,
+      body: "Invalid Request: limit parameter must be a positive number not greater than 2500",
+    });
+  });
+
+  it("returns 400 if unknown parameters are present", async () => {
+    const event = makeApiGwEvent({
+      path: "/letters",
+      queryStringParameters: { max: "2000" },
+    });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+    const result = await getLetters(event, context, callback);
+
+    expect(result).toEqual({
+      statusCode: 400,
+      body: "Invalid Request: Only 'limit' query parameter is supported",
+    });
+  });
+
+  it('returns 400 for missing supplier ID (empty headers)', async () => {
+    const event = makeApiGwEvent({ path: "/letters", headers: {} });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+    const result = await getLetters(event, context, callback);
+
+    expect(result).toEqual({
+      statusCode: 400,
+      body: 'Invalid Request: Missing supplier ID',
+    });
+  });
+
+  it('returns 400 for missing supplier ID (undefined headers)', async () => {
+    const event = makeApiGwEvent({ path: "/letters", headers: undefined });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+    const result = await getLetters(event, context, callback);
+
+    expect(result).toEqual({
+      statusCode: 400,
+      body: 'Invalid Request: Missing supplier ID',
     });
   });
 });
