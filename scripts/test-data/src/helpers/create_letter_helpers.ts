@@ -47,3 +47,34 @@ export async function createLetter(params: {
   const letterRecord = await letterRepository.putLetter(letter);
   console.log(letterRecord);
 }
+
+export function createLetterDto(params: {
+  letterId: string;
+  supplierId: string;
+  specificationId: string;
+  groupId: string;
+  status: LetterStatusType;
+  url: string;
+}) {
+  const {
+    letterId,
+    supplierId,
+    specificationId,
+    groupId,
+    status,
+    url,
+  } = params;
+
+  const letter: Omit<Letter, "ttl" | "supplierStatus"> = {
+    id: letterId,
+    supplierId,
+    specificationId,
+    groupId,
+    url: url,
+    status: status,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  return letter;
+}

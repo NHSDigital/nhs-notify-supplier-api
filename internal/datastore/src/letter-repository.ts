@@ -2,6 +2,8 @@ import {
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
+  BatchWriteCommand,
+  BatchWriteCommandOutput,
   QueryCommand,
   UpdateCommand,
   UpdateCommandOutput
@@ -25,8 +27,8 @@ export type LetterRepositoryConfig = {
 
 export class LetterRepository {
   constructor(readonly ddbClient: DynamoDBDocumentClient,
-              readonly log: Logger,
-              readonly config: LetterRepositoryConfig) {
+    readonly log: Logger,
+    readonly config: LetterRepositoryConfig) {
   }
 
   async putLetter(letter: Omit<Letter, 'ttl' | 'supplierStatus'>): Promise<Letter> {
@@ -48,6 +50,33 @@ export class LetterRepository {
       throw error;
     }
     return LetterSchema.parse(letterDb);
+  }
+
+  async putLetterBatch(letters: Omit<Letter, 'ttl' | 'supplierStatus'>[]): Promise<void> {
+    let lettersDb: Letter[] = [];
+    for (let i = 0; i < letters.length; i++) {
+      lettersDb.push({
+        ...letters[i],
+        supplierStatus: `${letters[i].supplierId}#${letters[i].status}`,
+        ttl: Math.floor(Date.now() / 1000 + 60 * 60 * this.config.ttlHours)
+      });
+
+      if (lettersDb.length === 25 || i === letters.length - 1) {
+        const input = {
+          RequestItems: {
+            [this.config.lettersTableName]: lettersDb.map((item: any) => ({
+              PutRequest: {
+                Item: item
+              }
+            }))
+          }
+        };
+
+        await this.ddbClient.send(new BatchWriteCommand(input));
+
+        lettersDb = [];
+      }
+    }
   }
 
   async getLetterById(supplierId: string, letterId: string): Promise<Letter> {
