@@ -3,7 +3,6 @@ import {
   GetCommand,
   PutCommand,
   BatchWriteCommand,
-  BatchWriteCommandOutput,
   QueryCommand,
   UpdateCommand,
   UpdateCommandOutput
