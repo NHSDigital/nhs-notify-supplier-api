@@ -7,17 +7,10 @@
       ],
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}/${input:workspace}",
-      "disableOptimisticBPs": true,
       "internalConsoleOptions": "neverOpen",
       "name": "Debug current test file (pick workspace)",
       "program": "${workspaceFolder}/node_modules/.bin/jest",
       "request": "launch",
-      "runtimeArgs": [
-        "run",
-        "test:unit",
-        "--"
-      ],
-      "runtimeExecutable": "npm",
       "type": "node"
     },
     {
@@ -29,17 +22,10 @@
       ],
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}/${input:workspace}",
-      "disableOptimisticBPs": true,
       "internalConsoleOptions": "neverOpen",
       "name": "Debug single test by name (pick workspace)",
       "program": "${workspaceFolder}/node_modules/.bin/jest",
       "request": "launch",
-      "runtimeArgs": [
-        "run",
-        "test:unit",
-        "--"
-      ],
-      "runtimeExecutable": "npm",
       "type": "node"
     }
   ],

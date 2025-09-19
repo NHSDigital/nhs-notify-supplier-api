@@ -34,8 +34,9 @@ export enum ApiErrorDetail {
   InvalidRequestMissingLetterIdPathParameter = 'The request is missing the letter id path parameter',
   InvalidRequestLetterIdsMismatch = 'The letter ID in the request body does not match the letter ID path parameter',
   InvalidRequestBody = 'The request body is invalid',
-  InvalidRequestLimitNotANumber = "The limit parameter is not a number",
-  InvalidRequestLimitNotPositive = "The limit parameter is not positive"
+  InvalidRequestLimitNotANumber = 'The limit parameter is not a number',
+  InvalidRequestLimitNotInRange = 'The limit parameter must be a positive number not greater than %s',
+  InvalidRequestLimitOnly = "Only 'limit' query parameter is supported"
 }
 
 export function buildApiError(params: {
