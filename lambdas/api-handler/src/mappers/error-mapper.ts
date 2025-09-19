@@ -22,7 +22,7 @@ export function mapErrorToResponse(error: unknown): APIGatewayProxyResult {
   }
 }
 
-function buildResponseFromErrorCode(code: ApiErrorCode, detail: ApiErrorDetail | string): APIGatewayProxyResult {
+function buildResponseFromErrorCode(code: ApiErrorCode, detail: string): APIGatewayProxyResult {
   const responseError = buildApiError({
     code,
     status: codeToStatus(code),

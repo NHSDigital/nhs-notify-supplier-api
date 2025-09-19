@@ -22,7 +22,7 @@ export const patchLetters: APIGatewayProxyHandler = async (event) => {
       patchLetterRequest = LetterApiDocumentSchema.parse(JSON.parse(body));
     } catch (error) {
       if (error instanceof Error) {
-        throw new ValidationError(errors.ApiErrorDetail.InvalidRequestBody, error.message, error);
+        throw new ValidationError(errors.ApiErrorDetail.InvalidRequestBody, { cause: error});
       }
       else throw error;
     }

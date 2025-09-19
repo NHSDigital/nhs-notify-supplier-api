@@ -81,7 +81,7 @@ function assertLimitInRange(limitNumber: number, maxLimit: number) {
       description: "Limit value is invalid",
       limitNumber,
     });
-    throw new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange);
+    throw new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange, { args: [maxLimit]});
   }
 }
 
