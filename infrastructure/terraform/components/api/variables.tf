@@ -116,3 +116,9 @@ variable "max_get_limit" {
   description = "Default limit to apply to GET requests that support pagination"
   default     = 2500
 }
+
+variable "force_destroy" {
+  type        = bool
+  description = "Flag to force deletion of S3 buckets"
+  default     = false
+}
