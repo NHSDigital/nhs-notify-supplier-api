@@ -4,6 +4,9 @@ import { mockDeep } from 'jest-mock-extended';
 import { makeApiGwEvent } from './utils/test-utils';
 import * as letterService from '../../services/letter-operations';
 import { mapErrorToResponse } from '../../mappers/error-mapper';
+import { getEnvars } from '../get-letters';
+import { ValidationError } from '../../errors';
+import * as errors from '../../contracts/errors';
 
 jest.mock('../../mappers/error-mapper');
 const mockedMapErrorToResponse = jest.mocked(mapErrorToResponse);
@@ -12,6 +15,7 @@ const expectedErrorResponse: APIGatewayProxyResult = {
   body: "Error"
 };
 mockedMapErrorToResponse.mockReturnValue(expectedErrorResponse);
+
 
 jest.mock('../../services/letter-operations');
 
@@ -23,8 +27,21 @@ jest.mock("../../config/lambda-config", () => ({
 
 describe('API Lambda handler', () => {
 
+  const originalEnv = process.env;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.resetModules();
+    process.env = { ...originalEnv };
+    process.env.MAX_LIMIT = '2500';
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  it('uses process.env.MAX_LIMIT for max limit set', async () => {
+    expect(getEnvars().maxLimit).toBe(2500);
   });
 
   it('returns 200 OK with basic paginated resources', async () => {
@@ -94,10 +111,11 @@ describe('API Lambda handler', () => {
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
 
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotANumber));
     expect(result).toEqual(expectedErrorResponse);
   });
 
-  it("returns 400 if the limit parameter is not positive", async () => {
+  it("returns 400 if the limit parameter is negative", async () => {
     const event = makeApiGwEvent({
       path: "/letters",
       queryStringParameters: { limit: "-1" },
@@ -107,6 +125,49 @@ describe('API Lambda handler', () => {
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
 
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange));
+    expect(result).toEqual(expectedErrorResponse);
+  });
+
+  it("returns 400 if the limit parameter is zero", async () => {
+    const event = makeApiGwEvent({
+      path: "/letters",
+      queryStringParameters: { limit: "0" },
+      headers: {'nhsd-supplier-id': 'supplier1'}
+    });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+    const result = await getLetters(event, context, callback);
+
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange));
+    expect(result).toEqual(expectedErrorResponse);
+  });
+
+  it("returns 400 if the limit parameter is higher than max limit", async () => {
+    const event = makeApiGwEvent({
+      path: "/letters",
+      queryStringParameters: { limit: "2501" },
+      headers: {'nhsd-supplier-id': 'supplier1'}
+    });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+    const result = await getLetters(event, context, callback);
+
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange));
+    expect(result).toEqual(expectedErrorResponse);
+  });
+
+  it("returns 400 if unknown parameters are present", async () => {
+    const event = makeApiGwEvent({
+      path: "/letters",
+      queryStringParameters: { max: "2000" },
+      headers: {'nhsd-supplier-id': 'supplier1'}
+    });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+    const result = await getLetters(event, context, callback);
+
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitOnly));
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -116,6 +177,7 @@ describe('API Lambda handler', () => {
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
 
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingSupplierId));
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -125,6 +187,7 @@ describe('API Lambda handler', () => {
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
 
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingSupplierId));
     expect(result).toEqual(expectedErrorResponse);
   });
 });

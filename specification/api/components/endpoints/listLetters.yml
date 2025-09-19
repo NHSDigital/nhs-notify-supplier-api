@@ -11,6 +11,8 @@ description: The key use of this endpoint is to query letters which are ready to
 responses:
   '200':
     $ref: "../responses/getLetters200.yml"
+  '400':
+    $ref: "../responses/errors/listLetters/listLettersBadRequest.yml"
   '404':
     $ref: "../responses/errors/resourceNotFound.yml"
   '429':

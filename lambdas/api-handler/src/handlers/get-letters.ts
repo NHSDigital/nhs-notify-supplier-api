@@ -9,18 +9,27 @@ import pino from 'pino';
 import { mapErrorToResponse } from "../mappers/error-mapper";
 import { ValidationError } from "../errors";
 import { mapLetterBaseToApiResource } from "../mappers/letter-mapper";
+import util from "util";
 
 const letterRepo = createLetterRepository();
+
 const log = pino();
 
 // The endpoint should only return pending letters for now
 const status = "PENDING";
 
+export const getEnvars = (): { maxLimit: number } => ({
+  maxLimit: parseInt(process.env.MAX_LIMIT!)
+});
+
 export const getLetters: APIGatewayProxyHandler = async (event) => {
 
+  const { maxLimit } = getEnvars();
+
   try {
+    assertNotEmpty(event.headers, errors.ApiErrorDetail.InvalidRequestMissingSupplierId);
     const supplierId = assertNotEmpty(event.headers[lambdaConfig.SUPPLIER_ID_HEADER], errors.ApiErrorDetail.InvalidRequestMissingSupplierId);
-    const limitNumber = validateLimit(event.queryStringParameters);
+    const limitNumber = getLimitOrDefault(event.queryStringParameters, maxLimit);
 
     const letters = await getLettersForSupplier(
       supplierId,
@@ -51,38 +60,56 @@ export const getLetters: APIGatewayProxyHandler = async (event) => {
   }
 };
 
-function validateLimit(queryStringParameters: APIGatewayProxyEventQueryStringParameters | null) : number {
+function getLimitOrDefault(queryStringParameters: APIGatewayProxyEventQueryStringParameters | null, maxLimit: number) : number {
 
-  let limit = queryStringParameters?.limit;
-
-  if (!limit) {
-    limit = "10";
-  }
-
-  let limitNumber = Number(limit);
-
-  assertIsNumber(limitNumber, limit);
-  assertIsPositive(limitNumber, limit);
-
-  return limitNumber;
+  validateLimitParamOnly(queryStringParameters);
+  return getLimit(queryStringParameters?.limit, maxLimit);
 }
 
-function assertIsNumber(limitNumber: number, limit: string) {
+function assertIsNumber(limitNumber: number) {
   if (isNaN(limitNumber)) {
     log.info({
       description: "limit parameter is not a number",
-      limit,
+      limitNumber,
     });
     throw new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotANumber);
   }
 }
 
-function assertIsPositive(limitNumber: number, limit?: string) {
-  if (limitNumber < 0) {
+function assertLimitInRange(limitNumber: number, maxLimit: number) {
+  if (limitNumber <= 0 || limitNumber > maxLimit) {
     log.info({
-      description: "limit parameter is not positive",
-      limit,
+      description: "Limit value is invalid",
+      limitNumber,
     });
-    throw new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotPositive);
+    throw new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange);
   }
+}
+
+function validateLimitParamOnly(queryStringParameters: APIGatewayProxyEventQueryStringParameters | null) {
+  if (
+    queryStringParameters &&
+    Object.keys(queryStringParameters).some(
+      (key) => key !== "limit"
+    )
+  ) {
+    log.info({
+      description: "Unexpected query parameter(s) present",
+      queryStringParameters: queryStringParameters,
+    });
+    throw new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitOnly);
+  }
+}
+
+function getLimit(limit: string | undefined, maxLimit: number) {
+  let result;
+  if (limit) {
+    let limitParam = limit;
+    result = Number(limitParam);
+    assertIsNumber(result);
+    assertLimitInRange(result, maxLimit);
+  } else {
+    result = maxLimit;
+  }
+  return result;
 }
