@@ -9,18 +9,17 @@ import pino from 'pino';
 import { mapErrorToResponse } from "../mappers/error-mapper";
 import { ValidationError } from "../errors";
 import { mapLetterBaseToApiResource } from "../mappers/letter-mapper";
-import util from "util";
 
 const letterRepo = createLetterRepository();
 
 const log = pino();
 
-// The endpoint should only return pending letters for now
-const status = "PENDING";
-
 export const getEnvars = (): { maxLimit: number } => ({
   maxLimit: parseInt(process.env.MAX_LIMIT!)
 });
+
+// The endpoint should only return pending letters for now
+const status = "PENDING";
 
 export const getLetters: APIGatewayProxyHandler = async (event) => {
 
