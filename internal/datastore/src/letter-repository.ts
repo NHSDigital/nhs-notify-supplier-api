@@ -53,12 +53,19 @@ export class LetterRepository {
     return LetterSchema.parse(letterDb);
   }
 
-  async putLetterBatch(letters: Omit<Letter, 'ttl' | 'supplierStatus'>[]): Promise<void> {
+  async putLetterBatch(letters: Omit<Letter, 'ttl' | 'supplierStatus'| 'supplierStatusSk'>[]): Promise<void> {
     let lettersDb: Letter[] = [];
     for (let i = 0; i < letters.length; i++) {
+
+      const letter = letters[i];
+
+      if(!letter){
+        continue;
+      }
+
       lettersDb.push({
-        ...letters[i],
-        supplierStatus: `${letters[i].supplierId}#${letters[i].status}`,
+        ...letter,
+        supplierStatus: `${letter.supplierId}#${letter.status}`,
         supplierStatusSk: Date.now().toString(),
         ttl: Math.floor(Date.now() / 1000 + 60 * 60 * this.config.ttlHours)
       });

@@ -306,6 +306,21 @@ describe('LetterRepository', () => {
     await checkLetterExists('supplier1', 'letter59');
   });
 
+  test('should skip array gaps', async () => {
+    const letters = [
+      createLetter('supplier1', 'letter1'),
+      createLetter('supplier1', 'letter2'),
+      createLetter('supplier1', 'letter3')
+    ];
+
+    delete letters[1];
+
+    await letterRepository.putLetterBatch(letters);
+
+    await checkLetterExists('supplier1', 'letter1');
+    await checkLetterExists('supplier1', 'letter3');
+  });
+
   test('rethrows errors from DynamoDB when batch creating letter', async () => {
     const misconfiguredRepository = new LetterRepository(db.docClient, logger, {
       ...db.config,
