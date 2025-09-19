@@ -5,6 +5,14 @@
       "path": "."
     },
     {
+      "name": "Infrastructure",
+      "path": "./infrastructure"
+    },
+    {
+      "name": "Lambdas Api Handler",
+      "path": "./lambdas/api-handler"
+    },
+    {
       "name": "Application Source Code",
       "path": "./src"
     },
@@ -15,10 +23,6 @@
     {
       "name": "Tests",
       "path": "./tests"
-    },
-    {
-      "name": "Infrastructure",
-      "path": "./infrastructure"
     },
     {
       "name": "Scripts",
@@ -40,8 +44,7 @@
   "settings": {
     "autoOpenWorkspace.enableAutoOpenIfSingleWorkspace": true,
     "githubCodeOwners.format.enabled": true,
-    "workspace-terminals.switchTerminal": "always",
-    "workspace-terminals.auto": "always",
+    "workspace-terminals.auto": "never",
     "markdownlint.config": {
       "MD013": false,
       "MD024": { "siblings_only": true },
