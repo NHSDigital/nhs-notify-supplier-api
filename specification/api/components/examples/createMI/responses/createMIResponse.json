@@ -1,9 +1,8 @@
 {
   "data": {
     "attributes": {
-      "cost": 10.25,
       "groupId": "abc123",
-      "lineItem": "Letter",
+      "lineItem": "envelope-business-standard",
       "quantity": 22,
       "specificationId": "da0b1495-c7cb-468c-9d81-07dee089d728",
       "stockRemaining": 2000,
