@@ -11,8 +11,6 @@ function mapExampleResponse1(requestBody, exampleResponseMap) {
     try {
       const requestBodyContent = await fs.readFile(requestBodyPath, 'utf8');
       const exampleRequestBody = JSON.parse(requestBodyContent);
-      console.log('requestBody', requestBody);
-      console.log('exampleRequestBody', exampleRequestBody);
       return lodash.isEqual(requestBody, exampleRequestBody);
     } catch (err) {
       console.error(`Failed to process ${requestBodyPath}:`, err);
@@ -20,11 +18,9 @@ function mapExampleResponse1(requestBody, exampleResponseMap) {
     }
   });
 
-  console.log('match:', match);
   return match ? match[1] : null; // Return the matched response, or undefined if no match
 }
 async function mapExampleResponse(requestBody, exampleResponseMap) {
-  console.log("\nrequestBody:", requestBody, "\n");
 
   const entries = Object.entries(exampleResponseMap);
 
@@ -35,10 +31,8 @@ async function mapExampleResponse(requestBody, exampleResponseMap) {
       {
         try {
           const exampleRequestBody = JSON.parse(await fs.readFile(requestBodyPath));
-          console.log("\nexampleRquestBody:", exampleRequestBody);
 
           if (lodash.isEqual(requestBody, exampleRequestBody)) {
-            console.log('returning:', response);
             return response; // match found
           }
         } catch (err) {
@@ -74,7 +68,7 @@ async function getLetterStatusResponse(id) {
   if (!futil.existsSync(filename))
   {
     filename = 'data/examples/errors/responses/resourceNotFound.json'
-    responseCode = 400
+    responseCode = 404
   }
 
   return {responsePath: filename, responseCode: responseCode}
@@ -85,14 +79,14 @@ async function getLetterStatusResponse(id) {
 async function getLettersResponse(limit) {
 
   let status = 'SUCCESS';
-  if (limit < 0)
+  if (limit < 0 || limit > 2500)
   {
     status = 'INVALID_REQUEST';
   }
 
   const getLettersfileMap = {
     SUCCESS: {responsePath: 'data/examples/getLetters/responses/getLetters_pending.json', responseCode: 200},
-    INVALID_REQUEST: {responsePath:'data/examples/errors/responses/badRequest.json', responseCode: 400},
+    INVALID_REQUEST: {responsePath:'data/examples/errors/responses/getLetter/limitInvalidValue.json', responseCode: 400},
   };
   return mapExampleGetResponse(status, getLettersfileMap);
 }
@@ -112,6 +106,13 @@ async function patchLettersResponse(request) {
     'data/examples/patchLetter/requests/patchLetter_RETURNED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_RETURNED.json',responseCode: 200},
     'data/examples/patchLetter/requests/patchLetter_INVALID.json': {responsePath:'data/examples/errors/responses/badRequest.json',responseCode: 400},
     'data/examples/patchLetter/requests/patchLetter_NOTFOUND.json': {responsePath:'data/examples/errors/responses/resourceNotFound.json',responseCode: 404},
+  };
+  return await mapExampleResponse(request, patchLettersFileMap);
+}
+
+async function postLettersResponse(request) {
+  const patchLettersFileMap = {
+    'data/examples/postLetter/requests/postLetters.json': {responsePath: 'data/examples/postLetter/responses/postLetters.json', responseCode: 200},
   };
   return await mapExampleResponse(request, patchLettersFileMap);
 }
