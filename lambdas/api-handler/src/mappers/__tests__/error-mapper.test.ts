@@ -14,7 +14,6 @@ describe("mapErrorToResponse", () => {
         {
           "code": "NOTIFY_INVALID_REQUEST",
           "detail": "The letter ID in the request body does not match the letter ID path parameter",
-          "id": expect.any(String),
           "links": {
             "about": "https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier"
           },
@@ -36,7 +35,6 @@ describe("mapErrorToResponse", () => {
         {
           "code": "NOTIFY_LETTER_NOT_FOUND",
           "detail": "The provided letter ID does not exist for the supplier",
-          "id": expect.any(String),
           "links": {
             "about": "https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier"
           },
@@ -58,7 +56,6 @@ describe("mapErrorToResponse", () => {
         {
           "code": "NOTIFY_INTERNAL_SERVER_ERROR",
           "detail": "Something broke",
-          "id": expect.any(String),
           "links": {
             "about": "https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier"
           },
@@ -80,7 +77,6 @@ describe("mapErrorToResponse", () => {
         {
           "code": "NOTIFY_INTERNAL_SERVER_ERROR",
           "detail": "Unexpected error",
-          "id": expect.any(String),
           "links": {
             "about": "https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier"
           },

@@ -1,7 +1,6 @@
 import { randomUUID } from 'crypto';
 
 export interface ApiError {
-  id: string;
   code: ApiErrorCode;
   links: {about: 'https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier'};
   status: ApiErrorStatus;
@@ -46,7 +45,6 @@ export function buildApiError(params: {
   detail: ApiErrorDetail | string;
 }): ApiError {
   return {
-    id: randomUUID(), // TODO CCM-11188: correlation ID?
     code: params.code,
     links: { about: 'https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier' },
     status: params.status,
