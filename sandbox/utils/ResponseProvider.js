@@ -116,8 +116,27 @@ async function patchLettersResponse(request) {
   return await mapExampleResponse(request, patchLettersFileMap);
 }
 
+async function postMIResponse(request) {
+  const postMIFileMap = {
+    'data/examples/createMI/requests/createMI_SUCCESS.json': {responsePath: 'data/examples/createMI/responses/createMI_SUCCESS.json', responseCode: 200},
+    'data/examples/createMI/requests/createMI_INVALID.json': {responsePath:'data/examples/errors/responses/badRequest.json',responseCode: 400},
+    'data/examples/createMI/requests/createMI_NOTFOUND.json': {responsePath:'data/examples/errors/responses/resourceNotFound.json',responseCode: 404},
+  };
+  return await mapExampleResponse(request, postMIFileMap);
+}
+
+async function getLetterDataResponse(id) {
+  const getLetterDataFileMap = {
+    '2AL5eYSWGzCHlGmzNxuqVusPxDg' : {responsePath: 'http://example.com', responseCode: 303},
+    '2WL5eYSWGzCHlGmzNxuqVusPxDg' : {responsePath: 'data/examples/errors/responses/resourceNotFound.json', responseCode: 404},
+  };
+  return mapExampleGetResponse(id, getLetterDataFileMap);
+}
+
 module.exports = {
   getLetterStatusResponse,
   getLettersResponse,
   patchLettersResponse,
+  postMIResponse,
+  getLetterDataResponse
 };

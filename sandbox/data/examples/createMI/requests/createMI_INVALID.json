@@ -1,0 +1,13 @@
+{
+  "data": {
+    "attributes": {
+      "cost": 10.25,
+      "lineItem": "Letter",
+      "quantity": 22,
+      "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+      "stockRemaining": 2000,
+      "timestamp": "yesterday"
+    },
+    "type": "ManagementInformation"
+  }
+}
