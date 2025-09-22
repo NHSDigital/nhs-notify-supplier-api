@@ -20,7 +20,6 @@ class Controller {
     } else {
       response.end(responsePayload);
     }
-    console.log('response:', response);
   }
 
   static sendError(response, error) {

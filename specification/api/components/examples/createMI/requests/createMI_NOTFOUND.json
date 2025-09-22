@@ -1,8 +1,7 @@
 {
   "data": {
     "attributes": {
-      "cost": 10.25,
-      "lineItem": "Letter",
+      "lineItem": "envelope-business-standard",
       "quantity": 22,
       "specificationId": "123456",
       "stockRemaining": 2000,
