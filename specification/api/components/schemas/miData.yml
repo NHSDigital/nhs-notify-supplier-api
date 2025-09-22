@@ -11,7 +11,7 @@ properties:
         properties:
           specificationId:
             type: string
-            example: da0b1495-c7cb-468c-9d81-07dee089d728
+            example: 2WL5eYSWGzCHlGmzNxuqVusPxDg
           groupId:
             type: string
             example: abc123

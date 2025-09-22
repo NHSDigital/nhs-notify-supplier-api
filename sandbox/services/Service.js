@@ -3,8 +3,8 @@ class Service {
     return { error, code };
   }
 
-  static successResponse(payload, code = 200) {
-    return { payload, code };
+  static successResponse(payload, code = 200, headers = {}) {
+    return { payload, code, headers };
   }
 }
 
