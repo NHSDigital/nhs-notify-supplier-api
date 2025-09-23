@@ -1,6 +1,7 @@
 {
   "data": {
     "attributes": {
+      "groupId": "abc123",
       "lineItem": "envelope-business-standard",
       "quantity": 22,
       "specificationId": "123456",
