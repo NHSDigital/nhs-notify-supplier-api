@@ -6,4 +6,4 @@ content:
     examples:
       patch_letter-response:
         value:
-          $ref: ../examples/patchLetter/responses/patchLetter.json
+          $ref: ../examples/patchLetter/responses/patchLetter_ACCEPTED.json
