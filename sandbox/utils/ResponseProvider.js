@@ -6,20 +6,7 @@ const futil = require('fs');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const lodash = require('lodash');
 
-function mapExampleResponse1(requestBody, exampleResponseMap) {
-  const match = Object.entries(exampleResponseMap).find(async ([requestBodyPath, response]) => {
-    try {
-      const requestBodyContent = await fs.readFile(requestBodyPath, 'utf8');
-      const exampleRequestBody = JSON.parse(requestBodyContent);
-      return lodash.isEqual(requestBody, exampleRequestBody);
-    } catch (err) {
-      console.error(`Failed to process ${requestBodyPath}:`, err);
-      throw err;
-    }
-  });
 
-  return match ? match[1] : null; // Return the matched response, or undefined if no match
-}
 async function mapExampleResponse(requestBody, exampleResponseMap) {
 
   const entries = Object.entries(exampleResponseMap);
