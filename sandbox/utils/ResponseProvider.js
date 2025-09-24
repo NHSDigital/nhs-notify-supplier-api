@@ -27,7 +27,7 @@ async function mapExampleResponse(requestBody, exampleResponseMap) {
           throw err;
         }
       }
-      return null; // no match
+      return {responsePath:'data/examples/errors/responses/resourceNotFound.json',responseCode: 404}; // no match
     })
   );
 
@@ -45,7 +45,7 @@ function mapExampleGetResponse(parameterValue, exampleResponseMap) {
       throw err;
     }
   });
-  return match ? match[1] : null;
+  return match ? match[1] : {responsePath:'data/examples/errors/responses/resourceNotFound.json',responseCode: 404};
 }
 
 async function getLetterStatusResponse(id) {
