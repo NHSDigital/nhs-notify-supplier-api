@@ -12,6 +12,7 @@ version.json
 
 # Please, add your custom content below!
 .idea
+.env
 
 # dependencies
 node_modules

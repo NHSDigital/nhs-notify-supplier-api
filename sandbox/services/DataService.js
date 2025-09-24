@@ -26,7 +26,7 @@ const getDataId = ({ id, xRequestID, xCorrelationID }) => new Promise(
   },
 );
 /**
-* Check for the existance of a data file
+* Check for the existence of a data file
 *
 * id String Unique identifier of this resource
 * xRequestID String Unique request identifier, in the format of a GUID

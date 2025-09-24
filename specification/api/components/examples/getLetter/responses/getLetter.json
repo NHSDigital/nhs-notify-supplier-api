@@ -1,9 +1,9 @@
 {
   "data": {
     "attributes": {
+      "groupId": "abc123",
       "reasonCode": 100,
       "reasonText": "failed validation",
-      "requestedProductionStatus": "ACTIVE",
       "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
       "status": "REJECTED"
     },

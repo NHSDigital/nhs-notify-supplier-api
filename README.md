@@ -1,7 +1,7 @@
 # NHS Notify Supplier API
 
 [![1. CI/CD pull request](https://github.com/NHSDigital/nhs-notify-supplier-api/actions/workflows/cicd-1-pull-request.yaml/badge.svg)](https://github.com/NHSDigital/nhs-notify-supplier-api/actions/workflows/cicd-1-pull-request.yaml)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nhs-notify-supplier-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=nhs-notify-supplier-api)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=NHSDigital_nhs-notify-supplier-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=NHSDigital_nhs-notify-supplier-api)
 
 The NHS Notify Supplier API is intended primarily for print suppliers to integrate with the NHS Notify message request queueing system.
 
@@ -68,7 +68,7 @@ If packages are unavailable the latest SDKs can be downloaded directly from:
 
 ### Examples
 
-TODO: Links to example clients.
+TODO:CCM-11209 Links to example clients.
 
 ## API Developers
 
@@ -106,7 +106,7 @@ should understand the below.
 ##### Servers
 
 - Servers folder is being built at build time from OAS specs.
-- TODO: Build actual servers
+- TODO:CCM-12139 Build actual servers
 
 ##### Libs
 
