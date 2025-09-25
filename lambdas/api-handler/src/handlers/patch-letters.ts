@@ -2,7 +2,7 @@ import { APIGatewayProxyHandler } from 'aws-lambda';
 import { createLetterRepository } from '../infrastructure/letter-repo-factory';
 import { patchLetterStatus } from '../services/letter-operations';
 import { LetterApiDocument, LetterApiDocumentSchema } from '../contracts/letter-api';
-import * as errors from '../contracts/errors';
+import { ApiErrorDetail } from '../contracts/errors';
 import { ValidationError } from '../errors';
 import { mapErrorToResponse } from '../mappers/error-mapper';
 import { lambdaConfig } from "../config/lambda-config";
@@ -11,10 +11,14 @@ import { assertNotEmpty } from '../utils/validation';
 const letterRepo = createLetterRepository();
 export const patchLetters: APIGatewayProxyHandler = async (event) => {
 
+  let correlationId;
+
   try {
-    const supplierId = assertNotEmpty(event.headers[lambdaConfig.SUPPLIER_ID_HEADER], errors.ApiErrorDetail.InvalidRequestMissingSupplierId);
-    const letterId = assertNotEmpty( event.pathParameters?.id, errors.ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter);
-    const body = assertNotEmpty(event.body, errors.ApiErrorDetail.InvalidRequestMissingBody);
+    assertNotEmpty(event.headers, new Error('The request headers are empty'));
+    correlationId = assertNotEmpty(event.headers[lambdaConfig.APIM_CORRELATION_HEADER], new Error("The request headers don't contain the APIM correlation id"));
+    const supplierId = assertNotEmpty(event.headers[lambdaConfig.SUPPLIER_ID_HEADER], new ValidationError(ApiErrorDetail.InvalidRequestMissingSupplierId));
+    const letterId = assertNotEmpty( event.pathParameters?.id, new ValidationError(ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter));
+    const body = assertNotEmpty(event.body, new ValidationError(ApiErrorDetail.InvalidRequestMissingBody));
 
     let patchLetterRequest: LetterApiDocument;
 
@@ -22,7 +26,7 @@ export const patchLetters: APIGatewayProxyHandler = async (event) => {
       patchLetterRequest = LetterApiDocumentSchema.parse(JSON.parse(body));
     } catch (error) {
       if (error instanceof Error) {
-        throw new ValidationError(errors.ApiErrorDetail.InvalidRequestBody, { cause: error});
+        throw new ValidationError(ApiErrorDetail.InvalidRequestBody, { cause: error});
       }
       else throw error;
     }
@@ -35,6 +39,6 @@ export const patchLetters: APIGatewayProxyHandler = async (event) => {
     };
 
   } catch (error) {
-    return mapErrorToResponse(error);
+    return mapErrorToResponse(error, correlationId);
   }
 };

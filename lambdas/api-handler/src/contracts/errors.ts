@@ -1,5 +1,3 @@
-import { randomUUID } from 'crypto';
-
 export interface ApiError {
   id: string;
   code: ApiErrorCode;
@@ -36,17 +34,19 @@ export enum ApiErrorDetail {
   InvalidRequestBody = 'The request body is invalid',
   InvalidRequestLimitNotANumber = 'The limit parameter is not a number',
   InvalidRequestLimitNotInRange = 'The limit parameter must be a positive number not greater than %s',
-  InvalidRequestLimitOnly = "Only 'limit' query parameter is supported"
+  InvalidRequestLimitOnly = "Only 'limit' query parameter is supported",
+  InvalidRequestNoRequestId = 'The request does not contain a request id'
 }
 
 export function buildApiError(params: {
+  id: string
   code: ApiErrorCode;
   status: ApiErrorStatus;
   title: ApiErrorTitle;
   detail: ApiErrorDetail | string;
 }): ApiError {
   return {
-    id: randomUUID(), // TODO CCM-11188: correlation ID?
+    id: params.id,
     code: params.code,
     links: { about: 'https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier' },
     status: params.status,

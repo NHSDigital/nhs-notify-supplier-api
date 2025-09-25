@@ -6,7 +6,7 @@ describe("mapErrorToResponse", () => {
   it("should map ValidationError to InvalidRequest response", () => {
     const err = new ValidationError(ApiErrorDetail.InvalidRequestLetterIdsMismatch);
 
-    const res = mapErrorToResponse(err);
+    const res = mapErrorToResponse(err, 'correlationId');
 
     expect(res.statusCode).toEqual(400);
     expect(JSON.parse(res.body)).toEqual({
@@ -14,7 +14,7 @@ describe("mapErrorToResponse", () => {
         {
           "code": "NOTIFY_INVALID_REQUEST",
           "detail": "The letter ID in the request body does not match the letter ID path parameter",
-          "id": expect.any(String),
+          "id": "correlationId",
           "links": {
             "about": "https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier"
           },
@@ -28,7 +28,7 @@ describe("mapErrorToResponse", () => {
   it("should map NotFoundError to NotFound response", () => {
     const err = new NotFoundError(ApiErrorDetail.NotFoundLetterId);
 
-    const res = mapErrorToResponse(err);
+    const res = mapErrorToResponse(err, undefined);
 
     expect(res.statusCode).toEqual(404);
     expect(JSON.parse(res.body)).toEqual({
@@ -50,7 +50,7 @@ describe("mapErrorToResponse", () => {
   it("should map generic Error to InternalServerError response", () => {
     const err = new Error("Something broke");
 
-    const res = mapErrorToResponse(err);
+    const res = mapErrorToResponse(err, 'correlationId');
 
     expect(res.statusCode).toEqual(500);
     expect(JSON.parse(res.body)).toEqual({
@@ -58,7 +58,7 @@ describe("mapErrorToResponse", () => {
         {
           "code": "NOTIFY_INTERNAL_SERVER_ERROR",
           "detail": "Something broke",
-          "id": expect.any(String),
+          "id": "correlationId",
           "links": {
             "about": "https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier"
           },
@@ -72,7 +72,7 @@ describe("mapErrorToResponse", () => {
   it("should map unexpected non-error to InternalServerError response", () => {
     const err = 12345; // not an Error
 
-    const res = mapErrorToResponse(err);
+    const res = mapErrorToResponse(err, 'correlationId');
 
     expect(res.statusCode).toEqual(500);
     expect(JSON.parse(res.body)).toEqual({
@@ -80,7 +80,7 @@ describe("mapErrorToResponse", () => {
         {
           "code": "NOTIFY_INTERNAL_SERVER_ERROR",
           "detail": "Unexpected error",
-          "id": expect.any(String),
+          "id": "correlationId",
           "links": {
             "about": "https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier"
           },

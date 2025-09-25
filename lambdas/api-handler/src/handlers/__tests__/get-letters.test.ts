@@ -12,15 +12,16 @@ jest.mock('../../mappers/error-mapper');
 const mockedMapErrorToResponse = jest.mocked(mapErrorToResponse);
 const expectedErrorResponse: APIGatewayProxyResult = {
   statusCode: 400,
-  body: "Error"
+  body: 'Error'
 };
 mockedMapErrorToResponse.mockReturnValue(expectedErrorResponse);
 
 jest.mock('../../services/letter-operations');
 
-jest.mock("../../config/lambda-config", () => ({
+jest.mock('../../config/lambda-config', () => ({
   lambdaConfig: {
-    SUPPLIER_ID_HEADER: "nhsd-supplier-id"
+    SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
+    APIM_CORRELATION_HEADER: 'nhsd-correlation-id'
   }
 }));
 
@@ -69,7 +70,8 @@ describe('API Lambda handler', () => {
       },
     ]);
 
-    const event = makeApiGwEvent({path: '/letters', headers: {'nhsd-supplier-id': 'supplier1'}});
+    const event = makeApiGwEvent({path: '/letters',
+      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}});
     const context = mockDeep<Context>();
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
@@ -104,13 +106,14 @@ describe('API Lambda handler', () => {
     const event = makeApiGwEvent({
       path: "/letters",
       queryStringParameters: { limit: "1%" },
-      headers: {'nhsd-supplier-id': 'supplier1'}});
+      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
+    });
 
     const context = mockDeep<Context>();
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotANumber));
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotANumber), 'correlationId');
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -118,13 +121,15 @@ describe('API Lambda handler', () => {
     const event = makeApiGwEvent({
       path: "/letters",
       queryStringParameters: { limit: "-1" },
-      headers: {'nhsd-supplier-id': 'supplier1'}});
+      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
+    });
 
     const context = mockDeep<Context>();
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange, { args: [getEnvars().maxLimit] }));
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(
+      new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange, { args: [getEnvars().maxLimit] }), 'correlationId');
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -132,13 +137,14 @@ describe('API Lambda handler', () => {
     const event = makeApiGwEvent({
       path: "/letters",
       queryStringParameters: { limit: "0" },
-      headers: {'nhsd-supplier-id': 'supplier1'}
+      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange, { args: [getEnvars().maxLimit] }));
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(
+      new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange, { args: [getEnvars().maxLimit] }), 'correlationId');
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -146,13 +152,14 @@ describe('API Lambda handler', () => {
     const event = makeApiGwEvent({
       path: "/letters",
       queryStringParameters: { limit: "2501" },
-      headers: {'nhsd-supplier-id': 'supplier1'}
+      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange, { args: [getEnvars().maxLimit] }));
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(
+      new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange, { args: [getEnvars().maxLimit] }), 'correlationId');
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -160,13 +167,13 @@ describe('API Lambda handler', () => {
     const event = makeApiGwEvent({
       path: "/letters",
       queryStringParameters: { max: "2000" },
-      headers: {'nhsd-supplier-id': 'supplier1'}
+      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitOnly));
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitOnly), 'correlationId');
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -176,17 +183,21 @@ describe('API Lambda handler', () => {
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingSupplierId));
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error('The request headers are empty'), undefined);
     expect(result).toEqual(expectedErrorResponse);
   });
 
-  it('returns 400 for missing supplier ID (undefined headers)', async () => {
-    const event = makeApiGwEvent({ path: "/letters", headers: undefined });
+  it("returns 500 if correlation id not provided in request", async () => {
+    const event = makeApiGwEvent({
+      path: "/letters",
+      queryStringParameters: { limit: "2000" },
+      headers: {'nhsd-supplier-id': 'supplier1'}
+    });
     const context = mockDeep<Context>();
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingSupplierId));
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error("The request headers don't contain the APIM correlation id"), undefined);
     expect(result).toEqual(expectedErrorResponse);
   });
 });

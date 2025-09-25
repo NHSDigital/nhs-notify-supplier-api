@@ -2,28 +2,33 @@ import { APIGatewayProxyResult } from "aws-lambda";
 import { NotFoundError, ValidationError } from "../errors";
 import { buildApiError, ApiErrorCode, ApiErrorDetail, ApiErrorTitle, ApiError, ApiErrorStatus } from "../contracts/errors";
 import pino from "pino";
+import { v4 as uuid } from 'uuid';
 
 const logger = pino();
 export interface ErrorResponse {
   errors: ApiError[];
 }
 
-export function mapErrorToResponse(error: unknown): APIGatewayProxyResult {
+export function mapErrorToResponse(error: unknown, correlationId: string | undefined): APIGatewayProxyResult {
   if (error instanceof ValidationError) {
-    return buildResponseFromErrorCode(ApiErrorCode.InvalidRequest, error.detail);
+    logger.info({ err: error }, `Validation error correlationId=${correlationId}`);
+    return buildResponseFromErrorCode(ApiErrorCode.InvalidRequest, error.detail, correlationId);
   } else if (error instanceof NotFoundError) {
-    return buildResponseFromErrorCode(ApiErrorCode.NotFound, error.detail);
+    logger.info({ err: error }, `Not found error correlationId=${correlationId}`);
+    return buildResponseFromErrorCode(ApiErrorCode.NotFound, error.detail, correlationId);
   } else if (error instanceof Error) {
-    logger.error({ err: error }, "Internal server error");
-    return buildResponseFromErrorCode(ApiErrorCode.InternalServerError, error.message);
+    logger.error({ err: error }, `Internal server error correlationId=${correlationId}`);
+    return buildResponseFromErrorCode(ApiErrorCode.InternalServerError, error.message, correlationId);
   } else {
-    logger.error({ err: error }, "Internal server error (non-Error thrown)");
-    return buildResponseFromErrorCode(ApiErrorCode.InternalServerError, "Unexpected error");
+    logger.error({ err: error }, `Internal server error (non-Error thrown) correlationId=${correlationId}`);
+    return buildResponseFromErrorCode(ApiErrorCode.InternalServerError, "Unexpected error", correlationId);
   }
 }
 
-function buildResponseFromErrorCode(code: ApiErrorCode, detail: string): APIGatewayProxyResult {
+function buildResponseFromErrorCode(code: ApiErrorCode, detail: string, correlationId: string | undefined): APIGatewayProxyResult {
+  const id = correlationId ? correlationId : uuid();
   const responseError = buildApiError({
+    id,
     code,
     status: codeToStatus(code),
     title: codeToTitle(code),

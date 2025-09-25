@@ -3,7 +3,7 @@ import { getLettersForSupplier } from "../services/letter-operations";
 import { createLetterRepository } from "../infrastructure/letter-repo-factory";
 import { LetterBase } from "../../../../internal/datastore/src";
 import { assertNotEmpty } from "../utils/validation";
-import * as errors from '../contracts/errors';
+import { ApiErrorDetail } from '../contracts/errors';
 import { lambdaConfig } from "../config/lambda-config";
 import pino from 'pino';
 import { mapErrorToResponse } from "../mappers/error-mapper";
@@ -24,10 +24,12 @@ const status = "PENDING";
 export const getLetters: APIGatewayProxyHandler = async (event) => {
 
   const { maxLimit } = getEnvars();
+  let correlationId;
 
   try {
-    assertNotEmpty(event.headers, errors.ApiErrorDetail.InvalidRequestMissingSupplierId);
-    const supplierId = assertNotEmpty(event.headers[lambdaConfig.SUPPLIER_ID_HEADER], errors.ApiErrorDetail.InvalidRequestMissingSupplierId);
+    assertNotEmpty(event.headers, new Error("The request headers are empty"));
+    correlationId = assertNotEmpty(event.headers[lambdaConfig.APIM_CORRELATION_HEADER], new Error("The request headers don't contain the APIM correlation id"));
+    const supplierId = assertNotEmpty(event.headers[lambdaConfig.SUPPLIER_ID_HEADER], new ValidationError(ApiErrorDetail.InvalidRequestMissingSupplierId));
     const limitNumber = getLimitOrDefault(event.queryStringParameters, maxLimit);
 
     const letters = await getLettersForSupplier(
@@ -55,7 +57,7 @@ export const getLetters: APIGatewayProxyHandler = async (event) => {
     };
   }
   catch (error) {
-    return mapErrorToResponse(error);
+    return mapErrorToResponse(error, correlationId);
   }
 };
 
@@ -71,7 +73,7 @@ function assertIsNumber(limitNumber: number) {
       description: "limit parameter is not a number",
       limitNumber,
     });
-    throw new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotANumber);
+    throw new ValidationError(ApiErrorDetail.InvalidRequestLimitNotANumber);
   }
 }
 
@@ -81,7 +83,7 @@ function assertLimitInRange(limitNumber: number, maxLimit: number) {
       description: "Limit value is invalid",
       limitNumber,
     });
-    throw new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange, { args: [maxLimit]});
+    throw new ValidationError(ApiErrorDetail.InvalidRequestLimitNotInRange, { args: [maxLimit]});
   }
 }
 
@@ -96,7 +98,7 @@ function validateLimitParamOnly(queryStringParameters: APIGatewayProxyEventQuery
       description: "Unexpected query parameter(s) present",
       queryStringParameters: queryStringParameters,
     });
-    throw new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitOnly);
+    throw new ValidationError(ApiErrorDetail.InvalidRequestLimitOnly);
   }
 }
 
