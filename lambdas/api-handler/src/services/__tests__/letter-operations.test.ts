@@ -87,7 +87,7 @@ describe('patchLetterStatus function', () => {
       updateLetterStatus: jest.fn().mockRejectedValue(new Error('Letter with id l1 not found for supplier s1'))
     };
 
-    await expect(patchLetterStatus(letterResource, 'letter1', 'supplier1', mockRepo as any)).rejects.toThrow("The provided letter ID does not exist");
+    await expect(patchLetterStatus(letterResource, 'letter1', 'supplier1', mockRepo as any)).rejects.toThrow("No resource found with that ID");
   });
 
   it('should throw unexpected error', async () => {

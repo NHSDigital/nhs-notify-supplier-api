@@ -7,7 +7,7 @@ responses:
   "200":
     $ref: "../responses/patchLetter200.yml"
   "400":
-    $ref: "../responses/errors/badRequest.yml"
+    $ref: "../responses/errors/patchLetter/patchLetterBadRequest.yml"
   "404":
     $ref: "../responses/errors/resourceNotFound.yml"
   "429":

@@ -35,7 +35,7 @@ describe("mapErrorToResponse", () => {
       "errors": [
         {
           "code": "NOTIFY_LETTER_NOT_FOUND",
-          "detail": "The provided letter ID does not exist for the supplier",
+          "detail": "No resource found with that ID",
           "id": expect.any(String),
           "links": {
             "about": "https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier"
