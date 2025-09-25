@@ -47,7 +47,7 @@
   },
   "scripts": {
     "build": "npm run bundle-oas && npm run generate --buildver=$npm_config_buildver",
-    "bundle-oas": "mkdir -p build && redocly bundle specification/api/notify-supplier-phase1.yml --dereferenced -k --remove-unused-components --ext yml > build/notify-supplier.yml",
+    "bundle-oas": "cp -r sandbox/data/examples/. specification/api/components/examples && mkdir -p build && redocly bundle specification/api/notify-supplier-phase1.yml --dereferenced -k --remove-unused-components --ext yml > build/notify-supplier.yml",
     "generate": "npm run generate:cs --buildver=$npm_config_buildver && npm run generate:html && npm run generate:ts --buildver=$npm_config_buildver && npm run generate:python",
     "generate-dependencies": "npm run generate-dependencies --workspaces --if-present",
     "generate-sandbox": "openapi-generator-cli generate -g nodejs-express-server -i build/notify-supplier.json --skip-validate-spec -o sandbox-staging",

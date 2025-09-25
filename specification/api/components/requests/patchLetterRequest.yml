@@ -7,6 +7,55 @@ content:
         data:
           $ref: ../schemas/letterUpdateItem.yml
     examples:
-      patch-letter-request:
+      patch-letter-request-default:
+        summary: Request for default (PENDING) update
         value:
-          $ref: ../examples/patchLetter/requests/patchLetter.json
+          $ref: ../examples/patchLetter/requests/patchLetter_DEFAULT.json
+      patch-letter-request-pending:
+        summary: Request for PENDING update
+        value:
+          $ref: ../examples/patchLetter/requests/patchLetter_PENDING.json
+      patch-letter-request-accepted:
+        summary: Request for ACCEPTED update
+        value:
+          $ref: ../examples/patchLetter/requests/patchLetter_ACCEPTED.json
+      patch-letter-request-rejected:
+        summary: Request for REJECTED update
+        value:
+          $ref: ../examples/patchLetter/requests/patchLetter_REJECTED.json
+      patch-letter-request-printed:
+        summary: Request for PRINTED update
+        value:
+          $ref: ../examples/patchLetter/requests/patchLetter_PRINTED.json
+      patch-letter-request-enclosed:
+        summary: Request for ENCLOSED update
+        value:
+          $ref: ../examples/patchLetter/requests/patchLetter_ENCLOSED.json
+      patch-letter-request-cancelled:
+        summary: Request for CANCELLED update
+        value:
+          $ref: ../examples/patchLetter/requests/patchLetter_CANCELLED.json
+      patch-letter-request-dispatched:
+        summary: Request for DISPATCHED update
+        value:
+          $ref: ../examples/patchLetter/requests/patchLetter_DISPATCHED.json
+      patch-letter-request-delivered:
+        summary: Request for DELIVERED update
+        value:
+          $ref: ../examples/patchLetter/requests/patchLetter_DELIVERED.json
+      patch-letter-request-failed:
+        summary: Request for FAILED update
+        value:
+          $ref: ../examples/patchLetter/requests/patchLetter_FAILED.json
+      patch-letter-request-returned:
+        summary: Request for RETURNED update
+        value:
+          $ref: ../examples/patchLetter/requests/patchLetter_RETURNED.json
+      patch-letter-request-invalid:
+        summary: Request for an invalid update
+        value:
+          $ref: ../examples/patchLetter/requests/patchLetter_INVALID.json
+      patch-letter-request-not-found:
+        summary: Request for a non existant letter
+        value:
+          $ref: ../examples/patchLetter/requests/patchLetter_NOTFOUND.json

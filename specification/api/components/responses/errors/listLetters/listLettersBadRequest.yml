@@ -6,7 +6,7 @@ content:
     examples:
       error-bad-request-unknown-parameter:
         value:
-          $ref: ../../../examples/errors/responses/listLetters/unknownParameter.json
+          $ref: ../../../examples/errors/responses/getLetter/unknownParameter.json
       error-bad-request-invalid-limit:
         value:
-          $ref: ../../../examples/errors/responses/listLetters/limitInvalidValue.json
+          $ref: ../../../examples/errors/responses/getLetter/limitInvalidValue.json

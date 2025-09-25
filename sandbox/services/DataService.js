@@ -1,5 +1,9 @@
 /* eslint-disable no-unused-vars */
+const fs = require('fs/promises');
+
 const Service = require('./Service');
+const ResponseProvider = require('../utils/ResponseProvider');
+
 
 /**
 * Fetch a data file
@@ -12,11 +16,19 @@ const Service = require('./Service');
 const getDataId = ({ id, xRequestID, xCorrelationID }) => new Promise(
   async (resolve, reject) => {
     try {
-      resolve(Service.successResponse({
-        id,
-        xRequestID,
-        xCorrelationID,
-      }));
+      const responseData = await ResponseProvider.getLetterDataResponse(id);
+      if ((responseData.responseCode) >= 300 && (responseData.responseCode < 400))
+      {
+        resolve(Service.successResponse(null, responseData.responseCode, { Location: responseData.responsePath }));
+      }else{
+        const content = await fs.readFile(responseData.responsePath);
+        const fileData = JSON.parse(content);
+        resolve(Service.successResponse({
+          xRequestID,
+          xCorrelationID,
+          data: fileData,
+        }, responseData.responseCode));
+      }
     } catch (e) {
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
@@ -36,11 +48,13 @@ const getDataId = ({ id, xRequestID, xCorrelationID }) => new Promise(
 const headDataId = ({ id, xRequestID, xCorrelationID }) => new Promise(
   async (resolve, reject) => {
     try {
-      resolve(Service.successResponse({
-        id,
-        xRequestID,
-        xCorrelationID,
-      }));
+      responseData = await ResponseProvider.getLetterDataResponse(id);
+      if ((responseData.responseCode >= 300) && (responseData.responseCode < 400))
+      {
+        resolve(Service.successResponse(null, 200));
+      }else{
+        resolve(Service.successResponse(null, 404));
+      }
     } catch (e) {
       reject(Service.rejectResponse(
         e.message || 'Invalid input',

@@ -6,4 +6,4 @@ content:
     examples:
       post-letters-responses:
         value:
-          $ref: "../examples/postLetter/responses/postLetter.json"
+          $ref: "../examples/postLetter/responses/postLetters.json"

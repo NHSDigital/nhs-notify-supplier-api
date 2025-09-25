@@ -6,4 +6,4 @@ content:
     examples:
       get-letters:
         value:
-          $ref: ../examples/getLetter/responses/getLetter.json
+          $ref: ../examples/getLetter/responses/getLetter-24L5eYSWGzCHlGmzNxuqVusPxDg.json
