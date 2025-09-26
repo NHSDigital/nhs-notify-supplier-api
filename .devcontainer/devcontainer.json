@@ -1,7 +1,4 @@
 {
-  "build": {
-    "dockerfile": "../scripts/devcontainer/Dockerfile"
-  },
   "customizations": {
     "codespaces": {
       "openFiles": [
@@ -12,7 +9,11 @@
     },
     "vscode": {
       "extensions": [
+        "ms-dotnettools.csdevkit",
         "42crunch.vscode-openapi",
+        "alefragnani.bookmarks",
+        "AmazonWebServices.aws-toolkit-vscode",
+        "chdsbd.github-code-owners",
         "davidanson.vscode-markdownlint",
         "dbaeumer.vscode-eslint",
         "donjayamanne.githistory",
@@ -25,6 +26,7 @@
         "github.vscode-github-actions",
         "github.vscode-pull-request-github",
         "hediet.vscode-drawio",
+        "johnpapa.vscode-peacock",
         "joshx.workspace-terminals",
         "maattdd.gitless",
         "mhutchie.git-graph",
@@ -38,10 +40,15 @@
         "streetsidesoftware.code-spell-checker-british-english",
         "takumii.markdowntable",
         "tamasfe.even-better-toml",
+        "tomoki1207.pdf",
+        "vscjava.vscode-java-pack",
+        "vscode-icons-team.vscode-icons",
+        "vstirbu.vscode-mermaid-preview",
         "wayou.vscode-todo-highlight",
         "yzane.markdown-pdf",
         "yzhang.dictionary-completion",
-        "yzhang.markdown-all-in-one"
+        "yzhang.markdown-all-in-one",
+        "zoma.vscode-auto-open-workspace"
       ],
       "settings": {
         "[makefile]": {
@@ -70,17 +77,30 @@
       "installZsh": true
     },
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "azureDnsAutoDetection": true,
       "dockerDashComposeVersion": "v2",
       "installDockerBuildx": true,
       "installDockerComposeSwitch": true,
       "moby": true,
       "version": "latest"
     },
+    "ghcr.io/devcontainers/features/dotnet:2": {
+      "aspNetCoreRuntimeVersions": "8.0",
+      "dotnetRuntimeVersions": "8.0",
+      "version": "8.0"
+    },
+    "ghcr.io/devcontainers/features/go:1": {},
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "17"
+    },
+    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/devcontainers/features/python:1": {},
     "ghcr.io/devcontainers/features/ruby:1": {}
   },
+  "image": "mcr.microsoft.com/devcontainers/base:noble",
   "mounts": [
-    "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"
+    "source=${localEnv:HOME}/.gnupg,target=/home/vscode/.gnupg,type=bind,consistency=cached"
   ],
-  "name": "Devcontainer",
+  "name": "Ubuntu",
   "postCreateCommand": "scripts/devcontainer/postcreatecommand.sh"
 }
