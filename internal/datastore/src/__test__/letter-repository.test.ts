@@ -291,9 +291,9 @@ describe('LetterRepository', () => {
 
     await letterRepository.putLetterBatch(letters);
 
-    await checkLetterExists('supplier1', 'letter1');
-    await checkLetterExists('supplier1', 'letter2');
-    await checkLetterExists('supplier1', 'letter3');
+    await checkLetterStatus('supplier1', 'letter1', 'PENDING');
+    await checkLetterStatus('supplier1', 'letter2', 'PENDING');
+    await checkLetterStatus('supplier1', 'letter3', 'PENDING');
   });
 
   test('should batch in calls upto 25', async () => {
@@ -308,9 +308,9 @@ describe('LetterRepository', () => {
 
     expect(sendSpy).toHaveBeenCalledTimes(3);
 
-    await checkLetterExists('supplier1', 'letter1');
-    await checkLetterExists('supplier1', 'letter6');
-    await checkLetterExists('supplier1', 'letter59');
+    await checkLetterStatus('supplier1', 'letter1', 'PENDING');
+    await checkLetterStatus('supplier1', 'letter6', 'PENDING');
+    await checkLetterStatus('supplier1', 'letter59', 'PENDING');
   });
 
   test('should skip array gaps', async () => {
@@ -324,8 +324,8 @@ describe('LetterRepository', () => {
 
     await letterRepository.putLetterBatch(letters);
 
-    await checkLetterExists('supplier1', 'letter1');
-    await checkLetterExists('supplier1', 'letter3');
+    await checkLetterStatus('supplier1', 'letter1', 'PENDING');
+    await checkLetterStatus('supplier1', 'letter3', 'PENDING');
   });
 
   test('rethrows errors from DynamoDB when batch creating letter', async () => {
