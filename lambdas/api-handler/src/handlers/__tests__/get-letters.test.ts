@@ -1,36 +1,18 @@
 import { getLetters } from '../../index';
-import type { APIGatewayProxyResult, Context } from 'aws-lambda';
+import type { Context } from 'aws-lambda';
 import { mockDeep } from 'jest-mock-extended';
 import { makeApiGwEvent } from './utils/test-utils';
 import * as letterService from '../../services/letter-operations';
-import { mapErrorToResponse } from '../../mappers/error-mapper';
 import { getEnvars } from '../get-letters';
-import { ValidationError } from '../../errors';
-import * as errors from '../../contracts/errors';
-
-jest.mock('../../mappers/error-mapper');
-const mockedMapErrorToResponse = jest.mocked(mapErrorToResponse);
-const expectedErrorResponse: APIGatewayProxyResult = {
-  statusCode: 400,
-  body: 'Error'
-};
-mockedMapErrorToResponse.mockReturnValue(expectedErrorResponse);
 
 jest.mock('../../services/letter-operations');
-
-jest.mock('../../config/lambda-config', () => ({
-  lambdaConfig: {
-    SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
-    APIM_CORRELATION_HEADER: 'nhsd-correlation-id'
-  }
-}));
 
 describe('API Lambda handler', () => {
 
   const originalEnv = process.env;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
     jest.resetModules();
     process.env = { ...originalEnv };
     process.env.MAX_LIMIT = '2500';
@@ -52,7 +34,7 @@ describe('API Lambda handler', () => {
         id: "l1",
         specificationId: "s1",
         groupId: 'g1',
-        status: "PENDING"
+        status: "PENDING",
       },
       {
         id: "l2",
@@ -65,13 +47,10 @@ describe('API Lambda handler', () => {
         specificationId: "s1",
         groupId: 'g1',
         status: "PENDING",
-        reasonCode: 123,
-        reasonText: "Reason text"
       },
     ]);
 
-    const event = makeApiGwEvent({path: '/letters',
-      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}});
+    const event = makeApiGwEvent({path: '/letters'});
     const context = mockDeep<Context>();
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
@@ -81,18 +60,18 @@ describe('API Lambda handler', () => {
         {
           id: "l1",
           type: "Letter",
-          attributes: { status: "PENDING", specificationId: "s1", groupId: 'g1' },
+          attributes: { specificationId: "s1", groupId: 'g1', status: "PENDING" },
         },
         {
           id: "l2",
           type: "Letter",
-          attributes: { status: "PENDING", specificationId: "s1", groupId: 'g1' },
+          attributes: { specificationId: "s1", groupId: 'g1', status: "PENDING" },
         },
         {
           id: "l3",
           type: "Letter",
-          attributes: { status: "PENDING", specificationId: "s1", groupId: 'g1' }
-        }
+          attributes: { specificationId: "s1", groupId: 'g1', status: "PENDING" },
+        },
       ],
     };
 
@@ -102,79 +81,91 @@ describe('API Lambda handler', () => {
     });
   });
 
-  it("returns 400 if the limit parameter is not a number", async () => {
-    const event = makeApiGwEvent({
-      path: "/letters",
-      queryStringParameters: { limit: "1%" },
-      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
-    });
-
+  it('returns 404 Not Found for an unknown path', async () => {
+    const event = makeApiGwEvent({ path: '/unknown' });
     const context = mockDeep<Context>();
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotANumber), 'correlationId');
-    expect(result).toEqual(expectedErrorResponse);
+    expect(result).toEqual({
+      statusCode: 404,
+      body: 'Not Found',
+    });
+  });
+
+  it("returns 400 if the limit parameter is not a number", async () => {
+    const event = makeApiGwEvent({
+      path: "/letters",
+      queryStringParameters: { limit: "1%" },
+    });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+    const result = await getLetters(event, context, callback);
+
+    expect(result).toEqual({
+      statusCode: 400,
+      body: "Invalid Request: limit parameter must be a positive number not greater than 2500",
+    });
   });
 
   it("returns 400 if the limit parameter is negative", async () => {
     const event = makeApiGwEvent({
       path: "/letters",
       queryStringParameters: { limit: "-1" },
-      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
     });
-
     const context = mockDeep<Context>();
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(
-      new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange, { args: [getEnvars().maxLimit] }), 'correlationId');
-    expect(result).toEqual(expectedErrorResponse);
+    expect(result).toEqual({
+      statusCode: 400,
+      body: "Invalid Request: limit parameter must be a positive number not greater than 2500",
+    });
   });
 
   it("returns 400 if the limit parameter is zero", async () => {
     const event = makeApiGwEvent({
       path: "/letters",
       queryStringParameters: { limit: "0" },
-      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(
-      new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange, { args: [getEnvars().maxLimit] }), 'correlationId');
-    expect(result).toEqual(expectedErrorResponse);
+    expect(result).toEqual({
+      statusCode: 400,
+      body: "Invalid Request: limit parameter must be a positive number not greater than 2500",
+    });
   });
 
-  it("returns 400 if the limit parameter is higher than max limit", async () => {
+  it("returns 400 if the limit parameter is out of range", async () => {
     const event = makeApiGwEvent({
       path: "/letters",
       queryStringParameters: { limit: "2501" },
-      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(
-      new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange, { args: [getEnvars().maxLimit] }), 'correlationId');
-    expect(result).toEqual(expectedErrorResponse);
+    expect(result).toEqual({
+      statusCode: 400,
+      body: "Invalid Request: limit parameter must be a positive number not greater than 2500",
+    });
   });
 
   it("returns 400 if unknown parameters are present", async () => {
     const event = makeApiGwEvent({
       path: "/letters",
       queryStringParameters: { max: "2000" },
-      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitOnly), 'correlationId');
-    expect(result).toEqual(expectedErrorResponse);
+    expect(result).toEqual({
+      statusCode: 400,
+      body: "Invalid Request: Only 'limit' query parameter is supported",
+    });
   });
 
   it('returns 400 for missing supplier ID (empty headers)', async () => {
@@ -183,21 +174,21 @@ describe('API Lambda handler', () => {
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error('The request headers are empty'), undefined);
-    expect(result).toEqual(expectedErrorResponse);
+    expect(result).toEqual({
+      statusCode: 400,
+      body: 'Invalid Request: Missing supplier ID',
+    });
   });
 
-  it("returns 500 if correlation id not provided in request", async () => {
-    const event = makeApiGwEvent({
-      path: "/letters",
-      queryStringParameters: { limit: "2000" },
-      headers: {'nhsd-supplier-id': 'supplier1'}
-    });
+  it('returns 400 for missing supplier ID (undefined headers)', async () => {
+    const event = makeApiGwEvent({ path: "/letters", headers: undefined });
     const context = mockDeep<Context>();
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error("The request headers don't contain the APIM correlation id"), undefined);
-    expect(result).toEqual(expectedErrorResponse);
+    expect(result).toEqual({
+      statusCode: 400,
+      body: 'Invalid Request: Missing supplier ID',
+    });
   });
 });

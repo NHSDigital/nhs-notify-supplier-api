@@ -1,36 +1,82 @@
-import { APIGatewayProxyEventQueryStringParameters, APIGatewayProxyHandler } from "aws-lambda";
+import { APIGatewayProxyHandler } from "aws-lambda";
 import { getLettersForSupplier } from "../services/letter-operations";
 import { createLetterRepository } from "../infrastructure/letter-repo-factory";
 import { LetterBase } from "../../../../internal/datastore/src";
-import { assertNotEmpty } from "../utils/validation";
-import { ApiErrorDetail } from '../contracts/errors';
-import { lambdaConfig } from "../config/lambda-config";
 import pino from 'pino';
-import { mapErrorToResponse } from "../mappers/error-mapper";
-import { ValidationError } from "../errors";
-import { mapLetterBaseToApiResource } from "../mappers/letter-mapper";
 
 const letterRepo = createLetterRepository();
-
 const log = pino();
 
 export const getEnvars = (): { maxLimit: number } => ({
   maxLimit: parseInt(process.env.MAX_LIMIT!)
 });
 
-// The endpoint should only return pending letters for now
-const status = "PENDING";
-
 export const getLetters: APIGatewayProxyHandler = async (event) => {
 
   const { maxLimit } = getEnvars();
-  let correlationId;
 
-  try {
-    assertNotEmpty(event.headers, new Error("The request headers are empty"));
-    correlationId = assertNotEmpty(event.headers[lambdaConfig.APIM_CORRELATION_HEADER], new Error("The request headers don't contain the APIM correlation id"));
-    const supplierId = assertNotEmpty(event.headers[lambdaConfig.SUPPLIER_ID_HEADER], new ValidationError(ApiErrorDetail.InvalidRequestMissingSupplierId));
-    const limitNumber = getLimitOrDefault(event.queryStringParameters, maxLimit);
+  if (event.path === "/letters") {
+    const supplierId = event.headers ? event.headers["NHSD-Supplier-ID"] : undefined;
+
+    if (!supplierId) {
+      log.info({
+        description: 'Supplier ID not provided'
+      });
+      return {
+        statusCode: 400,
+        body: "Invalid Request: Missing supplier ID",
+      };
+    }
+
+    // The endpoint should only return pending letters for now
+    const status = "PENDING";
+
+    if (
+      event.queryStringParameters &&
+      Object.keys(event.queryStringParameters).some(
+        (key) => key !== "limit"
+      )
+    ) {
+      log.info({
+        description: "Unexpected query parameter(s) present",
+        queryStringParameters: event.queryStringParameters,
+      });
+
+      return {
+        statusCode: 400,
+        body: "Invalid Request: Only 'limit' query parameter is supported",
+      };
+    }
+
+    let limitNumber;
+
+    if (event.queryStringParameters?.limit) {
+      let limitParam = event.queryStringParameters?.limit;
+      limitNumber = Number(limitParam);
+      if (isNaN(limitNumber)) {
+        log.info({
+          description: "limit parameter is not a number",
+          limitParam,
+        });
+        return {
+          statusCode: 400,
+          body: "Invalid Request: limit parameter must be a positive number not greater than 2500",
+        };
+      }
+    } else {
+      limitNumber = maxLimit;
+    }
+
+    if (limitNumber <= 0 || limitNumber > maxLimit) {
+      log.info({
+        description: "Limit value is invalid",
+        limitNumber,
+      });
+      return {
+        statusCode: 400,
+        body: `Invalid Request: limit parameter must be a positive number not greater than ${maxLimit}`,
+      };
+    }
 
     const letters = await getLettersForSupplier(
       supplierId,
@@ -39,9 +85,7 @@ export const getLetters: APIGatewayProxyHandler = async (event) => {
       letterRepo,
     );
 
-    const response = {
-      data: letters.map((letter: LetterBase) => (mapLetterBaseToApiResource(letter, { excludeOptional: true })))
-    };
+    const response = createGetLettersResponse(letters);
 
     log.info({
       description: 'Pending letters successfully fetched',
@@ -56,61 +100,44 @@ export const getLetters: APIGatewayProxyHandler = async (event) => {
       body: JSON.stringify(response, null, 2),
     };
   }
-  catch (error) {
-    return mapErrorToResponse(error, correlationId);
-  }
+
+  log.warn({
+    description: 'Unsupported event path',
+    path: event.path
+  });
+
+  return {
+    statusCode: 404,
+    body: "Not Found",
+  };
 };
 
-function getLimitOrDefault(queryStringParameters: APIGatewayProxyEventQueryStringParameters | null, maxLimit: number) : number {
-
-  validateLimitParamOnly(queryStringParameters);
-  return getLimit(queryStringParameters?.limit, maxLimit);
+interface GetLettersResponse {
+  data: Array<{
+    type: "Letter";
+    id: string;
+    attributes: {
+      specificationId: string;
+      groupId: string;
+      status: string;
+      reasonCode?: number;
+      reasonText?: string;
+    };
+  }>;
 }
 
-function assertIsNumber(limitNumber: number) {
-  if (isNaN(limitNumber)) {
-    log.info({
-      description: "limit parameter is not a number",
-      limitNumber,
-    });
-    throw new ValidationError(ApiErrorDetail.InvalidRequestLimitNotANumber);
-  }
-}
-
-function assertLimitInRange(limitNumber: number, maxLimit: number) {
-  if (limitNumber <= 0 || limitNumber > maxLimit) {
-    log.info({
-      description: "Limit value is invalid",
-      limitNumber,
-    });
-    throw new ValidationError(ApiErrorDetail.InvalidRequestLimitNotInRange, { args: [maxLimit]});
-  }
-}
-
-function validateLimitParamOnly(queryStringParameters: APIGatewayProxyEventQueryStringParameters | null) {
-  if (
-    queryStringParameters &&
-    Object.keys(queryStringParameters).some(
-      (key) => key !== "limit"
-    )
-  ) {
-    log.info({
-      description: "Unexpected query parameter(s) present",
-      queryStringParameters: queryStringParameters,
-    });
-    throw new ValidationError(ApiErrorDetail.InvalidRequestLimitOnly);
-  }
-}
-
-function getLimit(limit: string | undefined, maxLimit: number) {
-  let result;
-  if (limit) {
-    let limitParam = limit;
-    result = Number(limitParam);
-    assertIsNumber(result);
-    assertLimitInRange(result, maxLimit);
-  } else {
-    result = maxLimit;
-  }
-  return result;
+function createGetLettersResponse(letters: LetterBase[]): GetLettersResponse {
+  return {
+    data: letters.map((letter) => ({
+      id: letter.id,
+      type: "Letter",
+      attributes: {
+        specificationId: letter.specificationId,
+        groupId: letter.groupId,
+        status: letter.status,
+        reasonCode: letter.reasonCode,
+        reasonText: letter.reasonText,
+      },
+    })),
+  };
 }

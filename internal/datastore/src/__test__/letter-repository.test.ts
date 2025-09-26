@@ -50,23 +50,21 @@ describe('LetterRepository', () => {
     await db.container.stop();
   });
 
+  async function checkLetterExists(supplierId: string, letterId: string) {
+    const letter = await letterRepository.getLetterById(supplierId, letterId);
+    expect(letter).toBeDefined();
+    expect(letter.id).toBe(letterId);
+    expect(letter.supplierId).toBe(supplierId);
+  }
+
   async function checkLetterStatus(supplierId: string, letterId: string, status: Letter['status']) {
     const letter = await letterRepository.getLetterById(supplierId, letterId);
     expect(letter.status).toBe(status);
   }
 
   test('adds a letter to the database', async () => {
-    const supplierId = 'supplier1';
-    const letterId = 'letter1';
-
-    await letterRepository.putLetter(createLetter(supplierId, letterId));
-
-    const letter = await letterRepository.getLetterById(supplierId, letterId);
-    expect(letter).toBeDefined();
-    expect(letter.id).toBe(letterId);
-    expect(letter.supplierId).toBe(supplierId);
-    expect(letter.reasonCode).toBeUndefined();
-    expect(letter.reasonText).toBeUndefined();
+    await letterRepository.putLetter(createLetter('supplier1', 'letter1'));
+    await checkLetterExists('supplier1', 'letter1');
   });
 
   test('fetches a letter by id', async () => {
@@ -102,16 +100,11 @@ describe('LetterRepository', () => {
   });
 
   test('updates a letter\'s status in the database', async () => {
-    const letter = createLetter('supplier1', 'letter1', 'PENDING');
-    await letterRepository.putLetter(letter);
+    await letterRepository.putLetter(createLetter('supplier1', 'letter1', 'PENDING'));
     await checkLetterStatus('supplier1', 'letter1', 'PENDING');
 
-    await letterRepository.updateLetterStatus('supplier1', 'letter1', 'REJECTED', 1, "Reason text");
-
-    const updatedLetter = await letterRepository.getLetterById('supplier1', 'letter1');
-    expect(updatedLetter.status).toBe('REJECTED');
-    expect(updatedLetter.reasonCode).toBe(1);
-    expect(updatedLetter.reasonText).toBe('Reason text');
+    await letterRepository.updateLetterStatus('supplier1', 'letter1', 'DELIVERED');
+    await checkLetterStatus('supplier1', 'letter1', 'DELIVERED');
   });
 
   test('updates a letter\'s updatedAt date', async () => {
@@ -124,13 +117,13 @@ describe('LetterRepository', () => {
     // Month is zero-indexed in JavaScript Date
     // Day is one-indexed
     jest.setSystemTime(new Date(2020, 1, 2));
-    await letterRepository.updateLetterStatus('supplier1', 'letter1', 'DELIVERED', undefined, undefined);
+    await letterRepository.updateLetterStatus('supplier1', 'letter1', 'DELIVERED');
     const updatedLetter = await letterRepository.getLetterById('supplier1', 'letter1');
     expect(updatedLetter.updatedAt).toBe('2020-02-02T00:00:00.000Z');
   });
 
   test('can\'t update a letter that does not exist', async () => {
-    await expect(letterRepository.updateLetterStatus('supplier1', 'letter1', 'DELIVERED', undefined, undefined))
+    await expect(letterRepository.updateLetterStatus('supplier1', 'letter1', 'DELIVERED'))
       .rejects.toThrow('Letter with id letter1 not found for supplier supplier1');
   });
 
@@ -139,7 +132,7 @@ describe('LetterRepository', () => {
       ...db.config,
       lettersTableName: 'nonexistent-table'
     });
-    await expect(misconfiguredRepository.updateLetterStatus('supplier1', 'letter1', 'DELIVERED', undefined, undefined))
+    await expect(misconfiguredRepository.updateLetterStatus('supplier1', 'letter1', 'DELIVERED'))
       .rejects.toThrow('Cannot do operations on a non-existent table');
   });
 
@@ -164,7 +157,7 @@ describe('LetterRepository', () => {
     const pendingLetters = await letterRepository.getLettersByStatus('supplier1', 'PENDING');
     expect(pendingLetters.letters).toHaveLength(2);
 
-    await letterRepository.updateLetterStatus('supplier1', 'letter1', 'DELIVERED', undefined, undefined);
+    await letterRepository.updateLetterStatus('supplier1', 'letter1', 'DELIVERED');
     const remainingLetters = await letterRepository.getLettersByStatus('supplier1', 'PENDING');
     expect(remainingLetters.letters).toHaveLength(1);
     expect(remainingLetters.letters[0].id).toBe('letter2');

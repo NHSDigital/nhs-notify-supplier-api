@@ -2,7 +2,7 @@
   "errors": [
     {
       "code": "NOTIFY_INVALID_REQUEST",
-      "detail": "Only 'limit' query parameter is supported",
+      "detail": "Invalid Request: Only 'limit' query parameter is supported",
       "id": "rrt-1931948104716186917-c-geu2-10664-3111479-3.0",
       "links": {
         "about": "https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier"

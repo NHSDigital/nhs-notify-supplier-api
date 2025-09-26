@@ -1,8 +1,7 @@
 import { LetterBase, LetterRepository } from '../../../../internal/datastore/src'
 import { NotFoundError, ValidationError } from '../errors';
 import { LetterApiResource, LetterApiDocument } from '../contracts/letter-api';
-import { mapLetterBaseToApiDocument } from '../mappers/letter-mapper';
-import { ApiErrorDetail } from '../contracts/errors';
+import { toApiLetter } from '../mappers/letter-mapper';
 
 
 export const getLettersForSupplier = async (supplierId: string, status: string, limit: number, letterRepo: LetterRepository): Promise<LetterBase[]> => {
@@ -13,20 +12,18 @@ export const getLettersForSupplier = async (supplierId: string, status: string, 
 export const patchLetterStatus = async (letterToUpdate: LetterApiResource, letterId: string, supplierId: string, letterRepo: LetterRepository): Promise<LetterApiDocument> => {
 
   if (letterToUpdate.id !== letterId) {
-    throw new ValidationError(ApiErrorDetail.InvalidRequestLetterIdsMismatch);
+    throw new ValidationError("Bad Request: Letter ID in body does not match path parameter");
   }
 
-  let updatedLetter;
-
   try {
-    updatedLetter =  await letterRepo.updateLetterStatus(supplierId, letterId, letterToUpdate.attributes.status,
-      letterToUpdate.attributes.reasonCode, letterToUpdate.attributes.reasonText);
+    const updatedLetter =  await letterRepo.updateLetterStatus(supplierId, letterId, letterToUpdate.attributes.status);
+
+    return toApiLetter(updatedLetter);
+
   } catch (error) {
-    if (error instanceof Error && /^Letter with id \w+ not found for supplier \w+$/.test(error.message)) {
-      throw new NotFoundError(ApiErrorDetail.NotFoundLetterId);
+    if (error instanceof Error && error.message.includes('not found')) {
+      throw new NotFoundError(`Not Found: Letter with ID ${letterId} does not exist`);
     }
     throw error;
   }
-
-  return mapLetterBaseToApiDocument(updatedLetter);
 }

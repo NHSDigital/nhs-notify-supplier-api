@@ -67,22 +67,146 @@
       ],
       "patch": {
         "description": "Update the status of a letter by providing the new status in the request body.",
-        "operationId": "patchLetters",
         "requestBody": {
+          "content": {
+            "application/vnd.api+json": {
+              "schema": {
+                "properties": {
+                  "data": {
+                    "properties": {
+                      "attributes": {
+                        "properties": {
+                          "reasonCode": {
+                            "description": "Reason code for the given status",
+                            "type": "number"
+                          },
+                          "reasonText": {
+                            "description": "Reason text for the given status",
+                            "type": "string"
+                          },
+                          "requestedProductionStatus": {
+                            "description": "The requested production status for this letter.\nMay only be set by NHS Notify.",
+                            "enum": [
+                              "ACTIVE",
+                              "HOLD",
+                              "CANCEL"
+                            ],
+                            "title": "ProductionStatus",
+                            "type": "string"
+                          },
+                          "status": {
+                            "default": "PENDING",
+                            "description": "The supplier status of an individual letter",
+                            "enum": [
+                              "PENDING",
+                              "ACCEPTED",
+                              "REJECTED",
+                              "PRINTED",
+                              "ENCLOSED",
+                              "CANCELLED",
+                              "DISPATCHED",
+                              "FAILED",
+                              "RETURNED",
+                              "DESTROYED",
+                              "FORWARDED"
+                            ],
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      },
+                      "id": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "const": "Letter",
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
           "required": true
         },
         "responses": {
           "200": {
-            "description": "List of letters to process"
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "attributes": {
+                          "properties": {
+                            "reasonCode": {
+                              "description": "Reason code for the given status",
+                              "type": "number"
+                            },
+                            "reasonText": {
+                              "description": "Reason text for the given status",
+                              "type": "string"
+                            },
+                            "requestedProductionStatus": {
+                              "description": "A requested status for the production of a letter",
+                              "enum": [
+                                "ACTIVE",
+                                "HOLD",
+                                "CANCEL"
+                              ],
+                              "title": "ProductionStatus",
+                              "type": "string"
+                            },
+                            "status": {
+                              "default": "PENDING",
+                              "description": "The supplier status of an individual letter",
+                              "enum": [
+                                "PENDING",
+                                "ACCEPTED",
+                                "REJECTED",
+                                "PRINTED",
+                                "ENCLOSED",
+                                "CANCELLED",
+                                "DISPATCHED",
+                                "FAILED",
+                                "RETURNED",
+                                "DESTROYED",
+                                "FORWARDED"
+                              ],
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "status",
+                            "requestedProductionStatus"
+                          ],
+                          "type": "object"
+                        },
+                        "id": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "const": "Letter",
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Letter resource updated successfully"
           },
           "400": {
-            "description": "Bad request, invalid input data"
+            "description": "Bad request"
           },
           "404": {
             "description": "Resource not found"
-          },
-          "500": {
-            "description": "Server error"
           }
         },
         "security": [
@@ -90,6 +214,7 @@
             "LambdaAuthorizer": []
           }
         ],
+        "summary": "Update the status of a letter",
         "x-amazon-apigateway-integration": {
           "contentHandling": "CONVERT_TO_TEXT",
           "credentials": "${APIG_EXECUTION_ROLE_ARN}",

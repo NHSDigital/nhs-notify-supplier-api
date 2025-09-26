@@ -1,6 +1,4 @@
 type: object
 properties:
-  errors:
-    type: array
-    items:
-      $ref: "./errorItem.yml"
+  data:
+    $ref: "./errorData.yml"
