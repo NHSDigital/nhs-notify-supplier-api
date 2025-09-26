@@ -73,6 +73,6 @@
     "lambdas/authorizer",
     "internal/datastore",
     "scripts/test-data",
-    "docs/nhs-notify-docs"
+    "docs"
   ]
 }
