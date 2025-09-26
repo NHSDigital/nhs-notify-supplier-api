@@ -1,5 +1,4 @@
 module "domain_truststore" {
-
   source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.20/terraform-s3bucket.zip"
 
   name           = "truststore"

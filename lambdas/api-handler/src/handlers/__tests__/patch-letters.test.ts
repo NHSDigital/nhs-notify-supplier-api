@@ -1,12 +1,34 @@
 import { patchLetters } from '../../index';
-import type { Context } from 'aws-lambda';
+import { APIGatewayProxyResult, Context } from 'aws-lambda';
 import { mockDeep } from 'jest-mock-extended';
 import { makeApiGwEvent } from './utils/test-utils';
 import * as letterService from '../../services/letter-operations';
-import { NotFoundError, ValidationError } from '../../errors';
 import { LetterApiDocument, LetterApiStatus } from '../../contracts/letter-api';
+import { mapErrorToResponse } from '../../mappers/error-mapper';
+import { ValidationError } from '../../errors';
+import * as errors from '../../contracts/errors';
 
 jest.mock('../../services/letter-operations');
+jest.mock('../../mappers/error-mapper');
+
+jest.mock("../../config/lambda-config", () => ({
+  lambdaConfig: {
+    SUPPLIER_ID_HEADER: "nhsd-supplier-id",
+    APIM_CORRELATION_HEADER: 'nhsd-correlation-id'
+  }
+}));
+
+const mockedMapErrorToResponse = jest.mocked(mapErrorToResponse);
+const expectedErrorResponse: APIGatewayProxyResult = {
+  statusCode: 400,
+  body: "Error"
+};
+mockedMapErrorToResponse.mockReturnValue(expectedErrorResponse);
+
+const mockedPatchLetterStatus = jest.mocked(letterService.patchLetterStatus);
+
+const letterApiDocument = makeLetterApiDocument("id1", "REJECTED");
+const requestBody = JSON.stringify(letterApiDocument, null, 2);
 
 function makeLetterApiDocument(id: string, status: LetterApiStatus) : LetterApiDocument {
   return {
@@ -14,7 +36,7 @@ function makeLetterApiDocument(id: string, status: LetterApiStatus) : LetterApiD
       attributes: {
         reasonCode: 123,
         reasonText: "Reason text",
-        requestedProductionStatus: "ACTIVE",
+        specificationId: "spec1",
         status
       },
       id,
@@ -23,21 +45,22 @@ function makeLetterApiDocument(id: string, status: LetterApiStatus) : LetterApiD
   };
 }
 
-const letterApiDocument = makeLetterApiDocument("id1", "REJECTED");
-
-const requestBody = JSON.stringify(letterApiDocument, null, 2);
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('patchLetters API Handler', () => {
-  it('returns 200 OK with updated resource', async () => {
 
+  it('returns 200 OK with updated resource', async () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
       body: requestBody,
-      pathParameters: {id: "id1"}});
+      pathParameters: {id: "id1"},
+      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
+    });
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const mockedPatchLetterStatus = letterService.patchLetterStatus as jest.Mock;
     mockedPatchLetterStatus.mockResolvedValue(letterApiDocument);
 
     const result = await patchLetters(event, context, callback);
@@ -48,101 +71,154 @@ describe('patchLetters API Handler', () => {
     });
   });
 
-  it('returns 400 Bad Request as there is no body', async () => {
+  it('returns error response when there is no body', async () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
-      pathParameters: {id: "id1"}});
+      pathParameters: {id: "id1"},
+      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
+    });
     const context = mockDeep<Context>();
     const callback = jest.fn();
+
     const result = await patchLetters(event, context, callback);
 
-    expect(result).toEqual({
-      statusCode: 400,
-      body: 'Bad Request: Missing request body',
-    });
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingBody), 'correlationId');
+    expect(result).toEqual(expectedErrorResponse);
   });
 
-  it('returns 404 Not Found as path is unknown', async () => {
+  it('returns error response when path parameter letterId is not found', async () => {
     const event = makeApiGwEvent({
-      path: '/unknown',
+      path: '/letters/',
       body: requestBody,
-      pathParameters: {id: "id1"}});
+      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
+    });
     const context = mockDeep<Context>();
     const callback = jest.fn();
     const result = await patchLetters(event, context, callback);
 
-    expect(result).toEqual({
-      statusCode: 404,
-      body: 'Not Found: The requested resource does not exist',
-    });
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter), 'correlationId');
+    expect(result).toEqual(expectedErrorResponse);
   });
 
-  it('returns 404 Not Found as path parameter is not found', async () => {
-    const event = makeApiGwEvent({
-      path: '/letters',
-      body: requestBody});
-    const context = mockDeep<Context>();
-    const callback = jest.fn();
-    const result = await patchLetters(event, context, callback);
-
-    expect(result).toEqual({
-      statusCode: 404,
-      body: 'Not Found: The requested resource does not exist',
-    });
-  });
-
-  it('returns 400 Bad Request when ValidationError is thrown by service', async () => {
-    const mockedPatchLetterStatus = letterService.patchLetterStatus as jest.Mock;
-    mockedPatchLetterStatus.mockRejectedValue(new ValidationError('Validation failed'));
+  it('returns error response when error is thrown by service', async () => {
+    const error = new Error('Service error');
+    mockedPatchLetterStatus.mockRejectedValue(error);
 
     const event = makeApiGwEvent({
       path: '/letters/id1',
       body: requestBody,
-      pathParameters: { id: "id1" }
+      pathParameters: {id: "id1"},
+      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
     const result = await patchLetters(event, context, callback);
 
-    expect(result).toEqual({
-      statusCode: 400,
-      body: 'Validation failed'
-    });
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(error, 'correlationId');
+    expect(result).toEqual(expectedErrorResponse);
   });
 
-  it('returns 404 Not Found when NotFoundError is thrown by service', async () => {
-    const mockedPatchLetterStatus = letterService.patchLetterStatus as jest.Mock;
-    mockedPatchLetterStatus.mockRejectedValue(new NotFoundError('Letter not found'));
-
+  it('returns error when supplier id is missing', async () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
       body: requestBody,
-      pathParameters: { id: "id1" }
+      pathParameters: {id: "id1"},
+      headers: {'nhsd-correlation-id': 'correlationId'}
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
     const result = await patchLetters(event, context, callback);
 
-    expect(result).toEqual({
-      statusCode: 404,
-      body: 'Letter not found'
-    });
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingSupplierId), 'correlationId');
+    expect(result).toEqual(expectedErrorResponse);
   });
 
-  it('throws unexpected errors from service', async () => {
-    const mockedPatchLetterStatus = letterService.patchLetterStatus as jest.Mock;
-    mockedPatchLetterStatus.mockRejectedValue(new Error('Unexpected error'));
-
+  it('returns error when request body does not have correct shape', async () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
-      body: requestBody,
-      pathParameters: { id: "id1" }
+      body: '{test: "test"}',
+      pathParameters: {id: "id1"},
+      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    await expect(patchLetters(event, context, callback)).rejects.toThrow('Unexpected error');
+    const result = await patchLetters(event, context, callback);
+
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestBody), 'correlationId');
+    expect(result).toEqual(expectedErrorResponse);
+  });
+
+  it('returns error when request body is not json', async () => {
+    const event = makeApiGwEvent({
+      path: '/letters/id1',
+      body: '{#invalidJSON',
+      pathParameters: {id: "id1"},
+      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
+    });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+
+    const result = await patchLetters(event, context, callback);
+
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestBody), 'correlationId');
+    expect(result).toEqual(expectedErrorResponse);
+  });
+
+  it('returns error if unexpected error is thrown', async () => {
+    const event = makeApiGwEvent({
+      path: '/letters/id1',
+      body: 'somebody',
+      pathParameters: {id: "id1"},
+      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
+    });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+
+    const error = "Unexpected error";
+    const spy = jest.spyOn(JSON, "parse").mockImplementation(() => {
+      throw error;
+    });
+
+    const result = await patchLetters(event, context, callback);
+
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(error, 'correlationId');
+    expect(result).toEqual(expectedErrorResponse);
+
+    spy.mockRestore();
+  });
+
+  it("returns error if correlation id not provided in request", async () => {
+    const event = makeApiGwEvent({
+      path: '/letters/id1',
+      body: requestBody,
+      pathParameters: {id: "id1"},
+      headers: {'nhsd-supplier-id': 'supplier1'}
+    });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+
+    const result = await patchLetters(event, context, callback);
+
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error("The request headers don't contain the APIM correlation id"), undefined);
+    expect(result).toEqual(expectedErrorResponse);
+  });
+
+  it('returns 400 for missing supplier ID (empty headers)', async () => {
+    const event = makeApiGwEvent({
+      path: '/letters/id1',
+      body: requestBody,
+      pathParameters: {id: "id1"},
+      headers: {}
+    });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+
+    const result = await patchLetters(event, context, callback);
+
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error('The request headers are empty'), undefined);
+    expect(result).toEqual(expectedErrorResponse);
   });
 });

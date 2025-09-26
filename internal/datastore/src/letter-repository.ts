@@ -35,7 +35,7 @@ export class LetterRepository {
     const letterDb: Letter = {
       ...letter,
       supplierStatus: `${letter.supplierId}#${letter.status}`,
-      supplierStatusSk: Date.now().toString(),
+      supplierStatusSk: new Date().toISOString(),
       ttl: Math.floor(Date.now() / 1000 + 60 * 60 * this.config.ttlHours)
     };
     try {
@@ -133,28 +133,45 @@ export class LetterRepository {
     }
   }
 
-  async updateLetterStatus(supplierId: string, letterId: string, status: Letter['status']): Promise<Letter> {
+  async updateLetterStatus(supplierId: string, letterId: string, status: Letter['status'], reasonCode: number | undefined, reasonText: string | undefined): Promise<Letter> {
     this.log.debug(`Updating letter ${letterId} to status ${status}`);
     let result: UpdateCommandOutput;
     try {
+      let updateExpression = 'set #status = :status, updatedAt = :updatedAt, supplierStatus = :supplierStatus, #ttl = :ttl';
+      let expressionAttributeValues = {
+          ':status': status,
+          ':updatedAt': new Date().toISOString(),
+          ':supplierStatus': `${supplierId}#${status}`,
+          ':ttl': Math.floor(Date.now() / 1000 + 60 * 60 * this.config.ttlHours),
+          ...(!reasonCode && {':reasonCode': reasonCode}),
+          ...(!reasonText && {':reasonText': reasonText})
+        };
+
+      if (reasonCode)
+      {
+        updateExpression += ', reasonCode = :reasonCode';
+        expressionAttributeValues[':reasonCode'] = reasonCode;
+      }
+
+      if (reasonText)
+      {
+        updateExpression += ', reasonText = :reasonText';
+        expressionAttributeValues[':reasonText'] = reasonText;
+      }
+
       result = await this.ddbClient.send(new UpdateCommand({
         TableName: this.config.lettersTableName,
         Key: {
           supplierId: supplierId,
           id: letterId
         },
-        UpdateExpression: 'set #status = :status, updatedAt = :updatedAt, supplierStatus = :supplierStatus, #ttl = :ttl',
+        UpdateExpression: updateExpression,
         ConditionExpression: 'attribute_exists(id)', // Ensure letter exists
         ExpressionAttributeNames: {
           '#status': 'status',
           '#ttl': 'ttl'
         },
-        ExpressionAttributeValues: {
-          ':status': status,
-          ':updatedAt': new Date().toISOString(),
-          ':supplierStatus': `${supplierId}#${status}`,
-          ':ttl': Math.floor(Date.now() / 1000 + 60 * 60 * this.config.ttlHours)
-        },
+        ExpressionAttributeValues: expressionAttributeValues,
         ReturnValues: 'ALL_NEW'
       }));
     } catch (error) {

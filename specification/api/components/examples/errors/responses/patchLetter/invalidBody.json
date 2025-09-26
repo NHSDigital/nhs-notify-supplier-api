@@ -1,14 +1,14 @@
 {
   "errors": [
     {
-      "code": "NOTIFY_INTERNAL_SERVER_ERROR",
-      "detail": "An unexpected error occurred, please contact support",
+      "code": "NOTIFY_INVALID_REQUEST",
+      "detail": "The request body is invalid",
       "id": "rrt-1931948104716186917-c-geu2-10664-3111479-3.0",
       "links": {
         "about": "https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier"
       },
-      "status": "500",
-      "title": "Internal server error"
+      "status": "400",
+      "title": "Invalid request"
     }
   ]
 }

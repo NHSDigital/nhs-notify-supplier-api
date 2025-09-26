@@ -1,59 +1,44 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { createLetterRepository } from '../infrastructure/letter-repo-factory';
 import { patchLetterStatus } from '../services/letter-operations';
-import { LetterApiDocument } from '../contracts/letter-api';
-import { NotFoundError, ValidationError } from '../errors';
+import { LetterApiDocument, LetterApiDocumentSchema } from '../contracts/letter-api';
+import { ApiErrorDetail } from '../contracts/errors';
+import { ValidationError } from '../errors';
+import { mapErrorToResponse } from '../mappers/error-mapper';
+import { lambdaConfig } from "../config/lambda-config";
+import { assertNotEmpty } from '../utils/validation';
 
 const letterRepo = createLetterRepository();
 export const patchLetters: APIGatewayProxyHandler = async (event) => {
 
-    // TODO CCM-11188: default to supplier1 for now
-  const supplierId = event.headers['nhsd-apim-apikey'] ?? "supplier1";
+  let correlationId;
 
-  const pathParameters = event.pathParameters || {};
-  const letterId = pathParameters["id"];
+  try {
+    assertNotEmpty(event.headers, new Error('The request headers are empty'));
+    correlationId = assertNotEmpty(event.headers[lambdaConfig.APIM_CORRELATION_HEADER], new Error("The request headers don't contain the APIM correlation id"));
+    const supplierId = assertNotEmpty(event.headers[lambdaConfig.SUPPLIER_ID_HEADER], new ValidationError(ApiErrorDetail.InvalidRequestMissingSupplierId));
+    const letterId = assertNotEmpty( event.pathParameters?.id, new ValidationError(ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter));
+    const body = assertNotEmpty(event.body, new ValidationError(ApiErrorDetail.InvalidRequestMissingBody));
 
-  if (event.path.includes('/letters/') && letterId) {
-
-    if (!event.body)
-    {
-      return {
-        statusCode: 400,
-        body: "Bad Request: Missing request body"
-      }
-    }
-
-    const patchLetterRequest: LetterApiDocument = JSON.parse(event.body);
+    let patchLetterRequest: LetterApiDocument;
 
     try {
-
-      // TODO CCM-11188: Is it worth retrieving the letter first to check if the status is different?
-
-      const result = await patchLetterStatus(patchLetterRequest.data, letterId, supplierId, letterRepo);
-
-      return {
-        statusCode: 200,
-        body: JSON.stringify(result, null, 2)
-      };
+      patchLetterRequest = LetterApiDocumentSchema.parse(JSON.parse(body));
     } catch (error) {
-      if (error instanceof ValidationError) {
-        return {
-          statusCode: 400,
-          body: error.message
-        };
-      } else if (error instanceof NotFoundError) {
-        return {
-          statusCode: 404,
-          body: error.message
-        };
+      if (error instanceof Error) {
+        throw new ValidationError(ApiErrorDetail.InvalidRequestBody, { cause: error});
       }
-      throw error;
+      else throw error;
     }
-  }
 
-  // TODO CCM-11188: Is this reachable with the API GW?
-  return {
-    statusCode: 404,
-    body: 'Not Found: The requested resource does not exist',
-  };
+    const result = await patchLetterStatus(patchLetterRequest.data, letterId!, supplierId!, letterRepo);
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify(result, null, 2)
+    };
+
+  } catch (error) {
+    return mapErrorToResponse(error, correlationId);
+  }
 };

@@ -13,4 +13,11 @@ locals {
   })
 
   destination_arn = "arn:aws:logs:${var.region}:${var.shared_infra_account_id}:destination:nhs-main-obs-firehose-logs"
+
+  common_db_access_lambda_env_vars = {
+    LETTERS_TABLE_NAME = aws_dynamodb_table.letters.name,
+    LETTER_TTL_HOURS = 24,
+    SUPPLIER_ID_HEADER = "nhsd-supplier-id"
+    SUPPLIER_ID_HEADER = "nhsd-correlation-id"
+  }
 }

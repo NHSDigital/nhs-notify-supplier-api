@@ -1,17 +1,22 @@
-import { Letter } from "../../../../internal/datastore";
-import { LetterApiDocument } from '../contracts/letter-api';
+import { LetterBase } from "../../../../internal/datastore";
+import { LetterApiDocument, LetterApiDocumentSchema, LetterApiResource, LetterApiResourceSchema } from '../contracts/letter-api';
 
-export function toApiLetter(letter: Letter): LetterApiDocument {
-  return {
-    data: {
-      id: letter.id,
-      type: 'Letter',
-      attributes: {
-        reasonCode: 123, // TODO CCM-11188: map from DB if stored
-        reasonText: 'Reason text', // TODO CCM-11188: map from DB if stored
-        requestedProductionStatus: 'ACTIVE', // TODO CCM-11188: map from DB if stored
-        status: letter.status
-      }
+export function mapLetterBaseToApiDocument(letterBase: LetterBase, opts: { excludeOptional: boolean } = { excludeOptional: false }): LetterApiDocument {
+  return LetterApiDocumentSchema.parse({
+    data: mapLetterBaseToApiResource(letterBase, opts)
+  });
+}
+
+export function mapLetterBaseToApiResource(letterBase: LetterBase, opts: { excludeOptional: boolean } = { excludeOptional: false }): LetterApiResource {
+  return LetterApiResourceSchema.parse({
+    id: letterBase.id,
+    type: 'Letter',
+    attributes: {
+      status: letterBase.status,
+      specificationId: letterBase.specificationId,
+      groupId: letterBase.groupId,
+      ...(letterBase.reasonCode && !opts.excludeOptional && { reasonCode: letterBase.reasonCode }),
+      ...(letterBase.reasonText && !opts.excludeOptional && { reasonText: letterBase.reasonText })
     }
-  };
+  });
 }

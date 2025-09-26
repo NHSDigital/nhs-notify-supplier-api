@@ -5,10 +5,11 @@ import { getLettersForSupplier, patchLetterStatus } from '../letter-operations';
 function makeLetterApiResource(id: string, status: LetterApiStatus) : LetterApiResource {
   return {
       attributes: {
+        specificationId: "spec123",
+        status,
+        groupId: 'group123',
         reasonCode: 123,
-        reasonText: "Reason text",
-        requestedProductionStatus: "ACTIVE",
-        status
+        reasonText: "Reason text"
       },
       id,
       type: "Letter"
@@ -27,7 +28,9 @@ function makeLetter(id: string, status: Letter['status']) : Letter {
       updatedAt: new Date().toISOString(),
       supplierStatus: `supplier1#${status}`,
       supplierStatusSk: Date.now().toString(),
-      ttl: 123
+      ttl: 123,
+      reasonCode: 123,
+      reasonText: "Reason text"
   };
 }
 
@@ -61,9 +64,9 @@ describe("getLetterIdsForSupplier", () => {
 
 describe('patchLetterStatus function', () => {
 
-  const letterResource = makeLetterApiResource("letter1", "ACCEPTED");
+  const letterResource = makeLetterApiResource("letter1", "REJECTED");
 
-  const updatedLetter = makeLetter("letter1", "ACCEPTED");
+  const updatedLetter = makeLetter("letter1", "REJECTED");
 
   it('should update the letter status successfully', async () => {
     const mockRepo = {
@@ -76,15 +79,15 @@ describe('patchLetterStatus function', () => {
   });
 
   it('should throw validationError when letterIds differ', async () => {
-    await expect(patchLetterStatus(letterResource, 'letter2', "supplier1", {} as any)).rejects.toThrow("Bad Request: Letter ID in body does not match path parameter");
+    await expect(patchLetterStatus(letterResource, 'letter2', "supplier1", {} as any)).rejects.toThrow("The letter ID in the request body does not match the letter ID path parameter");
   });
 
   it('should throw notFoundError when letter does not exist', async () => {
     const mockRepo = {
-      updateLetterStatus: jest.fn().mockRejectedValue(new Error('not found'))
+      updateLetterStatus: jest.fn().mockRejectedValue(new Error('Letter with id l1 not found for supplier s1'))
     };
 
-    await expect(patchLetterStatus(letterResource, 'letter1', 'supplier1', mockRepo as any)).rejects.toThrow("Not Found: Letter with ID letter1 does not exist");
+    await expect(patchLetterStatus(letterResource, 'letter1', 'supplier1', mockRepo as any)).rejects.toThrow("No resource found with that ID");
   });
 
   it('should throw unexpected error', async () => {
@@ -95,5 +98,4 @@ describe('patchLetterStatus function', () => {
 
     await expect(patchLetterStatus(letterResource, 'letter1', 'supplier1', mockRepo as any)).rejects.toThrow("unexpected error");
   });
-
 });
