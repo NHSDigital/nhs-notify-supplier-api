@@ -1,3 +1,6 @@
-- name: NHSD-Supplier-ID
-  header: NHSD-Supplier-ID
+- name: NHSD-Application-ID
+  header: NHSD-Application-ID
+  required: false
+- name: NHSD-Product-ID
+  header: NHSD-Product-ID
   required: false
