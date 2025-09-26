@@ -8,7 +8,7 @@
   "engines": {},
   "keywords": [],
   "license": "ISC",
-  "name": "nhs-notify",
+  "name": "nhs-notify-docs",
   "private": true,
   "scripts": {
     "build": "JEKYLL_ENV=production bundle exec jekyll build --trace --config _config.yml,_config.version.yml",

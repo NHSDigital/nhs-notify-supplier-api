@@ -72,6 +72,7 @@
     "lambdas/api-handler",
     "lambdas/authorizer",
     "internal/datastore",
-    "scripts/test-data"
+    "scripts/test-data",
+    "docs/nhs-notify-docs"
   ]
 }
