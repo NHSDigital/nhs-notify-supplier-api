@@ -40,7 +40,7 @@ export const getLetters: APIGatewayProxyHandler = async (event) => {
     );
 
     const response = {
-      data: letters.map((letter: LetterBase) => (mapLetterBaseToApiResource(letter)))
+      data: letters.map((letter: LetterBase) => (mapLetterBaseToApiResource(letter, { excludeOptional: true })))
     };
 
     log.info({
