@@ -17,6 +17,8 @@ export const LetterStatus = z.enum([
   'ENCLOSED', 'CANCELLED', 'DISPATCHED', 'FAILED',
   'RETURNED', 'DESTROYED', 'FORWARDED', 'DELIVERED']);
 
+export type LetterStatusType = z.infer<typeof LetterStatus>;
+
 export const LetterSchemaBase = z.object({
   id: z.string(),
   status: LetterStatus,

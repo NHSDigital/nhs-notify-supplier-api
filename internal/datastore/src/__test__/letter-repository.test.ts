@@ -281,4 +281,59 @@ describe('LetterRepository', () => {
     const letters = await repo.getLettersBySupplier('supplier1', 'PENDING', 10);
     expect(letters).toEqual([]);
   });
+
+  test('should batch write letters to the database', async () => {
+    const letters = [
+      createLetter('supplier1', 'letter1'),
+      createLetter('supplier1', 'letter2'),
+      createLetter('supplier1', 'letter3')
+    ];
+
+    await letterRepository.putLetterBatch(letters);
+
+    await checkLetterStatus('supplier1', 'letter1', 'PENDING');
+    await checkLetterStatus('supplier1', 'letter2', 'PENDING');
+    await checkLetterStatus('supplier1', 'letter3', 'PENDING');
+  });
+
+  test('should batch in calls upto 25', async () => {
+    const letters = []
+    for(let i=0; i<60; i++) {
+      letters.push(createLetter('supplier1', `letter${i}`));
+    }
+
+    const sendSpy = jest.spyOn(db.docClient, 'send');
+
+    await letterRepository.putLetterBatch(letters);
+
+    expect(sendSpy).toHaveBeenCalledTimes(3);
+
+    await checkLetterStatus('supplier1', 'letter1', 'PENDING');
+    await checkLetterStatus('supplier1', 'letter6', 'PENDING');
+    await checkLetterStatus('supplier1', 'letter59', 'PENDING');
+  });
+
+  test('should skip array gaps', async () => {
+    const letters = [
+      createLetter('supplier1', 'letter1'),
+      createLetter('supplier1', 'letter2'),
+      createLetter('supplier1', 'letter3')
+    ];
+
+    delete letters[1];
+
+    await letterRepository.putLetterBatch(letters);
+
+    await checkLetterStatus('supplier1', 'letter1', 'PENDING');
+    await checkLetterStatus('supplier1', 'letter3', 'PENDING');
+  });
+
+  test('rethrows errors from DynamoDB when batch creating letter', async () => {
+    const misconfiguredRepository = new LetterRepository(db.docClient, logger, {
+      ...db.config,
+      lettersTableName: 'nonexistent-table'
+    });
+    await expect(misconfiguredRepository.putLetterBatch([createLetter('supplier1', 'letter1')]))
+      .rejects.toThrow('Cannot do operations on a non-existent table');
+  });
 });

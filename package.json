@@ -71,6 +71,8 @@
   "workspaces": [
     "lambdas/api-handler",
     "lambdas/authorizer",
-    "internal/datastore"
+    "internal/datastore",
+    "scripts/test-data",
+    "docs"
   ]
 }
