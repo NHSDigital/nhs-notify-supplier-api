@@ -4,7 +4,9 @@ Simple script to generate test data. It uploads a PDF to the test S3 bucket and 
 
 ## Usage
 
-Log in the desired AWS account and then run the command below. Note that the AWS account ID is required in order to resolve the bucket name.
+Log in the desired AWS account and then run the command below. You may need to set the AWS_REGION envar (eu-west-2)
+
+Note that the AWS account ID is required in order to resolve the bucket name.
 
 ```bash
 npm run cli -- create-letter \
@@ -15,4 +17,15 @@ npm run cli -- create-letter \
   --group-id group-id \
   --specification-id specification-id \
   --status PENDING
+```
+
+```bash
+npm run cli -- create-letter-batch \
+  --supplier-id supplier-id \
+  --environment main \
+  --awsAccountId 820178564574 \
+  --group-id group-id \
+  --specification-id specification-id \
+  --status PENDING \
+  --count 10
 ```

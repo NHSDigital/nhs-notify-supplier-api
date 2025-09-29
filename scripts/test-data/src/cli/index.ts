@@ -7,6 +7,7 @@ import { randomUUID } from "crypto";
 import { createLetter, createLetterDto } from "../helpers/create_letter_helpers";
 import { createLetterRepository } from "../infrastructure/letter-repo-factory";
 import { uploadFile } from "../helpers/s3_helpers";
+import { Console } from "console";
 
 async function main() {
   await yargs(hideBin(process.argv))
@@ -179,6 +180,8 @@ async function main() {
 
         // Upload Letters
         await letterRepository.putLetterBatch(letterDtos);
+
+        console.log(`Created batch ${batchId} of ${letterDtos.length}`);
       },
     )
     .demandCommand(1)
