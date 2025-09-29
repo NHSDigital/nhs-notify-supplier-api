@@ -18,6 +18,6 @@ locals {
     LETTERS_TABLE_NAME = aws_dynamodb_table.letters.name,
     LETTER_TTL_HOURS = 24,
     SUPPLIER_ID_HEADER = "nhsd-supplier-id"
-    SUPPLIER_ID_HEADER = "nhsd-correlation-id"
+    APIM_CORRELATION_HEADER = "nhsd-correlation-id"
   }
 }
