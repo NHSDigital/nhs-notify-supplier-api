@@ -2,7 +2,7 @@ required: true
 content:
   application/vnd.api+json:
     schema:
-      $ref: ../schemas/miData.yml
+      $ref: ../schemas/miPostRequest.yml
     examples:
       create-mi-request-success:
         summary: Request for successful MI record Creation

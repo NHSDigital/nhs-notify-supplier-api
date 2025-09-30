@@ -23,17 +23,14 @@ async function mapExampleResponse(requestBody, exampleResponseMap) {
             return response; // match found
           }
         } catch (err) {
-          console.error(`Failed to process ${requestBodyPath}:`, err);
           throw err;
         }
       }
-      return {responsePath:'data/examples/errors/responses/resourceNotFound.json',responseCode: 404}; // no match
+      return null; // no match
     })
   );
-
-  console.log('checks:', checks);
   // Find the first non-null result
-  return checks.find(result => result !== null) ?? null;
+  return checks.find(result => result !== null) ?? {responsePath:'data/examples/errors/responses/resourceNotFound.json',responseCode: 404};
 }
 
 function mapExampleGetResponse(parameterValue, exampleResponseMap) {
@@ -41,7 +38,6 @@ function mapExampleGetResponse(parameterValue, exampleResponseMap) {
     try {
       return parameterValue === requestParameter;
     } catch (err) {
-      console.error(`Failed to process ${parameterValue}:`, err);
       throw err;
     }
   });
@@ -126,5 +122,6 @@ module.exports = {
   getLettersResponse,
   patchLettersResponse,
   postMIResponse,
-  getLetterDataResponse
+  getLetterDataResponse,
+  postLettersResponse
 };

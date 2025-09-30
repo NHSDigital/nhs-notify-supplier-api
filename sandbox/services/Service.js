@@ -4,7 +4,19 @@ class Service {
   }
 
   static successResponse(payload, code = 200, headers = {}) {
-    return { payload, code, headers };
+    if (payload.xRequestId) {
+      headers['X-Request-ID'] = payload.xRequestId;
+    }
+    if (payload.xCorrelationId) {
+      headers['X-Correlation-ID'] = payload.xCorrelationId;
+    }
+
+    let body = {};
+    if (payload.data)
+    {
+      body = payload.data
+    }
+    return { body, code, headers };
   }
 }
 

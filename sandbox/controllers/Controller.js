@@ -13,7 +13,7 @@ class Controller {
     */
     Object.entries(payload.headers).forEach(([name, value]) => response.setHeader(name, String(value)));
     response.status(payload.code || 200);
-    const responsePayload = payload.payload !== undefined ? payload.payload : payload;
+    const responsePayload = payload.body !== undefined ? payload.body : payload;
     if (responsePayload instanceof Object) {
       response.json(responsePayload);
     } else {
@@ -92,12 +92,13 @@ class Controller {
 
     if (request.openapi.schema.parameters !== undefined) {
       request.openapi.schema.parameters.forEach((param) => {
+
         if (param.in === 'path') {
           requestParams[param.name] = request.openapi.pathParams[param.name];
         } else if (param.in === 'query') {
           requestParams[param.name] = request.query[param.name];
         } else if (param.in === 'header') {
-          requestParams[param.name] = request.headers[param.name];
+          requestParams[camelCase(param.name)] = request.headers[param.name.toLowerCase()];
         }
       });
     }
