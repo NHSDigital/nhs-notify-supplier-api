@@ -4,7 +4,27 @@ description: "Build Proxies"
 inputs:
   version:
     description: "Version number"
+    required: false
+  releaseVersion:
+    description: "Release, tag, branch, or commit ID to be used for deployment"
     required: true
+  environment:
+    description: "Deployment environment"
+    required: true
+  apimEnv:
+    description: "APIM environment"
+    required: true
+  runId:
+    description: "GitHub Actions run ID to fetch the OAS artifact from"
+    required: true
+  buildSandbox:
+    description: "Whether to build the sandbox OAS spec"
+    required: false
+    default: false
+  targetComponent:
+    description: "Name of the Component to deploy"
+    required: true
+    default: 'api'
 
 runs:
   using: composite
@@ -25,46 +45,63 @@ runs:
       shell: bash
       run: |
 
+        ENV="${{ inputs.environment }}"
+        if [[ "$ENV" == "internal-dev" || "$ENV" == pr* ]]; then
+          echo "TARGET_DOMAIN=suppliers.dev.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
+        elif [[ "$ENV" == "int" ]]; then
+          echo "TARGET_DOMAIN=suppliers.nonprod.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
+        elif [[ "$ENV" == "prod" ]]; then
+          echo "TARGET_DOMAIN=suppliers.prod.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
+        else
+          echo "TARGET_DOMAIN=suppliers.dev.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
+        fi
+
         if [ -z $PR_NUMBER ]
         then
           echo "INSTANCE=$PROXYGEN_API_NAME" >> $GITHUB_ENV
-          echo "TARGET=https://main.suppliers.dev.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
+          echo "TARGET=https://main.$TARGET_DOMAIN" >> $GITHUB_ENV
           echo "SANDBOX_TAG=latest" >> $GITHUB_ENV
           echo "MTLS_NAME=notify-supplier-mtls" >> $GITHUB_ENV
         else
-          echo "TARGET=https://pr$PR_NUMBER.suppliers.dev.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
+          echo "TARGET=https://pr$PR_NUMBER.$TARGET_DOMAIN" >> $GITHUB_ENV
           echo "INSTANCE=$PROXYGEN_API_NAME-PR-$PR_NUMBER" >> $GITHUB_ENV
           echo "SANDBOX_TAG=pr$PR_NUMBER" >> $GITHUB_ENV
           echo "MTLS_NAME=notify-supplier-mtls-pr$PR_NUMBER" >> $GITHUB_ENV
         fi
 
-    - name: Install Proxygen client
-      shell: bash
-      run: |
-        # Install proxygen cli
-        pip install pipx
-        pipx install proxygen-cli
-
-        # Setup proxygen auth and settings
-        mkdir -p ${HOME}/.proxygen
-        echo -n $PROXYGEN_PRIVATE_KEY | base64 --decode > ${HOME}/.proxygen/key
-        envsubst < ./.github/proxygen-credentials-template.yaml > ${HOME}/.proxygen/credentials.yaml
-        envsubst < ./.github/proxygen-credentials-template.yaml | cat
-        envsubst < ./.github/proxygen-settings.yaml > ${HOME}/.proxygen/settings.yaml
-        envsubst < ./.github/proxygen-settings.yaml | cat
-
-    - name: Build sandbox oas
+    - name: Build ${{ inputs.apimEnv }} oas
       working-directory: .
       shell: bash
       run: |
-        make build-json-oas-spec APIM_ENV=sandbox
+        if [ ${{ inputs.apimEnv }} == "internal-dev-sandbox" ] && [ ${{ inputs.buildSandbox }} == true ]
+        then
+          echo "Building sandbox OAS spec"
+          make build-json-oas-spec APIM_ENV=sandbox
+        else
+          echo "Building env specific OAS spec"
+          make build-json-oas-spec APIM_ENV=${{ inputs.apimEnv }}
+        fi
 
-    - name: Set docker tag
+    - name: Upload OAS Spec
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.apimEnv }}-build-output
+        path: ./build
+
+    - name: Trigger deploy proxy
+      env:
+        PR_TRIGGER_PAT: ${{ env.PR_TRIGGER_PAT }}
       shell: bash
       run: |
-        jq --arg newtag "$SANDBOX_TAG" '.["x-nhsd-apim"].target.containers[0].image.tag = $newtag' build/notify-supplier.json > build/notify-supplier_target.json && mv build/notify-supplier_target.json build/notify-supplier.json
-
-    - name: Deploy to Internal Dev Sandbox
-      shell: bash
-      run: |
-        proxygen instance deploy internal-dev-sandbox $INSTANCE build/notify-supplier.json --no-confirm
+        .github/scripts/dispatch_internal_repo_workflow.sh \
+          --infraRepoName "nhs-notify-supplier-api" \
+          --releaseVersion "${{ inputs.releaseVersion }}" \
+          --targetComponent "${{ inputs.targetComponent }}" \
+          --targetWorkflow "proxy-deploy.yaml" \
+          --targetEnvironment "${{ inputs.environment }}" \
+          --runId "${{ inputs.runId }}" \
+          --buildSandbox ${{ inputs.buildSandbox }} \
+          --apimEnvironment "${{ inputs.apimEnv }}" \
+          --boundedContext "notify-supplier" \
+          --targetDomain "$TARGET_DOMAIN" \
+          --version "${{ inputs.version }}"

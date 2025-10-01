@@ -1,0 +1,93 @@
+name: Deploy proxy to environment
+run-name: Proxygen Deployment for ${{ inputs.environment }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Name of the environment to deploy
+        required: true
+        type: choice
+        default: internal-dev
+        options:
+          - internal-dev
+          - int
+          - prod
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-environment:
+    runs-on: ubuntu-latest
+    name: Deploy to Environment
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Npm install
+        working-directory: .
+        run: npm ci
+        shell: bash
+
+      - name: "Check if pull request exists for this branch and set ENVIRONMENT/APIM_ENV"
+        id: pr_exists
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          branch_name=${GITHUB_HEAD_REF:-$(echo $GITHUB_REF | sed 's#refs/heads/##')}
+          echo "Current branch is '$branch_name'"
+
+          if [ -z "${{ inputs.environment }}" ]; then
+            ENVIRONMENT="internal-dev"
+          else
+            ENVIRONMENT="${{ inputs.environment }}"
+          fi
+
+          pr_json=$(gh pr list --head "$branch_name" --state open --json number --limit 1)
+          pr_number=$(echo "$pr_json" | jq -r '.[0].number // empty')
+
+          if [[ -n "$pr_number" ]]; then
+            echo "Pull request exists: #$pr_number"
+            echo "does_pull_request_exist=true" >> $GITHUB_OUTPUT
+            echo "pr_number=$pr_number" >> $GITHUB_OUTPUT
+            APIM_ENV="$ENVIRONMENT-pr"
+            echo "changing environment variable so that PR number is used in proxy pipeline for setting env vars"
+            ENVIRONMENT="pr$pr_number"
+          else
+            echo "Pull request doesn't exist"
+            echo "does_pull_request_exist=false" >> $GITHUB_OUTPUT
+            echo "pr_number=" >> $GITHUB_OUTPUT
+            APIM_ENV="$ENVIRONMENT"
+          fi
+
+          echo "ENVIRONMENT=$ENVIRONMENT" >> $GITHUB_ENV
+          echo "APIM_ENV=$APIM_ENV" >> $GITHUB_ENV
+      - name: Build environment oas
+        working-directory: .
+        env:
+          APIM_ENV: ${{ env.APIM_ENV }}
+        shell: bash
+        run: |
+            make build-json-oas-spec APIM_ENV=$APIM_ENV
+            if [[ $APIM_ENV == *-pr ]]; then
+              echo "Removing pr suffix from APIM_ENV after building OAS and calling proxygen"
+              APIM_ENV=$(echo "$APIM_ENV" | sed 's/-pr$//')
+              echo "APIM_ENV=$APIM_ENV" >> $GITHUB_ENV
+            fi
+      - name: "Build proxies"
+        env:
+          PROXYGEN_API_NAME: nhs-notify-supplier
+          PR_NUMBER: ${{ steps.pr_exists.outputs.pr_number }}
+          PR_TRIGGER_PAT: ${{ secrets.PR_TRIGGER_PAT }}
+        uses: ./.github/actions/build-proxies
+        with:
+          environment: "${{ env.ENVIRONMENT }}"
+          apimEnv: "${{ env.APIM_ENV }}"
+          runId: "${{ github.run_id }}"
+          buildSandbox: false
+          releaseVersion: ${{ github.ref_name }}
