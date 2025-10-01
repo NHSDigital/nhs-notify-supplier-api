@@ -64,7 +64,6 @@
     "serve-html-docs": "npx serve sdk/html -p 3050",
     "serve-oas": "redocly preview -p 5001 -d specification/api",
     "serve-swagger-docs": "npx serve sdk/swagger -p 3051",
-    "start": "npm run start --workspace frontend",
     "test:unit": "npm run test:unit --workspaces",
     "typecheck": "npm run typecheck --workspaces"
   },

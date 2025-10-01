@@ -3,4 +3,4 @@ healthcheck: /_status
 url: https://suppliers.dev.nhsnotify.national.nhs.uk
 security:
   type: mtls
-  secret: nhs-notify-supplier-mtls
+  secret: nhs-notify-supplier-mtls-main

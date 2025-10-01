@@ -1,0 +1,70 @@
+name: "Build Proxies"
+description: "Build an OAS file with sandbox settings"
+inputs:
+  apim_env:
+    description: "APIM Target environment: internal-dev, internal-dev-sandbox, int, prod"
+    required: true
+  backend_account:
+    description: "The backend target account: dev, nonprod, prod"
+    required: true
+  pr_number:
+    description: "Sandbox tag, one of: pr number, release tag, or latest"
+    required: true
+  api_name:
+    description: "The instance name of the API in APIM"
+    required: true
+
+runs:
+  using: composite
+
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24
+
+    - name: Npm install
+      working-directory: .
+      run: npm ci
+      shell: bash
+
+    - name: Determing backend env
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.pr_number }}" ]; then
+          echo "BACKEND_ENV=pr${{ inputs.pr_number }}" >> $GITHUB_ENV
+        else
+          echo "BACKEND_ENV=main" >> $GITHUB_ENV
+        fi
+
+    - name: Setup Proxy Name and target
+      shell: bash
+      run: |
+        echo "INSTANCE=${{ inputs.api_name }}-$BACKEND_ENV" >> $GITHUB_ENV
+        echo "MTLS_NAME=notify-supplier-mtls-$BACKEND_ENV" >> $GITHUB_ENV
+        echo "TARGET=https://$BACKEND_ENV.suppliers.${{ inputs.backend_account }}.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
+
+    - name: Build oas for environment
+      working-directory: .
+      shell: bash
+      run: |
+        make build-json-oas-spec APIM_ENV=${{ inputs.apim_env }}
+
+    - name: Set target and cert
+      shell: bash
+      run: |
+        jq --arg newurl "$TARGET" '.["x-nhsd-apim"].target.url = $newurl' build/notify-supplier.json > build/notify-supplier_target.json && mv build/notify-supplier_target.json build/notify-supplier.json
+        jq --arg newmtls "$MTLS_NAME" '.["x-nhsd-apim"].target.security.secret = $newmtls' build/notify-supplier.json > build/notify-supplier_target.json && mv build/notify-supplier_target.json build/notify-supplier.json
+
+    - name: Rename artefact
+      shell: bash
+      run: |
+        mv build/notify-supplier.json build/notify-supplier-${{ inputs.apim-env }}.json
+
+    - name: Upload Sandbox Specification
+      uses: actions/upload-artifact@v4
+      with:
+        name: api-specification
+        path: ./build/notify-supplier-${{ inputs.apim-env }}.json

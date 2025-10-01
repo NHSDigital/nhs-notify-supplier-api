@@ -88,6 +88,25 @@ jobs:
         with:
           version: "${{ inputs.version }}"
 
+  artefact-specifications:
+    name: "Build Open API Specifications"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+      - name: "Build sandbox"
+        uses: ./.github/actions/build-oas-sandbox
+        with:
+          pr_number: "${{ inputs.pr_number }}"
+      - name: "Build environment specification"
+        uses: ./.github/actions/build-oas
+        with:
+          apim_env: "internal-dev"
+          backend_account: "dev"
+          pr_number: "${{ inputs.pr_number }}"
+          api_name: "nhs-notify-supplier"
+
   artefact-proxies:
     name: "Build proxies"
     runs-on: ubuntu-latest

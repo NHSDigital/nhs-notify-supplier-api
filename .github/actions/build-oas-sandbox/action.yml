@@ -1,0 +1,46 @@
+name: "Build Proxies"
+description: "Build an OAS file with sandbox settings"
+inputs:
+  pr_number:
+    description: "Sandbox tag, one of: pr number, release tag, or latest"
+    required: true
+
+runs:
+  using: composite
+
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Build sandbox oas
+      working-directory: .
+      shell: bash
+      run: |
+        make build-json-oas-spec APIM_ENV=sandbox
+
+    - name: Generate Sandbox Tag
+      shell: bash
+      run: |
+        if [ -n "${{ github.event.release.tag_name }}" ]; then
+          echo "SANDBOX_TAG=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
+        elseif [ -n "${{ inputs.pr_number }}" ]; then
+          echo "SANDBOX_TAG=pr${{ inputs.pr_number }}" >> $GITHUB_ENV
+        else
+          echo "SANDBOX_TAG=latest" >> $GITHUB_ENV
+        fi
+
+    - name: Set docker tag
+      shell: bash
+      run: |
+        jq --arg newtag "$SANDBOX_TAG" '.["x-nhsd-apim"].target.containers[0].image.tag = $newtag' build/notify-supplier.json > build/notify-supplier_target.json && mv build/notify-supplier_target.json build/notify-supplier.json
+
+    - name: Rename artefact
+      shell: bash
+      run: |
+        mv build/notify-supplier.json build/notify-supplier-sandbox.json
+
+    - name: Upload Sandbox Specification
+      uses: actions/upload-artifact@v4
+      with:
+        name: api-specification-sandbox
+        path: ./build/notify-supplier-sandbox.json
