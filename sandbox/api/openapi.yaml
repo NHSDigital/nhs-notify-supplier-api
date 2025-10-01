@@ -9,7 +9,7 @@ info:
   version: next
 servers:
 - description: Local development server
-  url: http://127.0.0.1:3000
+  url: http://127.0.0.1:9000
 - description: Public sandbox
   url: https://sandbox-server.nhs.uk/nhs-notify-supplier-api
 tags:
@@ -46,13 +46,14 @@ paths:
           example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
           type: string
         style: simple
-      - description: The maximum number of items to return in a single request
+      - description: "The maximum number of items to return in a single request, max\
+          \ 2500"
         explode: true
         in: query
         name: limit
         required: false
         schema:
-          example: 100
+          example: 2500
           type: number
         style: form
       responses:
@@ -64,13 +65,174 @@ paths:
                   value:
                     data:
                     - attributes:
+                        groupId: c5d93f917f5546d08beccf770a915d96
                         specificationId: 2WL5eYSWGzCHlGmzNxuqVusPxDg
                         status: PENDING
-                      id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                      id: fcfd849ceec940e8832b41f4fc161e09
+                      type: Letter
+                    - attributes:
+                        groupId: c5d93f917f5546d08beccf770a915d96
+                        specificationId: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                        status: PENDING
+                      id: 7d64bd6a49e14213b47abbf6357eba0c
+                      type: Letter
+                    - attributes:
+                        groupId: c5d93f917f5546d08beccf770a915d96
+                        specificationId: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                        status: PENDING
+                      id: 2c06e7e32db4445fbbf56e7af223e0a2
+                      type: Letter
+                    - attributes:
+                        groupId: c5d93f917f5546d08beccf770a915d96
+                        specificationId: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                        status: PENDING
+                      id: 3b302a6122854695b5c514a4d28d18d5
+                      type: Letter
+                    - attributes:
+                        groupId: c5d93f917f5546d08beccf770a915d96
+                        specificationId: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                        status: PENDING
+                      id: fbe3a53aac764a17a834699b8779958c
+                      type: Letter
+                    - attributes:
+                        groupId: c5d93f917f5546d08beccf770a915d96
+                        specificationId: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                        status: PENDING
+                      id: 393056c7cdc649deb29ee8d2651f29dd
+                      type: Letter
+                    - attributes:
+                        groupId: c5d93f917f5546d08beccf770a915d96
+                        specificationId: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                        status: PENDING
+                      id: c6d0d4243f004b4e844003fbf80a9105
+                      type: Letter
+                    - attributes:
+                        groupId: c5d93f917f5546d08beccf770a915d96
+                        specificationId: 853817f0-d797-4eb2-bf40-2879a9b58117
+                        status: PENDING
+                      id: 03aa3fb76d544ad483984bdd7fcd900b
+                      type: Letter
+                    - attributes:
+                        groupId: c5d93f917f5546d08beccf770a915d96
+                        specificationId: 9e5d5da7-5991-4ac9-9cee-559769912ca5
+                        status: PENDING
+                      id: 7c9b698bf434479cabd0af946cc93f95
+                      type: Letter
+                    - attributes:
+                        groupId: c5d93f917f5546d08beccf770a915d96
+                        specificationId: 634bcc87-fcc3-41fe-b6f9-c6a2125758e6
+                        status: PENDING
+                      id: 987276fd0dc94ddbab607d4a24693db2
+                      type: Letter
+                    - attributes:
+                        groupId: c5d93f917f5546d08beccf770a915d96
+                        specificationId: 634bcc87-fcc3-41fe-b6f9-c6a2125758e6
+                        status: PENDING
+                      id: 32mAKk67isO29atr37M40VV8h4t
+                      type: Letter
+                    - attributes:
+                        groupId: c5d93f917f5546d08beccf770a915d96
+                        specificationId: 634bcc87-fcc3-41fe-b6f9-c6a2125758e6
+                        status: PENDING
+                      id: 32mAKiDtfmA1SCybeljxWaXsTO4
+                      type: Letter
+                    - attributes:
+                        groupId: c5d93f917f5546d08beccf770a915d96
+                        specificationId: 634bcc87-fcc3-41fe-b6f9-c6a2125758e6
+                        status: PENDING
+                      id: 32mAKeUmf6fBK2aCc5tK2AV8NLo
+                      type: Letter
+                    - attributes:
+                        groupId: c5d93f917f5546d08beccf770a915d96
+                        specificationId: 634bcc87-fcc3-41fe-b6f9-c6a2125758e6
+                        status: PENDING
+                      id: 32mAKg0opQaKuPrBaA11MGPTX1p
+                      type: Letter
+                    - attributes:
+                        groupId: c5d93f917f5546d08beccf770a915d96
+                        specificationId: 634bcc87-fcc3-41fe-b6f9-c6a2125758e6
+                        status: PENDING
+                      id: 32mAKjTJgMPTE4HdpgTvJcUmmW7
+                      type: Letter
+                    - attributes:
+                        groupId: c5d93f917f5546d08beccf770a915d96
+                        specificationId: 634bcc87-fcc3-41fe-b6f9-c6a2125758e6
+                        status: PENDING
+                      id: 32mAKfx3DNyUmzXMZ4zby3vh5gi
+                      type: Letter
+                    - attributes:
+                        groupId: c5d93f917f5546d08beccf770a915d96
+                        specificationId: 634bcc87-fcc3-41fe-b6f9-c6a2125758e6
+                        status: PENDING
+                      id: 32mAKlVCTgh4h1sTw6aiVcFdIwv
+                      type: Letter
+                    - attributes:
+                        groupId: c5d93f917f5546d08beccf770a915d96
+                        specificationId: 634bcc87-fcc3-41fe-b6f9-c6a2125758e6
+                        status: PENDING
+                      id: 32mAKirJUuWKB3aoGr6KkFObelC
+                      type: Letter
+                    - attributes:
+                        groupId: c5d93f917f5546d08beccf770a915d96
+                        specificationId: 634bcc87-fcc3-41fe-b6f9-c6a2125758e6
+                        status: PENDING
+                      id: 32mAKiUtgkjc3rS0xIYsqDOYYT4
+                      type: Letter
+                    - attributes:
+                        groupId: c5d93f917f5546d08beccf770a915d96
+                        specificationId: 634bcc87-fcc3-41fe-b6f9-c6a2125758e6
+                        status: PENDING
+                      id: 32mAKiQJZr3k2TBYboLgUWlR5NO
+                      type: Letter
+                    - attributes:
+                        groupId: c5d93f917f5546d08beccf770a915d96
+                        specificationId: 634bcc87-fcc3-41fe-b6f9-c6a2125758e6
+                        status: PENDING
+                      id: 32mAfv3V8RlfqSXOOtIZzNdjBFK
+                      type: Letter
+                    - attributes:
+                        groupId: c5d93f917f5546d08beccf770a915d96
+                        specificationId: 634bcc87-fcc3-41fe-b6f9-c6a2125758e6
+                        status: PENDING
+                      id: 32mAft7hTg2lKQhXhAxbPQTBudU
+                      type: Letter
+                    - attributes:
+                        groupId: c5d93f917f5546d08beccf770a915d96
+                        specificationId: 634bcc87-fcc3-41fe-b6f9-c6a2125758e6
+                        status: PENDING
+                      id: 32mAfv2nn1a9Kbfh4z19OyZw8Fo
                       type: Letter
               schema:
                 $ref: "#/components/schemas/listLetters_200_response"
           description: List of letters to process
+        "400":
+          content:
+            application/vnd.api+json:
+              examples:
+                error-bad-request-unknown-parameter:
+                  value:
+                    errors:
+                    - code: NOTIFY_INVALID_REQUEST
+                      detail: "Invalid Request: Only 'limit' query parameter is supported"
+                      id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
+                      links:
+                        about: https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier
+                      status: "400"
+                      title: Invalid request
+                error-bad-request-invalid-limit:
+                  value:
+                    errors:
+                    - code: NOTIFY_INVALID_REQUEST
+                      detail: "Invalid Request: limit parameter must be a positive\
+                        \ number not greater than 2500"
+                      id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
+                      links:
+                        about: https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier
+                      status: "400"
+                      title: Invalid request
+              schema:
+                $ref: "#/components/schemas/listLetters_400_response"
+          description: "Bad request, invalid input data"
         "404":
           content:
             application/vnd.api+json:
@@ -86,7 +248,7 @@ paths:
                       status: "404"
                       title: Resource not found
               schema:
-                $ref: "#/components/schemas/listLetters_404_response"
+                $ref: "#/components/schemas/listLetters_400_response"
           description: Resource not found
         "429":
           content:
@@ -103,7 +265,7 @@ paths:
                       status: "429"
                       title: Too many requests
               schema:
-                $ref: "#/components/schemas/listLetters_404_response"
+                $ref: "#/components/schemas/listLetters_400_response"
           description: Too many requests
         "500":
           content:
@@ -120,7 +282,7 @@ paths:
                       status: "500"
                       title: Internal Server Error
               schema:
-                $ref: "#/components/schemas/listLetters_404_response"
+                $ref: "#/components/schemas/listLetters_400_response"
           description: Server error
       summary: Get a list of PENDING letters
       tags:
@@ -157,10 +319,51 @@ paths:
                 value:
                   data:
                   - attributes:
+                      status: PENDING
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+                  - attributes:
+                      status: ACCEPTED
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+                  - attributes:
+                      status: PRINTED
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+                  - attributes:
+                      status: ENCLOSED
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+                  - attributes:
+                      status: DISPATCHED
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+                  - attributes:
+                      status: DELIVERED
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+                  - attributes:
                       reasonCode: 100
                       reasonText: failed validation
-                      specificationId: 2WL5eYSWGzCHlGmzNxuqVusPxDg
-                      status: REJECTED
+                      status: RETURNED
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+                  - attributes:
+                      reasonCode: 100
+                      reasonText: failed validation
+                      status: CANCELLED
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+                  - attributes:
+                      reasonCode: 100
+                      reasonText: failed validation
+                      status: FAILED
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+                  - attributes:
+                      reasonCode: 100
+                      reasonText: failed validation
+                      status: RETURNED
                     id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
                     type: Letter
             schema:
@@ -175,10 +378,51 @@ paths:
                   value:
                     data:
                     - attributes:
+                        status: PENDING
+                      id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                      type: Letter
+                    - attributes:
+                        status: ACCEPTED
+                      id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                      type: Letter
+                    - attributes:
+                        status: PRINTED
+                      id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                      type: Letter
+                    - attributes:
+                        status: ENCLOSED
+                      id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                      type: Letter
+                    - attributes:
+                        status: DISPATCHED
+                      id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                      type: Letter
+                    - attributes:
+                        status: DELIVERED
+                      id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                      type: Letter
+                    - attributes:
                         reasonCode: 100
                         reasonText: failed validation
-                        specificationId: 2WL5eYSWGzCHlGmzNxuqVusPxDg
-                        status: REJECTED
+                        status: RETURNED
+                      id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                      type: Letter
+                    - attributes:
+                        reasonCode: 100
+                        reasonText: failed validation
+                        status: CANCELLED
+                      id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                      type: Letter
+                    - attributes:
+                        reasonCode: 100
+                        reasonText: failed validation
+                        status: FAILED
+                      id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                      type: Letter
+                    - attributes:
+                        reasonCode: 100
+                        reasonText: failed validation
+                        status: RETURNED
                       id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
                       type: Letter
               schema:
@@ -199,7 +443,7 @@ paths:
                       status: "404"
                       title: Resource not found
               schema:
-                $ref: "#/components/schemas/listLetters_404_response"
+                $ref: "#/components/schemas/listLetters_400_response"
           description: Resource not found
         "429":
           content:
@@ -216,7 +460,7 @@ paths:
                       status: "429"
                       title: Too many requests
               schema:
-                $ref: "#/components/schemas/listLetters_404_response"
+                $ref: "#/components/schemas/listLetters_400_response"
           description: Too many requests
         "500":
           content:
@@ -233,7 +477,7 @@ paths:
                       status: "500"
                       title: Internal Server Error
               schema:
-                $ref: "#/components/schemas/listLetters_404_response"
+                $ref: "#/components/schemas/listLetters_400_response"
           description: Server error
       summary: Update the status of multiple letters
       tags:
@@ -241,7 +485,24 @@ paths:
       x-eov-operation-handler: controllers/LetterController
   /letters/{id}:
     get:
-      description: Get details the status of a letter.
+      description: |
+        ## Get details the status of a letter.
+
+        ## Sandbox test scenarios
+        You can test the following scenarios in our sandbox environment
+
+        | Scenario                                | Letter Id                    |
+        | ----------------------------------------| ---------------------------- |
+        | Retrieve a PENDING letter status        | `24L5eYSWGzCHlGmzNxuqVusPxDg`|
+        | Retrieve a ACCEPTED letter status       | `2AL5eYSWGzCHlGmzNxuqVusPxDg`|
+        | Retrieve a PRINTED letter status        | `2BL5eYSWGzCHlGmzNxuqVusPxDg`|
+        | Retrieve a ENCLOSED letter status       | `2CL5eYSWGzCHlGmzNxuqVusPxDg`|
+        | Retrieve a DISPATCHED letter status     | `2DL5eYSWGzCHlGmzNxuqVusPxDg`|
+        | Retrieve a DELIVERED letter status      | `2EL5eYSWGzCHlGmzNxuqVusPxDg`|
+        | Retrieve a REJECTED letter status       | `2WL5eYSWGzCHlGmzNxuqVusPxDg`|
+        | Retrieve a CANCELLED letter status      | `2XL5eYSWGzCHlGmzNxuqVusPxDg`|
+        | Retrieve a FAILED letter status         | `2YL5eYSWGzCHlGmzNxuqVusPxDg`|
+        | Retrieve a RETURNED letter status       | `2ZL5eYSWGzCHlGmzNxuqVusPxDg`|
       operationId: getLetterStatus
       parameters:
       - description: "Unique request identifier, in the format of a GUID"
@@ -282,11 +543,10 @@ paths:
                   value:
                     data:
                       attributes:
-                        reasonCode: 100
-                        reasonText: failed validation
+                        groupId: c5d93f917f5546d08beccf770a915d96
                         specificationId: 2WL5eYSWGzCHlGmzNxuqVusPxDg
-                        status: REJECTED
-                      id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                        status: PENDING
+                      id: 24L5eYSWGzCHlGmzNxuqVusPxDg
                       type: Letter
               schema:
                 $ref: "#/components/schemas/getLetterStatus_200_response"
@@ -306,7 +566,7 @@ paths:
                       status: "404"
                       title: Resource not found
               schema:
-                $ref: "#/components/schemas/listLetters_404_response"
+                $ref: "#/components/schemas/listLetters_400_response"
           description: Resource not found
         "429":
           content:
@@ -323,7 +583,7 @@ paths:
                       status: "429"
                       title: Too many requests
               schema:
-                $ref: "#/components/schemas/listLetters_404_response"
+                $ref: "#/components/schemas/listLetters_400_response"
           description: Too many requests
         "500":
           content:
@@ -340,7 +600,7 @@ paths:
                       status: "500"
                       title: Internal Server Error
               schema:
-                $ref: "#/components/schemas/listLetters_404_response"
+                $ref: "#/components/schemas/listLetters_400_response"
           description: Server error
       summary: Retrieve the status of a letter
       tags:
@@ -384,15 +644,115 @@ paths:
         content:
           application/vnd.api+json:
             examples:
-              patch-letter-request:
+              patch-letter-request-default:
+                summary: Request for default (PENDING) update
+                value:
+                  data:
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+              patch-letter-request-pending:
+                summary: Request for PENDING update
+                value:
+                  data:
+                    attributes:
+                      status: PENDING
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+              patch-letter-request-accepted:
+                summary: Request for ACCEPTED update
+                value:
+                  data:
+                    attributes:
+                      status: ACCEPTED
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+              patch-letter-request-rejected:
+                summary: Request for REJECTED update
                 value:
                   data:
                     attributes:
                       reasonCode: 100
                       reasonText: failed validation
-                      specificationId: 2WL5eYSWGzCHlGmzNxuqVusPxDg
                       status: REJECTED
                     id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+              patch-letter-request-printed:
+                summary: Request for PRINTED update
+                value:
+                  data:
+                    attributes:
+                      status: PRINTED
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+              patch-letter-request-enclosed:
+                summary: Request for ENCLOSED update
+                value:
+                  data:
+                    attributes:
+                      status: ENCLOSED
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+              patch-letter-request-cancelled:
+                summary: Request for CANCELLED update
+                value:
+                  data:
+                    attributes:
+                      reasonCode: 100
+                      reasonText: failed validation
+                      status: CANCELLED
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+              patch-letter-request-dispatched:
+                summary: Request for DISPATCHED update
+                value:
+                  data:
+                    attributes:
+                      status: DISPATCHED
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+              patch-letter-request-delivered:
+                summary: Request for DELIVERED update
+                value:
+                  data:
+                    attributes:
+                      status: DELIVERED
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+              patch-letter-request-failed:
+                summary: Request for FAILED update
+                value:
+                  data:
+                    attributes:
+                      reasonCode: 100
+                      reasonText: failed validation
+                      status: FAILED
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+              patch-letter-request-returned:
+                summary: Request for RETURNED update
+                value:
+                  data:
+                    attributes:
+                      reasonCode: 100
+                      reasonText: failed validation
+                      status: REJECTED
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+              patch-letter-request-invalid:
+                summary: Request for an invalid update
+                value:
+                  data:
+                    attributes:
+                      status: INVALID_STATUS
+                    id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                    type: Letter
+              patch-letter-request-not-found:
+                summary: Request for a non existant letter
+                value:
+                  data:
+                    attributes:
+                      status: ACCEPTED
+                    id: "123654789"
                     type: Letter
             schema:
               $ref: "#/components/schemas/patchLetters_request"
@@ -406,10 +766,8 @@ paths:
                   value:
                     data:
                       attributes:
-                        reasonCode: 100
-                        reasonText: failed validation
                         specificationId: 2WL5eYSWGzCHlGmzNxuqVusPxDg
-                        status: REJECTED
+                        status: ACCEPTED
                       id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
                       type: Letter
               schema:
@@ -419,18 +777,18 @@ paths:
           content:
             application/vnd.api+json:
               examples:
-                error-bad-request:
+                error-bad-request-invalid-request-body:
                   value:
                     errors:
                     - code: NOTIFY_INVALID_REQUEST
-                      detail: "Invalid request, please refer to the API specifications"
+                      detail: The request body is invalid
                       id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
                       links:
                         about: https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier
                       status: "400"
                       title: Invalid request
               schema:
-                $ref: "#/components/schemas/listLetters_404_response"
+                $ref: "#/components/schemas/listLetters_400_response"
           description: "Bad request, invalid input data"
         "404":
           content:
@@ -447,7 +805,7 @@ paths:
                       status: "404"
                       title: Resource not found
               schema:
-                $ref: "#/components/schemas/listLetters_404_response"
+                $ref: "#/components/schemas/listLetters_400_response"
           description: Resource not found
         "429":
           content:
@@ -464,7 +822,7 @@ paths:
                       status: "429"
                       title: Too many requests
               schema:
-                $ref: "#/components/schemas/listLetters_404_response"
+                $ref: "#/components/schemas/listLetters_400_response"
           description: Too many requests
         "500":
           content:
@@ -481,7 +839,7 @@ paths:
                       status: "500"
                       title: Internal Server Error
               schema:
-                $ref: "#/components/schemas/listLetters_404_response"
+                $ref: "#/components/schemas/listLetters_400_response"
           description: Server error
       summary: Update the status of a letter
       tags:
@@ -546,7 +904,7 @@ paths:
                       status: "404"
                       title: Resource not found
               schema:
-                $ref: "#/components/schemas/listLetters_404_response"
+                $ref: "#/components/schemas/listLetters_400_response"
           description: Resource not found
         "429":
           content:
@@ -563,7 +921,7 @@ paths:
                       status: "429"
                       title: Too many requests
               schema:
-                $ref: "#/components/schemas/listLetters_404_response"
+                $ref: "#/components/schemas/listLetters_400_response"
           description: Too many requests
         "500":
           content:
@@ -580,7 +938,7 @@ paths:
                       status: "500"
                       title: Internal Server Error
               schema:
-                $ref: "#/components/schemas/listLetters_404_response"
+                $ref: "#/components/schemas/listLetters_400_response"
           description: Server error
       summary: Fetch a data file
       tags:
@@ -653,14 +1011,39 @@ paths:
         content:
           application/vnd.api+json:
             examples:
-              create-mi-request:
+              create-mi-request-success:
+                summary: Request for successful MI record Creation
                 value:
                   data:
                     attributes:
-                      cost: 10.25
-                      lineItem: Letter
+                      groupId: abc123
+                      lineItem: envelope-business-standard
                       quantity: 22
-                      specificationId: da0b1495-c7cb-468c-9d81-07dee089d728
+                      specificationId: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                      stockRemaining: 2000
+                      timestamp: 2023-11-17T14:27:51.413Z
+                    type: ManagementInformation
+              create-mi-request-invalid:
+                summary: Invalid Request for MI record Creation
+                value:
+                  data:
+                    attributes:
+                      groupId: abc123
+                      lineItem: envelope-business-standard
+                      quantity: 22
+                      specificationId: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+                      stockRemaining: 2000
+                      timestamp: yesterday
+                    type: ManagementInformation
+              create-mi-request-notfound:
+                summary: Request for MI record Creation for unknown spec
+                value:
+                  data:
+                    attributes:
+                      groupId: abc123
+                      lineItem: envelope-business-standard
+                      quantity: 22
+                      specificationId: "123456"
                       stockRemaining: 2000
                       timestamp: 2023-11-17T14:27:51.413Z
                     type: ManagementInformation
@@ -676,10 +1059,10 @@ paths:
                   value:
                     data:
                       attributes:
-                        cost: 10.25
-                        lineItem: Letter
+                        groupId: abc123
+                        lineItem: envelope-business-standard
                         quantity: 22
-                        specificationId: da0b1495-c7cb-468c-9d81-07dee089d728
+                        specificationId: 2WL5eYSWGzCHlGmzNxuqVusPxDg
                         stockRemaining: 2000
                         timestamp: 2023-11-17T14:27:51.413Z
                       id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
@@ -702,7 +1085,7 @@ paths:
                       status: "404"
                       title: Resource not found
               schema:
-                $ref: "#/components/schemas/listLetters_404_response"
+                $ref: "#/components/schemas/listLetters_400_response"
           description: Resource not found
         "429":
           content:
@@ -719,7 +1102,7 @@ paths:
                       status: "429"
                       title: Too many requests
               schema:
-                $ref: "#/components/schemas/listLetters_404_response"
+                $ref: "#/components/schemas/listLetters_400_response"
           description: Too many requests
         "500":
           content:
@@ -736,7 +1119,7 @@ paths:
                       status: "500"
                       title: Internal Server Error
               schema:
-                $ref: "#/components/schemas/listLetters_404_response"
+                $ref: "#/components/schemas/listLetters_400_response"
           description: Server error
       summary: Create a new MI record
       tags:
@@ -766,6 +1149,9 @@ components:
       properties:
         specificationId:
           example: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+          type: string
+        groupId:
+          example: abc123
           type: string
         status:
           default: PENDING
@@ -797,51 +1183,41 @@ components:
       - specificationId
       - status
       type: object
-    listLetters_404_response:
-      properties:
-        data:
-          $ref: "#/components/schemas/listLetters_404_response_data"
-      type: object
     patchLetters_request:
       properties:
         data:
           $ref: "#/components/schemas/postLetters_request_data_inner"
       type: object
-    createMI_201_response_data_attributes:
-      properties:
-        messageReference:
-          example: da0b1495-c7cb-468c-9d81-07dee089d728
-          type: string
-        timestamp:
-          example: 2023-11-17T14:27:51.413Z
-          format: date-time
-          type: string
-        lineItem:
-          example: Letter
-          type: string
-        quantity:
-          example: 22
-          type: number
-        cost:
-          description: Total Amount
-          example: 10.25
-          type: number
-        stockRemaining:
-          description: Stock remaining for this line item
-          example: 20000
-          type: number
-      type: object
-    listLetters_404_response_data:
+    listLetters_400_response:
       properties:
         errors:
           items:
-            $ref: "#/components/schemas/listLetters_404_response_data_errors_inner"
+            $ref: "#/components/schemas/listLetters_400_response_errors_inner"
           type: array
       type: object
-    listLetters_404_response_data_errors_inner_links:
+    listLetters_400_response_errors_inner_links:
       properties:
         about:
           format: uri
+          type: string
+      type: object
+    listLetters_400_response_errors_inner:
+      properties:
+        id:
+          type: string
+        code:
+          enum:
+          - NOTIFY_INTERNAL_SERVER_ERROR
+          - NOTIFY_INVALID_REQUEST
+          - NOTIFY_LETTER_NOT_FOUND
+          type: string
+        links:
+          $ref: "#/components/schemas/listLetters_400_response_errors_inner_links"
+        status:
+          type: string
+        title:
+          type: string
+        detail:
           type: string
       type: object
     createMI_201_response:
@@ -863,9 +1239,6 @@ components:
       type: object
     postLetters_request_data_inner_attributes:
       properties:
-        specificationId:
-          example: 2WL5eYSWGzCHlGmzNxuqVusPxDg
-          type: string
         status:
           default: PENDING
           description: The supplier status of an individual letter
@@ -939,50 +1312,41 @@ components:
           example: 2WL5eYSWGzCHlGmzNxuqVusPxDg
           type: string
         attributes:
-          $ref: "#/components/schemas/createMI_201_response_data_attributes"
-      type: object
-    listLetters_404_response_data_errors_inner:
-      properties:
-        id:
-          type: string
-        code:
-          enum:
-          - NOTIFY_INTERNAL_SERVER_ERROR
-          - NOTIFY_INVALID_REQUEST
-          - NOTIFY_LETTER_NOT_FOUND
-          type: string
-        links:
-          $ref: "#/components/schemas/listLetters_404_response_data_errors_inner_links"
-        status:
-          type: string
-        title:
-          type: string
-        detail:
-          type: string
+          $ref: "#/components/schemas/createMI_request_data_attributes"
       type: object
     createMI_request_data_attributes:
       properties:
-        specificationId:
-          example: da0b1495-c7cb-468c-9d81-07dee089d728
+        lineItem:
+          description: A line item reference that should match an invoice line item
+          example: envelope-business-standard
           type: string
         timestamp:
+          description: The effective date of the activity being reported
           example: 2023-11-17T14:27:51.413Z
           format: date-time
           type: string
-        lineItem:
-          example: Letter
-          type: string
         quantity:
+          description: The quantity of the line item being reported
           example: 22
           type: number
-        cost:
-          description: Total Amount
-          example: 10.25
-          type: number
+        specificationId:
+          description: A specification ID provided in the Letter request that this
+            MI relates to
+          example: da0b1495-c7cb-468c-9d81-07dee089d728
+          type: string
+        groupId:
+          description: A group ID provided in the Letter request that this MI relates
+            to
+          example: abc123
+          type: string
         stockRemaining:
-          description: Stock remaining for this line item
+          description: "Stock remaining for this line item, where applicable"
           example: 20000
           type: number
+      required:
+      - lineItem
+      - quantity
+      - timestamp
       type: object
   securitySchemes:
     app-level3:

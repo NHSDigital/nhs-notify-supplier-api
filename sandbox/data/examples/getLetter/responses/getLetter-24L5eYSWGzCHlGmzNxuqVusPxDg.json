@@ -1,8 +1,7 @@
 {
   "data": {
     "attributes": {
-      "reasonCode": 100,
-      "reasonText": "failed validation",
+      "groupId": "c5d93f917f5546d08beccf770a915d96",
       "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
       "status": "PENDING"
     },
