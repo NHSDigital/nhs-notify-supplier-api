@@ -1,4 +1,9 @@
 description: Letter status
+headers:
+  X-Request-ID:
+    $ref: "../responseHeaders/xRequestId.yml"
+  X-Correlation-ID:
+    $ref: "../responseHeaders/xCorrelationId.yml"
 content:
   application/vnd.api+json:
     schema:

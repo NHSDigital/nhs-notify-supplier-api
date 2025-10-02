@@ -1,0 +1,8 @@
+description: See Other
+headers:
+  Location:
+    $ref: "../responseHeaders/getDataLocation.yml"
+  X-Request-ID:
+    $ref: "../responseHeaders/xRequestId.yml"
+  X-Correlation-ID:
+    $ref: "../responseHeaders/xCorrelationId.yml"
