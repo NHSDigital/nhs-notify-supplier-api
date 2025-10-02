@@ -6,4 +6,4 @@ content:
     examples:
       create-mi-response:
         value:
-          $ref: "../examples/createMI/responses/createMIResponse.json"
+          $ref: "../examples/createMI/responses/createMI_SUCCESS.json"
