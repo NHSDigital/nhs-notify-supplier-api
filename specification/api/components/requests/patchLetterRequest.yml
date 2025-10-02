@@ -1,8 +1,9 @@
-required: true
 content:
   application/vnd.api+json:
     schema:
       type: object
+      required:
+        - data
       properties:
         data:
           $ref: ../schemas/letterUpdateItem.yml

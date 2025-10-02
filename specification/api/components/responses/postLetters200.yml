@@ -1,9 +1,0 @@
-description: Letter Resources Updated successfully
-content:
-  application/vnd.api+json:
-    schema:
-      $ref: "../schemas/postLetterResponse.yml"
-    examples:
-      post-letters-responses:
-        value:
-          $ref: "../examples/postLetter/responses/postLetters.json"

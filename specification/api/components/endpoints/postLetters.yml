@@ -6,7 +6,7 @@ requestBody:
   $ref: '../requests/postLettersRequest.yml'
 responses:
   '200':
-    $ref: "../responses/postLetters200.yml"
+    $ref: "../responses/postLetters202.yml"
   '404':
     $ref: "../responses/errors/resourceNotFound.yml"
   '429':

@@ -205,6 +205,25 @@ paths:
               schema:
                 $ref: "#/components/schemas/listLetters_200_response"
           description: List of letters to process
+          headers:
+            X-Request-ID:
+              description: |
+                Unique request identifier, in the format of a GUID
+              explode: false
+              required: false
+              schema:
+                example: dcb9c8dc-c2f4-4d5f-8674-a2e913e040b2
+                type: string
+              style: simple
+            X-Correlation-ID:
+              description: |
+                An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding . characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header.
+              explode: false
+              required: false
+              schema:
+                example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
+                type: string
+              style: simple
         "400":
           content:
             application/vnd.api+json:
@@ -368,66 +387,28 @@ paths:
                     type: Letter
             schema:
               $ref: "#/components/schemas/postLetters_request"
-        required: true
       responses:
         "200":
-          content:
-            application/vnd.api+json:
-              examples:
-                post-letters-responses:
-                  value:
-                    data:
-                    - attributes:
-                        status: PENDING
-                      id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
-                      type: Letter
-                    - attributes:
-                        status: ACCEPTED
-                      id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
-                      type: Letter
-                    - attributes:
-                        status: PRINTED
-                      id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
-                      type: Letter
-                    - attributes:
-                        status: ENCLOSED
-                      id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
-                      type: Letter
-                    - attributes:
-                        status: DISPATCHED
-                      id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
-                      type: Letter
-                    - attributes:
-                        status: DELIVERED
-                      id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
-                      type: Letter
-                    - attributes:
-                        reasonCode: 100
-                        reasonText: failed validation
-                        status: RETURNED
-                      id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
-                      type: Letter
-                    - attributes:
-                        reasonCode: 100
-                        reasonText: failed validation
-                        status: CANCELLED
-                      id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
-                      type: Letter
-                    - attributes:
-                        reasonCode: 100
-                        reasonText: failed validation
-                        status: FAILED
-                      id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
-                      type: Letter
-                    - attributes:
-                        reasonCode: 100
-                        reasonText: failed validation
-                        status: RETURNED
-                      id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
-                      type: Letter
+          description: 202 (Accepted) Acknowledges that status updates have been posted
+          headers:
+            X-Request-ID:
+              description: |
+                Unique request identifier, in the format of a GUID
+              explode: false
+              required: false
               schema:
-                $ref: "#/components/schemas/listLetters_200_response"
-          description: Letter Resources Updated successfully
+                example: dcb9c8dc-c2f4-4d5f-8674-a2e913e040b2
+                type: string
+              style: simple
+            X-Correlation-ID:
+              description: |
+                An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding . characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header.
+              explode: false
+              required: false
+              schema:
+                example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
+                type: string
+              style: simple
         "404":
           content:
             application/vnd.api+json:
@@ -551,6 +532,25 @@ paths:
               schema:
                 $ref: "#/components/schemas/getLetterStatus_200_response"
           description: Letter status
+          headers:
+            X-Request-ID:
+              description: |
+                Unique request identifier, in the format of a GUID
+              explode: false
+              required: false
+              schema:
+                example: dcb9c8dc-c2f4-4d5f-8674-a2e913e040b2
+                type: string
+              style: simple
+            X-Correlation-ID:
+              description: |
+                An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding . characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header.
+              explode: false
+              required: false
+              schema:
+                example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
+                type: string
+              style: simple
         "404":
           content:
             application/vnd.api+json:
@@ -773,6 +773,25 @@ paths:
               schema:
                 $ref: "#/components/schemas/getLetterStatus_200_response"
           description: Letter resource updated successfully
+          headers:
+            X-Request-ID:
+              description: |
+                Unique request identifier, in the format of a GUID
+              explode: false
+              required: false
+              schema:
+                example: dcb9c8dc-c2f4-4d5f-8674-a2e913e040b2
+                type: string
+              style: simple
+            X-Correlation-ID:
+              description: |
+                An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding . characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header.
+              explode: false
+              required: false
+              schema:
+                example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
+                type: string
+              style: simple
         "400":
           content:
             application/vnd.api+json:
@@ -887,6 +906,24 @@ paths:
               example: https://examples3bucket.com/filelocation
               explode: false
               schema:
+                type: string
+              style: simple
+            X-Request-ID:
+              description: |
+                Unique request identifier, in the format of a GUID
+              explode: false
+              required: false
+              schema:
+                example: dcb9c8dc-c2f4-4d5f-8674-a2e913e040b2
+                type: string
+              style: simple
+            X-Correlation-ID:
+              description: |
+                An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding . characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header.
+              explode: false
+              required: false
+              schema:
+                example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
                 type: string
               style: simple
         "404":
@@ -1049,7 +1086,6 @@ paths:
                     type: ManagementInformation
             schema:
               $ref: "#/components/schemas/createMI_request"
-        required: true
       responses:
         "201":
           content:
@@ -1070,6 +1106,25 @@ paths:
               schema:
                 $ref: "#/components/schemas/createMI_201_response"
           description: Management Information created successfully
+          headers:
+            X-Request-ID:
+              description: |
+                Unique request identifier, in the format of a GUID
+              explode: false
+              required: false
+              schema:
+                example: dcb9c8dc-c2f4-4d5f-8674-a2e913e040b2
+                type: string
+              style: simple
+            X-Correlation-ID:
+              description: |
+                An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding . characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header.
+              explode: false
+              required: false
+              schema:
+                example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
+                type: string
+              style: simple
         "404":
           content:
             application/vnd.api+json:
@@ -1144,6 +1199,9 @@ components:
           type: string
         attributes:
           $ref: "#/components/schemas/createMI_request_data_attributes"
+      required:
+      - attributes
+      - type
       type: object
     listLetters_200_response_data_inner_attributes:
       properties:
@@ -1187,6 +1245,8 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/postLetters_request_data_inner"
+      required:
+      - data
       type: object
     listLetters_400_response:
       properties:
@@ -1236,6 +1296,8 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/listLetters_200_response_data_inner"
+      required:
+      - data
       type: object
     postLetters_request_data_inner_attributes:
       properties:
@@ -1265,6 +1327,8 @@ components:
           description: Reason text for the given status
           example: failed validation
           type: string
+      required:
+      - status
       type: object
     listLetters_200_response_data_inner:
       properties:
@@ -1289,6 +1353,10 @@ components:
           type: string
         attributes:
           $ref: "#/components/schemas/postLetters_request_data_inner_attributes"
+      required:
+      - attributes
+      - id
+      - type
       type: object
     postLetters_request:
       properties:
@@ -1296,6 +1364,8 @@ components:
           items:
             $ref: "#/components/schemas/postLetters_request_data_inner"
           type: array
+      required:
+      - data
       type: object
     createMI_request:
       properties:
