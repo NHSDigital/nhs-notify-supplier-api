@@ -16,11 +16,13 @@ Gitleaks
 Grype
 idempotence
 Jira
+npm
 OAuth
 Octokit
 onboarding
 Podman
 pre
+proxygen-cli
 Python
 rawContent
 SDK

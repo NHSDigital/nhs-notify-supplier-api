@@ -5,8 +5,8 @@
 layout: page
 title: Home
 nav_order: 1
-description: Home
-summary: Home
+description: NHS Notify Supplier API Homepage
+summary: Supplier API Home
 is_not_draft: false
 last_modified_date: 2024-05-28
 owner: NHS Notify
