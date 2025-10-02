@@ -139,14 +139,12 @@ export class LetterRepository {
     let result: UpdateCommandOutput;
     try {
       let updateExpression = 'set #status = :status, updatedAt = :updatedAt, supplierStatus = :supplierStatus, #ttl = :ttl';
-      let expressionAttributeValues = {
-          ':status': letterToUpdate.status,
-          ':updatedAt': new Date().toISOString(),
-          ':supplierStatus': `${letterToUpdate.supplierId}#${letterToUpdate.status}`,
-          ':ttl': Math.floor(Date.now() / 1000 + 60 * 60 * this.config.ttlHours),
-          ...(!letterToUpdate.reasonCode && {':reasonCode': letterToUpdate.reasonCode}),
-          ...(!letterToUpdate.reasonText && {':reasonText': letterToUpdate.reasonText})
-        };
+      let expressionAttributeValues : Record<string, any> = {
+        ':status': letterToUpdate.status,
+        ':updatedAt': new Date().toISOString(),
+        ':supplierStatus': `${letterToUpdate.supplierId}#${letterToUpdate.status}`,
+        ':ttl': Math.floor(Date.now() / 1000 + 60 * 60 * this.config.ttlHours)
+      };
 
       if (letterToUpdate.reasonCode)
       {
