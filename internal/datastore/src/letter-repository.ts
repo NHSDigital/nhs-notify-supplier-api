@@ -10,6 +10,7 @@ import {
 import { Letter, LetterBase, LetterSchema, LetterSchemaBase } from './types';
 import { Logger } from 'pino';
 import { z } from 'zod';
+import { LetterDto } from '../../../lambdas/api-handler/src/contracts/letters';
 
 export type PagingOptions = Partial<{
   exclusiveStartKey: Record<string, any>,
@@ -133,37 +134,37 @@ export class LetterRepository {
     }
   }
 
-  async updateLetterStatus(supplierId: string, letterId: string, status: Letter['status'], reasonCode: number | undefined, reasonText: string | undefined): Promise<Letter> {
-    this.log.debug(`Updating letter ${letterId} to status ${status}`);
+  async updateLetterStatus(letterToUpdate: LetterDto): Promise<Letter> {
+    this.log.debug(`Updating letter ${letterToUpdate.id} to status ${letterToUpdate.status}`);
     let result: UpdateCommandOutput;
     try {
       let updateExpression = 'set #status = :status, updatedAt = :updatedAt, supplierStatus = :supplierStatus, #ttl = :ttl';
       let expressionAttributeValues = {
-          ':status': status,
+          ':status': letterToUpdate.status,
           ':updatedAt': new Date().toISOString(),
-          ':supplierStatus': `${supplierId}#${status}`,
+          ':supplierStatus': `${letterToUpdate.supplierId}#${letterToUpdate.status}`,
           ':ttl': Math.floor(Date.now() / 1000 + 60 * 60 * this.config.ttlHours),
-          ...(!reasonCode && {':reasonCode': reasonCode}),
-          ...(!reasonText && {':reasonText': reasonText})
+          ...(!letterToUpdate.reasonCode && {':reasonCode': letterToUpdate.reasonCode}),
+          ...(!letterToUpdate.reasonText && {':reasonText': letterToUpdate.reasonText})
         };
 
-      if (reasonCode)
+      if (letterToUpdate.reasonCode)
       {
         updateExpression += ', reasonCode = :reasonCode';
-        expressionAttributeValues[':reasonCode'] = reasonCode;
+        expressionAttributeValues[':reasonCode'] = letterToUpdate.reasonCode;
       }
 
-      if (reasonText)
+      if (letterToUpdate.reasonText)
       {
         updateExpression += ', reasonText = :reasonText';
-        expressionAttributeValues[':reasonText'] = reasonText;
+        expressionAttributeValues[':reasonText'] = letterToUpdate.reasonText;
       }
 
       result = await this.ddbClient.send(new UpdateCommand({
         TableName: this.config.lettersTableName,
         Key: {
-          supplierId: supplierId,
-          id: letterId
+          supplierId: letterToUpdate.supplierId,
+          id: letterToUpdate.id
         },
         UpdateExpression: updateExpression,
         ConditionExpression: 'attribute_exists(id)', // Ensure letter exists
@@ -176,12 +177,12 @@ export class LetterRepository {
       }));
     } catch (error) {
       if (error instanceof Error && error.name === 'ConditionalCheckFailedException') {
-        throw new Error(`Letter with id ${letterId} not found for supplier ${supplierId}`);
+        throw new Error(`Letter with id ${letterToUpdate.id} not found for supplier ${letterToUpdate.supplierId}`);
       }
       throw error;
     }
 
-    this.log.debug(`Updated letter ${letterId} to status ${status}`);
+    this.log.debug(`Updated letter ${letterToUpdate.id} to status ${letterToUpdate.status}`);
     return LetterSchema.parse(result.Attributes);
   }
 

@@ -3,7 +3,7 @@ import { APIGatewayProxyResult, Context } from 'aws-lambda';
 import { mockDeep } from 'jest-mock-extended';
 import { makeApiGwEvent } from './utils/test-utils';
 import * as letterService from '../../services/letter-operations';
-import { LetterApiDocument, LetterApiStatus } from '../../contracts/letter-api';
+import { PatchLetterRequest, PatchLetterResponse } from '../../contracts/letters';
 import { mapErrorToResponse } from '../../mappers/error-mapper';
 import { ValidationError } from '../../errors';
 import * as errors from '../../contracts/errors';
@@ -11,9 +11,9 @@ import * as errors from '../../contracts/errors';
 jest.mock('../../services/letter-operations');
 jest.mock('../../mappers/error-mapper');
 
-jest.mock("../../config/lambda-config", () => ({
+jest.mock('../../config/lambda-config', () => ({
   lambdaConfig: {
-    SUPPLIER_ID_HEADER: "nhsd-supplier-id",
+    SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
     APIM_CORRELATION_HEADER: 'nhsd-correlation-id'
   }
 }));
@@ -21,29 +21,25 @@ jest.mock("../../config/lambda-config", () => ({
 const mockedMapErrorToResponse = jest.mocked(mapErrorToResponse);
 const expectedErrorResponse: APIGatewayProxyResult = {
   statusCode: 400,
-  body: "Error"
+  body: 'Error'
 };
 mockedMapErrorToResponse.mockReturnValue(expectedErrorResponse);
 
 const mockedPatchLetterStatus = jest.mocked(letterService.patchLetterStatus);
 
-const letterApiDocument = makeLetterApiDocument("id1", "REJECTED");
-const requestBody = JSON.stringify(letterApiDocument, null, 2);
-
-function makeLetterApiDocument(id: string, status: LetterApiStatus) : LetterApiDocument {
-  return {
+const updateLetterStatusRequest : PatchLetterRequest = {
     data: {
+      id: 'id1',
+      type: 'Letter',
       attributes: {
+        status: 'REJECTED',
         reasonCode: 123,
-        reasonText: "Reason text",
-        specificationId: "spec1",
-        status
-      },
-      id,
-      type: "Letter"
+        reasonText: 'Reason text',
+      }
     }
-  };
-}
+};
+
+const requestBody = JSON.stringify(updateLetterStatusRequest, null, 2);
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -55,26 +51,39 @@ describe('patchLetters API Handler', () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
       body: requestBody,
-      pathParameters: {id: "id1"},
+      pathParameters: {id: 'id1'},
       headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    mockedPatchLetterStatus.mockResolvedValue(letterApiDocument);
+    const updateLetterServiceResponse : PatchLetterResponse = {
+        data: {
+          id: 'id1',
+          type: 'Letter',
+          attributes: {
+            status: 'REJECTED',
+            specificationId: 'spec1',
+            groupId: 'group1',
+            reasonCode: 123,
+            reasonText: 'Reason text',
+          }
+        }
+    };
+    mockedPatchLetterStatus.mockResolvedValue(updateLetterServiceResponse);
 
     const result = await patchLetters(event, context, callback);
 
     expect(result).toEqual({
       statusCode: 200,
-      body: requestBody,
+      body: JSON.stringify(updateLetterServiceResponse, null, 2)
     });
   });
 
   it('returns error response when there is no body', async () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
-      pathParameters: {id: "id1"},
+      pathParameters: {id: 'id1'},
       headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
     });
     const context = mockDeep<Context>();
@@ -107,7 +116,7 @@ describe('patchLetters API Handler', () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
       body: requestBody,
-      pathParameters: {id: "id1"},
+      pathParameters: {id: 'id1'},
       headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
     });
     const context = mockDeep<Context>();
@@ -123,7 +132,7 @@ describe('patchLetters API Handler', () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
       body: requestBody,
-      pathParameters: {id: "id1"},
+      pathParameters: {id: 'id1'},
       headers: {'nhsd-correlation-id': 'correlationId'}
     });
     const context = mockDeep<Context>();
@@ -138,8 +147,8 @@ describe('patchLetters API Handler', () => {
   it('returns error when request body does not have correct shape', async () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
-      body: '{test: "test"}',
-      pathParameters: {id: "id1"},
+      body: "{test: 'test'}",
+      pathParameters: {id: 'id1'},
       headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
     });
     const context = mockDeep<Context>();
@@ -155,7 +164,7 @@ describe('patchLetters API Handler', () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
       body: '{#invalidJSON',
-      pathParameters: {id: "id1"},
+      pathParameters: {id: 'id1'},
       headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
     });
     const context = mockDeep<Context>();
@@ -171,14 +180,14 @@ describe('patchLetters API Handler', () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
       body: 'somebody',
-      pathParameters: {id: "id1"},
+      pathParameters: {id: 'id1'},
       headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const error = "Unexpected error";
-    const spy = jest.spyOn(JSON, "parse").mockImplementation(() => {
+    const error = 'Unexpected error';
+    const spy = jest.spyOn(JSON, 'parse').mockImplementation(() => {
       throw error;
     });
 
@@ -190,11 +199,11 @@ describe('patchLetters API Handler', () => {
     spy.mockRestore();
   });
 
-  it("returns error if correlation id not provided in request", async () => {
+  it('returns error if correlation id not provided in request', async () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
       body: requestBody,
-      pathParameters: {id: "id1"},
+      pathParameters: {id: 'id1'},
       headers: {'nhsd-supplier-id': 'supplier1'}
     });
     const context = mockDeep<Context>();
@@ -210,7 +219,7 @@ describe('patchLetters API Handler', () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
       body: requestBody,
-      pathParameters: {id: "id1"},
+      pathParameters: {id: 'id1'},
       headers: {}
     });
     const context = mockDeep<Context>();

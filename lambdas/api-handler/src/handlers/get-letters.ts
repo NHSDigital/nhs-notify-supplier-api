@@ -1,14 +1,13 @@
 import { APIGatewayProxyEventQueryStringParameters, APIGatewayProxyHandler } from "aws-lambda";
 import { getLettersForSupplier } from "../services/letter-operations";
 import { createLetterRepository } from "../infrastructure/letter-repo-factory";
-import { LetterBase } from "../../../../internal/datastore/src";
 import { assertNotEmpty } from "../utils/validation";
 import { ApiErrorDetail } from '../contracts/errors';
 import { lambdaConfig } from "../config/lambda-config";
 import pino from 'pino';
 import { mapErrorToResponse } from "../mappers/error-mapper";
 import { ValidationError } from "../errors";
-import { mapLetterBaseToApiResource } from "../mappers/letter-mapper";
+import { mapToGetLettersResponse } from "../mappers/letter-mapper";
 
 const letterRepo = createLetterRepository();
 
@@ -39,9 +38,7 @@ export const getLetters: APIGatewayProxyHandler = async (event) => {
       letterRepo,
     );
 
-    const response = {
-      data: letters.map((letter: LetterBase) => (mapLetterBaseToApiResource(letter, { excludeOptional: true })))
-    };
+    const response = mapToGetLettersResponse(letters);
 
     log.info({
       description: 'Pending letters successfully fetched',
