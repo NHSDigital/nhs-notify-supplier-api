@@ -67,18 +67,7 @@ jobs:
 
           echo "ENVIRONMENT=$ENVIRONMENT" >> $GITHUB_ENV
           echo "APIM_ENV=$APIM_ENV" >> $GITHUB_ENV
-      - name: Build environment oas
-        working-directory: .
-        env:
-          APIM_ENV: ${{ env.APIM_ENV }}
-        shell: bash
-        run: |
-            make build-json-oas-spec APIM_ENV=$APIM_ENV
-            if [[ $APIM_ENV == *-pr ]]; then
-              echo "Removing pr suffix from APIM_ENV after building OAS and calling proxygen"
-              APIM_ENV=$(echo "$APIM_ENV" | sed 's/-pr$//')
-              echo "APIM_ENV=$APIM_ENV" >> $GITHUB_ENV
-            fi
+
       - name: "Build proxies"
         env:
           PROXYGEN_API_NAME: nhs-notify-supplier
