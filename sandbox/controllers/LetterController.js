@@ -16,8 +16,8 @@ const listLetters = async (request, response) => {
   await Controller.handleRequest(request, response, service.listLetters);
 };
 
-const patchLetters = async (request, response) => {
-  await Controller.handleRequest(request, response, service.patchLetters);
+const patchLetter = async (request, response) => {
+  await Controller.handleRequest(request, response, service.patchLetter);
 };
 
 const postLetters = async (request, response) => {
@@ -28,6 +28,6 @@ const postLetters = async (request, response) => {
 module.exports = {
   getLetterStatus,
   listLetters,
-  patchLetters,
+  patchLetter,
   postLetters,
 };

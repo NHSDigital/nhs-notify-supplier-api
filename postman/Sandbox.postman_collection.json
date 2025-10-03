@@ -641,7 +641,7 @@
                   }
                 }
               ],
-              "name": "200 - PatchLetters",
+              "name": "200 - PatchLetter",
               "request": {
                 "body": {
                   "mode": "raw",
@@ -745,7 +745,7 @@
                   "body": null,
                   "cookie": [],
                   "header": null,
-                  "name": "200 - PatchLetters-CANCELLED",
+                  "name": "200 - PatchLetter-CANCELLED",
                   "originalRequest": {
                     "body": {
                       "mode": "raw",

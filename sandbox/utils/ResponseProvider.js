@@ -74,8 +74,8 @@ async function getLettersResponse(limit) {
   return mapExampleGetResponse(status, getLettersfileMap);
 }
 
-async function patchLettersResponse(request) {
-  const patchLettersFileMap = {
+async function patchLetterResponse(request) {
+  const patchLetterFileMap = {
     'data/examples/patchLetter/requests/patchLetter_DEFAULT.json': {responsePath: 'data/examples/patchLetter/responses/patchLetter_PENDING.json', responseCode: 200},
     'data/examples/patchLetter/requests/patchLetter_PENDING.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_PENDING.json',responseCode: 200},
     'data/examples/patchLetter/requests/patchLetter_ACCEPTED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_ACCEPTED.json',responseCode: 200},
@@ -90,14 +90,14 @@ async function patchLettersResponse(request) {
     'data/examples/patchLetter/requests/patchLetter_INVALID.json': {responsePath:'data/examples/errors/responses/badRequest.json',responseCode: 400},
     'data/examples/patchLetter/requests/patchLetter_NOTFOUND.json': {responsePath:'data/examples/errors/responses/resourceNotFound.json',responseCode: 404},
   };
-  return await mapExampleResponse(request, patchLettersFileMap);
+  return await mapExampleResponse(request, patchLetterFileMap);
 }
 
 async function postLettersResponse(request) {
-  const patchLettersFileMap = {
+  const patchLetterFileMap = {
     'data/examples/postLetter/requests/postLetters.json': {responsePath: 'data/examples/postLetter/responses/postLetters.json', responseCode: 200},
   };
-  return await mapExampleResponse(request, patchLettersFileMap);
+  return await mapExampleResponse(request, patchLetterFileMap);
 }
 
 async function postMIResponse(request) {
@@ -120,7 +120,7 @@ async function getLetterDataResponse(id) {
 module.exports = {
   getLetterStatusResponse,
   getLettersResponse,
-  patchLettersResponse,
+  patchLetterResponse,
   postMIResponse,
   getLetterDataResponse,
   postLettersResponse

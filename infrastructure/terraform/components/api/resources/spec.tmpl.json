@@ -67,7 +67,7 @@
       ],
       "patch": {
         "description": "Update the status of a letter by providing the new status in the request body.",
-        "operationId": "patchLetters",
+        "operationId": "patchLetter",
         "requestBody": {
           "required": true
         },
@@ -102,7 +102,7 @@
           },
           "timeoutInMillis": 29000,
           "type": "AWS_PROXY",
-          "uri": "arn:aws:apigateway:${AWS_REGION}:lambda:path/2015-03-31/functions/${PATCH_LETTERS_LAMBDA_ARN}/invocations"
+          "uri": "arn:aws:apigateway:${AWS_REGION}:lambda:path/2015-03-31/functions/${PATCH_LETTER_LAMBDA_ARN}/invocations"
         }
       }
     }

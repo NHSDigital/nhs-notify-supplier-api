@@ -1,7 +1,7 @@
-module "patch_letters" {
+module "patch_letter" {
   source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.20/terraform-lambda.zip"
 
-  function_name = "patch_letters"
+  function_name = "patch_letter"
   description   = "Update the status of a letter"
 
   aws_account_id = var.aws_account_id
@@ -15,14 +15,14 @@ module "patch_letters" {
   kms_key_arn           = module.kms.key_arn
 
   iam_policy_document = {
-    body = data.aws_iam_policy_document.patch_letters_lambda.json
+    body = data.aws_iam_policy_document.patch_letter_lambda.json
   }
 
   function_s3_bucket      = local.acct.s3_buckets["lambda_function_artefacts"]["id"]
   function_code_base_path = local.aws_lambda_functions_dir_path
   function_code_dir       = "api-handler/dist"
   function_include_common = true
-  handler_function_name   = "patchLetters"
+  handler_function_name   = "patchLetter"
   runtime                 = "nodejs22.x"
   memory                  = 128
   timeout                 = 5
@@ -35,10 +35,10 @@ module "patch_letters" {
   log_destination_arn       = local.destination_arn
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
-  lambda_env_vars = merge(local.common_db_access_lambda_env_vars, {})
+  lambda_env_vars = merge(local.common_lambda_env_vars, {})
 }
 
-data "aws_iam_policy_document" "patch_letters_lambda" {
+data "aws_iam_policy_document" "patch_letter_lambda" {
   statement {
     sid    = "KMSPermissions"
     effect = "Allow"

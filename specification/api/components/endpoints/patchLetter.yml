@@ -1,6 +1,6 @@
 summary: Update the status of a letter
 description: Update the status of a letter by providing the new status in the request body.
-operationId: patchLetters
+operationId: patchLetter
 requestBody:
   $ref: "../requests/patchLetterRequest.yml"
 responses:

@@ -74,14 +74,14 @@ const listLetters = ({ xRequestId, xCorrelationId, limit = 10 }) => new Promise(
 *
 * xRequestId String Unique request identifier, in the format of a GUID
 * id String Unique identifier of this resource
-* patchLettersRequest PatchLettersRequest
+* patchLetterRequest PatchLetterRequest
 * xCorrelationId String An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header. (optional)
 * returns getLetterStatus_200_response
 * */
-const patchLetters = ({ xRequestId, id, body, xCorrelationId }) => new Promise(
+const patchLetter = ({ xRequestId, id, body, xCorrelationId }) => new Promise(
   async (resolve, reject) => {
     try {
-      const responseData = await ResponseProvider.patchLettersResponse(body);
+      const responseData = await ResponseProvider.patchLetterResponse(body);
       const content  = await fs.readFile(responseData.responsePath);
       const fileData = JSON.parse(content);
 
@@ -131,6 +131,6 @@ const postLetters = ({ xRequestId, body, xCorrelationId }) => new Promise(
 module.exports = {
   getLetterStatus,
   listLetters,
-  patchLetters,
+  patchLetter,
   postLetters,
 };

@@ -4,6 +4,7 @@ import { Letter } from '../types';
 import { Logger } from 'pino';
 import { createTestLogger, LogStream } from './logs';
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
+import { LetterDto } from '../../../../lambdas/api-handler/src/contracts/letters';
 
 function createLetter(supplierId: string, letterId: string, status: Letter['status'] = 'PENDING'): Omit<Letter, 'ttl' | 'supplierStatus' | 'supplierStatusSk'> {
   return {
@@ -106,7 +107,14 @@ describe('LetterRepository', () => {
     await letterRepository.putLetter(letter);
     await checkLetterStatus('supplier1', 'letter1', 'PENDING');
 
-    await letterRepository.updateLetterStatus('supplier1', 'letter1', 'REJECTED', 1, "Reason text");
+    const letterDto: LetterDto = {
+      id: 'letter1',
+      supplierId: 'supplier1',
+      status: 'REJECTED',
+      reasonCode: 1,
+      reasonText: 'Reason text'
+    };
+    await letterRepository.updateLetterStatus(letterDto);
 
     const updatedLetter = await letterRepository.getLetterById('supplier1', 'letter1');
     expect(updatedLetter.status).toBe('REJECTED');
@@ -124,13 +132,25 @@ describe('LetterRepository', () => {
     // Month is zero-indexed in JavaScript Date
     // Day is one-indexed
     jest.setSystemTime(new Date(2020, 1, 2));
-    await letterRepository.updateLetterStatus('supplier1', 'letter1', 'DELIVERED', undefined, undefined);
+    const letterDto: LetterDto = {
+      id: 'letter1',
+      supplierId: 'supplier1',
+      status: 'DELIVERED'
+    };
+
+    await letterRepository.updateLetterStatus(letterDto);
     const updatedLetter = await letterRepository.getLetterById('supplier1', 'letter1');
+
     expect(updatedLetter.updatedAt).toBe('2020-02-02T00:00:00.000Z');
   });
 
   test('can\'t update a letter that does not exist', async () => {
-    await expect(letterRepository.updateLetterStatus('supplier1', 'letter1', 'DELIVERED', undefined, undefined))
+    const letterDto: LetterDto = {
+      id: 'letter1',
+      supplierId: 'supplier1',
+      status: 'DELIVERED'
+    };
+    await expect(letterRepository.updateLetterStatus(letterDto))
       .rejects.toThrow('Letter with id letter1 not found for supplier supplier1');
   });
 
@@ -139,7 +159,13 @@ describe('LetterRepository', () => {
       ...db.config,
       lettersTableName: 'nonexistent-table'
     });
-    await expect(misconfiguredRepository.updateLetterStatus('supplier1', 'letter1', 'DELIVERED', undefined, undefined))
+
+    const letterDto: LetterDto = {
+      id: 'letter1',
+      supplierId: 'supplier1',
+      status: 'DELIVERED'
+    };
+    await expect(misconfiguredRepository.updateLetterStatus(letterDto))
       .rejects.toThrow('Cannot do operations on a non-existent table');
   });
 
@@ -164,7 +190,12 @@ describe('LetterRepository', () => {
     const pendingLetters = await letterRepository.getLettersByStatus('supplier1', 'PENDING');
     expect(pendingLetters.letters).toHaveLength(2);
 
-    await letterRepository.updateLetterStatus('supplier1', 'letter1', 'DELIVERED', undefined, undefined);
+    const letterDto: LetterDto = {
+      id: 'letter1',
+      supplierId: 'supplier1',
+      status: 'DELIVERED'
+    };
+    await letterRepository.updateLetterStatus(letterDto);
     const remainingLetters = await letterRepository.getLettersByStatus('supplier1', 'PENDING');
     expect(remainingLetters.letters).toHaveLength(1);
     expect(remainingLetters.letters[0].id).toBe('letter2');
