@@ -1,4 +1,4 @@
-import { patchLetters } from '../../index';
+import { patchLetter } from '../../index';
 import { APIGatewayProxyResult, Context } from 'aws-lambda';
 import { mockDeep } from 'jest-mock-extended';
 import { makeApiGwEvent } from './utils/test-utils';
@@ -45,7 +45,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe('patchLetters API Handler', () => {
+describe('patchLetter API Handler', () => {
 
   it('returns 200 OK with updated resource', async () => {
     const event = makeApiGwEvent({
@@ -72,7 +72,7 @@ describe('patchLetters API Handler', () => {
     };
     mockedPatchLetterStatus.mockResolvedValue(updateLetterServiceResponse);
 
-    const result = await patchLetters(event, context, callback);
+    const result = await patchLetter(event, context, callback);
 
     expect(result).toEqual({
       statusCode: 200,
@@ -89,7 +89,7 @@ describe('patchLetters API Handler', () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const result = await patchLetters(event, context, callback);
+    const result = await patchLetter(event, context, callback);
 
     expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingBody), 'correlationId');
     expect(result).toEqual(expectedErrorResponse);
@@ -103,7 +103,7 @@ describe('patchLetters API Handler', () => {
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
-    const result = await patchLetters(event, context, callback);
+    const result = await patchLetter(event, context, callback);
 
     expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter), 'correlationId');
     expect(result).toEqual(expectedErrorResponse);
@@ -122,7 +122,7 @@ describe('patchLetters API Handler', () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const result = await patchLetters(event, context, callback);
+    const result = await patchLetter(event, context, callback);
 
     expect(mockedMapErrorToResponse).toHaveBeenCalledWith(error, 'correlationId');
     expect(result).toEqual(expectedErrorResponse);
@@ -138,7 +138,7 @@ describe('patchLetters API Handler', () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const result = await patchLetters(event, context, callback);
+    const result = await patchLetter(event, context, callback);
 
     expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingSupplierId), 'correlationId');
     expect(result).toEqual(expectedErrorResponse);
@@ -154,7 +154,7 @@ describe('patchLetters API Handler', () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const result = await patchLetters(event, context, callback);
+    const result = await patchLetter(event, context, callback);
 
     expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestBody), 'correlationId');
     expect(result).toEqual(expectedErrorResponse);
@@ -170,7 +170,7 @@ describe('patchLetters API Handler', () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const result = await patchLetters(event, context, callback);
+    const result = await patchLetter(event, context, callback);
 
     expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestBody), 'correlationId');
     expect(result).toEqual(expectedErrorResponse);
@@ -191,7 +191,7 @@ describe('patchLetters API Handler', () => {
       throw error;
     });
 
-    const result = await patchLetters(event, context, callback);
+    const result = await patchLetter(event, context, callback);
 
     expect(mockedMapErrorToResponse).toHaveBeenCalledWith(error, 'correlationId');
     expect(result).toEqual(expectedErrorResponse);
@@ -209,7 +209,7 @@ describe('patchLetters API Handler', () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const result = await patchLetters(event, context, callback);
+    const result = await patchLetter(event, context, callback);
 
     expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error("The request headers don't contain the APIM correlation id"), undefined);
     expect(result).toEqual(expectedErrorResponse);
@@ -225,7 +225,7 @@ describe('patchLetters API Handler', () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const result = await patchLetters(event, context, callback);
+    const result = await patchLetter(event, context, callback);
 
     expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error('The request headers are empty'), undefined);
     expect(result).toEqual(expectedErrorResponse);

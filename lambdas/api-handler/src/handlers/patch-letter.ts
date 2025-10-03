@@ -10,7 +10,7 @@ import { assertNotEmpty } from '../utils/validation';
 import { mapToLetterDto } from '../mappers/letter-mapper';
 
 const letterRepo = createLetterRepository();
-export const patchLetters: APIGatewayProxyHandler = async (event) => {
+export const patchLetter: APIGatewayProxyHandler = async (event) => {
 
   let correlationId;
 

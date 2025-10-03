@@ -609,7 +609,7 @@ paths:
     patch:
       description: Update the status of a letter by providing the new status in the
         request body.
-      operationId: patchLetters
+      operationId: patchLetter
       parameters:
       - description: "Unique request identifier, in the format of a GUID"
         explode: false
@@ -755,7 +755,7 @@ paths:
                     id: "123654789"
                     type: Letter
             schema:
-              $ref: "#/components/schemas/patchLetters_request"
+              $ref: "#/components/schemas/patchLetter_request"
         required: true
       responses:
         "200":
@@ -1183,7 +1183,7 @@ components:
       - specificationId
       - status
       type: object
-    patchLetters_request:
+    patchLetter_request:
       properties:
         data:
           $ref: "#/components/schemas/postLetters_request_data_inner"
