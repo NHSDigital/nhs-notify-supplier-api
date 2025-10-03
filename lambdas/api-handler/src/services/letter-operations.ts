@@ -1,4 +1,4 @@
-import { Letter, LetterBase, LetterRepository } from '../../../../internal/datastore/src'
+import { LetterBase, LetterRepository } from '../../../../internal/datastore/src'
 import { NotFoundError, ValidationError } from '../errors';
 import { LetterDto, PatchLetterResponse } from '../contracts/letters';
 import { mapToPatchLetterResponse } from '../mappers/letter-mapper';

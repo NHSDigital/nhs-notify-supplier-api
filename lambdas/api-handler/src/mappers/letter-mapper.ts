@@ -1,5 +1,5 @@
 import { LetterBase, LetterStatus } from "../../../../internal/datastore";
-import { GetLettersResponse, GetLettersResponseSchema, LetterDto, LetterStatusSchema, PatchLetterRequest, PatchLetterResponse, PatchLetterResponseSchema } from '../contracts/letters';
+import { GetLettersResponse, GetLettersResponseSchema, LetterDto, PatchLetterRequest, PatchLetterResponse, PatchLetterResponseSchema } from '../contracts/letters';
 
 export function mapToLetterDto(request: PatchLetterRequest, supplierId: string) : LetterDto {
   return  {

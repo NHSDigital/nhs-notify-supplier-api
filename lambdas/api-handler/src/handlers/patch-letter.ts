@@ -32,7 +32,7 @@ export const patchLetter: APIGatewayProxyHandler = async (event) => {
       else throw error;
     }
 
-    const result = await patchLetterStatus(mapToLetterDto(patchLetterRequest, supplierId!), letterId!, letterRepo);
+    const result = await patchLetterStatus(mapToLetterDto(patchLetterRequest, supplierId), letterId, letterRepo);
 
     return {
       statusCode: 200,
