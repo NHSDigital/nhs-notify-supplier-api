@@ -11,11 +11,8 @@ class Service {
       headers['X-Correlation-ID'] = payload.xCorrelationId;
     }
 
-    let body = {};
-    if (payload.data)
-    {
-      body = payload.data
-    }
+    let body = payload.data !== undefined ? payload.data : undefined;
+
     return { body, code, headers };
   }
 }

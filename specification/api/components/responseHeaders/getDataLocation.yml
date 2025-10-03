@@ -1,0 +1,4 @@
+description: The signed S3 URL of the data file to download
+schema:
+  type: string
+example: "https://examples3bucket.com/filelocation"

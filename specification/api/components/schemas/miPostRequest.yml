@@ -2,6 +2,9 @@ type: object
 properties:
   data:
     type: object
+    required:
+      - type
+      - attributes
     properties:
       type:
         type: string
