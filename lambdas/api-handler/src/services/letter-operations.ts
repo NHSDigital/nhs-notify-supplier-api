@@ -29,3 +29,19 @@ export const patchLetterStatus = async (letterToUpdate: LetterDto, letterId: str
 
   return mapToPatchLetterResponse(updatedLetter);
 }
+
+export const getLetterData = async (supplierId: string, letterId: string, letterRepo: LetterRepository): Promise<LetterBase> => {
+
+  let letter;
+
+  try {
+    letter = await letterRepo.getLetterById(supplierId, letterId);
+  } catch (error) {
+    if (error instanceof Error && /^Letter with id \w+ not found for supplier \w+$/.test(error.message)) {
+      throw new NotFoundError(ApiErrorDetail.NotFoundLetterId);
+    }
+    throw error;
+  }
+
+
+}
