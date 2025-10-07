@@ -45,8 +45,8 @@ runs:
       shell: bash
       run: |
 
-        ENV="${{ inputs.environment }}"
-        if [[ "$ENV" == "internal-dev" || "$ENV" == pr* ]]; then
+        ENV="${{ inputs.apimEnv }}"
+        if [[ "$ENV" == "internal-dev" || "$ENV" == *pr ]]; then
           echo "TARGET_DOMAIN=suppliers.dev.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
         elif [[ "$ENV" == "int" ]]; then
           echo "TARGET_DOMAIN=suppliers.nonprod.nhsnotify.national.nhs.uk" >> $GITHUB_ENV

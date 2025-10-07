@@ -1,11 +1,11 @@
 name: Deploy proxy to environment
-run-name: Proxygen Deployment for ${{ inputs.environment }}
+run-name: Proxygen Deployment for ${{ inputs.proxy_environment }}
 
 on:
   workflow_dispatch:
     inputs:
-      environment:
-        description: Name of the environment to deploy
+      proxy_environment:
+        description: Name of the proxygen environment to deploy to
         required: true
         type: choice
         default: internal-dev
@@ -42,10 +42,10 @@ jobs:
           branch_name=${GITHUB_HEAD_REF:-$(echo $GITHUB_REF | sed 's#refs/heads/##')}
           echo "Current branch is '$branch_name'"
 
-          if [ -z "${{ inputs.environment }}" ]; then
+          if [ -z "${{ inputs.proxy_environment }}" ]; then
             ENVIRONMENT="internal-dev"
           else
-            ENVIRONMENT="${{ inputs.environment }}"
+            ENVIRONMENT="${{ inputs.proxy_environment }}"
           fi
 
           pr_json=$(gh pr list --head "$branch_name" --state open --json number --limit 1)
@@ -59,10 +59,11 @@ jobs:
             echo "changing environment variable so that PR number is used in proxy pipeline for setting env vars"
             ENVIRONMENT="pr$pr_number"
           else
-            echo "Pull request doesn't exist"
+            echo "Pull request doesn't exist, setting target env to main"
             echo "does_pull_request_exist=false" >> $GITHUB_OUTPUT
             echo "pr_number=" >> $GITHUB_OUTPUT
             APIM_ENV="$ENVIRONMENT"
+            $ENVIRONMENT='main'
           fi
 
           echo "ENVIRONMENT=$ENVIRONMENT" >> $GITHUB_ENV
