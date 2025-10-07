@@ -1,6 +1,8 @@
 ## Overview
 
-Use this endpoint to get details the status of a letter.
+Get the current status of a single letter by its ID.
+
+Rate limiting applies. On excess requests, you may receive **429 Too Many Requests** (example error code(s): `NOTIFY_QUOTA`). Back off and retry later
 
 ## Sandbox test scenarios
 

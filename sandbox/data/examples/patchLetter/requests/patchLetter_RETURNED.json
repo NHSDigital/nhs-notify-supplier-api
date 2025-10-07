@@ -1,7 +1,7 @@
 {
   "data": {
     "attributes": {
-      "reasonCode": 100,
+      "reasonCode": "R01",
       "reasonText": "failed validation",
       "status": "REJECTED"
     },
