@@ -1,4 +1,6 @@
 summary: Check for the existence of a data file
+description:
+  $ref: '../documentation/headDataId.md'
 tags:
   - data
 responses:
