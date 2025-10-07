@@ -2,11 +2,8 @@ openapi: 3.0.3
 info:
   version: next
   title: NHS Notify Supplier API
-  description: |
-    API for communication suppliers to integrate with NHS Notify.
-
-    This specification represents the in-development 'next' version of the API schema
-    and should be treated as unstable.
+  description:
+    $ref: 'components/documentation/APIDescription.md'
 security:
   - $ref: 'components/security/security.yml'
 paths:
