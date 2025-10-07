@@ -103,7 +103,7 @@ jobs:
         uses: ./.github/actions/build-proxies
         with:
           version: "${{ inputs.version }}"
-          environment: "pr${{ inputs.pr_number }}"
+          environment: ${{ inputs.pr_number != '' && format('pr{0}', inputs.pr_number) || 'main' }}
           apimEnv: "internal-dev-sandbox"
           runId: "${{ github.run_id }}"
           buildSandbox: true
