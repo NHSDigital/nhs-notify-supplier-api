@@ -7,7 +7,8 @@ parameters:
 #  - $ref: "../parameters/letterStatus.yml"
 #  - $ref: "../parameters/pageNumber.yml"
   - $ref: "../parameters/limit.yml"
-description: The key use of this endpoint is to query letters which are ready to be printed
+description:
+  $ref: '../documentation/listLetters.md'
 responses:
   '200':
     $ref: "../responses/getLetters200.yml"

@@ -1,4 +1,6 @@
 summary: Create a new MI record
+description:
+  $ref: '../documentation/createMI.md'
 operationId: createMI
 tags:
   - mi

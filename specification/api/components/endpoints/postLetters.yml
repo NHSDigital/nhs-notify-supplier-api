@@ -1,4 +1,6 @@
 summary: Update the status of multiple letters
+description:
+  $ref: '../documentation/postLetters.md'
 operationId: postLetters
 tags:
   - letter

@@ -53,7 +53,7 @@ runs:
     - name: Upload API OAS specification artifact
       uses: actions/upload-artifact@v4
       with:
-        path: "specification/api"
+        path: "build"
         name: api-oas-specification-${{ inputs.version }}
 
     - name: Upload html artifact
