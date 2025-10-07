@@ -16,3 +16,7 @@ export function assertNotEmpty<T>(
 
   return value;
 }
+
+export function lowerCaseKeys(obj: Record<string, any>): Record<string, any> {
+  return Object.fromEntries(Object.entries(obj).map(([k, v]) => [k.toLowerCase(), v]));
+}

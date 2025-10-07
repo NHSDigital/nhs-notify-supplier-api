@@ -1,4 +1,4 @@
-import { assertNotEmpty } from "../validation";
+import { assertNotEmpty, lowerCaseKeys } from "../validation";
 
 describe("assertNotEmpty", () => {
   const error = new Error();
@@ -50,5 +50,18 @@ describe("assertNotEmpty", () => {
     const arr = [1, 2, 3];
     const result = assertNotEmpty(arr, error);
     expect(result).toBe(arr);
+  });
+});
+
+describe("lowerCaseKeys", () => {
+  it("lowers case on header keys", () => {
+    const headers: Record<string, number> = {'Aa_Bb-Cc':1, 'b':2};
+    const result = lowerCaseKeys(headers);
+    expect(result).toEqual({'aa_bb-cc':1, 'b':2});
+  });
+
+  it("handles empty input", () => {
+    const result = lowerCaseKeys({});
+    expect(result).toEqual({});
   });
 });
