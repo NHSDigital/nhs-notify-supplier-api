@@ -44,7 +44,7 @@
     },
     {
       "attributes": {
-        "reasonCode": 100,
+        "reasonCode": "R01",
         "reasonText": "failed validation",
         "status": "RETURNED"
       },
@@ -53,7 +53,7 @@
     },
     {
       "attributes": {
-        "reasonCode": 100,
+        "reasonCode": "R01",
         "reasonText": "failed validation",
         "status": "CANCELLED"
       },
@@ -62,7 +62,7 @@
     },
     {
       "attributes": {
-        "reasonCode": 100,
+        "reasonCode": "R01",
         "reasonText": "failed validation",
         "status": "FAILED"
       },
@@ -71,7 +71,7 @@
     },
     {
       "attributes": {
-        "reasonCode": 100,
+        "reasonCode": "R01",
         "reasonText": "failed validation",
         "status": "RETURNED"
       },
