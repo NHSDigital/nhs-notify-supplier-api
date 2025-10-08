@@ -7,3 +7,8 @@ vendor
 *Zone.Identifier
 node_modules
 _config.version.yml
+
+# Generated or copied from other repo resources
+_includes/components/nhs-notify-supplier-api.html
+_includes/components/contributing.md
+assets/diagrams/types.md

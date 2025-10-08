@@ -28,9 +28,69 @@ url: "https://nhsdigital.github.io" # the base hostname & protocol for your site
 collections_dir: collections
 
 collections:
-  notify-repos:
+  architecture:
     output: true
     sort_by: order
+  repos:
+    output: true
+    sort_by: order
+  consumers:
+    output: true
+    sort_by: order
+  developers:
+    output: true
+    sort_by: order
+
+just_the_docs:
+  collections:
+    consumers:
+      name: API Consumers
+    developers:
+      name: API Developers
+    repos:
+      name: Notify Repositories
+      # Exclude the collection from the navigation
+      # Supports true or false (default)
+      nav_exclude: false
+      # Fold the collection in the navigation
+      # Supports true or false (default)
+      nav_fold: false # note: this option is new in v0.4
+      # Exclude the collection from the search
+      # Supports true or false (defaul
+      search_exclude: false
+    architecture:
+      name: Architecture & Design
+    guides:
+      name: Guides & How Tos
+
+defaults:
+  - scope:
+      path: ""
+      type: "repos"
+    values:
+      layout: "notify-repo"
+      is_not_draft: false
+      owner: NHS Notify
+      author: NHS Notify
+      last_modified_date: 2025-10-08
+  - scope:
+      path: ""
+      type: "onboarding"
+    values:
+      layout: "page"
+      is_not_draft: false
+      owner: NHS Notify
+      author: NHS Notify
+      last_modified_date: 2025-10-08
+  - scope:
+      path: ""
+      type: "developers"
+    values:
+      layout: "page"
+      is_not_draft: false
+      owner: NHS Notify
+      author: NHS Notify
+      last_modified_date: 2025-10-08
 
 # Build settings
 theme: just-the-docs
@@ -45,15 +105,15 @@ mermaid:
   version: "10.9.1"
 
 aux_links:
-  "NHS Notify Repo Template on GitHub":
-    - "//github.com/NHSDigital/nhs-notify-repository-template"
+  "NHS Notify Supplier API Template on GitHub":
+    - "//github.com/NHSDigital/nhs-notify-supplier-api"
 
 aux_links_new_tab: false
 
 # Footer "Edit this page on GitHub" link text
 gh_edit_link: true # show or hide edit this page link
 gh_edit_link_text: "Edit this page on GitHub."
-gh_edit_repository: "https://github.com/NHSDigital/nhs-notify-repository-template" # the github URL for your repo
+gh_edit_repository: "https://github.com/NHSDigital/nhs-notify-supplier-api" # the github URL for your repo
 gh_edit_branch: "main" # the branch that your docs is served from
 # gh_edit_source: docs # the source that your files originate from
 gh_edit_view_mode: "tree" # "tree" or "edit" if you want the user to jump into the editor immediately
