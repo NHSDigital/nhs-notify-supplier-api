@@ -93,11 +93,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      PROXYGEN_PRIVATE_KEY: ${{ secrets.PROXYGEN_ENCODED_NOTIFY_SUPPLIER_PRIVATE_KEY }}
-      PROXYGEN_KID: notify-supplier-key-1
-      PROXYGEN_CLIENT_ID: nhs-notify-supplier-client
       PROXYGEN_API_NAME: nhs-notify-supplier
       PR_NUMBER: ${{ inputs.pr_number }}
+      PR_TRIGGER_PAT: ${{ secrets.PR_TRIGGER_PAT }}
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
@@ -105,24 +103,11 @@ jobs:
         uses: ./.github/actions/build-proxies
         with:
           version: "${{ inputs.version }}"
-
-  artefact-sandbox:
-    name: "Build sandbox"
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    env:
-      PROXYGEN_PRIVATE_KEY: ${{ secrets.PROXYGEN_ENCODED_NOTIFY_SUPPLIER_PRIVATE_KEY }}
-      PROXYGEN_KID: notify-supplier-key-1
-      PROXYGEN_CLIENT_ID: nhs-notify-supplier-client
-      PROXYGEN_API_NAME: nhs-notify-supplier
-      PR_NUMBER: ${{ inputs.pr_number }}
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v4
-      - name: "Build sandbox"
-        uses: ./.github/actions/build-sandbox
-        with:
-          version: "${{ inputs.version }}"
+          environment: ${{ inputs.pr_number != '' && format('pr{0}', inputs.pr_number) || 'main' }}
+          apimEnv: "internal-dev-sandbox"
+          runId: "${{ github.run_id }}"
+          buildSandbox: true
+          releaseVersion: ${{ github.ref_name }}
 
   # artefact-1:
   #   name: "Artefact 1"
