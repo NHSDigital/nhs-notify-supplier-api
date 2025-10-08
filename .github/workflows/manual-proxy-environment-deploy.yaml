@@ -14,7 +14,7 @@ on:
           - int
           - prod
       build_sandbox:
-        description: Whether to build the sandbox container
+        description: Build sandbox container?
         required: false
         default: false
         type: boolean
