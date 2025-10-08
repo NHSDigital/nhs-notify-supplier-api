@@ -13,6 +13,11 @@ on:
           - internal-dev
           - int
           - prod
+      build_sandbox:
+        description: Whether to build the sandbox container
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -79,5 +84,5 @@ jobs:
           environment: "${{ env.ENVIRONMENT }}"
           apimEnv: "${{ env.APIM_ENV }}"
           runId: "${{ github.run_id }}"
-          buildSandbox: false
+          buildSandbox: ${{ inputs.build_sandbox }}
           releaseVersion: ${{ github.ref_name }}
