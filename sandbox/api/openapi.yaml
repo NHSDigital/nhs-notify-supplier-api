@@ -232,7 +232,7 @@ paths:
                   value:
                     errors:
                     - code: NOTIFY_INVALID_REQUEST
-                      detail: "Only 'limit' query parameter is supported"
+                      detail: Only 'limit' query parameter is supported
                       id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
                       links:
                         about: https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier
@@ -242,8 +242,8 @@ paths:
                   value:
                     errors:
                     - code: NOTIFY_INVALID_REQUEST
-                      detail: "The limit parameter must be a positive\
-                        \ number not greater than 2500"
+                      detail: The limit parameter must be a positive number not greater
+                        than 2500
                       id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
                       links:
                         about: https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier
@@ -388,7 +388,7 @@ paths:
             schema:
               $ref: "#/components/schemas/postLetters_request"
       responses:
-        "200":
+        "202":
           description: 202 (Accepted) Acknowledges that status updates have been posted
           headers:
             X-Request-ID:
@@ -756,7 +756,6 @@ paths:
                     type: Letter
             schema:
               $ref: "#/components/schemas/patchLetter_request"
-        required: true
       responses:
         "200":
           content:
@@ -1241,13 +1240,6 @@ components:
       - specificationId
       - status
       type: object
-    patchLetter_request:
-      properties:
-        data:
-          $ref: "#/components/schemas/postLetters_request_data_inner"
-      required:
-      - data
-      type: object
     listLetters_400_response:
       properties:
         errors:
@@ -1291,6 +1283,13 @@ components:
           items:
             $ref: "#/components/schemas/listLetters_200_response_data_inner"
           type: array
+      type: object
+    patchLetter_request:
+      properties:
+        data:
+          $ref: "#/components/schemas/postLetters_request_data_inner"
+      required:
+      - data
       type: object
     getLetterStatus_200_response:
       properties:
@@ -1460,3 +1459,7 @@ x-nhsd-apim:
   - name: NHSD-Supplier-ID
     header: NHSD-Supplier-ID
     required: false
+  ratelimiting:
+    app-default:
+      limit: 300
+      timeunit: second
