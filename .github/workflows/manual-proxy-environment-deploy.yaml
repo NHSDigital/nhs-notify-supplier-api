@@ -63,7 +63,7 @@ jobs:
             echo "does_pull_request_exist=false" >> $GITHUB_OUTPUT
             echo "pr_number=" >> $GITHUB_OUTPUT
             APIM_ENV="$ENVIRONMENT"
-            $ENVIRONMENT='main'
+            ENVIRONMENT="main"
           fi
 
           echo "ENVIRONMENT=$ENVIRONMENT" >> $GITHUB_ENV
