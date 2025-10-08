@@ -3,8 +3,8 @@ import { NotFoundError, ValidationError } from '../errors';
 import { LetterDto, PatchLetterResponse } from '../contracts/letters';
 import { mapToPatchLetterResponse } from '../mappers/letter-mapper';
 import { ApiErrorDetail } from '../contracts/errors';
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 
 
 export const getLettersForSupplier = async (supplierId: string, status: string, limit: number, letterRepo: LetterRepository): Promise<LetterBase[]> => {
@@ -38,14 +38,13 @@ export const getLetterDataUrl = async (supplierId: string, letterId: string, let
 
   try {
     letter = await letterRepo.getLetterById(supplierId, letterId);
+    return await getPresignedUrl(letter.url);
   } catch (error) {
     if (error instanceof Error && /^Letter with id \w+ not found for supplier \w+$/.test(error.message)) {
       throw new NotFoundError(ApiErrorDetail.NotFoundLetterId);
     }
     throw error;
   }
-
-  return getPresignedUrl(letter.url);
 }
 
 async function getPresignedUrl(s3Uri: string) {
