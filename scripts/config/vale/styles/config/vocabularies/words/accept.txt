@@ -4,6 +4,7 @@ bot
 Cognito
 Cyber
 Dependabot
+Dev
 devcontainer
 draw.io
 drawio
@@ -16,6 +17,7 @@ Gitleaks
 Grype
 idempotence
 Jira
+Makefile
 OAuth
 Octokit
 onboarding
