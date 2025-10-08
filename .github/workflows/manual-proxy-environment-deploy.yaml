@@ -13,6 +13,11 @@ on:
           - internal-dev
           - int
           - prod
+      build_sandbox:
+        description: Build sandbox container?
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -63,7 +68,7 @@ jobs:
             echo "does_pull_request_exist=false" >> $GITHUB_OUTPUT
             echo "pr_number=" >> $GITHUB_OUTPUT
             APIM_ENV="$ENVIRONMENT"
-            $ENVIRONMENT='main'
+            ENVIRONMENT="main"
           fi
 
           echo "ENVIRONMENT=$ENVIRONMENT" >> $GITHUB_ENV
@@ -79,5 +84,5 @@ jobs:
           environment: "${{ env.ENVIRONMENT }}"
           apimEnv: "${{ env.APIM_ENV }}"
           runId: "${{ github.run_id }}"
-          buildSandbox: false
+          buildSandbox: ${{ inputs.build_sandbox }}
           releaseVersion: ${{ github.ref_name }}

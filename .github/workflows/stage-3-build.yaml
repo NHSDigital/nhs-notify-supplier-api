@@ -107,7 +107,7 @@ jobs:
           apimEnv: "internal-dev-sandbox"
           runId: "${{ github.run_id }}"
           buildSandbox: true
-          releaseVersion: ${{ github.ref_name }}
+          releaseVersion: ${{ github.head_ref || github.ref_name }}
 
   # artefact-1:
   #   name: "Artefact 1"
