@@ -75,10 +75,4 @@ data "aws_iam_policy_document" "get_letter_data_lambda" {
     actions   = ["s3:GetObject"]
     resources = ["${module.s3bucket_test_letters.arn}/*"]
   }
-
-  statement {
-    sid       = "KmsForS3Objects"
-    actions   = ["kms:Decrypt", "kms:Encrypt", "kms:GenerateDataKey"]
-    resources = [module.s3bucket_test_letters.kms_key_arn]
-  }
 }
