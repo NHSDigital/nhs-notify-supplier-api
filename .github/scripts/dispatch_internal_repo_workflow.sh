@@ -68,6 +68,10 @@ while [[ $# -gt 0 ]]; do
       internalRef="$2"
       shift 2
       ;;
+    --runId) # Github Run ID (optional)
+      runId="$2"
+      shift 2
+      ;;
     --overrides) # Terraform overrides for passing in extra variables (optional)
       overrides="$2"
       shift 2
@@ -78,6 +82,26 @@ while [[ $# -gt 0 ]]; do
       ;;
     --overrideRoleName) # Override the role name (optional)
       overrideRoleName="$2"
+      shift 2
+      ;;
+    --buildSandbox) # Build sandbox flag (optional)
+      buildSandbox="$2"
+      shift 2
+      ;;
+    --apimEnvironment) # APIM environment (optional)
+      apimEnvironment="$2"
+      shift 2
+      ;;
+    --boundedContext) # Bounded context (optional)
+      boundedContext="$2"
+      shift 2
+      ;;
+    --targetDomain) # Target domain (optional)
+      targetDomain="$2"
+      shift 2
+      ;;
+    --version) # Version (optional)
+      version="$2"
       shift 2
       ;;
     *)
@@ -101,6 +125,30 @@ if [[ -z "$internalRef" ]]; then
   internalRef="main"
 fi
 
+if [[ -z "$runId" ]]; then
+  runId=""
+fi
+
+if [[ -z "$buildSandbox" ]]; then
+  buildSandbox=""
+fi
+
+if [[ -z "$apimEnvironment" ]]; then
+  apimEnvironment=""
+fi
+
+if [[ -z "$boundedContext" ]]; then
+  boundedContext=""
+fi
+
+if [[ -z "$targetDomain" ]]; then
+  targetDomain=""
+fi
+
+if [[ -z "$version" ]]; then
+  version=""
+fi
+
 echo "==================== Workflow Dispatch Parameters ===================="
 echo "  infraRepoName:      $infraRepoName"
 echo "  releaseVersion:     $releaseVersion"
@@ -114,6 +162,12 @@ echo "  overrides:          $overrides"
 echo "  overrideProjectName: $overrideProjectName"
 echo "  overrideRoleName:   $overrideRoleName"
 echo "  targetProject:      $targetProject"
+echo "  runId:              $runId"
+echo "  buildSandbox:        $buildSandbox"
+echo "  apimEnvironment:     $apimEnvironment"
+echo "  boundedContext:       $boundedContext"
+echo "  targetDomain:         $targetDomain"
+echo "  version:              $version"
 
 DISPATCH_EVENT=$(jq -ncM \
   --arg infraRepoName "$infraRepoName" \
@@ -127,6 +181,12 @@ DISPATCH_EVENT=$(jq -ncM \
   --arg overrideProjectName "$overrideProjectName" \
   --arg overrideRoleName "$overrideRoleName" \
   --arg targetProject "$targetProject" \
+  --arg runId "$runId" \
+  --arg buildSandbox "$buildSandbox" \
+  --arg apimEnvironment "$apimEnvironment" \
+  --arg boundedContext "$boundedContext" \
+  --arg targetDomain "$targetDomain" \
+  --arg version "$version" \
   '{
     "ref": "'"$internalRef"'",
     "inputs": (
@@ -135,17 +195,25 @@ DISPATCH_EVENT=$(jq -ncM \
       (if $overrideProjectName != "" then { "overrideProjectName": $overrideProjectName } else {} end) +
       (if $overrideRoleName != "" then { "overrideRoleName": $overrideRoleName } else {} end) +
       (if $targetProject != "" then { "targetProject": $targetProject } else {} end) +
+      (if $overrides != "" then { "overrides": $overrides } else {} end) +
+      (if $runId != "" then { "runId": $runId } else {} end) +
+      (if $buildSandbox != "" then { "buildSandbox": $buildSandbox } else {} end) +
+      (if $apimEnvironment != "" then { "apimEnvironment": $apimEnvironment } else {} end) +
+      (if $boundedContext != "" then { "boundedContext": $boundedContext } else {} end) +
+      (if $targetDomain != "" then { "targetDomain": $targetDomain } else {} end) +
+      (if $version != "" then { "version": $version } else {} end) +
+      (if $targetAccountGroup != "" then { "targetAccountGroup": $targetAccountGroup } else {} end) +
       {
         "releaseVersion": $releaseVersion,
         "targetEnvironment": $targetEnvironment,
-        "targetAccountGroup": $targetAccountGroup,
         "targetComponent": $targetComponent,
-        "overrides": $overrides,
       }
     )
   }')
 
 echo "[INFO] Triggering workflow '$targetWorkflow' in nhs-notify-internal..."
+
+echo "[DEBUG] Dispatch event payload: $DISPATCH_EVENT"
 
 trigger_response=$(curl -s -L \
   --fail \
@@ -185,16 +253,12 @@ for _ in {1..18}; do
   workflow_run_url=$(echo "$response" | jq -r \
     --arg targetWorkflow "$targetWorkflow" \
     --arg targetEnvironment "$targetEnvironment" \
-    --arg targetAccountGroup "$targetAccountGroup" \
     --arg targetComponent "$targetComponent" \
-    --arg terraformAction "$terraformAction" \
     '.workflow_runs[]
       | select(.path == ".github/workflows/" + $targetWorkflow)
       | select(.name
           | contains($targetEnvironment)
-          and contains($targetAccountGroup)
           and contains($targetComponent)
-          and contains($terraformAction)
       )
       | .url')
 
