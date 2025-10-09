@@ -13,7 +13,7 @@
   "scripts": {
     "build": "JEKYLL_ENV=production bundle exec jekyll build --trace --config _config.yml,_config.version.yml",
     "debug": "JEKYLL_ENV=development BUNDLE_GEMFILE=Gemfile bundle exec jekyll serve --config _config.yml,_config.dev.yml,_config.version.yml --limit_posts 100 --trace",
-    "generate-dependencies": "./generate-dependencies.sh",
+    "generate-includes": "./generate-includes.sh",
     "test:unit": "echo \"Documentation module has no unit tests\""
   },
   "version": "1.0.0"
