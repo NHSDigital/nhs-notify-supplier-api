@@ -1,7 +1,22 @@
 import { Letter } from '../../../../../internal/datastore/src';
-import { LetterDto, LetterStatus } from '../../contracts/letters';
-import { getLettersForSupplier, patchLetterStatus } from '../letter-operations';
+import { LetterDto } from '../../contracts/letters';
+import { getLetterDataUrl, getLettersForSupplier, patchLetterStatus } from '../letter-operations';
 
+jest.mock('@aws-sdk/s3-request-presigner', () => ({
+  getSignedUrl: jest.fn(),
+}));
+
+jest.mock('@aws-sdk/client-s3', () => {
+  return {
+    S3Client: jest.fn().mockImplementation(() => ({})),
+    GetObjectCommand: jest.fn().mockImplementation((input) => ({ input })),
+  };
+});
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+
+const mockedGetSignedUrl = getSignedUrl as jest.MockedFunction<typeof getSignedUrl>;
+const MockedGetObjectCommand = GetObjectCommand as unknown as jest.Mock;
 
 function makeLetter(id: string, status: Letter['status']) : Letter {
   return {
@@ -10,7 +25,7 @@ function makeLetter(id: string, status: Letter['status']) : Letter {
       supplierId: 'supplier1',
       specificationId: 'spec123',
       groupId: 'group123',
-      url: 'https://example.com/letter/abc123',
+      url: `s3://letterDataBucket/${id}.pdf`,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       supplierStatus: `supplier1#${status}`,
@@ -102,5 +117,45 @@ describe('patchLetterStatus function', () => {
     };
 
     await expect(patchLetterStatus(updatedLetterDto, 'letter1', mockRepo as any)).rejects.toThrow("unexpected error");
+  });
+});
+
+describe('getLetterDataUrl function', () => {
+
+  const updatedLetter = makeLetter("letter1", "REJECTED");
+
+  it('should return pre signed url successfully', async () => {
+    const mockRepo = {
+      getLetterById: jest.fn().mockResolvedValue(updatedLetter)
+    };
+
+    mockedGetSignedUrl.mockResolvedValue('http://somePreSignedUrl.com');
+
+    const result = await getLetterDataUrl('supplier1', 'letter1', mockRepo as any);
+
+    expect(mockedGetSignedUrl).toHaveBeenCalled();
+    expect(MockedGetObjectCommand).toHaveBeenCalledWith({
+        Bucket: 'letterDataBucket',
+        Key: 'letter1.pdf'
+    });
+
+    expect(result).toEqual('http://somePreSignedUrl.com');
+  });
+
+  it('should throw notFoundError when letter does not exist', async () => {
+    const mockRepo = {
+      getLetterById: jest.fn().mockRejectedValue(new Error('Letter with id l1 not found for supplier s1'))
+    };
+
+    await expect(getLetterDataUrl('supplier1', 'letter42', mockRepo as any)).rejects.toThrow("No resource found with that ID");
+  });
+
+  it('should throw unexpected error', async () => {
+
+    const mockRepo = {
+      getLetterById: jest.fn().mockRejectedValue(new Error('unexpected error'))
+    };
+
+    await expect(getLetterDataUrl('supplier1', 'letter1', mockRepo as any)).rejects.toThrow("unexpected error");
   });
 });
