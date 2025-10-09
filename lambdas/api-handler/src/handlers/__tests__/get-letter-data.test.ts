@@ -47,7 +47,9 @@ describe('API Lambda handler', () => {
 
     expect(result).toEqual({
       statusCode: 303,
-      Location: 'https://somePreSignedUrl.com',
+      headers: {
+        'Location': 'https://somePreSignedUrl.com',
+      },
       body: ''
     });
   });

@@ -22,7 +22,9 @@ export const getLetterData: APIGatewayProxyHandler = async (event) => {
 
     return {
       statusCode: 303,
-      Location: await getLetterDataUrl(supplierId, letterId, letterRepo),
+      headers: {
+        'Location': await getLetterDataUrl(supplierId, letterId, letterRepo)
+      },
       body: ''
     };
   }
