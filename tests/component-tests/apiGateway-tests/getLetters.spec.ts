@@ -67,7 +67,7 @@ test.describe('API Gateway Tests To Get List Of Pending ', () =>
     expect(validationResult).toBeUndefined();
   });
 
-    test('GET /letters with invalid query param return 400', async ({ request }) => {
+  test('GET /letters with invalid query param return 400', async ({ request }) => {
     const header = await createValidRequestHeaders();
     const response = await request.get(`${baseUrl}/${SUPPLIER_LETTERS}` ,{
         headers: header,
@@ -79,12 +79,12 @@ test.describe('API Gateway Tests To Get List Of Pending ', () =>
     expect(response.status()).toBe(400);
     const responseBody = await response.json();
 
-  const validationResult = validateApiResponse("get", "/letters", response.status(), responseBody);
-  if (validationResult) {
-    console.error("API response validation failed:", validationResult);
-  }
+    const validationResult = validateApiResponse("get", "/letters", response.status(), responseBody);
+    if (validationResult) {
+      console.error("API response validation failed:", validationResult);
+    }
 
-  expect(validationResult).toBeUndefined();
+    expect(validationResult).toBeUndefined();
   });
 
 });
