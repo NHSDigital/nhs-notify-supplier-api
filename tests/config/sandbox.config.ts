@@ -3,16 +3,15 @@ import { config as baseConfig } from './playwright.base.config';
 import {  getReporters } from './reporters';
 
 const localConfig: PlaywrightTestConfig = {
-  ...baseConfig,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: getReporters('api-test'),
+  ...baseConfig,
   //globalSetup: require.resolve('./setup/globalSetup'),
   //globalTeardown: require.resolve('./setup/globalTeardown'),
   projects: [
     {
-      name: 'component-tests',
-      testDir: 'tests/component-tests',
-      testMatch: '**/*.spec.ts',
+      name: 'sandbox',
+      testMatch: '**/sandbox/get_single_letter/*.spec.ts',
     },
   ],
 };

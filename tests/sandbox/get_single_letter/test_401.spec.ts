@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { LETTERS_ENDPOINT} from '../../../constants/api_constants';
+import { SUPPLIER_LETTERS, SUPPLIER_API_URL_SANDBOX} from '../../constants/api_constants';
 
 // Constants
 const status = "PENDING";
@@ -11,10 +11,7 @@ test("401 when invalid APIKEY is passed", async ({ request }) => {
     Authorization: '1234'
   };
 
-  const API_URL = process.env.DEV_API_GATEWAY_URL;
-  const API_GATEWAY_URL = `${API_URL}${LETTERS_ENDPOINT}`;
-
-  const response = await request.get(API_GATEWAY_URL, {
+  const response = await request.get(`${SUPPLIER_API_URL_SANDBOX}/${SUPPLIER_LETTERS}` ,{
       params: {
         status: `${status}`
       },

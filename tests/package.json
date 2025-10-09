@@ -24,7 +24,8 @@
   "name": "tests",
   "scripts": {
     "clean": "rimraf $(pwd)/target",
-    "test": "playwright test tests --config=config/main.config.ts --max-failures=10"
+    "test": "playwright test tests --config=config/main.config.ts --max-failures=10 --project=component_tests",
+    "test:sandbox": "playwright test tests --config=config/sandbox.config.ts --max-failures=10 --project=sandbox"
   },
   "version": "1.0.0"
 }
