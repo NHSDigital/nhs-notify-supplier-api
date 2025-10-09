@@ -30,6 +30,7 @@ export async function setupDynamoDBContainer() {
     region: 'us-west-2',
     endpoint,
     lettersTableName: 'letters',
+    miTableName: 'management-info',
     ttlHours: 1
   };
 
@@ -44,10 +45,7 @@ export async function setupDynamoDBContainer() {
 
 export type DBContext = Awaited<ReturnType<typeof setupDynamoDBContainer>>;
 
-export async function createTables(context: DBContext) {
-  const { ddbClient } = context;
-
-  await ddbClient.send(new CreateTableCommand({
+const createLetterTableCommand = new CreateTableCommand({
     TableName: 'letters',
     BillingMode: 'PAY_PER_REQUEST',
     KeySchema: [
@@ -72,15 +70,37 @@ export async function createTables(context: DBContext) {
       { AttributeName: 'supplierStatus', AttributeType: 'S' },
       { AttributeName: 'supplierStatusSk', AttributeType: 'S' },
     ]
-  }));
+  });
 
-  await ddbClient.send(new UpdateTimeToLiveCommand({
+const updateTimeToLiveCommand = new UpdateTimeToLiveCommand({
     TableName: 'letters',
     TimeToLiveSpecification: {
       AttributeName: 'ttl',
       Enabled: true
     }
-  }));
+  });
+
+const createMITableCommand = new CreateTableCommand({
+    TableName: 'management-info',
+    BillingMode: 'PAY_PER_REQUEST',
+    KeySchema: [
+      { AttributeName: 'supplierId', KeyType: 'HASH' },  // Partition key
+      { AttributeName: 'id', KeyType: 'RANGE' }         // Sort key
+    ],
+    AttributeDefinitions: [
+      { AttributeName: 'supplierId', AttributeType: 'S' },
+      { AttributeName: 'id', AttributeType: 'S' },
+    ]
+  });
+
+
+export async function createTables(context: DBContext) {
+  const { ddbClient } = context;
+
+  await ddbClient.send(createLetterTableCommand);
+  await ddbClient.send(updateTimeToLiveCommand);
+
+  await ddbClient.send(createMITableCommand);
 }
 
 
@@ -89,5 +109,9 @@ export async function deleteTables(context: DBContext) {
 
   await ddbClient.send(new DeleteTableCommand({
     TableName: 'letters'
+  }));
+
+  await ddbClient.send(new DeleteTableCommand({
+    TableName: 'management-info'
   }));
 }
