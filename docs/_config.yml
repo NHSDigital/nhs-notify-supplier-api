@@ -28,9 +28,6 @@ url: "https://nhsdigital.github.io" # the base hostname & protocol for your site
 collections_dir: collections
 
 collections:
-  architecture:
-    output: true
-    sort_by: order
   repos:
     output: true
     sort_by: order
@@ -58,14 +55,10 @@ just_the_docs:
       # Exclude the collection from the search
       # Supports true or false (defaul
       search_exclude: false
-    architecture:
-      name: Architecture & Design
-    guides:
-      name: Guides & How Tos
 
 defaults:
   - scope:
-      path: ""
+      path: "repositories"
       type: "repos"
     values:
       layout: "notify-repo"
@@ -74,8 +67,8 @@ defaults:
       author: NHS Notify
       last_modified_date: 2025-10-08
   - scope:
-      path: ""
-      type: "onboarding"
+      path: "api-consumers"
+      type: "consumers"
     values:
       layout: "page"
       is_not_draft: false
@@ -83,7 +76,7 @@ defaults:
       author: NHS Notify
       last_modified_date: 2025-10-08
   - scope:
-      path: ""
+      path: "api-developers"
       type: "developers"
     values:
       layout: "page"

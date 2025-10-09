@@ -73,9 +73,9 @@ This API is being made available to support testing and integration, but may rec
 
 The API is defined through an Open API Specification `.yml` file.
 
-Released versions of the specification can be found within [latest releases](https://github.com/NHSDigital/nhs-notify-supplier-api/releases)
+The next version of the specification file is found within [/specifications](/specification/api/notify-supplier-phase1.yml)
 
-The current specification file is found within [/specifications](/specification/api/notify-supplier-phase1.yml)
+Released versions of the specification can be found within [latest releases](https://github.com/NHSDigital/nhs-notify-supplier-api/releases)
 
 ## Related Repos
 

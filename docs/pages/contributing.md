@@ -13,4 +13,4 @@ author: NHS Notify
 permalink: /contributing
 ---
 
-{% include components/contributing.md %}
+{% include components/generated/contributing.md %}

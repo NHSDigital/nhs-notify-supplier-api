@@ -6,11 +6,11 @@ cd "$(git rev-parse --show-toplevel)"
 
 # Database mermaid diagrams
 npm run -w internal/datastore diagrams
-cp ./internal/datastore/src/types.md ./docs/assets/diagrams/types.md
+cp ./internal/datastore/src/types.md ./docs/_includes/components/generated/types.md
 
 # Specifications
 npm run generate:html
-cp ./sdk/html/index.html ./docs/_includes/components/nhs-notify-supplier-api.html
+cp ./sdk/html/index.html ./docs/_includes/components/generated/nhs-notify-supplier-api.html
 
 #Contributing file
-cp ./CONTRIBUTING.md ./docs/_includes/components/contributing.md
+cp ./CONTRIBUTING.md ./docs/_includes/components/generated/contributing.md
