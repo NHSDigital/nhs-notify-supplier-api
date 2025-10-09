@@ -53,7 +53,7 @@ just_the_docs:
       # Supports true or false (default)
       nav_fold: false # note: this option is new in v0.4
       # Exclude the collection from the search
-      # Supports true or false (defaul
+      # Supports true or false (default)
       search_exclude: false
 
 defaults:

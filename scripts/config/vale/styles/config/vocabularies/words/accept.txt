@@ -15,6 +15,7 @@ env
 Git[Hh]ub
 Gitleaks
 Grype
+hotfix
 idempotence
 Jira
 OAuth
