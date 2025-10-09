@@ -13,11 +13,14 @@ class Controller {
     */
     Object.entries(payload.headers).forEach(([name, value]) => response.setHeader(name, String(value)));
     response.status(payload.code || 200);
-    const responsePayload = payload.body !== undefined ? payload.body : payload;
-    if (responsePayload instanceof Object) {
-      response.json(responsePayload);
+    if (payload.body) {
+      if (payload.body instanceof Object) {
+        response.json(payload.body);
+      } else {
+        response.end(payload.body);
+      }
     } else {
-      response.end(responsePayload);
+      response.end();
     }
   }
 

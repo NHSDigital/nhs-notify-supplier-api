@@ -110,14 +110,11 @@ const patchLetter = ({ xRequestId, id, body, xCorrelationId }) => new Promise(
 const postLetters = ({ xRequestId, body, xCorrelationId }) => new Promise(
   async (resolve, reject) => {
     const responseData = await ResponseProvider.postLettersResponse(body);
-    const content  = await fs.readFile(responseData.responsePath);
-    const fileData = JSON.parse(content);
 
     try {
       resolve(Service.successResponse({
         xRequestId,
-        xCorrelationId,
-        data: fileData,
+        xCorrelationId
       }, responseData.responseCode));
     } catch (e) {
       reject(Service.rejectResponse(
