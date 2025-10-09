@@ -21,7 +21,7 @@ export const getLetterData: APIGatewayProxyHandler = async (event) => {
     const letterId = assertNotEmpty( event.pathParameters?.id, new ValidationError(ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter));
 
     return {
-      statusCode: 302,
+      statusCode: 303,
       Location: await getLetterDataUrl(supplierId, letterId, letterRepo),
       body: ''
     };

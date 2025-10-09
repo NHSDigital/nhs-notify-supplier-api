@@ -54,34 +54,6 @@
       }
     },
     "/letters/{id}": {
-      "get": {
-        "description": "Returns 302 with pre-signed URL to the letter data",
-        "responses": {
-          "302": {
-            "description": "Found"
-          }
-        },
-        "security": [
-          {
-            "LambdaAuthorizer": []
-          }
-        ],
-        "summary": "Get letter data",
-        "x-amazon-apigateway-integration": {
-          "contentHandling": "CONVERT_TO_TEXT",
-          "credentials": "${APIG_EXECUTION_ROLE_ARN}",
-          "httpMethod": "POST",
-          "passthroughBehavior": "WHEN_NO_TEMPLATES",
-          "responses": {
-            ".*": {
-              "statusCode": "200"
-            }
-          },
-          "timeoutInMillis": 29000,
-          "type": "AWS_PROXY",
-          "uri": "arn:aws:apigateway:${AWS_REGION}:lambda:path/2015-03-31/functions/${GET_LETTER_DATA_LAMBDA_ARN}/invocations"
-        }
-      },
       "parameters": [
         {
           "description": "Unique identifier of this resource",
@@ -133,6 +105,50 @@
           "uri": "arn:aws:apigateway:${AWS_REGION}:lambda:path/2015-03-31/functions/${PATCH_LETTER_LAMBDA_ARN}/invocations"
         }
       }
+    },
+    "/letters/{id}/data": {
+      "get": {
+        "operationId": "getDataId",
+        "responses": {
+          "303": {
+            "description": "See Other",
+            "headers": {
+              "Location": {
+                "description": "The signed S3 URL of the data file to download",
+                "example": "https://examples3bucket.com/filelocation",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found"
+          },
+          "429": {
+            "description": "Too many requests"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "summary": "Fetch a data file",
+        "tags": [
+          "data"
+        ]
+      },
+      "parameters": [
+        {
+          "description": "Unique identifier of this resource",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "example": "24L5eYSWGzCHlGmzNxuqVusPxDg",
+            "type": "string"
+          }
+        }
+      ]
     }
   }
 }

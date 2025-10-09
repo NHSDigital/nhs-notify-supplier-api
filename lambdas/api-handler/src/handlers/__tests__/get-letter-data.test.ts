@@ -31,7 +31,7 @@ describe('API Lambda handler', () => {
     jest.resetModules();
   });
 
-  it('returns 302 Found with a pre signed url', async () => {
+  it('returns 303 Found with a pre signed url', async () => {
 
     const mockedGetLetterDataUrlService = letterService.getLetterDataUrl as jest.Mock;
     mockedGetLetterDataUrlService.mockResolvedValue('https://somePreSignedUrl.com');
@@ -46,7 +46,7 @@ describe('API Lambda handler', () => {
     const result = await getLetterData(event, context, callback);
 
     expect(result).toEqual({
-      statusCode: 302,
+      statusCode: 303,
       Location: 'https://somePreSignedUrl.com',
       body: ''
     });
