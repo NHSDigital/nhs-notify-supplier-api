@@ -132,10 +132,26 @@
             "description": "Server error"
           }
         },
+        "security": [
+          {
+            "LambdaAuthorizer": []
+          }
+        ],
         "summary": "Fetch a data file",
-        "tags": [
-          "data"
-        ]
+        "x-amazon-apigateway-integration": {
+          "contentHandling": "CONVERT_TO_TEXT",
+          "credentials": "${APIG_EXECUTION_ROLE_ARN}",
+          "httpMethod": "POST",
+          "passthroughBehavior": "WHEN_NO_TEMPLATES",
+          "responses": {
+            ".*": {
+              "statusCode": "200"
+            }
+          },
+          "timeoutInMillis": 29000,
+          "type": "AWS_PROXY",
+          "uri": "arn:aws:apigateway:${AWS_REGION}:lambda:path/2015-03-31/functions/${PATCH_LETTER_LAMBDA_ARN}/invocations"
+        }
       },
       "parameters": [
         {
