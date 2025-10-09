@@ -6,8 +6,8 @@ const envMaxInstances = Number.parseInt(process.env.WORKERS_MAX_INST!) || 10;
  * See https://playwright.dev/docs/test-configuration.
  */
 export const config: PlaywrightTestConfig = {
-  testDir: '../sandbox/messages/get_single_letter/',
-  testMatch: '*.spec.ts/',
+  testDir: '../tests',
+  testMatch: '**/*.spec.ts',
   /* Maximum time one test can run for. */
   timeout: 60 * 1000,
   workers: envMaxInstances,
