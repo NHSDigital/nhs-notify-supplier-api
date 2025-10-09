@@ -76,7 +76,6 @@ async function getLettersResponse(limit) {
 
 async function patchLetterResponse(request) {
   const patchLetterFileMap = {
-    'data/examples/patchLetter/requests/patchLetter_DEFAULT.json': {responsePath: 'data/examples/patchLetter/responses/patchLetter_PENDING.json', responseCode: 200},
     'data/examples/patchLetter/requests/patchLetter_PENDING.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_PENDING.json',responseCode: 200},
     'data/examples/patchLetter/requests/patchLetter_ACCEPTED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_ACCEPTED.json',responseCode: 200},
     'data/examples/patchLetter/requests/patchLetter_REJECTED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_REJECTED.json',responseCode: 200},

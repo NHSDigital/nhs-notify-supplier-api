@@ -1,4 +1,8 @@
 type: object
+required:
+  - type
+  - id
+  - attributes
 properties:
   type:
     type: string
@@ -8,6 +12,8 @@ properties:
     example: 2WL5eYSWGzCHlGmzNxuqVusPxDg
   attributes:
     type: object
+    required:
+      - status
     properties:
       status:
         $ref: "./letterStatus.yml"
