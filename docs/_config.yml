@@ -58,16 +58,7 @@ just_the_docs:
 
 defaults:
   - scope:
-      path: "repositories"
-      type: "repos"
-    values:
-      layout: "notify-repo"
-      is_not_draft: false
-      owner: NHS Notify
-      author: NHS Notify
-      last_modified_date: 2025-10-08
-  - scope:
-      path: "api-consumers"
+      path: ""
       type: "consumers"
     values:
       layout: "page"
@@ -76,7 +67,7 @@ defaults:
       author: NHS Notify
       last_modified_date: 2025-10-08
   - scope:
-      path: "api-developers"
+      path: ""
       type: "developers"
     values:
       layout: "page"
