@@ -19,10 +19,10 @@ define baseurlparam =
 $(if $(BASE_URL),-- --baseurl $(BASE_URL),-- --baseurl "")
 endef
 
-build: version .generate-dependencies
+build: version .generate-includes
 	npm run build $(baseurlparam)
 
-debug: version .generate-dependencies
+debug: version .generate-includes
 	npm run debug
 
 version:
