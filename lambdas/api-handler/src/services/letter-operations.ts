@@ -1,7 +1,7 @@
 import { LetterBase, LetterRepository } from '../../../../internal/datastore/src'
 import { NotFoundError, ValidationError } from '../errors';
-import { LetterApiResource, LetterApiDocument } from '../contracts/letter-api';
-import { mapLetterBaseToApiDocument } from '../mappers/letter-mapper';
+import { LetterDto, PatchLetterResponse } from '../contracts/letters';
+import { mapToPatchLetterResponse } from '../mappers/letter-mapper';
 import { ApiErrorDetail } from '../contracts/errors';
 
 
@@ -10,7 +10,7 @@ export const getLettersForSupplier = async (supplierId: string, status: string, 
   return await letterRepo.getLettersBySupplier(supplierId, status, limit);
 }
 
-export const patchLetterStatus = async (letterToUpdate: LetterApiResource, letterId: string, supplierId: string, letterRepo: LetterRepository): Promise<LetterApiDocument> => {
+export const patchLetterStatus = async (letterToUpdate: LetterDto, letterId: string, letterRepo: LetterRepository): Promise<PatchLetterResponse> => {
 
   if (letterToUpdate.id !== letterId) {
     throw new ValidationError(ApiErrorDetail.InvalidRequestLetterIdsMismatch);
@@ -19,8 +19,7 @@ export const patchLetterStatus = async (letterToUpdate: LetterApiResource, lette
   let updatedLetter;
 
   try {
-    updatedLetter =  await letterRepo.updateLetterStatus(supplierId, letterId, letterToUpdate.attributes.status,
-      letterToUpdate.attributes.reasonCode, letterToUpdate.attributes.reasonText);
+    updatedLetter =  await letterRepo.updateLetterStatus(letterToUpdate);
   } catch (error) {
     if (error instanceof Error && /^Letter with id \w+ not found for supplier \w+$/.test(error.message)) {
       throw new NotFoundError(ApiErrorDetail.NotFoundLetterId);
@@ -28,5 +27,5 @@ export const patchLetterStatus = async (letterToUpdate: LetterApiResource, lette
     throw error;
   }
 
-  return mapLetterBaseToApiDocument(updatedLetter);
+  return mapToPatchLetterResponse(updatedLetter);
 }

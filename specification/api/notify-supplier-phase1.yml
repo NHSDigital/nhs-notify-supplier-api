@@ -65,7 +65,7 @@ tags:
   - name: data
     description: ''
 servers:
-  - url: 'http://127.0.0.1:3000'
+  - url: 'http://127.0.0.1:9000'
     description: Local development server
   - url: 'https://sandbox-server.nhs.uk/nhs-notify-supplier-api'
     description: Public sandbox
@@ -78,3 +78,5 @@ x-nhsd-apim:
     $ref: ./components/x-nhsd-apim/target.yml
   target-attributes:
     $ref: ./components/x-nhsd-apim/target-attributes.yml
+  ratelimiting:
+    $ref: ./components/x-nhsd-apim/rate-limiting.yml

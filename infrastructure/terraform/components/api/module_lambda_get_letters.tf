@@ -35,7 +35,7 @@ module "get_letters" {
   log_destination_arn       = local.destination_arn
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
-  lambda_env_vars = merge(local.common_db_access_lambda_env_vars, {
+  lambda_env_vars = merge(local.common_lambda_env_vars, {
     MAX_LIMIT = var.max_get_limit
   })
 }

@@ -1,0 +1,13 @@
+{
+  "data": {
+    "attributes": {
+      "groupId": "c5d93f917f5546d08beccf770a915d96",
+      "reasonCode": 100,
+      "reasonText": "failed validation",
+      "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+      "status": "RETURNED"
+    },
+    "id": "2ZL5eYSWGzCHlGmzNxuqVusPxDg",
+    "type": "Letter"
+  }
+}

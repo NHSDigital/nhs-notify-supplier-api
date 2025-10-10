@@ -1,4 +1,4 @@
 type: object
 properties:
   data:
-    $ref: ./miItem.yml
+    $ref: ./miData.yml

@@ -1,22 +1,46 @@
-import { LetterBase } from "../../../../internal/datastore";
-import { LetterApiDocument, LetterApiDocumentSchema, LetterApiResource, LetterApiResourceSchema } from '../contracts/letter-api';
+import { LetterBase, LetterStatus } from "../../../../internal/datastore";
+import { GetLettersResponse, GetLettersResponseSchema, LetterDto, PatchLetterRequest, PatchLetterResponse, PatchLetterResponseSchema } from '../contracts/letters';
 
-export function mapLetterBaseToApiDocument(letterBase: LetterBase, opts: { excludeOptional: boolean } = { excludeOptional: false }): LetterApiDocument {
-  return LetterApiDocumentSchema.parse({
-    data: mapLetterBaseToApiResource(letterBase, opts)
+export function mapToLetterDto(request: PatchLetterRequest, supplierId: string) : LetterDto {
+  return  {
+    id: request.data.id,
+    supplierId,
+    status: LetterStatus.parse(request.data.attributes.status),
+    reasonCode: request.data.attributes.reasonCode,
+    reasonText: request.data.attributes.reasonText,
+  };
+}
+
+export function mapToPatchLetterResponse(letter: LetterBase): PatchLetterResponse {
+  return PatchLetterResponseSchema.parse({
+    data: {
+      id: letter.id,
+      type: 'Letter',
+      attributes: {
+        status: letter.status,
+        specificationId: letter.specificationId,
+        groupId: letter.groupId,
+        ...(letter.reasonCode != null && { reasonCode: letter.reasonCode }),
+        ...(letter.reasonText != null && { reasonText: letter.reasonText })
+      }
+    }
   });
 }
 
-export function mapLetterBaseToApiResource(letterBase: LetterBase, opts: { excludeOptional: boolean } = { excludeOptional: false }): LetterApiResource {
-  return LetterApiResourceSchema.parse({
-    id: letterBase.id,
+export function mapToGetLettersResponse(letters: LetterBase[]): GetLettersResponse {
+  return GetLettersResponseSchema.parse({
+    data: letters.map(letterToResourceResponse)
+  });
+}
+
+function letterToResourceResponse(letter: LetterBase) {
+  return {
+    id: letter.id,
     type: 'Letter',
     attributes: {
-      status: letterBase.status,
-      specificationId: letterBase.specificationId,
-      groupId: letterBase.groupId,
-      ...(letterBase.reasonCode && !opts.excludeOptional && { reasonCode: letterBase.reasonCode }),
-      ...(letterBase.reasonText && !opts.excludeOptional && { reasonText: letterBase.reasonText })
+      status: letter.status,
+      specificationId: letter.specificationId,
+      groupId: letter.groupId
     }
-  });
+  };
 }
