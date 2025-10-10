@@ -84,7 +84,7 @@ Released versions of the specification can be found within [latest releases](htt
 
 ## API Consumers
 
-If you wish to integrated with the Supplier API refer to the [API Consumer](/consumers) pages and
+If you wish to integrate with the Supplier API refer to the [API Consumer](/consumers) pages and
 [Getting Started as an API Consumer](/consumers/getting-started)
 
 You may also find it helpful to refer to the [Specification](/specification)

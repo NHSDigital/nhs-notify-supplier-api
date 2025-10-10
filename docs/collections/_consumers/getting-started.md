@@ -52,7 +52,7 @@ A sandbox environment is available to aid in discovery and development of your i
 
 It will provide limited, fixed responses and does not require authentication to use.
 
-Their are two ways to access the sandbox:
+There are two ways to access the sandbox:
 
 - The public sandbox [https://sandbox.api.service.nhs.uk/notify-supplier](https://sandbox.api.service.nhs.uk/notify-supplier)
 - Local Build

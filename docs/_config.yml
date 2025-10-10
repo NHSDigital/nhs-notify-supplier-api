@@ -28,9 +28,6 @@ url: "https://nhsdigital.github.io" # the base hostname & protocol for your site
 collections_dir: collections
 
 collections:
-  repos:
-    output: true
-    sort_by: order
   consumers:
     output: true
     sort_by: order
@@ -44,17 +41,6 @@ just_the_docs:
       name: API Consumers
     developers:
       name: API Developers
-    repos:
-      name: Notify Repositories
-      # Exclude the collection from the navigation
-      # Supports true or false (default)
-      nav_exclude: false
-      # Fold the collection in the navigation
-      # Supports true or false (default)
-      nav_fold: false # note: this option is new in v0.4
-      # Exclude the collection from the search
-      # Supports true or false (default)
-      search_exclude: false
 
 defaults:
   - scope:

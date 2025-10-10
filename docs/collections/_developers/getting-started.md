@@ -14,9 +14,9 @@ The Supplier API repository contains the following:
 
 - [.devcontainer](/.devcontainer) - A devcontainer that should be used for work on this repository that maintains developer dependencies
 - [.github](/.github) - GitHub workflows and actions for CI/CD
-- [docs](/docs) - This documentation; generated and publish on pre-release (PR merge to main)
+- [docs](/docs) - This documentation; generated and published on pre-release (PR merge to main)
 - [infrastructure](/infrastructure) - Infrastructure as code maintained in Terraform
-- [internal](/internal) - Internal packacges and libraries, e.g. database repositories
+- [internal](/internal) - Internal packages and libraries, e.g. database repositories
 - [lambdas](/lambdas) - Implementation of lambda handler functions
 - [postman](/postman) - Postman collection(s) which can be imported to assist in API development and testing
 - [sandbox](/sandbox) - Sandbox logic; [!NOTE] The sandbox specification is built from the core specification and should not be directly modified
@@ -26,7 +26,7 @@ The Supplier API repository contains the following:
 - [src](/src) - Non lambda implementation
 - [tests](/tests) - Higher level component and E2E test suites
 
-The API dependencies are manages through [NPM Workspaces](https://docs.npmjs.com/cli/v7/using-npm/workspaces/)
+The API dependencies are managed through [NPM Workspaces](https://docs.npmjs.com/cli/v7/using-npm/workspaces/)
 
 ## Setup
 
@@ -42,7 +42,7 @@ code .
 
 #### devcontainer
 
-You should use the devcontainer for thsi repository to satisy pre-requisites and configuration.
+You should use the devcontainer for this repository to satisy pre-requisites and configuration.
 You can open this using devcontainer plugins or GitHub workspaces
 By default it will run the necessary `make config`, `postcreatecommand.sh`, and `poststartcommand.sh`
 

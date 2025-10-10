@@ -12,7 +12,7 @@ The target architecture for the NHS Notify Supplier API is represented below:
 
 Letters are produced from external contexts, the primary use case being NHS Notify Core. These are received via event, consumed, and placed into the DynamoDB store as appropriate.
 
-The API is accessed by an API Management Platform proxy that targets and AWS backend through API Gateway.
+The API is accessed by an API Management Platform proxy that targets an AWS backend through API Gateway.
 
 Lambdas act as request handlers, manipulating Dynamo DB data stores and issuing responses back to the proxy.
 
