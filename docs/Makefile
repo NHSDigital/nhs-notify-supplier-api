@@ -19,10 +19,10 @@ define baseurlparam =
 $(if $(BASE_URL),-- --baseurl $(BASE_URL),-- --baseurl "")
 endef
 
-build: version
+build: version .generate-includes
 	npm run build $(baseurlparam)
 
-debug: version
+debug: version .generate-includes
 	npm run debug
 
 version:
@@ -38,3 +38,6 @@ version:
 	fi
 
 	echo "{ \"schemaVersion\": 1, \"label\": \"version\", \"message\": \"$$(head -n 1 .version 2> /dev/null || echo unknown)\", \"color\": \"orange\" }" > version.json
+
+.generate-includes:
+	npm run generate-includes
