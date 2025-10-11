@@ -76,11 +76,14 @@
       "moby": true,
       "version": "latest"
     },
+    "ghcr.io/devcontainers/features/go:1": {
+      "version": "latest"
+    },
     "ghcr.io/devcontainers/features/ruby:1": {}
   },
   "mounts": [
     "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"
   ],
   "name": "Devcontainer",
-  "postCreateCommand": "scripts/devcontainer/postcreatecommand.sh"
+  "postCreateCommand": "zsh scripts/devcontainer/postcreatecommand.sh"
 }
