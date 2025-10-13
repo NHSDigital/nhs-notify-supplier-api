@@ -30,15 +30,11 @@ export async function createHeaderWithNoCorrelationId(): Promise<RequestHeaders>
   return requestHeaders;
 }
 
-export async function createValidSandBoxRequestHeaders(): Promise<RequestSandBoxHeaders> {
-  let requestHeaders: RequestSandBoxHeaders;
-    requestHeaders = {
-      'X-Request-ID': randomUUID(),
-      'Content-Type':'application/vnd.api+json',
-      'X-Correlation-ID': randomUUID(),
-    };
-  return requestHeaders;
-}
+export const sandBoxHeader: RequestSandBoxHeaders = {
+    'X-Request-ID': randomUUID(),
+    'Content-Type': 'application/vnd.api+json',
+    'X-Correlation-ID': randomUUID(),
+};
 
 export interface RequestHeaders {
   headerauth1: string;
@@ -47,7 +43,7 @@ export interface RequestHeaders {
   [key: string]: string;
 }
 
-interface RequestSandBoxHeaders {
+export interface RequestSandBoxHeaders {
   'X-Request-ID': string;
   'Content-Type': string;
   'X-Correlation-ID': string;
