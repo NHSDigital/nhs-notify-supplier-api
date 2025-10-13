@@ -10,8 +10,5 @@
     "**/Thumbs.db": true,
     ".github": false,
     ".vscode": false
-  },
-  "terminal.integrated.env.linux": {
-    "PATH": "/home/vscode/.asdf/shims:/home/vscode/.asdf/bin:${env:PATH}"
   }
 }
