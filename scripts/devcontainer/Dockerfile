@@ -28,9 +28,9 @@ ENV REQUESTS_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt"
 ENV CURL_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt"
 ENV GIT_SSL_CAINFO="/etc/ssl/certs/ca-certificates.crt"
 
-# Set Go environment variables
+# Set Go environment variables and prepend asdf shims/bin to PATH
 ENV GOPATH="/home/vscode/go"
-ENV PATH="/go/bin:${GOPATH}/bin:${PATH}"
+ENV PATH="/home/vscode/.asdf/shims:/home/vscode/.asdf/bin:/go/bin:${GOPATH}/bin:${PATH}"
 
 # Ensure CA Certs is available for all shells, Node, Python & Ruby
 USER vscode
@@ -40,6 +40,3 @@ RUN echo 'SSL_CERT_FILE="/etc/ssl/certs/ca-certificates.crt"' >> ~/.zshrc
 RUN echo 'REQUESTS_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt"' >> ~/.zshrc
 RUN echo 'CURL_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt"' >> ~/.zshrc
 RUN echo 'GIT_SSL_CAINFO="/etc/ssl/certs/ca-certificates.crt"' >> ~/.zshrc
-
-# Add Go environment to shell
-RUN echo 'GOPATH="/home/vscode/go"' >> ~/.zshrc

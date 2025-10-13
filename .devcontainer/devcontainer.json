@@ -81,8 +81,5 @@
     "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"
   ],
   "name": "Devcontainer",
-  "postCreateCommand": "scripts/devcontainer/postcreatecommand.sh",
-  "remoteEnv": {
-    "PATH": "/home/vscode/.asdf/shims:/go/bin:/home/vscode/go/bin:/home/vscode/.asdf/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/vscode/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand:/home/vscode/.local/bin"
-  }
+  "postCreateCommand": "scripts/devcontainer/postcreatecommand.sh"
 }
