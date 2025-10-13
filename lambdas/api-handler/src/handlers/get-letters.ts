@@ -19,7 +19,8 @@ const status = "PENDING";
 export const getLetters: APIGatewayProxyHandler = async (event) => {
 
   const { maxLimit } = getMaxLimit();
-  let correlationId;
+
+  let correlationId: string | undefined;
 
   try {
     assertNotEmpty(event.headers, new Error("The request headers are empty"));

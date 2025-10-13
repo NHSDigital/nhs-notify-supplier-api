@@ -12,7 +12,7 @@ const deps: Deps = getDeps();
 
 export const patchLetter: APIGatewayProxyHandler = async (event) => {
 
-  let correlationId;
+  let correlationId: string | undefined;
 
   try {
     assertNotEmpty(event.headers, new Error('The request headers are empty'));

@@ -21,7 +21,7 @@ function createLetterRepository(log: pino.Logger, lambdaEnv: LambdaEnv): LetterR
   const docClient = DynamoDBDocumentClient.from(ddbClient);
   const config = {
     lettersTableName: lambdaEnv.LETTERS_TABLE_NAME,
-    ttlHours: parseInt(lambdaEnv.LETTER_TTL_HOURS, BASE_TEN),
+    ttlHours: Number.parseInt(lambdaEnv.LETTER_TTL_HOURS, BASE_TEN),
   };
 
   return new LetterRepository(docClient, log, config);
