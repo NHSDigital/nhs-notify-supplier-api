@@ -43,4 +43,3 @@ RUN echo 'GIT_SSL_CAINFO="/etc/ssl/certs/ca-certificates.crt"' >> ~/.zshrc
 
 # Add Go environment to shell
 RUN echo 'GOPATH="/home/vscode/go"' >> ~/.zshrc
-RUN echo 'PATH="/home/vscode/.asdf/shims:/go/bin:$GOPATH/bin:$PATH"' >> ~/.zshrc
