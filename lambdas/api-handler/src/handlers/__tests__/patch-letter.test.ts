@@ -1,23 +1,28 @@
-import { patchLetter } from '../../index';
-import { APIGatewayProxyResult, Context } from 'aws-lambda';
-import { mockDeep } from 'jest-mock-extended';
-import { makeApiGwEvent } from './utils/test-utils';
-import * as letterService from '../../services/letter-operations';
-import { PatchLetterRequest, PatchLetterResponse } from '../../contracts/letters';
-import { mapErrorToResponse } from '../../mappers/error-mapper';
-import { ValidationError } from '../../errors';
-import * as errors from '../../contracts/errors';
-
-jest.mock('../../services/letter-operations');
-jest.mock('../../mappers/error-mapper');
-
-jest.mock('../../config/lambda-config', () => ({
-  lambdaConfig: {
+// mock dependencies
+jest.mock("../../config/deps", () => ({ getDeps: jest.fn() }));
+import { Deps, getDeps } from "../../config/deps";
+const mockedGetDeps = getDeps as jest.Mock<Deps>;
+const fakeDeps: jest.Mocked<Deps> = {
+  s3Client: {} as unknown as S3Client,
+  letterRepo: {} as unknown as LetterRepository,
+  logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
+  env: {
     SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
-    APIM_CORRELATION_HEADER: 'nhsd-correlation-id'
-  }
-}));
+    APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
+    LETTERS_TABLE_NAME: 'LETTERS_TABLE_NAME',
+    LETTER_TTL_HOURS: 'LETTER_TTL_HOURS'
+  } as unknown as LambdaEnv
+}
+mockedGetDeps.mockReturnValue(fakeDeps);
 
+// mock service
+jest.mock('../../services/letter-operations');
+import * as letterService from '../../services/letter-operations';
+const mockedPatchLetterStatus = jest.mocked(letterService.patchLetterStatus);
+
+// mock mapper
+jest.mock('../../mappers/error-mapper');
+import { mapErrorToResponse } from '../../mappers/error-mapper';
 const mockedMapErrorToResponse = jest.mocked(mapErrorToResponse);
 const expectedErrorResponse: APIGatewayProxyResult = {
   statusCode: 400,
@@ -25,7 +30,17 @@ const expectedErrorResponse: APIGatewayProxyResult = {
 };
 mockedMapErrorToResponse.mockReturnValue(expectedErrorResponse);
 
-const mockedPatchLetterStatus = jest.mocked(letterService.patchLetterStatus);
+import { APIGatewayProxyResult, Context } from 'aws-lambda';
+import { mockDeep } from 'jest-mock-extended';
+import { makeApiGwEvent } from './utils/test-utils';
+import { PatchLetterRequest, PatchLetterResponse } from '../../contracts/letters';
+import { ValidationError } from '../../errors';
+import * as errors from '../../contracts/errors';
+import { S3Client } from '@aws-sdk/client-s3';
+import pino from 'pino';
+import { LetterRepository } from '../../../../../internal/datastore/src';
+import { LambdaEnv } from '../../config/env';
+import { patchLetter } from '../patch-letter';
 
 const updateLetterStatusRequest : PatchLetterRequest = {
     data: {
@@ -91,7 +106,7 @@ describe('patchLetter API Handler', () => {
 
     const result = await patchLetter(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingBody), 'correlationId');
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingBody), 'correlationId', mockedGetDeps().logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -105,7 +120,7 @@ describe('patchLetter API Handler', () => {
     const callback = jest.fn();
     const result = await patchLetter(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter), 'correlationId');
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter), 'correlationId', mockedGetDeps().logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -124,7 +139,7 @@ describe('patchLetter API Handler', () => {
 
     const result = await patchLetter(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(error, 'correlationId');
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(error, 'correlationId', mockedGetDeps().logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -140,7 +155,7 @@ describe('patchLetter API Handler', () => {
 
     const result = await patchLetter(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingSupplierId), 'correlationId');
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingSupplierId), 'correlationId', mockedGetDeps().logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -156,7 +171,7 @@ describe('patchLetter API Handler', () => {
 
     const result = await patchLetter(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestBody), 'correlationId');
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestBody), 'correlationId', mockedGetDeps().logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -172,7 +187,7 @@ describe('patchLetter API Handler', () => {
 
     const result = await patchLetter(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestBody), 'correlationId');
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestBody), 'correlationId', mockedGetDeps().logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -193,7 +208,7 @@ describe('patchLetter API Handler', () => {
 
     const result = await patchLetter(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(error, 'correlationId');
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(error, 'correlationId', mockedGetDeps().logger);
     expect(result).toEqual(expectedErrorResponse);
 
     spy.mockRestore();
@@ -211,7 +226,7 @@ describe('patchLetter API Handler', () => {
 
     const result = await patchLetter(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error("The request headers don't contain the APIM correlation id"), undefined);
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error("The request headers don't contain the APIM correlation id"), undefined, mockedGetDeps().logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -227,7 +242,7 @@ describe('patchLetter API Handler', () => {
 
     const result = await patchLetter(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error('The request headers are empty'), undefined);
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error('The request headers are empty'), undefined, mockedGetDeps().logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 });

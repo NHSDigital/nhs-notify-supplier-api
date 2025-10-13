@@ -1,14 +1,23 @@
-import { getLetters } from '../../index';
-import type { APIGatewayProxyResult, Context } from 'aws-lambda';
-import { mockDeep } from 'jest-mock-extended';
-import { makeApiGwEvent } from './utils/test-utils';
-import * as letterService from '../../services/letter-operations';
-import { mapErrorToResponse } from '../../mappers/error-mapper';
-import { getEnvars } from '../get-letters';
-import { ValidationError } from '../../errors';
-import * as errors from '../../contracts/errors';
+// mock dependencies
+jest.mock("../../config/deps", () => ({ getDeps: jest.fn() }));
+import { Deps, getDeps } from "../../config/deps";
+const mockedGetDeps = getDeps as jest.Mock<Deps>;
+const fakeDeps: jest.Mocked<Deps> = {
+  s3Client: {} as unknown as S3Client,
+  letterRepo: {} as unknown as LetterRepository,
+  logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
+  env: {
+    SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
+    APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
+    LETTERS_TABLE_NAME: 'LETTERS_TABLE_NAME',
+    LETTER_TTL_HOURS: 'LETTER_TTL_HOURS'
+  } as unknown as LambdaEnv
+}
+mockedGetDeps.mockReturnValue(fakeDeps);
 
+// mock error mapper
 jest.mock('../../mappers/error-mapper');
+import { mapErrorToResponse } from '../../mappers/error-mapper';
 const mockedMapErrorToResponse = jest.mocked(mapErrorToResponse);
 const expectedErrorResponse: APIGatewayProxyResult = {
   statusCode: 400,
@@ -16,14 +25,21 @@ const expectedErrorResponse: APIGatewayProxyResult = {
 };
 mockedMapErrorToResponse.mockReturnValue(expectedErrorResponse);
 
+//mock letter service
 jest.mock('../../services/letter-operations');
+import * as letterService from '../../services/letter-operations';
 
-jest.mock('../../config/lambda-config', () => ({
-  lambdaConfig: {
-    SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
-    APIM_CORRELATION_HEADER: 'nhsd-correlation-id'
-  }
-}));
+import type { APIGatewayProxyResult, Context } from 'aws-lambda';
+import { mockDeep } from 'jest-mock-extended';
+import { makeApiGwEvent } from './utils/test-utils';
+import { getMaxLimit } from '../get-letters';
+import { ValidationError } from '../../errors';
+import * as errors from '../../contracts/errors';
+import { S3Client } from '@aws-sdk/client-s3';
+import pino from 'pino';
+import { LetterRepository } from '../../../../../internal/datastore/src';
+import { LambdaEnv } from '../../config/env';
+import { getLetters } from "../get-letters";
 
 describe('API Lambda handler', () => {
 
@@ -32,6 +48,7 @@ describe('API Lambda handler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();
+
     process.env = { ...originalEnv };
     process.env.MAX_LIMIT = '2500';
   });
@@ -41,7 +58,7 @@ describe('API Lambda handler', () => {
   });
 
   it('uses process.env.MAX_LIMIT for max limit set', async () => {
-    expect(getEnvars().maxLimit).toBe(2500);
+    expect(getMaxLimit().maxLimit).toBe(2500);
   });
 
   it('returns 200 OK with basic paginated resources', async () => {
@@ -74,6 +91,7 @@ describe('API Lambda handler', () => {
       headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}});
     const context = mockDeep<Context>();
     const callback = jest.fn();
+
     const result = await getLetters(event, context, callback);
 
     const expected = {
@@ -103,6 +121,7 @@ describe('API Lambda handler', () => {
   });
 
   it("returns 400 if the limit parameter is not a number", async () => {
+
     const event = makeApiGwEvent({
       path: "/letters",
       queryStringParameters: { limit: "1%" },
@@ -113,7 +132,7 @@ describe('API Lambda handler', () => {
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotANumber), 'correlationId');
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotANumber), 'correlationId', mockedGetDeps().logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -129,7 +148,7 @@ describe('API Lambda handler', () => {
     const result = await getLetters(event, context, callback);
 
     expect(mockedMapErrorToResponse).toHaveBeenCalledWith(
-      new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange, { args: [getEnvars().maxLimit] }), 'correlationId');
+      new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange, { args: [getMaxLimit().maxLimit] }), 'correlationId', mockedGetDeps().logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -144,7 +163,7 @@ describe('API Lambda handler', () => {
     const result = await getLetters(event, context, callback);
 
     expect(mockedMapErrorToResponse).toHaveBeenCalledWith(
-      new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange, { args: [getEnvars().maxLimit] }), 'correlationId');
+      new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange, { args: [getMaxLimit().maxLimit] }), 'correlationId', mockedGetDeps().logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -159,7 +178,7 @@ describe('API Lambda handler', () => {
     const result = await getLetters(event, context, callback);
 
     expect(mockedMapErrorToResponse).toHaveBeenCalledWith(
-      new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange, { args: [getEnvars().maxLimit] }), 'correlationId');
+      new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange, { args: [getMaxLimit().maxLimit] }), 'correlationId', mockedGetDeps().logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -173,7 +192,7 @@ describe('API Lambda handler', () => {
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitOnly), 'correlationId');
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitOnly), 'correlationId', mockedGetDeps().logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -183,7 +202,7 @@ describe('API Lambda handler', () => {
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error('The request headers are empty'), undefined);
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error('The request headers are empty'), undefined, mockedGetDeps().logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -197,7 +216,7 @@ describe('API Lambda handler', () => {
     const callback = jest.fn();
     const result = await getLetters(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error("The request headers don't contain the APIM correlation id"), undefined);
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error("The request headers don't contain the APIM correlation id"), undefined, mockedGetDeps().logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 });

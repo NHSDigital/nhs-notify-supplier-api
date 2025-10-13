@@ -5,6 +5,7 @@ import { mapToPatchLetterResponse } from '../mappers/letter-mapper';
 import { ApiErrorDetail } from '../contracts/errors';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+import { Deps } from '../config/deps';
 
 
 export const getLettersForSupplier = async (supplierId: string, status: string, limit: number, letterRepo: LetterRepository): Promise<LetterBase[]> => {
@@ -32,13 +33,13 @@ export const patchLetterStatus = async (letterToUpdate: LetterDto, letterId: str
   return mapToPatchLetterResponse(updatedLetter);
 }
 
-export const getLetterDataUrl = async (supplierId: string, letterId: string, letterRepo: LetterRepository): Promise<string> => {
+export const getLetterDataUrl = async (supplierId: string, letterId: string, deps: Deps): Promise<string> => {
 
   let letter;
 
   try {
-    letter = await letterRepo.getLetterById(supplierId, letterId);
-    return await getPresignedUrl(letter.url);
+    letter = await deps.letterRepo.getLetterById(supplierId, letterId);
+    return await getPresignedUrl(letter.url, deps.s3Client);
   } catch (error) {
     if (error instanceof Error && /^Letter with id \w+ not found for supplier \w+$/.test(error.message)) {
       throw new NotFoundError(ApiErrorDetail.NotFoundLetterId);
@@ -47,8 +48,7 @@ export const getLetterDataUrl = async (supplierId: string, letterId: string, let
   }
 }
 
-async function getPresignedUrl(s3Uri: string) {
-  const client = new S3Client();
+async function getPresignedUrl(s3Uri: string, s3Client: S3Client) {
 
   const url = new URL(s3Uri); // works for s3:// URIs
   const bucket = url.hostname;
@@ -59,5 +59,5 @@ async function getPresignedUrl(s3Uri: string) {
     Key: key,
   });
 
-  return await getSignedUrl(client, command, { expiresIn: 3600 });
+  return await getSignedUrl(s3Client, command, { expiresIn: 3600 });
 }

@@ -1,40 +1,24 @@
-import { Letter } from '../../../../../internal/datastore/src';
+import { Letter, LetterRepository } from '../../../../../internal/datastore/src';
+import { Deps } from '../../config/deps';
 import { LetterDto } from '../../contracts/letters';
 import { getLetterDataUrl, getLettersForSupplier, patchLetterStatus } from '../letter-operations';
+import pino from 'pino';
+import { LambdaEnv } from '../../config/env';
 
 jest.mock('@aws-sdk/s3-request-presigner', () => ({
   getSignedUrl: jest.fn(),
 }));
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+const mockedGetSignedUrl = getSignedUrl as jest.MockedFunction<typeof getSignedUrl>;
 
 jest.mock('@aws-sdk/client-s3', () => {
+  const originalModule = jest.requireActual('@aws-sdk/client-s3');
   return {
-    S3Client: jest.fn().mockImplementation(() => ({})),
     GetObjectCommand: jest.fn().mockImplementation((input) => ({ input })),
   };
 });
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
-
-const mockedGetSignedUrl = getSignedUrl as jest.MockedFunction<typeof getSignedUrl>;
+import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 const MockedGetObjectCommand = GetObjectCommand as unknown as jest.Mock;
-
-function makeLetter(id: string, status: Letter['status']) : Letter {
-  return {
-      id,
-      status,
-      supplierId: 'supplier1',
-      specificationId: 'spec123',
-      groupId: 'group123',
-      url: `s3://letterDataBucket/${id}.pdf`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      supplierStatus: `supplier1#${status}`,
-      supplierStatusSk: Date.now().toString(),
-      ttl: 123,
-      reasonCode: 123,
-      reasonText: "Reason text"
-  };
-}
 
 describe("getLetterIdsForSupplier", () => {
   it("returns letter IDs from the repository", async () => {
@@ -124,14 +108,19 @@ describe('getLetterDataUrl function', () => {
 
   const updatedLetter = makeLetter("letter1", "REJECTED");
 
+  const s3Client = { send: jest.fn() } as unknown as S3Client;
+  const letterRepo = {
+    getLetterById: jest.fn().mockResolvedValue(updatedLetter)
+  } as unknown as LetterRepository;
+  const logger = jest.fn() as unknown as pino.Logger;;
+  const env = jest.fn() as unknown as LambdaEnv;
+  const deps: Deps = { s3Client, letterRepo, logger, env };
+
   it('should return pre signed url successfully', async () => {
-    const mockRepo = {
-      getLetterById: jest.fn().mockResolvedValue(updatedLetter)
-    };
 
     mockedGetSignedUrl.mockResolvedValue('http://somePreSignedUrl.com');
 
-    const result = await getLetterDataUrl('supplier1', 'letter1', mockRepo as any);
+    const result = await getLetterDataUrl('supplier1', 'letter1', deps);
 
     expect(mockedGetSignedUrl).toHaveBeenCalled();
     expect(MockedGetObjectCommand).toHaveBeenCalledWith({
@@ -143,19 +132,37 @@ describe('getLetterDataUrl function', () => {
   });
 
   it('should throw notFoundError when letter does not exist', async () => {
-    const mockRepo = {
+    deps.letterRepo = {
       getLetterById: jest.fn().mockRejectedValue(new Error('Letter with id l1 not found for supplier s1'))
-    };
+    } as unknown as LetterRepository;
 
-    await expect(getLetterDataUrl('supplier1', 'letter42', mockRepo as any)).rejects.toThrow("No resource found with that ID");
+    await expect(getLetterDataUrl('supplier1', 'letter42', deps)).rejects.toThrow("No resource found with that ID");
   });
 
   it('should throw unexpected error', async () => {
 
-    const mockRepo = {
+    deps.letterRepo = {
       getLetterById: jest.fn().mockRejectedValue(new Error('unexpected error'))
-    };
+    } as unknown as LetterRepository;
 
-    await expect(getLetterDataUrl('supplier1', 'letter1', mockRepo as any)).rejects.toThrow("unexpected error");
+    await expect(getLetterDataUrl('supplier1', 'letter1', deps)).rejects.toThrow("unexpected error");
   });
 });
+
+function makeLetter(id: string, status: Letter['status']) : Letter {
+  return {
+      id,
+      status,
+      supplierId: 'supplier1',
+      specificationId: 'spec123',
+      groupId: 'group123',
+      url: `s3://letterDataBucket/${id}.pdf`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      supplierStatus: `supplier1#${status}`,
+      supplierStatusSk: Date.now().toString(),
+      ttl: 123,
+      reasonCode: 123,
+      reasonText: "Reason text"
+  };
+}

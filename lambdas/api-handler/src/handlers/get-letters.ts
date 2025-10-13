@@ -1,19 +1,15 @@
 import { APIGatewayProxyEventQueryStringParameters, APIGatewayProxyHandler } from "aws-lambda";
 import { getLettersForSupplier } from "../services/letter-operations";
-import { createLetterRepository } from "../infrastructure/letter-repo-factory";
 import { assertNotEmpty, lowerCaseKeys } from "../utils/validation";
 import { ApiErrorDetail } from '../contracts/errors';
-import { lambdaConfig } from "../config/lambda-config";
-import pino from 'pino';
 import { mapErrorToResponse } from "../mappers/error-mapper";
 import { ValidationError } from "../errors";
 import { mapToGetLettersResponse } from "../mappers/letter-mapper";
+import { Deps, getDeps } from "../config/deps";
 
-const letterRepo = createLetterRepository();
+const deps: Deps = getDeps();
 
-const log = pino();
-
-export const getEnvars = (): { maxLimit: number } => ({
+export const getMaxLimit = (): { maxLimit: number } => ({
   maxLimit: parseInt(process.env.MAX_LIMIT!)
 });
 
@@ -22,26 +18,28 @@ const status = "PENDING";
 
 export const getLetters: APIGatewayProxyHandler = async (event) => {
 
-  const { maxLimit } = getEnvars();
+  const { maxLimit } = getMaxLimit();
   let correlationId;
 
   try {
     assertNotEmpty(event.headers, new Error("The request headers are empty"));
     const lowerCasedHeaders = lowerCaseKeys(event.headers);
-    correlationId = assertNotEmpty(lowerCasedHeaders[lambdaConfig.APIM_CORRELATION_HEADER], new Error("The request headers don't contain the APIM correlation id"));
-    const supplierId = assertNotEmpty(lowerCasedHeaders[lambdaConfig.SUPPLIER_ID_HEADER], new ValidationError(ApiErrorDetail.InvalidRequestMissingSupplierId));
+    correlationId = assertNotEmpty(lowerCasedHeaders[deps.env.APIM_CORRELATION_HEADER],
+      new Error("The request headers don't contain the APIM correlation id"));
+    const supplierId = assertNotEmpty(lowerCasedHeaders[deps.env.SUPPLIER_ID_HEADER],
+      new ValidationError(ApiErrorDetail.InvalidRequestMissingSupplierId));
     const limitNumber = getLimitOrDefault(event.queryStringParameters, maxLimit);
 
     const letters = await getLettersForSupplier(
       supplierId,
       status,
       limitNumber,
-      letterRepo,
+      deps.letterRepo,
     );
 
     const response = mapToGetLettersResponse(letters);
 
-    log.info({
+    deps.logger.info({
       description: 'Pending letters successfully fetched',
       supplierId,
       limitNumber,
@@ -55,7 +53,7 @@ export const getLetters: APIGatewayProxyHandler = async (event) => {
     };
   }
   catch (error) {
-    return mapErrorToResponse(error, correlationId);
+    return mapErrorToResponse(error, correlationId, deps.logger);
   }
 };
 
@@ -67,7 +65,7 @@ function getLimitOrDefault(queryStringParameters: APIGatewayProxyEventQueryStrin
 
 function assertIsNumber(limitNumber: number) {
   if (isNaN(limitNumber)) {
-    log.info({
+    deps.logger.info({
       description: "limit parameter is not a number",
       limitNumber,
     });
@@ -77,7 +75,7 @@ function assertIsNumber(limitNumber: number) {
 
 function assertLimitInRange(limitNumber: number, maxLimit: number) {
   if (limitNumber <= 0 || limitNumber > maxLimit) {
-    log.info({
+    deps.logger.info({
       description: "Limit value is invalid",
       limitNumber,
     });
@@ -92,7 +90,7 @@ function validateLimitParamOnly(queryStringParameters: APIGatewayProxyEventQuery
       (key) => key !== "limit"
     )
   ) {
-    log.info({
+    deps.logger.info({
       description: "Unexpected query parameter(s) present",
       queryStringParameters: queryStringParameters,
     });
