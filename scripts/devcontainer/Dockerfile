@@ -42,5 +42,5 @@ RUN echo 'CURL_CA_BUNDLE="/etc/ssl/certs/ca-certificates.crt"' >> ~/.zshrc
 RUN echo 'GIT_SSL_CAINFO="/etc/ssl/certs/ca-certificates.crt"' >> ~/.zshrc
 
 # Add Go environment to shell
-RUN echo 'export GOPATH="/home/vscode/go"' >> ~/.zshrc
-RUN echo 'export PATH="/go/bin:$GOPATH/bin:$PATH"' >> ~/.zshrc
+RUN echo 'GOPATH="/home/vscode/go"' >> ~/.zshrc
+RUN echo 'PATH="/home/vscode/.asdf/shims:/go/bin:$GOPATH/bin:$PATH"' >> ~/.zshrc

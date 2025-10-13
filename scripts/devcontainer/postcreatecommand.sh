@@ -2,8 +2,6 @@
 
 echo 'export GPG_TTY=$TTY' | cat - ~/.zshrc > temp && mv temp ~/.zshrc
 
-echo 'export PATH="$HOME/go/bin:/usr/local/go/bin:$PATH"' >> ~/.zshrc
-echo 'export PATH="$HOME/.asdf/shims:$PATH"' >> ~/.zshrc
 echo 'eval "$(asdf completion zsh)"' >> ~/.zshrc
 source ~/.zshrc
 

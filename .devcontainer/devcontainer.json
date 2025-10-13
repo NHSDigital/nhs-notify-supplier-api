@@ -81,5 +81,8 @@
     "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"
   ],
   "name": "Devcontainer",
-  "postCreateCommand": "zsh scripts/devcontainer/postcreatecommand.sh"
+  "postCreateCommand": "zsh scripts/devcontainer/postcreatecommand.sh",
+  "remoteEnv": {
+    "PATH": "/home/vscode/.asdf/shims:/home/vscode/.asdf/bin:${PATH}"
+  }
 }
