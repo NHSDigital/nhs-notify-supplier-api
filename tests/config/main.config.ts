@@ -1,20 +1,19 @@
-import type { PlaywrightTestConfig } from '@playwright/test';
-import { config as baseConfig } from './playwright.base.config';
-import {  getReporters } from './reporters';
+import {defineConfig, PlaywrightTestConfig } from '@playwright/test';
+import  baseConfig from './playwright.base.config';
+import { getReporters } from './reporters';
+import path from 'path';
 
 const localConfig: PlaywrightTestConfig = {
   ...baseConfig,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: getReporters('api-test'),
-  //globalSetup: require.resolve('./setup/globalSetup'),
-  //globalTeardown: require.resolve('./setup/globalTeardown'),
   projects: [
     {
       name: 'component-tests',
-      testDir: 'tests/component-tests',
+      testDir: path.resolve(__dirname, '../component-tests'),
       testMatch: '**/*.spec.ts',
     },
   ],
 };
 
-export default localConfig;
+export default defineConfig(localConfig);

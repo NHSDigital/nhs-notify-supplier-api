@@ -74,8 +74,7 @@ test.describe('API Gateway Tests To Get List Of Pending ', () =>
         params:{
           limit:'?'
         },
-        },
-        );
+      });
     expect(response.status()).toBe(400);
     const responseBody = await response.json();
 
