@@ -1,6 +1,6 @@
 ## Overview
 
-Update the status of a single letter by its ID, optionally providing a reason code and text.
+Use this endpoint to update the status of a letter by submitting the new status in the request body, optionally providing a reason code and text.
 
 When you make a PATCH request with your application, the endpoint will respond with a successful (200) response code, along with the updated patient resource or an unsuccessful (4xx/5xx) response.
 

@@ -1,6 +1,6 @@
 ## Overview
 
-Download the data file for a letter via a redirect to a signed URL.
+Use this endpoint to get letter data, including downloading the letter's print-ready PDF file.
 
 Rate limiting applies. On excess requests, you may receive **429 Too Many Requests** (example error code(s): `NOTIFY_QUOTA`). Back off and retry later
 

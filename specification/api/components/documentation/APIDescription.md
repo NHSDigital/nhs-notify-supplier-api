@@ -1,6 +1,13 @@
 ## Overview
 
-API for communication suppliers to integrate with NHS Notify.
+API for letter suppliers to integrate with NHS Notify.
+
+This API lets you:
+
+* Get lists of letters allocated to you
+* Download letter PDFs and metadata
+* Update and manage letter statuses
+* Submit and retrieve management information (MI)
 
 This specification represents the in-development 'next' version of the API schema
 and should be treated as unstable
@@ -9,7 +16,7 @@ Use this API to retrieve letters to be printed
 
 ## Who can use this API
 
-The NHS Notify Supplier service is intended for suppliers of print services to the [NHS Notify](https://digital.nhs.uk/services/nhs-notify) service
+ The NHS Notify Supplier API is designed for approved print service suppliers who support the delivery of physical letters through the [NHS Notify](https://digital.nhs.uk/services/nhs-notify) platform.
 
 ## Related APIs
 
@@ -17,15 +24,13 @@ The [NHS Notify API](https://digital.nhs.uk/developer/api-catalogue/nhs-notify) 
 
 ## API status and roadmap
 
-This API is [in development](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#statuses) meaning:
+This API is [in production, beta](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#statuses). We are onboarding partners to use it.
 
-* it is available for testing in the integration environment
-* we expect to make breaking changes based on developer feedback
+We may make additive non-breaking changes to the API without notice, for example the addition of fields to a response or callback, or new optional fields to a request.
 
 ## Service Level
 
-TBD
-
+This service is a [silver](https://digital.nhs.uk/services/reference-guide#service-levels) service, meaning it is available 24 hours a day, 365 days a year and supported from 8am to 6pm, Monday to Friday excluding bank holidays.
 For more details, see [service levels](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#service-levels).
 
 ## Technology
@@ -36,9 +41,20 @@ We follow the [JSON:API](https://jsonapi.org/) standard for our request and resp
 
 ### Response content types
 
-This API can generate responses in the following formats:
+This API can generate responses in the following format:
 
 * `application/vnd.api+json` - see [JSON:API specification](https://jsonapi.org/format/#introduction)
+
+### Request content types
+
+This API will accept request payloads of the following types:
+
+* `application/vnd.api+json` - see [JSON:API specification](https://jsonapi.org/format/#introduction)
+* `application/json`
+
+The `Content-Type` header may optionally include a `charset` attribute. If included, it **must** be set to `charset=utf-8` Any other `charset` value will result in a `406` error response. If omitted then `utf-8` is assumed.
+
+If you attempt to send a payload without the `Content-Type` header set to either of these values then the API will respond with a `415 Unsupported Media Type` response.
 
 ## Network access
 
@@ -60,9 +76,9 @@ To access this API, use the following security pattern:
 
 | Environment | Base URL |
 |------------ | -------- |
-| Sandbox     | `https://sandbox.api.service.nhs.uk/comms` |
-| Integration test | `https://int.api.service.nhs.uk/comms` |
-| Production | `https://api.service.nhs.uk/comms` |
+| Sandbox     | `https://sandbox.api.service.nhs.uk/nhs-notify-supplier` |
+| Integration test | `https://int.api.service.nhs.uk/nhs-notify-supplier` |
+| Production | `https://api.service.nhs.uk/nhs-notify-supplier` |
 
 ### Sandbox testing
 
@@ -75,6 +91,10 @@ Our [sandbox environment](https://digital.nhs.uk/developer/guides-and-documentat
 
 For details of sandbox test scenarios, or to try out sandbox using our 'Try this API' feature, see the documentation for each endpoint.
 
+Alternatively, you can try out the sandbox using our Postman collection
+
+You can find our postman collection source in our [public repository on github](https://github.com/NHSDigital/nhs-notify-supplier-api/tree/main/postman).
+
 ### Integration testing
 
 Our integration test environment:
@@ -86,3 +106,15 @@ Our integration test environment:
 You need to get your software approved by us before it can go live with this API.
 
 You will also need to follow our steps to - TBD
+
+### Production smoke testing
+
+Before go-live, you must complete a smoke test in the NHS Notify production environment.
+The smoke test confirms that your live credentials, connectivity, and print workflow operate correctly end-to-end. It will be carried out in coordination with the NHS Notify Supplier API team.
+You will retrieve and print one or more live test letters through the production API, send the printed output to the address provided, and submit a Management Information (MI) update for verification.
+The NHS Notify team will configure your production access, review your results, and confirm that your output meets NHS Notify print specifications.
+
+### Onboarding
+
+You need to get your software approved by us before it can go live with this API.
+You will also need to be an approved NHS letter supplier under the framework agreement (ADD link) and nominate your technical and operational contacts

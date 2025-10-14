@@ -1,6 +1,6 @@
 ## Overview
 
-Check whether a data file exists for a letter without downloading it.
+Use this endpoint to check for the existence of letter data. This is useful for verifying readiness before performing retrieval or print operations.
 
 ## Sandbox test scenarios
 

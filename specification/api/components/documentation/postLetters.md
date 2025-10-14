@@ -1,6 +1,8 @@
 ## Overview
 
-Update the status for (example, PRINTED, DISPATCHED, DELIVERED) of multiple letters by providing the new statuses in the request body, optionally including reason codes and text.
+Use this endpoint to update the status for (example, PRINTED, DISPATCHED, DELIVERED) of multiple letters by providing the new statuses in the request body, optionally including reason codes and text.
+
+Use this endpoint when you need to report status changes for several letters at once.
 
 When you make a POST update request with, the endpoint will respond with a successful (202) response code or an unsuccessful (4xx/5xx) response.
 

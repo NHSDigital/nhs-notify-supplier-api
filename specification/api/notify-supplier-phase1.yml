@@ -62,12 +62,12 @@ tags:
   - name: data
     description: ''
 servers:
+  - url: 'https://internal-dev-sandbox.api.service.nhs.uk/nhs-notify-supplier'
+    description: Public sandbox
   - url: 'http://127.0.0.1:9000'
     description: Local development server
-  - url: 'https://sandbox-server.nhs.uk/nhs-notify-supplier-api'
-    description: Public sandbox
 x-nhsd-apim:
-  temporary: true
+  temporary: false
   monitoring: false
   access:
     $ref: ./components/x-nhsd-apim/access.yml

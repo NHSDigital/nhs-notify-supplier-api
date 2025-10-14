@@ -20,7 +20,7 @@ Jira
 Makefile
 OAuth
 Octokit
-onboarding
+[Oo]nboarding
 Podman
 pre
 Python

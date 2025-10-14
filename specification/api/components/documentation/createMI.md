@@ -1,8 +1,8 @@
 ## Overview
 
-Submit a Management Information (MI) record for your activity (counts and costs for letters).
+Use this endpoint to send management or operational metrics relating to letter processing and print fulfilment
 
-When you submit a create management information request, the endpoint will respond with a created(201) response code along with the created data including a unique id for the record or an unsuccessful (4xx/%xx) response
+When you submit a create management information request, the endpoint will respond with a c201 (Created) response code along with the created data including a unique id for the record or an unsuccessful (4xx/5xx) response
 
 Rate limiting applies. On excess requests, you may receive **429 Too Many Requests** (example error code(s): `NOTIFY_QUOTA`). Back off and retry later
 
