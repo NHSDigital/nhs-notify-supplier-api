@@ -44,7 +44,6 @@ describe('API Lambda handler', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.resetModules();
   });
 
   it('returns 303 Found with a pre signed url', async () => {
