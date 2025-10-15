@@ -111,6 +111,59 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+if [[ -z "$PEM_FILE" ]]; then
+  echo "[ERROR] PEM_FILE environment variable is not set or is empty."
+  exit 1
+fi
+
+if [[ -z "$CLIENT_ID" ]]; then
+  echo "[ERROR] CLIENT_ID environment variable is not set or is empty."
+  exit 1
+fi
+
+now=$(date +%s)
+iat=$((${now} - 60)) # Issues 60 seconds in the past
+exp=$((${now} + 600)) # Expires 10 minutes in the future
+
+b64enc() { openssl base64 | tr -d '=' | tr '/+' '_-' | tr -d '\n'; }
+
+header_json='{
+    "typ":"JWT",
+    "alg":"RS256"
+}'
+# Header encode
+header=$( echo -n "${header_json}" | b64enc )
+
+payload_json="{
+    \"iat\":${iat},
+    \"exp\":${exp},
+    \"iss\":\"${$CLIENT_ID}\"
+}"
+# Payload encode
+payload=$( echo -n "${payload_json}" | b64enc )
+
+# Signature
+header_payload="${header}"."${payload}"
+signature=$(
+    openssl dgst -sha256 -sign <(echo -n "${$PEM_FILE}") \
+    <(echo -n "${header_payload}") | b64enc
+)
+
+# Create JWT
+JWT="${header_payload}"."${signature}"
+
+INSTALLATION_ID=$(curl -X GET \
+    -H "Accept: application/vnd.github+json" \
+    -H "Authorization: Bearer ${JWT}" \
+    -H "X-GitHub-Api-Version: 2022-11-28" \
+    --url "https://api.github.com/app/installations" | jq -r '.[0].id')
+
+PR_TRIGGER_PAT=$(curl --request POST \
+  --url "https://api.github.com/app/installations/${INSTALLATION_ID}/access_tokens" \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer ${JWT}" \
+  -H "X-GitHub-Api-Version: 2022-11-28" | jq -r '.token')
+
 # Set default values if not provided
 if [[ -z "$PR_TRIGGER_PAT" ]]; then
   echo "[ERROR] PR_TRIGGER_PAT environment variable is not set or is empty."
