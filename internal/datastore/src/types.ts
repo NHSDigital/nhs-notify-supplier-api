@@ -48,11 +48,12 @@ export type LetterBase = z.infer<typeof LetterSchemaBase>;
 
 export const MISchemaBase = z.object({
   id: z.string(),
-  specificationId: z.string(),
-  groupId: z.string(),
   lineItem: z.string(),
+  timestamp: z.string(),
   quantity: z.number(),
-  stockRemaining: z.number()
+  specificationId: z.string().optional(),
+  groupId: z.string().optional(),
+  stockRemaining: z.number().optional()
 });
 
 export const MISchema = MISchemaBase.extend({

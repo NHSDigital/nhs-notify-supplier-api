@@ -17,6 +17,7 @@ export class MIRepository {
   }
 
   async putMI(mi: Omit<MI, 'id' | 'createdAt' | 'updatedAt'>): Promise<MI> {
+
     const now = new Date().toISOString();
     const miDb = {
       ...mi,

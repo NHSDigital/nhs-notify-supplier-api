@@ -165,6 +165,45 @@
           }
         }
       ]
+    },
+    "/mi": {
+      "post": {
+        "description": "Provide management information.",
+        "operationId": "postMi",
+        "requestBody": {
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Resource created"
+          },
+          "400": {
+            "description": "Bad request, invalid input data"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "security": [
+          {
+            "LambdaAuthorizer": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "contentHandling": "CONVERT_TO_TEXT",
+          "credentials": "${APIG_EXECUTION_ROLE_ARN}",
+          "httpMethod": "POST",
+          "passthroughBehavior": "WHEN_NO_TEMPLATES",
+          "responses": {
+            ".*": {
+              "statusCode": "200"
+            }
+          },
+          "timeoutInMillis": 29000,
+          "type": "AWS_PROXY",
+          "uri": "arn:aws:apigateway:${AWS_REGION}:lambda:path/2015-03-31/functions/${POST_MI_LAMBDA_ARN}/invocations"
+        }
+      }
     }
   }
 }
