@@ -7,10 +7,10 @@ type ApiSandboxGetLetterStatusTestCase = {
   id: string,
   header?: RequestSandBoxHeaders | NoRequestIdHeaders;
   expectedStatus: number;
-  expectedResponse?: GetLetterStatusResposne | GetLetterStatusErrorResponse | GetRejectedLetterResponse;
+  expectedResponse?: GetLetterStatusResponse | GetLetterStatusErrorResponse | GetRejectedLetterResponse;
 };
 
-export type GetLetterStatusResposne = {
+export type GetLetterStatusResponse = {
     data: GetLetterData;
 };
 

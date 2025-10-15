@@ -21,7 +21,7 @@
   "keywords": [],
   "license": "ISC",
   "main": "index.js",
-  "name": "tests",
+  "name": "nhs-notify-supplier-api-tests",
   "scripts": {
     "clean": "rimraf $(pwd)/target",
     "test:component": "playwright test --config=config/main.config.ts --max-failures=10 --project=component-tests",
