@@ -11,8 +11,7 @@ This repository documents the Supplier API specification and provides an SDK wit
 
 ## OAS Specifications
 
-- [Current Version](specification/api/notify-supplier.yml)
-- [vNext](specification/api/notify-supplier-next.yml)
+- [Current Version](specification/api/notify-supplier-phase1.yml)
 
 ## Table of Contents
 
