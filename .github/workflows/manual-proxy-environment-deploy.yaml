@@ -78,7 +78,6 @@ jobs:
         env:
           PROXYGEN_API_NAME: nhs-notify-supplier
           PR_NUMBER: ${{ steps.pr_exists.outputs.pr_number }}
-          PR_TRIGGER_PAT: ${{ secrets.PR_TRIGGER_PAT }}
         uses: ./.github/actions/build-proxies
         with:
           environment: "${{ env.ENVIRONMENT }}"
