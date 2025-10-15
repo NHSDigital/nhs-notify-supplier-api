@@ -1,11 +1,6 @@
 {
-  "compilerOptions": {
-    "noImplicitAny": true,
-    "noUncheckedIndexedAccess": true,
-    "strict": true,
-    "strictNullChecks": true
-  },
-  "extends": "@tsconfig/node22/tsconfig.json",
+  "compilerOptions": {},
+  "extends": "../../tsconfig.base.json",
   "include": [
     "src/**/*",
     "jest.config.ts"

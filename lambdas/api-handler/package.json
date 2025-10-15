@@ -1,6 +1,9 @@
 {
   "dependencies": {
-    "esbuild": "^0.24.0"
+    "@internal/datastore": "*",
+    "@internal/helpers": "*",
+    "esbuild": "^0.24.0",
+    "pino": "^9.7.0"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.2",
@@ -8,7 +11,8 @@
     "@types/jest": "^29.5.14",
     "jest": "^29.7.0",
     "jest-mock-extended": "^3.0.7",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.3",
+    "zod": "^4.1.11"
   },
   "name": "nhs-notify-supplier-api-handler",
   "private": true,

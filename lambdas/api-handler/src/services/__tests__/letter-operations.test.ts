@@ -1,23 +1,23 @@
-import { Letter } from '../../../../../internal/datastore/src';
+import { Letter } from '@internal/datastore';
 import { LetterDto, LetterStatus } from '../../contracts/letters';
 import { getLettersForSupplier, patchLetterStatus } from '../letter-operations';
 
 
-function makeLetter(id: string, status: Letter['status']) : Letter {
+function makeLetter(id: string, status: Letter['status']): Letter {
   return {
-      id,
-      status,
-      supplierId: 'supplier1',
-      specificationId: 'spec123',
-      groupId: 'group123',
-      url: 'https://example.com/letter/abc123',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      supplierStatus: `supplier1#${status}`,
-      supplierStatusSk: Date.now().toString(),
-      ttl: 123,
-      reasonCode: 123,
-      reasonText: "Reason text"
+    id,
+    status,
+    supplierId: 'supplier1',
+    specificationId: 'spec123',
+    groupId: 'group123',
+    url: 'https://example.com/letter/abc123',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    supplierStatus: `supplier1#${status}`,
+    supplierStatusSk: Date.now().toString(),
+    ttl: 123,
+    reasonCode: 123,
+    reasonText: "Reason text"
   };
 }
 
@@ -68,7 +68,8 @@ describe('patchLetterStatus function', () => {
 
     const result = await patchLetterStatus(updatedLetterDto, 'letter1', mockRepo as any);
 
-    expect(result).toEqual({ data:
+    expect(result).toEqual({
+      data:
       {
         id: 'letter1',
         type: 'Letter',
