@@ -98,7 +98,8 @@ runs:
 
     - name: Trigger deploy proxy
       env:
-        PR_TRIGGER_PAT: ${{ env.PR_TRIGGER_PAT }}
+        CLIENT_ID: ${{ secrets.CLIENT_ID }}
+        PEM_FILE: ${{ secrets.PEM_FILE }}
       shell: bash
       run: |
         .github/scripts/dispatch_internal_repo_workflow.sh \
