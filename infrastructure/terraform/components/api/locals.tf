@@ -10,6 +10,7 @@ locals {
     AUTHORIZER_LAMBDA_ARN    = module.authorizer_lambda.function_arn
     GET_LETTERS_LAMBDA_ARN  = module.get_letters.function_arn
     PATCH_LETTER_LAMBDA_ARN  = module.patch_letter.function_arn
+    POST_MI_LAMBDA_ARN       = module.post_mi.function_arn
   })
 
   destination_arn = "arn:aws:logs:${var.region}:${var.shared_infra_account_id}:destination:nhs-main-obs-firehose-logs"

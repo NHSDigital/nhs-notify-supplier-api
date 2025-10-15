@@ -1,5 +1,4 @@
 import { Logger } from "pino";
-import { LetterRepository } from "../letter-repository";
 import { setupDynamoDBContainer, createTables, DBContext, deleteTables } from "./db";
 import { createTestLogger, LogStream } from "./logs";
 import { MIRepository } from "../mi-repository";
@@ -46,6 +45,7 @@ describe('MiRepository', () => {
         groupId:'group1',
         lineItem: 'item1',
         quantity: 12,
+        timestamp: new Date().toISOString(),
         stockRemaining: 0
       };
 
