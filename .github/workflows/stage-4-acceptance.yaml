@@ -108,7 +108,7 @@ jobs:
       - name: "Save result"
         run: |
           echo "Nothing to save"
-  test-integration:
+  test-component:
     name: "Integration test"
     runs-on: ubuntu-latest
     needs: environment-set-up
@@ -118,7 +118,7 @@ jobs:
         uses: actions/checkout@v4
       - name: "Run integration test"
         run: |
-          make test-integration
+          make test-component
       - name: "Save result"
         run: |
           echo "Nothing to save"
@@ -157,7 +157,7 @@ jobs:
       [
         test-accessibility,
         test-contract,
-        test-integration,
+        test-component,
         test-load,
         test-security,
         test-ui-performance,
