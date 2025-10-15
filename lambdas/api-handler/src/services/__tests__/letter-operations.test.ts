@@ -3,13 +3,11 @@ import { Deps } from '../../config/deps';
 import { LetterDto } from '../../contracts/letters';
 import { getLetterDataUrl, getLettersForSupplier, patchLetterStatus } from '../letter-operations';
 import pino from 'pino';
-import { LambdaEnv } from '../../config/env';
 
 jest.mock('@aws-sdk/s3-request-presigner', () => ({
   getSignedUrl: jest.fn(),
 }));
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-const mockedGetSignedUrl = getSignedUrl as jest.MockedFunction<typeof getSignedUrl>;
 
 jest.mock('@aws-sdk/client-s3', () => {
   const originalModule = jest.requireActual('@aws-sdk/client-s3');
@@ -18,9 +16,13 @@ jest.mock('@aws-sdk/client-s3', () => {
   };
 });
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
-const MockedGetObjectCommand = GetObjectCommand as unknown as jest.Mock;
 
 describe("getLetterIdsForSupplier", () => {
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("returns letter IDs from the repository", async () => {
     const mockRepo = {
       getLettersBySupplier: jest.fn().mockResolvedValue([
@@ -49,6 +51,10 @@ describe("getLetterIdsForSupplier", () => {
 });
 
 describe('patchLetterStatus function', () => {
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   const updatedLetterDto: LetterDto = {
     id: 'letter1',
@@ -106,6 +112,13 @@ describe('patchLetterStatus function', () => {
 
 describe('getLetterDataUrl function', () => {
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const mockedGetSignedUrl = getSignedUrl as jest.MockedFunction<typeof getSignedUrl>;
+  const MockedGetObjectCommand = GetObjectCommand as unknown as jest.Mock;
+
   const updatedLetter = makeLetter("letter1", "REJECTED");
 
   const s3Client = { send: jest.fn() } as unknown as S3Client;
@@ -113,7 +126,13 @@ describe('getLetterDataUrl function', () => {
     getLetterById: jest.fn().mockResolvedValue(updatedLetter)
   } as unknown as LetterRepository;
   const logger = jest.fn() as unknown as pino.Logger;;
-  const env = jest.fn() as unknown as LambdaEnv;
+  const env = {
+        LETTERS_TABLE_NAME: 'LettersTable',
+        LETTER_TTL_HOURS: '24',
+        SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
+        APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
+        DOWNLOAD_URL_TTL_SECONDS: '3600'
+  };
   const deps: Deps = { s3Client, letterRepo, logger, env };
 
   it('should return pre signed url successfully', async () => {
@@ -122,12 +141,11 @@ describe('getLetterDataUrl function', () => {
 
     const result = await getLetterDataUrl('supplier1', 'letter1', deps);
 
-    expect(mockedGetSignedUrl).toHaveBeenCalled();
-    expect(MockedGetObjectCommand).toHaveBeenCalledWith({
+    const expectedCommandInput = {
         Bucket: 'letterDataBucket',
         Key: 'letter1.pdf'
-    });
-
+    };
+    expect(mockedGetSignedUrl).toHaveBeenCalledWith(s3Client, { input: expectedCommandInput}, { expiresIn: 3600});
     expect(result).toEqual('http://somePreSignedUrl.com');
   });
 

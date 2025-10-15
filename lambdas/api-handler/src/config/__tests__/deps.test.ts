@@ -33,6 +33,7 @@ describe('getDeps()', () => {
         LETTER_TTL_HOURS: '24',
         SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
         APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
+        DOWNLOAD_URL_TTL_SECONDS: '3600'
       },
     }));
   });
@@ -61,6 +62,7 @@ describe('getDeps()', () => {
       LETTER_TTL_HOURS: '24',
       SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
       APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
+      DOWNLOAD_URL_TTL_SECONDS: '3600'
     });
   });
 

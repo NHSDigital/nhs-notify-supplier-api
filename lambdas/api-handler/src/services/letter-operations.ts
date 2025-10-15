@@ -39,7 +39,7 @@ export const getLetterDataUrl = async (supplierId: string, letterId: string, dep
 
   try {
     letter = await deps.letterRepo.getLetterById(supplierId, letterId);
-    return await getPresignedUrl(letter.url, deps.s3Client);
+    return await getDownloadUrl(letter.url, deps.s3Client, deps.env.DOWNLOAD_URL_TTL_SECONDS);
   } catch (error) {
     if (error instanceof Error && /^Letter with id \w+ not found for supplier \w+$/.test(error.message)) {
       throw new NotFoundError(ApiErrorDetail.NotFoundLetterId);
@@ -48,7 +48,7 @@ export const getLetterDataUrl = async (supplierId: string, letterId: string, dep
   }
 }
 
-async function getPresignedUrl(s3Uri: string, s3Client: S3Client) {
+async function getDownloadUrl(s3Uri: string, s3Client: S3Client, expiry: string) {
 
   const url = new URL(s3Uri); // works for s3:// URIs
   const bucket = url.hostname;
@@ -59,5 +59,5 @@ async function getPresignedUrl(s3Uri: string, s3Client: S3Client) {
     Key: key,
   });
 
-  return await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+  return await getSignedUrl(s3Client, command, { expiresIn: Number.parseInt(expiry) });
 }

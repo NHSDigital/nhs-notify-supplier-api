@@ -24,7 +24,8 @@ const fakeDeps: jest.Mocked<Deps> = {
     SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
     APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
     LETTERS_TABLE_NAME: 'LETTERS_TABLE_NAME',
-    LETTER_TTL_HOURS: 'LETTER_TTL_HOURS'
+    LETTER_TTL_HOURS: 'LETTER_TTL_HOURS',
+    DOWNLOAD_URL_TTL_SECONDS: 'DOWNLOAD_URL_TTL_SECONDS'
   } as unknown as LambdaEnv
 }
 mockedGetDeps.mockReturnValue(fakeDeps);
