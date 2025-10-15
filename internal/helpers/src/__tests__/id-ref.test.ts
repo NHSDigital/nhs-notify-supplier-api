@@ -3,7 +3,7 @@ import { idRef } from "../id-ref";
 
 describe("idRef", () => {
   const TestSchema = z.object({
-    domainId: z.string().uuid(),
+    domainId: z.uuid(),
     name: z.string(),
   });
 
@@ -18,10 +18,12 @@ describe("idRef", () => {
   it("should add reference metadata", () => {
     const refField = idRef(TestSchema, "domainId", "TestEntity");
 
-    // Just verify that the reference can be created and doesn't throw
     expect(refField).toBeDefined();
-    // We can't easily check the meta properties directly, but we can validate it works
-    expect(() => refField.parse("123e4567-e89b-12d3-a456-426614174000")).not.toThrow();
+    expect(z.globalRegistry.has(refField)).toBe(true);
+    expect(z.globalRegistry.get(refField)).toEqual(expect.objectContaining({
+      title: "TestEntity ID Reference",
+      description: "Reference to a TestEntity by its unique identifier",
+    }));
   });
 
   it("should use custom ID field name when provided", () => {
