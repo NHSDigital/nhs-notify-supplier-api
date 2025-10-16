@@ -14,9 +14,9 @@ export const lambdaEnv: LambdaEnv = {
   DOWNLOAD_URL_TTL_SECONDS: getEnv('DOWNLOAD_URL_TTL_SECONDS')!
 };
 
-function getEnv(name: string, required = true): string | undefined {
+function getEnv(name: string): string {
   const value = process.env[name];
-  if (!value && required) {
+  if (!value) {
     throw new Error(`Missing required env var: ${name}`);
   }
   return value;
