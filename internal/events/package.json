@@ -40,8 +40,9 @@
     "pregen:asyncapi": "npm run gen:jsonschema",
     "pregen:jsonschema": "rm -rf ./client-config/json",
     "prelint:schema": "npm run gen:jsonschema",
+    "pretest:unit": "npm run gen:jsonschema",
     "start": "node dist/index.js",
-    "test": "jest",
+    "test": "npm run test:unit",
     "test:unit": "jest"
   },
   "types": "dist/index.d.ts",

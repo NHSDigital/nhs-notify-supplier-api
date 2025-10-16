@@ -19,22 +19,22 @@ export { $EnvelopeProfile, type EnvelopeProfile } from './events/envelope-profil
 export {
   $LetterStatus,
   type LetterStatus,
-  $LetterStatusChange,
-  type LetterStatusChange,
-} from './domain/letter-status-change';
+  $Letter,
+  type Letter,
+} from './domain/letter';
 
 // Event schemas (collection & generic)
 export {
-  letterStatusChangeEventsMap,
-  $LetterStatusChangeEvent,
-  type LetterStatusChangeEvent,
-} from './events/letter-status-change-events';
+  letterEventMap,
+  $LetterEvent,
+  type LetterEvent,
+} from './events/letter-events';
 
 // Default export (optional): object grouping primary schemas
 export default {
   $EnvelopeProfile: undefined as unknown as typeof import('./events/envelope-profile').$EnvelopeProfile, // placeholder for intellisense grouping only
-  $LetterStatus: undefined as unknown as typeof import('./domain/letter-status-change').$LetterStatus,
-  $LetterStatusChange: undefined as unknown as typeof import('./domain/letter-status-change').$LetterStatusChange,
-  letterStatusChangeEventsMap: undefined as unknown as typeof import('./events/letter-status-change-events').letterStatusChangeEventsMap,
-  $LetterStatusChangeEvent: undefined as unknown as typeof import('./events/letter-status-change-events').$LetterStatusChangeEvent,
+  $LetterStatus: undefined as unknown as typeof import('./domain/letter').$LetterStatus,
+  $Letter: undefined as unknown as typeof import('./domain/letter').$Letter,
+  letterEventMap: undefined as unknown as typeof import('./events/letter-events').letterEventMap,
+  $LetterEvent: undefined as unknown as typeof import('./events/letter-events').$LetterEvent,
 };
