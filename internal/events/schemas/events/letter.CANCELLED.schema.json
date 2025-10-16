@@ -1,6 +1,6 @@
 {
-  "title": "letter-status.ENCLOSED Event",
-  "description": "Event schema for letter status change to ENCLOSED",
+  "title": "letter.CANCELLED Event",
+  "description": "Event schema for letter status change to CANCELLED",
   "type": "object",
   "properties": {
     "specversion": {
@@ -38,18 +38,18 @@
     },
     "subject": {
       "title": "Event Subject",
-      "description": "Resource path (no leading slash) within the source made of lowercase segments separated by '/'.",
+      "description": "Resource path (no leading slash) within the source made of segments separated by '/'.",
       "examples": [
         "customer/920fca11-596a-4eca-9c47-99f624614658/order/769acdd4-6a47-496f-999f-76a6fd2c3959/item/4f5e17c0-ec57-4cee-9a86-14580cf5af7d"
       ],
       "type": "string",
       "minLength": 5,
-      "pattern": "^[a-z0-9-]+(\\/[a-z0-9-]+)*$"
+      "pattern": "^[^\\/]+(\\/[^\\/]+)*$"
     },
     "type": {
       "type": "string",
       "enum": [
-        "uk.nhs.notify.supplier-api.letter-status.ENCLOSED.v1"
+        "uk.nhs.notify.supplier-api.letter.CANCELLED.v1"
       ]
     },
     "time": {
@@ -75,38 +75,64 @@
     },
     "dataschema": {
       "type": "string",
-      "pattern": "^https:\\/\\/notify\\.nhs\\.uk\\/events\\/supplier-api\\/letter-status\\/ENCLOSED\\/1\\.\\d+\\.\\d+\\.json$"
+      "pattern": "^https:\\/\\/notify\\.nhs\\.uk\\/events\\/supplier-api\\/letter\\/CANCELLED\\/1\\.\\d+\\.\\d+\\.json$"
     },
     "data": {
       "type": "object",
       "properties": {
         "domainId": {
-          "title": "LetterStatusChange ID",
-          "description": "Unique identifier for the LetterStatusChange",
+          "title": "Letter ID",
+          "description": "Unique identifier for the Letter",
           "examples": [
             "1y3q9v1zzzz"
           ],
           "type": "string"
         },
-        "sourceSubject": {
-          "type": "string"
+        "origin": {
+          "title": "Letter origin",
+          "description": "The source and subject of the original event that introduced the letter to the supplier-api domain.",
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "string"
+            },
+            "subject": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "source",
+            "subject"
+          ]
         },
         "status": {
           "type": "string",
           "enum": [
-            "ENCLOSED"
+            "CANCELLED"
           ]
         },
         "reasonCode": {
+          "title": "Reason Code",
+          "description": "Optional reason code for the status change, if applicable.",
+          "examples": [
+            "R01",
+            "R08"
+          ],
           "type": "string"
         },
         "reasonText": {
+          "title": "Reason Text",
+          "description": "Optional human-readable reason for the status change, if applicable.",
+          "examples": [
+            "Undeliverable",
+            "Recipient moved"
+          ],
           "type": "string"
         }
       },
       "required": [
         "domainId",
-        "sourceSubject",
+        "origin",
         "status"
       ]
     },
