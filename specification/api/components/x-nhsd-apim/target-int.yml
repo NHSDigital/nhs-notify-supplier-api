@@ -1,0 +1,6 @@
+type: external
+healthcheck: /_status
+url: https://suppliers.int.nhsnotify.national.nhs.uk
+security:
+  type: mtls
+  secret: nhs-notify-supplier-mtls-int

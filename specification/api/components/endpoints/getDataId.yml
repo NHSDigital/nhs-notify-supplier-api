@@ -1,4 +1,6 @@
 summary: Fetch a data file
+description:
+  $ref: '../documentation/getDataId.md'
 operationId: getDataId
 tags:
   - data
