@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { letterStatusChangeEventsMap } from "../letter-status-change-events";
+import { letterEventMap } from "../letter-events";
 
 function readJson(filename: string): unknown {
   const filePath = path.resolve(__dirname, "./testData/", filename);
@@ -10,43 +10,47 @@ function readJson(filename: string): unknown {
 
 describe("LetterStatus event validations", () => {
   it("should validate a LetterStatus.ACCEPTED event with all required fields", () => {
-    const json = readJson("letter-status.ACCEPTED-valid.json");
+    const json = readJson("letter.ACCEPTED-valid.json");
 
-    const event = letterStatusChangeEventsMap['letter-status.ACCEPTED'].parse(json);
+    const event = letterEventMap['letter.ACCEPTED'].parse(json);
+
     expect(event).toBeDefined();
-    expect(event.type).toBe(
-      "uk.nhs.notify.supplier-api.letter-status.ACCEPTED.v1",
-    );
-    expect(event.specversion).toBe("1.0");
-    expect(event.source).toBe("/data-plane/supplier-api/prod/update-status");
-    expect(event.id).toBe("23f1f09c-a555-4d9b-8405-0b33490bc920");
-    expect(event.time).toBe("2025-08-28T08:45:00.000Z");
-    expect(event.datacontenttype).toBe("application/json");
-    expect(event.dataschema).toBe(
-      "https://notify.nhs.uk/events/supplier-api/letter-status/ACCEPTED/1.0.0.json",
-    );
-    expect(event.dataschemaversion).toBe("1.0.0");
-    expect(event.data).toBeDefined();
-    expect(event.data.sourceSubject).toBe("some-subject");
-    expect(event.data.status).toBe("ACCEPTED");
-    expect(event.data.reasonCode).toBeUndefined();
-    expect(event.data.reasonText).toBeUndefined();
-  });
-
-  it("should throw error for letter-status.ACCEPTED event with missing sourceSubject", () => {
-    const json = readJson("letter-status.ACCEPTED-with-missing-fields.json");
-
-    expect(() => letterStatusChangeEventsMap['letter-status.ACCEPTED'].parse(json)).toThrow(
-      "sourceSubject",
+    expect(event).toEqual(
+      expect.objectContaining({
+        type: "uk.nhs.notify.supplier-api.letter.ACCEPTED.v1",
+        specversion: "1.0",
+        source: "/data-plane/supplier-api/prod/update-status",
+        id: "23f1f09c-a555-4d9b-8405-0b33490bc920",
+        time: "2025-08-28T08:45:00.000Z",
+        datacontenttype: "application/json",
+        dataschema: "https://notify.nhs.uk/events/supplier-api/letter/ACCEPTED/1.0.0.json",
+        dataschemaversion: "1.0.0",
+        subject: "customer/letter-renderer/supplier-api/letter/f47ac10b-58cc-4372-a567-0e02b2c3d479",
+        data: expect.objectContaining({
+          origin: expect.objectContaining({
+            source: "/data-plane/letter-rendering/prod/render-pdf",
+            subject: "customer/00f3b388-bbe9-41c9-9e76-052d37ee8988/letter-rendering/letter-request/0o5Fs0EELR0fUjHjbCnEtdUwQe4_0o5Fs0EELR0fUjHjbCnEtdUwQe5",
+          }),
+          status: "ACCEPTED"
+        })
+      })
     );
   });
 
-  it("should throw error for letter-status.ACCEPTED event with invalid major schema version", () => {
+  it("should throw error for letter.ACCEPTED event with missing sourceSubject", () => {
+    const json = readJson("letter.ACCEPTED-with-missing-fields.json");
+
+    expect(() => letterEventMap['letter.ACCEPTED'].parse(json)).toThrow(
+      "source",
+    );
+  });
+
+  it("should throw error for letter.ACCEPTED event with invalid major schema version", () => {
     const json = readJson(
-      "letter-status.ACCEPTED-with-invalid-major-version.json",
+      "letter.ACCEPTED-with-invalid-major-version.json",
     );
 
-    expect(() => letterStatusChangeEventsMap['letter-status.ACCEPTED'].parse(json)).toThrow(
+    expect(() => letterEventMap['letter.ACCEPTED'].parse(json)).toThrow(
       "dataschemaversion",
     );
   });

@@ -28,11 +28,11 @@ export const $EnvelopeProfile = z
     subject: z
       .string()
       .min(5)
-      .regex(/^[a-z0-9-]+(\/[a-z0-9-]+)*$/)
+      .regex(/^[^\/]+(\/[^\/]+)*$/)
       .meta({
         title: "Event Subject",
         description:
-          "Resource path (no leading slash) within the source made of lowercase segments separated by '/'.",
+          "Resource path (no leading slash) within the source made of segments separated by '/'.",
         examples: [
           "customer/920fca11-596a-4eca-9c47-99f624614658/order/769acdd4-6a47-496f-999f-76a6fd2c3959/item/4f5e17c0-ec57-4cee-9a86-14580cf5af7d",
         ],
@@ -200,14 +200,14 @@ export const $EnvelopeProfile = z
     if (
       /^\/data-plane/.test(obj.source) &&
       // eslint-disable-next-line sonarjs/regex-complexity
-      !/^customer\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}(?:\/(?:[a-z0-9-]+|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}))*$/.test(
+      !/^customer(\/[^\/]+)+$/.test(
         obj.subject,
       )
     ) {
       ctx.addIssue({
         code: "custom",
         message:
-          "For /data-plane sources, subject must start with customer/{uuid} and may have further segments which are either lowercase tokens or UUIDs.",
+          "For /data-plane sources, subject must start with customer/{id} and may have further segments separated by '/'.",
         path: ["subject"],
       });
     }

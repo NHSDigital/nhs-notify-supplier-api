@@ -1,10 +1,10 @@
 import { z } from "zod";
 import * as fs from "node:fs";
-import { $LetterStatusChange } from "../domain/letter-status-change";
-import { letterStatusChangeEventsMap } from "../events/letter-status-change-events";
+import { $Letter } from "../domain/letter";
+import { letterEventMap } from "../events/letter-events";
 
 for (const [key, schema] of Object.entries({
-  "letter-status-change": $LetterStatusChange,
+  "letter": $Letter,
 })) {
   const json = z.toJSONSchema(schema, {
     io: "input",
@@ -17,7 +17,7 @@ for (const [key, schema] of Object.entries({
   console.info(`Wrote JSON schema for ${key} to ${file}`);
 }
 
-for (const [key, schema] of Object.entries(letterStatusChangeEventsMap)) {
+for (const [key, schema] of Object.entries(letterEventMap)) {
   const json = z.toJSONSchema(schema, {
     io: "input",
     target: "openapi-3.0",

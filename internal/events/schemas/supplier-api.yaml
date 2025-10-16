@@ -11,33 +11,33 @@ channels:
     title: Data Plane
     description: Events relating to message delivery
     messages:
-      letter-status-accepted:
-        $ref: '#/components/messages/letter-status-accepted'
-      letter-status-cancelled:
-        $ref: '#/components/messages/letter-status-cancelled'
-      letter-status-delivered:
-        $ref: '#/components/messages/letter-status-delivered'
-      letter-status-dispatched:
-        $ref: '#/components/messages/letter-status-dispatched'
-      letter-status-enclosed:
-        $ref: '#/components/messages/letter-status-enclosed'
-      letter-status-failed:
-        $ref: '#/components/messages/letter-status-failed'
-      letter-status-forwarded:
-        $ref: '#/components/messages/letter-status-forwarded'
-      letter-status-pending:
-        $ref: '#/components/messages/letter-status-pending'
-      letter-status-printed:
-        $ref: '#/components/messages/letter-status-printed'
-      letter-status-rejected:
-        $ref: '#/components/messages/letter-status-rejected'
-      letter-status-returned:
-        $ref: '#/components/messages/letter-status-returned'
+      letter-accepted:
+        $ref: '#/components/messages/letter-accepted'
+      letter-cancelled:
+        $ref: '#/components/messages/letter-cancelled'
+      letter-delivered:
+        $ref: '#/components/messages/letter-delivered'
+      letter-dispatched:
+        $ref: '#/components/messages/letter-dispatched'
+      letter-enclosed:
+        $ref: '#/components/messages/letter-enclosed'
+      letter-failed:
+        $ref: '#/components/messages/letter-failed'
+      letter-forwarded:
+        $ref: '#/components/messages/letter-forwarded'
+      letter-pending:
+        $ref: '#/components/messages/letter-pending'
+      letter-printed:
+        $ref: '#/components/messages/letter-printed'
+      letter-rejected:
+        $ref: '#/components/messages/letter-rejected'
+      letter-returned:
+        $ref: '#/components/messages/letter-returned'
 
 components:
   messages:
-    letter-status-accepted:
-      name: letter-status-accepted
+    letter-accepted:
+      name: letter-accepted
       title: Letter Status Accepted
       summary: |
         A letter status has been updated to accepted.
@@ -45,10 +45,10 @@ components:
         This indicates that a letter has been accepted for processing by a supplier.
       contentType: application/json
       payload:
-        $ref: './events/letter-status.ACCEPTED.schema.json'
+        $ref: './events/letter.ACCEPTED.schema.json'
 
-    letter-status-cancelled:
-      name: letter-status-cancelled
+    letter-cancelled:
+      name: letter-cancelled
       title: Letter Status Cancelled
       summary: |
         A letter status has been updated to cancelled.
@@ -56,10 +56,10 @@ components:
         This indicates that a letter has been cancelled and will not be printed or dispatched.
       contentType: application/json
       payload:
-        $ref: './events/letter-status.CANCELLED.schema.json'
+        $ref: './events/letter.CANCELLED.schema.json'
 
-    letter-status-delivered:
-      name: letter-status-delivered
+    letter-delivered:
+      name: letter-delivered
       title: Letter Status Delivered
       summary: |
         A letter status has been updated to delivered.
@@ -67,10 +67,10 @@ components:
         This indicates that a letter has been delivered to the recipient.
       contentType: application/json
       payload:
-        $ref: './events/letter-status.DELIVERED.schema.json'
+        $ref: './events/letter.DELIVERED.schema.json'
 
-    letter-status-dispatched:
-      name: letter-status-dispatched
+    letter-dispatched:
+      name: letter-dispatched
       title: Letter Status Dispatched
       summary: |
         A letter status has been updated to dispatched.
@@ -78,13 +78,13 @@ components:
         This indicates that a letter has been dispatched from the supplier to a down-stream access (DSA) provider.
       contentType: application/json
       payload:
-        $ref: './events/letter-status.DISPATCHED.schema.json'
+        $ref: './events/letter.DISPATCHED.schema.json'
       examples:
         - payload:
-            $ref: './examples/letter-status.DISPATCHED.json'
+            $ref: './examples/letter.DISPATCHED.json'
 
-    letter-status-enclosed:
-      name: letter-status-enclosed
+    letter-enclosed:
+      name: letter-enclosed
       title: Letter Status Enclosed
       summary: |
         A letter status has been updated to enclosed.
@@ -92,10 +92,10 @@ components:
         This indicates that a letter has been printed and packaged in an envelope.
       contentType: application/json
       payload:
-        $ref: './events/letter-status.ENCLOSED.schema.json'
+        $ref: './events/letter.ENCLOSED.schema.json'
 
-    letter-status-failed:
-      name: letter-status-failed
+    letter-failed:
+      name: letter-failed
       title: Letter Status Failed
       summary: |
         A letter status has been updated to failed.
@@ -103,10 +103,10 @@ components:
         This indicates that a letter has failed to be processed by a supplier.
       contentType: application/json
       payload:
-        $ref: './events/letter-status.FAILED.schema.json'
+        $ref: './events/letter.FAILED.schema.json'
 
-    letter-status-forwarded:
-      name: letter-status-forwarded
+    letter-forwarded:
+      name: letter-forwarded
       title: Letter Status Forwarded
       summary: |
         A letter status has been updated to forwarded.
@@ -114,10 +114,10 @@ components:
         This indicates that a letter has been forwarded to another supplier for processing.
       contentType: application/json
       payload:
-        $ref: './events/letter-status.FORWARDED.schema.json'
+        $ref: './events/letter.FORWARDED.schema.json'
 
-    letter-status-pending:
-      name: letter-status-pending
+    letter-pending:
+      name: letter-pending
       title: Letter Status Pending
       summary: |
         A letter status has been updated to pending.
@@ -125,10 +125,10 @@ components:
         This indicates that a letter has been queued for processing by a supplier.
       contentType: application/json
       payload:
-        $ref: './events/letter-status.PENDING.schema.json'
+        $ref: './events/letter.PENDING.schema.json'
 
-    letter-status-printed:
-      name: letter-status-printed
+    letter-printed:
+      name: letter-printed
       title: Letter Status Printed
       summary: |
         A letter status has been updated to printed.
@@ -136,10 +136,10 @@ components:
         This indicates that a letter has been printed by the supplier.
       contentType: application/json
       payload:
-        $ref: './events/letter-status.PRINTED.schema.json'
+        $ref: './events/letter.PRINTED.schema.json'
 
-    letter-status-rejected:
-      name: letter-status-rejected
+    letter-rejected:
+      name: letter-rejected
       title: Letter Status Rejected
       summary: |
         A letter status has been updated to rejected.
@@ -147,10 +147,10 @@ components:
         This indicates that a letter has been rejected by the supplier and will not be processed.
       contentType: application/json
       payload:
-        $ref: './events/letter-status.REJECTED.schema.json'
+        $ref: './events/letter.REJECTED.schema.json'
 
-    letter-status-returned:
-      name: letter-status-returned
+    letter-returned:
+      name: letter-returned
       title: Letter Status Returned
       summary: |
         A letter status has been updated to returned.
@@ -158,4 +158,4 @@ components:
         This indicates that a letter has been returned to the supplier.
       contentType: application/json
       payload:
-        $ref: './events/letter-status.RETURNED.schema.json'
+        $ref: './events/letter.RETURNED.schema.json'

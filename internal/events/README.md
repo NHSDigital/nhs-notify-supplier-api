@@ -3,7 +3,7 @@
 This internal package defines CloudEvents-compatible schemas (with Zod) for the Supplier API domain – currently focusing on Letter Status Change events. It provides:
 
 * A reusable CloudEvents envelope profile (`$EnvelopeProfile`)
-* Domain model schemas for letter status transitions (`$LetterStatus`, `$LetterStatusChange`)
+* Domain model schemas for letter status transitions (`$LetterStatus`, `$Letter`)
 * Concrete per-status event schemas with strict `type`, `dataschema` URI and semantic version validation
 * Utilities to programmatically access all status change event schemas (`statusChangeEvents`)
 
@@ -16,10 +16,10 @@ This internal package defines CloudEvents-compatible schemas (with Zod) for the 
 ```text
 src/
   domain/
-    letter-status-change.ts        # Domain model and status enum
+    letter.ts                      # Domain model and status enum
   events/
     envelope-profile.ts            # CloudEvents base envelope extensions & constraints
-    letter-status-change-events.ts # Per status event schema generation
+    letter-events.ts               # Per status event schema generation
   cli/                             # CLI scripts for bundling / codegen
   index.ts                         # (re-)exports (not shown above if generated later)
 ```
@@ -43,11 +43,11 @@ Defines the constrained CloudEvents 1.0 envelope used across Notify. It enforces
 
 ### 2. Letter Status Domain
 
-`letter-status-change.ts` introduces:
+`letter-change.ts` introduces:
 
 * `$LetterStatus` enumeration covering lifecycle states:
   `PENDING | ACCEPTED | REJECTED | PRINTED | ENCLOSED | CANCELLED | DISPATCHED | FAILED | RETURNED | DESTROYED | FORWARDED | DELIVERED`
-* `$LetterStatusChange` domain object, extending a `DomainBase('LetterStatusChange')` (see helpers package) with:
+* `$Letter` domain object, extending a `DomainBase('Letter')` (see helpers package) with:
   * `domainId` (branded identifier)
   * `sourceSubject` – original resource subject
   * `status` – one of `$LetterStatus`
@@ -55,14 +55,14 @@ Defines the constrained CloudEvents 1.0 envelope used across Notify. It enforces
 
 ### 3. Per‑Status Event Schemas
 
-`letter-status-change-events.ts` programmatically creates a schema per status by extending `$EnvelopeProfile` and replacing `data` with the domain payload. Each schema enforces:
+`letter-change-events.ts` programmatically creates a schema per status by extending `$EnvelopeProfile` and replacing `data` with the domain payload. Each schema enforces:
 
-* `type = uk.nhs.notify.supplier-api.letter-status.<STATUS>.v1`
-* `dataschema` matches: `https://notify.nhs.uk/events/supplier-api/letter-status/<STATUS>/1.<minor>.<patch>.json`
+* `type = uk.nhs.notify.supplier-api.letter.<STATUS>.v1`
+* `dataschema` matches: `https://notify.nhs.uk/events/supplier-api/letter/<STATUS>/1.<minor>.<patch>.json`
 * `dataschemaversion` uses semantic version with major fixed to `1` (`1.x.y`)
 * `data.status` literal‑locked to the matching status
 
-The export `statusChangeEvents` is a dictionary keyed by `letter-status.<STATUS>`.
+The export `letterEventMap` is a dictionary keyed by `letter.<STATUS>`.
 
 ---
 
@@ -88,7 +88,7 @@ External `npm install` instructions are intentionally omitted (private package).
 ```typescript
 import { statusChangeEvents } from '@nhsdigital/nhs-notify-event-schemas-supplier-api';
 
-const schema = statusChangeEvents['letter-status.PRINTED'];
+const schema = statusChangeEvents['letter.PRINTED'];
 const parsed = schema.safeParse(incomingEventJson);
 if (!parsed.success) {
   // handle validation failure (log / DLQ)
@@ -99,14 +99,14 @@ if (!parsed.success) {
 }
 ```
 
-### Validating a generic letter-status.* event
+### Validating a generic letter.* event
 
 ```typescript
 ```typescript
-import { $LetterStatusChangeEvent } from '@nhsdigital/nhs-notify-event-schemas-supplier-api';
+import { $LetterEvent } from '@nhsdigital/nhs-notify-event-schemas-supplier-api';
 
 function validateLetterStatusEvent(e: unknown) {
-  const result = $LetterStatusChangeEvent.safeParse(e);
+  const result = $LetterEvent.safeParse(e);
   if (!result.success) {
     // handle validation failure (log / DLQ)
     return { ok: false as const, error: result.error };
@@ -123,16 +123,16 @@ import { statusChangeEvents } from '@nhsdigital/nhs-notify-event-schemas-supplie
 import { randomUUID } from 'crypto';
 
 const status = 'ACCEPTED' as const;
-const schema = statusChangeEvents[`letter-status.${status}`];
+const schema = statusChangeEvents[`letter.${status}`];
 
 const event = {
   specversion: '1.0',
   id: randomUUID(),
   source: '/data-plane/supplier-api',
   subject: 'customer/1b20f918-bb05-4c78-a4aa-5f6a3b8e0c91/letter/4a5a9cb5-1440-4a12-bd72-baa7cfecd111',
-  type: 'uk.nhs.notify.supplier-api.letter-status.ACCEPTED.v1',
+  type: 'uk.nhs.notify.supplier-api.letter.ACCEPTED.v1',
   time: new Date().toISOString(),
-  dataschema: 'https://notify.nhs.uk/events/supplier-api/letter-status/ACCEPTED/1.0.0.json',
+  dataschema: 'https://notify.nhs.uk/events/supplier-api/letter/ACCEPTED/1.0.0.json',
   dataschemaversion: '1.0.0',
   data: {
     domainId: 'abc123',
@@ -181,7 +181,7 @@ Execution order helpers:
 ## Adding New Event Types (Future)
 
 1. Extend the domain model under `src/domain/`
-2. Add a generator similar to `letter-status-change-events.ts`
+2. Add a generator similar to `letter-events.ts`
 3. Ensure `type` naming: `uk.nhs.notify.supplier-api.<area>.<action>.v1`
 4. Provide deterministic `dataschema` pattern with semantic versioning
 5. Export via `src/index.ts`
