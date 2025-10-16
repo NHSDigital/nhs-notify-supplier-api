@@ -60,8 +60,10 @@ data "aws_iam_policy_document" "get_letters_lambda" {
     effect = "Allow"
 
     actions = [
+      "dynamodb:BatchGetItem",
       "dynamodb:GetItem",
-      "dynamodb:Query"
+      "dynamodb:Query",
+      "dynamodb:Scan",
     ]
 
     resources = [
