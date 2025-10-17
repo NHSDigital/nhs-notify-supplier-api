@@ -1,7 +1,7 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import pino from 'pino';
-import { LetterRepository } from '../../../../internal/datastore';
+import { LetterRepository } from '@internal/datastore';
 
 const BASE_TEN = 10;
 

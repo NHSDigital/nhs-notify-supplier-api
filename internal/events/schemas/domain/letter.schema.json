@@ -1,0 +1,76 @@
+{
+  "type": "object",
+  "properties": {
+    "domainId": {
+      "title": "Letter ID",
+      "description": "Unique identifier for the Letter",
+      "examples": [
+        "1y3q9v1zzzz"
+      ],
+      "type": "string"
+    },
+    "origin": {
+      "title": "Letter origin",
+      "description": "The source and subject of the original event that introduced the letter to the supplier-api domain.",
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "subject"
+      ]
+    },
+    "status": {
+      "title": "Letter Status",
+      "description": "The status of a letter in the supplier-api domain.",
+      "examples": [
+        "ACCEPTED",
+        "REJECTED",
+        "PRINTED"
+      ],
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "ACCEPTED",
+        "REJECTED",
+        "PRINTED",
+        "ENCLOSED",
+        "CANCELLED",
+        "DISPATCHED",
+        "FAILED",
+        "RETURNED",
+        "FORWARDED",
+        "DELIVERED"
+      ]
+    },
+    "reasonCode": {
+      "title": "Reason Code",
+      "description": "Optional reason code for the status change, if applicable.",
+      "examples": [
+        "R01",
+        "R08"
+      ],
+      "type": "string"
+    },
+    "reasonText": {
+      "title": "Reason Text",
+      "description": "Optional human-readable reason for the status change, if applicable.",
+      "examples": [
+        "Undeliverable",
+        "Recipient moved"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "domainId",
+    "origin",
+    "status"
+  ]
+}
