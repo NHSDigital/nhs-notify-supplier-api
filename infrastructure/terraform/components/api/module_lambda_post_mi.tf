@@ -1,4 +1,4 @@
-module "patch_letter" {
+module "post_mi" {
   source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.20/terraform-lambda.zip"
 
   function_name = "post_mi"
