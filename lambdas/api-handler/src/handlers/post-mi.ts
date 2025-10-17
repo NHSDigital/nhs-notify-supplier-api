@@ -48,7 +48,7 @@ export const postMi: APIGatewayProxyHandler = async (event) => {
 
     const date = new Date(timestamp);
     if (Number.isNaN(date.valueOf()) || date.toISOString() !== timestamp) {
-      throw new ValidationError('%s is not a valid ISO8601 instant', {args: [timestamp]});
+      throw new ValidationError(ApiErrorDetail.InvalidRequestTimestamp);
     }
   }
 };
