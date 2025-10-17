@@ -3,7 +3,7 @@ import { mockDeep } from "jest-mock-extended";
 import { makeApiGwEvent } from "./utils/test-utils";
 import { PostMIRequest, PostMIResponse } from "../../contracts/mi";
 import * as miService from '../../services/mi-operations';
-import { postMi } from "../post-mi";
+import { postMi } from '../../index';
 
 jest.mock('../../services/mi-operations');
 
