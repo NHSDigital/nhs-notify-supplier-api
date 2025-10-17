@@ -44,7 +44,7 @@ If packages are not available, then SDKs can be downloaded directly from [latest
 - CSharp sdk-csharp-[Version].zip
 ```
 
-An [NPM nhsnotifysupplier packages](https://github.com/NHSDigital/nhs-notify-supplier-api/pkgs/npm/nhsnotifysupplier) is published on pre-releases and releases
+An [NPM nhsnotifysupplier package](https://github.com/NHSDigital/nhs-notify-supplier-api/pkgs/npm/nhsnotifysupplier) is published on pre-releases and releases
 
 ## Sandbox
 
