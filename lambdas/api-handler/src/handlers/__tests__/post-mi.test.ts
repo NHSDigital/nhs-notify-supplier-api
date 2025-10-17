@@ -81,8 +81,7 @@ describe('postMI API Handler', () => {
 
   it('returns 400 Bad Request when there is no body', async () => {
       const event = makeApiGwEvent({
-        path: '/letters/id1',
-        pathParameters: {id: 'id1'},
+        path: '/mi',
         headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
       });
 
@@ -96,7 +95,7 @@ describe('postMI API Handler', () => {
 
   it('returns 500 Internal Error when error is thrown by service', async () => {
       const event = makeApiGwEvent({
-        path: '/letters/id1',
+        path: '/mi',
         body: requestBody,
         pathParameters: {id: 'id1'},
         headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}

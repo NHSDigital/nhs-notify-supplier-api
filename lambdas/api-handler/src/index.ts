@@ -1,3 +1,4 @@
 // Export all handlers for ease of access
 export { getLetters } from './handlers/get-letters';
 export { patchLetter } from './handlers/patch-letter';
+export { postMi } from './handlers/post-mi';
