@@ -74,6 +74,7 @@ function main() {
 # Run markdownlint natively.
 # Arguments (provided as environment variables):
 #   files=[files to check]
+#   config=[path to config file]
 function run-markdownlint-natively() {
 
   # shellcheck disable=SC2086
@@ -85,6 +86,7 @@ function run-markdownlint-natively() {
 # Run markdownlint in a Docker container.
 # Arguments (provided as environment variables):
 #   files=[files to check]
+#   config=[path to config file]
 function run-markdownlint-in-docker() {
 
   # shellcheck disable=SC1091
