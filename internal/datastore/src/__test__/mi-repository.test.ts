@@ -3,6 +3,10 @@ import { setupDynamoDBContainer, createTables, DBContext, deleteTables } from ".
 import { createTestLogger, LogStream } from "./logs";
 import { MIRepository } from "../mi-repository";
 
+// Database tests can take longer, especially with setup and teardown
+jest.setTimeout(30000);
+
+
 describe('MiRepository', () => {
   let db: DBContext;
   let miRepository: MIRepository;
