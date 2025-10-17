@@ -10,12 +10,14 @@ locals {
     AUTHORIZER_LAMBDA_ARN    = module.authorizer_lambda.function_arn
     GET_LETTERS_LAMBDA_ARN  = module.get_letters.function_arn
     PATCH_LETTER_LAMBDA_ARN  = module.patch_letter.function_arn
+    POST_MI_LAMBDA_ARN       = module.post_mi.function_arn
   })
 
   destination_arn = "arn:aws:logs:${var.region}:${var.shared_infra_account_id}:destination:nhs-main-obs-firehose-logs"
 
   common_lambda_env_vars = {
     LETTERS_TABLE_NAME = aws_dynamodb_table.letters.name,
+    MI_TABLE_NAME = aws_dynamodb_table.mi.name,
     LETTER_TTL_HOURS = 24,
     SUPPLIER_ID_HEADER = "nhsd-supplier-id"
     APIM_CORRELATION_HEADER = "nhsd-correlation-id"
