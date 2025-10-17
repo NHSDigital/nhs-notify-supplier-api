@@ -2,11 +2,8 @@ openapi: 3.0.3
 info:
   version: next
   title: NHS Notify Supplier API
-  description: |
-    API for communication suppliers to integrate with NHS Notify.
-
-    This specification represents the in-development 'next' version of the API schema
-    and should be treated as unstable.
+  description:
+    $ref: 'components/documentation/APIDescription.md'
 security:
   - $ref: 'components/security/security.yml'
 paths:
@@ -65,12 +62,12 @@ tags:
   - name: data
     description: ''
 servers:
+  - url: 'https://internal-dev-sandbox.api.service.nhs.uk/nhs-notify-supplier'
+    description: Public sandbox
   - url: 'http://127.0.0.1:9000'
     description: Local development server
-  - url: 'https://sandbox-server.nhs.uk/nhs-notify-supplier-api'
-    description: Public sandbox
 x-nhsd-apim:
-  temporary: true
+  temporary: false
   monitoring: false
   access:
     $ref: ./components/x-nhsd-apim/access.yml
