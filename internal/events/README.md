@@ -49,13 +49,13 @@ Defines the constrained CloudEvents 1.0 envelope used across Notify. It enforces
   `PENDING | ACCEPTED | REJECTED | PRINTED | ENCLOSED | CANCELLED | DISPATCHED | FAILED | RETURNED | DESTROYED | FORWARDED | DELIVERED`
 * `$Letter` domain object, extending a `DomainBase('Letter')` (see helpers package) with:
   * `domainId` (branded identifier)
-  * `sourceSubject` – original resource subject
+  * `origin` – resource identifiers from the origin domain
   * `status` – one of `$LetterStatus`
   * Optional `reasonCode`, `reasonText`
 
 ### 3. Per‑Status Event Schemas
 
-`letter-change-events.ts` programmatically creates a schema per status by extending `$EnvelopeProfile` and replacing `data` with the domain payload. Each schema enforces:
+`letter-events.ts` programmatically creates a schema per status by extending `$EnvelopeProfile` and replacing `data` with the domain payload. Each schema enforces:
 
 * `type = uk.nhs.notify.supplier-api.letter.<STATUS>.v1`
 * `dataschema` matches: `https://notify.nhs.uk/events/supplier-api/letter/<STATUS>/1.<minor>.<patch>.json`
@@ -128,15 +128,19 @@ const schema = statusChangeEvents[`letter.${status}`];
 const event = {
   specversion: '1.0',
   id: randomUUID(),
-  source: '/data-plane/supplier-api',
-  subject: 'customer/1b20f918-bb05-4c78-a4aa-5f6a3b8e0c91/letter/4a5a9cb5-1440-4a12-bd72-baa7cfecd111',
+  source: '/data-plane/supplier-api/prod/letter-status-change',
+  subject: 'origin/letter-rendering/letter/4a5a9cb5-1440-4a12-bd72-baa7cfecd111',
   type: 'uk.nhs.notify.supplier-api.letter.ACCEPTED.v1',
   time: new Date().toISOString(),
   dataschema: 'https://notify.nhs.uk/events/supplier-api/letter/ACCEPTED/1.0.0.json',
   dataschemaversion: '1.0.0',
   data: {
     domainId: 'abc123',
-    sourceSubject: 'customer/.../letter/...',
+    origin: {
+        domain: 'letter-rendering',
+        source: '/data-plane/letter-rendering/prod/render-pdf',
+        subject: 'origin/.../letter-request/...'
+    },
     status: 'ACCEPTED',
   },
   traceparent: '00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01',

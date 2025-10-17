@@ -34,7 +34,7 @@ export const $EnvelopeProfile = z
         description:
           "Resource path (no leading slash) within the source made of segments separated by '/'.",
         examples: [
-          "customer/920fca11-596a-4eca-9c47-99f624614658/order/769acdd4-6a47-496f-999f-76a6fd2c3959/item/4f5e17c0-ec57-4cee-9a86-14580cf5af7d",
+          "origin/920fca11-596a-4eca-9c47-99f624614658/order/769acdd4-6a47-496f-999f-76a6fd2c3959/item/4f5e17c0-ec57-4cee-9a86-14580cf5af7d",
         ],
       }),
     type: z
@@ -200,14 +200,14 @@ export const $EnvelopeProfile = z
     if (
       /^\/data-plane/.test(obj.source) &&
       // eslint-disable-next-line sonarjs/regex-complexity
-      !/^customer(\/[^\/]+)+$/.test(
+      !/^origin(\/[^\/]+)+$/.test(
         obj.subject,
       )
     ) {
       ctx.addIssue({
         code: "custom",
         message:
-          "For /data-plane sources, subject must start with customer/{id} and may have further segments separated by '/'.",
+          "For /data-plane sources, subject must start with origin/{id} and may have further segments separated by '/'.",
         path: ["subject"],
       });
     }
