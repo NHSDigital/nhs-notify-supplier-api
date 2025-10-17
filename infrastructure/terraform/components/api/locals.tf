@@ -17,6 +17,7 @@ locals {
 
   common_lambda_env_vars = {
     LETTERS_TABLE_NAME = aws_dynamodb_table.letters.name,
+    MI_TABLE_NAME = aws_dynamodb_table.mi.name,
     LETTER_TTL_HOURS = 24,
     SUPPLIER_ID_HEADER = "nhsd-supplier-id"
     APIM_CORRELATION_HEADER = "nhsd-correlation-id"
