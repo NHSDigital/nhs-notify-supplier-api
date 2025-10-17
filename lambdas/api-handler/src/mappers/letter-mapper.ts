@@ -1,5 +1,5 @@
 import { LetterBase, LetterStatus } from "../../../../internal/datastore";
-import { GetLettersResponse, GetLettersResponseSchema, LetterDto, PatchLetterRequest, PatchLetterResponse, PatchLetterResponseSchema } from '../contracts/letters';
+import { GetLetterResponse, GetLetterResponseSchema, GetLettersResponse, GetLettersResponseSchema, LetterDto, PatchLetterRequest, PatchLetterResponse, PatchLetterResponseSchema } from '../contracts/letters';
 
 export function mapToLetterDto(request: PatchLetterRequest, supplierId: string) : LetterDto {
   return  {
@@ -13,23 +13,19 @@ export function mapToLetterDto(request: PatchLetterRequest, supplierId: string) 
 
 export function mapToPatchLetterResponse(letter: LetterBase): PatchLetterResponse {
   return PatchLetterResponseSchema.parse({
-    data: {
-      id: letter.id,
-      type: 'Letter',
-      attributes: {
-        status: letter.status,
-        specificationId: letter.specificationId,
-        groupId: letter.groupId,
-        ...(letter.reasonCode != null && { reasonCode: letter.reasonCode }),
-        ...(letter.reasonText != null && { reasonText: letter.reasonText })
-      }
-    }
+    data: letterToResourceResponse(letter)
   });
 }
 
 export function mapToGetLettersResponse(letters: LetterBase[]): GetLettersResponse {
   return GetLettersResponseSchema.parse({
-    data: letters.map(letterToResourceResponse)
+    data: letters.map(letterToGetLettersResourceResponse)
+  });
+}
+
+export function mapToGetLetterResponse(letter: LetterBase): GetLetterResponse {
+  return GetLetterResponseSchema.parse({
+    data:letterToResourceResponse(letter)
   });
 }
 
@@ -40,7 +36,21 @@ function letterToResourceResponse(letter: LetterBase) {
     attributes: {
       status: letter.status,
       specificationId: letter.specificationId,
+      groupId: letter.groupId,
+      ...(letter.reasonCode != null && { reasonCode: letter.reasonCode }),
+      ...(letter.reasonText != null && { reasonText: letter.reasonText })
+    }
+  };
+};
+
+function letterToGetLettersResourceResponse(letter: LetterBase) {
+  return {
+    id: letter.id,
+    type: 'Letter',
+    attributes: {
+      status: letter.status,
+      specificationId: letter.specificationId,
       groupId: letter.groupId
     }
   };
-}
+};

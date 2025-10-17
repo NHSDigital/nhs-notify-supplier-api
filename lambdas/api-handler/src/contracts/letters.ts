@@ -36,7 +36,7 @@ export const PatchLetterRequestResourceSchema = z.object({
   }).strict()
 }).strict();
 
-export const PatchLetterResponseResourceSchema = z.object({
+export const GetLetterResponseResourceSchema = z.object({
   id: z.string(),
   type: z.literal('Letter'),
   attributes: z.object({
@@ -58,12 +58,16 @@ export const GetLettersResponseResourceSchema = z.object({
   }).strict()
 }).strict();
 
+export const PatchLetterResponseResourceSchema = GetLetterResponseResourceSchema;
+
 export type LetterStatus = z.infer<typeof LetterStatusSchema>;
 
 export const PatchLetterRequestSchema = makeDocumentSchema(PatchLetterRequestResourceSchema);
-export const PatchLetterResponseSchema = makeDocumentSchema(PatchLetterResponseResourceSchema);
+export const GetLetterResponseSchema = makeDocumentSchema(GetLetterResponseResourceSchema);
 export const GetLettersResponseSchema = makeCollectionSchema(GetLettersResponseResourceSchema);
+export const PatchLetterResponseSchema = makeDocumentSchema(PatchLetterResponseResourceSchema);
 
 export type PatchLetterRequest = z.infer<typeof PatchLetterRequestSchema>;
-export type PatchLetterResponse = z.infer<typeof PatchLetterResponseSchema>;
+export type GetLetterResponse = z.infer<typeof GetLetterResponseSchema>;
 export type GetLettersResponse = z.infer<typeof GetLettersResponseSchema>;
+export type PatchLetterResponse = z.infer<typeof PatchLetterResponseSchema>;
