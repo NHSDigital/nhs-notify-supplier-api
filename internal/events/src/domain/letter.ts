@@ -20,11 +20,19 @@ export type LetterStatus = z.infer<typeof $LetterStatus>;
  */
 export const $Letter = DomainBase('Letter').extend({
   origin: z.object({
+    domain: z.string(),
     source: z.string(),
     subject: z.string()
   }).meta({
     title: "Letter origin",
-    description: "The source and subject of the original event that introduced the letter to the supplier-api domain.",
+    description: `The origin domain identifier, source and subject of the original event that introduced the letter to the supplier-api domain.
+
+The identifier will be included as the origin in the subject of any corresponding events emitted by the supplier-api domain.`,
+    examples: [{
+      domain: "letter-rendering",
+      source: "/data-plane/letter-rendering/prod/render-pdf",
+      subject: "customer/00f3b388-bbe9-41c9-9e76-052d37ee8988/letter-rendering/letter-request/0o5Fs0EELR0fUjHjbCnEtdUwQe4_0o5Fs0EELR0fUjHjbCnEtdUwQe5",
+    }]
   }),
   status: $LetterStatus,
   reasonCode: z.string().optional().meta({
