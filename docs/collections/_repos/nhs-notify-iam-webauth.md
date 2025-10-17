@@ -8,7 +8,7 @@ order: 3
 parent: Repositories
 ---
 
-# Purpose
+## Purpose
 
 This repository contains a Micro-Frontend (MFE) web application which handles user login using a Cognito User Pool
 

@@ -1,4 +1,4 @@
-# Contributing to NHS Notify Supplier API
+## Contributing to NHS Notify Supplier API
 
 ## Feature Branches
 
