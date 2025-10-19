@@ -1,23 +1,13 @@
-export interface LambdaEnv {
-  SUPPLIER_ID_HEADER: string;
-  APIM_CORRELATION_HEADER: string;
-  LETTERS_TABLE_NAME: string;
-  LETTER_TTL_HOURS: string;
-  DOWNLOAD_URL_TTL_SECONDS: string;
-}
+import {z} from 'zod';
 
-export const lambdaEnv: LambdaEnv = {
-  SUPPLIER_ID_HEADER: getEnv('SUPPLIER_ID_HEADER'),
-  APIM_CORRELATION_HEADER: getEnv('APIM_CORRELATION_HEADER'),
-  LETTERS_TABLE_NAME: getEnv('LETTERS_TABLE_NAME'),
-  LETTER_TTL_HOURS: getEnv('LETTER_TTL_HOURS'),
-  DOWNLOAD_URL_TTL_SECONDS: getEnv('DOWNLOAD_URL_TTL_SECONDS')
-};
+const EnvVarsSchema = z.object({
+  SUPPLIER_ID_HEADER: z.string(),
+  APIM_CORRELATION_HEADER: z.string(),
+  LETTERS_TABLE_NAME: z.string(),
+  LETTER_TTL_HOURS: z.coerce.number().int(),
+  DOWNLOAD_URL_TTL_SECONDS: z.coerce.number().int()
+});
 
-function getEnv(name: string): string {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(`Missing required env var: ${name}`);
-  }
-  return value;
-}
+export type EnvVars = z.infer<typeof EnvVarsSchema>;
+
+export const envVars = EnvVarsSchema.parse(process.env);

@@ -128,10 +128,10 @@ describe('getLetterDataUrl function', () => {
   const logger = jest.fn() as unknown as pino.Logger;;
   const env = {
         LETTERS_TABLE_NAME: 'LettersTable',
-        LETTER_TTL_HOURS: '24',
+        LETTER_TTL_HOURS: 24,
         SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
         APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
-        DOWNLOAD_URL_TTL_SECONDS: '3600'
+        DOWNLOAD_URL_TTL_SECONDS: 3600
   };
   const deps: Deps = { s3Client, letterRepo, logger, env };
 

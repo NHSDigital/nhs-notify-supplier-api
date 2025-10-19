@@ -1,21 +1,3 @@
-// mock dependencies
-jest.mock("../../config/deps", () => ({ getDeps: jest.fn() }));
-import { Deps, getDeps } from "../../config/deps";
-const mockedGetDeps = getDeps as jest.Mock<Deps>;
-const fakeDeps: jest.Mocked<Deps> = {
-  s3Client: {} as unknown as S3Client,
-  letterRepo: {} as unknown as LetterRepository,
-  logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
-  env: {
-    SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
-    APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
-    LETTERS_TABLE_NAME: 'LETTERS_TABLE_NAME',
-    LETTER_TTL_HOURS: 'LETTER_TTL_HOURS',
-    DOWNLOAD_URL_TTL_SECONDS: 'DOWNLOAD_URL_TTL_SECONDS'
-  } as unknown as LambdaEnv
-}
-mockedGetDeps.mockReturnValue(fakeDeps);
-
 // mock service
 jest.mock('../../services/letter-operations');
 import * as letterService from '../../services/letter-operations';
@@ -40,8 +22,9 @@ import * as errors from '../../contracts/errors';
 import { S3Client } from '@aws-sdk/client-s3';
 import pino from 'pino';
 import { LetterRepository } from '../../../../../internal/datastore/src';
-import { LambdaEnv } from '../../config/env';
-import { patchLetter } from '../patch-letter';
+import { EnvVars } from '../../config/env';
+import { createPatchLetterHandler } from '../patch-letter';
+import { Deps } from "../../config/deps";
 
 const updateLetterStatusRequest : PatchLetterRequest = {
     data: {
@@ -57,11 +40,24 @@ const updateLetterStatusRequest : PatchLetterRequest = {
 
 const requestBody = JSON.stringify(updateLetterStatusRequest, null, 2);
 
-beforeEach(() => {
-  jest.clearAllMocks();
-});
-
 describe('patchLetter API Handler', () => {
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const mockedDeps: jest.Mocked<Deps> = {
+  s3Client: {} as unknown as S3Client,
+  letterRepo: {} as unknown as LetterRepository,
+  logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
+  env: {
+    SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
+    APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
+    LETTERS_TABLE_NAME: 'LETTERS_TABLE_NAME',
+    LETTER_TTL_HOURS: 1,
+    DOWNLOAD_URL_TTL_SECONDS: 1
+  } as unknown as EnvVars
+}
 
   it('returns 200 OK with updated resource', async () => {
     const event = makeApiGwEvent({
@@ -88,7 +84,8 @@ describe('patchLetter API Handler', () => {
     };
     mockedPatchLetterStatus.mockResolvedValue(updateLetterServiceResponse);
 
-    const result = await patchLetter(event, context, callback);
+    const patchLetterHandler = createPatchLetterHandler(mockedDeps);
+    const result = await patchLetterHandler(event, context, callback);
 
     expect(result).toEqual({
       statusCode: 200,
@@ -105,9 +102,10 @@ describe('patchLetter API Handler', () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const result = await patchLetter(event, context, callback);
+    const patchLetterHandler = createPatchLetterHandler(mockedDeps);
+    const result = await patchLetterHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingBody), 'correlationId', mockedGetDeps().logger);
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingBody), 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -119,9 +117,11 @@ describe('patchLetter API Handler', () => {
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
-    const result = await patchLetter(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter), 'correlationId', mockedGetDeps().logger);
+    const patchLetterHandler = createPatchLetterHandler(mockedDeps);
+    const result = await patchLetterHandler(event, context, callback);
+
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter), 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -138,9 +138,10 @@ describe('patchLetter API Handler', () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const result = await patchLetter(event, context, callback);
+    const patchLetterHandler = createPatchLetterHandler(mockedDeps);
+    const result = await patchLetterHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(error, 'correlationId', mockedGetDeps().logger);
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(error, 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -154,9 +155,10 @@ describe('patchLetter API Handler', () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const result = await patchLetter(event, context, callback);
+    const patchLetterHandler = createPatchLetterHandler(mockedDeps);
+    const result = await patchLetterHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingSupplierId), 'correlationId', mockedGetDeps().logger);
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingSupplierId), 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -170,9 +172,10 @@ describe('patchLetter API Handler', () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const result = await patchLetter(event, context, callback);
+    const patchLetterHandler = createPatchLetterHandler(mockedDeps);
+    const result = await patchLetterHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestBody), 'correlationId', mockedGetDeps().logger);
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestBody), 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -186,9 +189,10 @@ describe('patchLetter API Handler', () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const result = await patchLetter(event, context, callback);
+    const patchLetterHandler = createPatchLetterHandler(mockedDeps);
+    const result = await patchLetterHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestBody), 'correlationId', mockedGetDeps().logger);
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestBody), 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -207,9 +211,10 @@ describe('patchLetter API Handler', () => {
       throw error;
     });
 
-    const result = await patchLetter(event, context, callback);
+    const patchLetterHandler = createPatchLetterHandler(mockedDeps);
+    const result = await patchLetterHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(error, 'correlationId', mockedGetDeps().logger);
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(error, 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
 
     spy.mockRestore();
@@ -225,9 +230,10 @@ describe('patchLetter API Handler', () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const result = await patchLetter(event, context, callback);
+    const patchLetterHandler = createPatchLetterHandler(mockedDeps);
+    const result = await patchLetterHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error("The request headers don't contain the APIM correlation id"), undefined, mockedGetDeps().logger);
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error("The request headers don't contain the APIM correlation id"), undefined, mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -241,9 +247,10 @@ describe('patchLetter API Handler', () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const result = await patchLetter(event, context, callback);
+    const patchLetterHandler = createPatchLetterHandler(mockedDeps);
+    const result = await patchLetterHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error('The request headers are empty'), undefined, mockedGetDeps().logger);
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error('The request headers are empty'), undefined, mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 });

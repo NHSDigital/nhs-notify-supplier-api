@@ -12,36 +12,32 @@ mockedMapErrorToResponse.mockReturnValue(expectedErrorResponse);
 jest.mock('../../services/letter-operations');
 import * as letterService from '../../services/letter-operations';
 
-// mock dependencies
-jest.mock("../../config/deps", () => ({ getDeps: jest.fn() }));
-import { Deps, getDeps } from "../../config/deps";
-const mockedGetDeps = getDeps as jest.Mock<Deps>;
-const fakeDeps: jest.Mocked<Deps> = {
-  s3Client: {} as unknown as S3Client,
-  letterRepo: {} as unknown as LetterRepository,
-  logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
-  env: {
-    SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
-    APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
-    LETTERS_TABLE_NAME: 'LETTERS_TABLE_NAME',
-    LETTER_TTL_HOURS: 'LETTER_TTL_HOURS',
-    DOWNLOAD_URL_TTL_SECONDS: 'DOWNLOAD_URL_TTL_SECONDS'
-  } as unknown as LambdaEnv
-}
-mockedGetDeps.mockReturnValue(fakeDeps);
-
 import type { APIGatewayProxyResult, Context } from 'aws-lambda';
 import { mockDeep } from 'jest-mock-extended';
 import { makeApiGwEvent } from './utils/test-utils';
 import { ValidationError } from '../../errors';
 import * as errors from '../../contracts/errors';
-import { getLetterData } from '../get-letter-data';
+import { createGetLetterDataHandler } from '../get-letter-data';
 import { S3Client } from '@aws-sdk/client-s3';
 import pino from 'pino';
 import { LetterRepository } from '../../../../../internal/datastore/src';
-import { LambdaEnv } from '../../config/env';
+import { EnvVars } from '../../config/env';
+import { Deps } from "../../config/deps";
 
 describe('API Lambda handler', () => {
+
+  const mockedDeps: jest.Mocked<Deps> = {
+    s3Client: {} as unknown as S3Client,
+    letterRepo: {} as unknown as LetterRepository,
+    logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
+    env: {
+      SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
+      APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
+      LETTERS_TABLE_NAME: 'LETTERS_TABLE_NAME',
+      LETTER_TTL_HOURS: 1,
+      DOWNLOAD_URL_TTL_SECONDS: 1
+    } as unknown as EnvVars
+  }
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -59,7 +55,8 @@ describe('API Lambda handler', () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const result = await getLetterData(event, context, callback);
+    const getLetterDataHandler = createGetLetterDataHandler(mockedDeps);
+    const result = await getLetterDataHandler(event, context, callback);
 
     expect(result).toEqual({
       statusCode: 303,
@@ -77,9 +74,10 @@ describe('API Lambda handler', () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const result = await getLetterData(event, context, callback);
+    const getLetterDataHandler = createGetLetterDataHandler(mockedDeps);
+    const result = await getLetterDataHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error('The request headers are empty'), undefined, mockedGetDeps().logger);
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error('The request headers are empty'), undefined, mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -93,9 +91,10 @@ describe('API Lambda handler', () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const result = await getLetterData(event, context, callback);
+    const getLetterDataHandler = createGetLetterDataHandler(mockedDeps);
+    const result = await getLetterDataHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error("The request headers don't contain the APIM correlation id"), undefined, mockedGetDeps().logger);
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error("The request headers don't contain the APIM correlation id"), undefined, mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -107,9 +106,10 @@ describe('API Lambda handler', () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const result = await getLetterData(event, context, callback);
+    const getLetterDataHandler = createGetLetterDataHandler(mockedDeps);
+    const result = await getLetterDataHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter), 'correlationId', mockedGetDeps().logger);
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter), 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 });

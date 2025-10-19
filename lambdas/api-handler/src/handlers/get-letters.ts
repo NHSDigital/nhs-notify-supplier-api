@@ -5,9 +5,8 @@ import { ApiErrorDetail } from '../contracts/errors';
 import { mapErrorToResponse } from "../mappers/error-mapper";
 import { ValidationError } from "../errors";
 import { mapToGetLettersResponse } from "../mappers/letter-mapper";
-import { Deps, getDeps } from "../config/deps";
-
-const deps: Deps = getDeps();
+import type { Deps } from "../config/deps";
+import { Logger } from 'pino';
 
 export const getMaxLimit = (): { maxLimit: number } => ({
   maxLimit: parseInt(process.env.MAX_LIMIT!)
@@ -16,82 +15,65 @@ export const getMaxLimit = (): { maxLimit: number } => ({
 // The endpoint should only return pending letters for now
 const status = "PENDING";
 
-export const getLetters: APIGatewayProxyHandler = async (event) => {
+export function createGetLettersHandler(deps: Deps): APIGatewayProxyHandler {
 
-  const { maxLimit } = getMaxLimit();
+  return async (event) => {
 
-  let correlationId: string | undefined;
+    const { maxLimit } = getMaxLimit();
 
-  try {
-    assertNotEmpty(event.headers, new Error("The request headers are empty"));
-    const lowerCasedHeaders = lowerCaseKeys(event.headers);
-    correlationId = assertNotEmpty(lowerCasedHeaders[deps.env.APIM_CORRELATION_HEADER],
-      new Error("The request headers don't contain the APIM correlation id"));
-    const supplierId = assertNotEmpty(lowerCasedHeaders[deps.env.SUPPLIER_ID_HEADER],
-      new ValidationError(ApiErrorDetail.InvalidRequestMissingSupplierId));
-    const limitNumber = getLimitOrDefault(event.queryStringParameters, maxLimit);
+    let correlationId: string | undefined;
 
-    const letters = await getLettersForSupplier(
-      supplierId,
-      status,
-      limitNumber,
-      deps.letterRepo,
-    );
+    try {
+      assertNotEmpty(event.headers, new Error("The request headers are empty"));
+      const lowerCasedHeaders = lowerCaseKeys(event.headers);
+      correlationId = assertNotEmpty(lowerCasedHeaders[deps.env.APIM_CORRELATION_HEADER],
+        new Error("The request headers don't contain the APIM correlation id"));
+      const supplierId = assertNotEmpty(lowerCasedHeaders[deps.env.SUPPLIER_ID_HEADER],
+        new ValidationError(ApiErrorDetail.InvalidRequestMissingSupplierId));
+      const limitNumber = getLimitOrDefault(event.queryStringParameters, maxLimit, deps.logger);
 
-    const response = mapToGetLettersResponse(letters);
+      const letters = await getLettersForSupplier(
+        supplierId,
+        status,
+        limitNumber,
+        deps.letterRepo,
+      );
 
-    deps.logger.info({
-      description: 'Pending letters successfully fetched',
-      supplierId,
-      limitNumber,
-      status,
-      lettersCount: letters.length
-    });
+      const response = mapToGetLettersResponse(letters);
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify(response, null, 2),
-    };
-  }
-  catch (error) {
-    return mapErrorToResponse(error, correlationId, deps.logger);
+      deps.logger.info({
+        description: 'Pending letters successfully fetched',
+        supplierId,
+        limitNumber,
+        status,
+        lettersCount: letters.length
+      });
+
+      return {
+        statusCode: 200,
+        body: JSON.stringify(response, null, 2),
+      };
+    }
+    catch (error) {
+      return mapErrorToResponse(error, correlationId, deps.logger);
+    }
   }
 };
 
-function getLimitOrDefault(queryStringParameters: APIGatewayProxyEventQueryStringParameters | null, maxLimit: number) : number {
+function getLimitOrDefault(queryStringParameters: APIGatewayProxyEventQueryStringParameters | null, maxLimit: number, logger: Logger) : number {
 
-  validateLimitParamOnly(queryStringParameters);
-  return getLimit(queryStringParameters?.limit, maxLimit);
+  validateLimitParamOnly(queryStringParameters, logger);
+  return getLimit(queryStringParameters?.limit, maxLimit, logger);
 }
 
-function assertIsNumber(limitNumber: number) {
-  if (isNaN(limitNumber)) {
-    deps.logger.info({
-      description: "limit parameter is not a number",
-      limitNumber,
-    });
-    throw new ValidationError(ApiErrorDetail.InvalidRequestLimitNotANumber);
-  }
-}
-
-function assertLimitInRange(limitNumber: number, maxLimit: number) {
-  if (limitNumber <= 0 || limitNumber > maxLimit) {
-    deps.logger.info({
-      description: "Limit value is invalid",
-      limitNumber,
-    });
-    throw new ValidationError(ApiErrorDetail.InvalidRequestLimitNotInRange, { args: [maxLimit]});
-  }
-}
-
-function validateLimitParamOnly(queryStringParameters: APIGatewayProxyEventQueryStringParameters | null) {
+function validateLimitParamOnly(queryStringParameters: APIGatewayProxyEventQueryStringParameters | null, logger: Logger) {
   if (
     queryStringParameters &&
     Object.keys(queryStringParameters).some(
       (key) => key !== "limit"
     )
   ) {
-    deps.logger.info({
+    logger.info({
       description: "Unexpected query parameter(s) present",
       queryStringParameters: queryStringParameters,
     });
@@ -99,15 +81,35 @@ function validateLimitParamOnly(queryStringParameters: APIGatewayProxyEventQuery
   }
 }
 
-function getLimit(limit: string | undefined, maxLimit: number) {
+function getLimit(limit: string | undefined, maxLimit: number, logger: Logger) {
   let result;
   if (limit) {
     let limitParam = limit;
     result = Number(limitParam);
-    assertIsNumber(result);
-    assertLimitInRange(result, maxLimit);
+    assertIsNumber(result, logger);
+    assertLimitInRange(result, maxLimit, logger);
   } else {
     result = maxLimit;
   }
   return result;
+}
+
+function assertIsNumber(limitNumber: number, logger: Logger) {
+  if (isNaN(limitNumber)) {
+    logger.info({
+      description: "limit parameter is not a number",
+      limitNumber,
+    });
+    throw new ValidationError(ApiErrorDetail.InvalidRequestLimitNotANumber);
+  }
+}
+
+function assertLimitInRange(limitNumber: number, maxLimit: number, logger: Logger) {
+  if (limitNumber <= 0 || limitNumber > maxLimit) {
+    logger.info({
+      description: "Limit value is invalid",
+      limitNumber,
+    });
+    throw new ValidationError(ApiErrorDetail.InvalidRequestLimitNotInRange, { args: [maxLimit]});
+  }
 }

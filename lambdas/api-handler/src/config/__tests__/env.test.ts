@@ -1,3 +1,5 @@
+import { ZodError } from 'zod';
+
 describe('lambdaEnv', () => {
   const OLD_ENV = process.env;
 
@@ -17,14 +19,14 @@ describe('lambdaEnv', () => {
     process.env.LETTER_TTL_HOURS = '24';
     process.env.DOWNLOAD_URL_TTL_SECONDS = '3600';
 
-    const { lambdaEnv } = require('../env');
+    const { envVars } = require('../env');
 
-    expect(lambdaEnv).toEqual({
+    expect(envVars).toEqual({
       SUPPLIER_ID_HEADER: 'x-supplier-id',
       APIM_CORRELATION_HEADER: 'x-correlation-id',
       LETTERS_TABLE_NAME: 'letters-table',
-      LETTER_TTL_HOURS: '24',
-      DOWNLOAD_URL_TTL_SECONDS: '3600'
+      LETTER_TTL_HOURS: 24,
+      DOWNLOAD_URL_TTL_SECONDS: 3600
     });
   });
 
@@ -35,8 +37,6 @@ describe('lambdaEnv', () => {
     process.env.LETTER_TTL_HOURS = '24';
     process.env.DOWNLOAD_URL_TTL_SECONDS = '3600';
 
-    expect(() => require('../env')).toThrow(
-      'Missing required env var: LETTERS_TABLE_NAME'
-    );
+    expect(() => require('../env')).toThrow(ZodError);
   });
 });

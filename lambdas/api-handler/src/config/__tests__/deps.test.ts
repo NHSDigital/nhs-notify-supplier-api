@@ -1,7 +1,7 @@
 
 import type { Deps } from '../deps';
 
-describe('getDeps()', () => {
+describe('createDependenciesContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();
@@ -28,12 +28,12 @@ describe('getDeps()', () => {
 
     // Env
     jest.mock('../env', () => ({
-      lambdaEnv: {
+      envVars: {
         LETTERS_TABLE_NAME: 'LettersTable',
-        LETTER_TTL_HOURS: '24',
+        LETTER_TTL_HOURS: 24,
         SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
         APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
-        DOWNLOAD_URL_TTL_SECONDS: '3600'
+        DOWNLOAD_URL_TTL_SECONDS: 3600
       },
     }));
   });
@@ -44,8 +44,8 @@ describe('getDeps()', () => {
     const pinoMock = jest.requireMock('pino') as { default: jest.Mock };
     const { LetterRepository } = jest.requireMock('../../../../../internal/datastore') as { LetterRepository: jest.Mock };
 
-    const { getDeps } = require('../deps');
-    const deps: Deps = getDeps();
+    const { createDependenciesContainer } = require('../deps');
+    const deps: Deps = createDependenciesContainer();
 
     expect(S3Client).toHaveBeenCalledTimes(1);
     expect(pinoMock.default).toHaveBeenCalledTimes(1);
@@ -59,27 +59,10 @@ describe('getDeps()', () => {
 
     expect(deps.env).toEqual({
       LETTERS_TABLE_NAME: 'LettersTable',
-      LETTER_TTL_HOURS: '24',
+      LETTER_TTL_HOURS: 24,
       SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
       APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
-      DOWNLOAD_URL_TTL_SECONDS: '3600'
+      DOWNLOAD_URL_TTL_SECONDS: 3600
     });
-  });
-
-  test('is a singleton (second call returns the same object; constructors not re-run)', async () => {
-    // get current mock instances
-    const { S3Client } = jest.requireMock('@aws-sdk/client-s3') as { S3Client: jest.Mock };
-    const pinoMock = jest.requireMock('pino') as { default: jest.Mock };
-    const { LetterRepository } = jest.requireMock('../../../../../internal/datastore') as { LetterRepository: jest.Mock };
-
-    const { getDeps } = require('../deps');
-
-    const first = getDeps();
-    const second = getDeps();
-
-    expect(first).toBe(second);
-    expect(S3Client).toHaveBeenCalledTimes(1);
-    expect(LetterRepository).toHaveBeenCalledTimes(1);
-    expect(pinoMock.default).toHaveBeenCalledTimes(1);
   });
 });

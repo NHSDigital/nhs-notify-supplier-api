@@ -48,7 +48,7 @@ export const getLetterDataUrl = async (supplierId: string, letterId: string, dep
   }
 }
 
-async function getDownloadUrl(s3Uri: string, s3Client: S3Client, expiry: string) {
+async function getDownloadUrl(s3Uri: string, s3Client: S3Client, expiry: number) {
 
   const url = new URL(s3Uri); // works for s3:// URIs
   const bucket = url.hostname;
@@ -59,5 +59,5 @@ async function getDownloadUrl(s3Uri: string, s3Client: S3Client, expiry: string)
     Key: key,
   });
 
-  return await getSignedUrl(s3Client, command, { expiresIn: Number.parseInt(expiry) });
+  return await getSignedUrl(s3Client, command, { expiresIn: expiry });
 }
