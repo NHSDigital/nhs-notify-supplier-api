@@ -1,5 +1,5 @@
 module "get_letters" {
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.20/terraform-lambda.zip"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.24/terraform-lambda.zip"
 
   function_name = "get_letters"
   description   = "Get paginated letter ids"
