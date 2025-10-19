@@ -1,6 +1,6 @@
 import { APIGatewayProxyEventQueryStringParameters, APIGatewayProxyHandler } from "aws-lambda";
 import { getLettersForSupplier } from "../services/letter-operations";
-import { assertNotEmpty, lowerCaseKeys } from "../utils/validation";
+import { validateCommonHeaders } from "../utils/validation";
 import { ApiErrorDetail } from '../contracts/errors';
 import { mapErrorToResponse } from "../mappers/error-mapper";
 import { ValidationError } from "../errors";
@@ -19,21 +19,19 @@ export function createGetLettersHandler(deps: Deps): APIGatewayProxyHandler {
 
   return async (event) => {
 
+    const commonHeadersResult = validateCommonHeaders(event.headers, deps);
+
+    if (!commonHeadersResult.ok) {
+      return mapErrorToResponse(commonHeadersResult.error, commonHeadersResult.correlationId, deps.logger);
+    }
+
     const { maxLimit } = getMaxLimit();
 
-    let correlationId: string | undefined;
-
     try {
-      assertNotEmpty(event.headers, new Error("The request headers are empty"));
-      const lowerCasedHeaders = lowerCaseKeys(event.headers);
-      correlationId = assertNotEmpty(lowerCasedHeaders[deps.env.APIM_CORRELATION_HEADER],
-        new Error("The request headers don't contain the APIM correlation id"));
-      const supplierId = assertNotEmpty(lowerCasedHeaders[deps.env.SUPPLIER_ID_HEADER],
-        new ValidationError(ApiErrorDetail.InvalidRequestMissingSupplierId));
       const limitNumber = getLimitOrDefault(event.queryStringParameters, maxLimit, deps.logger);
 
       const letters = await getLettersForSupplier(
-        supplierId,
+        commonHeadersResult.value.supplierId,
         status,
         limitNumber,
         deps.letterRepo,
@@ -43,7 +41,7 @@ export function createGetLettersHandler(deps: Deps): APIGatewayProxyHandler {
 
       deps.logger.info({
         description: 'Pending letters successfully fetched',
-        supplierId,
+        supplierId: commonHeadersResult.value.supplierId,
         limitNumber,
         status,
         lettersCount: letters.length
@@ -55,7 +53,7 @@ export function createGetLettersHandler(deps: Deps): APIGatewayProxyHandler {
       };
     }
     catch (error) {
-      return mapErrorToResponse(error, correlationId, deps.logger);
+      return mapErrorToResponse(error, commonHeadersResult.value.correlationId, deps.logger);
     }
   }
 };

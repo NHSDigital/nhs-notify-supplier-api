@@ -4,7 +4,7 @@ import { PatchLetterRequest, PatchLetterRequestSchema } from '../contracts/lette
 import { ApiErrorDetail } from '../contracts/errors';
 import { ValidationError } from '../errors';
 import { mapErrorToResponse } from '../mappers/error-mapper';
-import { assertNotEmpty, lowerCaseKeys } from '../utils/validation';
+import { assertNotEmpty, validateCommonHeaders } from '../utils/validation';
 import { mapToLetterDto } from '../mappers/letter-mapper';
 import type { Deps } from "../config/deps";
 
@@ -13,15 +13,13 @@ export function createPatchLetterHandler(deps: Deps): APIGatewayProxyHandler {
 
   return async (event) => {
 
-    let correlationId: string | undefined;
+    const commonHeadersResult = validateCommonHeaders(event.headers, deps);
+
+    if (!commonHeadersResult.ok) {
+      return mapErrorToResponse(commonHeadersResult.error, commonHeadersResult.correlationId, deps.logger);
+    }
 
     try {
-      assertNotEmpty(event.headers, new Error('The request headers are empty'));
-      const lowerCasedHeaders = lowerCaseKeys(event.headers);
-      correlationId = assertNotEmpty(lowerCasedHeaders[deps.env.APIM_CORRELATION_HEADER],
-        new Error("The request headers don't contain the APIM correlation id"));
-      const supplierId = assertNotEmpty(lowerCasedHeaders[deps.env.SUPPLIER_ID_HEADER],
-        new ValidationError(ApiErrorDetail.InvalidRequestMissingSupplierId));
       const letterId = assertNotEmpty( event.pathParameters?.id,
         new ValidationError(ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter));
       const body = assertNotEmpty(event.body, new ValidationError(ApiErrorDetail.InvalidRequestMissingBody));
@@ -37,15 +35,15 @@ export function createPatchLetterHandler(deps: Deps): APIGatewayProxyHandler {
         else throw error;
       }
 
-      const result = await patchLetterStatus(mapToLetterDto(patchLetterRequest, supplierId), letterId, deps.letterRepo);
+      const updatedLetter = await patchLetterStatus(mapToLetterDto(patchLetterRequest, commonHeadersResult.value.supplierId), letterId, deps.letterRepo);
 
       return {
         statusCode: 200,
-        body: JSON.stringify(result, null, 2)
+        body: JSON.stringify(updatedLetter, null, 2)
       };
 
     } catch (error) {
-      return mapErrorToResponse(error, correlationId, deps.logger);
+      return mapErrorToResponse(error, commonHeadersResult.value.correlationId, deps.logger);
     }
   };
 };
