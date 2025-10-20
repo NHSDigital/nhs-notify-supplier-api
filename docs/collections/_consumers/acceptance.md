@@ -273,7 +273,7 @@ Validate that your system promptly reports all dispatched letters by updating th
 
 This test validates that your system can record the delivery confirmation of letters once this information is received from the delivery partner, and correctly mark the letters as DELIVERED.
 
-If your downstream access provider supports reporting delivery confirmation then dispatch should be reported as DELIVERED.
+If your downstream delivery provider supports reporting delivery confirmation then dispatch should be reported as DELIVERED.
 
 **Business outcome:**
 Letters that have completed postal delivery are updated to DELIVERED, confirming the end of the production and delivery workflow.
@@ -282,6 +282,9 @@ Letters that have completed postal delivery are updated to DELIVERED, confirming
 
 - Letters retrieved via GET /letters
 - **Eligible statuses:**
+  - ACCEPTED
+  - PRINTED
+  - ENCLOSED
   - DISPATCHED
 
 **Endpoints:**
@@ -295,7 +298,7 @@ Show that the printed letters have been delivered to patients
 
 | Criteria | Description |
 |---|---|
-| **Steps** | 1. Identify letters with status 'DISPATCHED'<br>2. Send a PATCH /letters/{id}/ request to update targeted letters to DELIVERED or send a POST /letters for a bulk update<br>3. Verify via GET /letters/{id} that status updated to DELIVERED. |
+| **Steps** | 1. Identify letters with status ACCEPTED, PRINTED, ENCLOSED, or DISPATCHED<br>2. Send a PATCH /letters/{id}/ request to update targeted letters to DELIVERED or send a POST /letters for a bulk update<br>3. Verify via GET /letters/{id} that status updated to DELIVERED. |
 | **Acceptance** | - Only letters currently in ACCEPTED, PRINTED, ENCLOSED, or DISPATCHED state are targeted<br>- All targeted letters are updated to DELIVERED<br>- API returns a successful response. |
 | **Evidence** | API responses and before/after samples show correct transition. |
 | **Business value** | Ensures that letters are delivered to patients. |
