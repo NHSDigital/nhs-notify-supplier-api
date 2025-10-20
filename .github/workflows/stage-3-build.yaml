@@ -95,7 +95,6 @@ jobs:
     env:
       PROXYGEN_API_NAME: nhs-notify-supplier
       PR_NUMBER: ${{ inputs.pr_number }}
-      PR_TRIGGER_PAT: ${{ secrets.PR_TRIGGER_PAT }}
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4

@@ -111,12 +111,12 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ -z "$PEM_FILE" ]]; then
+if [[ -z "$APP_PEM_FILE" ]]; then
   echo "[ERROR] PEM_FILE environment variable is not set or is empty."
   exit 1
 fi
 
-if [[ -z "$CLIENT_ID" ]]; then
+if [[ -z "$APP_CLIENT_ID" ]]; then
   echo "[ERROR] CLIENT_ID environment variable is not set or is empty."
   exit 1
 fi
