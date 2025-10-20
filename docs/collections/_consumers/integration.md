@@ -89,6 +89,7 @@ These statuses provide visibility of where a letter is in its lifecycle - from b
 You are required to update each letter's status through the API as key processing events occur.
 The status updates need to be as close to real time as possible.
 This enables NHS Notify to monitor performance, confirm postal outcomes, and ensure accurate tracking across the Service.
+State transitions are not currently enforced. Technically, stages can be skipped or reversed. However, reverting an ACCEPTED letter to PENDING or marking a DISPATCHED letter as FAILED is not expected behaviour.
 
 Statuses are categorised as follows:
 
@@ -101,7 +102,7 @@ The mandatory statuses are: **ACCEPTED**, **REJECTED**, **FORWARDED**, **DISPATC
 - **DISPATCHED:** The letter has been handed over to a postal service.
 - **FAILED:** An unrecoverable error occurred during production, preventing the letter from being dispatched.
 - **RETURNED:** The letter was undeliverable and has been returned to sender.
-- **CANCELLED:** The letter was cancelled following a request from the NHS Notify team.
+- **CANCELLED:** The letter was cancelled following a request from the NHS Notify team
 
 **Optional statuses** - additional, non-mandatory updates that can provide greater operational insight.
 The optional statuses are: **PRINTED**, **ENCLOSED**, **DELIVERED**, and **DESTROYED**.
@@ -109,7 +110,7 @@ These can be used if your internal workflow supports more granular reporting.
 
 - **PRINTED:** The letter has been printed.
 - **ENCLOSED:** The printed letter and any relevant enclosures have been inserted into the mailing envelope.
-- **DELIVERED:** The letter has been delivered to the patient.
+- **DELIVERED:** The letter has been delivered to the patient
 
 Refer to the Letter Status Lifecycle diagram below for the complete sequence of possible transitions, including optional supplier-initiated updates and NHS Notify system-driven outcomes.
 
@@ -163,7 +164,7 @@ A safe environment that mirrors the live API using synthetic data.
 You can test end-to-end workflows without using real patient data.
 
 - Access via APIM: <https://sandbox.api.service.nhs.uk/notify-supplier>
-- Or clone the repository to run a local version.
+- Or clone the repository to run a local version
 
 #### Developer tools
 
@@ -193,7 +194,7 @@ Before moving to production, you must complete integration testing using the [Ac
 - Providing you with two one-week testing windows for your integration.
 - Configuring and maintaining the INT environment.
 - Seeding the environment with test data.
-- Reviewing your submitted evidence and confirming readiness for production.
+- Reviewing your submitted evidence and confirming readiness for production
 
 ---
 
@@ -226,12 +227,12 @@ During the smoke test you (the Supplier) will:
 
 1. Retrieve and print one or more live letters through the production API.
 2. Send the output of the specifications to the address provided.
-3. Confirm reporting - submit a Management Information (MI) update for the smoke-test letter and verify that it’s recorded successfully in NHS Notify.
+3. Confirm reporting - submit a Management Information (MI) update for the smoke-test letter and verify that it’s recorded successfully in NHS Notify
 
 **We (NHS Notify) will:**
 
 - Configure your access to the production environment.
-- Review the smoke-test results and confirm your output meets NHS Notify print specifications.
+- Review the smoke-test results and confirm your output meets NHS Notify print specifications
 
 ---
 
@@ -243,7 +244,7 @@ On your agreed go-live date,  you should make live requests to the NHS Notify Su
 
 - Run early service support calls to help monitor your integration and ensure everything is working as expected.
 - Monitor performance and delivery metrics.
-- Provide help through the [NHS Notify Support](https://notify.nhs.uk/support/) portal.
+- Provide help through the [NHS Notify Support](https://notify.nhs.uk/support/) portal
 
 If you find a problem or have a question, contact the **Supplier API team**  by writing an email to [england.nhsnotifysuppliers@nhs.net](mailto:england.nhsnotifysupplier@nhs.net).
 
