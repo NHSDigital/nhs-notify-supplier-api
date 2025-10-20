@@ -1,18 +1,14 @@
-#!/bin/bash
-
-rm -Rf ~/.asdf
-git clone https://github.com/asdf-vm/asdf.git ~/.asdf;
-chmod +x ~/.asdf/asdf.sh;
-echo '. $HOME/.asdf/asdf.sh' >> ~/.zshrc
+#!/bin/zsh
 
 echo 'export GPG_TTY=$TTY' | cat - ~/.zshrc > temp && mv temp ~/.zshrc
 
+echo 'eval "$(asdf completion zsh)"' >> ~/.zshrc
 source ~/.zshrc
 
-echo 'asdf setup complete'
-
+make _install-dependencies # required before config to ensure python is available due to race between config:: make targets
 make config
 
+sudo gem install jekyll bundler
 jekyll --version && cd docs && bundle install
 
 echo 'jekyll setup complete'
