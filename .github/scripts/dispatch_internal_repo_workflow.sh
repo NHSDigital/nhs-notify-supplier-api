@@ -145,7 +145,7 @@ payload=$( echo -n "${payload_json}" | b64enc )
 # Signature
 header_payload="${header}"."${payload}"
 signature=$(
-    openssl dgst -sha256 -sign <(echo -n "${$PEM_FILE}") \
+    openssl dgst -sha256 -sign <(echo -n "${$APP_PEM_FILE}") \
     <(echo -n "${header_payload}") | b64enc
 )
 
