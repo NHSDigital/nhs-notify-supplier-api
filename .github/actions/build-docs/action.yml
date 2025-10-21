@@ -14,7 +14,7 @@ runs:
         node-version: 18
     - name: Npm cli install
       working-directory: .
-      run: npm ci -w docs
+      run: npm ci
       shell: bash
     - name: Setup Ruby
       uses: ruby/setup-ruby@v1.180.1
