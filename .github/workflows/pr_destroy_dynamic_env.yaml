@@ -18,7 +18,8 @@ jobs:
 
       - name: Trigger dynamic environment destruction
         env:
-          PR_TRIGGER_PAT: ${{ secrets.PR_TRIGGER_PAT }}
+          APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
+          APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
         shell: bash
         run: |
           .github/scripts/dispatch_internal_repo_workflow.sh \
