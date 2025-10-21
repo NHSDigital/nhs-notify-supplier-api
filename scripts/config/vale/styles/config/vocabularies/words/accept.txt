@@ -1,3 +1,4 @@
+API
 [A-Z]+s
 Bitwarden
 bot
@@ -15,6 +16,7 @@ env
 Git[Hh]ub
 Gitleaks
 Grype
+hotfix
 idempotence
 Jira
 Makefile
@@ -22,11 +24,13 @@ OAuth
 Octokit
 [Oo]nboarding
 Podman
-pre
+[Pp]re
 Python
 rawContent
+repo
 SDK
 sed
+src
 Syft
 Terraform
 toolchain
