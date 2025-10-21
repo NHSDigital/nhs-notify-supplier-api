@@ -27,6 +27,7 @@ Podman
 [Pp]re
 Python
 rawContent
+relative_url
 repo
 SDK
 sed
@@ -34,6 +35,7 @@ semver
 src
 Syft
 Terraform
+timeframe
 toolchain
 Trufflehog
 vNext
