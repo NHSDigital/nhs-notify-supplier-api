@@ -511,14 +511,13 @@ Your MI submissions accurately match the letters you've processed.
 **Endpoints:**
 
 - POST /mi
-- GET /mi
 
 **What this test proves:**
 That you can submit MI data in the correct format and confirm it's recorded correctly.
 
 | Criteria | Description |
 |---|---|
-| **Steps** | - Submit MI for a known number of processed letters. The MI should be grouped by specification and group ID<br>- Retrieve the same data with GET /mi<br>- Reconcile counts and timestamps with your local records. |
+| **Steps** | - Submit MI for a known number of processed letters. The MI should be grouped by specification and group ID<br>- Reconcile counts and timestamps with your local records. |
 | **Acceptance** | - MI entries appear in NHS Notify within expected timeframe<br>- Counts match processed letters <br>- No duplicates MI entries for the same date or missing records. |
 | **Evidence** | MI payloads and responses. |
 | **Business value** | Shows that operational and billing data are aligned and complete. |
