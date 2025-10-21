@@ -22,7 +22,7 @@ module "post_mi" {
   function_code_base_path = local.aws_lambda_functions_dir_path
   function_code_dir       = "api-handler/dist"
   function_include_common = true
-  handler_function_name   = "postMi"
+  handler_function_name   = "postMI"
   runtime                 = "nodejs22.x"
   memory                  = 128
   timeout                 = 5

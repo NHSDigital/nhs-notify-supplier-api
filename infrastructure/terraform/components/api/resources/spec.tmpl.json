@@ -169,7 +169,7 @@
     "/mi": {
       "post": {
         "description": "Provide management information.",
-        "operationId": "postMi",
+        "operationId": "postMI",
         "requestBody": {
           "required": true
         },
