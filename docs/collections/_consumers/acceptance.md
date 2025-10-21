@@ -510,7 +510,7 @@ Your MI submissions accurately match the letters you've processed.
 
 **Endpoints:**
 
-- PUT /mi
+- POST /mi
 - GET /mi
 
 **What this test proves:**
