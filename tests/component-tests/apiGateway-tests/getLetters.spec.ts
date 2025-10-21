@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { SUPPLIER_API_GATEWAY_NAME, SUPPLIER_LETTERS, AWS_REGION } from '../../constants/api_constants';
+import { SUPPLIER_LETTERS, AWS_REGION } from '../../constants/api_constants';
 import { createHeaderWithNoCorrelationId, createInvalidRequestHeaders, createValidRequestHeaders } from '../../constants/request_headers';
 import { validateApiResponse } from '../../helpers/validateJsonSchema';
 import { getRestApiGatewayBaseUrl } from '../../helpers/awsGatewayHelper';
@@ -8,7 +8,7 @@ let baseUrl: string;
 
 test.beforeAll(async () => {
   const region = AWS_REGION;
-  baseUrl = await getRestApiGatewayBaseUrl(SUPPLIER_API_GATEWAY_NAME, region);
+  baseUrl = await getRestApiGatewayBaseUrl();
 });
 
 test.describe('API Gateway Tests To Get List Of Pending ', () =>

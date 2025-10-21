@@ -1,4 +1,5 @@
 import { defineConfig, PlaywrightTestConfig } from '@playwright/test';
+import 'dotenv/config';
 
 const baseUrl = process.env.NHSD_APIM_PROXY_URL || 'http://localhost:3000/';
 const envMaxInstances = Number.parseInt(process.env.WORKERS_MAX_INST!) || 10;

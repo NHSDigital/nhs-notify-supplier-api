@@ -116,6 +116,9 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
+      - name: "Set API Suffix"
+        run: |
+          echo "API_SUFFIX=${{ inputs.pr_number }}" >> $GITHUB_ENV
       - name: "Run integration test"
         run: |
           make test-component
