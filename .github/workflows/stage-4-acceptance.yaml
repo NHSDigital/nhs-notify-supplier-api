@@ -52,6 +52,11 @@ jobs:
       - name: "Deploy application"
         run: |
           echo "Deploying application..."
+      - name: "Build OAS file"
+        working-directory: .
+        run: |
+          make publish-oas
+        shell: bash
   test-contract:
     name: "Contract test"
     runs-on: ubuntu-latest

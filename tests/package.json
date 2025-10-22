@@ -2,6 +2,8 @@
   "author": "",
   "dependencies": {
     "@aws-sdk/client-api-gateway": "^3.906.0",
+    "@aws-sdk/client-dynamodb": "^3.858.0",
+    "@aws-sdk/lib-dynamodb": "^3.858.0",
     "allure-js-commons": "^3.3.3",
     "charenc": "^0.0.2",
     "crypt": "^0.0.2",
