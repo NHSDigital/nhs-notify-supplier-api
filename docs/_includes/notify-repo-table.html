@@ -1,0 +1,18 @@
+<h2>Repository List</h2>
+
+<table>
+  <tr>
+    <th>Repository Name</th>
+    <th>More Info</th>
+  </tr>
+  {% for repo in site.repos %} {% if repo.order > 0 %}
+  <tr>
+    <td>{{repo.repo-name}}</td>
+    <td>
+      <a href="{{site.baseurl}}/repos/{{repo.repo-name}}.html">
+        {{ repo.name }} - {{ repo.description }}
+      </a>
+    </td>
+  </tr>
+  {% endif %} {% endfor %}
+</table>
