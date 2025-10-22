@@ -47,8 +47,9 @@ export function createPostMIHandler(deps: Deps): APIGatewayProxyHandler {
 
   function validateIso8601Timestamp(timestamp: string) {
 
-    const date = new Date(timestamp);
-    if (Number.isNaN(date.valueOf()) || date.toISOString() !== timestamp) {
+    // If timestamp looks like a date, but is not valid (e.g. 2025-02-31T13:45:56Z), then new Date(timestamp).valueOf()
+    // will return NaN
+    if (! /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(.\d+)?Z/.test(timestamp) || Number.isNaN(new Date(timestamp).valueOf())) {
       throw new ValidationError(ApiErrorDetail.InvalidRequestTimestamp);
     }
   }

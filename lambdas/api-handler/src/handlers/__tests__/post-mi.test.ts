@@ -72,13 +72,14 @@ describe('postMI API Handler', () => {
   });
 
 
-  it.each([['not a date string'], ['2025-10-16T00:00:00'], ['2025-16-10T00:00:00Z']])
-    ('returns 400 Bad Request when the timestamp is not an ISO8601 instant', async (timestamp: string) => {
-    const invalidRequest = JSON.parse(requestBody);
-    invalidRequest['data']['attributes']['timestamp'] = timestamp;
+  it.each([['not a date string', false], ['2025-10-16T00:00:00', false], ['2025-16-10T00:00:00Z', false],
+            ['2025-10-16T00:00:00Z', true], ['2025-10-16T00:00:00.000000Z', true]])
+    ('validates the timestamp', async (timestamp: string, valid: boolean) => {
+    const modifiedRequest = JSON.parse(requestBody);
+    modifiedRequest['data']['attributes']['timestamp'] = timestamp;
     const event = makeApiGwEvent({
       path: '/mi',
-      body: JSON.stringify(invalidRequest),
+      body: JSON.stringify(modifiedRequest),
       headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
     });
 
@@ -86,7 +87,7 @@ describe('postMI API Handler', () => {
     const result = await postMI(event,  mockDeep<Context>(), jest.fn());
 
     expect(result).toEqual(expect.objectContaining({
-      statusCode: 400
+      statusCode: valid? 201: 400
     }));
   });
 
