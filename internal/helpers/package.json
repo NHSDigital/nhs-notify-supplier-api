@@ -1,11 +1,8 @@
 {
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.858.0",
-    "@aws-sdk/lib-dynamodb": "^3.858.0",
-    "@internal/helpers": "*",
-    "pino": "^9.7.0",
     "zod": "^4.1.11"
   },
+  "description": "Common helper utilities for NHS Notify Supplier API",
   "devDependencies": {
     "@stylistic/eslint-plugin": "^3.1.0",
     "@tsconfig/node22": "^22.0.2",
@@ -15,19 +12,19 @@
     "eslint": "^9.27.0",
     "eslint-plugin-jest": "^29.0.1",
     "jest": "^29.7.0",
-    "jest-mock-extended": "^3.0.7",
-    "testcontainers": "^11.4.0",
     "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
   "license": "MIT",
   "main": "src/index.ts",
-  "name": "@internal/datastore",
+  "name": "@internal/helpers",
   "private": true,
   "scripts": {
+    "build": "tsc",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "test": "jest",
     "test:unit": "jest",
     "typecheck": "tsc --noEmit"
   },

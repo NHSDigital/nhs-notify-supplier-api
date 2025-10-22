@@ -15,6 +15,11 @@ export const baseJestConfig: Config = {
   // Indicates which provider should be used to instrument code for coverage
   coverageProvider: 'babel',
 
+  // Module name mapper to handle TypeScript path aliases
+  moduleNameMapper: {
+    '^@internal/helpers$': '<rootDir>/../helpers/src'
+  },
+
   coverageThreshold: {
     global: {
       branches: 100,

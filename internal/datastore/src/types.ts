@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { idRef } from 'zod-mermaid';
+import { idRef } from '@internal/helpers';
 
 export const SupplerStatus = z.enum(['ENABLED', 'DISABLED']);
 
@@ -29,7 +29,7 @@ export const LetterSchemaBase = z.object({
 });
 
 export const LetterSchema = LetterSchemaBase.extend({
-  supplierId: z.string(),
+  supplierId: idRef(SupplierSchema, 'id'),
   url: z.url(),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -48,7 +48,7 @@ export type LetterBase = z.infer<typeof LetterSchemaBase>;
 
 export const MISchema = z.object({
   id: z.string(),
-  supplierId: idRef(SupplierSchema),
+  supplierId: idRef(SupplierSchema, 'id'),
   specificationId: z.string(),
   groupId: z.string(),
   lineItem: z.string(),

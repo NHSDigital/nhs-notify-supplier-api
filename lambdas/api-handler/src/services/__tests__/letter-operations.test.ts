@@ -1,4 +1,4 @@
-import { Letter, LetterRepository } from '../../../../../internal/datastore/src';
+import { Letter, LetterRepository } from '@internal/datastore';
 import { Deps } from '../../config/deps';
 import { LetterDto } from '../../contracts/letters';
 import { getLetterDataUrl, getLettersForSupplier, patchLetterStatus } from '../letter-operations';
@@ -73,7 +73,8 @@ describe('patchLetterStatus function', () => {
 
     const result = await patchLetterStatus(updatedLetterDto, 'letter1', mockRepo as any);
 
-    expect(result).toEqual({ data:
+    expect(result).toEqual({
+      data:
       {
         id: 'letter1',
         type: 'Letter',
