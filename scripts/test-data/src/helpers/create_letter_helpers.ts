@@ -46,7 +46,6 @@ export async function createLetter(params: {
 
   const letterRecord = await letterRepository.putLetter(letter);
   console.log(letterRecord);
-  return letterRecord;
 }
 
 export function createLetterDto(params: {
@@ -76,4 +75,6 @@ export function createLetterDto(params: {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
+
+  return letter;
 }
