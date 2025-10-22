@@ -52,6 +52,10 @@ jobs:
       - name: "Deploy application"
         run: |
           echo "Deploying application..."
+      - name: "NPM install"
+        working-directory: .
+        run: npm ci
+        shell: bash
       - name: "Build OAS file"
         working-directory: .
         run: |
