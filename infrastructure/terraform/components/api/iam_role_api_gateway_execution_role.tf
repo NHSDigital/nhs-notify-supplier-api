@@ -51,7 +51,8 @@ data "aws_iam_policy_document" "api_gateway_execution_policy" {
       module.authorizer_lambda.function_arn,
       module.get_letter.function_arn,
       module.get_letters.function_arn,
-      module.patch_letter.function_arn
+      module.patch_letter.function_arn,
+      module.get_letter_data.function_arn
     ]
   }
 }

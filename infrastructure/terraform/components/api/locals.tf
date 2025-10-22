@@ -10,6 +10,7 @@ locals {
     AUTHORIZER_LAMBDA_ARN    = module.authorizer_lambda.function_arn
     GET_LETTER_LAMBDA_ARN  = module.get_letter.function_arn
     GET_LETTERS_LAMBDA_ARN  = module.get_letters.function_arn
+    GET_LETTER_DATA_LAMBDA_ARN  = module.get_letter_data.function_arn
     PATCH_LETTER_LAMBDA_ARN  = module.patch_letter.function_arn
   })
 
@@ -17,8 +18,9 @@ locals {
 
   common_lambda_env_vars = {
     LETTERS_TABLE_NAME = aws_dynamodb_table.letters.name,
-    LETTER_TTL_HOURS = 24,
-    SUPPLIER_ID_HEADER = "nhsd-supplier-id"
-    APIM_CORRELATION_HEADER = "nhsd-correlation-id"
+    LETTER_TTL_HOURS = 12960, # 18 months * 30 days * 24 hours
+    SUPPLIER_ID_HEADER = "nhsd-supplier-id",
+    APIM_CORRELATION_HEADER = "nhsd-correlation-id",
+    DOWNLOAD_URL_TTL_SECONDS = 60
   }
 }
