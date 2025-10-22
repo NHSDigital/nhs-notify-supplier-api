@@ -2,7 +2,7 @@
 
 Use this endpoint to get the current status of a single letter by its ID.
 
-Rate limiting applies. On excess requests, you may receive **429 Too Many Requests** (example error code(s): `NOTIFY_QUOTA`). Back off and retry later
+Rate limiting applies. On excess requests, you may receive **429 Too Many Requests** (example error code(s): `NOTIFY_QUOTA`). Back off and retry later.
 
 ## Sandbox test scenarios
 

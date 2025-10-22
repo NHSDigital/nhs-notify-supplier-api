@@ -94,7 +94,7 @@ async function patchLetterResponse(request) {
 
 async function postLettersResponse(request) {
   const patchLetterFileMap = {
-    'data/examples/postLetter/requests/postLetters.json': {responsePath: 'data/examples/postLetter/responses/postLetters.json', responseCode: 200},
+    'data/examples/postLetter/requests/postLetters.json': {responsePath: 'data/examples/postLetter/responses/postLetters.json', responseCode: 202},
   };
   return await mapExampleResponse(request, patchLetterFileMap);
 }
@@ -110,7 +110,7 @@ async function postMIResponse(request) {
 
 async function getLetterDataResponse(id) {
   const getLetterDataFileMap = {
-    '2AL5eYSWGzCHlGmzNxuqVusPxDg' : {responsePath: 'http://example.com', responseCode: 303},
+    '2AL5eYSWGzCHlGmzNxuqVusPxDg' : {responsePath: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', responseCode: 303},
     '2WL5eYSWGzCHlGmzNxuqVusPxDg' : {responsePath: 'data/examples/errors/responses/resourceNotFound.json', responseCode: 404},
   };
   return mapExampleGetResponse(id, getLetterDataFileMap);

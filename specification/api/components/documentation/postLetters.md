@@ -4,7 +4,7 @@ Use this endpoint to update the status for (example, PRINTED, DISPATCHED, DELIVE
 
 Use this endpoint when you need to report status changes for several letters at once.
 
-When you make a POST update request with, the endpoint will respond with a successful (202) response code or an unsuccessful (4xx/5xx) response.
+When you make a POST update request with the endpoint, it will respond with a successful (202) response code or an unsuccessful (4xx/5xx) response.
 
 Rate limiting applies. On excess requests, you may receive **429 Too Many Requests** (example error code(s): `NOTIFY_QUOTA`). Back off and retry later.
 
@@ -15,7 +15,6 @@ Allowed `status` values that can be used to are:
 - `ACCEPTED`
 - `CANCELLED`
 - `DELIVERED`
-- `DESTROYED`
 - `DISPATCHED`
 - `ENCLOSED`
 - `FAILED`
