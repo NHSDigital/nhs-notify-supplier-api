@@ -140,6 +140,13 @@ The process is as follows:
 * send the printed output to the address provided.
 * submit a Management Information (MI) update for verification.
 
+
+The process is as follows:
+
+* retrieve and print one or more live test letters through the production API.
+* send the printed output to the address provided.
+* submit a Management Information (MI) update for verification.
+
 The NHS Notify team will configure your production access, review your results, and confirm that your output meets NHS Notify print specifications.
 
 ## Onboarding
