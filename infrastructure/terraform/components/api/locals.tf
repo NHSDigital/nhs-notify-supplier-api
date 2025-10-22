@@ -12,6 +12,7 @@ locals {
     GET_LETTERS_LAMBDA_ARN  = module.get_letters.function_arn
     GET_LETTER_DATA_LAMBDA_ARN  = module.get_letter_data.function_arn
     PATCH_LETTER_LAMBDA_ARN  = module.patch_letter.function_arn
+    GET_STATUS_LAMBDA_ARN = module.get_status.function_arn
   })
 
   destination_arn = "arn:aws:logs:${var.region}:${var.shared_infra_account_id}:destination:nhs-main-obs-firehose-logs"
