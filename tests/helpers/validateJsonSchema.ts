@@ -1,7 +1,10 @@
 import OpenAPIResponseValidator from "openapi-response-validator";
-import openapiDoc from "../../build/notify-supplier.json" assert { type: "json" };
-type ValidationResult = ReturnType<OpenAPIResponseValidator["validateResponse"]>;
+import path from 'path';
 
+const paths = path.resolve(__dirname, '../../build/notify-supplier.json');
+const openapiDoc = require(paths);
+
+type ValidationResult = ReturnType<OpenAPIResponseValidator["validateResponse"]>;
 /**
  * Validate a response against the OpenAPI spec for a given endpoint and method.
  *

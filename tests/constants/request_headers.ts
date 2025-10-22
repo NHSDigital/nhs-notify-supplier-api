@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { supplierId } from './api_constants';
 
 export const sandBoxHeader: RequestSandBoxHeaders = {
     'X-Request-ID': randomUUID(),
@@ -24,7 +25,7 @@ export async function createInvalidRequestHeaders(): Promise<RequestHeaders> {
   let requestHeaders: RequestHeaders;
     requestHeaders = {
         headerauth1: '',
-        'NHSD-Supplier-ID': '70735ec9-3ba5-4fb0-bb01-b56d2df24bc',
+        'NHSD-Supplier-ID': supplierId,
         'NHSD-Correlation-ID': '1234',
     };
   return requestHeaders;
@@ -34,7 +35,7 @@ export async function createHeaderWithNoCorrelationId(): Promise<RequestHeaders>
   let requestHeaders: RequestHeaders;
     requestHeaders = {
         headerauth1: process.env.HEADERAUTH || '',
-        'NHSD-Supplier-ID': '70735ec9-3ba5-4fb0-bb01-b56d2df24bc',
+        'NHSD-Supplier-ID': supplierId,
         'NHSD-Correlation-ID': '',
     };
   return requestHeaders;
@@ -44,7 +45,7 @@ export async function createValidRequestHeaders(): Promise<RequestHeaders> {
   let requestHeaders: RequestHeaders;
     requestHeaders = {
         headerauth1: process.env.HEADERAUTH || '',
-        'NHSD-Supplier-ID': '70735ec9-3ba5-4fb0-bb01-b56d2df24bc',
+        'NHSD-Supplier-ID': supplierId,
         'NHSD-Correlation-ID': '12345',
     };
   return requestHeaders;
