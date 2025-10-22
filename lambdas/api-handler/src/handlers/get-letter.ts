@@ -1,40 +1,33 @@
-import pino from "pino";
-import { createLetterRepository } from "../infrastructure/letter-repo-factory";
 import { APIGatewayProxyHandler } from "aws-lambda";
-import { assertNotEmpty, lowerCaseKeys } from "../utils/validation";
-import { lambdaConfig } from "../config/lambda-config";
+import { assertNotEmpty, validateCommonHeaders } from "../utils/validation";
 import { ValidationError } from "../errors";
 import { ApiErrorDetail } from "../contracts/errors";
 import { getLetterById } from "../services/letter-operations";
 import { mapErrorToResponse } from "../mappers/error-mapper";
 import { mapToGetLetterResponse } from "../mappers/letter-mapper";
+import { Deps } from "../config/deps";
 
 
-const letterRepo = createLetterRepository();
-const log = pino();
+export function createGetLetterHandler(deps: Deps): APIGatewayProxyHandler {
 
-export const getLetter: APIGatewayProxyHandler = async (event) => {
+  return async (event) => {
 
-    let correlationId;
+    const commonHeadersResult = validateCommonHeaders(event.headers, deps);
+
+    if (!commonHeadersResult.ok) {
+      return mapErrorToResponse(commonHeadersResult.error, commonHeadersResult.correlationId, deps.logger);
+    }
+
     try {
-      assertNotEmpty(event.headers, new Error("The request headers are empty"));
-      const lowerCasedHeaders = lowerCaseKeys(event.headers);
-
-      correlationId = assertNotEmpty(lowerCasedHeaders[lambdaConfig.APIM_CORRELATION_HEADER],
-        new Error("The request headers don't contain the APIM correlation id"));
-
-      const supplierId = assertNotEmpty(lowerCasedHeaders[lambdaConfig.SUPPLIER_ID_HEADER],
-        new ValidationError(ApiErrorDetail.InvalidRequestMissingSupplierId));
-
       const letterId = assertNotEmpty(event.pathParameters?.id, new ValidationError(ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter));
 
-      const letter = await getLetterById(supplierId, letterId, letterRepo);
+      const letter = await getLetterById(commonHeadersResult.value.supplierId, letterId, deps.letterRepo);
 
       const response = mapToGetLetterResponse(letter);
 
-      log.info({
+      deps.logger.info({
         description: 'Letter successfully fetched by id',
-        supplierId,
+        supplierId: commonHeadersResult.value.supplierId,
         letterId
       });
 
@@ -44,6 +37,7 @@ export const getLetter: APIGatewayProxyHandler = async (event) => {
       };
     } catch (error)
     {
-      return mapErrorToResponse(error, correlationId);
+      return mapErrorToResponse(error, commonHeadersResult.value.correlationId, deps.logger);
     }
+  }
 }

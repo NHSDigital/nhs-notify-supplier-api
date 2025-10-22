@@ -2,20 +2,33 @@ import { Context } from 'aws-lambda';
 import { mockDeep } from 'jest-mock-extended';
 import * as letterService from '../../services/letter-operations';
 import { makeApiGwEvent } from './utils/test-utils';
-import { getLetter } from '../../index';
 import { ApiErrorDetail } from '../../contracts/errors';
 import { NotFoundError } from '../../errors';
+import { S3Client } from '@aws-sdk/client-s3';
+import pino from 'pino';
+import { LetterRepository } from '../../../../../internal/datastore/src';
+import { Deps } from '../../config/deps';
+import { EnvVars } from '../../config/env';
+import { createGetLetterHandler } from '../get-letter';
 
 jest.mock('../../services/letter-operations');
 
-jest.mock('../../config/lambda-config', () => ({
-  lambdaConfig: {
-    SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
-    APIM_CORRELATION_HEADER: 'nhsd-correlation-id'
-  }
-}));
 
 describe('API Lambda handler', () => {
+
+  const mockedDeps: jest.Mocked<Deps> = {
+    s3Client: {} as unknown as S3Client,
+    letterRepo: {} as unknown as LetterRepository,
+    logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
+    env: {
+      SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
+      APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
+      LETTERS_TABLE_NAME: 'LETTERS_TABLE_NAME',
+      LETTER_TTL_HOURS: 12960,
+      DOWNLOAD_URL_TTL_SECONDS: 60,
+      MAX_LIMIT: 2500
+    } as unknown as EnvVars
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -33,9 +46,10 @@ describe('API Lambda handler', () => {
     });
 
     const event = makeApiGwEvent({path: '/letters/id1',
-      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'},
+      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId', 'x-request-id': 'requestId'},
       pathParameters: {id: 'id1'}});
 
+    const getLetter = createGetLetterHandler(mockedDeps);
     const result = await getLetter(event, mockDeep<Context>(), jest.fn());
 
     const expected = {
@@ -69,11 +83,11 @@ describe('API Lambda handler', () => {
     });
 
     const event = makeApiGwEvent({path: '/letters/id1',
-      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'},
+      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId', 'x-request-id': 'requestId'},
       pathParameters: {id: 'id1'}});
 
+    const getLetter = createGetLetterHandler(mockedDeps);
     const result = await getLetter(event, mockDeep<Context>(), jest.fn());
-
 
     const expected = {
       data: {
@@ -103,9 +117,10 @@ describe('API Lambda handler', () => {
       });
 
       const event = makeApiGwEvent({path: '/letters/id1',
-        headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'},
+        headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId', 'x-request-id': 'requestId'},
         pathParameters: {id: 'id1'}});
 
+      const getLetter = createGetLetterHandler(mockedDeps);
       const result = await getLetter(event, mockDeep<Context>(), jest.fn());
 
       expect(result).toEqual(expect.objectContaining({
@@ -115,9 +130,10 @@ describe('API Lambda handler', () => {
 
   it ('returns 500 when correlation id is missing from header', async() => {
       const event = makeApiGwEvent({path: '/letters/id1',
-        headers: {'nhsd-supplier-id': 'supplier1'},
+        headers: {'nhsd-supplier-id': 'supplier1', 'x-request-id': 'requestId'},
         pathParameters: {id: 'id1'}});
 
+      const getLetter = createGetLetterHandler(mockedDeps);
       const result = await getLetter(event, mockDeep<Context>(), jest.fn());
 
       expect(result).toEqual(expect.objectContaining({
@@ -125,23 +141,25 @@ describe('API Lambda handler', () => {
     }));
   });
 
-  it ('returns 400 when supplier id is missing from header', async() => {
+  it ('returns 500 when supplier id is missing from header', async() => {
       const event = makeApiGwEvent({path: '/letters/id1',
-        headers: {'nhsd-correlation-id': 'correlationId'},
+        headers: {'nhsd-correlation-id': 'correlationId', 'x-request-id': 'requestId'},
         pathParameters: {id: 'id1'}});
 
+      const getLetter = createGetLetterHandler(mockedDeps);
       const result = await getLetter(event, mockDeep<Context>(), jest.fn());
 
       expect(result).toEqual(expect.objectContaining({
-        statusCode: 400,
+        statusCode: 500,
     }));
   });
 
 
   it ('returns 400 when letter id is missing from path', async() => {
       const event = makeApiGwEvent({path: '/letters/id1',
-        headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}});
+        headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId', 'x-request-id': 'requestId'}});
 
+      const getLetter = createGetLetterHandler(mockedDeps);
       const result = await getLetter(event, mockDeep<Context>(), jest.fn());
 
       expect(result).toEqual(expect.objectContaining({
