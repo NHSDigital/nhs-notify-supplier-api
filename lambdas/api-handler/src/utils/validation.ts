@@ -1,10 +1,7 @@
-import { APIGatewayProxyEventHeaders } from "aws-lambda";
-import { EnvVars } from "../config/env";
-import { ValidationError } from "../errors";
-import { ApiErrorDetail } from "../contracts/errors";
-import { mapErrorToResponse } from "../mappers/error-mapper";
-import { getLetterDataUrl } from "../services/letter-operations";
-import { Deps } from "../config/deps";
+import { APIGatewayProxyEventHeaders } from 'aws-lambda';
+import { ValidationError } from '../errors';
+import { ApiErrorDetail } from '../contracts/errors';
+import { Deps } from '../config/deps';
 
 export function assertNotEmpty<T>(
   value: T | null | undefined,
@@ -14,11 +11,11 @@ export function assertNotEmpty<T>(
     throw error;
   }
 
-  if (typeof value === "string" && value.trim() === "") {
+  if (typeof value === 'string' && value.trim() === '') {
     throw error;
   }
 
-  if (typeof value === "object" && Object.keys(value).length === 0) {
+  if (typeof value === 'object' && Object.keys(value).length === 0) {
     throw error;
   }
 
@@ -33,7 +30,7 @@ export function validateCommonHeaders(headers: APIGatewayProxyEventHeaders, deps
 ): { ok: true; value: {correlationId: string, supplierId: string } } | { ok: false; error: Error; correlationId?: string } {
 
   if (!headers || Object.keys(headers).length === 0) {
-    return { ok: false, error: new Error("The request headers are empty") };
+    return { ok: false, error: new Error('The request headers are empty') };
   }
 
   const lowerCasedHeaders = lowerCaseKeys(headers);
@@ -43,12 +40,21 @@ export function validateCommonHeaders(headers: APIGatewayProxyEventHeaders, deps
     return { ok: false, error: new Error("The request headers don't contain the APIM correlation id") };
   }
 
+  const requestId = lowerCasedHeaders['x-request-id'];
+  if (!requestId) {
+    return {
+      ok: false,
+      error: new Error("The request headers don't contain the x-request-id"),
+      correlationId
+    };
+  }
+
   const supplierId = lowerCasedHeaders[deps.env.SUPPLIER_ID_HEADER];
   if (!supplierId) {
     return {
       ok: false,
-      error: new ValidationError(ApiErrorDetail.InvalidRequestMissingSupplierId),
-      correlationId,
+      error: new Error('The supplier ID is missing from the request'),
+      correlationId
     };
   }
 

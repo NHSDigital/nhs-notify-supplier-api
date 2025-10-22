@@ -13,30 +13,51 @@ describe('lambdaEnv', () => {
   });
 
   it('should load all environment variables successfully', () => {
-    process.env.SUPPLIER_ID_HEADER = 'x-supplier-id';
-    process.env.APIM_CORRELATION_HEADER = 'x-correlation-id';
+    process.env.SUPPLIER_ID_HEADER = 'nhsd-supplier-id';
+    process.env.APIM_CORRELATION_HEADER = 'nhsd-correlation-id';
     process.env.LETTERS_TABLE_NAME = 'letters-table';
-    process.env.LETTER_TTL_HOURS = '24';
-    process.env.DOWNLOAD_URL_TTL_SECONDS = '3600';
+    process.env.LETTER_TTL_HOURS = '12960';
+    process.env.DOWNLOAD_URL_TTL_SECONDS = '60';
+    process.env.MAX_LIMIT = '2500';
 
     const { envVars } = require('../env');
 
     expect(envVars).toEqual({
-      SUPPLIER_ID_HEADER: 'x-supplier-id',
-      APIM_CORRELATION_HEADER: 'x-correlation-id',
+      SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
+      APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
       LETTERS_TABLE_NAME: 'letters-table',
-      LETTER_TTL_HOURS: 24,
-      DOWNLOAD_URL_TTL_SECONDS: 3600
+      LETTER_TTL_HOURS: 12960,
+      DOWNLOAD_URL_TTL_SECONDS: 60,
+      MAX_LIMIT: 2500,
     });
   });
 
   it('should throw if a required env var is missing', () => {
-    process.env.SUPPLIER_ID_HEADER = 'x-supplier-id';
-    process.env.APIM_CORRELATION_HEADER = 'x-correlation-id';
+    process.env.SUPPLIER_ID_HEADER = 'nhsd-supplier-id';
+    process.env.APIM_CORRELATION_HEADER = 'nhsd-correlation-id';
     process.env.LETTERS_TABLE_NAME = undefined; // simulate missing var
-    process.env.LETTER_TTL_HOURS = '24';
-    process.env.DOWNLOAD_URL_TTL_SECONDS = '3600';
+    process.env.LETTER_TTL_HOURS = '12960';
+    process.env.DOWNLOAD_URL_TTL_SECONDS = '60';
 
     expect(() => require('../env')).toThrow(ZodError);
+  });
+
+  it('should not throw if optional are not set', () => {
+    process.env.SUPPLIER_ID_HEADER = 'nhsd-supplier-id';
+    process.env.APIM_CORRELATION_HEADER = 'nhsd-correlation-id';
+    process.env.LETTERS_TABLE_NAME = 'letters-table';
+    process.env.LETTER_TTL_HOURS = '12960';
+    process.env.DOWNLOAD_URL_TTL_SECONDS = '60';
+
+    const { envVars } = require('../env');
+
+    expect(envVars).toEqual({
+      SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
+      APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
+      LETTERS_TABLE_NAME: 'letters-table',
+      LETTER_TTL_HOURS: 12960,
+      DOWNLOAD_URL_TTL_SECONDS: 60,
+      MAX_LIMIT: undefined
+    });
   });
 });

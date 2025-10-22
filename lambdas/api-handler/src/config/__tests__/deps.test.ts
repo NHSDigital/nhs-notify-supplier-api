@@ -30,10 +30,10 @@ describe('createDependenciesContainer', () => {
     jest.mock('../env', () => ({
       envVars: {
         LETTERS_TABLE_NAME: 'LettersTable',
-        LETTER_TTL_HOURS: 24,
+        LETTER_TTL_HOURS: 12960,
         SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
         APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
-        DOWNLOAD_URL_TTL_SECONDS: 3600
+        DOWNLOAD_URL_TTL_SECONDS: 60
       },
     }));
   });
@@ -54,15 +54,15 @@ describe('createDependenciesContainer', () => {
     const repoCtorArgs = (LetterRepository as jest.Mock).mock.calls[0];
     expect(repoCtorArgs[2]).toEqual({
       lettersTableName: 'LettersTable',
-      ttlHours: 24
+      ttlHours: 12960
     });
 
     expect(deps.env).toEqual({
       LETTERS_TABLE_NAME: 'LettersTable',
-      LETTER_TTL_HOURS: 24,
+      LETTER_TTL_HOURS: 12960,
       SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
       APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
-      DOWNLOAD_URL_TTL_SECONDS: 3600
+      DOWNLOAD_URL_TTL_SECONDS: 60
     });
   });
 });

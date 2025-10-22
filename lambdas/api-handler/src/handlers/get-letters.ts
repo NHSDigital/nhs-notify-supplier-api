@@ -1,19 +1,16 @@
-import { APIGatewayProxyEventQueryStringParameters, APIGatewayProxyHandler } from "aws-lambda";
-import { getLettersForSupplier } from "../services/letter-operations";
-import { validateCommonHeaders } from "../utils/validation";
+import { APIGatewayProxyEventQueryStringParameters, APIGatewayProxyHandler } from 'aws-lambda';
+import { getLettersForSupplier } from '../services/letter-operations';
+import { validateCommonHeaders } from '../utils/validation';
 import { ApiErrorDetail } from '../contracts/errors';
-import { mapErrorToResponse } from "../mappers/error-mapper";
-import { ValidationError } from "../errors";
-import { mapToGetLettersResponse } from "../mappers/letter-mapper";
-import type { Deps } from "../config/deps";
+import { mapErrorToResponse } from '../mappers/error-mapper';
+import { ValidationError } from '../errors';
+import { mapToGetLettersResponse } from '../mappers/letter-mapper';
+import type { Deps } from '../config/deps';
 import { Logger } from 'pino';
 
-export const getMaxLimit = (): { maxLimit: number } => ({
-  maxLimit: parseInt(process.env.MAX_LIMIT!)
-});
 
 // The endpoint should only return pending letters for now
-const status = "PENDING";
+const status = 'PENDING';
 
 export function createGetLettersHandler(deps: Deps): APIGatewayProxyHandler {
 
@@ -25,9 +22,9 @@ export function createGetLettersHandler(deps: Deps): APIGatewayProxyHandler {
       return mapErrorToResponse(commonHeadersResult.error, commonHeadersResult.correlationId, deps.logger);
     }
 
-    const { maxLimit } = getMaxLimit();
-
     try {
+      const maxLimit = getMaxLimit(deps);
+
       const limitNumber = getLimitOrDefault(event.queryStringParameters, maxLimit, deps.logger);
 
       const letters = await getLettersForSupplier(
@@ -68,11 +65,11 @@ function validateLimitParamOnly(queryStringParameters: APIGatewayProxyEventQuery
   if (
     queryStringParameters &&
     Object.keys(queryStringParameters).some(
-      (key) => key !== "limit"
+      (key) => key !== 'limit'
     )
   ) {
     logger.info({
-      description: "Unexpected query parameter(s) present",
+      description: 'Unexpected query parameter(s) present',
       queryStringParameters: queryStringParameters,
     });
     throw new ValidationError(ApiErrorDetail.InvalidRequestLimitOnly);
@@ -95,7 +92,7 @@ function getLimit(limit: string | undefined, maxLimit: number, logger: Logger) {
 function assertIsNumber(limitNumber: number, logger: Logger) {
   if (isNaN(limitNumber)) {
     logger.info({
-      description: "limit parameter is not a number",
+      description: 'limit parameter is not a number',
       limitNumber,
     });
     throw new ValidationError(ApiErrorDetail.InvalidRequestLimitNotANumber);
@@ -105,9 +102,18 @@ function assertIsNumber(limitNumber: number, logger: Logger) {
 function assertLimitInRange(limitNumber: number, maxLimit: number, logger: Logger) {
   if (limitNumber <= 0 || limitNumber > maxLimit) {
     logger.info({
-      description: "Limit value is invalid",
+      description: 'Limit value is invalid',
       limitNumber,
     });
     throw new ValidationError(ApiErrorDetail.InvalidRequestLimitNotInRange, { args: [maxLimit]});
   }
+}
+
+function getMaxLimit(deps: Deps): number{
+
+  if (deps.env.MAX_LIMIT == null) {
+    throw new Error('MAX_LIMIT is required for getLetters');
+  }
+
+  return deps.env.MAX_LIMIT;
 }

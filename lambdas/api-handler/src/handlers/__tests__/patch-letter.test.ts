@@ -47,24 +47,28 @@ describe('patchLetter API Handler', () => {
   });
 
   const mockedDeps: jest.Mocked<Deps> = {
-  s3Client: {} as unknown as S3Client,
-  letterRepo: {} as unknown as LetterRepository,
-  logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
-  env: {
-    SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
-    APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
-    LETTERS_TABLE_NAME: 'LETTERS_TABLE_NAME',
-    LETTER_TTL_HOURS: 1,
-    DOWNLOAD_URL_TTL_SECONDS: 1
-  } as unknown as EnvVars
-}
+    s3Client: {} as unknown as S3Client,
+    letterRepo: {} as unknown as LetterRepository,
+    logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
+    env: {
+      SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
+      APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
+      LETTERS_TABLE_NAME: 'LETTERS_TABLE_NAME',
+      LETTER_TTL_HOURS: 12960,
+      DOWNLOAD_URL_TTL_SECONDS: 60
+    } as unknown as EnvVars
+  }
 
   it('returns 200 OK with updated resource', async () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
       body: requestBody,
       pathParameters: {id: 'id1'},
-      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
+      headers: {
+        'nhsd-supplier-id': 'supplier1',
+        'nhsd-correlation-id': 'correlationId',
+        'x-request-id': 'requestId'
+      }
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
@@ -97,7 +101,11 @@ describe('patchLetter API Handler', () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
       pathParameters: {id: 'id1'},
-      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
+      headers: {
+        'nhsd-supplier-id': 'supplier1',
+        'nhsd-correlation-id': 'correlationId',
+        'x-request-id': 'requestId'
+      }
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
@@ -113,7 +121,11 @@ describe('patchLetter API Handler', () => {
     const event = makeApiGwEvent({
       path: '/letters/',
       body: requestBody,
-      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
+      headers: {
+        'nhsd-supplier-id': 'supplier1',
+        'nhsd-correlation-id': 'correlationId',
+        'x-request-id': 'requestId'
+      }
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
@@ -133,7 +145,11 @@ describe('patchLetter API Handler', () => {
       path: '/letters/id1',
       body: requestBody,
       pathParameters: {id: 'id1'},
-      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
+      headers: {
+        'nhsd-supplier-id': 'supplier1',
+        'nhsd-correlation-id': 'correlationId',
+        'x-request-id': 'requestId'
+      }
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
@@ -150,7 +166,10 @@ describe('patchLetter API Handler', () => {
       path: '/letters/id1',
       body: requestBody,
       pathParameters: {id: 'id1'},
-      headers: {'nhsd-correlation-id': 'correlationId'}
+      headers: {
+        'nhsd-correlation-id': 'correlationId',
+        'x-request-id': 'requestId'
+      }
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
@@ -158,7 +177,7 @@ describe('patchLetter API Handler', () => {
     const patchLetterHandler = createPatchLetterHandler(mockedDeps);
     const result = await patchLetterHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingSupplierId), 'correlationId', mockedDeps.logger);
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error('The supplier ID is missing from the request'), 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -167,7 +186,11 @@ describe('patchLetter API Handler', () => {
       path: '/letters/id1',
       body: "{test: 'test'}",
       pathParameters: {id: 'id1'},
-      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
+      headers: {
+        'nhsd-supplier-id': 'supplier1',
+        'nhsd-correlation-id': 'correlationId',
+        'x-request-id': 'requestId'
+      }
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
@@ -184,7 +207,11 @@ describe('patchLetter API Handler', () => {
       path: '/letters/id1',
       body: '{#invalidJSON',
       pathParameters: {id: 'id1'},
-      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
+      headers: {
+        'nhsd-supplier-id': 'supplier1',
+        'nhsd-correlation-id': 'correlationId',
+        'x-request-id': 'requestId'
+      }
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
@@ -201,7 +228,11 @@ describe('patchLetter API Handler', () => {
       path: '/letters/id1',
       body: 'somebody',
       pathParameters: {id: 'id1'},
-      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
+      headers: {
+        'nhsd-supplier-id': 'supplier1',
+        'nhsd-correlation-id': 'correlationId',
+        'x-request-id': 'requestId'
+      }
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
@@ -225,7 +256,10 @@ describe('patchLetter API Handler', () => {
       path: '/letters/id1',
       body: requestBody,
       pathParameters: {id: 'id1'},
-      headers: {'nhsd-supplier-id': 'supplier1'}
+      headers: {
+        'nhsd-supplier-id': 'supplier1',
+        'x-request-id': 'requestId'
+      }
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
@@ -237,7 +271,7 @@ describe('patchLetter API Handler', () => {
     expect(result).toEqual(expectedErrorResponse);
   });
 
-  it('returns 400 for missing supplier ID (empty headers)', async () => {
+  it('returns error if headers are empty', async () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
       body: requestBody,
@@ -251,6 +285,26 @@ describe('patchLetter API Handler', () => {
     const result = await patchLetterHandler(event, context, callback);
 
     expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error('The request headers are empty'), undefined, mockedDeps.logger);
+    expect(result).toEqual(expectedErrorResponse);
+  });
+
+  it('returns error when request id is missing', async () => {
+    const event = makeApiGwEvent({
+      path: '/letters/id1',
+      body: requestBody,
+      pathParameters: {id: 'id1'},
+      headers: {
+        'nhsd-supplier-id': 'supplier1',
+        'nhsd-correlation-id': 'correlationId'
+      }
+    });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+
+    const patchLetterHandler = createPatchLetterHandler(mockedDeps);
+    const result = await patchLetterHandler(event, context, callback);
+
+    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error("The request headers don't contain the x-request-id"), 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 });

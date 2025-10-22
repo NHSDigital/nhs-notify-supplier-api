@@ -34,8 +34,8 @@ describe('API Lambda handler', () => {
       SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
       APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
       LETTERS_TABLE_NAME: 'LETTERS_TABLE_NAME',
-      LETTER_TTL_HOURS: 1,
-      DOWNLOAD_URL_TTL_SECONDS: 1
+      LETTER_TTL_HOURS: 12960,
+      DOWNLOAD_URL_TTL_SECONDS: 60
     } as unknown as EnvVars
   }
 
@@ -48,8 +48,13 @@ describe('API Lambda handler', () => {
     const mockedGetLetterDataUrlService = letterService.getLetterDataUrl as jest.Mock;
     mockedGetLetterDataUrlService.mockResolvedValue('https://somePreSignedUrl.com');
 
-    const event = makeApiGwEvent({path: '/letters/letter1/data',
-      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'},
+    const event = makeApiGwEvent({
+      path: '/letters/letter1/data',
+      headers: {
+        'nhsd-supplier-id': 'supplier1',
+        'nhsd-correlation-id': 'correlationId',
+        'x-request-id': 'requestId'
+      },
       pathParameters: {id: 'id1'}
     });
     const context = mockDeep<Context>();
@@ -67,7 +72,7 @@ describe('API Lambda handler', () => {
     });
   });
 
-  it('returns 400 for missing supplier ID (empty headers)', async () => {
+  it('returns error if headers are empty', async () => {
     const event = makeApiGwEvent({ path: '/letters/letter1/data', headers: {},
       pathParameters: {id: 'id1'}
     });
@@ -81,11 +86,14 @@ describe('API Lambda handler', () => {
     expect(result).toEqual(expectedErrorResponse);
   });
 
-  it('returns 500 if correlation id not provided in request', async () => {
+  it('returns error if correlation id not provided in request', async () => {
     const event = makeApiGwEvent({
       path: '/letters/letter1/data',
       queryStringParameters: { limit: '2000' },
-      headers: {'nhsd-supplier-id': 'supplier1'},
+      headers: {
+        'nhsd-supplier-id': 'supplier1',
+        'x-request-id': 'requestId'
+      },
       pathParameters: {id: 'id1'}
     });
     const context = mockDeep<Context>();
@@ -101,7 +109,11 @@ describe('API Lambda handler', () => {
   it('returns error response when path parameter letterId is not found', async () => {
     const event = makeApiGwEvent({
       path: '/letters/',
-      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
+      headers: {
+        'nhsd-supplier-id': 'supplier1',
+        'nhsd-correlation-id': 'correlationId',
+        'x-request-id': 'requestId'
+      },
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
