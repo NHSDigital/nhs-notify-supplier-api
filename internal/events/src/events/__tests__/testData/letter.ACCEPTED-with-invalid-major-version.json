@@ -3,6 +3,7 @@
     "domainId": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
     "groupId": "client_template",
     "origin": {
+      "domain": "letter-rendering",
       "source": "/data-plane/letter-rendering/prod/render-pdf",
       "subject": "origin/00f3b388-bbe9-41c9-9e76-052d37ee8988/letter-rendering/letter-request/0o5Fs0EELR0fUjHjbCnEtdUwQe4_0o5Fs0EELR0fUjHjbCnEtdUwQe5"
     },
