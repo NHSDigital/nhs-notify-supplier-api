@@ -6,6 +6,7 @@
     "pino": "^9.7.0"
   },
   "devDependencies": {
+    "@aws-sdk/s3-request-presigner": "^3.901.0",
     "@tsconfig/node22": "^22.0.2",
     "@types/aws-lambda": "^8.10.148",
     "@types/jest": "^29.5.14",
