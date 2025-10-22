@@ -8,6 +8,7 @@ locals {
     APIG_EXECUTION_ROLE_ARN  = aws_iam_role.api_gateway_execution_role.arn
     AWS_REGION               = var.region
     AUTHORIZER_LAMBDA_ARN    = module.authorizer_lambda.function_arn
+    GET_LETTER_LAMBDA_ARN  = module.get_letter.function_arn
     GET_LETTERS_LAMBDA_ARN  = module.get_letters.function_arn
     GET_LETTER_DATA_LAMBDA_ARN  = module.get_letter_data.function_arn
     PATCH_LETTER_LAMBDA_ARN  = module.patch_letter.function_arn
