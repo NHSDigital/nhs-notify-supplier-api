@@ -145,7 +145,7 @@ The NHS Notify team will configure your production access, review your results, 
 ## Onboarding
 
 You need to get your software approved by us before it can go live with this API.
-You will also need to be an approved NHS letter supplier under the framework agreement and nominate your technical and operational contacts
+You will also need to be an approved NHS letter supplier under the framework agreement and nominate your technical and operational contacts.
 
 ## Related APIs
 
