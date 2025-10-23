@@ -36,11 +36,11 @@ guard-%:
 serve:
 	npm run serve
 
-
 lint-oas:
 	npm run lint-oas
 
 publish-oas:
+	$(MAKE) copy-examples
 	npm run publish-oas
 
 set-target: guard-APIM_ENV
@@ -75,19 +75,24 @@ build-yml-oas-spec: guard-APIM_ENV
 	$(MAKE) bundle-oas
 
 serve-oas:
+	$(MAKE) copy-examples
 	npm run serve-oas
 
 bundle-oas:
+	$(MAKE) copy-examples
 	npm run bundle-oas
 
 generate-sandbox:
 	$(MAKE) build-json-oas-spec APIM_ENV=sandbox
-	jq --slurpfile status sandbox/HealthcheckEndpoint.json '.paths += $$status[0]' build/notify-supplier.json > tmp.json && mv tmp.json build/notify-supplier.json
+	# jq --slurpfile status sandbox/HealthcheckEndpoint.json '.paths += $$status[0]' build/notify-supplier.json > tmp.json && mv tmp.json build/notify-supplier.json
 	jq '.security = []' build/notify-supplier.json > tmp.json && mv tmp.json build/notify-supplier.json
 	npm run generate-sandbox
 
 serve-swagger:
 	npm run serve-swagger-docs
+
+copy-examples:
+	cp -r ./sandbox/data/examples/. ./specification/api/components/examples
 
 config:: _install-dependencies version # Configure development environment (main) @Configuration
 	npm install

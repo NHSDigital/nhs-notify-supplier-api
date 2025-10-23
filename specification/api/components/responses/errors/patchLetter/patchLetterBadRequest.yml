@@ -1,0 +1,9 @@
+description: "Bad request, invalid input data"
+content:
+  application/vnd.api+json:
+    schema:
+      $ref: "../../../schemas/errorResponse.yml"
+    examples:
+      error-bad-request-invalid-request-body:
+        value:
+          $ref: ../../../examples/errors/responses/patchLetter/invalidBody.json

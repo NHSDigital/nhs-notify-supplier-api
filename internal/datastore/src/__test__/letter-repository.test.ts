@@ -4,8 +4,9 @@ import { Letter } from '../types';
 import { Logger } from 'pino';
 import { createTestLogger, LogStream } from './logs';
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
+import { LetterDto } from '../../../../lambdas/api-handler/src/contracts/letters';
 
-function createLetter(supplierId: string, letterId: string, status: Letter['status'] = 'PENDING'): Omit<Letter, 'ttl' | 'supplierStatus'> {
+function createLetter(supplierId: string, letterId: string, status: Letter['status'] = 'PENDING'): Omit<Letter, 'ttl' | 'supplierStatus' | 'supplierStatusSk'> {
   return {
     id: letterId,
     supplierId: supplierId,
@@ -50,21 +51,23 @@ describe('LetterRepository', () => {
     await db.container.stop();
   });
 
-  async function checkLetterExists(supplierId: string, letterId: string) {
-    const letter = await letterRepository.getLetterById(supplierId, letterId);
-    expect(letter).toBeDefined();
-    expect(letter.id).toBe(letterId);
-    expect(letter.supplierId).toBe(supplierId);
-  }
-
   async function checkLetterStatus(supplierId: string, letterId: string, status: Letter['status']) {
     const letter = await letterRepository.getLetterById(supplierId, letterId);
     expect(letter.status).toBe(status);
   }
 
   test('adds a letter to the database', async () => {
-    await letterRepository.putLetter(createLetter('supplier1', 'letter1'));
-    await checkLetterExists('supplier1', 'letter1');
+    const supplierId = 'supplier1';
+    const letterId = 'letter1';
+
+    await letterRepository.putLetter(createLetter(supplierId, letterId));
+
+    const letter = await letterRepository.getLetterById(supplierId, letterId);
+    expect(letter).toBeDefined();
+    expect(letter.id).toBe(letterId);
+    expect(letter.supplierId).toBe(supplierId);
+    expect(letter.reasonCode).toBeUndefined();
+    expect(letter.reasonText).toBeUndefined();
   });
 
   test('fetches a letter by id', async () => {
@@ -100,11 +103,23 @@ describe('LetterRepository', () => {
   });
 
   test('updates a letter\'s status in the database', async () => {
-    await letterRepository.putLetter(createLetter('supplier1', 'letter1', 'PENDING'));
+    const letter = createLetter('supplier1', 'letter1', 'PENDING');
+    await letterRepository.putLetter(letter);
     await checkLetterStatus('supplier1', 'letter1', 'PENDING');
 
-    await letterRepository.updateLetterStatus('supplier1', 'letter1', 'DELIVERED');
-    await checkLetterStatus('supplier1', 'letter1', 'DELIVERED');
+    const letterDto: LetterDto = {
+      id: 'letter1',
+      supplierId: 'supplier1',
+      status: 'REJECTED',
+      reasonCode: 1,
+      reasonText: 'Reason text'
+    };
+    await letterRepository.updateLetterStatus(letterDto);
+
+    const updatedLetter = await letterRepository.getLetterById('supplier1', 'letter1');
+    expect(updatedLetter.status).toBe('REJECTED');
+    expect(updatedLetter.reasonCode).toBe(1);
+    expect(updatedLetter.reasonText).toBe('Reason text');
   });
 
   test('updates a letter\'s updatedAt date', async () => {
@@ -117,13 +132,25 @@ describe('LetterRepository', () => {
     // Month is zero-indexed in JavaScript Date
     // Day is one-indexed
     jest.setSystemTime(new Date(2020, 1, 2));
-    await letterRepository.updateLetterStatus('supplier1', 'letter1', 'DELIVERED');
+    const letterDto: LetterDto = {
+      id: 'letter1',
+      supplierId: 'supplier1',
+      status: 'DELIVERED'
+    };
+
+    await letterRepository.updateLetterStatus(letterDto);
     const updatedLetter = await letterRepository.getLetterById('supplier1', 'letter1');
+
     expect(updatedLetter.updatedAt).toBe('2020-02-02T00:00:00.000Z');
   });
 
   test('can\'t update a letter that does not exist', async () => {
-    await expect(letterRepository.updateLetterStatus('supplier1', 'letter1', 'DELIVERED'))
+    const letterDto: LetterDto = {
+      id: 'letter1',
+      supplierId: 'supplier1',
+      status: 'DELIVERED'
+    };
+    await expect(letterRepository.updateLetterStatus(letterDto))
       .rejects.toThrow('Letter with id letter1 not found for supplier supplier1');
   });
 
@@ -132,7 +159,13 @@ describe('LetterRepository', () => {
       ...db.config,
       lettersTableName: 'nonexistent-table'
     });
-    await expect(misconfiguredRepository.updateLetterStatus('supplier1', 'letter1', 'DELIVERED'))
+
+    const letterDto: LetterDto = {
+      id: 'letter1',
+      supplierId: 'supplier1',
+      status: 'DELIVERED'
+    };
+    await expect(misconfiguredRepository.updateLetterStatus(letterDto))
       .rejects.toThrow('Cannot do operations on a non-existent table');
   });
 
@@ -157,7 +190,12 @@ describe('LetterRepository', () => {
     const pendingLetters = await letterRepository.getLettersByStatus('supplier1', 'PENDING');
     expect(pendingLetters.letters).toHaveLength(2);
 
-    await letterRepository.updateLetterStatus('supplier1', 'letter1', 'DELIVERED');
+    const letterDto: LetterDto = {
+      id: 'letter1',
+      supplierId: 'supplier1',
+      status: 'DELIVERED'
+    };
+    await letterRepository.updateLetterStatus(letterDto);
     const remainingLetters = await letterRepository.getLettersByStatus('supplier1', 'PENDING');
     expect(remainingLetters.letters).toHaveLength(1);
     expect(remainingLetters.letters[0].id).toBe('letter2');
@@ -205,6 +243,7 @@ describe('LetterRepository', () => {
         url: 's3://bucket/invalid-letter.pdf',
         status: 'PENDING',
         supplierStatus: 'supplier1#PENDING',
+        supplierStatusSk: Date.now().toString(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       }
@@ -218,30 +257,48 @@ describe('LetterRepository', () => {
     expect(logStream.logs).toContainEqual(expect.stringMatching(/.*specificationId.*Invalid input: expected string.*/));
   });
 
-  test('should return all letter ids for a supplier', async () => {
-    await letterRepository.putLetter(createLetter('supplier1', 'letter1'));
-    await letterRepository.putLetter(createLetter('supplier1', 'letter2'));
-    await letterRepository.putLetter(createLetter('supplier1', 'letter3'));
-    await letterRepository.putLetter(createLetter('supplier2', 'letter4'));
-    await letterRepository.putLetter(createLetter('supplier2', 'letter5'));
+  test("should return all letters for a supplier status", async () => {
+    await letterRepository.putLetter(createLetter("supplier1", "letter1"));
+    await letterRepository.putLetter(createLetter("supplier1", "letter2"));
+    await letterRepository.putLetter(createLetter("supplier1", "letter3"));
+    await letterRepository.putLetter(
+      createLetter("supplier1", "letter4", "REJECTED"),
+    );
+    await letterRepository.putLetter(createLetter("supplier2", "letter1"));
+    await letterRepository.putLetter(createLetter("supplier2", "letter2"));
 
-    const letters = await letterRepository.getLetterIdsBySupplier('supplier1');
-    expect(letters).toEqual(['letter1', 'letter2', 'letter3']);
+    const letters = await letterRepository.getLettersBySupplier(
+      "supplier1",
+      "PENDING",
+      10,
+    );
+    expect(letters).toEqual([
+      {
+        id: "letter1",
+        specificationId: "specification1",
+        groupId: 'group1',
+        status: "PENDING",
+      },
+      {
+        id: "letter2",
+        specificationId: "specification1",
+        groupId: 'group1',
+        status: "PENDING",
+      },
+      {
+        id: "letter3",
+        specificationId: "specification1",
+        groupId: 'group1',
+        status: "PENDING",
+      },
+    ]);
   });
 
   test('should return empty if no letters exist for a supplier', async () => {
     await letterRepository.putLetter(createLetter('supplier1', 'letter1'));
     await letterRepository.putLetter(createLetter('supplier1', 'letter2'));
 
-    const letters = await letterRepository.getLetterIdsBySupplier('supplier2');
-    expect(letters).toEqual([]);
-  });
-
-  test('should return empty if no letters exist for a supplier', async () => {
-    await letterRepository.putLetter(createLetter('supplier1', 'letter1'));
-    await letterRepository.putLetter(createLetter('supplier1', 'letter2'));
-
-    const letters = await letterRepository.getLetterIdsBySupplier('supplier2');
+    const letters = await letterRepository.getLettersBySupplier('supplier2', 'PENDING', 10);
     expect(letters).toEqual([]);
   });
 
@@ -252,7 +309,62 @@ describe('LetterRepository', () => {
     const mockDdbClient = { send: mockSend } as any;
     const repo = new LetterRepository(mockDdbClient, { debug: jest.fn() } as any, { lettersTableName: 'letters', ttlHours: 1 });
 
-    const result = await repo.getLetterIdsBySupplier('supplier1');
-    expect(result).toEqual([]);
+    const letters = await repo.getLettersBySupplier('supplier1', 'PENDING', 10);
+    expect(letters).toEqual([]);
+  });
+
+  test('should batch write letters to the database', async () => {
+    const letters = [
+      createLetter('supplier1', 'letter1'),
+      createLetter('supplier1', 'letter2'),
+      createLetter('supplier1', 'letter3')
+    ];
+
+    await letterRepository.putLetterBatch(letters);
+
+    await checkLetterStatus('supplier1', 'letter1', 'PENDING');
+    await checkLetterStatus('supplier1', 'letter2', 'PENDING');
+    await checkLetterStatus('supplier1', 'letter3', 'PENDING');
+  });
+
+  test('should batch in calls upto 25', async () => {
+    const letters = []
+    for(let i=0; i<60; i++) {
+      letters.push(createLetter('supplier1', `letter${i}`));
+    }
+
+    const sendSpy = jest.spyOn(db.docClient, 'send');
+
+    await letterRepository.putLetterBatch(letters);
+
+    expect(sendSpy).toHaveBeenCalledTimes(3);
+
+    await checkLetterStatus('supplier1', 'letter1', 'PENDING');
+    await checkLetterStatus('supplier1', 'letter6', 'PENDING');
+    await checkLetterStatus('supplier1', 'letter59', 'PENDING');
+  });
+
+  test('should skip array gaps', async () => {
+    const letters = [
+      createLetter('supplier1', 'letter1'),
+      createLetter('supplier1', 'letter2'),
+      createLetter('supplier1', 'letter3')
+    ];
+
+    delete letters[1];
+
+    await letterRepository.putLetterBatch(letters);
+
+    await checkLetterStatus('supplier1', 'letter1', 'PENDING');
+    await checkLetterStatus('supplier1', 'letter3', 'PENDING');
+  });
+
+  test('rethrows errors from DynamoDB when batch creating letter', async () => {
+    const misconfiguredRepository = new LetterRepository(db.docClient, logger, {
+      ...db.config,
+      lettersTableName: 'nonexistent-table'
+    });
+    await expect(misconfiguredRepository.putLetterBatch([createLetter('supplier1', 'letter1')]))
+      .rejects.toThrow('Cannot do operations on a non-existent table');
   });
 });

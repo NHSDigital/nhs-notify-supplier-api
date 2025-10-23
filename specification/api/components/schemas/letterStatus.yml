@@ -13,6 +13,5 @@ enum:
   - DESTROYED
   - FORWARDED
 description: The supplier status of an individual letter
-examples:
-  - PENDING
+example: PENDING
 default: PENDING

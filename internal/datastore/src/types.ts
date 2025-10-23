@@ -17,17 +17,25 @@ export const LetterStatus = z.enum([
   'ENCLOSED', 'CANCELLED', 'DISPATCHED', 'FAILED',
   'RETURNED', 'DESTROYED', 'FORWARDED', 'DELIVERED']);
 
-export const LetterSchema = z.object({
+export type LetterStatusType = z.infer<typeof LetterStatus>;
+
+export const LetterSchemaBase = z.object({
   id: z.string(),
-  supplierId: idRef(SupplierSchema),
+  status: LetterStatus,
   specificationId: z.string(),
   groupId: z.string(),
+  reasonCode: z.number().optional(),
+  reasonText: z.string().optional()
+});
+
+export const LetterSchema = LetterSchemaBase.extend({
+  supplierId: z.string(),
   url: z.url(),
-  status: LetterStatus,
   createdAt: z.string(),
   updatedAt: z.string(),
   supplierStatus: z.string().describe('Secondary index PK'),
-  ttl: z.int()
+  supplierStatusSk: z.string().describe('Secondary index SK'),
+  ttl: z.int(),
 }).describe('Letter');
 
 /**
@@ -36,6 +44,7 @@ export const LetterSchema = z.object({
  * The ttl is used for automatic deletion of old letters.
  */
 export type Letter = z.infer<typeof LetterSchema>;
+export type LetterBase = z.infer<typeof LetterSchemaBase>;
 
 export const MISchema = z.object({
   id: z.string(),

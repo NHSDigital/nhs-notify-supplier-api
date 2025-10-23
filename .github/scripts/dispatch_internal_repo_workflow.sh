@@ -68,6 +68,10 @@ while [[ $# -gt 0 ]]; do
       internalRef="$2"
       shift 2
       ;;
+    --runId) # Github Run ID (optional)
+      runId="$2"
+      shift 2
+      ;;
     --overrides) # Terraform overrides for passing in extra variables (optional)
       overrides="$2"
       shift 2
@@ -80,12 +84,85 @@ while [[ $# -gt 0 ]]; do
       overrideRoleName="$2"
       shift 2
       ;;
+    --buildSandbox) # Build sandbox flag (optional)
+      buildSandbox="$2"
+      shift 2
+      ;;
+    --apimEnvironment) # APIM environment (optional)
+      apimEnvironment="$2"
+      shift 2
+      ;;
+    --boundedContext) # Bounded context (optional)
+      boundedContext="$2"
+      shift 2
+      ;;
+    --targetDomain) # Target domain (optional)
+      targetDomain="$2"
+      shift 2
+      ;;
+    --version) # Version (optional)
+      version="$2"
+      shift 2
+      ;;
     *)
     echo "[ERROR] Unknown argument: $1"
       exit 1
       ;;
   esac
 done
+
+if [[ -z "$APP_PEM_FILE" ]]; then
+  echo "[ERROR] PEM_FILE environment variable is not set or is empty."
+  exit 1
+fi
+
+if [[ -z "$APP_CLIENT_ID" ]]; then
+  echo "[ERROR] CLIENT_ID environment variable is not set or is empty."
+  exit 1
+fi
+
+now=$(date +%s)
+iat=$((${now} - 60)) # Issues 60 seconds in the past
+exp=$((${now} + 600)) # Expires 10 minutes in the future
+
+b64enc() { openssl base64 | tr -d '=' | tr '/+' '_-' | tr -d '\n'; }
+
+header_json='{
+    "typ":"JWT",
+    "alg":"RS256"
+}'
+# Header encode
+header=$( echo -n "${header_json}" | b64enc )
+
+payload_json="{
+    \"iat\":${iat},
+    \"exp\":${exp},
+    \"iss\":\"${APP_CLIENT_ID}\"
+}"
+# Payload encode
+payload=$( echo -n "${payload_json}" | b64enc )
+
+# Signature
+header_payload="${header}"."${payload}"
+signature=$(
+    openssl dgst -sha256 -sign <(echo -n "${APP_PEM_FILE}") \
+    <(echo -n "${header_payload}") | b64enc
+)
+
+# Create JWT
+JWT="${header_payload}"."${signature}"
+
+INSTALLATION_ID=$(curl -X GET \
+    -H "Accept: application/vnd.github+json" \
+    -H "Authorization: Bearer ${JWT}" \
+    -H "X-GitHub-Api-Version: 2022-11-28" \
+    --url "https://api.github.com/app/installations" | jq -r '.[0].id')
+
+PR_TRIGGER_PAT=$(curl --request POST \
+  --url "https://api.github.com/app/installations/${INSTALLATION_ID}/access_tokens" \
+  -H "Accept: application/vnd.github+json" \
+  -H "Authorization: Bearer ${JWT}" \
+  -H "X-GitHub-Api-Version: 2022-11-28" | jq -r '.token')
 
 # Set default values if not provided
 if [[ -z "$PR_TRIGGER_PAT" ]]; then
@@ -101,6 +178,30 @@ if [[ -z "$internalRef" ]]; then
   internalRef="main"
 fi
 
+if [[ -z "$runId" ]]; then
+  runId=""
+fi
+
+if [[ -z "$buildSandbox" ]]; then
+  buildSandbox=""
+fi
+
+if [[ -z "$apimEnvironment" ]]; then
+  apimEnvironment=""
+fi
+
+if [[ -z "$boundedContext" ]]; then
+  boundedContext=""
+fi
+
+if [[ -z "$targetDomain" ]]; then
+  targetDomain=""
+fi
+
+if [[ -z "$version" ]]; then
+  version=""
+fi
+
 echo "==================== Workflow Dispatch Parameters ===================="
 echo "  infraRepoName:      $infraRepoName"
 echo "  releaseVersion:     $releaseVersion"
@@ -114,6 +215,12 @@ echo "  overrides:          $overrides"
 echo "  overrideProjectName: $overrideProjectName"
 echo "  overrideRoleName:   $overrideRoleName"
 echo "  targetProject:      $targetProject"
+echo "  runId:              $runId"
+echo "  buildSandbox:        $buildSandbox"
+echo "  apimEnvironment:     $apimEnvironment"
+echo "  boundedContext:       $boundedContext"
+echo "  targetDomain:         $targetDomain"
+echo "  version:              $version"
 
 DISPATCH_EVENT=$(jq -ncM \
   --arg infraRepoName "$infraRepoName" \
@@ -127,6 +234,12 @@ DISPATCH_EVENT=$(jq -ncM \
   --arg overrideProjectName "$overrideProjectName" \
   --arg overrideRoleName "$overrideRoleName" \
   --arg targetProject "$targetProject" \
+  --arg runId "$runId" \
+  --arg buildSandbox "$buildSandbox" \
+  --arg apimEnvironment "$apimEnvironment" \
+  --arg boundedContext "$boundedContext" \
+  --arg targetDomain "$targetDomain" \
+  --arg version "$version" \
   '{
     "ref": "'"$internalRef"'",
     "inputs": (
@@ -135,17 +248,25 @@ DISPATCH_EVENT=$(jq -ncM \
       (if $overrideProjectName != "" then { "overrideProjectName": $overrideProjectName } else {} end) +
       (if $overrideRoleName != "" then { "overrideRoleName": $overrideRoleName } else {} end) +
       (if $targetProject != "" then { "targetProject": $targetProject } else {} end) +
+      (if $overrides != "" then { "overrides": $overrides } else {} end) +
+      (if $runId != "" then { "runId": $runId } else {} end) +
+      (if $buildSandbox != "" then { "buildSandbox": $buildSandbox } else {} end) +
+      (if $apimEnvironment != "" then { "apimEnvironment": $apimEnvironment } else {} end) +
+      (if $boundedContext != "" then { "boundedContext": $boundedContext } else {} end) +
+      (if $targetDomain != "" then { "targetDomain": $targetDomain } else {} end) +
+      (if $version != "" then { "version": $version } else {} end) +
+      (if $targetAccountGroup != "" then { "targetAccountGroup": $targetAccountGroup } else {} end) +
       {
         "releaseVersion": $releaseVersion,
         "targetEnvironment": $targetEnvironment,
-        "targetAccountGroup": $targetAccountGroup,
         "targetComponent": $targetComponent,
-        "overrides": $overrides,
       }
     )
   }')
 
 echo "[INFO] Triggering workflow '$targetWorkflow' in nhs-notify-internal..."
+
+echo "[DEBUG] Dispatch event payload: $DISPATCH_EVENT"
 
 trigger_response=$(curl -s -L \
   --fail \
@@ -185,16 +306,12 @@ for _ in {1..18}; do
   workflow_run_url=$(echo "$response" | jq -r \
     --arg targetWorkflow "$targetWorkflow" \
     --arg targetEnvironment "$targetEnvironment" \
-    --arg targetAccountGroup "$targetAccountGroup" \
     --arg targetComponent "$targetComponent" \
-    --arg terraformAction "$terraformAction" \
     '.workflow_runs[]
       | select(.path == ".github/workflows/" + $targetWorkflow)
       | select(.name
           | contains($targetEnvironment)
-          and contains($targetAccountGroup)
           and contains($targetComponent)
-          and contains($terraformAction)
       )
       | .url')
 

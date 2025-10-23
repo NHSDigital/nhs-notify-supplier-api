@@ -1,0 +1,12 @@
+description: "Bad request, invalid input data"
+content:
+  application/vnd.api+json:
+    schema:
+      $ref: "../../../schemas/errorResponse.yml"
+    examples:
+      error-bad-request-unknown-parameter:
+        value:
+          $ref: ../../../examples/errors/responses/getLetter/unknownParameter.json
+      error-bad-request-invalid-limit:
+        value:
+          $ref: ../../../examples/errors/responses/getLetter/limitInvalidValue.json

@@ -12,6 +12,7 @@ version.json
 
 # Please, add your custom content below!
 .idea
+.env
 
 # dependencies
 node_modules
@@ -25,3 +26,4 @@ dist
 .reports
 /sandbox/*.log
 /sandbox-staging
+/specification/api/components/examples

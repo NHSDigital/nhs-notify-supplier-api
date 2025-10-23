@@ -1,5 +1,5 @@
 module "domain_truststore" {
-  source = "git::https://github.com/NHSDigital/nhs-notify-shared-modules.git//infrastructure/modules/s3bucket?ref=v2.0.17"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.20/terraform-s3bucket.zip"
 
   name           = "truststore"
   aws_account_id = var.aws_account_id
@@ -8,8 +8,8 @@ module "domain_truststore" {
   project        = var.project
   region         = var.region
 
-  default_tags   = local.default_tags
-  kms_key_arn = module.kms.key_id
+  default_tags = local.default_tags
+  kms_key_arn  = module.kms.key_id
 
   bucket_logging_target = {
     bucket = module.logging_bucket.bucket

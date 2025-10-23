@@ -1,12 +1,14 @@
 summary: Update the status of multiple letters
+description:
+  $ref: '../documentation/postLetters.md'
 operationId: postLetters
 tags:
   - letter
 requestBody:
-  $ref: '../requests/postLetterRequest.yml'
+  $ref: '../requests/postLettersRequest.yml'
 responses:
-  '200':
-    $ref: "../responses/postLetters200.yml"
+  '202':
+    $ref: "../responses/postLetters202.yml"
   '404':
     $ref: "../responses/errors/resourceNotFound.yml"
   '429':
