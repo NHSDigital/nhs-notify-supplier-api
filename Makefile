@@ -98,8 +98,8 @@ config:: _install-dependencies version # Configure development environment (main
 	npm install
 	(cd docs && make install && cd ..)
 
-test-component:
-	(cd tests && npm install && npm run test:component)
+#test-component: To Be discussed with Infra on AWS credentials @Pipeline
+#	(cd tests && npm install && npm run test:component)
 
 version:
 	rm -f .version
