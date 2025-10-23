@@ -20,18 +20,18 @@ export type LetterStatus = z.infer<typeof $LetterStatus>;
  */
 export const $Letter = DomainBase('Letter').extend({
   origin: z.object({
-    domain: z.string(),
-    source: z.string(),
-    subject: z.string()
+    domain: z.string().meta({title: "Domain ID", description: "The domain which requested this letter"}),
+    subject: z.string().meta({title: "Event subject", description: "The subject of the event which created this letter"}),
+    event: z.string().meta({title: "Event ID", description: "The ID of the event which created this letter"}),
   }).meta({
     title: "Letter origin",
-    description: `The origin domain identifier, source and subject of the original event that introduced the letter to the supplier-api domain.
+    description: `Identifiers captured from the original event that introduced the letter to the supplier-api domain.
 
-The identifier will be included as the origin in the subject of any corresponding events emitted by the supplier-api domain.`,
+The identifier will be included as the origin domain in the subject of any corresponding events emitted by the supplier-api domain.`,
     examples: [{
       domain: "letter-rendering",
-      source: "/data-plane/letter-rendering/prod/render-pdf",
       subject: "customer/00f3b388-bbe9-41c9-9e76-052d37ee8988/letter-rendering/letter-request/0o5Fs0EELR0fUjHjbCnEtdUwQe4_0o5Fs0EELR0fUjHjbCnEtdUwQe5",
+      event: "00f3b388-bbe9-41c9-9e76-052d37ee8988"
     }]
   }),
   specificationId: z.string().meta({
@@ -55,6 +55,11 @@ The identifier will be included as the origin in the subject of any correspondin
     description: "Optional human-readable reason for the status change, if applicable.",
     examples: ["Undeliverable", "Recipient moved"]
   })
+}).meta({
+  title: "Letter",
+  description: `The status of a letter in the supplier-api domain.
+
+This will include the current production status, any reason provided for the status, if applicable, and identifiers used for grouping in reports.`,
 });
 
 export type Letter = z.infer<typeof $Letter>;

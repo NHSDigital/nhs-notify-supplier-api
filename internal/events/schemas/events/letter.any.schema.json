@@ -1,6 +1,6 @@
 {
-  "title": "letter.REJECTED Event",
-  "description": "Event schema for letter status change to REJECTED",
+  "title": "letter.* Event",
+  "description": "Event schema for generic letter status change",
   "type": "object",
   "properties": {
     "specversion": {
@@ -41,14 +41,26 @@
       "pattern": "^letter-origin\\/[a-z0-9-]+\\/letter\\/[^/]+(?:\\/.*)?"
     },
     "type": {
-      "title": "Letter REJECTED event type",
+      "title": "Letter event type",
       "description": "Event type using reverse-DNS style",
       "examples": [
-        "uk.nhs.notify.supplier-api.letter.REJECTED.v1"
+        "uk.nhs.notify.supplier-api.letter.PENDING.v1",
+        "uk.nhs.notify.supplier-api.letter.ACCEPTED.v1",
+        "uk.nhs.notify.supplier-api.letter.DISPATCHED.v1"
       ],
       "type": "string",
       "enum": [
-        "uk.nhs.notify.supplier-api.letter.REJECTED.v1"
+        "uk.nhs.notify.supplier-api.letter.PENDING.v1",
+        "uk.nhs.notify.supplier-api.letter.ACCEPTED.v1",
+        "uk.nhs.notify.supplier-api.letter.REJECTED.v1",
+        "uk.nhs.notify.supplier-api.letter.PRINTED.v1",
+        "uk.nhs.notify.supplier-api.letter.ENCLOSED.v1",
+        "uk.nhs.notify.supplier-api.letter.CANCELLED.v1",
+        "uk.nhs.notify.supplier-api.letter.DISPATCHED.v1",
+        "uk.nhs.notify.supplier-api.letter.FAILED.v1",
+        "uk.nhs.notify.supplier-api.letter.RETURNED.v1",
+        "uk.nhs.notify.supplier-api.letter.FORWARDED.v1",
+        "uk.nhs.notify.supplier-api.letter.DELIVERED.v1"
       ]
     },
     "time": {
@@ -79,11 +91,11 @@
         "https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.ACCEPTED.1.0.0.schema.json"
       ],
       "type": "string",
-      "pattern": "^https:\\/\\/notify\\.nhs\\.uk\\/cloudevents\\/schemas\\/supplier-api\\/letter.REJECTED.1\\.\\d+\\.\\d+\\.schema.json$"
+      "pattern": "^https:\\/\\/notify\\.nhs\\.uk\\/cloudevents\\/schemas\\/supplier-api\\/letter\\.(?<status>PENDING|ACCEPTED|REJECTED|PRINTED|ENCLOSED|CANCELLED|DISPATCHED|FAILED|RETURNED|FORWARDED|DELIVERED)\\.1\\.\\d+\\.\\d+\\.schema.json$"
     },
     "data": {
       "title": "Letter",
-      "description": "The status of a letter in the supplier-api domain.\n\nThis will include the current production status, any reason provided for the status, if applicable, and identifiers used for grouping in reports.\n\nFor this event the status is always `REJECTED`",
+      "description": "The status of a letter in the supplier-api domain.\n\nThis will include the current production status, any reason provided for the status, if applicable, and identifiers used for grouping in reports.",
       "type": "object",
       "properties": {
         "domainId": {
@@ -146,9 +158,26 @@
           "type": "string"
         },
         "status": {
+          "title": "Letter Status",
+          "description": "The status of a letter in the supplier-api domain.",
+          "examples": [
+            "ACCEPTED",
+            "REJECTED",
+            "PRINTED"
+          ],
           "type": "string",
           "enum": [
-            "REJECTED"
+            "PENDING",
+            "ACCEPTED",
+            "REJECTED",
+            "PRINTED",
+            "ENCLOSED",
+            "CANCELLED",
+            "DISPATCHED",
+            "FAILED",
+            "RETURNED",
+            "FORWARDED",
+            "DELIVERED"
           ]
         },
         "reasonCode": {

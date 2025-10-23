@@ -1,7 +1,7 @@
 import { z } from "zod";
 import * as fs from "node:fs";
 import { $Letter } from "../domain/letter";
-import { letterEventMap } from "../events/letter-events";
+import {$LetterEvent, letterEventMap} from "../events/letter-events";
 
 for (const [key, schema] of Object.entries({
   "letter": $Letter,
@@ -28,3 +28,14 @@ for (const [key, schema] of Object.entries(letterEventMap)) {
   fs.writeFileSync(file, JSON.stringify(json, null, 2));
   console.info(`Wrote JSON schema for ${key} to ${file}`);
 }
+
+// Generic letter status change event schema
+const json = z.toJSONSchema($LetterEvent, {
+  io: "input",
+  target: "openapi-3.0",
+  reused: "ref",
+});
+fs.mkdirSync("schemas/events", { recursive: true });
+const file = `schemas/events/letter.any.schema.json`;
+fs.writeFileSync(file, JSON.stringify(json, null, 2));
+console.info(`Wrote JSON schema for letter.any to ${file}`);
