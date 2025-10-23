@@ -27,6 +27,7 @@ export async function createInvalidRequestHeaders(): Promise<RequestHeaders> {
         headerauth1: '',
         'NHSD-Supplier-ID': supplierId,
         'NHSD-Correlation-ID': '1234',
+        'X-Request-ID': 'requestId1'
     };
   return requestHeaders;
 }
@@ -37,6 +38,7 @@ export async function createHeaderWithNoCorrelationId(): Promise<RequestHeaders>
         headerauth1: process.env.HEADERAUTH || '',
         'NHSD-Supplier-ID': supplierId,
         'NHSD-Correlation-ID': '',
+        'X-Request-ID': 'requestId1'
     };
   return requestHeaders;
 }
@@ -47,6 +49,7 @@ export async function createValidRequestHeaders(): Promise<RequestHeaders> {
         headerauth1: process.env.HEADERAUTH || '',
         'NHSD-Supplier-ID': supplierId,
         'NHSD-Correlation-ID': '12345',
+        'X-Request-ID': 'requestId1'
     };
   return requestHeaders;
 }

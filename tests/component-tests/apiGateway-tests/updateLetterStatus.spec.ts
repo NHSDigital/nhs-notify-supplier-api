@@ -37,8 +37,8 @@ test.describe('API Gateway Tests to Verify Patch Status Endpoint', () => {
       data:{
         attributes: {
             status: 'ACCEPTED',
-            specificationId: 'TestSpecificationID',
-            groupId: 'TestGroupID',
+            specificationId: letter.specificationId,
+            groupId: letter.groupId,
         },
         id: letter.id,
         type: 'Letter'
@@ -112,7 +112,6 @@ test.describe('API Gateway Tests to Verify Patch Status Endpoint', () => {
         });
 
       const res = await response.json();
-      console.log(res);
       expect(response.status()).toBe(403);
     });
 });

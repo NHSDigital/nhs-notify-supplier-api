@@ -1,4 +1,3 @@
-import { PatchMessageRequestBody } from "../../component-tests/apiGateway-tests/testCases/UpdateLetterStatus";
 import { RequestSandBoxHeaders, sandBoxHeader } from "../../constants/request_headers";
 
 export type ApiSandboxUpdateLetterStatusTestData = {
@@ -16,7 +15,7 @@ type postRequest = {
     type: string;
     id: string;
     attributes: {
-      reasonCode?: number;
+      reasonCode?: string | number;
       reasonText?: string;
       status: string;
     }

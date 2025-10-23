@@ -7,8 +7,6 @@ const localConfig: PlaywrightTestConfig = {
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: getReporters('api-test'),
   ...baseConfig,
-  //globalSetup: require.resolve('./setup/globalSetup'),
-  //globalTeardown: require.resolve('./setup/globalTeardown'),
   projects: [
     {
       name: 'sandbox',

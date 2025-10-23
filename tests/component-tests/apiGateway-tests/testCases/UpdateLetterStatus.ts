@@ -7,12 +7,30 @@ export type PatchMessageRequestBody = {
     type: string;
     id: string;
     attributes: {
-      reasonCode?: number;
+      reasonCode?: string | number;
       reasonText?: string;
       status: string;
     };
   };
 };
+
+export type ErrorLink = {
+  about: string;
+};
+
+type PatchErrorResponse = {
+  id: string;
+  code: string;
+  links: ErrorLink;
+  status: string;
+  title: string;
+  detail: string;
+};
+
+export type PatchErrorMessageBody = {
+  errors: PatchErrorResponse[];
+};
+
 
 export type PatchMessageResponseBody = {
   data: {
@@ -34,6 +52,7 @@ export async function patchRequestHeaders(): Promise<RequestHeaders> {
         headerauth1: process.env.HEADERAUTH || '',
         'NHSD-Supplier-ID': supplierId,
         'NHSD-Correlation-ID': '12344',
+        'X-Request-ID': 'requestId1'
     };
   return requestHeaders;
 };
@@ -60,11 +79,10 @@ export async function patchFailureRequestBody (id: string, status: string) : Pro
 
   requestBody = {
     data: {
-       attributes: {
-          status: status,
-        reasonCode: 123,
-        reasonText: 'Test Reason'
-
+        attributes: {
+          status: status,
+          reasonCode: 123,
+          reasonText: 'Test Reason'
       },
       type: 'Letter',
       id: id

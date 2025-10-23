@@ -1,7 +1,6 @@
 import { test, expect, request } from '@playwright/test';
 import {  SUPPLIER_API_URL_SANDBOX, SUPPLIER_LETTERS} from '../constants/api_constants';
-import { apiSandboxUpdateLetterStatusTestData } from './testCases/updateLetterStatus_testCases';
-import { apiSandboxMultipleLetterStatusTestData } from './testCases/updateMultipleStatys_testCases';
+import { apiSandboxMultipleLetterStatusTestData } from './testCases/updateMultipleStatus_testCases';
 
 
 test.describe('Sandbox Tests To Update Multiple Letter Status', () =>
