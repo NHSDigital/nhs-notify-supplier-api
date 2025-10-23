@@ -112,8 +112,7 @@ jobs:
           draft: false
           prerelease: ${{ inputs.is_version_prerelease == 'true'}}
 
-
-      - name: "Upload jeykll docs release asset"
+      - name: "Upload jekyll docs release asset"
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -142,7 +141,6 @@ jobs:
           asset_path: ./artifacts/sdk-swagger-docs-${{ inputs.version }}/artifact.tar
           asset_name: sdk-swagger-docs-${{ inputs.version }}.tar
           asset_content_type: "application/gzip"
-
 
       - name: "zip html release asset"
         # Git hub pages needs a single tar called artifact inside the zip.
@@ -192,9 +190,6 @@ jobs:
           asset_name: sdk-python-${{ inputs.version }}.zip
           asset_content_type: "application/gzip"
 
-
-
-
       - name: "zip sdk csharp release asset"
         # Git hub pages needs a single tar called artifact inside the zip.
         working-directory: ./artifacts/sdk-csharp-${{ inputs.version }}
@@ -227,7 +222,6 @@ jobs:
           asset_name: api-oas-specification-${{ inputs.version }}.zip
           asset_content_type: "application/gzip"
 
-
       - name: "zip csharp server release asset"
         # Git hub pages needs a single tar called artifact inside the zip.
         working-directory: ./artifacts/server-csharp-${{ inputs.version }}
@@ -244,8 +238,7 @@ jobs:
           asset_name: server-csharp-${{ inputs.version }}.zip
           asset_content_type: "application/gzip"
 
-
-### PUBLISH DOCKER  - THIS NEEDS CHANGING TO DO THE DOCKER BUILD IN THE BUILD STAGE AND ARTIFACT IT. SEE publishlibhostdocker below how how and the buildlibs action.
+  ### PUBLISH DOCKER  - THIS NEEDS CHANGING TO DO THE DOCKER BUILD IN THE BUILD STAGE AND ARTIFACT IT. SEE publishlibhostdocker below how how and the buildlibs action.
   publishdocker:
     name: "Publish docker packages"
     runs-on: ubuntu-latest
@@ -272,8 +265,7 @@ jobs:
         env:
           CR_PAT: ${{ secrets.GITHUB_TOKEN }}
 
-
-### PUBLISH NUGET
+  ### PUBLISH NUGET
   publishnuget:
     name: "Publish nuget packages to nuget.pkg.github.com"
     runs-on: ubuntu-latest
@@ -328,7 +320,7 @@ jobs:
           TEST_NUGET_VERSION: ${{ steps.set-nuget-version.outputs.TEST_NUGET_VERSION }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-### Publish NPM
+  ### Publish NPM
 
   publishnpm:
     name: "Publish npm packages to npm.pkg.github.com"
@@ -345,9 +337,9 @@ jobs:
           name: sdk-ts-${{ inputs.version }}
       - uses: actions/setup-node@v4
         with:
-          node-version: '24.3'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@NHSDigital'
+          node-version: "24.3"
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@NHSDigital"
 
       - run: ls -la
       - run: npm cache clear --force
@@ -357,9 +349,6 @@ jobs:
       - run: npm publish --verbose --tag next
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
-
 
       # - name: "Upload other release asset 1"
       #   uses: actions/upload-release-asset@v1
@@ -382,7 +371,7 @@ jobs:
   success:
     name: "Success notification"
     runs-on: ubuntu-latest
-    needs: [publish,publishnpm]
+    needs: [publish, publishnpm]
     steps:
       - name: "Check prerequisites for notification"
         id: check
@@ -397,8 +386,7 @@ jobs:
           message-text: "This is a notification body"
           link: ${{ github.event.pull_request.html_url }}
 
-
-### PUBLISH LIBS ABSTRACTION NUGET
+  ### PUBLISH LIBS ABSTRACTION NUGET
   publishlibsabstractionsnuget:
     name: "Publish libs abstractions packages to nuget.pkg.github.com"
     runs-on: ubuntu-latest
@@ -454,9 +442,7 @@ jobs:
           TEST_NUGET_VERSION: ${{ steps.set-nuget-version.outputs.TEST_NUGET_VERSION }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-
-
-### PUBLISH LIBS LETTERS NUGET
+  ### PUBLISH LIBS LETTERS NUGET
   publishliblettersnuget:
     name: "Publish libs letter packages to nuget.pkg.github.com"
     runs-on: ubuntu-latest
@@ -512,8 +498,7 @@ jobs:
           TEST_NUGET_VERSION: ${{ steps.set-nuget-version.outputs.TEST_NUGET_VERSION }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-
-### PUBLISH LIBS data NUGET
+  ### PUBLISH LIBS data NUGET
   publishlibhostnuget:
     name: "Publish libs data packages to nuget.pkg.github.com"
     runs-on: ubuntu-latest
@@ -569,9 +554,7 @@ jobs:
           TEST_NUGET_VERSION: ${{ steps.set-nuget-version.outputs.TEST_NUGET_VERSION }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-
-
-### PUBLISH LIBS host NUGET
+  ### PUBLISH LIBS host NUGET
   publishlibdatanuget:
     name: "Publish libs host packages to nuget.pkg.github.com"
     runs-on: ubuntu-latest
@@ -627,9 +610,7 @@ jobs:
           TEST_NUGET_VERSION: ${{ steps.set-nuget-version.outputs.TEST_NUGET_VERSION }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-
-
-### PUBLISH LIBS host docker
+  ### PUBLISH LIBS host docker
   publishlibhostdocker:
     name: "Publish libs host docker"
     runs-on: ubuntu-latest

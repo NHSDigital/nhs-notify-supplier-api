@@ -5,7 +5,7 @@
 
 The NHS Notify Supplier API is intended primarily for print suppliers to integrate with the NHS Notify message request queueing system.
 
-It models the concepts needed to configure production of letters and other printed materials to specific specifications, provide proofs of these materials, receive batch production requests, provide details of returned letters and correspondence, and to report on the status of these artifacts and associated management information such as volumes and assocated costs.
+It models the concepts needed to configure production of letters and other printed materials to specific specifications, provide proofs of these materials, receive batch production requests, provide details of returned letters and correspondence, and to report on the status of these artifacts and associated management information such as volumes and associated costs.
 
 This repository documents the Supplier API specification and provides an SDK with examples and reference client implementations for interacting with it.
 
@@ -25,8 +25,7 @@ This repository documents the Supplier API specification and provides an SDK wit
   - [SDK Assets](#sdk-assets)
   - [Examples](#examples)
 - [API Developers](#api-developers)
-  - [Documentation](#documentation-1)
-  - [pre built servers](#pre-built-servers)
+  - [Pre built servers](#pre-built-servers)
   - [Setup](#setup)
     - [Prerequisites and Configuration](#prerequisites-and-configuration)
       - [SDKs](#sdks)
@@ -71,15 +70,9 @@ TODO:CCM-11209 Links to example clients.
 
 ## API Developers
 
-New developer of the NHS Notify Supplier API
-should understand the below.
+New developer of the NHS Notify Supplier API should understand the below.
 
-### Documentation
-
-- [Built](/)
-- [Source](/docs/README.md)
-
-### pre built servers
+### Pre built servers
 
 - "Working" C# server [/src/server/host](/src/server/host) `docker run -p 8080:8080 ghcr.io/nhsdigital/libshostdocker:latest`
   - View at [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html)
@@ -109,7 +102,7 @@ should understand the below.
 
 ##### Libs
 
-- [/src/server](/src/server) has various separate libaries that are used by:
+- [/src/server](/src/server) has various separate libraries that are used by:
   - [/src/server/host](/src/server/host) custom loads libs for different parts of the server
 
 ### Build
