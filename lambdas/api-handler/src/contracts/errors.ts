@@ -34,7 +34,8 @@ export enum ApiErrorDetail {
   InvalidRequestLimitNotANumber = 'The limit parameter is not a number',
   InvalidRequestLimitNotInRange = 'The limit parameter must be a positive number not greater than %s',
   InvalidRequestLimitOnly = "Only 'limit' query parameter is supported",
-  InvalidRequestNoRequestId = 'The request does not contain a request id'
+  InvalidRequestNoRequestId = 'The request does not contain a request id',
+  InvalidRequestTimestamp = 'Timestamps should be UTC date/times in ISO8601 format, with a Z suffix'
 }
 
 export function buildApiError(params: {

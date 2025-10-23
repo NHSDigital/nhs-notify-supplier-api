@@ -1,4 +1,5 @@
 
+import { MIRepository } from '../../../../../internal/datastore/src';
 import type { Deps } from '../deps';
 
 describe('createDependenciesContainer', () => {
@@ -24,6 +25,7 @@ describe('createDependenciesContainer', () => {
     // Repo client
     jest.mock('../../../../../internal/datastore', () => ({
       LetterRepository: jest.fn(),
+      MIRepository: jest.fn(),
     }));
 
     // Env

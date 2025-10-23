@@ -37,7 +37,7 @@ describe('API Lambda handler', () => {
       LETTER_TTL_HOURS: 12960,
       DOWNLOAD_URL_TTL_SECONDS: 60
     } as unknown as EnvVars
-  }
+  } as Deps;
 
   beforeEach(() => {
     jest.clearAllMocks();
