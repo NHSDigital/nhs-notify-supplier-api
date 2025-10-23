@@ -1,15 +1,14 @@
 import { APIGatewayProxyResult } from "aws-lambda";
 import { NotFoundError, ValidationError } from "../errors";
 import { buildApiError, ApiErrorCode, ApiErrorDetail, ApiErrorTitle, ApiError, ApiErrorStatus } from "../contracts/errors";
-import pino from "pino";
 import { v4 as uuid } from 'uuid';
+import { Logger } from "pino";
 
-const logger = pino();
 export interface ErrorResponse {
   errors: ApiError[];
 }
 
-export function mapErrorToResponse(error: unknown, correlationId: string | undefined): APIGatewayProxyResult {
+export function mapErrorToResponse(error: unknown, correlationId: string | undefined, logger: Logger): APIGatewayProxyResult {
   if (error instanceof ValidationError) {
     logger.info({ err: error }, `Validation error correlationId=${correlationId}`);
     return buildResponseFromErrorCode(ApiErrorCode.InvalidRequest, error.detail, correlationId);
