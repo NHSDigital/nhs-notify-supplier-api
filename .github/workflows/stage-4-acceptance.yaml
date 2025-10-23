@@ -157,7 +157,7 @@ jobs:
       [
         test-accessibility,
         test-contract,
-        test-component,
+        test-integration,
         test-load,
         test-security,
         test-ui-performance,
