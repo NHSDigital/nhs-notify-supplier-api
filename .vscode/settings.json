@@ -10,6 +10,5 @@
     "**/Thumbs.db": true,
     ".github": false,
     ".vscode": false
-  },
-  "typescript.tsdk": "node_modules/typescript/lib"
+  }
 }
