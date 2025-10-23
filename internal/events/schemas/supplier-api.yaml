@@ -48,6 +48,9 @@ components:
       contentType: application/json
       payload:
         $ref: './events/letter.ACCEPTED.schema.json'
+      examples:
+        - payload:
+            $ref: './examples/letter.ACCEPTED.json'
 
     letter-cancelled:
       name: letter-cancelled
@@ -81,9 +84,6 @@ components:
       contentType: application/json
       payload:
         $ref: './events/letter.DISPATCHED.schema.json'
-      examples:
-        - payload:
-            $ref: './examples/letter.DISPATCHED.json'
 
     letter-enclosed:
       name: letter-enclosed
@@ -117,6 +117,9 @@ components:
       contentType: application/json
       payload:
         $ref: './events/letter.FORWARDED.schema.json'
+      examples:
+        - payload:
+            $ref: './examples/letter.FORWARDED.json'
 
     letter-pending:
       name: letter-pending
@@ -161,6 +164,9 @@ components:
       contentType: application/json
       payload:
         $ref: './events/letter.RETURNED.schema.json'
+      examples:
+        - payload:
+            $ref: './examples/letter.RETURNED.json'
 
     letter-any:
       name: letter-any
