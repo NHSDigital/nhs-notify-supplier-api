@@ -5,13 +5,10 @@ import { version as packageVersion } from "../../package.json";
 
 async function main() {
   const baseDir = path.resolve(process.cwd(), "..");
-  const document = await bundle(
-    ["events/schemas/supplier-api.yaml"],
-    {
-      baseDir,
-      xOrigin: true,
-    },
-  );
+  const document = await bundle(["events/schemas/supplier-api.yaml"], {
+    baseDir,
+    xOrigin: true,
+  });
   const info = document.json()?.info;
   if (info) {
     info.version = packageVersion;

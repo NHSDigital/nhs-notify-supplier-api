@@ -1,10 +1,10 @@
 import { z } from "zod";
 import * as fs from "node:fs";
 import { $Letter } from "../domain/letter";
-import {$LetterEvent, letterEventMap} from "../events/letter-events";
+import { $LetterEvent, letterEventMap } from "../events/letter-events";
 
 for (const [key, schema] of Object.entries({
-  "letter": $Letter,
+  letter: $Letter,
 })) {
   const json = z.toJSONSchema(schema, {
     io: "input",
