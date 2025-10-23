@@ -4,7 +4,8 @@
     "groupId": "client_template",
     "origin": {
       "domain": "letter-rendering",
-      "event": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+      "event": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+      "source": "/data-plane/letter-rendering/prod/render-pdf"
     },
     "specificationId": "1y3q9v1zzzz",
     "status": "ACCEPTED"

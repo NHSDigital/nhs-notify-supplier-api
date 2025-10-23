@@ -37,9 +37,14 @@ export const $Letter = DomainBase("Letter")
           title: "Domain ID",
           description: "The domain which requested this letter",
         }),
+        source: z.string().meta({
+          title: "Event source",
+          description: "The source of the event which created this letter",
+        }),
         subject: z.string().meta({
           title: "Event subject",
-          description: "The subject of the event which created this letter",
+          description:
+            "The subject of the event which created this letter, scoped to source",
         }),
         event: z.string().meta({
           title: "Event ID",
