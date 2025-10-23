@@ -5,7 +5,6 @@
     "charenc": "^0.0.2",
     "crypt": "^0.0.2",
     "dotenv": "^17.2.2",
-    "fsevents": "^2.3.2",
     "is-buffer": "^1.1.6",
     "md5": "^2.3.0",
     "playwright": "^1.54.2",

@@ -1,8 +1,8 @@
-import { LetterRepository } from "../../../../internal/datastore/src/letter-repository";
 import {
+  LetterRepository,
   Letter,
   LetterStatusType,
-} from "../../../../internal/datastore/src/types";
+} from "@internal/datastore";
 import { uploadFile } from "./s3_helpers";
 
 export async function createLetter(params: {

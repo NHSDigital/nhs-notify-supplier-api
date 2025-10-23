@@ -51,11 +51,22 @@ function main() {
       ;;
   esac
 
-  if [ -n "$files" ]; then
+  specfiles=$(echo "$files" | grep '^specification/') || true
+  otherfiles=$(echo "$files" | grep -v '^specification/') || true
+
+  if [ -n "$specfiles" ]; then
     if command -v markdownlint > /dev/null 2>&1 && ! is-arg-true "${FORCE_USE_DOCKER:-false}"; then
-      files="$files" run-markdownlint-natively
+      files="$specfiles" config="specification/.markdownlint.json" run-markdownlint-natively
     else
-      files="$files" run-markdownlint-in-docker
+      files="$specfiles" config="specification/.markdownlint.json" run-markdownlint-in-docker
+    fi
+  fi
+
+  if [ -n "$otherfiles" ]; then
+    if command -v markdownlint > /dev/null 2>&1 && ! is-arg-true "${FORCE_USE_DOCKER:-false}"; then
+      files="$otherfiles" config=".markdownlint.jsonc" run-markdownlint-natively
+    else
+      files="$otherfiles" config=".markdownlint.jsonc" run-markdownlint-in-docker
     fi
   fi
 }
@@ -63,17 +74,19 @@ function main() {
 # Run markdownlint natively.
 # Arguments (provided as environment variables):
 #   files=[files to check]
+#   config=[path to config file]
 function run-markdownlint-natively() {
 
   # shellcheck disable=SC2086
   markdownlint \
     $files \
-    --config "$PWD/scripts/config/markdownlint.yaml"
+    --config "$config"
 }
 
 # Run markdownlint in a Docker container.
 # Arguments (provided as environment variables):
 #   files=[files to check]
+#   config=[path to config file]
 function run-markdownlint-in-docker() {
 
   # shellcheck disable=SC1091
@@ -86,7 +99,7 @@ function run-markdownlint-in-docker() {
     --volume "$PWD":/workdir \
     "$image" \
       $files \
-      --config /workdir/scripts/config/markdownlint.yaml
+      --config "$config"
 }
 
 # ==============================================================================

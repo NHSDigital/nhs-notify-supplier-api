@@ -1,0 +1,26 @@
+{
+  "data": {
+    "domainId": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+    "groupId": "client_template",
+    "origin": {
+      "domain": "letter-rendering",
+      "event": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+      "source": "/data-plane/letter-rendering/prod/render-pdf"
+    },
+    "specificationId": "1y3q9v1zzzz",
+    "status": "ACCEPTED"
+  },
+  "datacontenttype": "application/json",
+  "dataschema": "https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.ACCEPTED.1.0.0.schema.json",
+  "dataschemaversion": "1.0.0",
+  "id": "23f1f09c-a555-4d9b-8405-0b33490bc920",
+  "recordedtime": "2025-08-28T08:45:00.000Z",
+  "severitynumber": 2,
+  "severitytext": "INFO",
+  "source": "/data-plane/supplier-api/prod/update-status",
+  "specversion": "1.0",
+  "subject": "letter-origin/letter-rendering/letter/f47ac10b-58cc-4372-a567-0e02b2c3d479",
+  "time": "2025-08-28T08:45:00.000Z",
+  "traceparent": "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01",
+  "type": "uk.nhs.notify.supplier-api.letter.ACCEPTED.v1"
+}
