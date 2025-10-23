@@ -111,9 +111,14 @@
               "description": "The domain which requested this letter",
               "type": "string"
             },
+            "source": {
+              "title": "Event source",
+              "description": "The source of the event which created this letter",
+              "type": "string"
+            },
             "subject": {
               "title": "Event subject",
-              "description": "The subject of the event which created this letter",
+              "description": "The subject of the event which created this letter, scoped to source",
               "type": "string"
             },
             "event": {
@@ -124,6 +129,7 @@
           },
           "required": [
             "domain",
+            "source",
             "subject",
             "event"
           ]
