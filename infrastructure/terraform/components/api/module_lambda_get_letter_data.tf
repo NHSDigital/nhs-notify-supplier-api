@@ -1,8 +1,8 @@
-module "patch_letter" {
+module "get_letter_data" {
   source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.24/terraform-lambda.zip"
 
-  function_name = "patch_letter"
-  description   = "Update the status of a letter"
+  function_name = "get_letter_data"
+  description   = "Get the letter data"
 
   aws_account_id = var.aws_account_id
   component      = var.component
@@ -15,14 +15,14 @@ module "patch_letter" {
   kms_key_arn           = module.kms.key_arn
 
   iam_policy_document = {
-    body = data.aws_iam_policy_document.patch_letter_lambda.json
+    body = data.aws_iam_policy_document.get_letter_data_lambda.json
   }
 
   function_s3_bucket      = local.acct.s3_buckets["lambda_function_artefacts"]["id"]
   function_code_base_path = local.aws_lambda_functions_dir_path
   function_code_dir       = "api-handler/dist"
   function_include_common = true
-  handler_function_name   = "patchLetter"
+  handler_function_name   = "getLetterData"
   runtime                 = "nodejs22.x"
   memory                  = 128
   timeout                 = 5
@@ -38,7 +38,7 @@ module "patch_letter" {
   lambda_env_vars = merge(local.common_lambda_env_vars, {})
 }
 
-data "aws_iam_policy_document" "patch_letter_lambda" {
+data "aws_iam_policy_document" "get_letter_data_lambda" {
   statement {
     sid    = "KMSPermissions"
     effect = "Allow"
@@ -58,17 +58,21 @@ data "aws_iam_policy_document" "patch_letter_lambda" {
     effect = "Allow"
 
     actions = [
-      "dynamodb:BatchGetItem",
-      "dynamodb:BatchWriteItem",
       "dynamodb:GetItem",
-      "dynamodb:PutItem",
-      "dynamodb:Query",
-      "dynamodb:Scan",
-      "dynamodb:UpdateItem",
+      "dynamodb:Query"
     ]
 
     resources = [
       aws_dynamodb_table.letters.arn,
+      "${aws_dynamodb_table.letters.arn}/index/supplierStatus-index"
     ]
+  }
+
+  statement {
+    sid       = "S3GetObjectForPresign"
+    actions   = [
+      "s3:GetObject",
+      "s3:ListBucket"] # allows 404 response instead of 403 if object missing
+    resources = ["${module.s3bucket_test_letters.arn}/*"]
   }
 }
