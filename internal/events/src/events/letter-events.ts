@@ -1,6 +1,10 @@
 import { z } from "zod";
-import { $Letter, $LetterStatus, LetterStatus } from "../domain/letter";
-import { $EnvelopeProfile } from "./envelope-profile";
+import {
+  $Letter,
+  $LetterStatus,
+  LetterStatus,
+} from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/domain/letter";
+import { $EnvelopeProfile } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/envelope-profile";
 
 /**
  * A generic schema for parsing any letter status change event
