@@ -27,26 +27,25 @@
     },
     "source": {
       "title": "Event Source",
-      "description": "Logical event producer path starting /data-plane or /control-plane followed by lowercase segments.",
-      "examples": [
-        "/data-plane/ordering",
-        "/control-plane/audit"
-      ],
+      "description": "Logical event producer path within the supplier-api domain",
       "type": "string",
-      "minLength": 12,
-      "pattern": "^\\/(data-plane|control-plane)(?:\\/[a-z0-9-]+)*$"
+      "pattern": "^\\/data-plane\\/supplier-api(?:\\/.*)?$"
     },
     "subject": {
       "title": "Event Subject",
       "description": "Resource path (no leading slash) within the source made of segments separated by '/'.",
       "examples": [
-        "origin/920fca11-596a-4eca-9c47-99f624614658/order/769acdd4-6a47-496f-999f-76a6fd2c3959/item/4f5e17c0-ec57-4cee-9a86-14580cf5af7d"
+        "letter-origin/letter-rendering/letter/f47ac10b-58cc-4372-a567-0e02b2c3d479"
       ],
       "type": "string",
-      "minLength": 5,
-      "pattern": "^[^\\/]+(\\/[^\\/]+)*$"
+      "pattern": "^letter-origin\\/[a-z0-9-]+\\/letter\\/[^/]+(?:\\/.*)?"
     },
     "type": {
+      "title": "Letter PRINTED event type",
+      "description": "Event type using reverse-DNS style",
+      "examples": [
+        "uk.nhs.notify.supplier-api.letter.PRINTED.v1"
+      ],
       "type": "string",
       "enum": [
         "uk.nhs.notify.supplier-api.letter.PRINTED.v1"
@@ -74,10 +73,17 @@
       ]
     },
     "dataschema": {
+      "title": "Data Schema URI",
+      "description": "URI of a schema that describes the event data\n\nData schema version must match the major version indicated by the type",
+      "examples": [
+        "https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.ACCEPTED.1.0.0.schema.json"
+      ],
       "type": "string",
-      "pattern": "^https:\\/\\/notify\\.nhs\\.uk\\/events\\/supplier-api\\/letter\\/PRINTED\\/1\\.\\d+\\.\\d+\\.json$"
+      "pattern": "^https:\\/\\/notify\\.nhs\\.uk\\/cloudevents\\/schemas\\/supplier-api\\/letter.PRINTED.1\\.\\d+\\.\\d+\\.schema.json$"
     },
     "data": {
+      "title": "Letter",
+      "description": "The status of a letter in the supplier-api domain.\n\nThis will include the current production status, any reason provided for the status, if applicable, and identifiers used for grouping in reports.\n\nFor this event the status is always `PRINTED`",
       "type": "object",
       "properties": {
         "domainId": {
@@ -90,30 +96,36 @@
         },
         "origin": {
           "title": "Letter origin",
-          "description": "The origin domain identifier, source and subject of the original event that introduced the letter to the supplier-api domain.\n\nThe identifier will be included as the origin in the subject of any corresponding events emitted by the supplier-api domain.",
+          "description": "Identifiers captured from the original event that introduced the letter to the supplier-api domain.\n\nThe identifier will be included as the origin domain in the subject of any corresponding events emitted by the supplier-api domain.",
           "examples": [
             {
               "domain": "letter-rendering",
-              "source": "/data-plane/letter-rendering/prod/render-pdf",
-              "subject": "customer/00f3b388-bbe9-41c9-9e76-052d37ee8988/letter-rendering/letter-request/0o5Fs0EELR0fUjHjbCnEtdUwQe4_0o5Fs0EELR0fUjHjbCnEtdUwQe5"
+              "subject": "customer/00f3b388-bbe9-41c9-9e76-052d37ee8988/letter-rendering/letter-request/0o5Fs0EELR0fUjHjbCnEtdUwQe4_0o5Fs0EELR0fUjHjbCnEtdUwQe5",
+              "event": "00f3b388-bbe9-41c9-9e76-052d37ee8988"
             }
           ],
           "type": "object",
           "properties": {
             "domain": {
-              "type": "string"
-            },
-            "source": {
+              "title": "Domain ID",
+              "description": "The domain which requested this letter",
               "type": "string"
             },
             "subject": {
+              "title": "Event subject",
+              "description": "The subject of the event which created this letter",
+              "type": "string"
+            },
+            "event": {
+              "title": "Event ID",
+              "description": "The ID of the event which created this letter",
               "type": "string"
             }
           },
           "required": [
             "domain",
-            "source",
-            "subject"
+            "subject",
+            "event"
           ]
         },
         "specificationId": {
@@ -295,6 +307,8 @@
       ]
     },
     "dataschemaversion": {
+      "title": "Data Schema Version",
+      "description": "Matches semantic versioning format with fixed major version (Not part of cloudevents spec?)",
       "type": "string",
       "pattern": "^1\\.\\d+\\.\\d+$"
     }

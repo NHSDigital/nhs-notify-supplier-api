@@ -200,14 +200,14 @@ export const $EnvelopeProfile = z
     if (
       /^\/data-plane/.test(obj.source) &&
       // eslint-disable-next-line sonarjs/regex-complexity
-      !/^origin(\/[^\/]+)+$/.test(
+      !/^[a-z0-9-]+(\/[^/]+)+$/.test(
         obj.subject,
       )
     ) {
       ctx.addIssue({
         code: "custom",
         message:
-          "For /data-plane sources, subject must start with origin/{id} and may have further segments separated by '/'.",
+          "For /data-plane sources, subject must start with a {namespace}/{id} and may have further segments separated by '/'.",
         path: ["subject"],
       });
     }

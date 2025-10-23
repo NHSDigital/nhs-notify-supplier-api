@@ -1,4 +1,6 @@
 {
+  "title": "Letter",
+  "description": "The status of a letter in the supplier-api domain.\n\nThis will include the current production status, any reason provided for the status, if applicable, and identifiers used for grouping in reports.",
   "type": "object",
   "properties": {
     "domainId": {
@@ -11,30 +13,36 @@
     },
     "origin": {
       "title": "Letter origin",
-      "description": "The origin domain identifier, source and subject of the original event that introduced the letter to the supplier-api domain.\n\nThe identifier will be included as the origin in the subject of any corresponding events emitted by the supplier-api domain.",
+      "description": "Identifiers captured from the original event that introduced the letter to the supplier-api domain.\n\nThe identifier will be included as the origin domain in the subject of any corresponding events emitted by the supplier-api domain.",
       "examples": [
         {
           "domain": "letter-rendering",
-          "source": "/data-plane/letter-rendering/prod/render-pdf",
-          "subject": "customer/00f3b388-bbe9-41c9-9e76-052d37ee8988/letter-rendering/letter-request/0o5Fs0EELR0fUjHjbCnEtdUwQe4_0o5Fs0EELR0fUjHjbCnEtdUwQe5"
+          "subject": "customer/00f3b388-bbe9-41c9-9e76-052d37ee8988/letter-rendering/letter-request/0o5Fs0EELR0fUjHjbCnEtdUwQe4_0o5Fs0EELR0fUjHjbCnEtdUwQe5",
+          "event": "00f3b388-bbe9-41c9-9e76-052d37ee8988"
         }
       ],
       "type": "object",
       "properties": {
         "domain": {
-          "type": "string"
-        },
-        "source": {
+          "title": "Domain ID",
+          "description": "The domain which requested this letter",
           "type": "string"
         },
         "subject": {
+          "title": "Event subject",
+          "description": "The subject of the event which created this letter",
+          "type": "string"
+        },
+        "event": {
+          "title": "Event ID",
+          "description": "The ID of the event which created this letter",
           "type": "string"
         }
       },
       "required": [
         "domain",
-        "source",
-        "subject"
+        "subject",
+        "event"
       ]
     },
     "specificationId": {

@@ -33,6 +33,8 @@ channels:
         $ref: '#/components/messages/letter-rejected'
       letter-returned:
         $ref: '#/components/messages/letter-returned'
+      letter-any:
+        $ref: '#/components/messages/letter-any'
 
 components:
   messages:
@@ -159,3 +161,18 @@ components:
       contentType: application/json
       payload:
         $ref: './events/letter.RETURNED.schema.json'
+
+    letter-any:
+      name: letter-any
+      title: Letter Status Changed
+      summary: |
+        A letter status has been updated.
+
+        This is a generic schema which matches any status change.
+      contentType: application/json
+      payload:
+        $ref: './events/letter.any.schema.json'
+
+  schemas:
+    letter:
+      $ref: './domain/letter.schema.json'
