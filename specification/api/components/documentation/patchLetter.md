@@ -13,7 +13,6 @@ Allowed `status` values that can be used to are:
 - `ACCEPTED`
 - `CANCELLED`
 - `DELIVERED`
-- `DESTROYED`
 - `DISPATCHED`
 - `ENCLOSED`
 - `FAILED`
