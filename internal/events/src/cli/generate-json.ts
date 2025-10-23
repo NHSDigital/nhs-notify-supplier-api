@@ -1,7 +1,10 @@
 import { z } from "zod";
 import * as fs from "node:fs";
-import { $Letter } from "../domain/letter";
-import { $LetterEvent, letterEventMap } from "../events/letter-events";
+import { $Letter } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/domain/letter";
+import {
+  $LetterEvent,
+  letterEventMap,
+} from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
 
 for (const [key, schema] of Object.entries({
   letter: $Letter,

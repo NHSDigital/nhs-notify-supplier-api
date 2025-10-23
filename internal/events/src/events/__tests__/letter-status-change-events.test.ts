@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { letterEventMap } from "../letter-events";
+import { letterEventMap } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
 
 function readJson(filename: string): unknown {
   const filePath = path.resolve(__dirname, "./testData/", filename);
