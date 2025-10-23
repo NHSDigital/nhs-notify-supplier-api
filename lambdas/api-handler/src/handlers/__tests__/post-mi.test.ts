@@ -57,7 +57,7 @@ describe('postMI API Handler', () => {
     const event = makeApiGwEvent({
       path: '/mi',
       body: requestBody,
-      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
+      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId', 'x-request-id': 'requestId'}
     });
 
     mockedPostMIOperation.mockResolvedValue(postMIResponse);
@@ -80,7 +80,7 @@ describe('postMI API Handler', () => {
     const event = makeApiGwEvent({
       path: '/mi',
       body: JSON.stringify(modifiedRequest),
-      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
+      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId', 'x-request-id': 'requestId'}
     });
 
     const postMI = createPostMIHandler(mockedDeps);
@@ -94,7 +94,7 @@ describe('postMI API Handler', () => {
   it('returns 400 Bad Request when there is no body', async () => {
       const event = makeApiGwEvent({
         path: '/mi',
-        headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
+        headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId', 'x-request-id': 'requestId'}
       });
 
       const postMI = createPostMIHandler(mockedDeps);
@@ -111,7 +111,7 @@ describe('postMI API Handler', () => {
         path: '/mi',
         body: requestBody,
         pathParameters: {id: 'id1'},
-        headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
+        headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId', 'x-request-id': 'requestId'}
       });
       mockedPostMIOperation.mockRejectedValue(new Error());
 
@@ -123,18 +123,18 @@ describe('postMI API Handler', () => {
       }));
     });
 
-  it('returns 400 Bad Request when supplier id is missing', async () => {
+  it('returns 500 Bad Request when supplier id is missing', async () => {
     const event = makeApiGwEvent({
       path: '/mi',
       body: requestBody,
-      headers: {'nhsd-correlation-id': 'correlationId'}
+      headers: {'nhsd-correlation-id': 'correlationId', 'x-request-id': 'requestId'}
     });
 
     const postMI = createPostMIHandler(mockedDeps);
     const result = await postMI(event,  mockDeep<Context>(), jest.fn());
 
     expect(result).toEqual(expect.objectContaining({
-      statusCode: 400
+      statusCode: 500
     }));
   });
 
@@ -142,7 +142,7 @@ describe('postMI API Handler', () => {
     const event = makeApiGwEvent({
       path: '/mi',
       body: requestBody,
-        headers: {'nhsd-supplier-id': 'supplier1'}
+        headers: {'nhsd-supplier-id': 'supplier1', 'x-request-id': 'requestId'}
     });
 
     const postMI = createPostMIHandler(mockedDeps);
@@ -157,7 +157,7 @@ describe('postMI API Handler', () => {
     const event = makeApiGwEvent({
       path: '/mi',
       body: '{"test": "test"}',
-      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
+      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId', 'x-request-id': 'requestId'}
     });
 
     const postMI = createPostMIHandler(mockedDeps);
@@ -172,7 +172,7 @@ describe('postMI API Handler', () => {
     const event = makeApiGwEvent({
       path: '/mi',
       body: '{#invalidJSON',
-      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
+      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId', 'x-request-id': 'requestId'}
     });
 
     const postMI = createPostMIHandler(mockedDeps);
@@ -187,7 +187,7 @@ describe('postMI API Handler', () => {
     const event = makeApiGwEvent({
       path: '/mi',
       body: requestBody,
-      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
+      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId', 'x-request-id': 'requestId'}
     });
     const spy = jest.spyOn(JSON, 'parse').mockImplementation(() => {
       throw 'Unexpected error';

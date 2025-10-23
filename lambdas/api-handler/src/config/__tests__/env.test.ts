@@ -38,7 +38,8 @@ describe('lambdaEnv', () => {
     process.env.SUPPLIER_ID_HEADER = 'nhsd-supplier-id';
     process.env.APIM_CORRELATION_HEADER = 'nhsd-correlation-id';
     process.env.LETTERS_TABLE_NAME = undefined; // simulate missing var
-    process.env.MI_TABLE_NAME = 'mi-table';    process.env.LETTER_TTL_HOURS = '12960';
+    process.env.MI_TABLE_NAME = 'mi-table';
+    process.env.LETTER_TTL_HOURS = '12960';
     process.env.DOWNLOAD_URL_TTL_SECONDS = '60';
 
     expect(() => require('../env')).toThrow(ZodError);
@@ -48,6 +49,7 @@ describe('lambdaEnv', () => {
     process.env.SUPPLIER_ID_HEADER = 'nhsd-supplier-id';
     process.env.APIM_CORRELATION_HEADER = 'nhsd-correlation-id';
     process.env.LETTERS_TABLE_NAME = 'letters-table';
+    process.env.MI_TABLE_NAME = 'mi-table';
     process.env.LETTER_TTL_HOURS = '12960';
     process.env.DOWNLOAD_URL_TTL_SECONDS = '60';
 
@@ -57,6 +59,7 @@ describe('lambdaEnv', () => {
       SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
       APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
       LETTERS_TABLE_NAME: 'letters-table',
+      MI_TABLE_NAME: 'mi-table',
       LETTER_TTL_HOURS: 12960,
       DOWNLOAD_URL_TTL_SECONDS: 60,
       MAX_LIMIT: undefined
