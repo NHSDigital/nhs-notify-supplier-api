@@ -1,4 +1,3 @@
-
 import type { Deps } from '../deps';
 
 describe('createDependenciesContainer', () => {
@@ -24,6 +23,7 @@ describe('createDependenciesContainer', () => {
     // Repo client
     jest.mock('../../../../../internal/datastore', () => ({
       LetterRepository: jest.fn(),
+      DBHealthcheck: jest.fn()
     }));
 
     // Env

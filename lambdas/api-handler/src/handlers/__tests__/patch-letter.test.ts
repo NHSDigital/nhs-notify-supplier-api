@@ -57,7 +57,7 @@ describe('patchLetter API Handler', () => {
       LETTER_TTL_HOURS: 12960,
       DOWNLOAD_URL_TTL_SECONDS: 60
     } as unknown as EnvVars
-  }
+  } as Deps;
 
   it('returns 200 OK with updated resource', async () => {
     const event = makeApiGwEvent({
