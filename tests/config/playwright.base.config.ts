@@ -1,4 +1,5 @@
-import type { PlaywrightTestConfig } from '@playwright/test';
+import { defineConfig, PlaywrightTestConfig } from '@playwright/test';
+import 'dotenv/config';
 
 const baseUrl = process.env.NHSD_APIM_PROXY_URL || 'http://localhost:3000/';
 const envMaxInstances = Number.parseInt(process.env.WORKERS_MAX_INST!) || 10;
@@ -6,8 +7,6 @@ const envMaxInstances = Number.parseInt(process.env.WORKERS_MAX_INST!) || 10;
  * See https://playwright.dev/docs/test-configuration.
  */
 export const config: PlaywrightTestConfig = {
-  testDir: '../sandbox/messages/get_single_letter/',
-  testMatch: '*.spec.ts/',
   /* Maximum time one test can run for. */
   timeout: 60 * 1000,
   workers: envMaxInstances,
@@ -24,19 +23,5 @@ export const config: PlaywrightTestConfig = {
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
-  use: {
-    /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
-    actionTimeout: 0,
-    /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: baseUrl,
-    ignoreHTTPSErrors: true,
-    trace: 'on-first-retry',
-    /* Slows down Playwright operations by the specified amount of milliseconds. */
-    launchOptions: {
-      slowMo: 0,
-    },
-  },
 };
-export default config;
+export default defineConfig(config);
