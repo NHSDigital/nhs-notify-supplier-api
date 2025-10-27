@@ -1,6 +1,6 @@
 import { Letter, LetterRepository } from '@internal/datastore';
 import { Deps } from '../../config/deps';
-import { LetterDto, LetterStatus } from '../../contracts/letters';
+import { LetterDto } from '../../contracts/letters';
 import { getLetterById, getLetterDataUrl, getLettersForSupplier, patchLetterStatus } from '../letter-operations';
 import pino from 'pino';
 
