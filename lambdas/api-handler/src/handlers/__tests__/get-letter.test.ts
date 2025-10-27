@@ -28,7 +28,7 @@ describe('API Lambda handler', () => {
       DOWNLOAD_URL_TTL_SECONDS: 60,
       MAX_LIMIT: 2500
     } as unknown as EnvVars
-  };
+  } as Deps;
 
   beforeEach(() => {
     jest.clearAllMocks();
