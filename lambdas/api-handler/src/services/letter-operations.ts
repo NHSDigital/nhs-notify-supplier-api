@@ -13,6 +13,22 @@ export const getLettersForSupplier = async (supplierId: string, status: string, 
   return await letterRepo.getLettersBySupplier(supplierId, status, limit);
 }
 
+export const getLetterById = async (supplierId: string, letterId: string, letterRepo: LetterRepository): Promise<LetterBase> => {
+
+  let letter;
+
+  try {
+    letter = await letterRepo.getLetterById(supplierId, letterId);
+  } catch (error) {
+    if (isNotFoundError(error)) {
+      throw new NotFoundError(ApiErrorDetail.NotFoundLetterId);
+    }
+    throw error;
+  }
+
+  return letter;
+}
+
 export const patchLetterStatus = async (letterToUpdate: LetterDto, letterId: string, letterRepo: LetterRepository): Promise<PatchLetterResponse> => {
 
   if (letterToUpdate.id !== letterId) {
@@ -24,13 +40,16 @@ export const patchLetterStatus = async (letterToUpdate: LetterDto, letterId: str
   try {
     updatedLetter =  await letterRepo.updateLetterStatus(letterToUpdate);
   } catch (error) {
-    if (error instanceof Error && /^Letter with id \w+ not found for supplier \w+$/.test(error.message)) {
+    if (isNotFoundError(error)) {
       throw new NotFoundError(ApiErrorDetail.NotFoundLetterId);
     }
     throw error;
   }
 
   return mapToPatchLetterResponse(updatedLetter);
+}
+function isNotFoundError(error: any) {
+  return error instanceof Error && /^Letter with id \w+ not found for supplier \w+$/.test(error.message);
 }
 
 export const getLetterDataUrl = async (supplierId: string, letterId: string, deps: Deps): Promise<string> => {
