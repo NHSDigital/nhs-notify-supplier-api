@@ -2,13 +2,10 @@ openapi: 3.0.3
 info:
   version: next
   title: NHS Notify Supplier API
-  description: |
-    API for communication suppliers to integrate with NHS Notify.
-
-    This specification represents the in-development 'next' version of the API schema
-    and should be treated as unstable.
+  description:
+    $ref: 'components/documentation/APIDescription.md'
 security:
-  - app-level0: [ ]
+  - $ref: 'components/security/security.yml'
 paths:
   /letters:
     parameters:
@@ -27,24 +24,7 @@ paths:
       $ref: 'components/endpoints/getLetterStatus.yml'
     patch:
       $ref: 'components/endpoints/patchLetter.yml'
-  /mi:
-    parameters:
-      - $ref: 'components/parameters/requestId.yml'
-      - $ref: 'components/parameters/correlationId.yml'
-    get:
-      $ref: 'components/endpoints/listMI.yml'
-    post:
-      $ref: 'components/endpoints/createMI.yml'
-
-  '/mi/{id}':
-    parameters:
-      - $ref: 'components/parameters/requestId.yml'
-      - $ref: 'components/parameters/correlationId.yml'
-      - $ref: 'components/parameters/resourceId.yml'
-    get:
-      $ref: 'components/endpoints/getMI.yml'
-
-  '/data/{id}':
+  '/letters/{id}/data':
     parameters:
       - $ref: 'components/parameters/resourceId.yml'
       - $ref: 'components/parameters/requestId.yml'
@@ -53,12 +33,27 @@ paths:
       $ref: 'components/endpoints/getDataId.yml'
     head:
       $ref: 'components/endpoints/headDataId.yml'
+  /mi:
+    parameters:
+      - $ref: 'components/parameters/requestId.yml'
+      - $ref: 'components/parameters/correlationId.yml'
+    post:
+      $ref: 'components/endpoints/createMI.yml'
+  /_status:
+    get:
+      description: Returns 200 OK if the service is up.
+      operationId: getStatus
+      responses:
+        "200":
+          description: Service is healthy
+      summary: Health check endpoint
 components:
   securitySchemes:
-    nhs-login-p0:
-      $ref: https://proxygen.ptl.api.platform.nhs.uk/components/securitySchemes/nhs-login-p0
+    app-level3:
+      $ref: https://proxygen.ptl.api.platform.nhs.uk/components/securitySchemes/app-level3
     app-level0:
       $ref: https://proxygen.ptl.api.platform.nhs.uk/components/securitySchemes/app-level0
+
 tags:
   - name: letter
     description: ''
@@ -67,23 +62,18 @@ tags:
   - name: data
     description: ''
 servers:
-  - url: 'http://127.0.0.1:3000'
-    description: Local development server
-  - url: 'https://sandbox-server.nhs.uk/nhs-notify-supplier-api'
+  - url: 'https://internal-dev-sandbox.api.service.nhs.uk/nhs-notify-supplier'
     description: Public sandbox
+  - url: 'http://127.0.0.1:9000'
+    description: Local development server
 x-nhsd-apim:
   temporary: false
   monitoring: false
   access:
-  - title: Application Restricted
-    grants:
-      app-level0: []
-      app-level3: []
+    $ref: ./components/x-nhsd-apim/access.yml
   target:
-    type: external
-    healthcheck: /_status
-    url: https://jct1kdzzma.execute-api.eu-west-2.amazonaws.com/main/
-    security:
-      type: apikey
-      header: nhsd-apim-apikey
-      secret: nhs-notify-supplier-key
+    $ref: ./components/x-nhsd-apim/target.yml
+  target-attributes:
+    $ref: ./components/x-nhsd-apim/target-attributes.yml
+  ratelimiting:
+    $ref: ./components/x-nhsd-apim/rate-limiting.yml

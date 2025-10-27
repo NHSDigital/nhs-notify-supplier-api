@@ -1,0 +1,50 @@
+{
+  "configurations": [
+    {
+      "args": [
+        "${relativeFile}",
+        "--runInBand"
+      ],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/${input:workspace}",
+      "internalConsoleOptions": "neverOpen",
+      "name": "Debug current test file (pick workspace)",
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "request": "launch",
+      "type": "node"
+    },
+    {
+      "args": [
+        "${relativeFile}",
+        "--runInBand",
+        "--testNamePattern",
+        "${input:testName}"
+      ],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}/${input:workspace}",
+      "internalConsoleOptions": "neverOpen",
+      "name": "Debug single test by name (pick workspace)",
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "request": "launch",
+      "type": "node"
+    }
+  ],
+  "inputs": [
+    {
+      "description": "Select package workspace to run tests in",
+      "id": "workspace",
+      "options": [
+        "lambdas/api-handler",
+        "lambdas/authorizer",
+        "internal/datastore"
+      ],
+      "type": "pickString"
+    },
+    {
+      "description": "Enter test name regex for --testNamePattern",
+      "id": "testName",
+      "type": "promptString"
+    }
+  ],
+  "version": "0.0.1"
+}

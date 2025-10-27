@@ -11,12 +11,16 @@ class Controller {
     * payload will be an object consisting of a code and a payload. If not customized
     * send 200 and the payload as received in this method.
     */
+    Object.entries(payload.headers).forEach(([name, value]) => response.setHeader(name, String(value)));
     response.status(payload.code || 200);
-    const responsePayload = payload.payload !== undefined ? payload.payload : payload;
-    if (responsePayload instanceof Object) {
-      response.json(responsePayload);
+    if (payload.body) {
+      if (payload.body instanceof Object) {
+        response.json(payload.body);
+      } else {
+        response.end(payload.body);
+      }
     } else {
-      response.end(responsePayload);
+      response.end();
     }
   }
 
@@ -61,7 +65,7 @@ class Controller {
     if (codeGenDefinedBodyName !== undefined) {
       return codeGenDefinedBodyName;
     }
-    const refObjectPath = request.openapi.schema.requestBody.content['application/json'].schema.$ref;
+    const refObjectPath = request.openapi.schema.requestBody.content['application/vnd.api+json'].schema.$ref;
     if (refObjectPath !== undefined && refObjectPath.length > 0) {
       return (refObjectPath.substr(refObjectPath.lastIndexOf('/') + 1));
     }
@@ -72,7 +76,7 @@ class Controller {
     const requestParams = {};
     if (request.openapi.schema.requestBody !== null) {
       const { content } = request.openapi.schema.requestBody;
-      if (content['application/json'] !== undefined) {
+      if (content['application/vnd.api+json'] !== undefined) {
         const requestBodyName = camelCase(this.getRequestBodyName(request));
         requestParams[requestBodyName] = request.body;
       } else if (content['multipart/form-data'] !== undefined) {
@@ -91,12 +95,13 @@ class Controller {
 
     if (request.openapi.schema.parameters !== undefined) {
       request.openapi.schema.parameters.forEach((param) => {
+
         if (param.in === 'path') {
           requestParams[param.name] = request.openapi.pathParams[param.name];
         } else if (param.in === 'query') {
           requestParams[param.name] = request.query[param.name];
         } else if (param.in === 'header') {
-          requestParams[param.name] = request.headers[param.name];
+          requestParams[camelCase(param.name)] = request.headers[param.name.toLowerCase()];
         }
       });
     }
@@ -105,7 +110,8 @@ class Controller {
 
   static async handleRequest(request, response, serviceOperation) {
     try {
-      const serviceResponse = await serviceOperation(this.collectRequestParams(request));
+      const requestParams = this.collectRequestParams(request);
+      const serviceResponse = await serviceOperation(requestParams);
       Controller.sendResponse(response, serviceResponse);
     } catch (error) {
       Controller.sendError(response, error);

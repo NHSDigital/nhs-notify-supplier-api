@@ -11,36 +11,28 @@
 
 // See https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html for the original JS documentation
 
-import { APIGatewayRequestAuthorizerEvent, Context, Callback, APIGatewayAuthorizerResult } from 'aws-lambda';
+import { APIGatewayAuthorizerResult, APIGatewayRequestAuthorizerEvent, Callback, Context } from 'aws-lambda';
+import pino from 'pino';
 
 export const handler = (
   event: APIGatewayRequestAuthorizerEvent,
   context: Context,
-  callback: Callback<APIGatewayAuthorizerResult>
+  callback: Callback<APIGatewayAuthorizerResult>,
+  log = pino()
 ): void => {
-  console.log('Received event:', JSON.stringify(event, null, 2));
+  log.info(event, 'Received event');
 
   const headers = event.headers || {};
-  const tmp = event.methodArn.split(':');
-  const apiGatewayArnTmp = tmp[5].split('/');
-  const awsAccountId = tmp[4];
-  const region = tmp[3];
-  const restApiId = apiGatewayArnTmp[0];
-  const stage = apiGatewayArnTmp[1];
-  const method = apiGatewayArnTmp[2];
-  let resource = '/'; // root resource
-
-  if (apiGatewayArnTmp[3]) {
-    resource += apiGatewayArnTmp[3];
-  }
 
   // Perform authorization to return the Allow policy for correct parameters and
   // the 'Unauthorized' error, otherwise.
   if (
     headers['headerauth1'] === 'headervalue1'
   ) {
+    log.info('Allow event');
     callback(null, generateAllow('me', event.methodArn));
   } else {
+    log.info('Deny event');
     callback(null, generateDeny('me', event.methodArn));
   }
 };

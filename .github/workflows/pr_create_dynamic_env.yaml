@@ -8,48 +8,30 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   create-dynamic-environment:
     name: Create Dynamic Environment
     runs-on: ubuntu-latest
 
     steps:
-      - name: Trigger nhs-notify-internal dynamic environment workflow
+      - uses: actions/checkout@v5.0.0
+      - name: Trigger dynamic environment creation
+        env:
+          APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
+          APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
         shell: bash
         run: |
-          set -x
-          this_repo_name=$(echo ${{ github.repository }} | cut -d'/' -f2)
-
-          DISPATCH_EVENT=$(jq -ncM \
-            --arg infraRepoName "${this_repo_name}" \
-            --arg releaseVersion "${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" \
-            --arg targetProject "nhs" \
-            --arg targetEnvironment "pr${{ github.event.number }}" \
-            --arg targetAccountGroup "nhs-notify-supplier-api-dev" \
-            --arg targetComponent "api" \
-            --arg terraformAction "apply" \
-            --arg overrides "branch_name=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" \
-            --arg overrideProjectName "nhs" \
-            --arg overrideRoleName "nhs-main-acct-supplier-api-github-deploy" \
-            '{ "ref": "main",
-              "inputs": {
-                "infraRepoName", $infraRepoName,
-                "releaseVersion", $releaseVersion,
-                "targetProject", $targetProject,
-                "targetEnvironment", $targetEnvironment,
-                "targetAccountGroup", $targetAccountGroup,
-                "targetComponent", $targetComponent,
-                "terraformAction", $terraformAction,
-                "overrides", $overrides,
-                "overrideProjectName", $overrideProjectName,
-                "overrideRoleName", $overrideRoleName,
-              }
-            }')
-
-          curl --fail -L \
-            -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.PR_TRIGGER_PAT }}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/NHSDigital/nhs-notify-internal/actions/workflows/dispatch-deploy-dynamic-env.yaml/dispatches \
-            -d "${DISPATCH_EVENT}"
+          .github/scripts/dispatch_internal_repo_workflow.sh \
+            --infraRepoName "$(echo ${{ github.repository }} | cut -d'/' -f2)" \
+            --releaseVersion "${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" \
+            --targetWorkflow "dispatch-deploy-dynamic-env.yaml" \
+            --targetEnvironment "pr${{ github.event.number }}" \
+            --targetComponent "api" \
+            --targetAccountGroup "nhs-notify-supplier-api-dev" \
+            --terraformAction "apply" \
+            --overrideProjectName "nhs" \
+            --overrideRoleName "nhs-main-acct-supplier-api-github-deploy"

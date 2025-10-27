@@ -1,5 +1,5 @@
 module "get_letters" {
-  source = "git::https://github.com/NHSDigital/nhs-notify-shared-modules.git//infrastructure/modules/lambda?ref=v2.0.10"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.24/terraform-lambda.zip"
 
   function_name = "get_letters"
   description   = "Get paginated letter ids"
@@ -35,8 +35,9 @@ module "get_letters" {
   log_destination_arn       = local.destination_arn
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
-  lambda_env_vars = {
-  }
+  lambda_env_vars = merge(local.common_lambda_env_vars, {
+    MAX_LIMIT = var.max_get_limit
+  })
 }
 
 data "aws_iam_policy_document" "get_letters_lambda" {
@@ -51,6 +52,23 @@ data "aws_iam_policy_document" "get_letters_lambda" {
 
     resources = [
       module.kms.key_arn, ## Requires shared kms module
+    ]
+  }
+
+  statement {
+    sid    = "AllowDynamoDBAccess"
+    effect = "Allow"
+
+    actions = [
+      "dynamodb:BatchGetItem",
+      "dynamodb:GetItem",
+      "dynamodb:Query",
+      "dynamodb:Scan",
+    ]
+
+    resources = [
+      aws_dynamodb_table.letters.arn,
+      "${aws_dynamodb_table.letters.arn}/index/supplierStatus-index"
     ]
   }
 }

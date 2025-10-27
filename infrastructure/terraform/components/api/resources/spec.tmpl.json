@@ -3,13 +3,13 @@
     "securitySchemes": {
       "LambdaAuthorizer": {
         "in": "header",
-        "name": "Authorization",
+        "name": "NHSD-Supplier-ID",
         "type": "apiKey",
         "x-amazon-apigateway-authorizer": {
           "authorizerCredentials": "${APIG_EXECUTION_ROLE_ARN}",
           "authorizerResultTtlInSeconds": 0,
           "authorizerUri": "arn:aws:apigateway:${AWS_REGION}:lambda:path/2015-03-31/functions/${AUTHORIZER_LAMBDA_ARN}/invocations",
-          "identitySource": "method.request.header.Authorization",
+          "identitySource": "method.request.header.NHSD-Supplier-ID",
           "type": "request"
         },
         "x-amazon-apigateway-authtype": "custom"
@@ -23,36 +23,6 @@
   },
   "openapi": "3.0.1",
   "paths": {
-    "/": {
-      "get": {
-        "description": "Returns 200 OK if the API is up.",
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "security": [
-          {
-            "LambdaAuthorizer": []
-          }
-        ],
-        "summary": "Health check",
-        "x-amazon-apigateway-integration": {
-          "contentHandling": "CONVERT_TO_TEXT",
-          "credentials": "${APIG_EXECUTION_ROLE_ARN}",
-          "httpMethod": "POST",
-          "passthroughBehavior": "WHEN_NO_TEMPLATES",
-          "responses": {
-            ".*": {
-              "statusCode": "200"
-            }
-          },
-          "timeoutInMillis": 29000,
-          "type": "AWS_PROXY",
-          "uri": "arn:aws:apigateway:${AWS_REGION}:lambda:path/2015-03-31/functions/${HELLO_WORLD_LAMBDA_ARN}/invocations"
-        }
-      }
-    },
     "/letters": {
       "get": {
         "description": "Returns 200 OK with paginated letter ids.",
@@ -82,6 +52,119 @@
           "uri": "arn:aws:apigateway:${AWS_REGION}:lambda:path/2015-03-31/functions/${GET_LETTERS_LAMBDA_ARN}/invocations"
         }
       }
+    },
+    "/letters/{id}": {
+      "parameters": [
+        {
+          "description": "Unique identifier of this resource",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "patch": {
+        "description": "Update the status of a letter by providing the new status in the request body.",
+        "operationId": "patchLetter",
+        "requestBody": {
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "List of letters to process"
+          },
+          "400": {
+            "description": "Bad request, invalid input data"
+          },
+          "404": {
+            "description": "Resource not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "security": [
+          {
+            "LambdaAuthorizer": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "contentHandling": "CONVERT_TO_TEXT",
+          "credentials": "${APIG_EXECUTION_ROLE_ARN}",
+          "httpMethod": "POST",
+          "passthroughBehavior": "WHEN_NO_TEMPLATES",
+          "responses": {
+            ".*": {
+              "statusCode": "200"
+            }
+          },
+          "timeoutInMillis": 29000,
+          "type": "AWS_PROXY",
+          "uri": "arn:aws:apigateway:${AWS_REGION}:lambda:path/2015-03-31/functions/${PATCH_LETTER_LAMBDA_ARN}/invocations"
+        }
+      }
+    },
+    "/letters/{id}/data": {
+      "get": {
+        "operationId": "getDataId",
+        "responses": {
+          "303": {
+            "description": "See Other",
+            "headers": {
+              "Location": {
+                "description": "The signed S3 URL of the data file to download",
+                "example": "https://examples3bucket.com/filelocation",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found"
+          },
+          "429": {
+            "description": "Too many requests"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "security": [
+          {
+            "LambdaAuthorizer": []
+          }
+        ],
+        "summary": "Fetch a data file",
+        "x-amazon-apigateway-integration": {
+          "contentHandling": "CONVERT_TO_TEXT",
+          "credentials": "${APIG_EXECUTION_ROLE_ARN}",
+          "httpMethod": "POST",
+          "passthroughBehavior": "WHEN_NO_TEMPLATES",
+          "responses": {
+            ".*": {
+              "statusCode": "200"
+            }
+          },
+          "timeoutInMillis": 29000,
+          "type": "AWS_PROXY",
+          "uri": "arn:aws:apigateway:${AWS_REGION}:lambda:path/2015-03-31/functions/${GET_LETTER_DATA_LAMBDA_ARN}/invocations"
+        }
+      },
+      "parameters": [
+        {
+          "description": "Unique identifier of this resource",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "example": "24L5eYSWGzCHlGmzNxuqVusPxDg",
+            "type": "string"
+          }
+        }
+      ]
     }
   }
 }

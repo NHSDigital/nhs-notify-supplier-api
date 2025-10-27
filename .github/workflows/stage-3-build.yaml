@@ -36,6 +36,9 @@ on:
         required: false
         type: string
 
+permissions:
+  id-token: write # This is required for requesting the JWT
+  contents: read  # This is required for actions/checkout
 jobs:
   artefact-jekyll-docs:
     name: "Build Docs"
@@ -90,26 +93,22 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      PROXYGEN_PRIVATE_KEY: ${{ secrets.PROXYGEN_ENCODED_NOTIFY_SUPPLIER_PRIVATE_KEY }}
-      PROXYGEN_KID: notify-supplier-key-1
-      PROXYGEN_CLIENT_ID: nhs-notify-supplier-client
       PROXYGEN_API_NAME: nhs-notify-supplier
       PR_NUMBER: ${{ inputs.pr_number }}
+      APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
+      APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
     steps:
-      - name: Verify environment variables
-        shell: bash
-        run: |
-          echo "PROXYGEN_PRIVATE_KEY is set: [${{ secrets.PROXYGEN_ENCODED_NOTIFY_SUPPLIER_PRIVATE_KEY != '' }}]"
-          echo "PROXYGEN_KID: $PROXYGEN_KID"
-          echo "PROXYGEN_CLIENT_ID: $PROXYGEN_CLIENT_ID"
-          echo "PROXYGEN_API_NAME: $PROXYGEN_API_NAME"
-          echo "PR_NUMBER: $PR_NUMBER"
       - name: "Checkout code"
         uses: actions/checkout@v4
       - name: "Build proxies"
         uses: ./.github/actions/build-proxies
         with:
           version: "${{ inputs.version }}"
+          environment: ${{ inputs.pr_number != '' && format('pr{0}', inputs.pr_number) || 'main' }}
+          apimEnv: "internal-dev-sandbox"
+          runId: "${{ github.run_id }}"
+          buildSandbox: true
+          releaseVersion: ${{ github.head_ref || github.ref_name }}
 
   # artefact-1:
   #   name: "Artefact 1"

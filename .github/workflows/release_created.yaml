@@ -11,6 +11,7 @@ concurrency:
 jobs:
   deploy-main:
     name: Deploy changes to main in nonprod AWS Account
+    runs-on: ubuntu-latest
 
     permissions:
       id-token: write
@@ -21,12 +22,19 @@ jobs:
       matrix:
         component: [api]
 
-    uses: ./.github/workflows/reusable_internal_repo_build.yaml
-    secrets: inherit
-    with:
-      releaseVersion: ${{ github.event.release.tag_name }}
-      targetWorkflow: "dispatch-deploy-static-notify-supliers-api-env.yaml"
-      targetEnvironment: "main"
-      targetAccountGroup: "nhs-notify-supliers-api-nonprod"
-      targetComponent: ${{ matrix.component }}
-      terraformAction: "apply"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy Nonprod Environment
+        env:
+          APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
+          APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
+        run: |
+          bash .github/scripts/dispatch_internal_repo_workflow.sh \
+            --releaseVersion "${{ github.event.release.tag_name }}" \
+            --targetWorkflow "dispatch-deploy-static-notify-supplier-api-env.yaml" \
+            --targetEnvironment "main" \
+            --targetAccountGroup "nhs-notify-supplier-api-nonprod" \
+            --targetComponent "${{ matrix.component }}" \
+            --terraformAction "apply"

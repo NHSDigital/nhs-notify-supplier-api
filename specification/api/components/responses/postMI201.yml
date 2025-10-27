@@ -1,9 +1,14 @@
 description: Management Information created successfully
+headers:
+  X-Request-ID:
+    $ref: "../responseHeaders/xRequestId.yml"
+  X-Correlation-ID:
+    $ref: "../responseHeaders/xCorrelationId.yml"
 content:
   application/vnd.api+json:
     schema:
-      $ref: "../schemas/miItem.yml"
+      $ref: "../schemas/miResponse.yml"
     examples:
-      create-mi:
+      create-mi-response:
         value:
-          $ref: "../examples/createMI/responses/createMI.json"
+          $ref: "../examples/createMI/responses/createMI_SUCCESS.json"

@@ -1,4 +1,9 @@
 description: Letter resource updated successfully
+headers:
+  X-Request-ID:
+    $ref: "../responseHeaders/xRequestId.yml"
+  X-Correlation-ID:
+    $ref: "../responseHeaders/xCorrelationId.yml"
 content:
   application/vnd.api+json:
     schema:
@@ -6,4 +11,4 @@ content:
     examples:
       patch_letter-response:
         value:
-          $ref: ../examples/patchLetter/responses/patchLetter.json
+          $ref: ../examples/patchLetter/responses/patchLetter_ACCEPTED.json

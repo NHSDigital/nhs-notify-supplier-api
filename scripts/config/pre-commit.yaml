@@ -15,6 +15,7 @@ repos:
         args: ['--autofix']
         exclude: |
             (?x)^(
+                package(-lock)?\.json$ |
                 sdk/.* |
                 someotherdir/.* |
                 src/server/host/Properties/launchSettings.json

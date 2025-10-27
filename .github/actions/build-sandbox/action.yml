@@ -1,0 +1,56 @@
+name: "Build Sandbox"
+description: "Build Sandbox"
+inputs:
+  version:
+    description: "Version number"
+    required: true
+runs:
+  using: composite
+
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24
+
+    - name: Npm install
+      working-directory: .
+      run: npm ci
+      shell: bash
+
+    - name: Install Proxygen client
+      shell: bash
+      run: |
+        # Install proxygen cli
+        pip install pipx
+        pipx install proxygen-cli
+
+        # Setup proxygen auth and settings
+        mkdir -p ${HOME}/.proxygen
+        echo -n $PROXYGEN_PRIVATE_KEY | base64 --decode > ${HOME}/.proxygen/key
+        envsubst < ./.github/proxygen-credentials-template.yaml > ${HOME}/.proxygen/credentials.yaml
+        envsubst < ./.github/proxygen-credentials-template.yaml | cat
+        envsubst < ./.github/proxygen-settings.yaml > ${HOME}/.proxygen/settings.yaml
+        envsubst < ./.github/proxygen-settings.yaml | cat
+
+    - name: Setup Sandbox tag
+      shell: bash
+      run: |
+        if [ -z $PR_NUMBER ]
+        then
+          echo "SANDBOX_TAG=latest" >> $GITHUB_ENV
+        else
+          echo "SANDBOX_TAG=pr$PR_NUMBER" >> $GITHUB_ENV
+        fi
+
+    - name: Build and publish sandbox Docker image
+      shell: bash
+      working-directory: ./sandbox
+      run: |
+          proxygen docker get-login | bash
+          docker build -t nhs-notify-supplier:$SANDBOX_TAG .
+          DOCKER_REGISTRY=$(proxygen docker registry | tail -1)
+          IMAGE_ID=$(docker images -q nhs-notify-supplier:$SANDBOX_TAG)
+          docker tag $IMAGE_ID $DOCKER_REGISTRY/nhs-notify-supplier:$SANDBOX_TAG
+          docker push $DOCKER_REGISTRY/nhs-notify-supplier:$SANDBOX_TAG

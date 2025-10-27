@@ -1,16 +1,12 @@
 summary: Fetch a data file
-operationId: get-data-id
+description:
+  $ref: '../documentation/getDataId.md'
+operationId: getDataId
 tags:
   - data
 responses:
   "303":
-    description: See Other
-    headers:
-      Location:
-        description: The signed S3 URL of the data file to download
-        schema:
-          type: string
-        example: "https://examples3bucket.com/filelocation"
+    $ref: "../responses/getDataId303.yml"
   "404":
     $ref: "../responses/errors/resourceNotFound.yml"
   "429":

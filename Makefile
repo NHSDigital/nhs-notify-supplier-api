@@ -26,24 +26,73 @@ clean:: # Clean-up project resources (main) @Operations
 	(cd sdk && make clean)
 	(cd server && make clean)
 	(cd src/server && make clean)
+
+guard-%:
+	@ if [ "${${*}}" = "" ]; then \
+		echo "Variable $* not set"; \
+		echo "Usage: make <target> APIM_ENV=<env>"
+		exit 1; \
+	fi
 serve:
 	npm run serve
-
 
 lint-oas:
 	npm run lint-oas
 
 publish-oas:
+	$(MAKE) copy-examples
 	npm run publish-oas
 
+set-target: guard-APIM_ENV
+	@ TARGET=target-$$APIM_ENV.yml \
+	envsubst '$${TARGET}' \
+	< specification/api/components/x-nhsd-apim/target-template.yml > specification/api/components/x-nhsd-apim/target.yml
+
+set-access: guard-APIM_ENV
+	@ ACCESS=access-$$APIM_ENV.yml \
+	envsubst '$${ACCESS}' \
+	< specification/api/components/x-nhsd-apim/access-template.yml > specification/api/components/x-nhsd-apim/access.yml
+
+set-security: guard-APIM_ENV
+	@ SECURITY=security-$$APIM_ENV.yml \
+	envsubst '$${SECURITY}' \
+	< specification/api/components/security/security-template.yml > specification/api/components/security/security.yml
+
+construct-spec: guard-APIM_ENV
+	$(MAKE) set-target APIM_ENV=$$APIM_ENV
+	$(MAKE) set-access APIM_ENV=$$APIM_ENV
+	$(MAKE) set-security APIM_ENV=$$APIM_ENV
+
+
+
+build-json-oas-spec: guard-APIM_ENV
+	$(MAKE) construct-spec APIM_ENV=$$APIM_ENV
+	$(MAKE) publish-oas
+
+
+build-yml-oas-spec: guard-APIM_ENV
+	$(MAKE) construct-spec APIM_ENV=$$APIM_ENV
+	$(MAKE) bundle-oas
+
 serve-oas:
+	$(MAKE) copy-examples
 	npm run serve-oas
 
 bundle-oas:
+	$(MAKE) copy-examples
 	npm run bundle-oas
+
+generate-sandbox:
+	$(MAKE) build-json-oas-spec APIM_ENV=sandbox
+	# jq --slurpfile status sandbox/HealthcheckEndpoint.json '.paths += $$status[0]' build/notify-supplier.json > tmp.json && mv tmp.json build/notify-supplier.json
+	jq '.security = []' build/notify-supplier.json > tmp.json && mv tmp.json build/notify-supplier.json
+	npm run generate-sandbox
 
 serve-swagger:
 	npm run serve-swagger-docs
+
+copy-examples:
+	cp -r ./sandbox/data/examples/. ./specification/api/components/examples
 
 config:: _install-dependencies version # Configure development environment (main) @Configuration
 	npm install

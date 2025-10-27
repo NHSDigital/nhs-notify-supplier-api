@@ -1,29 +1,23 @@
 type: object
+required:
+  - type
+  - id
+  - attributes
 properties:
   type:
     type: string
-    const: Letter
+    enum: [Letter]
   id:
     type: string
-    examples:
-      - 2WL5eYSWGzCHlGmzNxuqVusPxDg
+    example: 2WL5eYSWGzCHlGmzNxuqVusPxDg
   attributes:
     type: object
+    required:
+      - status
     properties:
       status:
         $ref: "./letterStatus.yml"
-      requestedProductionStatus:
-        $ref: "./productionStatus.yml"
-        description: |-
-          The requested production status for this letter.
-          May only be set by NHS Notify.
       reasonCode:
-        type: number
-        description: Reason code for the given status
-        examples:
-          - 100
+        $ref: "./reasonCode.yml"
       reasonText:
-        type: string
-        description: Reason text for the given status
-        examples:
-          - failed validation
+        $ref: "./reasonText.yml"

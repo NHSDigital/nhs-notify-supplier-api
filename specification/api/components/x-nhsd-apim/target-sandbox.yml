@@ -1,0 +1,10 @@
+type: hosted
+healthcheck: /_status
+containers:
+  - name: nhs-notify-supplier
+    image:
+      name: nhs-notify-supplier
+      tag: latest
+    environment:
+      LOG_LEVEL: info
+      NODE_ENV: development

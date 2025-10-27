@@ -1,7 +1,9 @@
-summary: Check for the existance of a data file
+summary: Check for the existence of a data file
+description:
+  $ref: '../documentation/headDataId.md'
 tags:
   - data
 responses:
   200:
     description: OK
-operationId: head-data-id
+operationId: headDataId

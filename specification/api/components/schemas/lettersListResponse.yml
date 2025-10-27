@@ -4,3 +4,30 @@ properties:
     type: array
     items:
       $ref: "./letterItem.yml"
+
+## Links are not currently used as we are only returning the head of the list
+#  links:
+#    type: object
+#    additionalProperties: false
+#    description: Contains links to other data pages
+#    properties:
+#      last:
+#        type: string
+#        format: uri
+#        description: URI of final page of data
+#        example: https://dev.api.service.nhs.uk/nhs-notify-supplier/letters?status=PENDING&page=10
+#      next:
+#        type: string
+#        format: uri
+#        description: URI of next page of data
+#        example: https://dev.api.service.nhs.uk/nhs-notify-supplier/letters?status=PENDING&page=5
+#      prev:
+#        type: string
+#        format: uri
+#        description: URI of prev page of data
+#        example: https://dev.api.service.nhs.uk/nhs-notify-supplier/letters?status=PENDING&page=7
+#      self:
+#        type: string
+#        format: uri
+#        description: URI of current page of data
+#        example: https://dev.api.service.nhs.uk/nhs-notify-supplier/letters?status=PENDING&page=6

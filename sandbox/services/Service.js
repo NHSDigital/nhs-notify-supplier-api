@@ -3,8 +3,16 @@ class Service {
     return { error, code };
   }
 
-  static successResponse(payload, code = 200) {
-    return { payload, code };
+  static successResponse(payload, code = 200, headers = {}) {
+    if (payload.xRequestId) {
+      headers['X-Request-ID'] = payload.xRequestId;
+    }
+    if (payload.xCorrelationId) {
+      headers['X-Correlation-ID'] = payload.xCorrelationId;
+    }
+    let body = payload.data !== undefined ? payload.data : undefined;
+
+    return { body, code, headers };
   }
 }
 

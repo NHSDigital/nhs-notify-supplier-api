@@ -1,0 +1,7 @@
+name: limit
+in: query
+description: |-
+  The maximum number of items to return in a single request, max 2500
+schema:
+  type: number
+  example: 2500
