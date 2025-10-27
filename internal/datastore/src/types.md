@@ -41,3 +41,15 @@ erDiagram
         string updatedAt
     }
 ```
+
+## Supplier schema
+
+```mermaid
+erDiagram
+    Supplier {
+        string id
+        string name
+        string apimId
+        string status "enum: ENABLED, DISABLED"
+    }
+```
