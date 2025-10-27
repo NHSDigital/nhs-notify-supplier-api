@@ -1,7 +1,9 @@
 
-import { PatchErrorMessageBody, PatchMessageRequestBody, PatchMessageResponseBody } from '../../component-tests/apiGateway-tests/testCases/UpdateLetterStatus';
+import { PatchMessageRequestBody, PatchMessageResponseBody } from '../../component-tests/apiGateway-tests/testCases/UpdateLetterStatus';
 import { RequestSandBoxHeaders, sandBoxHeader } from '../../constants/request_headers';
+import { ErrorMessageBody } from '../../helpers/commonTypes';
 import { SandboxErrorResponse } from './getListOfLetters_testCases';
+
 
 export type ApiSandboxUpdateLetterStatusTestData = {
   testCase: string;
@@ -9,7 +11,7 @@ export type ApiSandboxUpdateLetterStatusTestData = {
   header: RequestSandBoxHeaders;
   body?: PatchMessageRequestBody;
   expectedStatus: number;
-  expectedResponse?: PatchMessageResponseBody | SandboxErrorResponse | PatchErrorMessageBody;
+  expectedResponse?: PatchMessageResponseBody | SandboxErrorResponse | ErrorMessageBody;
 };
 
 export const apiSandboxUpdateLetterStatusTestData: ApiSandboxUpdateLetterStatusTestData[] = [

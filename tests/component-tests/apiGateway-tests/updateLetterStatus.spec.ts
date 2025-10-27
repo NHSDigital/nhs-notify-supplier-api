@@ -23,8 +23,8 @@ test.describe('API Gateway Tests to Verify Patch Status Endpoint', () => {
         return;
       }
       const letter = letters[0];
-      const headers = await patchRequestHeaders();
-      const body = await patchValidRequestBody(letter.id, 'ACCEPTED');
+      const headers = patchRequestHeaders();
+      const body = patchValidRequestBody(letter.id, 'ACCEPTED');
 
       const response = await request.patch(`${baseUrl}/${SUPPLIER_LETTERS}/${letter.id}`, {
           headers: headers,
@@ -58,8 +58,8 @@ test.describe('API Gateway Tests to Verify Patch Status Endpoint', () => {
         return;
       }
       const letter = letters[0];
-      const headers = await patchRequestHeaders();
-      const body = await patchFailureRequestBody(letter.id, 'REJECTED');
+      const headers = patchRequestHeaders();
+      const body = patchFailureRequestBody(letter.id, 'REJECTED');
 
       const response = await request.patch(`${baseUrl}/${SUPPLIER_LETTERS}/${letter.id}`, {
           headers: headers,
@@ -74,8 +74,8 @@ test.describe('API Gateway Tests to Verify Patch Status Endpoint', () => {
   test(`Patch /letters returns 400 if request Body is invalid`, async ({ request }) => {
 
       const id = randomUUID()
-      const headers = await patchRequestHeaders();
-      const body = await patchValidRequestBody(id, '');
+      const headers = patchRequestHeaders();
+      const body = patchValidRequestBody(id, '');
 
       const response = await request.patch(`${baseUrl}/${SUPPLIER_LETTERS}/${id}`, {
           headers: headers,
@@ -88,9 +88,9 @@ test.describe('API Gateway Tests to Verify Patch Status Endpoint', () => {
     });
 
     test(`Patch /letters returns 500 if Id doesn't exist for SupplierId`, async ({ request }) => {
-        const headers = await patchRequestHeaders();
+        const headers = patchRequestHeaders();
         const id = randomUUID()
-        const body = await patchValidRequestBody(id, 'PENDING');
+        const body = patchValidRequestBody(id, 'PENDING');
 
         const response = await request.patch(`${baseUrl}/${SUPPLIER_LETTERS}/${id}`, {
         headers: headers,
@@ -104,7 +104,7 @@ test.describe('API Gateway Tests to Verify Patch Status Endpoint', () => {
     test(`Patch /letters returns 403 for invalid headers`, async ({ request }) => {
         const headers = await createInvalidRequestHeaders();
         const id = randomUUID()
-        const body = await patchValidRequestBody(id, 'PENDING');
+        const body = patchValidRequestBody(id, 'PENDING');
 
         const response = await request.patch(`${baseUrl}/${SUPPLIER_LETTERS}/${id}`, {
             headers: headers,

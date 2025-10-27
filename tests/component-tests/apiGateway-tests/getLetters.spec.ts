@@ -11,7 +11,7 @@ test.beforeAll(async () => {
   baseUrl = await getRestApiGatewayBaseUrl();
 });
 
-test.describe('API Gateway Tests To Get List Of Pending ', () =>
+test.describe('API Gateway Tests To Get List Of Pending Letters', () =>
 {
   test('GET /letters should return 200 and list items', async ({ request }) =>
   {

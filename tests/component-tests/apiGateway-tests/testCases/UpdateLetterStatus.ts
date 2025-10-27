@@ -14,24 +14,6 @@ export type PatchMessageRequestBody = {
   };
 };
 
-export type ErrorLink = {
-  about: string;
-};
-
-type PatchErrorResponse = {
-  id: string;
-  code: string;
-  links: ErrorLink;
-  status: string;
-  title: string;
-  detail: string;
-};
-
-export type PatchErrorMessageBody = {
-  errors: PatchErrorResponse[];
-};
-
-
 export type PatchMessageResponseBody = {
   data: {
     type: string;
@@ -46,7 +28,7 @@ export type PatchMessageResponseBody = {
   };
 };
 
-export async function patchRequestHeaders(): Promise<RequestHeaders> {
+export function patchRequestHeaders(): RequestHeaders {
   let requestHeaders: RequestHeaders;
     requestHeaders = {
         headerauth1: process.env.HEADERAUTH || '',
@@ -58,7 +40,7 @@ export async function patchRequestHeaders(): Promise<RequestHeaders> {
 };
 
 
-export async function patchValidRequestBody (id: string, status: string) : Promise<PatchMessageRequestBody>{
+export function patchValidRequestBody (id: string, status: string) : PatchMessageRequestBody{
   let requestBody: PatchMessageRequestBody;
 
   requestBody = {
@@ -74,7 +56,7 @@ export async function patchValidRequestBody (id: string, status: string) : Promi
   return requestBody;
 }
 
-export async function patchFailureRequestBody (id: string, status: string) : Promise<PatchMessageRequestBody>{
+export function patchFailureRequestBody (id: string, status: string) : PatchMessageRequestBody{
   let requestBody: PatchMessageRequestBody;
 
   requestBody = {
