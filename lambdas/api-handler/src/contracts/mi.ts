@@ -14,16 +14,8 @@ export const PostMIRequestResourceSchema = z.object({
 }).strict();
 
 export const PostMIResponseResourceSchema = z.object({
-  type: z.literal('ManagementInformation'),
   id: z.string(),
-  attributes: z.object({
-    lineItem: z.string(),
-    timestamp: z.string(),
-    quantity: z.number(),
-    specificationId: z.string().optional(),
-    groupId: z.string().optional(),
-    stockRemaining: z.number().optional(),
-  }).strict()
+  ...PostMIRequestResourceSchema.shape,
 }).strict();
 
 export const PostMIRequestSchema = makeDocumentSchema(PostMIRequestResourceSchema);

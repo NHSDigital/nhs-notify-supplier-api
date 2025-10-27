@@ -27,10 +27,10 @@ const postMIRequest : PostMIRequest = {
 const requestBody = JSON.stringify(postMIRequest, null, 2);
 
     const postMIResponse : PostMIResponse = {
-        data: {
-          id: 'id1',
-          ...postMIRequest.data
-        }
+      data: {
+        id: 'id1',
+        ...postMIRequest.data
+      }
     };
 
 const mockedPostMIOperation = jest.mocked(miService.postMI);
@@ -72,11 +72,9 @@ describe('postMI API Handler', () => {
   });
 
 
-  it.each([['not a date string', false], ['2025-10-16T00:00:00', false], ['2025-16-10T00:00:00Z', false],
-            ['2025-10-16T00:00:00Z', true], ['2025-10-16T00:00:00.000000Z', true]])
-    ('validates the timestamp', async (timestamp: string, valid: boolean) => {
+  it('rejects invalid timestamps', async() => {
     const modifiedRequest = JSON.parse(requestBody);
-    modifiedRequest['data']['attributes']['timestamp'] = timestamp;
+    modifiedRequest['data']['attributes']['timestamp'] = '2025-02-31T00:00:00Z';
     const event = makeApiGwEvent({
       path: '/mi',
       body: JSON.stringify(modifiedRequest),
@@ -87,7 +85,7 @@ describe('postMI API Handler', () => {
     const result = await postMI(event,  mockDeep<Context>(), jest.fn());
 
     expect(result).toEqual(expect.objectContaining({
-      statusCode: valid? 201: 400
+      statusCode: 400
     }));
   });
 

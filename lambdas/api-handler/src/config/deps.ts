@@ -33,8 +33,7 @@ function createMIRepository(documentClient: DynamoDBDocumentClient, log: pino.Lo
   const ddbClient = new DynamoDBClient({});
   const docClient = DynamoDBDocumentClient.from(ddbClient);
   const config = {
-    miTableName: envVars.MI_TABLE_NAME,
-    ttlHours: envVars.LETTER_TTL_HOURS
+    miTableName: envVars.MI_TABLE_NAME
   };
 
   return new MIRepository(docClient, log, config);

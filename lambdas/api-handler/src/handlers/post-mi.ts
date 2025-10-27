@@ -3,7 +3,7 @@ import { postMI as postMIOperation } from '../services/mi-operations';
 import { ApiErrorDetail } from "../contracts/errors";
 import { ValidationError } from "../errors";
 import { mapErrorToResponse } from "../mappers/error-mapper";
-import { assertNotEmpty, validateCommonHeaders } from "../utils/validation";
+import { assertNotEmpty, validateCommonHeaders, validateIso8601Timestamp } from "../utils/validation";
 import { PostMIRequest, PostMIRequestSchema } from "../contracts/mi";
 import { mapToMI } from "../mappers/mi-mapper";
 import { Deps } from "../config/deps";
@@ -42,15 +42,6 @@ export function createPostMIHandler(deps: Deps): APIGatewayProxyHandler {
 
     } catch (error) {
       return mapErrorToResponse(error, commonHeadersResult.value.correlationId, deps.logger);
-    }
-  }
-
-  function validateIso8601Timestamp(timestamp: string) {
-
-    // If timestamp looks like a date, but is not valid (e.g. 2025-02-31T13:45:56Z), then new Date(timestamp).valueOf()
-    // will return NaN
-    if (! /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(.\d+)?Z/.test(timestamp) || Number.isNaN(new Date(timestamp).valueOf())) {
-      throw new ValidationError(ApiErrorDetail.InvalidRequestTimestamp);
     }
   }
 };
