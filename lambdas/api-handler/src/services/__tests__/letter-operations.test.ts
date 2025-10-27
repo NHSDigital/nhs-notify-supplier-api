@@ -1,7 +1,7 @@
 import { Letter, LetterRepository } from '@internal/datastore';
 import { Deps } from '../../config/deps';
-import { LetterDto } from '../../contracts/letters';
-import { getLetterDataUrl, getLettersForSupplier, patchLetterStatus } from '../letter-operations';
+import { LetterDto, LetterStatus } from '../../contracts/letters';
+import { getLetterById, getLetterDataUrl, getLettersForSupplier, patchLetterStatus } from '../letter-operations';
 import pino from 'pino';
 
 jest.mock('@aws-sdk/s3-request-presigner', () => ({
@@ -48,6 +48,48 @@ describe("getLetterIdsForSupplier", () => {
       { id: "id2", status: "PENDING", specificationId: "s1" },
     ]);
   });
+});
+
+describe("getLetterById", () => {
+
+  const testLetter = { id: "id1", status: "PENDING", specificationId: "s1",  groupId: "g1", };
+
+  it("returns letter from the repository", async () => {
+
+    const mockRepo = {
+      getLetterById: jest.fn().mockResolvedValue(testLetter),
+    };
+
+    const result = await getLetterById(
+      "supplier1",
+      "id1",
+      mockRepo as any,
+    );
+
+    expect(mockRepo.getLetterById).toHaveBeenCalledWith(
+      "supplier1",
+      "id1",
+    );
+    expect(result).toEqual({ id: 'id1', status: 'PENDING', specificationId: 's1',  groupId: 'g1' });
+  });
+
+    it('should throw notFoundError when letter does not exist', async () => {
+    const mockRepo = {
+      getLetterById: jest.fn().mockRejectedValue(new Error('Letter with id l1 not found for supplier s1'))
+    };
+
+    await expect(getLetterById('supplierid', 'letter1', mockRepo as any)).rejects.toThrow('No resource found with that ID');
+  });
+
+    it('should throw unexpected error', async () => {
+
+    const mockRepo = {
+      getLetterById: jest.fn().mockRejectedValue(new Error('unexpected error'))
+    };
+
+    await expect(getLetterById('supplierid', 'letter1', mockRepo as any)).rejects.toThrow("unexpected error");
+  });
+
 });
 
 describe('patchLetterStatus function', () => {
