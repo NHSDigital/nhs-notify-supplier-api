@@ -1,6 +1,7 @@
 
 import { RequestHeaders } from '../../../constants/request_headers';
 import { supplierId } from '../../../constants/api_constants';
+import { ErrorMessageBody } from '../../../helpers/commonTypes';
 
 export type PatchMessageRequestBody = {
   data: {
@@ -72,4 +73,42 @@ export function patchFailureRequestBody (id: string, status: string) : PatchMess
 
   };
   return requestBody;
+}
+
+export function patch400ErrorResponseBody () : ErrorMessageBody{
+  let responseBody: ErrorMessageBody;
+  responseBody = {
+    errors: [
+      {
+        id : '12344',
+        code : 'NOTIFY_INVALID_REQUEST',
+        "links": {
+                "about": "https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier"
+            },
+            "status": "400",
+            "title": "Invalid request",
+            "detail": "The request body is invalid"
+      }
+    ]
+  };
+  return responseBody;
+};
+
+export function patch500ErrorResponseBody (id: string) : ErrorMessageBody{
+  let responseBody: ErrorMessageBody;
+  responseBody = {
+    errors: [
+        {
+            id: "12344",
+            code: "NOTIFY_INTERNAL_SERVER_ERROR",
+            links: {
+                "about": "https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier"
+            },
+            status: "500",
+            title: "Internal server error",
+            detail: `Letter with id ${id} not found for supplier ${supplierId}`
+        }
+    ]
+  };
+  return responseBody;
 }

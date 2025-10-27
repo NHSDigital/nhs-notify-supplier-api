@@ -21,7 +21,7 @@ export interface RequestSandBoxHeaders {
   [key: string]: string;
 }
 
-export async function createInvalidRequestHeaders(): Promise<RequestHeaders> {
+export function createInvalidRequestHeaders(): RequestHeaders {
   let requestHeaders: RequestHeaders;
     requestHeaders = {
         headerauth1: '',
@@ -32,7 +32,7 @@ export async function createInvalidRequestHeaders(): Promise<RequestHeaders> {
   return requestHeaders;
 }
 
-export async function createHeaderWithNoCorrelationId(): Promise<RequestHeaders> {
+export function createHeaderWithNoCorrelationId(): RequestHeaders {
   let requestHeaders: RequestHeaders;
     requestHeaders = {
         headerauth1: process.env.HEADERAUTH || '',
@@ -43,7 +43,7 @@ export async function createHeaderWithNoCorrelationId(): Promise<RequestHeaders>
   return requestHeaders;
 }
 
-export async function createValidRequestHeaders(): Promise<RequestHeaders> {
+export function createValidRequestHeaders(): RequestHeaders{
   let requestHeaders: RequestHeaders;
     requestHeaders = {
         headerauth1: process.env.HEADERAUTH || '',

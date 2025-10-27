@@ -109,7 +109,7 @@ export const apiSandboxMultipleLetterStatusTestData: ApiSandboxUpdateLetterStatu
     expectedStatus: 200
 },
 {
-    testCase: '400 response if invalid request is passed',
+    testCase: '404 response if invalid request is passed',
     header: sandBoxHeader,
     body:{
         data :

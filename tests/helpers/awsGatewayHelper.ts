@@ -11,6 +11,5 @@ export async function getRestApiGatewayBaseUrl(): Promise<string> {
 
   if (!api?.id) throw new Error(`API with name "${API_NAME}" not found.`);
 
-  const url = `https://${api.id}.execute-api.${region}.amazonaws.com/main`;
-  return url;
+  return `https://${api.id}.execute-api.${region}.amazonaws.com/main`;
 }

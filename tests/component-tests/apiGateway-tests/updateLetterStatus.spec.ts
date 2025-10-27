@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { SUPPLIER_LETTERS, supplierId } from '../../constants/api_constants';
 import { getRestApiGatewayBaseUrl } from '../../helpers/awsGatewayHelper';
-import { patchFailureRequestBody, patchRequestHeaders, patchValidRequestBody } from './testCases/UpdateLetterStatus';
+import { patch400ErrorResponseBody, patch500ErrorResponseBody, patchFailureRequestBody, patchRequestHeaders, patchValidRequestBody } from './testCases/UpdateLetterStatus';
 import { createTestData, deleteLettersBySupplier, getLettersBySupplier } from '../../helpers/generate_fetch_testData';
 import { randomUUID } from 'crypto';
 import { createInvalidRequestHeaders } from '../../constants/request_headers';
@@ -68,6 +68,18 @@ test.describe('API Gateway Tests to Verify Patch Status Endpoint', () => {
 
     const res = await response.json();
     expect(response.status()).toBe(200);
+    expect(res).toMatchObject({
+      data:{
+        attributes: {
+            status: 'REJECTED',
+            specificationId: letter.specificationId,
+            groupId: letter.groupId,
+        },
+        id: letter.id,
+        type: 'Letter'
+      }
+    });
+
     await deleteLettersBySupplier(letter.id);
   });
 
@@ -85,7 +97,8 @@ test.describe('API Gateway Tests to Verify Patch Status Endpoint', () => {
     const res = await response.json();
 
     expect(response.status()).toBe(400);
-    });
+    expect(res).toMatchObject(patch400ErrorResponseBody());
+  });
 
     test(`Patch /letters returns 500 if Id doesn't exist for SupplierId`, async ({ request }) => {
         const headers = patchRequestHeaders();
@@ -99,6 +112,7 @@ test.describe('API Gateway Tests to Verify Patch Status Endpoint', () => {
 
       const res = await response.json();
       expect(response.status()).toBe(500);
+      expect(res).toMatchObject(patch500ErrorResponseBody(id));
     });
 
     test(`Patch /letters returns 403 for invalid headers`, async ({ request }) => {
