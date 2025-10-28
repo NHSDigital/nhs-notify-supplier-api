@@ -3,5 +3,6 @@ export type DatastoreConfig = {
   endpoint?: string,
   lettersTableName: string,
   miTableName: string,
-  ttlHours: number
+  lettersTtlHours: number,
+  miTtlHours: number
 }

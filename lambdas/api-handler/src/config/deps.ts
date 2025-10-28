@@ -23,7 +23,7 @@ function createLetterRepository(documentClient: DynamoDBDocumentClient, log: pin
   const docClient = DynamoDBDocumentClient.from(ddbClient);
   const config = {
     lettersTableName: envVars.LETTERS_TABLE_NAME,
-    ttlHours: envVars.LETTER_TTL_HOURS
+    lettersTtlHours: envVars.LETTER_TTL_HOURS
   };
 
   return new LetterRepository(docClient, log, config);
@@ -33,7 +33,8 @@ function createMIRepository(documentClient: DynamoDBDocumentClient, log: pino.Lo
   const ddbClient = new DynamoDBClient({});
   const docClient = DynamoDBDocumentClient.from(ddbClient);
   const config = {
-    miTableName: envVars.MI_TABLE_NAME
+    miTableName: envVars.MI_TABLE_NAME,
+    miTtlHours: envVars.MI_TTL_HOURS
   };
 
   return new MIRepository(docClient, log, config);

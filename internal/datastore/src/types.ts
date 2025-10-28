@@ -59,7 +59,8 @@ export const MISchemaBase = z.object({
 export const MISchema = MISchemaBase.extend({
   supplierId: idRef(SupplierSchema),
   createdAt: z.string(),
-  updatedAt: z.string()
+  updatedAt: z.string(),
+  ttl: z.int(),
 }).describe('MI');
 
 export type MI = z.infer<typeof MISchema>;

@@ -7,7 +7,8 @@ import { Logger } from 'pino';
 import { v4 as uuidv4 } from 'uuid';
 
 export type MIRepositoryConfig = {
-  miTableName: string
+  miTableName: string,
+  miTtlHours: number
 };
 
 export class MIRepository {
@@ -16,14 +17,15 @@ export class MIRepository {
     readonly config: MIRepositoryConfig) {
   }
 
-  async putMI(mi: Omit<MI, 'id' | 'createdAt' | 'updatedAt'>): Promise<MI> {
+  async putMI(mi: Omit<MI, 'id' | 'createdAt' | 'updatedAt' | 'ttl'>): Promise<MI> {
 
     const now = new Date().toISOString();
     const miDb = {
       ...mi,
       id: uuidv4(),
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
+      ttl: Math.floor(Date.now() / 1000 + 60 * 60 * this.config.miTtlHours)
     };
 
     await this.ddbClient.send(new PutCommand({

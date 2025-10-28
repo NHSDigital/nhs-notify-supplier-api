@@ -31,7 +31,8 @@ export async function setupDynamoDBContainer() {
     endpoint,
     lettersTableName: 'letters',
     miTableName: 'management-info',
-    ttlHours: 1
+    lettersTtlHours: 1,
+    miTtlHours: 1
   };
 
   return {

@@ -1,8 +1,18 @@
 
-import { MIRepository } from '../../../../../internal/datastore/src';
 import type { Deps } from '../deps';
 
 describe('createDependenciesContainer', () => {
+
+  const env = {
+    LETTERS_TABLE_NAME: 'LettersTable',
+    LETTER_TTL_HOURS: 12960,
+    MI_TABLE_NAME: 'MITable',
+    MI_TTL_HOURS: 2160,
+    SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
+    APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
+    DOWNLOAD_URL_TTL_SECONDS: 60
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();
@@ -29,22 +39,17 @@ describe('createDependenciesContainer', () => {
     }));
 
     // Env
-    jest.mock('../env', () => ({
-      envVars: {
-        LETTERS_TABLE_NAME: 'LettersTable',
-        LETTER_TTL_HOURS: 12960,
-        SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
-        APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
-        DOWNLOAD_URL_TTL_SECONDS: 60
-      },
-    }));
+    jest.mock('../env', () => ({envVars: env}));
   });
 
   test('constructs deps and wires repository config correctly', async () => {
     // get current mock instances
     const { S3Client } = jest.requireMock('@aws-sdk/client-s3') as { S3Client: jest.Mock };
     const pinoMock = jest.requireMock('pino') as { default: jest.Mock };
-    const { LetterRepository } = jest.requireMock('../../../../../internal/datastore') as { LetterRepository: jest.Mock };
+    const { LetterRepository, MIRepository } = jest.requireMock('../../../../../internal/datastore') as {
+      LetterRepository: jest.Mock,
+      MIRepository: jest.Mock
+    };
 
     const { createDependenciesContainer } = require('../deps');
     const deps: Deps = createDependenciesContainer();
@@ -53,18 +58,19 @@ describe('createDependenciesContainer', () => {
     expect(pinoMock.default).toHaveBeenCalledTimes(1);
 
     expect(LetterRepository).toHaveBeenCalledTimes(1);
-    const repoCtorArgs = (LetterRepository as jest.Mock).mock.calls[0];
-    expect(repoCtorArgs[2]).toEqual({
+    const letterRepoCtorArgs = (LetterRepository as jest.Mock).mock.calls[0];
+    expect(letterRepoCtorArgs[2]).toEqual({
       lettersTableName: 'LettersTable',
-      ttlHours: 12960
+      lettersTtlHours: 12960
     });
 
-    expect(deps.env).toEqual({
-      LETTERS_TABLE_NAME: 'LettersTable',
-      LETTER_TTL_HOURS: 12960,
-      SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
-      APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
-      DOWNLOAD_URL_TTL_SECONDS: 60
+    expect(MIRepository).toHaveBeenCalledTimes(1);
+    const miRepoCtorArgs = (MIRepository as jest.Mock).mock.calls[0];
+    expect(miRepoCtorArgs[2]).toEqual({
+      miTableName: 'MITable',
+      miTtlHours: 2160
     });
+
+    expect(deps.env).toEqual(env);
   });
 });

@@ -59,6 +59,7 @@ describe('MiRepository', () => {
         id: expect.any(String),
         createdAt: '2020-02-01T00:00:00.000Z',
         updatedAt: '2020-02-01T00:00:00.000Z',
+        ttl: 1580518800, // 2020-02-01T00:01:00.000Z, seconds since epoch
         ...mi
       }));
     });
