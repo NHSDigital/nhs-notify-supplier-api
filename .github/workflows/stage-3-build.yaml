@@ -46,7 +46,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: "Build docs"
         uses: ./.github/actions/build-docs
         with:
@@ -58,7 +58,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: "Build sdks"
         uses: ./.github/actions/build-sdk
         with:
@@ -70,7 +70,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: "Build servers"
         uses: ./.github/actions/build-server
         with:
@@ -82,7 +82,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: "Build servers"
         uses: ./.github/actions/build-libraries
         with:
@@ -99,7 +99,7 @@ jobs:
       APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: "Build proxies"
         uses: ./.github/actions/build-proxies
         with:
@@ -116,7 +116,7 @@ jobs:
   #   timeout-minutes: 3
   #   steps:
   #     - name: "Checkout code"
-  #       uses: actions/checkout@v4
+  #       uses: actions/checkout@v5
   #     - name: "Build artefact 1"
   #       run: |
   #         echo "Building artefact 1 ..."
@@ -133,7 +133,7 @@ jobs:
   #   timeout-minutes: 3
   #   steps:
   #     - name: "Checkout code"
-  #       uses: actions/checkout@v4
+  #       uses: actions/checkout@v5
   #     - name: "Build artefact n"
   #       run: |
   #         echo "Building artefact n ..."
