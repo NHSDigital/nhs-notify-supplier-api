@@ -1,5 +1,5 @@
 module "get_letters" {
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.20/terraform-lambda.zip"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.24/terraform-lambda.zip"
 
   function_name = "get_letters"
   description   = "Get paginated letter ids"
@@ -35,10 +35,9 @@ module "get_letters" {
   log_destination_arn       = local.destination_arn
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
-  lambda_env_vars = {
-    LETTERS_TABLE_NAME = aws_dynamodb_table.letters.name,
-    LETTER_TTL_HOURS   = 24
-  }
+  lambda_env_vars = merge(local.common_lambda_env_vars, {
+    MAX_LIMIT = var.max_get_limit
+  })
 }
 
 data "aws_iam_policy_document" "get_letters_lambda" {
@@ -69,6 +68,7 @@ data "aws_iam_policy_document" "get_letters_lambda" {
 
     resources = [
       aws_dynamodb_table.letters.arn,
+      "${aws_dynamodb_table.letters.arn}/index/supplierStatus-index"
     ]
   }
 }

@@ -1,0 +1,12 @@
+{
+  "data": {
+    "attributes": {
+      "reasonCode": "R01",
+      "reasonText": "failed validation",
+      "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+      "status": "FAILED"
+    },
+    "id": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+    "type": "Letter"
+  }
+}

@@ -149,7 +149,7 @@ jobs:
   trivy:
     name: "Trivy Scan"
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     needs: detect-terraform-changes
     if: needs.detect-terraform-changes.outputs.terraform_changed == 'true'
     steps:

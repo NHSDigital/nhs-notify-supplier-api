@@ -26,3 +26,4 @@ dist
 .reports
 /sandbox/*.log
 /sandbox-staging
+/specification/api/components/examples

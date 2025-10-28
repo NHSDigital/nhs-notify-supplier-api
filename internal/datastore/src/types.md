@@ -10,19 +10,19 @@ The schemas are generated from Zod definitions and provide a visual representati
 erDiagram
     Letter {
         string id
-        string supplierId "ref: Supplier"
+        string status "enum: PENDING, ACCEPTED, REJECTED, PRINTED, ENCLOSED, CANCELLED, DISPATCHED, FAILED, RETURNED, DESTROYED, FORWARDED, DELIVERED"
         string specificationId
         string groupId
+        number reasonCode
+        string reasonText
+        string supplierId
         string url "url"
-        string status "enum: PENDING, ACCEPTED, DISPATCHED, FAILED, REJECTED, DELIVERED, CANCELLED"
         string createdAt
         string updatedAt
         string supplierStatus
+        string supplierStatusSk
         number ttl "min: -9007199254740991, max: 9007199254740991"
     }
-    Supplier {
-    }
-    Letter }o--|| Supplier : "supplierId"
 ```
 
 ## MI schema

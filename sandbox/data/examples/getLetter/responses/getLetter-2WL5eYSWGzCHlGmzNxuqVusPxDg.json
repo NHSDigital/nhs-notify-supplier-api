@@ -1,7 +1,8 @@
 {
   "data": {
     "attributes": {
-      "reasonCode": 100,
+      "groupId": "c5d93f917f5546d08beccf770a915d96",
+      "reasonCode": "R01",
       "reasonText": "failed validation",
       "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
       "status": "REJECTED"
