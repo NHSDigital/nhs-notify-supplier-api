@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "@aws-sdk/client-s3": "^3.858.0",
-    "esbuild": "^0.24.0",
+    "esbuild": "^0.25.11",
     "pino": "^9.7.0",
     "yargs": "^17.7.2"
   },
