@@ -23,7 +23,7 @@ function createDocumentClient(): DynamoDBDocumentClient {
 function createLetterRepository(documentClient: DynamoDBDocumentClient, log: pino.Logger, envVars: EnvVars): LetterRepository {
   const config = {
     lettersTableName: envVars.LETTERS_TABLE_NAME,
-    ttlHours: envVars.LETTER_TTL_HOURS
+    lettersTtlHours: envVars.LETTER_TTL_HOURS
   };
 
   return new LetterRepository(documentClient, log, config);
