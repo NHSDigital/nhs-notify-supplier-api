@@ -1,4 +1,4 @@
-import { LetterBase, LetterRepository } from '../../../../internal/datastore/src'
+import { LetterBase, LetterRepository } from '@internal/datastore'
 import { NotFoundError, ValidationError } from '../errors';
 import { LetterDto, PatchLetterResponse } from '../contracts/letters';
 import { mapToPatchLetterResponse } from '../mappers/letter-mapper';
@@ -38,7 +38,7 @@ export const patchLetterStatus = async (letterToUpdate: LetterDto, letterId: str
   let updatedLetter;
 
   try {
-    updatedLetter =  await letterRepo.updateLetterStatus(letterToUpdate);
+    updatedLetter = await letterRepo.updateLetterStatus(letterToUpdate);
   } catch (error) {
     if (isNotFoundError(error)) {
       throw new NotFoundError(ApiErrorDetail.NotFoundLetterId);

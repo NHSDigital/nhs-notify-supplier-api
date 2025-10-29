@@ -2,8 +2,9 @@
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.858.0",
     "@aws-sdk/lib-dynamodb": "^3.858.0",
+    "@internal/helpers": "*",
     "pino": "^9.7.0",
-    "zod": "^4.0.14"
+    "zod": "^4.1.11"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^3.1.0",
@@ -18,15 +19,15 @@
     "testcontainers": "^11.4.0",
     "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.2",
+    "typescript": "^5.8.3",
     "zod-mermaid": "^1.0.9"
   },
   "license": "MIT",
   "main": "src/index.ts",
-  "name": "datastore",
+  "name": "@internal/datastore",
   "private": true,
   "scripts": {
-    "diagrams": "ts-node src/cli/diagrams.ts",
+    "diagrams": "tsx src/cli/diagrams.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test:unit": "jest",

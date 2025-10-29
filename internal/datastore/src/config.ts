@@ -2,5 +2,7 @@ export type DatastoreConfig = {
   region: string,
   endpoint?: string,
   lettersTableName: string,
-  ttlHours: number
+  miTableName: string,
+  lettersTtlHours: number,
+  miTtlHours: number
 }

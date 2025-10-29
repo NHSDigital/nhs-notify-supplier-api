@@ -39,7 +39,7 @@
     "jest-mock-extended": "^4.0.0",
     "lcov-result-merger": "^5.0.1",
     "openapi-typescript": "^7.8.0",
-    "ts-jest": "^29.3.0",
+    "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.3",
     "typescript": "^5.8.3"
@@ -72,12 +72,13 @@
     "serve-swagger-docs": "npx serve sdk/swagger -p 3051",
     "start": "npm run start --workspace frontend",
     "test:unit": "npm run test:unit --workspaces",
-    "typecheck": "npm run typecheck --workspaces"
+    "typecheck": "npm run typecheck --workspaces",
+    "deps:sync": "npx syncpack fix-mismatches",
+    "deps:check": "npx syncpack list-mismatches"
   },
   "workspaces": [
-    "lambdas/api-handler",
-    "lambdas/authorizer",
-    "internal/datastore",
+    "lambdas/*",
+    "internal/*",
     "scripts/test-data",
     "docs"
   ]
