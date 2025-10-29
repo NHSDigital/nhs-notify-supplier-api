@@ -2,7 +2,7 @@
   "dependencies": {
     "@internal/datastore": "*",
     "@internal/helpers": "*",
-    "esbuild": "^0.24.0",
+    "esbuild": "^0.25.11",
     "pino": "^9.7.0"
   },
   "devDependencies": {

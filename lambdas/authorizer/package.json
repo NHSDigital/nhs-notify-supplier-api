@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "esbuild": "^0.24.0"
+    "esbuild": "^0.25.11"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.2",
