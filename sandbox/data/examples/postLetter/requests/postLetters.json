@@ -1,0 +1,82 @@
+{
+  "data": [
+    {
+      "attributes": {
+        "status": "PENDING"
+      },
+      "id": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+      "type": "Letter"
+    },
+    {
+      "attributes": {
+        "status": "ACCEPTED"
+      },
+      "id": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+      "type": "Letter"
+    },
+    {
+      "attributes": {
+        "status": "PRINTED"
+      },
+      "id": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+      "type": "Letter"
+    },
+    {
+      "attributes": {
+        "status": "ENCLOSED"
+      },
+      "id": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+      "type": "Letter"
+    },
+    {
+      "attributes": {
+        "status": "DISPATCHED"
+      },
+      "id": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+      "type": "Letter"
+    },
+    {
+      "attributes": {
+        "status": "DELIVERED"
+      },
+      "id": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+      "type": "Letter"
+    },
+    {
+      "attributes": {
+        "reasonCode": "R01",
+        "reasonText": "failed validation",
+        "status": "RETURNED"
+      },
+      "id": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+      "type": "Letter"
+    },
+    {
+      "attributes": {
+        "reasonCode": "R01",
+        "reasonText": "failed validation",
+        "status": "CANCELLED"
+      },
+      "id": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+      "type": "Letter"
+    },
+    {
+      "attributes": {
+        "reasonCode": "R01",
+        "reasonText": "failed validation",
+        "status": "FAILED"
+      },
+      "id": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+      "type": "Letter"
+    },
+    {
+      "attributes": {
+        "reasonCode": "R01",
+        "reasonText": "failed validation",
+        "status": "RETURNED"
+      },
+      "id": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+      "type": "Letter"
+    }
+  ]
+}

@@ -46,7 +46,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: "Build docs"
         uses: ./.github/actions/build-docs
         with:
@@ -58,7 +58,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: "Build sdks"
         uses: ./.github/actions/build-sdk
         with:
@@ -70,7 +70,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: "Build servers"
         uses: ./.github/actions/build-server
         with:
@@ -82,7 +82,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: "Build servers"
         uses: ./.github/actions/build-libraries
         with:
@@ -93,36 +93,22 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      PROXYGEN_PRIVATE_KEY: ${{ secrets.PROXYGEN_ENCODED_NOTIFY_SUPPLIER_PRIVATE_KEY }}
-      PROXYGEN_KID: notify-supplier-key-1
-      PROXYGEN_CLIENT_ID: nhs-notify-supplier-client
       PROXYGEN_API_NAME: nhs-notify-supplier
       PR_NUMBER: ${{ inputs.pr_number }}
+      APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
+      APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: "Build proxies"
         uses: ./.github/actions/build-proxies
         with:
           version: "${{ inputs.version }}"
-
-  artefact-sandbox:
-    name: "Build sandbox"
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    env:
-      PROXYGEN_PRIVATE_KEY: ${{ secrets.PROXYGEN_ENCODED_NOTIFY_SUPPLIER_PRIVATE_KEY }}
-      PROXYGEN_KID: notify-supplier-key-1
-      PROXYGEN_CLIENT_ID: nhs-notify-supplier-client
-      PROXYGEN_API_NAME: nhs-notify-supplier
-      PR_NUMBER: ${{ inputs.pr_number }}
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v4
-      - name: "Build sandbox"
-        uses: ./.github/actions/build-sandbox
-        with:
-          version: "${{ inputs.version }}"
+          environment: ${{ inputs.pr_number != '' && format('pr{0}', inputs.pr_number) || 'main' }}
+          apimEnv: "internal-dev-sandbox"
+          runId: "${{ github.run_id }}"
+          buildSandbox: true
+          releaseVersion: ${{ github.head_ref || github.ref_name }}
 
   # artefact-1:
   #   name: "Artefact 1"
@@ -130,7 +116,7 @@ jobs:
   #   timeout-minutes: 3
   #   steps:
   #     - name: "Checkout code"
-  #       uses: actions/checkout@v4
+  #       uses: actions/checkout@v5
   #     - name: "Build artefact 1"
   #       run: |
   #         echo "Building artefact 1 ..."
@@ -147,7 +133,7 @@ jobs:
   #   timeout-minutes: 3
   #   steps:
   #     - name: "Checkout code"
-  #       uses: actions/checkout@v4
+  #       uses: actions/checkout@v5
   #     - name: "Build artefact n"
   #       run: |
   #         echo "Building artefact n ..."

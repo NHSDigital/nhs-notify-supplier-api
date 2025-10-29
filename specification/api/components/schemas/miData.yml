@@ -1,35 +1,40 @@
 type: object
 properties:
-  data:
+  type:
+    type: string
+    enum: [ManagementInformation]
+  id:
+    type: string
+    example: 2WL5eYSWGzCHlGmzNxuqVusPxDg
+  attributes:
     type: object
     properties:
-      type:
+      lineItem:
+        description: "A line item reference that should match an invoice line item"
         type: string
-        enum: [ManagementInformation]
-      attributes:
-        type: object
-        properties:
-          specificationId:
-            type: string
-            example: da0b1495-c7cb-468c-9d81-07dee089d728
-          groupId:
-            type: string
-            example: abc123
-          timestamp:
-            type: string
-            format: date-time
-            example: "2023-11-17T14:27:51.413Z"
-          lineItem:
-            type: string
-            example: Letter
-          quantity:
-            type: number
-            example: 22
-          cost:
-            type: number
-            description: "Total Amount"
-            example: 10.25
-          stockRemaining:
-            type: number
-            description: "Stock remaining for this line item"
-            example: 20000
+        example: envelope-business-standard
+      timestamp:
+        description: "The effective date of the activity being reported"
+        type: string
+        format: date-time
+        example: "2023-11-17T14:27:51.413Z"
+      quantity:
+        description: "The quantity of the line item being reported"
+        type: number
+        example: 22
+      specificationId:
+        description: "A specification ID provided in the Letter request that this MI relates to"
+        type: string
+        example: da0b1495-c7cb-468c-9d81-07dee089d728
+      groupId:
+        description: "A group ID provided in the Letter request that this MI relates to"
+        type: string
+        example: abc123
+      stockRemaining:
+        description: "Stock remaining for this line item, where applicable"
+        type: number
+        example: 20000
+    required:
+        - lineItem
+        - timestamp
+        - quantity

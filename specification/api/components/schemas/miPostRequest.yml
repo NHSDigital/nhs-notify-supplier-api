@@ -1,0 +1,43 @@
+type: object
+properties:
+  data:
+    type: object
+    required:
+      - type
+      - attributes
+    properties:
+      type:
+        type: string
+        enum: [ManagementInformation]
+      attributes:
+        type: object
+        properties:
+          lineItem:
+            description: "A line item reference that should match an invoice line item"
+            type: string
+            example: envelope-business-standard
+          timestamp:
+            description: "The effective date of the activity being reported"
+            type: string
+            format: date-time
+            example: "2023-11-17T14:27:51.413Z"
+          quantity:
+            description: "The quantity of the line item being reported"
+            type: number
+            example: 22
+          specificationId:
+            description: "A specification ID provided in the Letter request that this MI relates to"
+            type: string
+            example: da0b1495-c7cb-468c-9d81-07dee089d728
+          groupId:
+            description: "A group ID provided in the Letter request that this MI relates to"
+            type: string
+            example: abc123
+          stockRemaining:
+            description: "Stock remaining for this line item, where applicable"
+            type: number
+            example: 20000
+        required:
+            - lineItem
+            - timestamp
+            - quantity

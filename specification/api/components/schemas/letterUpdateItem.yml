@@ -1,4 +1,8 @@
 type: object
+required:
+  - type
+  - id
+  - attributes
 properties:
   type:
     type: string
@@ -8,14 +12,12 @@ properties:
     example: 2WL5eYSWGzCHlGmzNxuqVusPxDg
   attributes:
     type: object
+    required:
+      - status
     properties:
       status:
         $ref: "./letterStatus.yml"
       reasonCode:
-        type: number
-        description: Reason code for the given status
-        example: 100
+        $ref: "./reasonCode.yml"
       reasonText:
-        type: string
-        description: Reason text for the given status
-        example: failed validation
+        $ref: "./reasonText.yml"

@@ -2,6 +2,7 @@ import {
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
+  BatchWriteCommand,
   QueryCommand,
   UpdateCommand,
   UpdateCommandOutput
@@ -9,6 +10,7 @@ import {
 import { Letter, LetterBase, LetterSchema, LetterSchemaBase } from './types';
 import { Logger } from 'pino';
 import { z } from 'zod';
+import { LetterDto } from '../../../lambdas/api-handler/src/contracts/letters';
 
 export type PagingOptions = Partial<{
   exclusiveStartKey: Record<string, any>,
@@ -26,15 +28,15 @@ export type LetterRepositoryConfig = {
 
 export class LetterRepository {
   constructor(readonly ddbClient: DynamoDBDocumentClient,
-              readonly log: Logger,
-              readonly config: LetterRepositoryConfig) {
+    readonly log: Logger,
+    readonly config: LetterRepositoryConfig) {
   }
 
   async putLetter(letter: Omit<Letter, 'ttl' | 'supplierStatus' | 'supplierStatusSk'>): Promise<Letter> {
     const letterDb: Letter = {
       ...letter,
       supplierStatus: `${letter.supplierId}#${letter.status}`,
-      supplierStatusSk: Date.now().toString(),
+      supplierStatusSk: new Date().toISOString(),
       ttl: Math.floor(Date.now() / 1000 + 60 * 60 * this.config.ttlHours)
     };
     try {
@@ -50,6 +52,41 @@ export class LetterRepository {
       throw error;
     }
     return LetterSchema.parse(letterDb);
+  }
+
+  async putLetterBatch(letters: Omit<Letter, 'ttl' | 'supplierStatus'| 'supplierStatusSk'>[]): Promise<void> {
+    let lettersDb: Letter[] = [];
+    for (let i = 0; i < letters.length; i++) {
+
+      const letter = letters[i];
+
+      if(!letter){
+        continue;
+      }
+
+      lettersDb.push({
+        ...letter,
+        supplierStatus: `${letter.supplierId}#${letter.status}`,
+        supplierStatusSk: Date.now().toString(),
+        ttl: Math.floor(Date.now() / 1000 + 60 * 60 * this.config.ttlHours)
+      });
+
+      if (lettersDb.length === 25 || i === letters.length - 1) {
+        const input = {
+          RequestItems: {
+            [this.config.lettersTableName]: lettersDb.map((item: any) => ({
+              PutRequest: {
+                Item: item
+              }
+            }))
+          }
+        };
+
+        await this.ddbClient.send(new BatchWriteCommand(input));
+
+        lettersDb = [];
+      }
+    }
   }
 
   async getLetterById(supplierId: string, letterId: string): Promise<Letter> {
@@ -97,38 +134,53 @@ export class LetterRepository {
     }
   }
 
-  async updateLetterStatus(supplierId: string, letterId: string, status: Letter['status']): Promise<Letter> {
-    this.log.debug(`Updating letter ${letterId} to status ${status}`);
+  async updateLetterStatus(letterToUpdate: LetterDto): Promise<Letter> {
+    this.log.debug(`Updating letter ${letterToUpdate.id} to status ${letterToUpdate.status}`);
     let result: UpdateCommandOutput;
     try {
+      let updateExpression = 'set #status = :status, updatedAt = :updatedAt, supplierStatus = :supplierStatus, #ttl = :ttl';
+      let expressionAttributeValues : Record<string, any> = {
+        ':status': letterToUpdate.status,
+        ':updatedAt': new Date().toISOString(),
+        ':supplierStatus': `${letterToUpdate.supplierId}#${letterToUpdate.status}`,
+        ':ttl': Math.floor(Date.now() / 1000 + 60 * 60 * this.config.ttlHours)
+      };
+
+      if (letterToUpdate.reasonCode)
+      {
+        updateExpression += ', reasonCode = :reasonCode';
+        expressionAttributeValues[':reasonCode'] = letterToUpdate.reasonCode;
+      }
+
+      if (letterToUpdate.reasonText)
+      {
+        updateExpression += ', reasonText = :reasonText';
+        expressionAttributeValues[':reasonText'] = letterToUpdate.reasonText;
+      }
+
       result = await this.ddbClient.send(new UpdateCommand({
         TableName: this.config.lettersTableName,
         Key: {
-          supplierId: supplierId,
-          id: letterId
+          supplierId: letterToUpdate.supplierId,
+          id: letterToUpdate.id
         },
-        UpdateExpression: 'set #status = :status, updatedAt = :updatedAt, supplierStatus = :supplierStatus, #ttl = :ttl',
+        UpdateExpression: updateExpression,
         ConditionExpression: 'attribute_exists(id)', // Ensure letter exists
         ExpressionAttributeNames: {
           '#status': 'status',
           '#ttl': 'ttl'
         },
-        ExpressionAttributeValues: {
-          ':status': status,
-          ':updatedAt': new Date().toISOString(),
-          ':supplierStatus': `${supplierId}#${status}`,
-          ':ttl': Math.floor(Date.now() / 1000 + 60 * 60 * this.config.ttlHours)
-        },
+        ExpressionAttributeValues: expressionAttributeValues,
         ReturnValues: 'ALL_NEW'
       }));
     } catch (error) {
       if (error instanceof Error && error.name === 'ConditionalCheckFailedException') {
-        throw new Error(`Letter with id ${letterId} not found for supplier ${supplierId}`);
+        throw new Error(`Letter with id ${letterToUpdate.id} not found for supplier ${letterToUpdate.supplierId}`);
       }
       throw error;
     }
 
-    this.log.debug(`Updated letter ${letterId} to status ${status}`);
+    this.log.debug(`Updated letter ${letterToUpdate.id} to status ${letterToUpdate.status}`);
     return LetterSchema.parse(result.Attributes);
   }
 

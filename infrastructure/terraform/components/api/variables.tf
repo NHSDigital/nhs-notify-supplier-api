@@ -105,6 +105,12 @@ variable "ca_pem_filename" {
   default     = null
 }
 
+variable "force_destroy" {
+  type        = bool
+  description = "Flag to force deletion of S3 buckets"
+  default     = false
+}
+
 variable "letter_table_ttl_hours" {
   type        = number
   description = "Number of hours to set as TTL on letters table"

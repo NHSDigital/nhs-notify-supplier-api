@@ -37,7 +37,7 @@ jobs:
       # tag: ${{ steps.variables.outputs.tag }}
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: "Set CI/CD variables"
         id: variables
         run: |
@@ -70,7 +70,7 @@ jobs:
     needs: metadata
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: "Get version"
         id: get-asset-version
@@ -101,37 +101,15 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release download ${{steps.get-asset-version.outputs.release_version}} -p sdk-swagger-docs-*.tar --output artifact.tar
+          gh release download ${{steps.get-asset-version.outputs.release_version}} -p jekyll-docs-*.tar --output artifact.tar
 
       - uses: actions/upload-artifact@v4
         with:
-          name: sdk-swagger-docs-${{steps.get-asset-version.outputs.release_version}}
+          name: jekyll-docs-${{steps.get-asset-version.outputs.release_version}}
           path: artifact.tar
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
         with:
-          artifact_name: sdk-swagger-docs-${{steps.get-asset-version.outputs.release_version}}
-
-
-      ### BELOW WAS THE DEFAULT USING THE JEKYLL BUILD
-
-      # - name: "Get release version"
-      #   id: download-asset
-      #   shell: bash
-      #   env:
-      #     GH_TOKEN: ${{ github.token }}
-      #   run: |
-      #     gh release download ${{steps.get-asset-version.outputs.release_version}} -p jekyll-docs-*.tar --output artifact.tar
-
-      # - uses: actions/upload-artifact@v4
-      #   with:
-      #     name: jekyll-docs-${{steps.get-asset-version.outputs.release_version}}
-      #     path: artifact.tar
-
-      # - name: Deploy to GitHub Pages
-      #   id: deployment
-      #   uses: actions/deploy-pages@v4
-      #   with:
-      #     artifact_name: jekyll-docs-${{steps.get-asset-version.outputs.release_version}}
+          artifact_name: jekyll-docs-${{steps.get-asset-version.outputs.release_version}}

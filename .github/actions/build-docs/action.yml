@@ -13,7 +13,7 @@ runs:
       with:
         node-version: 18
     - name: Npm cli install
-      working-directory: ./docs
+      working-directory: .
       run: npm ci
       shell: bash
     - name: Setup Ruby

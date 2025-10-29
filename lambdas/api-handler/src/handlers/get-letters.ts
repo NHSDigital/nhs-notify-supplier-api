@@ -1,143 +1,119 @@
-import { APIGatewayProxyHandler } from "aws-lambda";
-import { getLettersForSupplier } from "../services/letter-operations";
-import { createLetterRepository } from "../infrastructure/letter-repo-factory";
-import { LetterBase } from "../../../../internal/datastore/src";
-import pino from 'pino';
+import { APIGatewayProxyEventQueryStringParameters, APIGatewayProxyHandler } from 'aws-lambda';
+import { getLettersForSupplier } from '../services/letter-operations';
+import { validateCommonHeaders } from '../utils/validation';
+import { ApiErrorDetail } from '../contracts/errors';
+import { mapErrorToResponse } from '../mappers/error-mapper';
+import { ValidationError } from '../errors';
+import { mapToGetLettersResponse } from '../mappers/letter-mapper';
+import type { Deps } from '../config/deps';
+import { Logger } from 'pino';
 
-const letterRepo = createLetterRepository();
-const log = pino();
 
-export const getEnvars = (): { maxLimit: number } => ({
-  maxLimit: parseInt(process.env.MAX_LIMIT!)
-});
+// The endpoint should only return pending letters for now
+const status = 'PENDING';
 
-export const getLetters: APIGatewayProxyHandler = async (event) => {
+export function createGetLettersHandler(deps: Deps): APIGatewayProxyHandler {
 
-  const { maxLimit } = getEnvars();
+  return async (event) => {
 
-  if (event.path === "/letters") {
-    const supplierId = event.headers ? event.headers["NHSD-Supplier-ID"] : undefined;
+    const commonHeadersResult = validateCommonHeaders(event.headers, deps);
 
-    if (!supplierId) {
-      log.info({
-        description: 'Supplier ID not provided'
-      });
-      return {
-        statusCode: 400,
-        body: "Invalid Request: Missing supplier ID",
-      };
+    if (!commonHeadersResult.ok) {
+      return mapErrorToResponse(commonHeadersResult.error, commonHeadersResult.correlationId, deps.logger);
     }
 
-    // The endpoint should only return pending letters for now
-    const status = "PENDING";
+    try {
+      const maxLimit = getMaxLimit(deps);
 
-    if (
-      event.queryStringParameters &&
-      Object.keys(event.queryStringParameters).some(
-        (key) => key !== "limit"
-      )
-    ) {
-      log.info({
-        description: "Unexpected query parameter(s) present",
-        queryStringParameters: event.queryStringParameters,
-      });
+      const limitNumber = getLimitOrDefault(event.queryStringParameters, maxLimit, deps.logger);
 
-      return {
-        statusCode: 400,
-        body: "Invalid Request: Only 'limit' query parameter is supported",
-      };
-    }
-
-    let limitNumber;
-
-    if (event.queryStringParameters?.limit) {
-      let limitParam = event.queryStringParameters?.limit;
-      limitNumber = Number(limitParam);
-      if (isNaN(limitNumber)) {
-        log.info({
-          description: "limit parameter is not a number",
-          limitParam,
-        });
-        return {
-          statusCode: 400,
-          body: "Invalid Request: limit parameter must be a positive number not greater than 2500",
-        };
-      }
-    } else {
-      limitNumber = maxLimit;
-    }
-
-    if (limitNumber <= 0 || limitNumber > maxLimit) {
-      log.info({
-        description: "Limit value is invalid",
+      const letters = await getLettersForSupplier(
+        commonHeadersResult.value.supplierId,
+        status,
         limitNumber,
+        deps.letterRepo,
+      );
+
+      const response = mapToGetLettersResponse(letters);
+
+      deps.logger.info({
+        description: 'Pending letters successfully fetched',
+        supplierId: commonHeadersResult.value.supplierId,
+        limitNumber,
+        status,
+        lettersCount: letters.length
       });
+
       return {
-        statusCode: 400,
-        body: `Invalid Request: limit parameter must be a positive number not greater than ${maxLimit}`,
+        statusCode: 200,
+        body: JSON.stringify(response, null, 2),
       };
     }
-
-    const letters = await getLettersForSupplier(
-      supplierId,
-      status,
-      limitNumber,
-      letterRepo,
-    );
-
-    const response = createGetLettersResponse(letters);
-
-    log.info({
-      description: 'Pending letters successfully fetched',
-      supplierId,
-      limitNumber,
-      status,
-      lettersCount: letters.length
-    });
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify(response, null, 2),
-    };
+    catch (error) {
+      return mapErrorToResponse(error, commonHeadersResult.value.correlationId, deps.logger);
+    }
   }
-
-  log.warn({
-    description: 'Unsupported event path',
-    path: event.path
-  });
-
-  return {
-    statusCode: 404,
-    body: "Not Found",
-  };
 };
 
-interface GetLettersResponse {
-  data: Array<{
-    type: "Letter";
-    id: string;
-    attributes: {
-      specificationId: string;
-      groupId: string;
-      status: string;
-      reasonCode?: number;
-      reasonText?: string;
-    };
-  }>;
+function getLimitOrDefault(queryStringParameters: APIGatewayProxyEventQueryStringParameters | null, maxLimit: number, logger: Logger) : number {
+
+  validateLimitParamOnly(queryStringParameters, logger);
+  return getLimit(queryStringParameters?.limit, maxLimit, logger);
 }
 
-function createGetLettersResponse(letters: LetterBase[]): GetLettersResponse {
-  return {
-    data: letters.map((letter) => ({
-      id: letter.id,
-      type: "Letter",
-      attributes: {
-        specificationId: letter.specificationId,
-        groupId: letter.groupId,
-        status: letter.status,
-        reasonCode: letter.reasonCode,
-        reasonText: letter.reasonText,
-      },
-    })),
-  };
+function validateLimitParamOnly(queryStringParameters: APIGatewayProxyEventQueryStringParameters | null, logger: Logger) {
+  if (
+    queryStringParameters &&
+    Object.keys(queryStringParameters).some(
+      (key) => key !== 'limit'
+    )
+  ) {
+    logger.info({
+      description: 'Unexpected query parameter(s) present',
+      queryStringParameters: queryStringParameters,
+    });
+    throw new ValidationError(ApiErrorDetail.InvalidRequestLimitOnly);
+  }
+}
+
+function getLimit(limit: string | undefined, maxLimit: number, logger: Logger) {
+  let result;
+  if (limit) {
+    let limitParam = limit;
+    result = Number(limitParam);
+    assertIsNumber(result, logger);
+    assertLimitInRange(result, maxLimit, logger);
+  } else {
+    result = maxLimit;
+  }
+  return result;
+}
+
+function assertIsNumber(limitNumber: number, logger: Logger) {
+  if (isNaN(limitNumber)) {
+    logger.info({
+      description: 'limit parameter is not a number',
+      limitNumber,
+    });
+    throw new ValidationError(ApiErrorDetail.InvalidRequestLimitNotANumber);
+  }
+}
+
+function assertLimitInRange(limitNumber: number, maxLimit: number, logger: Logger) {
+  if (limitNumber <= 0 || limitNumber > maxLimit) {
+    logger.info({
+      description: 'Limit value is invalid',
+      limitNumber,
+    });
+    throw new ValidationError(ApiErrorDetail.InvalidRequestLimitNotInRange, { args: [maxLimit]});
+  }
+}
+
+function getMaxLimit(deps: Deps): number{
+
+  if (deps.env.MAX_LIMIT == null) {
+    throw new Error('MAX_LIMIT is required for getLetters');
+  }
+
+  return deps.env.MAX_LIMIT;
 }
