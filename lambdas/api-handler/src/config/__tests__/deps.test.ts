@@ -33,7 +33,7 @@ describe('createDependenciesContainer', () => {
     }));
 
     // Repo client
-    jest.mock('../../../../../internal/datastore', () => ({
+    jest.mock('@internal/datastore', () => ({
       LetterRepository: jest.fn(),
       MIRepository: jest.fn(),
     }));
@@ -46,7 +46,7 @@ describe('createDependenciesContainer', () => {
     // get current mock instances
     const { S3Client } = jest.requireMock('@aws-sdk/client-s3') as { S3Client: jest.Mock };
     const pinoMock = jest.requireMock('pino') as { default: jest.Mock };
-    const { LetterRepository, MIRepository } = jest.requireMock('../../../../../internal/datastore') as {
+    const { LetterRepository, MIRepository } = jest.requireMock('@internal/datastore') as {
       LetterRepository: jest.Mock,
       MIRepository: jest.Mock
     };
