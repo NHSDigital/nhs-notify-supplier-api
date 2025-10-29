@@ -2,14 +2,14 @@
 description: "Comprehensive GitHub Copilot instructions for NHS Notify Supplier API development"
 ---
 
-<!-- 
+<!--
 NHS Notify Supplier API - Copilot Instructions
 Repository: nhs-notify-supplier-api
 Version: 1.0.0
 Owners: NHSDigital
 Last Updated: 2025-10-29
 Languages: TypeScript JavaScript YAML Makefile Ruby C# Python
-Frameworks: OpenAPI Express.js AWS-Lambda Jest Redocly Jekyll  
+Frameworks: OpenAPI Express.js AWS-Lambda Jest Redocly Jekyll
 Build Tools: npm make esbuild openapi-generator docker
 CI/CD: GitHub-Actions SonarCloud
 Runtime Targets: Node.js-22 AWS-Lambda Docker
