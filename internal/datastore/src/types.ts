@@ -46,16 +46,22 @@ export const LetterSchema = LetterSchemaBase.extend({
 export type Letter = z.infer<typeof LetterSchema>;
 export type LetterBase = z.infer<typeof LetterSchemaBase>;
 
-export const MISchema = z.object({
+export const MISchemaBase = z.object({
   id: z.string(),
-  supplierId: idRef(SupplierSchema),
-  specificationId: z.string(),
-  groupId: z.string(),
   lineItem: z.string(),
+  timestamp: z.string(),
   quantity: z.number(),
-  stockRemaining: z.number(),
+  specificationId: z.string().optional(),
+  groupId: z.string().optional(),
+  stockRemaining: z.number().optional()
+});
+
+export const MISchema = MISchemaBase.extend({
+  supplierId: idRef(SupplierSchema),
   createdAt: z.string(),
-  updatedAt: z.string()
+  updatedAt: z.string(),
+  ttl: z.int(),
 }).describe('MI');
 
 export type MI = z.infer<typeof MISchema>;
+export type MIBase = z.infer<typeof MISchemaBase>;
