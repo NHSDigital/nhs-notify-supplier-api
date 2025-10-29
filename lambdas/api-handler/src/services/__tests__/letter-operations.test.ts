@@ -176,7 +176,7 @@ describe('getLetterDataUrl function', () => {
         APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
         DOWNLOAD_URL_TTL_SECONDS: 60
   };
-  const deps: Deps = { s3Client, letterRepo, logger, env };
+  const deps: Deps = { s3Client, letterRepo, logger, env } as Deps;
 
   it('should return pre signed url successfully', async () => {
 
