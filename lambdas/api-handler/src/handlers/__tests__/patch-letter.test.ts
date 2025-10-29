@@ -21,7 +21,7 @@ import { ValidationError } from '../../errors';
 import * as errors from '../../contracts/errors';
 import { S3Client } from '@aws-sdk/client-s3';
 import pino from 'pino';
-import { LetterRepository } from '../../../../../internal/datastore/src';
+import { LetterRepository } from '@internal/datastore/src';
 import { EnvVars } from '../../config/env';
 import { createPatchLetterHandler } from '../patch-letter';
 import { Deps } from "../../config/deps";

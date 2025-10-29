@@ -20,7 +20,7 @@ import * as errors from '../../contracts/errors';
 import { createGetLetterDataHandler } from '../get-letter-data';
 import { Destination, S3Client } from '@aws-sdk/client-s3';
 import pino from 'pino';
-import { LetterRepository } from '../../../../../internal/datastore/src';
+import { LetterRepository } from '@internal/datastore/src';
 import { EnvVars } from '../../config/env';
 import { Deps } from "../../config/deps";
 

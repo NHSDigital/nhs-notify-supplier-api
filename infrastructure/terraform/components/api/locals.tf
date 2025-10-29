@@ -13,15 +13,18 @@ locals {
     GET_LETTER_DATA_LAMBDA_ARN  = module.get_letter_data.function_arn
     GET_STATUS_LAMBDA_ARN       = module.get_status.function_arn
     PATCH_LETTER_LAMBDA_ARN     = module.patch_letter.function_arn
+    POST_MI_LAMBDA_ARN          = module.post_mi.function_arn
   })
 
   destination_arn = "arn:aws:logs:${var.region}:${var.shared_infra_account_id}:destination:nhs-main-obs-firehose-logs"
 
   common_lambda_env_vars = {
-    LETTERS_TABLE_NAME = aws_dynamodb_table.letters.name,
-    LETTER_TTL_HOURS = 12960, # 18 months * 30 days * 24 hours
-    SUPPLIER_ID_HEADER = "nhsd-supplier-id",
-    APIM_CORRELATION_HEADER = "nhsd-correlation-id",
+    LETTERS_TABLE_NAME       = aws_dynamodb_table.letters.name,
+    MI_TABLE_NAME            = aws_dynamodb_table.mi.name,
+    LETTER_TTL_HOURS         = 12960, # 18 months * 30 days * 24 hours
+    MI_TTL_HOURS             = 2160 # 90 days * 24 hours
+    SUPPLIER_ID_HEADER       = "nhsd-supplier-id",
+    APIM_CORRELATION_HEADER  = "nhsd-correlation-id",
     DOWNLOAD_URL_TTL_SECONDS = 60
   }
 }

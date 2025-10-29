@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v5.0.0
+      - uses: actions/checkout@v5
       - name: Trigger dynamic environment creation
         env:
           APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}

@@ -23,7 +23,7 @@ const defaultPagingOptions = {
 
 export type LetterRepositoryConfig = {
   lettersTableName: string,
-  ttlHours: number
+  lettersTtlHours: number
 }
 
 export class LetterRepository {
@@ -37,7 +37,7 @@ export class LetterRepository {
       ...letter,
       supplierStatus: `${letter.supplierId}#${letter.status}`,
       supplierStatusSk: new Date().toISOString(),
-      ttl: Math.floor(Date.now() / 1000 + 60 * 60 * this.config.ttlHours)
+      ttl: Math.floor(Date.now() / 1000 + 60 * 60 * this.config.lettersTtlHours)
     };
     try {
       await this.ddbClient.send(new PutCommand({
@@ -68,7 +68,7 @@ export class LetterRepository {
         ...letter,
         supplierStatus: `${letter.supplierId}#${letter.status}`,
         supplierStatusSk: Date.now().toString(),
-        ttl: Math.floor(Date.now() / 1000 + 60 * 60 * this.config.ttlHours)
+        ttl: Math.floor(Date.now() / 1000 + 60 * 60 * this.config.lettersTtlHours)
       });
 
       if (lettersDb.length === 25 || i === letters.length - 1) {
@@ -143,7 +143,7 @@ export class LetterRepository {
         ':status': letterToUpdate.status,
         ':updatedAt': new Date().toISOString(),
         ':supplierStatus': `${letterToUpdate.supplierId}#${letterToUpdate.status}`,
-        ':ttl': Math.floor(Date.now() / 1000 + 60 * 60 * this.config.ttlHours)
+        ':ttl': Math.floor(Date.now() / 1000 + 60 * 60 * this.config.lettersTtlHours)
       };
 
       if (letterToUpdate.reasonCode)
