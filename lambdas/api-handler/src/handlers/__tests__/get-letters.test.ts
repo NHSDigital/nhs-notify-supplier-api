@@ -112,6 +112,51 @@ describe('API Lambda handler', () => {
     });
   });
 
+  it('returns 200 OK with a valid limit', async () => {
+
+    const mockedGetLetters = letterService.getLettersForSupplier as jest.Mock;
+    mockedGetLetters.mockResolvedValue([
+      {
+        id: 'l1',
+        specificationId: 's1',
+        groupId: 'g1',
+        status: 'PENDING'
+      },
+    ]);
+
+    const event = makeApiGwEvent({
+      path: '/letters',
+      queryStringParameters: { limit: '50' },
+      headers: {
+        'nhsd-supplier-id': 'supplier1',
+        'nhsd-correlation-id': 'correlationId',
+        'x-request-id': 'requestId'
+      }
+    });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+
+    const getLettersHandler = createGetLettersHandler(mockedDeps);
+    const result = await getLettersHandler(event, context, callback);
+
+    expect(mockedGetLetters).toHaveBeenCalledWith('supplier1', 'PENDING', 50, mockedDeps.letterRepo);
+
+    const expected = {
+      data: [
+        {
+          id: 'l1',
+          type: 'Letter',
+          attributes: { status: 'PENDING', specificationId: 's1', groupId: 'g1' },
+        },
+      ],
+    };
+
+    expect(result).toEqual({
+      statusCode: 200,
+      body: JSON.stringify(expected, null, 2),
+    });
+  });
+
   it('returns error if the limit parameter is not a number', async () => {
 
     const event = makeApiGwEvent({
