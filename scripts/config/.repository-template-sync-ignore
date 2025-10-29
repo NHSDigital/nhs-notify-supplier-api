@@ -14,6 +14,7 @@ CHANGELOG.md
 project.code-workspace
 README.md
 scripts/config/sonar-scanner.properties
+scripts/githooks/check-markdown-format.sh
 scripts/tests/
 VERSION
 
