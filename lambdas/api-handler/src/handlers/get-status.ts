@@ -25,11 +25,11 @@ export function createGetStatusHandler(deps: Deps): APIGatewayProxyHandler {
 
       return {
         statusCode: 200,
-        body: JSON.stringify({}, null, 2)
+        body: '{}'
       };
     } catch (error) {
       return mapErrorToResponse(error, commonHeadersResult.value.correlationId, deps.logger);
-  }
+    }
   }
 }
 

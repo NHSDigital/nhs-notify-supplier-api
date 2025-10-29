@@ -34,10 +34,6 @@ module "get_status" {
   send_to_firehose          = true
   log_destination_arn       = local.destination_arn
   log_subscription_role_arn = local.acct.log_subscription_role_arn
-
-  lambda_env_vars = merge(local.common_lambda_env_vars, {
-    MAX_LIMIT = var.max_get_limit
-  })
 }
 
 data "aws_iam_policy_document" "get_status_lambda" {

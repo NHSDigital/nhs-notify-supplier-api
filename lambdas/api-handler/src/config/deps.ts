@@ -13,36 +13,39 @@ export type Deps = {
   env: EnvVars
 };
 
-function createLetterRepository(log: pino.Logger, envVars: EnvVars): LetterRepository {
+function createDocumentClient(): DynamoDBDocumentClient {
   const ddbClient = new DynamoDBClient({});
-  const docClient = DynamoDBDocumentClient.from(ddbClient);
-  const config = {
-    lettersTableName: envVars.LETTERS_TABLE_NAME,
-    ttlHours: envVars.LETTER_TTL_HOURS
-  };
-
-  return new LetterRepository(docClient, log, config);
+  return DynamoDBDocumentClient.from(ddbClient);
 }
 
-function createDBHealthcheck(envVars: EnvVars): DBHealthcheck {
-  const ddbClient = new DynamoDBClient({});
-  const docClient = DynamoDBDocumentClient.from(ddbClient);
+
+function createLetterRepository(documentClient: DynamoDBDocumentClient, log: pino.Logger, envVars: EnvVars): LetterRepository {
   const config = {
     lettersTableName: envVars.LETTERS_TABLE_NAME,
     ttlHours: envVars.LETTER_TTL_HOURS
   };
 
-  return new DBHealthcheck(docClient, config);
+  return new LetterRepository(documentClient, log, config);
+}
+
+function createDBHealthcheck(documentClient: DynamoDBDocumentClient, envVars: EnvVars): DBHealthcheck {
+  const config = {
+    lettersTableName: envVars.LETTERS_TABLE_NAME,
+    ttlHours: envVars.LETTER_TTL_HOURS
+  };
+
+  return new DBHealthcheck(documentClient, config);
 }
 
 export function createDependenciesContainer(): Deps {
 
   const log = pino();
+  const documentClient = createDocumentClient();
 
   return {
     s3Client: new S3Client(),
-    letterRepo: createLetterRepository(log, envVars),
-    dbHealthcheck: createDBHealthcheck(envVars),
+    letterRepo: createLetterRepository(documentClient, log, envVars),
+    dbHealthcheck: createDBHealthcheck(documentClient, envVars),
     logger: log,
     env: envVars
   };
