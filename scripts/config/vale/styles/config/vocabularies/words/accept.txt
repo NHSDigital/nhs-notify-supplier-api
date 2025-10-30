@@ -20,6 +20,7 @@ hotfix
 idempotence
 Jira
 Makefile
+npm
 OAuth
 Octokit
 [Oo]nboarding
@@ -37,6 +38,7 @@ Syft
 Terraform
 timeframe
 toolchain
+Toolchain
 Trufflehog
 vNext
 Zod
