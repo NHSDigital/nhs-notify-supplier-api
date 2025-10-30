@@ -2,7 +2,7 @@ import { S3Client } from "@aws-sdk/client-s3";
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import pino from 'pino';
-import { LetterRepository, MIRepository, DBHealthcheck } from '../../../../internal/datastore';
+import { LetterRepository, MIRepository, DBHealthcheck } from '@internal/datastore';
 import { envVars, EnvVars } from "../config/env";
 
 export type Deps = {

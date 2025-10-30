@@ -1,5 +1,5 @@
 import { S3Client } from "@aws-sdk/client-s3";
-import { DBHealthcheck } from "../../../../../internal/datastore/src";
+import { DBHealthcheck } from "@internal/datastore/src";
 import pino from "pino";
 import { Deps } from "../../config/deps";
 import { makeApiGwEvent } from "./utils/test-utils";
