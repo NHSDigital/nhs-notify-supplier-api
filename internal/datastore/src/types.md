@@ -1,4 +1,4 @@
-## Data Store Schemas
+# Data Store Schemas
 
 This document contains the mermaid diagrams for the data store schemas used in the application.
 
@@ -31,7 +31,7 @@ erDiagram
 erDiagram
     MI {
         string id
-        string supplierId "ref: Supplier"
+        string supplierId
         string specificationId
         string groupId
         string lineItem
@@ -40,7 +40,16 @@ erDiagram
         string createdAt
         string updatedAt
     }
+```
+
+## Supplier schema
+
+```mermaid
+erDiagram
     Supplier {
+        string id
+        string name
+        string apimId
+        string status "enum: ENABLED, DISABLED"
     }
-    MI }o--|| Supplier : "supplierId"
 ```

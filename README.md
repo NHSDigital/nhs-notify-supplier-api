@@ -1,4 +1,4 @@
-## NHS Notify Supplier API
+# NHS Notify Supplier API
 
 [![1. CI/CD pull request](https://github.com/NHSDigital/nhs-notify-supplier-api/actions/workflows/cicd-1-pull-request.yaml/badge.svg)](https://github.com/NHSDigital/nhs-notify-supplier-api/actions/workflows/cicd-1-pull-request.yaml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=NHSDigital_nhs-notify-supplier-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=NHSDigital_nhs-notify-supplier-api)
@@ -16,25 +16,25 @@ This repository documents the Supplier API specification and provides an SDK wit
 ## Table of Contents
 
 - [NHS Notify Supplier API](#nhs-notify-supplier-api)
-- [OAS Specifications](#oas-specifications)
-- [Table of Contents](#table-of-contents)
-- [API Consumers - Getting Started](#api-consumers---getting-started)
-  - [OAS Specification](#oas-specification)
-  - [Packages](#packages)
-  - [Documentation](#documentation)
-  - [SDK Assets](#sdk-assets)
-  - [Examples](#examples)
-- [API Developers](#api-developers)
-  - [Pre built servers](#pre-built-servers)
-  - [Setup](#setup)
-    - [Prerequisites and Configuration](#prerequisites-and-configuration)
-      - [SDKs](#sdks)
-      - [Libs](#libs)
-  - [Build](#build)
-  - [GitHub Actions CI/CD](#github-actions-cicd)
-    - [CI (Automatic)](#ci-automatic)
-    - [CD (Manual)](#cd-manual)
-- [Licence](#licence)
+  - [OAS Specifications](#oas-specifications)
+  - [Table of Contents](#table-of-contents)
+  - [API Consumers - Getting Started](#api-consumers---getting-started)
+    - [OAS Specification](#oas-specification)
+    - [Packages](#packages)
+    - [Documentation](#documentation)
+    - [SDK Assets](#sdk-assets)
+    - [Examples](#examples)
+  - [API Developers](#api-developers)
+    - [Pre built servers](#pre-built-servers)
+    - [Setup](#setup)
+      - [Prerequisites and Configuration](#prerequisites-and-configuration)
+        - [SDKs](#sdks)
+        - [Libs](#libs)
+    - [Build](#build)
+    - [GitHub Actions CI/CD](#github-actions-cicd)
+      - [CI (Automatic)](#ci-automatic)
+      - [CD (Manual)](#cd-manual)
+  - [Licence](#licence)
 
 ## API Consumers - Getting Started
 

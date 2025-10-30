@@ -43,59 +43,59 @@ jobs:
 
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: "Get the artefacts 1"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: ./artifacts/jekyll-docs-${{ inputs.version }}
           name: jekyll-docs-${{ inputs.version }}
 
       - name: "Get the artefacts 2"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: ./artifacts/sdk-html-docs-${{ inputs.version }}
           name: sdk-html-docs-${{ inputs.version }}
 
       - name: "Get the artefacts 3"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: ./artifacts/sdk-swagger-docs-${{ inputs.version }}
           name: sdk-swagger-docs-${{ inputs.version }}
 
       - name: "Get the artefacts 4"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: ./artifacts/sdk-html-${{ inputs.version }}
           name: sdk-html-${{ inputs.version }}
 
       - name: "Get the artefacts 5"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: ./artifacts/sdk-ts-${{ inputs.version }}
           name: sdk-ts-${{ inputs.version }}
 
       - name: "Get the artefacts 6"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: ./artifacts/sdk-python-${{ inputs.version }}
           name: sdk-python-${{ inputs.version }}
 
       - name: "Get the artefacts 7"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: ./artifacts/sdk-csharp-${{ inputs.version }}
           name: sdk-csharp-${{ inputs.version }}
 
       - name: "Get the artefacts 8"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: ./artifacts/api-oas-specification-${{ inputs.version }}
           name: api-oas-specification-${{ inputs.version }}
 
       # Take out for now - might add again in the future
       # - name: "Get the artefacts 9"
-      #   uses: actions/download-artifact@v4
+      #   uses: actions/download-artifact@v5
       #   with:
       #     path: ./artifacts/server-csharp-${{ inputs.version }}
       #     name: server-csharp-${{ inputs.version }}
@@ -243,31 +243,31 @@ jobs:
 
   # Take out for now - might add again in the future
   # ### PUBLISH DOCKER  - THIS NEEDS CHANGING TO DO THE DOCKER BUILD IN THE BUILD STAGE AND ARTIFACT IT. SEE publishlibhostdocker below how how and the buildlibs action.
-  # publishdocker:
-  #   name: "Publish docker packages"
-  #   runs-on: ubuntu-latest
-  #   needs: [publish]
-  #   permissions:
-  #     packages: write
-  #     contents: read
-  #   steps:
-  #     - name: "Get the artefacts csharp docker"
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         path: .
-  #         name: server-csharp-docker-${{ inputs.version }}
-  #     - name: "Get the artefacts csharp server"
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         path: ./csharp-server
-  #         name: server-csharp-${{ inputs.version }}
-  #     - run: ls -la
-  #     - run: |
-  #         docker build . -t ghcr.io/nhsdigital/nhsnotifysupplierserver:latest
-  #         echo $CR_PAT | docker login ghcr.io -u nhs-notify-supplier-api --password-stdin
-  #         docker push ghcr.io/nhsdigital/nhsnotifysupplierserver:latest
-  #       env:
-  #         CR_PAT: ${{ secrets.GITHUB_TOKEN }}
+  #   publishdocker:
+  #     name: "Publish docker packages"
+  #     runs-on: ubuntu-latest
+  #     needs: [publish]
+  #     permissions:
+  #       packages: write
+  #       contents: read
+  #     steps:
+  #       - name: "Get the artefacts csharp docker"
+  #         uses: actions/download-artifact@v5
+  #         with:
+  #           path: .
+  #           name: server-csharp-docker-${{ inputs.version }}
+  #       - name: "Get the artefacts csharp server"
+  #         uses: actions/download-artifact@v5
+  #         with:
+  #           path: ./csharp-server
+  #           name: server-csharp-${{ inputs.version }}
+  #       - run: ls -la
+  #       - run: |
+  #           docker build . -t ghcr.io/nhsdigital/nhsnotifysupplierserver:latest
+  #           echo $CR_PAT | docker login ghcr.io -u nhs-notify-supplier-api --password-stdin
+  #           docker push ghcr.io/nhsdigital/nhsnotifysupplierserver:latest
+  #         env:
+  #           CR_PAT: ${{ secrets.GITHUB_TOKEN }}
 
   ### PUBLISH NUGET
   publishnuget:
@@ -279,7 +279,7 @@ jobs:
       contents: read
     steps:
       - name: "Get the artefacts"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: .
           name: sdk-csharp-${{ inputs.version }}
@@ -335,11 +335,11 @@ jobs:
       contents: read
     steps:
       - name: "Get the artefacts"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: .
           name: sdk-ts-${{ inputs.version }}
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: "24.3"
           registry-url: "https://npm.pkg.github.com"
@@ -400,7 +400,7 @@ jobs:
       contents: read
     steps:
       - name: "Get the artefacts"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: .
           name: libs-abstractions-${{ inputs.version }}
@@ -456,7 +456,7 @@ jobs:
       contents: read
     steps:
       - name: "Get the artefacts"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: .
           name: libs-letter-${{ inputs.version }}
@@ -512,7 +512,7 @@ jobs:
       contents: read
     steps:
       - name: "Get the artefacts"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: .
           name: libs-data-${{ inputs.version }}
@@ -568,7 +568,7 @@ jobs:
       contents: read
     steps:
       - name: "Get the artefacts"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: .
           name: libs-host-${{ inputs.version }}
@@ -624,7 +624,7 @@ jobs:
       contents: read
     steps:
       - name: "Get the artefacts"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: .
           name: libs-host-docker-${{ inputs.version }}

@@ -6,7 +6,7 @@ import { ApiErrorDetail } from '../../contracts/errors';
 import { NotFoundError } from '../../errors';
 import { S3Client } from '@aws-sdk/client-s3';
 import pino from 'pino';
-import { LetterRepository } from '../../../../../internal/datastore/src';
+import { LetterRepository } from '@internal/datastore/src';
 import { Deps } from '../../config/deps';
 import { EnvVars } from '../../config/env';
 import { createGetLetterHandler } from '../get-letter';
@@ -28,7 +28,7 @@ describe('API Lambda handler', () => {
       DOWNLOAD_URL_TTL_SECONDS: 60,
       MAX_LIMIT: 2500
     } as unknown as EnvVars
-  };
+  } as Deps;
 
   beforeEach(() => {
     jest.clearAllMocks();

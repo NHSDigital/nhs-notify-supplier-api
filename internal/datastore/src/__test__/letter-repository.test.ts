@@ -307,7 +307,7 @@ describe('LetterRepository', () => {
 
     const mockSend = jest.fn().mockResolvedValue({ Items: null });
     const mockDdbClient = { send: mockSend } as any;
-    const repo = new LetterRepository(mockDdbClient, { debug: jest.fn() } as any, { lettersTableName: 'letters', ttlHours: 1 });
+    const repo = new LetterRepository(mockDdbClient, { debug: jest.fn() } as any, { lettersTableName: 'letters', lettersTtlHours: 1 });
 
     const letters = await repo.getLettersBySupplier('supplier1', 'PENDING', 10);
     expect(letters).toEqual([]);

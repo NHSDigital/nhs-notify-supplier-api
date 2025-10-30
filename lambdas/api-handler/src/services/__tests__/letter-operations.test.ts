@@ -1,6 +1,6 @@
-import { Letter, LetterRepository } from '../../../../../internal/datastore/src';
+import { Letter, LetterRepository } from '@internal/datastore';
 import { Deps } from '../../config/deps';
-import { LetterDto, LetterStatus } from '../../contracts/letters';
+import { LetterDto } from '../../contracts/letters';
 import { getLetterById, getLetterDataUrl, getLettersForSupplier, patchLetterStatus } from '../letter-operations';
 import pino from 'pino';
 
@@ -115,7 +115,8 @@ describe('patchLetterStatus function', () => {
 
     const result = await patchLetterStatus(updatedLetterDto, 'letter1', mockRepo as any);
 
-    expect(result).toEqual({ data:
+    expect(result).toEqual({
+      data:
       {
         id: 'letter1',
         type: 'Letter',
@@ -175,7 +176,7 @@ describe('getLetterDataUrl function', () => {
         APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
         DOWNLOAD_URL_TTL_SECONDS: 60
   };
-  const deps: Deps = { s3Client, letterRepo, logger, env };
+  const deps: Deps = { s3Client, letterRepo, logger, env } as Deps;
 
   it('should return pre signed url successfully', async () => {
 
