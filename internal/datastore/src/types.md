@@ -1,4 +1,4 @@
-# Data Store Schemas
+## Data Store Schemas
 
 This document contains the mermaid diagrams for the data store schemas used in the application.
 

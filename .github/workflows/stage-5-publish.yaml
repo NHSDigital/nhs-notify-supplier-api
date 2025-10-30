@@ -93,11 +93,12 @@ jobs:
           path: ./artifacts/api-oas-specification-${{ inputs.version }}
           name: api-oas-specification-${{ inputs.version }}
 
-      - name: "Get the artefacts 9"
-        uses: actions/download-artifact@v4
-        with:
-          path: ./artifacts/server-csharp-${{ inputs.version }}
-          name: server-csharp-${{ inputs.version }}
+      # Take out for now - might add again in the future
+      # - name: "Get the artefacts 9"
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     path: ./artifacts/server-csharp-${{ inputs.version }}
+      #     name: server-csharp-${{ inputs.version }}
 
       - name: "Create release"
         id: create_release
@@ -222,48 +223,51 @@ jobs:
           asset_name: api-oas-specification-${{ inputs.version }}.zip
           asset_content_type: "application/gzip"
 
-      - name: "zip csharp server release asset"
-        # Git hub pages needs a single tar called artifact inside the zip.
-        working-directory: ./artifacts/server-csharp-${{ inputs.version }}
-        run: zip -r ../server-csharp-${{ inputs.version }}.zip .
-        shell: bash
+      # Take out for now - might add again in the future
+      # - name: "zip csharp server release asset"
+      #   # Git hub pages needs a single tar called artifact inside the zip.
+      #   working-directory: ./artifacts/server-csharp-${{ inputs.version }}
+      #   run: zip -r ../server-csharp-${{ inputs.version }}.zip .
+      #   shell: bash
 
-      - name: "Upload csharp server release asset"
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: "${{ steps.create_release.outputs.upload_url }}"
-          asset_path: ./artifacts/server-csharp-${{ inputs.version }}.zip
-          asset_name: server-csharp-${{ inputs.version }}.zip
-          asset_content_type: "application/gzip"
+      # Take out for now - might add again in the future
+      # - name: "Upload csharp server release asset"
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: "${{ steps.create_release.outputs.upload_url }}"
+      #     asset_path: ./artifacts/server-csharp-${{ inputs.version }}.zip
+      #     asset_name: server-csharp-${{ inputs.version }}.zip
+      #     asset_content_type: "application/gzip"
 
-  ### PUBLISH DOCKER  - THIS NEEDS CHANGING TO DO THE DOCKER BUILD IN THE BUILD STAGE AND ARTIFACT IT. SEE publishlibhostdocker below how how and the buildlibs action.
-  publishdocker:
-    name: "Publish docker packages"
-    runs-on: ubuntu-latest
-    needs: [publish]
-    permissions:
-      packages: write
-      contents: read
-    steps:
-      - name: "Get the artefacts csharp docker"
-        uses: actions/download-artifact@v4
-        with:
-          path: .
-          name: server-csharp-docker-${{ inputs.version }}
-      - name: "Get the artefacts csharp server"
-        uses: actions/download-artifact@v4
-        with:
-          path: ./csharp-server
-          name: server-csharp-${{ inputs.version }}
-      - run: ls -la
-      - run: |
-          docker build . -t ghcr.io/nhsdigital/nhsnotifysupplierserver:latest
-          echo $CR_PAT | docker login ghcr.io -u nhs-notify-supplier-api --password-stdin
-          docker push ghcr.io/nhsdigital/nhsnotifysupplierserver:latest
-        env:
-          CR_PAT: ${{ secrets.GITHUB_TOKEN }}
+  # Take out for now - might add again in the future
+  # ### PUBLISH DOCKER  - THIS NEEDS CHANGING TO DO THE DOCKER BUILD IN THE BUILD STAGE AND ARTIFACT IT. SEE publishlibhostdocker below how how and the buildlibs action.
+  # publishdocker:
+  #   name: "Publish docker packages"
+  #   runs-on: ubuntu-latest
+  #   needs: [publish]
+  #   permissions:
+  #     packages: write
+  #     contents: read
+  #   steps:
+  #     - name: "Get the artefacts csharp docker"
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         path: .
+  #         name: server-csharp-docker-${{ inputs.version }}
+  #     - name: "Get the artefacts csharp server"
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         path: ./csharp-server
+  #         name: server-csharp-${{ inputs.version }}
+  #     - run: ls -la
+  #     - run: |
+  #         docker build . -t ghcr.io/nhsdigital/nhsnotifysupplierserver:latest
+  #         echo $CR_PAT | docker login ghcr.io -u nhs-notify-supplier-api --password-stdin
+  #         docker push ghcr.io/nhsdigital/nhsnotifysupplierserver:latest
+  #       env:
+  #         CR_PAT: ${{ secrets.GITHUB_TOKEN }}
 
   ### PUBLISH NUGET
   publishnuget:

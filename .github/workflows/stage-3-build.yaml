@@ -38,7 +38,7 @@ on:
 
 permissions:
   id-token: write # This is required for requesting the JWT
-  contents: read  # This is required for actions/checkout
+  contents: read # This is required for actions/checkout
 jobs:
   artefact-jekyll-docs:
     name: "Build Docs"
@@ -64,17 +64,18 @@ jobs:
         with:
           version: "${{ inputs.version }}"
 
-  artefact-servers:
-    name: "Build servers"
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v4
-      - name: "Build servers"
-        uses: ./.github/actions/build-server
-        with:
-          version: "${{ inputs.version }}"
+  # Take out for now - might add again in the future
+  # artefact-servers:
+  #   name: "Build servers"
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 10
+  #   steps:
+  #     - name: "Checkout code"
+  #       uses: actions/checkout@v4
+  #     - name: "Build servers"
+  #       uses: ./.github/actions/build-server
+  #       with:
+  #         version: "${{ inputs.version }}"
 
   artefact-libs:
     name: "Build libs"
@@ -109,38 +110,3 @@ jobs:
           runId: "${{ github.run_id }}"
           buildSandbox: true
           releaseVersion: ${{ github.head_ref || github.ref_name }}
-
-  # artefact-1:
-  #   name: "Artefact 1"
-  #   runs-on: ubuntu-latest
-  #   timeout-minutes: 3
-  #   steps:
-  #     - name: "Checkout code"
-  #       uses: actions/checkout@v4
-  #     - name: "Build artefact 1"
-  #       run: |
-  #         echo "Building artefact 1 ..."
-  #     - name: "Check artefact 1"
-  #       run: |
-  #         echo "Checking artefact 1 ..."
-  #     - name: "Upload artefact 1"
-  #       run: |
-  #         echo "Uploading artefact 1 ..."
-  #         # Use either action/cache or action/upload-artifact
-  # artefact-n:
-  #   name: "Artefact n"
-  #   runs-on: ubuntu-latest
-  #   timeout-minutes: 3
-  #   steps:
-  #     - name: "Checkout code"
-  #       uses: actions/checkout@v4
-  #     - name: "Build artefact n"
-  #       run: |
-  #         echo "Building artefact n ..."
-  #     - name: "Check artefact n"
-  #       run: |
-  #         echo "Checking artefact n ..."
-  #     - name: "Upload artefact n"
-  #       run: |
-  #         echo "Uploading artefact n ..."
-  #         # Use either action/cache or action/upload-artifact
