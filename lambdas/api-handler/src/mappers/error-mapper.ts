@@ -15,6 +15,9 @@ export function mapErrorToResponse(error: unknown, correlationId: string | undef
   } else if (error instanceof NotFoundError) {
     logger.info({ err: error }, `Not found error correlationId=${correlationId}`);
     return buildResponseFromErrorCode(ApiErrorCode.NotFound, error.detail, correlationId);
+  } else if (error instanceof Error) {
+    logger.error({ err: error }, `Internal server error correlationId=${correlationId}`);
+    return buildResponseFromErrorCode(ApiErrorCode.InternalServerError, "Unexpected error", correlationId);
   } else {
     logger.error({ err: error }, `Internal server error (non-Error thrown) correlationId=${correlationId}`);
     return buildResponseFromErrorCode(ApiErrorCode.InternalServerError, "Unexpected error", correlationId);
