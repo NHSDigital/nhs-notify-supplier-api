@@ -1,6 +1,6 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
-import pino from 'pino';
+import { pino } from 'pino';
 import { LetterRepository } from '@internal/datastore';
 
 export function createLetterRepository(environment: string, ttlHours:number): LetterRepository {
@@ -9,7 +9,7 @@ export function createLetterRepository(environment: string, ttlHours:number): Le
   const log = pino();
   const config = {
     lettersTableName: `nhs-${environment}-supapi-letters`,
-    ttlHours: ttlHours,
+    lettersTtlHours: ttlHours,
   };
 
   return new LetterRepository(docClient, log, config);

@@ -79,7 +79,7 @@
   "workspaces": [
     "lambdas/*",
     "internal/*",
-    "scripts/test-data",
+    "scripts/utilities/*",
     "docs"
   ]
 }
