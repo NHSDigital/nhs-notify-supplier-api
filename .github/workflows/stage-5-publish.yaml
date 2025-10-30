@@ -354,24 +354,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # - name: "Upload other release asset 1"
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     upload_url: "${{ steps.create_release.outputs.upload_url }}"
-      #     asset_path: ./*
-      #     asset_name: repository-template-${{ inputs.version }}.tar.gz
-      #     asset_content_type: "application/gzip"
-      # - name: "Upload other release asset 2"
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     upload_url: "${{ steps.create_release.outputs.upload_url }}"
-      #     asset_path: ./*
-      #     asset_name: repository-template-${{ inputs.version }}.tar.gz
-      #     asset_content_type: "application/gzip"
   success:
     name: "Success notification"
     runs-on: ubuntu-latest
@@ -390,250 +372,251 @@ jobs:
           message-text: "This is a notification body"
           link: ${{ github.event.pull_request.html_url }}
 
-  ### PUBLISH LIBS ABSTRACTION NUGET
-  publishlibsabstractionsnuget:
-    name: "Publish libs abstractions packages to nuget.pkg.github.com"
-    runs-on: ubuntu-latest
-    needs: [publish]
-    permissions:
-      packages: write
-      contents: read
-    steps:
-      - name: "Get the artefacts"
-        uses: actions/download-artifact@v5
-        with:
-          path: .
-          name: libs-abstractions-${{ inputs.version }}
-      - run: |
-          ls -la
-          find . -name ".version"
-      - run: |
-          dotnet nuget add source \
-          --username nhs-notify-supplier-api \
-          --password ${{ secrets.GITHUB_TOKEN }} \
-          --store-password-in-clear-text \
-          --name github \
-          "https://nuget.pkg.github.com/NHSDigital/index.json"
-      - run: |
-          echo "ROOT .version file is: $(cat .version)"
-          echo "GH variable version is: ${{ inputs.version }}"
-        name: Showing the base versions
+  # Take out for now - might add again in the future
+  # ### PUBLISH LIBS ABSTRACTION NUGET
+  # publishlibsabstractionsnuget:
+  #   name: "Publish libs abstractions packages to nuget.pkg.github.com"
+  #   runs-on: ubuntu-latest
+  #   needs: [publish]
+  #   permissions:
+  #     packages: write
+  #     contents: read
+  #   steps:
+  #     - name: "Get the artefacts"
+  #       uses: actions/download-artifact@v5
+  #       with:
+  #         path: .
+  #         name: libs-abstractions-${{ inputs.version }}
+  #     - run: |
+  #         ls -la
+  #         find . -name ".version"
+  #     - run: |
+  #         dotnet nuget add source \
+  #         --username nhs-notify-supplier-api \
+  #         --password ${{ secrets.GITHUB_TOKEN }} \
+  #         --store-password-in-clear-text \
+  #         --name github \
+  #         "https://nuget.pkg.github.com/NHSDigital/index.json"
+  #     - run: |
+  #         echo "ROOT .version file is: $(cat .version)"
+  #         echo "GH variable version is: ${{ inputs.version }}"
+  #       name: Showing the base versions
 
-      - run: |
-          VERSION=${{ inputs.version }}
-          SHORT_VERSION="$(echo $VERSION | rev | cut -d"." -f2-  | rev)"
-          NUGET_VERSION="$(echo "$VERSION" | tr + .)"
-          echo $VERSION
-          echo $SHORT_VERSION
-          echo $NUGET_VERSION
-          SHORT_NUGET_VERSION="$(echo $NUGET_VERSION | rev | cut -d"." -f2-  | rev)"
-          echo $SHORT_NUGET_VERSION
-          SHORTER_NUGET_VERSION="$(echo $SHORT_NUGET_VERSION | rev | cut -d"." -f2-  | rev)"
-          echo $SHORTER_NUGET_VERSION
-          TEST_NUGET_VERSION="$(echo $NUGET_VERSION | sed -E 's/.([^.]*)$/\1/')"
-          TEST_NUGET_VERSION="$(echo $TEST_NUGET_VERSION | sed -E 's/.([^.]*)$/\1/')"
-          echo $TEST_NUGET_VERSION
-          echo "TEST_NUGET_VERSION=$TEST_NUGET_VERSION" >> "$GITHUB_OUTPUT"
-        name: Set the nuget version
-        id: set-nuget-version
+  #     - run: |
+  #         VERSION=${{ inputs.version }}
+  #         SHORT_VERSION="$(echo $VERSION | rev | cut -d"." -f2-  | rev)"
+  #         NUGET_VERSION="$(echo "$VERSION" | tr + .)"
+  #         echo $VERSION
+  #         echo $SHORT_VERSION
+  #         echo $NUGET_VERSION
+  #         SHORT_NUGET_VERSION="$(echo $NUGET_VERSION | rev | cut -d"." -f2-  | rev)"
+  #         echo $SHORT_NUGET_VERSION
+  #         SHORTER_NUGET_VERSION="$(echo $SHORT_NUGET_VERSION | rev | cut -d"." -f2-  | rev)"
+  #         echo $SHORTER_NUGET_VERSION
+  #         TEST_NUGET_VERSION="$(echo $NUGET_VERSION | sed -E 's/.([^.]*)$/\1/')"
+  #         TEST_NUGET_VERSION="$(echo $TEST_NUGET_VERSION | sed -E 's/.([^.]*)$/\1/')"
+  #         echo $TEST_NUGET_VERSION
+  #         echo "TEST_NUGET_VERSION=$TEST_NUGET_VERSION" >> "$GITHUB_OUTPUT"
+  #       name: Set the nuget version
+  #       id: set-nuget-version
 
-      - run: |
-          dotnet nuget push \
-          nhs.notify.suppliers.api.abstractions.${TEST_NUGET_VERSION}.nupkg \
-          --source github \
-          --api-key $GITHUB_TOKEN
-        env:
-          TEST_NUGET_VERSION: ${{ steps.set-nuget-version.outputs.TEST_NUGET_VERSION }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     - run: |
+  #         dotnet nuget push \
+  #         nhs.notify.suppliers.api.abstractions.${TEST_NUGET_VERSION}.nupkg \
+  #         --source github \
+  #         --api-key $GITHUB_TOKEN
+  #       env:
+  #         TEST_NUGET_VERSION: ${{ steps.set-nuget-version.outputs.TEST_NUGET_VERSION }}
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  ### PUBLISH LIBS LETTERS NUGET
-  publishliblettersnuget:
-    name: "Publish libs letter packages to nuget.pkg.github.com"
-    runs-on: ubuntu-latest
-    needs: [publish]
-    permissions:
-      packages: write
-      contents: read
-    steps:
-      - name: "Get the artefacts"
-        uses: actions/download-artifact@v5
-        with:
-          path: .
-          name: libs-letter-${{ inputs.version }}
-      - run: |
-          ls -la
-          find . -name ".version"
-      - run: |
-          dotnet nuget add source \
-          --username nhs-notify-supplier-api \
-          --password ${{ secrets.GITHUB_TOKEN }} \
-          --store-password-in-clear-text \
-          --name github \
-          "https://nuget.pkg.github.com/NHSDigital/index.json"
-      - run: |
-          echo "ROOT .version file is: $(cat .version)"
-          echo "GH variable version is: ${{ inputs.version }}"
-        name: Showing the base versions
+  # ### PUBLISH LIBS LETTERS NUGET
+  # publishliblettersnuget:
+  #   name: "Publish libs letter packages to nuget.pkg.github.com"
+  #   runs-on: ubuntu-latest
+  #   needs: [publish]
+  #   permissions:
+  #     packages: write
+  #     contents: read
+  #   steps:
+  #     - name: "Get the artefacts"
+  #       uses: actions/download-artifact@v5
+  #       with:
+  #         path: .
+  #         name: libs-letter-${{ inputs.version }}
+  #     - run: |
+  #         ls -la
+  #         find . -name ".version"
+  #     - run: |
+  #         dotnet nuget add source \
+  #         --username nhs-notify-supplier-api \
+  #         --password ${{ secrets.GITHUB_TOKEN }} \
+  #         --store-password-in-clear-text \
+  #         --name github \
+  #         "https://nuget.pkg.github.com/NHSDigital/index.json"
+  #     - run: |
+  #         echo "ROOT .version file is: $(cat .version)"
+  #         echo "GH variable version is: ${{ inputs.version }}"
+  #       name: Showing the base versions
 
-      - run: |
-          VERSION=${{ inputs.version }}
-          SHORT_VERSION="$(echo $VERSION | rev | cut -d"." -f2-  | rev)"
-          NUGET_VERSION="$(echo "$VERSION" | tr + .)"
-          echo $VERSION
-          echo $SHORT_VERSION
-          echo $NUGET_VERSION
-          SHORT_NUGET_VERSION="$(echo $NUGET_VERSION | rev | cut -d"." -f2-  | rev)"
-          echo $SHORT_NUGET_VERSION
-          SHORTER_NUGET_VERSION="$(echo $SHORT_NUGET_VERSION | rev | cut -d"." -f2-  | rev)"
-          echo $SHORTER_NUGET_VERSION
-          TEST_NUGET_VERSION="$(echo $NUGET_VERSION | sed -E 's/.([^.]*)$/\1/')"
-          TEST_NUGET_VERSION="$(echo $TEST_NUGET_VERSION | sed -E 's/.([^.]*)$/\1/')"
-          echo $TEST_NUGET_VERSION
-          echo "TEST_NUGET_VERSION=$TEST_NUGET_VERSION" >> "$GITHUB_OUTPUT"
-        name: Set the nuget version
-        id: set-nuget-version
+  #     - run: |
+  #         VERSION=${{ inputs.version }}
+  #         SHORT_VERSION="$(echo $VERSION | rev | cut -d"." -f2-  | rev)"
+  #         NUGET_VERSION="$(echo "$VERSION" | tr + .)"
+  #         echo $VERSION
+  #         echo $SHORT_VERSION
+  #         echo $NUGET_VERSION
+  #         SHORT_NUGET_VERSION="$(echo $NUGET_VERSION | rev | cut -d"." -f2-  | rev)"
+  #         echo $SHORT_NUGET_VERSION
+  #         SHORTER_NUGET_VERSION="$(echo $SHORT_NUGET_VERSION | rev | cut -d"." -f2-  | rev)"
+  #         echo $SHORTER_NUGET_VERSION
+  #         TEST_NUGET_VERSION="$(echo $NUGET_VERSION | sed -E 's/.([^.]*)$/\1/')"
+  #         TEST_NUGET_VERSION="$(echo $TEST_NUGET_VERSION | sed -E 's/.([^.]*)$/\1/')"
+  #         echo $TEST_NUGET_VERSION
+  #         echo "TEST_NUGET_VERSION=$TEST_NUGET_VERSION" >> "$GITHUB_OUTPUT"
+  #       name: Set the nuget version
+  #       id: set-nuget-version
 
-      - run: |
-          dotnet nuget push \
-          nhs.notify.suppliers.api.letter.${TEST_NUGET_VERSION}.nupkg \
-          --source github \
-          --api-key $GITHUB_TOKEN
-        env:
-          TEST_NUGET_VERSION: ${{ steps.set-nuget-version.outputs.TEST_NUGET_VERSION }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     - run: |
+  #         dotnet nuget push \
+  #         nhs.notify.suppliers.api.letter.${TEST_NUGET_VERSION}.nupkg \
+  #         --source github \
+  #         --api-key $GITHUB_TOKEN
+  #       env:
+  #         TEST_NUGET_VERSION: ${{ steps.set-nuget-version.outputs.TEST_NUGET_VERSION }}
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  ### PUBLISH LIBS data NUGET
-  publishlibhostnuget:
-    name: "Publish libs data packages to nuget.pkg.github.com"
-    runs-on: ubuntu-latest
-    needs: [publish]
-    permissions:
-      packages: write
-      contents: read
-    steps:
-      - name: "Get the artefacts"
-        uses: actions/download-artifact@v5
-        with:
-          path: .
-          name: libs-data-${{ inputs.version }}
-      - run: |
-          ls -la
-          find . -name ".version"
-      - run: |
-          dotnet nuget add source \
-          --username nhs-notify-supplier-api \
-          --password ${{ secrets.GITHUB_TOKEN }} \
-          --store-password-in-clear-text \
-          --name github \
-          "https://nuget.pkg.github.com/NHSDigital/index.json"
-      - run: |
-          echo "ROOT .version file is: $(cat .version)"
-          echo "GH variable version is: ${{ inputs.version }}"
-        name: Showing the base versions
+  # ### PUBLISH LIBS data NUGET
+  # publishlibhostnuget:
+  #   name: "Publish libs data packages to nuget.pkg.github.com"
+  #   runs-on: ubuntu-latest
+  #   needs: [publish]
+  #   permissions:
+  #     packages: write
+  #     contents: read
+  #   steps:
+  #     - name: "Get the artefacts"
+  #       uses: actions/download-artifact@v5
+  #       with:
+  #         path: .
+  #         name: libs-data-${{ inputs.version }}
+  #     - run: |
+  #         ls -la
+  #         find . -name ".version"
+  #     - run: |
+  #         dotnet nuget add source \
+  #         --username nhs-notify-supplier-api \
+  #         --password ${{ secrets.GITHUB_TOKEN }} \
+  #         --store-password-in-clear-text \
+  #         --name github \
+  #         "https://nuget.pkg.github.com/NHSDigital/index.json"
+  #     - run: |
+  #         echo "ROOT .version file is: $(cat .version)"
+  #         echo "GH variable version is: ${{ inputs.version }}"
+  #       name: Showing the base versions
 
-      - run: |
-          VERSION=${{ inputs.version }}
-          SHORT_VERSION="$(echo $VERSION | rev | cut -d"." -f2-  | rev)"
-          NUGET_VERSION="$(echo "$VERSION" | tr + .)"
-          echo $VERSION
-          echo $SHORT_VERSION
-          echo $NUGET_VERSION
-          SHORT_NUGET_VERSION="$(echo $NUGET_VERSION | rev | cut -d"." -f2-  | rev)"
-          echo $SHORT_NUGET_VERSION
-          SHORTER_NUGET_VERSION="$(echo $SHORT_NUGET_VERSION | rev | cut -d"." -f2-  | rev)"
-          echo $SHORTER_NUGET_VERSION
-          TEST_NUGET_VERSION="$(echo $NUGET_VERSION | sed -E 's/.([^.]*)$/\1/')"
-          TEST_NUGET_VERSION="$(echo $TEST_NUGET_VERSION | sed -E 's/.([^.]*)$/\1/')"
-          echo $TEST_NUGET_VERSION
-          echo "TEST_NUGET_VERSION=$TEST_NUGET_VERSION" >> "$GITHUB_OUTPUT"
-        name: Set the nuget version
-        id: set-nuget-version
+  #     - run: |
+  #         VERSION=${{ inputs.version }}
+  #         SHORT_VERSION="$(echo $VERSION | rev | cut -d"." -f2-  | rev)"
+  #         NUGET_VERSION="$(echo "$VERSION" | tr + .)"
+  #         echo $VERSION
+  #         echo $SHORT_VERSION
+  #         echo $NUGET_VERSION
+  #         SHORT_NUGET_VERSION="$(echo $NUGET_VERSION | rev | cut -d"." -f2-  | rev)"
+  #         echo $SHORT_NUGET_VERSION
+  #         SHORTER_NUGET_VERSION="$(echo $SHORT_NUGET_VERSION | rev | cut -d"." -f2-  | rev)"
+  #         echo $SHORTER_NUGET_VERSION
+  #         TEST_NUGET_VERSION="$(echo $NUGET_VERSION | sed -E 's/.([^.]*)$/\1/')"
+  #         TEST_NUGET_VERSION="$(echo $TEST_NUGET_VERSION | sed -E 's/.([^.]*)$/\1/')"
+  #         echo $TEST_NUGET_VERSION
+  #         echo "TEST_NUGET_VERSION=$TEST_NUGET_VERSION" >> "$GITHUB_OUTPUT"
+  #       name: Set the nuget version
+  #       id: set-nuget-version
 
-      - run: |
-          dotnet nuget push \
-          nhs.notify.suppliers.api.data.${TEST_NUGET_VERSION}.nupkg \
-          --source github \
-          --api-key $GITHUB_TOKEN
-        env:
-          TEST_NUGET_VERSION: ${{ steps.set-nuget-version.outputs.TEST_NUGET_VERSION }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     - run: |
+  #         dotnet nuget push \
+  #         nhs.notify.suppliers.api.data.${TEST_NUGET_VERSION}.nupkg \
+  #         --source github \
+  #         --api-key $GITHUB_TOKEN
+  #       env:
+  #         TEST_NUGET_VERSION: ${{ steps.set-nuget-version.outputs.TEST_NUGET_VERSION }}
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  ### PUBLISH LIBS host NUGET
-  publishlibdatanuget:
-    name: "Publish libs host packages to nuget.pkg.github.com"
-    runs-on: ubuntu-latest
-    needs: [publish]
-    permissions:
-      packages: write
-      contents: read
-    steps:
-      - name: "Get the artefacts"
-        uses: actions/download-artifact@v5
-        with:
-          path: .
-          name: libs-host-${{ inputs.version }}
-      - run: |
-          ls -la
-          find . -name ".version"
-      - run: |
-          dotnet nuget add source \
-          --username nhs-notify-supplier-api \
-          --password ${{ secrets.GITHUB_TOKEN }} \
-          --store-password-in-clear-text \
-          --name github \
-          "https://nuget.pkg.github.com/NHSDigital/index.json"
-      - run: |
-          echo "ROOT .version file is: $(cat .version)"
-          echo "GH variable version is: ${{ inputs.version }}"
-        name: Showing the base versions
+  # ### PUBLISH LIBS host NUGET
+  # publishlibdatanuget:
+  #   name: "Publish libs host packages to nuget.pkg.github.com"
+  #   runs-on: ubuntu-latest
+  #   needs: [publish]
+  #   permissions:
+  #     packages: write
+  #     contents: read
+  #   steps:
+  #     - name: "Get the artefacts"
+  #       uses: actions/download-artifact@v5
+  #       with:
+  #         path: .
+  #         name: libs-host-${{ inputs.version }}
+  #     - run: |
+  #         ls -la
+  #         find . -name ".version"
+  #     - run: |
+  #         dotnet nuget add source \
+  #         --username nhs-notify-supplier-api \
+  #         --password ${{ secrets.GITHUB_TOKEN }} \
+  #         --store-password-in-clear-text \
+  #         --name github \
+  #         "https://nuget.pkg.github.com/NHSDigital/index.json"
+  #     - run: |
+  #         echo "ROOT .version file is: $(cat .version)"
+  #         echo "GH variable version is: ${{ inputs.version }}"
+  #       name: Showing the base versions
 
-      - run: |
-          VERSION=${{ inputs.version }}
-          SHORT_VERSION="$(echo $VERSION | rev | cut -d"." -f2-  | rev)"
-          NUGET_VERSION="$(echo "$VERSION" | tr + .)"
-          echo $VERSION
-          echo $SHORT_VERSION
-          echo $NUGET_VERSION
-          SHORT_NUGET_VERSION="$(echo $NUGET_VERSION | rev | cut -d"." -f2-  | rev)"
-          echo $SHORT_NUGET_VERSION
-          SHORTER_NUGET_VERSION="$(echo $SHORT_NUGET_VERSION | rev | cut -d"." -f2-  | rev)"
-          echo $SHORTER_NUGET_VERSION
-          TEST_NUGET_VERSION="$(echo $NUGET_VERSION | sed -E 's/.([^.]*)$/\1/')"
-          TEST_NUGET_VERSION="$(echo $TEST_NUGET_VERSION | sed -E 's/.([^.]*)$/\1/')"
-          echo $TEST_NUGET_VERSION
-          echo "TEST_NUGET_VERSION=$TEST_NUGET_VERSION" >> "$GITHUB_OUTPUT"
-        name: Set the nuget version
-        id: set-nuget-version
+  #     - run: |
+  #         VERSION=${{ inputs.version }}
+  #         SHORT_VERSION="$(echo $VERSION | rev | cut -d"." -f2-  | rev)"
+  #         NUGET_VERSION="$(echo "$VERSION" | tr + .)"
+  #         echo $VERSION
+  #         echo $SHORT_VERSION
+  #         echo $NUGET_VERSION
+  #         SHORT_NUGET_VERSION="$(echo $NUGET_VERSION | rev | cut -d"." -f2-  | rev)"
+  #         echo $SHORT_NUGET_VERSION
+  #         SHORTER_NUGET_VERSION="$(echo $SHORT_NUGET_VERSION | rev | cut -d"." -f2-  | rev)"
+  #         echo $SHORTER_NUGET_VERSION
+  #         TEST_NUGET_VERSION="$(echo $NUGET_VERSION | sed -E 's/.([^.]*)$/\1/')"
+  #         TEST_NUGET_VERSION="$(echo $TEST_NUGET_VERSION | sed -E 's/.([^.]*)$/\1/')"
+  #         echo $TEST_NUGET_VERSION
+  #         echo "TEST_NUGET_VERSION=$TEST_NUGET_VERSION" >> "$GITHUB_OUTPUT"
+  #       name: Set the nuget version
+  #       id: set-nuget-version
 
-      - run: |
-          dotnet nuget push \
-          nhs.notify.suppliers.api.host.${TEST_NUGET_VERSION}.nupkg \
-          --source github \
-          --api-key $GITHUB_TOKEN
-        env:
-          TEST_NUGET_VERSION: ${{ steps.set-nuget-version.outputs.TEST_NUGET_VERSION }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     - run: |
+  #         dotnet nuget push \
+  #         nhs.notify.suppliers.api.host.${TEST_NUGET_VERSION}.nupkg \
+  #         --source github \
+  #         --api-key $GITHUB_TOKEN
+  #       env:
+  #         TEST_NUGET_VERSION: ${{ steps.set-nuget-version.outputs.TEST_NUGET_VERSION }}
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  ### PUBLISH LIBS host docker
-  publishlibhostdocker:
-    name: "Publish libs host docker"
-    runs-on: ubuntu-latest
-    needs: [publish]
-    permissions:
-      packages: write
-      contents: read
-    steps:
-      - name: "Get the artefacts"
-        uses: actions/download-artifact@v5
-        with:
-          path: .
-          name: libs-host-docker-${{ inputs.version }}
+  # ### PUBLISH LIBS host docker
+  # publishlibhostdocker:
+  #   name: "Publish libs host docker"
+  #   runs-on: ubuntu-latest
+  #   needs: [publish]
+  #   permissions:
+  #     packages: write
+  #     contents: read
+  #   steps:
+  #     - name: "Get the artefacts"
+  #       uses: actions/download-artifact@v5
+  #       with:
+  #         path: .
+  #         name: libs-host-docker-${{ inputs.version }}
 
-      - run: |
-          ls -Rla
-          docker load --input myimage.tar
-          docker image ls -a
-          echo $CR_PAT | docker login ghcr.io -u nhs-notify-supplier-api --password-stdin
-          docker push ghcr.io/nhsdigital/libshostdocker:latest
-        env:
-          CR_PAT: ${{ secrets.GITHUB_TOKEN }}
+  #     - run: |
+  #         ls -Rla
+  #         docker load --input myimage.tar
+  #         docker image ls -a
+  #         echo $CR_PAT | docker login ghcr.io -u nhs-notify-supplier-api --password-stdin
+  #         docker push ghcr.io/nhsdigital/libshostdocker:latest
+  #       env:
+  #         CR_PAT: ${{ secrets.GITHUB_TOKEN }}
