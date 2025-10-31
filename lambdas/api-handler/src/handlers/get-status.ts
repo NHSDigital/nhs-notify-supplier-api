@@ -1,18 +1,14 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { Deps } from "../config/deps";
 import { ListBucketsCommand, S3Client } from "@aws-sdk/client-s3";
-import { validateCommonHeaders } from "../utils/validation";
 import { mapErrorToResponse } from "../mappers/error-mapper";
 
 export function createGetStatusHandler(deps: Deps): APIGatewayProxyHandler {
 
   return async(event) => {
 
-    const commonHeadersResult = validateCommonHeaders(event.headers, deps);
-
-    if (!commonHeadersResult.ok) {
-      return mapErrorToResponse(commonHeadersResult.error, commonHeadersResult.correlationId, deps.logger);
-    }
+    const correlationId = Object.entries(event.headers)
+      .find(([headerName, _]) => headerName.toLowerCase() === deps.env.APIM_CORRELATION_HEADER)?.[1];
 
     try {
       await deps.dbHealthcheck.check();
@@ -20,7 +16,7 @@ export function createGetStatusHandler(deps: Deps): APIGatewayProxyHandler {
 
       deps.logger.info({
         description: 'Healthcheck passed',
-        supplierId: commonHeadersResult.value.supplierId
+        correlationId
       });
 
       return {
@@ -28,7 +24,7 @@ export function createGetStatusHandler(deps: Deps): APIGatewayProxyHandler {
         body: '{}'
       };
     } catch (error) {
-      return mapErrorToResponse(error, commonHeadersResult.value.correlationId, deps.logger);
+      return mapErrorToResponse(error, correlationId || '', deps.logger);
     }
   }
 }

@@ -11,7 +11,7 @@ describe('API Lambda handler', () => {
   it('passes if S3 and DynamoDB are available', async() => {
 
     const event = makeApiGwEvent({path: '/_status',
-      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId', 'x-request-id': 'requestId'}
+      headers: {'Nhsd-Correlation-Id': 'correlationId'}
     });
 
     const getLetterDataHandler = createGetStatusHandler(getMockedDeps());
@@ -28,15 +28,14 @@ describe('API Lambda handler', () => {
     mockedDeps.s3Client.send = jest.fn().mockRejectedValue(new Error('unexpected error'));
 
     const event = makeApiGwEvent({path: '/_status',
-      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId', 'x-request-id': 'requestId'}
+      headers: {'Nhsd-Correlation-Id': 'correlationId'}
     });
 
     const getLetterDataHandler = createGetStatusHandler(mockedDeps);
     const result = await getLetterDataHandler(event,  mockDeep<Context>(), jest.fn());
 
-    expect(result).toEqual(expect.objectContaining({
-      statusCode: 500
-    }));
+    expect(result!.statusCode).toBe(500);
+    expect(JSON.parse(result!.body).errors[0].id).toBe('correlationId');
   });
 
 
@@ -45,28 +44,29 @@ describe('API Lambda handler', () => {
     mockedDeps.dbHealthcheck.check = jest.fn().mockRejectedValue(new Error('unexpected error'));
 
     const event = makeApiGwEvent({path: '/_status',
-      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId', 'x-request-id': 'requestId'}
+      headers: {'Nhsd-Correlation-Id': 'correlationId'}
     });
 
     const getLetterDataHandler = createGetStatusHandler(mockedDeps);
     const result = await getLetterDataHandler(event,  mockDeep<Context>(), jest.fn());
 
-    expect(result).toEqual(expect.objectContaining({
-      statusCode: 500
-    }));
+    expect(result!.statusCode).toBe(500);
+    expect(JSON.parse(result!.body).errors[0].id).toBe('correlationId');
   });
 
-  it('fails if request ID is absent', async() => {
+    it('allows the correlation ID to be absent', async() => {
+    const mockedDeps = getMockedDeps();
+    mockedDeps.dbHealthcheck.check = jest.fn().mockRejectedValue(new Error('unexpected error'));
+
     const event = makeApiGwEvent({path: '/_status',
-      headers: {'nhsd-supplier-id': 'supplier1', 'nhsd-correlation-id': 'correlationId'}
+      headers: {}
     });
 
-    const getLetterDataHandler = createGetStatusHandler(getMockedDeps());
+    const getLetterDataHandler = createGetStatusHandler(mockedDeps);
     const result = await getLetterDataHandler(event,  mockDeep<Context>(), jest.fn());
 
-    expect(result).toEqual(expect.objectContaining({
-      statusCode: 500
-    }));
+    expect(result!.statusCode).toBe(500);
+    expect(JSON.parse(result!.body).errors[0].id).toBeDefined();
   });
 
   function getMockedDeps(): jest.Mocked<Deps> {
