@@ -13,7 +13,7 @@
     "jest-mock-extended": "^4.0.0",
     "typescript": "^5.8.3"
   },
-  "name": "nhs-notify-supplier-api-data-generator",
+  "name": "nhs-notify-supplier-api-letter-test-data-utility",
   "private": true,
   "scripts": {
     "cli": "tsx ./src/cli/index.ts",
