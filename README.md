@@ -25,11 +25,11 @@ This repository documents the Supplier API specification and provides an SDK wit
     - [SDK Assets](#sdk-assets)
     - [Examples](#examples)
   - [API Developers](#api-developers)
-    - [Pre built servers](#pre-built-servers)
     - [Setup](#setup)
       - [Prerequisites and Configuration](#prerequisites-and-configuration)
         - [SDKs](#sdks)
     - [Build](#build)
+    - [Documentation](#documentation-1)
     - [GitHub Actions CI/CD](#github-actions-cicd)
       - [CI (Automatic)](#ci-automatic)
       - [CD (Manual)](#cd-manual)
@@ -68,11 +68,7 @@ TODO:CCM-11209 Links to example clients.
 
 ## API Developers
 
-New developer of the NHS Notify Supplier API should understand the below.
-
-### Pre built servers
-
-- OAS preview at [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html)
+New developers of the NHS Notify Supplier API should understand the below.
 
 ### Setup
 
@@ -114,6 +110,10 @@ make serve
 by default they will be available at [http://localhost:3050](http://localhost:3050)
 
 These are generated using [https://hub.docker.com/r/openapitools/openapi-generator-cli](https://hub.docker.com/r/openapitools/openapi-generator-cli)
+
+### Documentation
+
+- You can preview the OAS locally by running `make serve-oas`
 
 ### GitHub Actions CI/CD
 
