@@ -8,7 +8,7 @@
     "serve": "^14.2.4"
   },
   "devDependencies": {
-    "@openapitools/openapi-generator-cli": "^2.21.4",
+    "@openapitools/openapi-generator-cli": "^2.25.0",
     "@redocly/cli": "^2.8.0",
     "@tsconfig/node22": "^22.0.2",
     "@types/jest": "^30.0.0",
