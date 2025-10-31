@@ -1,4 +1,4 @@
-import { envName, LETTERSTABLENAME, supplierId } from "../constants/api_constants";
+import { envName, LETTERSTABLENAME, SUPPLIERID } from "../constants/api_constants";
 import { runCreateLetter } from "./pnpmHelpers";
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DeleteCommand, DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb';
@@ -62,7 +62,7 @@ export const deleteLettersBySupplier = async(id: string) => {
   const resp = await docClient.send(
     new DeleteCommand({
       TableName: LETTERSTABLENAME,
-      Key: { supplierId, id },
+      Key: { supplierId: SUPPLIERID, id },
       ReturnValues: 'ALL_OLD',
     })
   )

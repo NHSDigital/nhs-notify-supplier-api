@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { SUPPLIER_LETTERS, supplierId } from '../../constants/api_constants';
+import { SUPPLIER_LETTERS, SUPPLIERID } from '../../constants/api_constants';
 import { getRestApiGatewayBaseUrl } from '../../helpers/awsGatewayHelper';
 import { patch400ErrorResponseBody, patch500ErrorResponseBody, patchFailureRequestBody, patchRequestHeaders, patchValidRequestBody } from './testCases/UpdateLetterStatus';
 import { createTestData, deleteLettersBySupplier, getLettersBySupplier } from '../../helpers/generate_fetch_testData';
@@ -15,11 +15,11 @@ test.beforeAll(async () => {
 test.describe('API Gateway Tests to Verify Patch Status Endpoint', () => {
     test(`Patch /letters returns 200 and status is updated to ACCEPTED`, async ({ request }) => {
 
-      await createTestData(supplierId);
-      const letters = await getLettersBySupplier(supplierId, 'PENDING', 1);
+      await createTestData(SUPPLIERID);
+      const letters = await getLettersBySupplier(SUPPLIERID, 'PENDING', 1);
 
       if (!letters?.length) {
-        test.fail(true, `No PENDING letters found for supplier ${supplierId}`);
+        test.fail(true, `No PENDING letters found for supplier ${SUPPLIERID}`);
         return;
       }
       const letter = letters[0];
@@ -50,11 +50,11 @@ test.describe('API Gateway Tests to Verify Patch Status Endpoint', () => {
 
   test(`Patch /letters returns 200 and status is updated to REJECTED`, async ({ request }) => {
 
-      await createTestData(supplierId);
-      const letters = await getLettersBySupplier(supplierId, 'PENDING', 1);
+      await createTestData(SUPPLIERID);
+      const letters = await getLettersBySupplier(SUPPLIERID, 'PENDING', 1);
 
       if (!letters?.length) {
-        test.fail(true, `No PENDING letters found for supplier ${supplierId}`);
+        test.fail(true, `No PENDING letters found for supplier ${SUPPLIERID}`);
         return;
       }
       const letter = letters[0];
