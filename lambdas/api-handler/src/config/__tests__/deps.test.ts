@@ -1,4 +1,3 @@
-
 import type { Deps } from '../deps';
 
 describe('createDependenciesContainer', () => {
@@ -36,6 +35,7 @@ describe('createDependenciesContainer', () => {
     jest.mock('@internal/datastore', () => ({
       LetterRepository: jest.fn(),
       MIRepository: jest.fn(),
+      DBHealthcheck: jest.fn()
     }));
 
     // Env

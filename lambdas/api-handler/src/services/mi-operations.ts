@@ -1,4 +1,4 @@
-import { MIRepository } from "../../../../internal/datastore/src/mi-repository";
+import { MIRepository } from "@internal/datastore/src/mi-repository";
 import { IncomingMI, PostMIResponse } from "../contracts/mi";
 import { mapToPostMIResponse } from "../mappers/mi-mapper";
 
