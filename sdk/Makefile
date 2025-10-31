@@ -8,6 +8,7 @@ build: version # Build the project artefact @Pipeline
 
 clean: # Clean-up project resources (main) @Operations
 	rm -rf */
+
 swagger:
 	./swagger.sh
 

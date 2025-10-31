@@ -9,6 +9,7 @@ terraform-docs 0.19.0
 trivy 0.61.0
 vale 3.6.0
 poetry 2.1.4
+java openjdk-25.0.1
 
 # ==============================================================================
 # The section below is reserved for Docker image versions.

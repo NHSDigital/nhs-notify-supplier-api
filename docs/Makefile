@@ -1,6 +1,7 @@
 BASE_URL ?= "/"
 VERSION ?= ""
 SHELL = /bin/bash
+SDK_DIR := ../sdk
 
 default: install
 
@@ -19,10 +20,12 @@ define baseurlparam =
 $(if $(BASE_URL),-- --baseurl $(BASE_URL),-- --baseurl "")
 endef
 
-build: version .generate-includes
+build: version .generate-includes $(SDK_DIR)/build
+	rsync -a --delete $(SDK_DIR)/swagger/ ./assets/swagger
 	npm run build $(baseurlparam)
 
-debug: version .generate-includes
+debug: version .generate-includes $(SDK_DIR)/build
+	rsync -a --delete $(SDK_DIR)/swagger/ ./assets/swagger
 	npm run debug
 
 version:
@@ -41,3 +44,6 @@ version:
 
 .generate-includes:
 	npm run generate-includes
+
+$(SDK_DIR)/build:
+	$(MAKE) -C $(SDK_DIR) build

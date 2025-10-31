@@ -11,10 +11,11 @@ dependencies: # Install dependencies needed to build and test the project @Pipel
 	# TODO: Implement installation of your project dependencies
 
 build: # Build the project artefact @Pipeline
-	(cd server && make build)
 	(cd sdk && make build)
 	(cd docs && make build)
-	(cd src/server && make build)
+# Take out for now - might add again in the future
+# (cd server && make build)
+#	(cd src/server && make build)
 publish: # Publish the project artefact @Pipeline
 	# TODO: Implement the artefact publishing step
 
@@ -24,8 +25,9 @@ deploy: # Deploy the project artefact to the target environment @Pipeline
 clean:: # Clean-up project resources (main) @Operations
 	rm -f .version
 	(cd sdk && make clean)
-	(cd server && make clean)
-	(cd src/server && make clean)
+# Take out for now - might add again in the future
+# (cd server && make clean)
+# (cd src/server && make clean)
 
 guard-%:
 	@ if [ "${${*}}" = "" ]; then \

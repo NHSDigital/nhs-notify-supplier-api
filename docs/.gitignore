@@ -10,3 +10,4 @@ _config.version.yml
 
 # Generated or copied from other repo resources
 _includes/components/generated/*
+assets/swagger/*
