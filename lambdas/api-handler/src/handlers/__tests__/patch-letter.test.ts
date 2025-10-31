@@ -21,7 +21,7 @@ import { ValidationError } from '../../errors';
 import * as errors from '../../contracts/errors';
 import { S3Client } from '@aws-sdk/client-s3';
 import pino from 'pino';
-import { LetterRepository } from '../../../../../internal/datastore/src';
+import { LetterRepository } from '@internal/datastore/src';
 import { EnvVars } from '../../config/env';
 import { createPatchLetterHandler } from '../patch-letter';
 import { Deps } from "../../config/deps";
@@ -47,17 +47,17 @@ describe('patchLetter API Handler', () => {
   });
 
   const mockedDeps: jest.Mocked<Deps> = {
-    s3Client: {} as unknown as S3Client,
-    letterRepo: {} as unknown as LetterRepository,
-    logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
-    env: {
-      SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
-      APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
-      LETTERS_TABLE_NAME: 'LETTERS_TABLE_NAME',
-      LETTER_TTL_HOURS: 12960,
-      DOWNLOAD_URL_TTL_SECONDS: 60
-    } as unknown as EnvVars
-  }
+      s3Client: {} as unknown as S3Client,
+      letterRepo: {} as unknown as LetterRepository,
+      logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
+      env: {
+        SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
+        APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
+        LETTERS_TABLE_NAME: 'LETTERS_TABLE_NAME',
+        LETTER_TTL_HOURS: 12960,
+        DOWNLOAD_URL_TTL_SECONDS: 60
+      } as unknown as EnvVars
+    } as Deps;
 
   it('returns 200 OK with updated resource', async () => {
     const event = makeApiGwEvent({

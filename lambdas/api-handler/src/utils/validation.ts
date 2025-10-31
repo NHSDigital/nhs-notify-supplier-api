@@ -60,3 +60,27 @@ export function validateCommonHeaders(headers: APIGatewayProxyEventHeaders, deps
 
   return { ok: true, value: { correlationId, supplierId } };
 }
+
+export function validateIso8601Timestamp(timestamp: string) {
+
+  function normalisePrecision([_, mainPart, fractionalPart='.000']: string[]) : string {
+    if (fractionalPart.length < 4) {
+      return mainPart + fractionalPart + '0'.repeat(4 - fractionalPart.length) + 'Z';
+    } else {
+      return mainPart + fractionalPart.slice(0, 4) + 'Z';
+    }
+  }
+
+  const groups = timestamp.match(/(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(.\d+)?Z/);
+  if (!groups)  {
+    throw new ValidationError(ApiErrorDetail.InvalidRequestTimestamp);
+  }
+  const date = new Date(timestamp);
+  // An invalid month (e.g. '2025-16-10T00:00:00Z') will result in new Date(timestamp).valueOf() returning NaN.
+  // An invalid day of month (e.g. '2025-02-31T00:00:00Z') will roll over into the following month, but we can
+  // detect that by comparing date.toISOString() with the original timestamp string. We need to normalise the
+  // original string to millisecond precision to make this work.
+  if (Number.isNaN(new Date(timestamp).valueOf()) || date.toISOString() != normalisePrecision(groups)) {
+      throw new ValidationError(ApiErrorDetail.InvalidRequestTimestamp);
+  }
+}

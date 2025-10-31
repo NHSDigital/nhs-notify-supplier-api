@@ -1,5 +1,5 @@
 import { mapToGetLetterResponse, mapToGetLettersResponse, mapToPatchLetterResponse } from '../letter-mapper';
-import { Letter } from '../../../../../internal/datastore';
+import { Letter } from '@internal/datastore';
 import { GetLetterResponse, GetLettersResponse, PatchLetterResponse } from '../../contracts/letters';
 
 describe('letter-mapper', () => {

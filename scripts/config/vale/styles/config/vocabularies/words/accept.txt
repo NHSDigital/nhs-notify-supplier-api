@@ -31,6 +31,7 @@ relative_url
 repo
 SDK
 sed
+semver
 src
 Syft
 Terraform
