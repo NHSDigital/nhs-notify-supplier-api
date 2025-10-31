@@ -6,8 +6,6 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { Supplier, SupplierSchema } from './types';
 import { Logger } from 'pino';
-import { v4 as uuidv4 } from 'uuid';
-import z from 'zod';
 
 export type SupplierRepositoryConfig = {
   suppliersTableName: string
