@@ -5,18 +5,14 @@ import { mapErrorToResponse } from "../mappers/error-mapper";
 
 export function createGetStatusHandler(deps: Deps): APIGatewayProxyHandler {
 
-  return async(event) => {
-
-    const correlationId = Object.entries(event.headers)
-      .find(([headerName, _]) => headerName.toLowerCase() === deps.env.APIM_CORRELATION_HEADER)?.[1];
+  return async(_) => {
 
     try {
       await deps.dbHealthcheck.check();
       await s3HealthCheck(deps.s3Client);
 
       deps.logger.info({
-        description: 'Healthcheck passed',
-        correlationId
+        description: 'Healthcheck passed'
       });
 
       return {
@@ -24,7 +20,7 @@ export function createGetStatusHandler(deps: Deps): APIGatewayProxyHandler {
         body: '{}'
       };
     } catch (error) {
-      return mapErrorToResponse(error, correlationId || '', deps.logger);
+      return mapErrorToResponse(error, undefined, deps.logger);
     }
   }
 }

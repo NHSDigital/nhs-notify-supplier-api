@@ -11,7 +11,7 @@ describe('API Lambda handler', () => {
   it('passes if S3 and DynamoDB are available', async() => {
 
     const event = makeApiGwEvent({path: '/_status',
-      headers: {'Nhsd-Correlation-Id': 'correlationId'}
+      headers: undefined
     });
 
     const getLetterDataHandler = createGetStatusHandler(getMockedDeps());
@@ -28,14 +28,15 @@ describe('API Lambda handler', () => {
     mockedDeps.s3Client.send = jest.fn().mockRejectedValue(new Error('unexpected error'));
 
     const event = makeApiGwEvent({path: '/_status',
-      headers: {'Nhsd-Correlation-Id': 'correlationId'}
+      headers: undefined
     });
 
     const getLetterDataHandler = createGetStatusHandler(mockedDeps);
     const result = await getLetterDataHandler(event,  mockDeep<Context>(), jest.fn());
 
-    expect(result!.statusCode).toBe(500);
-    expect(JSON.parse(result!.body).errors[0].id).toBe('correlationId');
+    expect(result).toEqual(expect.objectContaining({
+      statusCode: 500
+    }));
   });
 
 
@@ -50,24 +51,11 @@ describe('API Lambda handler', () => {
     const getLetterDataHandler = createGetStatusHandler(mockedDeps);
     const result = await getLetterDataHandler(event,  mockDeep<Context>(), jest.fn());
 
-    expect(result!.statusCode).toBe(500);
-    expect(JSON.parse(result!.body).errors[0].id).toBe('correlationId');
+    expect(result).toEqual(expect.objectContaining({
+      statusCode: 500
+    }));
   });
 
-    it('allows the correlation ID to be absent', async() => {
-    const mockedDeps = getMockedDeps();
-    mockedDeps.dbHealthcheck.check = jest.fn().mockRejectedValue(new Error('unexpected error'));
-
-    const event = makeApiGwEvent({path: '/_status',
-      headers: {}
-    });
-
-    const getLetterDataHandler = createGetStatusHandler(mockedDeps);
-    const result = await getLetterDataHandler(event,  mockDeep<Context>(), jest.fn());
-
-    expect(result!.statusCode).toBe(500);
-    expect(JSON.parse(result!.body).errors[0].id).toBeDefined();
-  });
 
   function getMockedDeps(): jest.Mocked<Deps> {
     return {
