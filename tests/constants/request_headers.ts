@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { supplierId } from './api_constants';
+import { SUPPLIERID } from './api_constants';
 
 export const sandBoxHeader: RequestSandBoxHeaders = {
     'X-Request-ID': randomUUID(),
@@ -25,7 +25,7 @@ export function createInvalidRequestHeaders(): RequestHeaders {
   let requestHeaders: RequestHeaders;
     requestHeaders = {
         headerauth1: '',
-        'NHSD-Supplier-ID': supplierId,
+        'NHSD-Supplier-ID': SUPPLIERID,
         'NHSD-Correlation-ID': '1234',
         'X-Request-ID': 'requestId1'
     };
@@ -36,7 +36,7 @@ export function createHeaderWithNoCorrelationId(): RequestHeaders {
   let requestHeaders: RequestHeaders;
     requestHeaders = {
         headerauth1: process.env.HEADERAUTH || '',
-        'NHSD-Supplier-ID': supplierId,
+        'NHSD-Supplier-ID': SUPPLIERID,
         'NHSD-Correlation-ID': '',
         'X-Request-ID': 'requestId1'
     };
@@ -47,9 +47,20 @@ export function createValidRequestHeaders(): RequestHeaders{
   let requestHeaders: RequestHeaders;
     requestHeaders = {
         headerauth1: process.env.HEADERAUTH || '',
-        'NHSD-Supplier-ID': supplierId,
+        'NHSD-Supplier-ID': SUPPLIERID,
         'NHSD-Correlation-ID': '12345',
         'X-Request-ID': 'requestId1'
+    };
+  return requestHeaders;
+}
+
+export function createHeaderWithNoRequestId(): RequestHeaders {
+  let requestHeaders: RequestHeaders;
+    requestHeaders = {
+        headerauth1: process.env.HEADERAUTH || '',
+        'NHSD-Supplier-ID': SUPPLIERID,
+        'NHSD-Correlation-ID': '1234',
+        'X-Request-ID': ''
     };
   return requestHeaders;
 }
