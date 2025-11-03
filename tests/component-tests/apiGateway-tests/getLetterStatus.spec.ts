@@ -26,10 +26,10 @@ test.describe('API Gateway Tests to Verify Get Letter Status Endpoint', () => {
                   headers: headers,
               });
 
-            const res = await response.json();
+            const responseBody = await response.json();
 
             expect(response.status()).toBe(200);
-            expect(res).toMatchObject({
+            expect(responseBody).toMatchObject({
               data:{
                 attributes: {
                     status: 'PENDING',
@@ -50,9 +50,9 @@ test.describe('API Gateway Tests to Verify Get Letter Status Endpoint', () => {
             headers: headers,
         });
 
-        const res = await response.json();
+        const responseBody = await response.json();
         expect(response.status()).toBe(404);
-        expect(res).toMatchObject(error404ResponseBody());
+        expect(responseBody).toMatchObject(error404ResponseBody());
     });
 
     test(`Get /letters/{id} returns 500 if letter is not found for supplierId ${SUPPLIERID}`, async ({ request }) =>
@@ -63,9 +63,9 @@ test.describe('API Gateway Tests to Verify Get Letter Status Endpoint', () => {
             headers: headers,
         });
 
-        const res = await response.json();
+        const responseBody = await response.json();
         expect(response.status()).toBe(500);
-        expect(res).toMatchObject(error500ResponseBody(id));
+        expect(responseBody).toMatchObject(error500ResponseBody(id));
     });
 
 });

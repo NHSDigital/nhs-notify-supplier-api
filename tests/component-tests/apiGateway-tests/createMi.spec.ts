@@ -2,9 +2,9 @@ import {test, expect} from '@playwright/test';
 import { getRestApiGatewayBaseUrl } from "../../helpers/awsGatewayHelper";
 import { MI_ENDPOINT } from '../../constants/api_constants';
 import { createHeaderWithNoCorrelationId, createHeaderWithNoRequestId, createInvalidRequestHeaders, createValidRequestHeaders } from '../../constants/request_headers';
-import { miInValidRequest, miValidRequest } from './testCases/createMi';
+import { miInvalidDateRequest, miInvalidRequest, miValidRequest } from './testCases/createMi';
 import { time } from 'console';
-import { error400ResponseBody, error404ResponseBody, RequestId500Error } from '../../helpers/commonTypes';
+import { error400InvalidDate, error400ResponseBody, error403ResponseBody, error404ResponseBody, requestId500Error } from '../../helpers/commonTypes';
 
 let baseUrl: string;
 
@@ -23,9 +23,9 @@ test.describe('API Gateway Tests to Verify Mi Endpoint', () => {
           data: body
       });
 
-        const res = await response.json();
+        const responseBody = await response.json();
         expect(response.status()).toBe(201);
-        expect(res.data.attributes).toMatchObject({
+        expect(responseBody.data.attributes).toMatchObject({
             groupId: 'group123',
             lineItem: 'envelope-business-standard',
             quantity: 10,
@@ -33,24 +33,24 @@ test.describe('API Gateway Tests to Verify Mi Endpoint', () => {
             stockRemaining: 100,
             timestamp: body.data.attributes.timestamp,
         });
-        expect(res.data.type).toBe('ManagementInformation');
+        expect(responseBody.data.type).toBe('ManagementInformation');
   });
 
     test(`Post /mi returns 400 when a invalid request is passed`, async ({ request }) => {
         const headers = createValidRequestHeaders();
-        const body = miInValidRequest();
+        const body = miInvalidRequest();
 
         const response = await request.post(`${baseUrl}/${MI_ENDPOINT}`, {
             headers: headers,
             data: body
         });
 
-        const res = await response.json();
+        const responseBody = await response.json();
         expect(response.status()).toBe(400);
-        expect(res).toMatchObject(error400ResponseBody());
+        expect(responseBody).toMatchObject(error400ResponseBody());
     });
 
-    test(`Post /mi returns 403 when a invalid request is passed`, async ({ request }) => {
+    test(`Post /mi returns 403 when a authentication header is not passed`, async ({ request }) => {
         const headers = createInvalidRequestHeaders();
         const body = miValidRequest();
 
@@ -59,11 +59,9 @@ test.describe('API Gateway Tests to Verify Mi Endpoint', () => {
             data: body
         });
 
-        const res = await response.json();
+        const responseBody = await response.json();
         expect(response.status()).toBe(403);
-        expect(res).toMatchObject({
-          Message : 'User is not authorized to access this resource with an explicit deny in an identity-based policy' }
-        );
+        expect(responseBody).toMatchObject(error403ResponseBody());
     });
 
     test(`Post /mi returns 500 when a correlationId is not passed`, async ({ request }) => {
@@ -89,9 +87,23 @@ test.describe('API Gateway Tests to Verify Mi Endpoint', () => {
             data: body
         });
 
-        const res = await response.json();
+        const responseBody = await response.json();
         expect(response.status()).toBe(500);
-        expect(res).toMatchObject(RequestId500Error());
+        expect(responseBody).toMatchObject(requestId500Error());
+    });
+
+    test(`Post /mi returns 400 when a invalid Date is passed`, async ({ request }) => {
+        const headers = createValidRequestHeaders();
+        const body = miInvalidDateRequest();
+
+        const response = await request.post(`${baseUrl}/${MI_ENDPOINT}`, {
+            headers: headers,
+            data: body
+        });
+
+        const responseBody = await response.json();
+        expect(response.status()).toBe(400);
+        expect(responseBody).toMatchObject(error400InvalidDate());
     });
 
 

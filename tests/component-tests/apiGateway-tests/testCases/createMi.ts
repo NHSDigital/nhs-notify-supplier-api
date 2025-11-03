@@ -33,7 +33,7 @@ export function miValidRequest() : MiRequestBody{
   return requestBody;
 }
 
-export function miInValidRequest() : MiRequestBody{
+export function miInvalidRequest() : MiRequestBody{
   let requestBody: MiRequestBody;
 
   requestBody = {
@@ -47,6 +47,24 @@ export function miInValidRequest() : MiRequestBody{
         timestamp: new Date().toISOString(),
       },
       type: '?',
+  }};
+  return requestBody;
+}
+
+export function miInvalidDateRequest() : MiRequestBody{
+  let requestBody: MiRequestBody;
+
+  requestBody = {
+    data: {
+       attributes: {
+        groupId: 'group123',
+        lineItem: 'envelope-business-standard',
+        quantity: 10,
+        specificationId: 'Test-Spec-Id',
+        stockRemaining: 100,
+        timestamp: '2021-10-28T',
+      },
+      type: 'ManagementInformation',
   }};
   return requestBody;
 }
