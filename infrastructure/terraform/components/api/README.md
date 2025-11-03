@@ -11,6 +11,7 @@ No requirements.
 |------|-------------|------|---------|:--------:|
 | <a name="input_aws_account_id"></a> [aws\_account\_id](#input\_aws\_account\_id) | The AWS Account ID (numeric) | `string` | n/a | yes |
 | <a name="input_ca_pem_filename"></a> [ca\_pem\_filename](#input\_ca\_pem\_filename) | Filename for the CA truststore file within the s3 bucket | `string` | `null` | no |
+| <a name="input_commit_id"></a> [commit\_id](#input\_commit\_id) | The commit to deploy. Must be in the tree for branch\_name | `string` | `"HEAD"` | no |
 | <a name="input_component"></a> [component](#input\_component) | The variable encapsulating the name of this component | `string` | `"supapi"` | no |
 | <a name="input_default_tags"></a> [default\_tags](#input\_default\_tags) | A map of default tags to apply to all taggable resources within the component | `map(string)` | `{}` | no |
 | <a name="input_enable_backups"></a> [enable\_backups](#input\_enable\_backups) | Enable backups | `bool` | `false` | no |
@@ -48,6 +49,7 @@ No requirements.
 | Name | Description |
 |------|-------------|
 | <a name="output_api_urll"></a> [api\_urll](#output\_api\_urll) | n/a |
+| <a name="output_deployment"></a> [deployment](#output\_deployment) | Deployment details used for post-deployment scripts |
 <!-- vale on -->
 <!-- markdownlint-enable -->
 <!-- END_TF_DOCS -->
