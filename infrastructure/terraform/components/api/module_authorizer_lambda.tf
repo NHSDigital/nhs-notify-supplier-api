@@ -30,4 +30,24 @@ module "authorizer_lambda" {
   send_to_firehose          = true
   log_destination_arn       = local.destination_arn
   log_subscription_role_arn = local.acct.log_subscription_role_arn
+
+  lambda_env_vars = {
+    CLOUDWATCH_NAMESPACE                     = "/aws/api-gateway/supplier/alarms"
+    CLIENT_CERTIFICATE_EXPIRATION_ALERT_DAYS = 14
+  }
+}
+
+data "aws_iam_policy_document" "authorizer_lambda" {
+  statement {
+    sid    = "AllowPutMetricData"
+    effect = "Allow"
+
+    actions = [
+      "cloudwatch:PutMetricData"
+    ]
+
+    resources = [
+      "*"
+    ]
+  }
 }

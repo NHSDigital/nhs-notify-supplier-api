@@ -1,6 +1,9 @@
 {
   "dependencies": {
-    "esbuild": "^0.25.11"
+    "@aws-sdk/client-cloudwatch": "^3.922.0",
+    "esbuild": "^0.25.11",
+    "pino": "^10.1.0",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.2",
