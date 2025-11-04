@@ -34,7 +34,7 @@ export function createAuthorizerHandler(deps: Deps): APIGatewayRequestAuthorizer
         callback(null, generateAllow('me', event.methodArn, supplier.id));
       })
       .catch((error) => {
-        deps.logger.info('Deny event', {error});
+        deps.logger.info({error}, 'Deny event');
         callback(null, generateDeny('me', event.methodArn));
       });
   };
@@ -43,7 +43,7 @@ export function createAuthorizerHandler(deps: Deps): APIGatewayRequestAuthorizer
 
 function extractApimId(headers: APIGatewayRequestAuthorizerEventHeaders | null, deps: Deps): string {
   const apimId = Object.entries(headers || {})
-    .find(([headerName, _]) => headerName.toLowerCase() === deps.env.APIM_APPLICATION_ID_HEADER)?.[1];
+    .find(([headerName, _]) => headerName.toLowerCase() === deps.env.APIM_APPLICATION_ID_HEADER)?.[1] as string;
 
     if(!apimId) {
       throw new Error("No APIM application ID found in header");
