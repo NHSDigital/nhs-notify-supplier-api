@@ -49,7 +49,6 @@ runs:
       run: |
         make build VERSION="${{ inputs.version }}"
 
-
     - name: Upload API OAS specification artifact
       uses: actions/upload-artifact@v4
       with:
@@ -85,13 +84,6 @@ runs:
       with:
         path: "sdk/csharp"
         name: sdk-csharp-${{ inputs.version }}
-
-    # - name: Upload artifact
-    #   # Automatically uploads an artifact from the './_site' directory by default
-    #   uses: actions/upload-pages-artifact@v3
-    #   with:
-    #     path: "docs/_site/"
-    #     name: jekyll-docs-${{ inputs.version }}
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3

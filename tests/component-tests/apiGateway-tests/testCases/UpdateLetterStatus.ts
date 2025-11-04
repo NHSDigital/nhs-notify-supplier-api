@@ -1,6 +1,6 @@
 
 import { RequestHeaders } from '../../../constants/request_headers';
-import { supplierId } from '../../../constants/api_constants';
+import { SUPPLIERID } from '../../../constants/api_constants';
 import { ErrorMessageBody } from '../../../helpers/commonTypes';
 
 export type PatchMessageRequestBody = {
@@ -33,7 +33,7 @@ export function patchRequestHeaders(): RequestHeaders {
   let requestHeaders: RequestHeaders;
     requestHeaders = {
         headerauth1: process.env.HEADERAUTH || '',
-        'NHSD-Supplier-ID': supplierId,
+        'NHSD-Supplier-ID': SUPPLIERID,
         'NHSD-Correlation-ID': '12344',
         'X-Request-ID': 'requestId1'
     };
@@ -106,7 +106,7 @@ export function patch500ErrorResponseBody (id: string) : ErrorMessageBody{
             },
             status: "500",
             title: "Internal server error",
-            detail: `Letter with id ${id} not found for supplier ${supplierId}`
+            detail: `Letter with id ${id} not found for supplier ${SUPPLIERID}`
         }
     ]
   };
