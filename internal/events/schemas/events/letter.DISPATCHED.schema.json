@@ -82,16 +82,9 @@
       "pattern": "^https:\\/\\/notify\\.nhs\\.uk\\/cloudevents\\/schemas\\/supplier-api\\/letter.DISPATCHED.1\\.\\d+\\.\\d+\\.schema.json$"
     },
     "data": {
-      "title": "Letter",
-      "description": "The status of a letter in the supplier-api domain.\n\nThis will include the current production status, any reason provided for the status, if applicable, and identifiers used for grouping in reports.\n\nFor this event the status is always `DISPATCHED`",
       "type": "object",
       "properties": {
         "domainId": {
-          "title": "Letter ID",
-          "description": "Unique identifier for the Letter",
-          "examples": [
-            "1y3q9v1zzzz"
-          ],
           "type": "string"
         },
         "origin": {
