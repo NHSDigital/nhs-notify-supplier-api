@@ -105,7 +105,7 @@ The mandatory statuses are: **ACCEPTED**, **REJECTED**, **FORWARDED**, **DISPATC
 - **CANCELLED:** The letter was cancelled following a request from the NHS Notify team
 
 **Optional statuses** - additional, non-mandatory updates that can provide greater operational insight.
-The optional statuses are: **PRINTED**, **ENCLOSED**, **DELIVERED**, and **DESTROYED**.
+The optional statuses are: **PRINTED**, **ENCLOSED**, and **DELIVERED**.
 These can be used if your internal workflow supports more granular reporting.
 
 - **PRINTED:** The letter has been printed.
