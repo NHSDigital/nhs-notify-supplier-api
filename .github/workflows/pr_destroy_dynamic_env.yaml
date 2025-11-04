@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  create-dynamic-environment:
+  destroy-dynamic-environment:
     name: Destroy Dynamic Environment
     runs-on: ubuntu-latest
 
@@ -32,3 +32,25 @@ jobs:
             --terraformAction "destroy" \
             --overrideProjectName "nhs" \
             --overrideRoleName "nhs-main-acct-supplier-api-github-deploy"
+
+  destroy-dynamic-proxy:
+    name: Destroy Dynamic Proxy
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Trigger dynamic proxy destruction
+        env:
+          APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
+          APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
+        shell: bash
+        run: |
+          .github/scripts/dispatch_internal_repo_workflow.sh \
+          --infraRepoName "nhs-notify-supplier-api" \
+          --releaseVersion "main" \
+          --targetComponent "api" \
+          --targetWorkflow "proxy-destroy.yaml" \
+          --targetEnvironment "pr${{ github.event.number }}" \
+          --apimEnvironment "internal-dev-sandbox" \
+          --boundedContext "notify-supplier"
