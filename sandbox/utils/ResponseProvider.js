@@ -76,16 +76,16 @@ async function getLettersResponse(limit) {
 
 async function patchLetterResponse(request) {
   const patchLetterFileMap = {
-    'data/examples/patchLetter/requests/patchLetter_PENDING.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_PENDING.json',responseCode: 200},
-    'data/examples/patchLetter/requests/patchLetter_ACCEPTED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_ACCEPTED.json',responseCode: 200},
-    'data/examples/patchLetter/requests/patchLetter_REJECTED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_REJECTED.json',responseCode: 200},
-    'data/examples/patchLetter/requests/patchLetter_PRINTED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_PRINTED.json',responseCode: 200},
-    'data/examples/patchLetter/requests/patchLetter_ENCLOSED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_ENCLOSED.json',responseCode: 200},
-    'data/examples/patchLetter/requests/patchLetter_CANCELLED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_CANCELLED.json',responseCode: 200},
-    'data/examples/patchLetter/requests/patchLetter_DISPATCHED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_DISPATCHED.json',responseCode: 200},
-    'data/examples/patchLetter/requests/patchLetter_DELIVERED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_DELIVERED.json',responseCode: 200},
-    'data/examples/patchLetter/requests/patchLetter_FAILED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_FAILED.json',responseCode: 200},
-    'data/examples/patchLetter/requests/patchLetter_RETURNED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_RETURNED.json',responseCode: 200},
+    'data/examples/patchLetter/requests/patchLetter_PENDING.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_PENDING.json',responseCode: 202},
+    'data/examples/patchLetter/requests/patchLetter_ACCEPTED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_ACCEPTED.json',responseCode: 202},
+    'data/examples/patchLetter/requests/patchLetter_REJECTED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_REJECTED.json',responseCode: 202},
+    'data/examples/patchLetter/requests/patchLetter_PRINTED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_PRINTED.json',responseCode: 202},
+    'data/examples/patchLetter/requests/patchLetter_ENCLOSED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_ENCLOSED.json',responseCode: 202},
+    'data/examples/patchLetter/requests/patchLetter_CANCELLED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_CANCELLED.json',responseCode: 202},
+    'data/examples/patchLetter/requests/patchLetter_DISPATCHED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_DISPATCHED.json',responseCode: 202},
+    'data/examples/patchLetter/requests/patchLetter_DELIVERED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_DELIVERED.json',responseCode: 202},
+    'data/examples/patchLetter/requests/patchLetter_FAILED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_FAILED.json',responseCode: 202},
+    'data/examples/patchLetter/requests/patchLetter_RETURNED.json': {responsePath:'data/examples/patchLetter/responses/patchLetter_RETURNED.json',responseCode: 202},
     'data/examples/patchLetter/requests/patchLetter_INVALID.json': {responsePath:'data/examples/errors/responses/badRequest.json',responseCode: 400},
     'data/examples/patchLetter/requests/patchLetter_NOTFOUND.json': {responsePath:'data/examples/errors/responses/resourceNotFound.json',responseCode: 404},
   };
