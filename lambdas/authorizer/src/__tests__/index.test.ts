@@ -8,10 +8,14 @@ const mockedDeps: jest.Mocked<Deps> = {
     logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
     env: {
       CLOUDWATCH_NAMESPACE: 'cloudwatch-namespace',
-      CLIENT_CERTIFICATE_EXPIRATION_ALERT_DAYS: 14
+      CLIENT_CERTIFICATE_EXPIRATION_ALERT_DAYS: 14,
+      APIM_APPLICATION_ID_HEADER: 'apim-application-id'
     } as unknown as EnvVars,
     cloudWatchClient: {
       send: jest.fn().mockResolvedValue({}),
+    } as any,
+    supplierRepo: {
+      getSupplierByApimId: jest.fn(),
     } as any,
   } as Deps;
 
@@ -34,100 +38,6 @@ describe('Authorizer Lambda Function', () => {
     mockCallback = jest.fn();
   });
 
-  it('Should allow access when headers match', async() => {
-    mockEvent.headers = { headerauth1: 'headervalue1' };
-
-    const handler = createAuthorizerHandler(mockedDeps);
-    handler(mockEvent, mockContext, mockCallback);
-    await new Promise(process.nextTick);
-
-    expect(mockCallback).toHaveBeenCalledWith(null, expect.objectContaining({
-      policyDocument: expect.objectContaining({
-        Statement: expect.arrayContaining([
-          expect.objectContaining({
-            Effect: 'Allow',
-          }),
-        ]),
-      }),
-    }));
-  });
-
-  it('Should deny access when headers do not match', async() => {
-    mockEvent.headers = { headerauth1: 'wrongValue' };
-
-    const handler = createAuthorizerHandler(mockedDeps);
-    handler(mockEvent, mockContext, mockCallback);
-    await new Promise(process.nextTick);
-
-    expect(mockCallback).toHaveBeenCalledWith(null, expect.objectContaining({
-      policyDocument: expect.objectContaining({
-        Statement: expect.arrayContaining([
-          expect.objectContaining({
-            Effect: 'Deny',
-          }),
-        ]),
-      }),
-    }));
-  });
-
-  it('Should handle null headers gracefully', async() => {
-    mockEvent.headers = null;
-
-    const handler = createAuthorizerHandler(mockedDeps);
-    handler(mockEvent, mockContext, mockCallback);
-    await new Promise(process.nextTick);
-
-    expect(mockCallback).toHaveBeenCalledWith(null, expect.objectContaining({
-      policyDocument: expect.objectContaining({
-        Statement: expect.arrayContaining([
-          expect.objectContaining({
-            Effect: 'Deny',
-          }),
-        ]),
-      }),
-    }));
-  });
-
-  it('Should handle defined headers correctly', async() => {
-    mockEvent.headers = { headerauth1: 'headervalue1' };
-
-    const handler = createAuthorizerHandler(mockedDeps);
-    handler(mockEvent, mockContext, mockCallback);
-    await new Promise(process.nextTick);
-
-    expect(mockCallback).toHaveBeenCalledWith(null, expect.objectContaining({
-      policyDocument: expect.objectContaining({
-        Statement: expect.arrayContaining([
-          expect.objectContaining({
-            Effect: 'Allow',
-          }),
-        ]),
-      }),
-    }));
-  });
-
-  it('Should handle additional headers correctly', async() => {
-    mockEvent.headers = {
-      headerauth1: 'headervalue1' ,
-      otherheader1: 'headervalue2',
-      otherheader2: 'headervalue3'
-    };
-
-    const handler = createAuthorizerHandler(mockedDeps);
-    handler(mockEvent, mockContext, mockCallback);
-    await new Promise(process.nextTick);
-
-    expect(mockCallback).toHaveBeenCalledWith(null, expect.objectContaining({
-      policyDocument: expect.objectContaining({
-        Statement: expect.arrayContaining([
-          expect.objectContaining({
-            Effect: 'Allow',
-          }),
-        ]),
-      }),
-    }));
-  });
-
   describe('Certificate expiry check', () => {
 
     beforeEach(() => {
@@ -140,7 +50,6 @@ describe('Authorizer Lambda Function', () => {
     })
 
     it('Should not send CloudWatch metric when certificate is null', async () => {
-      mockEvent.headers = { headerauth1: 'headervalue1' };
       mockEvent.requestContext.identity.clientCert = null;
 
       const handler = createAuthorizerHandler(mockedDeps);
@@ -151,7 +60,6 @@ describe('Authorizer Lambda Function', () => {
     });
 
     it('Should send CloudWatch metric when the certificate expiry threshold is reached', async () => {
-      mockEvent.headers = { headerauth1: 'headervalue1' };
       mockEvent.requestContext.identity.clientCert = buildCertWithExpiry('2025-11-17T14:19:00Z');
 
       const handler = createAuthorizerHandler(mockedDeps);
@@ -177,7 +85,6 @@ describe('Authorizer Lambda Function', () => {
     });
 
     it('Should not send CloudWatch metric when the certificate expiry threshold is not yet reached', async () => {
-      mockEvent.headers = { headerauth1: 'headervalue1' };
       mockEvent.requestContext.identity.clientCert = buildCertWithExpiry('2025-11-18T14:19:00Z');
 
       const handler = createAuthorizerHandler(mockedDeps);
@@ -197,4 +104,88 @@ describe('Authorizer Lambda Function', () => {
       } as APIGatewayEventClientCertificate['validity'],
     } as APIGatewayEventClientCertificate;
   }
+
+    describe('Supplier ID lookup', () => {
+
+      it('Should deny the request when no headers are present', async () => {
+        mockEvent.headers = null;
+
+        const handler = createAuthorizerHandler(mockedDeps);
+        handler(mockEvent, mockContext, mockCallback);
+        await new Promise(process.nextTick);
+
+        expect(mockCallback).toHaveBeenCalledWith(null, expect.objectContaining({
+          policyDocument: expect.objectContaining({
+            Statement: [
+              expect.objectContaining({
+                Effect: 'Deny',
+              }),
+            ],
+          }),
+        }));
+      });
+
+      it('Should deny the request when the APIM application ID header is absent', async () => {
+        mockEvent.headers = {'x-apim-correlation-id': 'correlation-id'};
+
+        const handler = createAuthorizerHandler(mockedDeps);
+        handler(mockEvent, mockContext, mockCallback);
+        await new Promise(process.nextTick);
+
+        expect(mockCallback).toHaveBeenCalledWith(null, expect.objectContaining({
+          policyDocument: expect.objectContaining({
+            Statement: [
+              expect.objectContaining({
+                Effect: 'Deny',
+              }),
+            ],
+          }),
+        }));
+      });
+
+      it('Should deny the request when no supplier ID is found', async () => {
+        mockEvent.headers = { 'apim-application-id': 'unknown-apim-id' };
+        (mockedDeps.supplierRepo.getSupplierByApimId as jest.Mock).mockRejectedValue(new Error('Supplier not found'));
+
+        const handler = createAuthorizerHandler(mockedDeps);
+        handler(mockEvent, mockContext, mockCallback);
+        await new Promise(process.nextTick);
+
+        expect(mockCallback).toHaveBeenCalledWith(null, expect.objectContaining({
+          policyDocument: expect.objectContaining({
+            Statement: [
+              expect.objectContaining({
+                Effect: 'Deny',
+              }),
+            ],
+          }),
+        }));
+      });
+
+      it('Should allow the request when the supplier ID is found', async () => {
+        mockEvent.headers = { 'apim-application-id': 'valid-apim-id' };
+        (mockedDeps.supplierRepo.getSupplierByApimId as jest.Mock).mockResolvedValue({
+          id: 'supplier-123',
+          apimApplicationId: 'valid-apim-id',
+          name: 'Test Supplier',
+        });
+
+        const handler = createAuthorizerHandler(mockedDeps);
+        handler(mockEvent, mockContext, mockCallback);
+        await new Promise(process.nextTick);
+
+        expect(mockCallback).toHaveBeenCalledWith(null, expect.objectContaining({
+          policyDocument: expect.objectContaining({
+            Statement: [
+              expect.objectContaining({
+                Effect: 'Allow',
+              }),
+            ],
+          }),
+          context: {
+            supplierId: 'supplier-123',
+          },
+        }));
+      });
+    });
 });

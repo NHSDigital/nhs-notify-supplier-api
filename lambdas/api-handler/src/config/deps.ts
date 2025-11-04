@@ -19,25 +19,21 @@ function createDocumentClient(): DynamoDBDocumentClient {
 }
 
 function createLetterRepository(documentClient: DynamoDBDocumentClient, log: pino.Logger, envVars: EnvVars): LetterRepository {
-  const ddbClient = new DynamoDBClient({});
-  const docClient = DynamoDBDocumentClient.from(ddbClient);
   const config = {
     lettersTableName: envVars.LETTERS_TABLE_NAME,
     lettersTtlHours: envVars.LETTER_TTL_HOURS
   };
 
-  return new LetterRepository(docClient, log, config);
+  return new LetterRepository(documentClient, log, config);
 }
 
 function createMIRepository(documentClient: DynamoDBDocumentClient, log: pino.Logger, envVars: EnvVars): MIRepository {
-  const ddbClient = new DynamoDBClient({});
-  const docClient = DynamoDBDocumentClient.from(ddbClient);
   const config = {
     miTableName: envVars.MI_TABLE_NAME,
     miTtlHours: envVars.MI_TTL_HOURS
   };
 
-  return new MIRepository(docClient, log, config);
+  return new MIRepository(documentClient, log, config);
 }
 
 export function createDependenciesContainer(): Deps {

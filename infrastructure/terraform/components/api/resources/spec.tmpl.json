@@ -3,13 +3,13 @@
     "securitySchemes": {
       "LambdaAuthorizer": {
         "in": "header",
-        "name": "NHSD-Supplier-ID",
+        "name": "apim-application-id",
         "type": "apiKey",
         "x-amazon-apigateway-authorizer": {
           "authorizerCredentials": "${APIG_EXECUTION_ROLE_ARN}",
           "authorizerResultTtlInSeconds": 0,
           "authorizerUri": "arn:aws:apigateway:${AWS_REGION}:lambda:path/2015-03-31/functions/${AUTHORIZER_LAMBDA_ARN}/invocations",
-          "identitySource": "method.request.header.NHSD-Supplier-ID",
+          "identitySource": "method.request.header.apim-application-id",
           "type": "request"
         },
         "x-amazon-apigateway-authtype": "custom"

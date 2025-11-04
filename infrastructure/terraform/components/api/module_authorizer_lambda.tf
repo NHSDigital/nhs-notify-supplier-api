@@ -32,8 +32,10 @@ module "authorizer_lambda" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = {
-    CLOUDWATCH_NAMESPACE                     = "/aws/api-gateway/supplier/alarms"
-    CLIENT_CERTIFICATE_EXPIRATION_ALERT_DAYS = 14
+    CLOUDWATCH_NAMESPACE                     = "/aws/api-gateway/supplier/alarms",
+    CLIENT_CERTIFICATE_EXPIRATION_ALERT_DAYS = 14,
+    APIM_APPLICATION_ID_HEADER               = "apim-application-id",
+    SUPPLIERS_TABLE_NAME                     = aws_dynamodb_table.suppliers.name
   }
 }
 
