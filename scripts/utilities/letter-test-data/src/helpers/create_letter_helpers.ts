@@ -65,7 +65,7 @@ export function createLetterDto(params: {
     url,
   } = params;
 
-  const letter: Omit<Letter, "ttl" | "supplierStatus"> = {
+  const letter: Omit<Letter, "ttl" | "supplierStatus" | "supplierStatusSk"> = {
     id: letterId,
     supplierId,
     specificationId,
