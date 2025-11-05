@@ -1,5 +1,6 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
-import { assertNotEmpty, validateCommonHeaders } from "../utils/validation";
+import { assertNotEmpty } from "../utils/validation";
+import { extractCommonIds } from '../utils/commonIds';
 import { ApiErrorDetail } from '../contracts/errors';
 import { mapErrorToResponse } from "../mappers/error-mapper";
 import { ValidationError } from "../errors";
@@ -11,10 +12,10 @@ export function createGetLetterDataHandler(deps: Deps): APIGatewayProxyHandler {
 
   return async (event) => {
 
-    const commonHeadersResult = validateCommonHeaders(event.headers, deps);
+    const commonIds = extractCommonIds(event.headers, event.requestContext, deps);
 
-    if (!commonHeadersResult.ok) {
-      return mapErrorToResponse(commonHeadersResult.error, commonHeadersResult.correlationId, deps.logger);
+    if (!commonIds.ok) {
+      return mapErrorToResponse(commonIds.error, commonIds.correlationId, deps.logger);
     }
 
     try {
@@ -24,13 +25,13 @@ export function createGetLetterDataHandler(deps: Deps): APIGatewayProxyHandler {
       return {
         statusCode: 303,
         headers: {
-          'Location': await getLetterDataUrl(commonHeadersResult.value.supplierId, letterId, deps)
+          'Location': await getLetterDataUrl(commonIds.value.supplierId, letterId, deps)
         },
         body: ''
       };
     }
     catch (error) {
-      return mapErrorToResponse(error, commonHeadersResult.value.correlationId, deps.logger);
+      return mapErrorToResponse(error, commonIds.value.correlationId, deps.logger);
     }
   }
 };

@@ -168,6 +168,7 @@ describe('Authorizer Lambda Function', () => {
           id: 'supplier-123',
           apimApplicationId: 'valid-apim-id',
           name: 'Test Supplier',
+          status: 'ENABLED'
         });
 
         const handler = createAuthorizerHandler(mockedDeps);
@@ -182,10 +183,32 @@ describe('Authorizer Lambda Function', () => {
               }),
             ],
           }),
-          context: {
-            supplierId: 'supplier-123',
-          },
+          principalId: 'supplier-123',
         }));
       });
     });
+
+      it('Should deny the request the supplier is disabled', async () => {
+        mockEvent.headers = { 'apim-application-id': 'unknown-apim-id' };
+          (mockedDeps.supplierRepo.getSupplierByApimId as jest.Mock).mockResolvedValue({
+            id: 'supplier-123',
+            apimApplicationId: 'valid-apim-id',
+            name: 'Test Supplier',
+            status: 'DISABLED'
+        });
+
+        const handler = createAuthorizerHandler(mockedDeps);
+        handler(mockEvent, mockContext, mockCallback);
+        await new Promise(process.nextTick);
+
+        expect(mockCallback).toHaveBeenCalledWith(null, expect.objectContaining({
+          policyDocument: expect.objectContaining({
+            Statement: [
+              expect.objectContaining({
+                Effect: 'Deny',
+              }),
+            ],
+          }),
+        }));
+      });
 });

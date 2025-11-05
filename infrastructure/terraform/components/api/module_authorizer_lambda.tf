@@ -11,6 +11,10 @@ module "authorizer_lambda" {
   log_retention_in_days = var.log_retention_in_days
   kms_key_arn           = module.kms.key_arn
 
+  iam_policy_document = {
+    body = data.aws_iam_policy_document.authorizer_lambda.json
+  }
+
   function_name = "authorizer"
   description   = "Authorizer for Suppliers API"
 
@@ -50,6 +54,20 @@ data "aws_iam_policy_document" "authorizer_lambda" {
 
     resources = [
       "*"
+    ]
+  }
+
+  statement {
+    sid    = "AllowDynamoDBAccess"
+    effect = "Allow"
+
+    actions = [
+      "dynamodb:Query"
+    ]
+
+    resources = [
+      aws_dynamodb_table.suppliers.arn,
+      "${aws_dynamodb_table.suppliers.arn}/index/supplier-apim-index"
     ]
   }
 }

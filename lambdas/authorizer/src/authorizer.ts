@@ -11,7 +11,7 @@
 
 // See https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html for the original JS documentation
 
-import {APIGatewayAuthorizerResult, APIGatewayAuthorizerResultContext, APIGatewayEventClientCertificate, APIGatewayRequestAuthorizerEvent, APIGatewayRequestAuthorizerEventHeaders, APIGatewayRequestAuthorizerHandler,
+import {APIGatewayAuthorizerResult, APIGatewayEventClientCertificate, APIGatewayRequestAuthorizerEvent, APIGatewayRequestAuthorizerEventHeaders, APIGatewayRequestAuthorizerHandler,
   Callback, Context } from 'aws-lambda';
 import { Deps } from './deps';
 import { PutMetricDataCommand } from '@aws-sdk/client-cloudwatch';
@@ -28,27 +28,30 @@ export function createAuthorizerHandler(deps: Deps): APIGatewayRequestAuthorizer
 
 
     checkCertificateExpiry(event.requestContext.identity.clientCert, deps)
-      .then(() => deps.supplierRepo.getSupplierByApimId(extractApimId(event.headers, deps)))
+      .then(() => getSupplier(event.headers, deps))
       .then((supplier: Supplier) => {
         deps.logger.info('Allow event');
-        callback(null, generateAllow('me', event.methodArn, supplier.id));
+        callback(null, generateAllow(event.methodArn, supplier.id));
       })
       .catch((error) => {
-        deps.logger.info({error}, 'Deny event');
-        callback(null, generateDeny('me', event.methodArn));
+        deps.logger.info(error, 'Deny event');
+        callback(null, generateDeny(event.methodArn));
       });
   };
 }
 
-
-function extractApimId(headers: APIGatewayRequestAuthorizerEventHeaders | null, deps: Deps): string {
+async function getSupplier(headers: APIGatewayRequestAuthorizerEventHeaders | null, deps: Deps): Promise<Supplier> {
   const apimId = Object.entries(headers || {})
     .find(([headerName, _]) => headerName.toLowerCase() === deps.env.APIM_APPLICATION_ID_HEADER)?.[1] as string;
 
     if(!apimId) {
-      throw new Error("No APIM application ID found in header");
+      throw new Error('No APIM application ID found in header');
     }
-    return apimId;
+    const supplier = await deps.supplierRepo.getSupplierByApimId(apimId);
+    if (supplier.status === 'DISABLED') {
+      throw new Error(`Supplier ${supplier.id} is disabled`);
+    }
+    return supplier;
 }
 
 
@@ -56,8 +59,7 @@ function extractApimId(headers: APIGatewayRequestAuthorizerEventHeaders | null, 
   function generatePolicy(
     principalId: string,
     effect: 'Allow' | 'Deny',
-    resource: string,
-    context: APIGatewayAuthorizerResultContext
+    resource: string
   ): APIGatewayAuthorizerResult {
     // Required output:
     const authResponse: APIGatewayAuthorizerResult = {
@@ -72,17 +74,16 @@ function extractApimId(headers: APIGatewayRequestAuthorizerEventHeaders | null, 
           },
         ],
       },
-      context: context,
     };
     return authResponse;
   }
 
-function generateAllow(principalId: string, resource: string, supplierId: string): APIGatewayAuthorizerResult {
-  return generatePolicy(principalId, 'Allow', resource, {supplierId: supplierId});
+function generateAllow(resource: string, supplierId: string): APIGatewayAuthorizerResult {
+  return generatePolicy(supplierId, 'Allow', resource);
 }
 
-function generateDeny(principalId: string, resource: string): APIGatewayAuthorizerResult {
-  return generatePolicy(principalId, 'Deny', resource, {});
+function generateDeny(resource: string): APIGatewayAuthorizerResult {
+  return generatePolicy('invalid-user', 'Deny', resource);
 }
 
 function getCertificateExpiryInDays(certificate: APIGatewayEventClientCertificate): number {
