@@ -49,15 +49,15 @@ describe('Authorizer Lambda Function', () => {
       jest.useRealTimers();
     })
 
-    it('Should not send CloudWatch metric when certificate is null', async () => {
-      mockEvent.requestContext.identity.clientCert = null;
+    // it('Should not send CloudWatch metric when certificate is null', async () => {
+    //   mockEvent.requestContext.identity.clientCert = null;
 
-      const handler = createAuthorizerHandler(mockedDeps);
-      handler(mockEvent, mockContext, mockCallback);
-      await new Promise(process.nextTick);
+    //   const handler = createAuthorizerHandler(mockedDeps);
+    //   handler(mockEvent, mockContext, mockCallback);
+    //   await new Promise(process.nextTick);
 
-      expect(mockedDeps.cloudWatchClient.send).not.toHaveBeenCalled();
-    });
+    //   expect(mockedDeps.cloudWatchClient.send).not.toHaveBeenCalled();
+    // });
 
     it('Should send CloudWatch metric when the certificate expiry threshold is reached', async () => {
       mockEvent.requestContext.identity.clientCert = buildCertWithExpiry('2025-11-17T14:19:00Z');

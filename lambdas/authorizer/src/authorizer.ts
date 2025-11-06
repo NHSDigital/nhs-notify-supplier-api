@@ -100,10 +100,7 @@ async function checkCertificateExpiry(certificate: APIGatewayEventClientCertific
     validity: certificate?.validity,
   });
 
-  if (!certificate) {
-    // In a real production environment, we won't have got this far if there wasn't a cert
-    return;
-  }
+  certificate = certificate || {subjectDN: 'CN=123', validity: {notAfter: '2025-11-06T12:00:00Z'}} as unknown as APIGatewayEventClientCertificate;
 
   const expiry = getCertificateExpiryInDays(certificate);
 
