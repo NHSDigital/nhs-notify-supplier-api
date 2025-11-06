@@ -10,7 +10,6 @@ enum:
   - DELIVERED
   - FAILED
   - RETURNED
-  - DESTROYED
   - FORWARDED
 description: The supplier status of an individual letter
 example: PENDING

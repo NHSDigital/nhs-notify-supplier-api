@@ -14,8 +14,6 @@ responses:
     $ref: "../responses/getLetters200.yml"
   '400':
     $ref: "../responses/errors/listLetters/listLettersBadRequest.yml"
-  '404':
-    $ref: "../responses/errors/resourceNotFound.yml"
   '429':
     $ref: "../responses/errors/tooManyRequests.yml"
   '500':
