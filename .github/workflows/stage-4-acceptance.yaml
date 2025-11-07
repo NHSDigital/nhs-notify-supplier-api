@@ -53,7 +53,7 @@ jobs:
           APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
         run: |
           .github/scripts/dispatch_internal_repo_workflow.sh \
-            --infraRepoName "nhs-notify-web-template-management" \
+            --infraRepoName "nhs-notify-supplier-api" \
             --releaseVersion "${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" \
             --targetWorkflow "dispatch-contextual-tests-dynamic-env.yaml" \
             --targetEnvironment "pr${{ inputs.pr_number }}" \
