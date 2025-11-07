@@ -31,8 +31,8 @@ paths:
       - $ref: 'components/parameters/correlationId.yml'
     get:
       $ref: 'components/endpoints/getDataId.yml'
-    head:
-      $ref: 'components/endpoints/headDataId.yml'
+    #head:
+    #  $ref: 'components/endpoints/headDataId.yml'
   /mi:
     parameters:
       - $ref: 'components/parameters/requestId.yml'
@@ -46,7 +46,7 @@ paths:
       responses:
         "200":
           description: Service is healthy
-      summary: Health check endpoint
+      summary: Health check
 components:
   securitySchemes:
     app-level3:

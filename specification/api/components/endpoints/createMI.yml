@@ -11,8 +11,6 @@ responses:
     $ref: "../responses/postMI201.yml"
   '400':
     $ref: "../responses/errors/badRequest.yml"
-  '404':
-    $ref: "../responses/errors/resourceNotFound.yml"
   '429':
     $ref: "../responses/errors/tooManyRequests.yml"
   '500':

@@ -2,7 +2,7 @@
 
 Use this endpoint to update the status of a letter by submitting the new status in the request body, optionally providing a reason code and text.
 
-When you make a PATCH request with your application, the endpoint will respond with a successful (200) response code, along with the updated patient resource or an unsuccessful (4xx/5xx) response.
+When you make a PATCH request with your application, the endpoint will respond with an accepted (202) response code or an unsuccessful (4xx/5xx) response.
 
 Rate limiting applies. On excess requests, you may receive **429 Too Many Requests** (example error code(s): `NOTIFY_QUOTA`). Back off and retry later.
 
@@ -13,7 +13,6 @@ Allowed `status` values that can be used to are:
 - `ACCEPTED`
 - `CANCELLED`
 - `DELIVERED`
-- `DESTROYED`
 - `DISPATCHED`
 - `ENCLOSED`
 - `FAILED`
