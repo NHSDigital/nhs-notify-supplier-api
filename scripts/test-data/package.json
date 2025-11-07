@@ -4,7 +4,7 @@
     "@internal/datastore": "*",
     "esbuild": "^0.25.11",
     "pino": "^9.7.0",
-    "yargs": "^17.7.2"
+    "yargs": "^18.0.0"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.2",
