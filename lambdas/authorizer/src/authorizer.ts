@@ -14,7 +14,6 @@
 import {APIGatewayAuthorizerResult, APIGatewayEventClientCertificate, APIGatewayRequestAuthorizerEvent, APIGatewayRequestAuthorizerEventHeaders, APIGatewayRequestAuthorizerHandler,
   Callback, Context } from 'aws-lambda';
 import { Deps } from './deps';
-import { PutMetricDataCommand } from '@aws-sdk/client-cloudwatch';
 import { Supplier } from '@internal/datastore';
 
 export function createAuthorizerHandler(deps: Deps): APIGatewayRequestAuthorizerHandler {
@@ -27,8 +26,9 @@ export function createAuthorizerHandler(deps: Deps): APIGatewayRequestAuthorizer
     deps.logger.info(event, 'Received event');
 
 
-    checkCertificateExpiry(event.requestContext.identity.clientCert, deps)
-      .then(() => getSupplier(event.headers, deps))
+    checkCertificateExpiry(event.requestContext.identity.clientCert, deps);
+
+    getSupplier(event.headers, deps)
       .then((supplier: Supplier) => {
         deps.logger.info('Allow event');
         callback(null, generateAllow(event.methodArn, supplier.id));
@@ -100,31 +100,38 @@ async function checkCertificateExpiry(certificate: APIGatewayEventClientCertific
     validity: certificate?.validity,
   });
 
-  certificate = certificate || {subjectDN: 'CN=123', validity: {notAfter: '2025-11-06T12:00:00Z'}} as unknown as APIGatewayEventClientCertificate;
+  if (!certificate) {
+    // In a real production environment, we won't have got this far if there wasn't a cert
+    return;
+  }
 
   const expiry = getCertificateExpiryInDays(certificate);
 
   if (expiry <= deps.env.CLIENT_CERTIFICATE_EXPIRATION_ALERT_DAYS) {
-    const { subjectDN, validity } = certificate;
-
-    deps.logger.info({
-      description: 'Client certificate near expiry',
-      certificateExpiry: validity.notAfter,
-      subjectDN,
-    });
-    await deps.cloudWatchClient.send(buildCloudWatchCommand(deps.env.CLOUDWATCH_NAMESPACE, certificate));
+    deps.logger.info(JSON.stringify(buildCloudWatchMetric(deps.env.CLOUDWATCH_NAMESPACE, certificate)));
   }
 
-  function buildCloudWatchCommand(namespace: string, certificate: APIGatewayEventClientCertificate): PutMetricDataCommand {
-    return new PutMetricDataCommand({
-      MetricData: [{
-        MetricName: 'apim-client-certificate-near-expiry',
-        Dimensions: [
-          {Name: 'SUBJECT_DN', Value: certificate.subjectDN},
-          {Name: 'NOT_AFTER', Value: certificate.validity.notAfter}
-        ]
-      }],
-      Namespace: namespace
-    });
+  function buildCloudWatchMetric(namespace: string, certificate: APIGatewayEventClientCertificate) {
+    return {
+      _aws: {
+        Timestamp: new Date().valueOf(),
+        CloudWatchMetrics: [
+          {
+            Namespace: namespace,
+            Dimensions: ['SUBJECT_DN', 'NOT_AFTER'],
+            Metrics: [
+              {
+                Name: 'apim-client-certificate-near-expiry',
+                Unit: 'Count',
+                Value: 1,
+              },
+            ],
+          },
+        ],
+      },
+      'SUBJECT_DN': certificate.subjectDN,
+      'NOT_AFTER':  certificate.validity.notAfter,
+      'apim-client-certificate-near-expiry': 1,
+    };
   }
 };

@@ -11,9 +11,6 @@ const mockedDeps: jest.Mocked<Deps> = {
       CLIENT_CERTIFICATE_EXPIRATION_ALERT_DAYS: 14,
       APIM_APPLICATION_ID_HEADER: 'apim-application-id'
     } as unknown as EnvVars,
-    cloudWatchClient: {
-      send: jest.fn().mockResolvedValue({}),
-    } as any,
     supplierRepo: {
       getSupplierByApimId: jest.fn(),
     } as any,
@@ -49,49 +46,48 @@ describe('Authorizer Lambda Function', () => {
       jest.useRealTimers();
     })
 
-    // it('Should not send CloudWatch metric when certificate is null', async () => {
-    //   mockEvent.requestContext.identity.clientCert = null;
+    it('Should not log CloudWatch metric when certificate is null', async () => {
+      mockEvent.requestContext.identity.clientCert = null;
 
-    //   const handler = createAuthorizerHandler(mockedDeps);
-    //   handler(mockEvent, mockContext, mockCallback);
-    //   await new Promise(process.nextTick);
+      const handler = createAuthorizerHandler(mockedDeps);
+      handler(mockEvent, mockContext, mockCallback);
+      await new Promise(process.nextTick);
 
-    //   expect(mockedDeps.cloudWatchClient.send).not.toHaveBeenCalled();
-    // });
+      const mockedInfo = mockedDeps.logger.info as jest.Mock;
+      expect(mockedInfo.mock.calls).not.toContainEqual(
+        expect.stringContaining('CloudWatchMetrics'));
+    });
 
-    it('Should send CloudWatch metric when the certificate expiry threshold is reached', async () => {
+    it('Should log CloudWatch metric when the certificate expiry threshold is reached', async () => {
       mockEvent.requestContext.identity.clientCert = buildCertWithExpiry('2025-11-17T14:19:00Z');
 
       const handler = createAuthorizerHandler(mockedDeps);
       handler(mockEvent, mockContext, mockCallback);
       await new Promise(process.nextTick);
 
-      expect(mockedDeps.cloudWatchClient.send).toHaveBeenCalledWith(
-        expect.objectContaining({
-          input: {
+      const mockedInfo = mockedDeps.logger.info as jest.Mock;
+      expect(mockedInfo.mock.calls.map(call => call[0])).toContain(JSON.stringify(
+        {_aws: {Timestamp: 1762179540000,
+          CloudWatchMetrics: [{
             Namespace: 'cloudwatch-namespace',
-            MetricData: [
-              {
-                MetricName: 'apim-client-certificate-near-expiry',
-                Dimensions: [
-                  { Name: 'SUBJECT_DN', Value: 'CN=test-subject' },
-                  { Name: 'NOT_AFTER', Value: '2025-11-17T14:19:00Z' },
-                ],
-              },
-            ],
-          },
-        })
-      );
+            Dimensions: ['SUBJECT_DN', 'NOT_AFTER'],
+            Metrics: [{Name: 'apim-client-certificate-near-expiry', Unit: 'Count', Value: 1}]
+          }]},
+          SUBJECT_DN: 'CN=test-subject',
+          NOT_AFTER: '2025-11-17T14:19:00Z',
+          'apim-client-certificate-near-expiry': 1}));
     });
 
-    it('Should not send CloudWatch metric when the certificate expiry threshold is not yet reached', async () => {
+    it('Should not log CloudWatch metric when the certificate expiry threshold is not yet reached', async () => {
       mockEvent.requestContext.identity.clientCert = buildCertWithExpiry('2025-11-18T14:19:00Z');
 
       const handler = createAuthorizerHandler(mockedDeps);
       handler(mockEvent, mockContext, mockCallback);
       await new Promise(process.nextTick);
 
-      expect(mockedDeps.cloudWatchClient.send).not.toHaveBeenCalled();
+      const mockedInfo = mockedDeps.logger.info as jest.Mock;
+      expect(mockedInfo.mock.calls).not.toContainEqual(
+        expect.stringContaining('CloudWatchMetrics'));
     });
   });
 
@@ -105,110 +101,110 @@ describe('Authorizer Lambda Function', () => {
     } as APIGatewayEventClientCertificate;
   }
 
-    describe('Supplier ID lookup', () => {
+  describe('Supplier ID lookup', () => {
 
-      it('Should deny the request when no headers are present', async () => {
-        mockEvent.headers = null;
+    it('Should deny the request when no headers are present', async () => {
+      mockEvent.headers = null;
 
-        const handler = createAuthorizerHandler(mockedDeps);
-        handler(mockEvent, mockContext, mockCallback);
-        await new Promise(process.nextTick);
+      const handler = createAuthorizerHandler(mockedDeps);
+      handler(mockEvent, mockContext, mockCallback);
+      await new Promise(process.nextTick);
 
-        expect(mockCallback).toHaveBeenCalledWith(null, expect.objectContaining({
-          policyDocument: expect.objectContaining({
-            Statement: [
-              expect.objectContaining({
-                Effect: 'Deny',
-              }),
-            ],
-          }),
-        }));
-      });
-
-      it('Should deny the request when the APIM application ID header is absent', async () => {
-        mockEvent.headers = {'x-apim-correlation-id': 'correlation-id'};
-
-        const handler = createAuthorizerHandler(mockedDeps);
-        handler(mockEvent, mockContext, mockCallback);
-        await new Promise(process.nextTick);
-
-        expect(mockCallback).toHaveBeenCalledWith(null, expect.objectContaining({
-          policyDocument: expect.objectContaining({
-            Statement: [
-              expect.objectContaining({
-                Effect: 'Deny',
-              }),
-            ],
-          }),
-        }));
-      });
-
-      it('Should deny the request when no supplier ID is found', async () => {
-        mockEvent.headers = { 'apim-application-id': 'unknown-apim-id' };
-        (mockedDeps.supplierRepo.getSupplierByApimId as jest.Mock).mockRejectedValue(new Error('Supplier not found'));
-
-        const handler = createAuthorizerHandler(mockedDeps);
-        handler(mockEvent, mockContext, mockCallback);
-        await new Promise(process.nextTick);
-
-        expect(mockCallback).toHaveBeenCalledWith(null, expect.objectContaining({
-          policyDocument: expect.objectContaining({
-            Statement: [
-              expect.objectContaining({
-                Effect: 'Deny',
-              }),
-            ],
-          }),
-        }));
-      });
-
-      it('Should allow the request when the supplier ID is found', async () => {
-        mockEvent.headers = { 'apim-application-id': 'valid-apim-id' };
-        (mockedDeps.supplierRepo.getSupplierByApimId as jest.Mock).mockResolvedValue({
-          id: 'supplier-123',
-          apimApplicationId: 'valid-apim-id',
-          name: 'Test Supplier',
-          status: 'ENABLED'
-        });
-
-        const handler = createAuthorizerHandler(mockedDeps);
-        handler(mockEvent, mockContext, mockCallback);
-        await new Promise(process.nextTick);
-
-        expect(mockCallback).toHaveBeenCalledWith(null, expect.objectContaining({
-          policyDocument: expect.objectContaining({
-            Statement: [
-              expect.objectContaining({
-                Effect: 'Allow',
-              }),
-            ],
-          }),
-          principalId: 'supplier-123',
-        }));
-      });
+      expect(mockCallback).toHaveBeenCalledWith(null, expect.objectContaining({
+        policyDocument: expect.objectContaining({
+          Statement: [
+            expect.objectContaining({
+              Effect: 'Deny',
+            }),
+          ],
+        }),
+      }));
     });
 
-      it('Should deny the request the supplier is disabled', async () => {
-        mockEvent.headers = { 'apim-application-id': 'unknown-apim-id' };
-          (mockedDeps.supplierRepo.getSupplierByApimId as jest.Mock).mockResolvedValue({
-            id: 'supplier-123',
-            apimApplicationId: 'valid-apim-id',
-            name: 'Test Supplier',
-            status: 'DISABLED'
-        });
+    it('Should deny the request when the APIM application ID header is absent', async () => {
+      mockEvent.headers = {'x-apim-correlation-id': 'correlation-id'};
 
-        const handler = createAuthorizerHandler(mockedDeps);
-        handler(mockEvent, mockContext, mockCallback);
-        await new Promise(process.nextTick);
+      const handler = createAuthorizerHandler(mockedDeps);
+      handler(mockEvent, mockContext, mockCallback);
+      await new Promise(process.nextTick);
 
-        expect(mockCallback).toHaveBeenCalledWith(null, expect.objectContaining({
-          policyDocument: expect.objectContaining({
-            Statement: [
-              expect.objectContaining({
-                Effect: 'Deny',
-              }),
-            ],
-          }),
-        }));
+      expect(mockCallback).toHaveBeenCalledWith(null, expect.objectContaining({
+        policyDocument: expect.objectContaining({
+          Statement: [
+            expect.objectContaining({
+              Effect: 'Deny',
+            }),
+          ],
+        }),
+      }));
+    });
+
+    it('Should deny the request when no supplier ID is found', async () => {
+      mockEvent.headers = { 'apim-application-id': 'unknown-apim-id' };
+      (mockedDeps.supplierRepo.getSupplierByApimId as jest.Mock).mockRejectedValue(new Error('Supplier not found'));
+
+      const handler = createAuthorizerHandler(mockedDeps);
+      handler(mockEvent, mockContext, mockCallback);
+      await new Promise(process.nextTick);
+
+      expect(mockCallback).toHaveBeenCalledWith(null, expect.objectContaining({
+        policyDocument: expect.objectContaining({
+          Statement: [
+            expect.objectContaining({
+              Effect: 'Deny',
+            }),
+          ],
+        }),
+      }));
+    });
+
+    it('Should allow the request when the supplier ID is found', async () => {
+      mockEvent.headers = { 'apim-application-id': 'valid-apim-id' };
+      (mockedDeps.supplierRepo.getSupplierByApimId as jest.Mock).mockResolvedValue({
+        id: 'supplier-123',
+        apimApplicationId: 'valid-apim-id',
+        name: 'Test Supplier',
+        status: 'ENABLED'
       });
+
+      const handler = createAuthorizerHandler(mockedDeps);
+      handler(mockEvent, mockContext, mockCallback);
+      await new Promise(process.nextTick);
+
+      expect(mockCallback).toHaveBeenCalledWith(null, expect.objectContaining({
+        policyDocument: expect.objectContaining({
+          Statement: [
+            expect.objectContaining({
+              Effect: 'Allow',
+            }),
+          ],
+        }),
+        principalId: 'supplier-123',
+      }));
+    });
+  });
+
+  it('Should deny the request the supplier is disabled', async () => {
+    mockEvent.headers = { 'apim-application-id': 'unknown-apim-id' };
+      (mockedDeps.supplierRepo.getSupplierByApimId as jest.Mock).mockResolvedValue({
+        id: 'supplier-123',
+        apimApplicationId: 'valid-apim-id',
+        name: 'Test Supplier',
+        status: 'DISABLED'
+    });
+
+    const handler = createAuthorizerHandler(mockedDeps);
+    handler(mockEvent, mockContext, mockCallback);
+    await new Promise(process.nextTick);
+
+    expect(mockCallback).toHaveBeenCalledWith(null, expect.objectContaining({
+      policyDocument: expect.objectContaining({
+        Statement: [
+          expect.objectContaining({
+            Effect: 'Deny',
+          }),
+        ],
+      }),
+    }));
+  });
 });
