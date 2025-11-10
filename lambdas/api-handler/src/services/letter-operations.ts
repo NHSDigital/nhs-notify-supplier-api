@@ -1,10 +1,11 @@
-import { LetterBase, LetterRepository } from '@internal/datastore'
+import { LetterBase, LetterRepository } from '@internal/datastore';
 import { NotFoundError, ValidationError } from '../errors';
-import { LetterDto, PatchLetterResponse } from '../contracts/letters';
-import { mapToPatchLetterResponse } from '../mappers/letter-mapper';
+import { LetterDto, PatchLetterResponse, PostLettersRequest } from '../contracts/letters';
+import { mapPostLetterResourceToDto, mapToPatchLetterResponse } from '../mappers/letter-mapper';
 import { ApiErrorDetail } from '../contracts/errors';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import { Deps } from '../config/deps';
 
 
@@ -48,9 +49,6 @@ export const patchLetterStatus = async (letterToUpdate: LetterDto, letterId: str
 
   return mapToPatchLetterResponse(updatedLetter);
 }
-function isNotFoundError(error: any) {
-  return error instanceof Error && /^Letter with id \w+ not found for supplier \w+$/.test(error.message);
-}
 
 export const getLetterDataUrl = async (supplierId: string, letterId: string, deps: Deps): Promise<string> => {
 
@@ -60,7 +58,7 @@ export const getLetterDataUrl = async (supplierId: string, letterId: string, dep
     letter = await deps.letterRepo.getLetterById(supplierId, letterId);
     return await getDownloadUrl(letter.url, deps.s3Client, deps.env.DOWNLOAD_URL_TTL_SECONDS);
   } catch (error) {
-    if (error instanceof Error && /^Letter with id \w+ not found for supplier \w+$/.test(error.message)) {
+    if (isNotFoundError(error)) {
       throw new NotFoundError(ApiErrorDetail.NotFoundLetterId);
     }
     throw error;
@@ -79,4 +77,28 @@ async function getDownloadUrl(s3Uri: string, s3Client: S3Client, expiry: number)
   });
 
   return await getSignedUrl(s3Client, command, { expiresIn: expiry });
+}
+
+export async function enqueueLetterUpdateRequests(postLettersRequest: PostLettersRequest, supplierId: string, correlationId: string, deps: Deps) {
+
+  const tasks = postLettersRequest.data.map(async (request) => {
+    try {
+      const command = new SendMessageCommand({
+        QueueUrl: deps.env.SQS_QUEUE_URL,
+        MessageAttributes: {
+          CorrelationId: { DataType: 'String', StringValue: correlationId },
+        },
+        MessageBody: JSON.stringify(mapPostLetterResourceToDto(request, supplierId)),
+      });
+      await deps.sqsClient.send(command);
+    } catch (err) {
+      deps.logger.error({ err }, `Error queuing letterId=${request.id} supplierId=${supplierId} correlationId=${correlationId} for update`);
+    }
+  });
+
+  await Promise.allSettled(tasks);
+}
+
+function isNotFoundError(error: any) {
+  return error instanceof Error && /^Letter with id \w+ not found for supplier \w+$/.test(error.message);
 }

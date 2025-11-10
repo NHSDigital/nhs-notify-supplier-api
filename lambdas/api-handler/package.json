@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@aws-sdk/client-sqs": "^3.925.0",
     "@internal/datastore": "*",
     "@internal/helpers": "*",
     "esbuild": "^0.25.11",

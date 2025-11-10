@@ -1,7 +1,7 @@
 import { Letter, LetterRepository } from '@internal/datastore';
 import { Deps } from '../../config/deps';
-import { LetterDto } from '../../contracts/letters';
-import { getLetterById, getLetterDataUrl, getLettersForSupplier, patchLetterStatus } from '../letter-operations';
+import { LetterDto, PostLettersRequest } from '../../contracts/letters';
+import { enqueueLetterUpdateRequests, getLetterById, getLetterDataUrl, getLettersForSupplier, patchLetterStatus } from '../letter-operations';
 import pino from 'pino';
 
 jest.mock('@aws-sdk/s3-request-presigner', () => ({
@@ -16,6 +16,7 @@ jest.mock('@aws-sdk/client-s3', () => {
   };
 });
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 
 describe("getLetterIdsForSupplier", () => {
 
@@ -227,3 +228,108 @@ function makeLetter(id: string, status: Letter['status']) : Letter {
       reasonText: "Reason text"
   };
 }
+
+describe('enqueueLetterUpdateRequests function', () => {
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should update the letter status successfully', async () => {
+
+    const updateLettersRequest : PostLettersRequest = {
+      data: [
+        {
+          id: 'id1',
+          type: 'Letter',
+          attributes: {
+            status: 'REJECTED',
+            reasonCode: 123,
+            reasonText: 'Reason text',
+          }
+        },
+        {
+          id: 'id2',
+          type: 'Letter',
+          attributes: {
+            status: 'ACCEPTED'
+          }
+        }
+      ]
+    };
+    const sqsClient = { send: jest.fn() } as unknown as SQSClient;
+    const logger = { error: jest.fn() } as unknown as pino.Logger;
+    const env = {
+      SQS_QUEUE_URL: 'sqsUrl'
+    };
+    const deps: Deps = { sqsClient, logger, env } as Deps;
+
+    const result = await enqueueLetterUpdateRequests(updateLettersRequest, 'supplier1', 'correlationId1', deps);
+
+    expect(deps.sqsClient.send).toHaveBeenNthCalledWith(1, expect.objectContaining({
+      input: {
+        QueueUrl: deps.env.SQS_QUEUE_URL,
+        MessageAttributes: {
+          CorrelationId: {
+            DataType: 'String',
+            StringValue: 'correlationId1',
+          }
+        },
+        MessageBody: JSON.stringify({
+            id: updateLettersRequest.data[0].id,
+            supplierId: 'supplier1',
+            status: updateLettersRequest.data[0].attributes.status,
+            reasonCode: updateLettersRequest.data[0].attributes.reasonCode,
+            reasonText: updateLettersRequest.data[0].attributes.reasonText
+        })
+      }
+    }));
+
+    expect(deps.sqsClient.send).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      input: {
+        QueueUrl: deps.env.SQS_QUEUE_URL,
+        MessageAttributes: {
+          CorrelationId: {
+            DataType: 'String',
+            StringValue: 'correlationId1',
+          }
+        },
+        MessageBody: JSON.stringify({
+            id: updateLettersRequest.data[1].id,
+            supplierId: 'supplier1',
+            status: updateLettersRequest.data[1].attributes.status
+        })
+      }
+    }));
+  });
+
+  it('should log error if enqueueing fails', async () => {
+
+    const mockError = new Error('error');
+
+    const updateLettersRequest : PostLettersRequest = {
+      data: [
+        {
+          id: 'id1',
+          type: 'Letter',
+          attributes: {
+            status: 'REJECTED',
+            reasonCode: 123,
+            reasonText: 'Reason text',
+          }
+        }
+      ]
+    };
+    const sqsClient = { send: jest.fn().mockRejectedValue(mockError) } as unknown as SQSClient;
+    const logger = { error: jest.fn() } as unknown as pino.Logger;
+    const env = {
+      SQS_QUEUE_URL: 'sqsUrl'
+    };
+    const deps: Deps = { sqsClient, logger, env } as Deps;
+
+    const result = await enqueueLetterUpdateRequests(updateLettersRequest, 'supplier1', 'correlationId1', deps);
+
+    expect(deps.logger.error).toHaveBeenCalledWith({ err: mockError},
+          'Error queuing letterId=id1 supplierId=supplier1 correlationId=correlationId1 for update');
+  });
+});

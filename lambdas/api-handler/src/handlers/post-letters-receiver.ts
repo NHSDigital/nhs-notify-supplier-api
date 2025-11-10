@@ -1,15 +1,13 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { patchLetterStatus } from '../services/letter-operations';
-import { PatchLetterRequest, PatchLetterRequestSchema } from '../contracts/letters';
+import { enqueueLetterUpdateRequests } from '../services/letter-operations';
+import { PostLettersRequest, PostLettersRequestSchema } from '../contracts/letters';
 import { ApiErrorDetail } from '../contracts/errors';
 import { ValidationError } from '../errors';
 import { processError } from '../mappers/error-mapper';
-import { assertNotEmpty, validateCommonHeaders } from '../utils/validation';
-import { mapPatchLetterToDto } from '../mappers/letter-mapper';
+import { assertNotEmpty, requireEnvVar, validateCommonHeaders } from '../utils/validation';
 import type { Deps } from "../config/deps";
 
-
-export function createPatchLetterHandler(deps: Deps): APIGatewayProxyHandler {
+export function createPostLettersReceiverHandler(deps: Deps): APIGatewayProxyHandler {
 
   return async (event) => {
 
@@ -19,15 +17,16 @@ export function createPatchLetterHandler(deps: Deps): APIGatewayProxyHandler {
       return processError(commonHeadersResult.error, commonHeadersResult.correlationId, deps.logger);
     }
 
+    const maxUpdateItems = requireEnvVar(deps.env, "MAX_LIMIT");
+    requireEnvVar(deps.env, "SQS_QUEUE_URL");
+
     try {
-      const letterId = assertNotEmpty( event.pathParameters?.id,
-        new ValidationError(ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter));
       const body = assertNotEmpty(event.body, new ValidationError(ApiErrorDetail.InvalidRequestMissingBody));
 
-      let patchLetterRequest: PatchLetterRequest;
+      let postLettersRequest: PostLettersRequest;
 
       try {
-        patchLetterRequest = PatchLetterRequestSchema.parse(JSON.parse(body));
+        postLettersRequest = PostLettersRequestSchema.parse(JSON.parse(body));
       } catch (error) {
         if (error instanceof Error) {
           throw new ValidationError(ApiErrorDetail.InvalidRequestBody, { cause: error});
@@ -35,11 +34,15 @@ export function createPatchLetterHandler(deps: Deps): APIGatewayProxyHandler {
         else throw error;
       }
 
-      const updatedLetter = await patchLetterStatus(mapPatchLetterToDto(patchLetterRequest, commonHeadersResult.value.supplierId), letterId, deps.letterRepo);
+      if (postLettersRequest.data.length > maxUpdateItems) {
+        throw new ValidationError(ApiErrorDetail.InvalidRequestLettersToUpdate, { args: [maxUpdateItems]});
+      }
+
+      enqueueLetterUpdateRequests(postLettersRequest, commonHeadersResult.value.supplierId, commonHeadersResult.value.correlationId, deps);
 
       return {
-        statusCode: 200,
-        body: JSON.stringify(updatedLetter, null, 2)
+        statusCode: 202,
+        body: ''
       };
 
     } catch (error) {

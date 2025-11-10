@@ -3,7 +3,7 @@ import { assertNotEmpty, validateCommonHeaders } from "../utils/validation";
 import { ValidationError } from "../errors";
 import { ApiErrorDetail } from "../contracts/errors";
 import { getLetterById } from "../services/letter-operations";
-import { mapErrorToResponse } from "../mappers/error-mapper";
+import { processError } from "../mappers/error-mapper";
 import { mapToGetLetterResponse } from "../mappers/letter-mapper";
 import { Deps } from "../config/deps";
 
@@ -15,7 +15,7 @@ export function createGetLetterHandler(deps: Deps): APIGatewayProxyHandler {
     const commonHeadersResult = validateCommonHeaders(event.headers, deps);
 
     if (!commonHeadersResult.ok) {
-      return mapErrorToResponse(commonHeadersResult.error, commonHeadersResult.correlationId, deps.logger);
+      return processError(commonHeadersResult.error, commonHeadersResult.correlationId, deps.logger);
     }
 
     try {
@@ -37,7 +37,7 @@ export function createGetLetterHandler(deps: Deps): APIGatewayProxyHandler {
       };
     } catch (error)
     {
-      return mapErrorToResponse(error, commonHeadersResult.value.correlationId, deps.logger);
+      return processError(error, commonHeadersResult.value.correlationId, deps.logger);
     }
   }
 }

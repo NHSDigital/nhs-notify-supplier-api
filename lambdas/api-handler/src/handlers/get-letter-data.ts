@@ -1,7 +1,7 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { assertNotEmpty, validateCommonHeaders } from "../utils/validation";
 import { ApiErrorDetail } from '../contracts/errors';
-import { mapErrorToResponse } from "../mappers/error-mapper";
+import { processError } from "../mappers/error-mapper";
 import { ValidationError } from "../errors";
 import { getLetterDataUrl } from "../services/letter-operations";
 import type { Deps } from "../config/deps";
@@ -14,7 +14,7 @@ export function createGetLetterDataHandler(deps: Deps): APIGatewayProxyHandler {
     const commonHeadersResult = validateCommonHeaders(event.headers, deps);
 
     if (!commonHeadersResult.ok) {
-      return mapErrorToResponse(commonHeadersResult.error, commonHeadersResult.correlationId, deps.logger);
+      return processError(commonHeadersResult.error, commonHeadersResult.correlationId, deps.logger);
     }
 
     try {
@@ -30,7 +30,7 @@ export function createGetLetterDataHandler(deps: Deps): APIGatewayProxyHandler {
       };
     }
     catch (error) {
-      return mapErrorToResponse(error, commonHeadersResult.value.correlationId, deps.logger);
+      return processError(error, commonHeadersResult.value.correlationId, deps.logger);
     }
   }
 };

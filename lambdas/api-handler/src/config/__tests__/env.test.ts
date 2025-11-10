@@ -21,6 +21,7 @@ describe('lambdaEnv', () => {
     process.env.MI_TTL_HOURS = '2160';
     process.env.DOWNLOAD_URL_TTL_SECONDS = '60';
     process.env.MAX_LIMIT = '2500';
+    process.env.SQS_QUEUE_URL = 'url';
 
     const { envVars } = require('../env');
 
@@ -33,6 +34,7 @@ describe('lambdaEnv', () => {
       MI_TTL_HOURS: 2160,
       DOWNLOAD_URL_TTL_SECONDS: 60,
       MAX_LIMIT: 2500,
+      SQS_QUEUE_URL: 'url'
     });
   });
 

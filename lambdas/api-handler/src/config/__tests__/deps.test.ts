@@ -32,6 +32,10 @@ describe('createDependenciesContainer', () => {
       S3Client: jest.fn(),
     }));
 
+    jest.mock('@aws-sdk/client-sqs', () => ({
+      SQSClient: jest.fn(),
+    }));
+
     // Repo client
     jest.mock('@internal/datastore', () => ({
       LetterRepository: jest.fn(),
@@ -45,6 +49,7 @@ describe('createDependenciesContainer', () => {
   test('constructs deps and wires repository config correctly', async () => {
     // get current mock instances
     const { S3Client } = jest.requireMock('@aws-sdk/client-s3') as { S3Client: jest.Mock };
+    const { SQSClient } = jest.requireMock('@aws-sdk/client-sqs') as { SQSClient: jest.Mock };
     const pinoMock = jest.requireMock('pino') as { default: jest.Mock };
     const { LetterRepository, MIRepository } = jest.requireMock('@internal/datastore') as {
       LetterRepository: jest.Mock,
@@ -55,6 +60,9 @@ describe('createDependenciesContainer', () => {
     const deps: Deps = createDependenciesContainer();
 
     expect(S3Client).toHaveBeenCalledTimes(1);
+
+    expect(SQSClient).toHaveBeenCalledTimes(1);
+
     expect(pinoMock.default).toHaveBeenCalledTimes(1);
 
     expect(LetterRepository).toHaveBeenCalledTimes(1);

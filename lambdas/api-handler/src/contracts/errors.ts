@@ -20,9 +20,9 @@ export enum ApiErrorTitle {
 }
 
 export enum ApiErrorStatus {
-  InternalServerError = "500",
-  InvalidRequest = "400",
-  NotFound = "404"
+  InternalServerError = '500',
+  InvalidRequest = '400',
+  NotFound = '404'
 }
 
 export enum ApiErrorDetail {
@@ -35,7 +35,8 @@ export enum ApiErrorDetail {
   InvalidRequestLimitNotInRange = 'The limit parameter must be a positive number not greater than %s',
   InvalidRequestLimitOnly = "Only 'limit' query parameter is supported",
   InvalidRequestNoRequestId = 'The request does not contain a request id',
-  InvalidRequestTimestamp = 'Timestamps should be UTC date/times in ISO8601 format, with a Z suffix'
+  InvalidRequestTimestamp = 'Timestamps should be UTC date/times in ISO8601 format, with a Z suffix',
+  InvalidRequestLettersToUpdate = 'The request exceeds the maximum of %s items allowed for update'
 }
 
 export function buildApiError(params: {
@@ -53,4 +54,8 @@ export function buildApiError(params: {
     title: params.title,
     detail: params.detail,
   };
+}
+
+export interface ErrorResponse {
+  errors: ApiError[];
 }
