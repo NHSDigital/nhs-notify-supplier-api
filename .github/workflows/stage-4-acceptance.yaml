@@ -54,7 +54,6 @@ jobs:
         run: |
           .github/scripts/dispatch_internal_repo_workflow.sh \
             --targetWorkflow "dispatch-contextual-tests-dynamic-env.yaml" \
-            --callerRunId "${{ github.run_id }}" \
             --infraRepoName "nhs-notify-supplier-api" \
             --releaseVersion "${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" \
             --overrideProjectName "nhs" \
