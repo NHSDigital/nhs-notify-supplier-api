@@ -1,7 +1,3 @@
-resource "aws_sns_topic" "main" {
-  name = "my-topic-with-policy"
-}
-
 resource "aws_sns_topic_policy" "main" {
   arn = aws_sns_topic.main.arn
 
@@ -41,7 +37,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
     }
 
     resources = [
-      aws_sns_topic.test.arn,
+      aws_sns_topic.main.arn,
     ]
 
     sid = "AllowAllSNSActionsFromAccount"
@@ -57,7 +53,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
       variable = "AWS:SourceArn"
 
       values = [
-        "arn:aws:sns:${var.region}:${var.shared_infra_account_id}:nhs-*-core-to-supplier-events",
+        "arn:aws:iam::${var.shared_infra_account_id}:role/nhs-*-core-to-supplier-events",
       ]
     }
 
@@ -69,7 +65,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
     }
 
     resources = [
-      aws_sns_topic.test.arn,
+      aws_sns_topic.main.arn,
     ]
 
     sid = "AllowAllSNSActionsFromSharedAccount"
