@@ -36,7 +36,8 @@ module "post_letters_receiver" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
-    QUEUE_URL = module.letter_status_updates_queue.sqs_queue_url
+    QUEUE_URL = module.letter_status_updates_queue.queue_url,
+    MAX_LIMIT = var.max_get_limit
   })
 }
 

@@ -18,7 +18,7 @@ export function createPostLettersReceiverHandler(deps: Deps): APIGatewayProxyHan
     }
 
     const maxUpdateItems = requireEnvVar(deps.env, "MAX_LIMIT");
-    requireEnvVar(deps.env, "SQS_QUEUE_URL");
+    requireEnvVar(deps.env, "QUEUE_URL");
 
     try {
       const body = assertNotEmpty(event.body, new ValidationError(ApiErrorDetail.InvalidRequestMissingBody));

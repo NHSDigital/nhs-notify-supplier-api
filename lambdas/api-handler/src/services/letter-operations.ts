@@ -84,7 +84,7 @@ export async function enqueueLetterUpdateRequests(postLettersRequest: PostLetter
   const tasks = postLettersRequest.data.map(async (request) => {
     try {
       const command = new SendMessageCommand({
-        QueueUrl: deps.env.SQS_QUEUE_URL,
+        QueueUrl: deps.env.QUEUE_URL,
         MessageAttributes: {
           CorrelationId: { DataType: 'String', StringValue: correlationId },
         },

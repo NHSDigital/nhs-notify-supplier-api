@@ -52,7 +52,7 @@ describe('createLetterStatusUpdateHandler', () => {
         LETTER_TTL_HOURS: 12960,
         DOWNLOAD_URL_TTL_SECONDS: 60,
         MAX_LIMIT: 2500,
-        SQS_QUEUE_URL: 'SQS_URL'
+        QUEUE_URL: 'SQS_URL'
       } as unknown as EnvVars
     } as Deps;
 
@@ -82,7 +82,7 @@ describe('createLetterStatusUpdateHandler', () => {
         LETTER_TTL_HOURS: 12960,
         DOWNLOAD_URL_TTL_SECONDS: 60,
         MAX_LIMIT: 2500,
-        SQS_QUEUE_URL: 'SQS_URL'
+        QUEUE_URL: 'SQS_URL'
       } as unknown as EnvVars
     } as Deps;
 

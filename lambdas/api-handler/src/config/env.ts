@@ -9,7 +9,7 @@ const EnvVarsSchema = z.object({
   MI_TTL_HOURS:  z.coerce.number().int(),
   DOWNLOAD_URL_TTL_SECONDS: z.coerce.number().int(),
   MAX_LIMIT: z.coerce.number().int().optional(),
-  SQS_QUEUE_URL: z.coerce.string().optional()
+  QUEUE_URL: z.coerce.string().optional()
 });
 
 export type EnvVars = z.infer<typeof EnvVarsSchema>;

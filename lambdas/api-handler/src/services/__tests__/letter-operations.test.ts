@@ -260,7 +260,7 @@ describe('enqueueLetterUpdateRequests function', () => {
     const sqsClient = { send: jest.fn() } as unknown as SQSClient;
     const logger = { error: jest.fn() } as unknown as pino.Logger;
     const env = {
-      SQS_QUEUE_URL: 'sqsUrl'
+      QUEUE_URL: 'sqsUrl'
     };
     const deps: Deps = { sqsClient, logger, env } as Deps;
 
@@ -268,7 +268,7 @@ describe('enqueueLetterUpdateRequests function', () => {
 
     expect(deps.sqsClient.send).toHaveBeenNthCalledWith(1, expect.objectContaining({
       input: {
-        QueueUrl: deps.env.SQS_QUEUE_URL,
+        QueueUrl: deps.env.QUEUE_URL,
         MessageAttributes: {
           CorrelationId: {
             DataType: 'String',
@@ -287,7 +287,7 @@ describe('enqueueLetterUpdateRequests function', () => {
 
     expect(deps.sqsClient.send).toHaveBeenNthCalledWith(2, expect.objectContaining({
       input: {
-        QueueUrl: deps.env.SQS_QUEUE_URL,
+        QueueUrl: deps.env.QUEUE_URL,
         MessageAttributes: {
           CorrelationId: {
             DataType: 'String',
@@ -323,7 +323,7 @@ describe('enqueueLetterUpdateRequests function', () => {
     const sqsClient = { send: jest.fn().mockRejectedValue(mockError) } as unknown as SQSClient;
     const logger = { error: jest.fn() } as unknown as pino.Logger;
     const env = {
-      SQS_QUEUE_URL: 'sqsUrl'
+      QUEUE_URL: 'sqsUrl'
     };
     const deps: Deps = { sqsClient, logger, env } as Deps;
 
