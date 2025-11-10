@@ -112,10 +112,10 @@ export const apiSandboxUpdateLetterStatusTestData: ApiSandboxUpdateLetterStatusT
     },
     expectedStatus: 400,
     expectedResponse: {
-      message: 'request.body.data.attributes.status should be equal to one of the allowed values: PENDING, ACCEPTED, REJECTED, PRINTED, ENCLOSED, CANCELLED, DISPATCHED, DELIVERED, FAILED, RETURNED, DESTROYED, FORWARDED',
+      message: 'request.body.data.attributes.status should be equal to one of the allowed values: PENDING, ACCEPTED, REJECTED, PRINTED, ENCLOSED, CANCELLED, DISPATCHED, DELIVERED, FAILED, RETURNED, FORWARDED',
       errors: [{
           path: '.body.data.attributes.status',
-          message: 'should be equal to one of the allowed values: PENDING, ACCEPTED, REJECTED, PRINTED, ENCLOSED, CANCELLED, DISPATCHED, DELIVERED, FAILED, RETURNED, DESTROYED, FORWARDED',
+          message: 'should be equal to one of the allowed values: PENDING, ACCEPTED, REJECTED, PRINTED, ENCLOSED, CANCELLED, DISPATCHED, DELIVERED, FAILED, RETURNED, FORWARDED',
           errorCode: 'enum.openapi.validation'
       }]
     },

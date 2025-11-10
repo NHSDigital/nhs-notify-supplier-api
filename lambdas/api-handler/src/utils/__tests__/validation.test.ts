@@ -1,4 +1,5 @@
-import { assertNotEmpty, lowerCaseKeys } from "../validation";
+import { ValidationError } from "../../errors";
+import { assertNotEmpty, lowerCaseKeys, validateIso8601Timestamp } from "../validation";
 
 describe("assertNotEmpty", () => {
   const error = new Error();
@@ -64,4 +65,17 @@ describe("lowerCaseKeys", () => {
     const result = lowerCaseKeys({});
     expect(result).toEqual({});
   });
+});
+
+describe('validateIso8601Timestamp', () => {
+  it.each([['2025-10-16T00:00:00.000Z'], ['2025-10-16T00:00:00Z'], ['2025-10-16T00:00:00.0Z'], ['2025-10-16T00:00:00.999999Z']])
+    ('permits valid timestamps', (timestamp: string) => {
+    validateIso8601Timestamp(timestamp);
+  });
+
+  it.each([['not a date string'], ['2025-10-16T00:00:00'], ['2025-16-10T00:00:00Z'], ['2025-02-31T00:00:00Z']])
+    ('rejects invalid timestamps', (timestamp: string) => {
+    expect(() => validateIso8601Timestamp(timestamp)).toThrow(ValidationError);
+  });
+
 });

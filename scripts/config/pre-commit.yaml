@@ -9,6 +9,10 @@ repos:
       - id: check-symlinks
       - id: detect-private-key
       - id: end-of-file-fixer
+        exclude: |
+          (?x)^(
+            internal/events/.*/.*\.schema\.json
+          )$
       - id: forbid-new-submodules
       - id: mixed-line-ending
       - id: pretty-format-json
@@ -18,7 +22,8 @@ repos:
                 package(-lock)?\.json$ |
                 sdk/.* |
                 someotherdir/.* |
-                src/server/host/Properties/launchSettings.json
+                src/server/host/Properties/launchSettings.json |
+                internal/events/.*/.*\.schema\.json
             )$
 
     # -   id: ...
