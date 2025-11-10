@@ -1,8 +1,8 @@
-module "get_letters" {
+module "upsert_letter" {
   source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.25/terraform-lambda.zip"
 
-  function_name = "get_letters"
-  description   = "Get paginated letter ids"
+  function_name = "upsert-letter"
+  description   = "Update or Insert the letter data in the letters table"
 
   aws_account_id = var.aws_account_id
   component      = var.component
@@ -15,14 +15,14 @@ module "get_letters" {
   kms_key_arn           = module.kms.key_arn
 
   iam_policy_document = {
-    body = data.aws_iam_policy_document.get_letters_lambda.json
+    body = data.aws_iam_policy_document.upsert_letter_lambda.json
   }
 
   function_s3_bucket      = local.acct.s3_buckets["lambda_function_artefacts"]["id"]
   function_code_base_path = local.aws_lambda_functions_dir_path
-  function_code_dir       = "api-handler/dist"
+  function_code_dir       = "upsert-letter/dist"
   function_include_common = true
-  handler_function_name   = "getLetters"
+  handler_function_name   = "upsertLetter"
   runtime                 = "nodejs22.x"
   memory                  = 128
   timeout                 = 5
@@ -35,12 +35,10 @@ module "get_letters" {
   log_destination_arn       = local.destination_arn
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
-  lambda_env_vars = merge(local.common_lambda_env_vars, {
-    MAX_LIMIT = var.max_get_limit
-  })
+  lambda_env_vars = merge(local.common_lambda_env_vars, {})
 }
 
-data "aws_iam_policy_document" "get_letters_lambda" {
+data "aws_iam_policy_document" "upsert_letter_lambda" {
   statement {
     sid    = "KMSPermissions"
     effect = "Allow"
@@ -51,24 +49,36 @@ data "aws_iam_policy_document" "get_letters_lambda" {
     ]
 
     resources = [
-      module.kms.key_arn, ## Requires shared kms module
+      module.kms.key_arn,
     ]
   }
 
   statement {
-    sid    = "AllowDynamoDBAccess"
+    sid    = "AllowDynamoDBWrite"
     effect = "Allow"
 
     actions = [
-      "dynamodb:BatchGetItem",
-      "dynamodb:GetItem",
-      "dynamodb:Query",
-      "dynamodb:Scan",
+      "dynamodb:PutItem"
     ]
 
     resources = [
       aws_dynamodb_table.letters.arn,
       "${aws_dynamodb_table.letters.arn}/index/supplierStatus-index"
+    ]
+  }
+
+  statement {
+    sid    = "AllowSQSRead"
+    effect = "Allow"
+
+    actions = [
+      "sqs:ReceiveMessage",
+      "sqs:DeleteMessage",
+      "sqs:GetQueueAttributes"
+    ]
+
+    resources = [
+      module.sqs_letter_updates.sqs_queue_arn
     ]
   }
 }
