@@ -2,7 +2,7 @@ import { SQSEvent, Context, SQSHandler, SQSRecord } from 'aws-lambda';
 import { LetterDto, LetterDtoSchema } from '../contracts/letters';
 import { Deps } from '../config/deps';
 
-export function createPostLettersProcessorHandler(deps: Deps): SQSHandler {
+export function createLetterStatusUpdateHandler(deps: Deps): SQSHandler {
 
   return async ( event: SQSEvent, context: Context ) => {
     for (const message of event.Records) {

@@ -1,7 +1,7 @@
-module "post_letters_processor" {
+module "letter_status_update" {
   source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.24/terraform-lambda.zip"
 
-  function_name = "post_letters_processor"
+  function_name = "letter_status_update"
   description   = "Processes letter status updates"
 
   aws_account_id = var.aws_account_id
@@ -15,14 +15,14 @@ module "post_letters_processor" {
   kms_key_arn           = module.kms.key_arn
 
   iam_policy_document = {
-    body = data.aws_iam_policy_document.post_letters_processor.json
+    body = data.aws_iam_policy_document.letter_status_update.json
   }
 
   function_s3_bucket      = local.acct.s3_buckets["lambda_function_artefacts"]["id"]
   function_code_base_path = local.aws_lambda_functions_dir_path
   function_code_dir       = "api-handler/dist"
   function_include_common = true
-  handler_function_name   = "postLetters"
+  handler_function_name   = "statusUpdateHandler"
   runtime                 = "nodejs22.x"
   memory                  = 128
   timeout                 = 5
@@ -38,7 +38,7 @@ module "post_letters_processor" {
   lambda_env_vars = merge(local.common_lambda_env_vars, {})
 }
 
-data "aws_iam_policy_document" "post_letters_processor" {
+data "aws_iam_policy_document" "letter_status_update" {
   statement {
     sid    = "KMSPermissions"
     effect = "Allow"
@@ -78,7 +78,7 @@ data "aws_iam_policy_document" "post_letters_processor" {
     ]
 
     resources = [
-      module.post_letters_queue.sqs_queue_arn
+      module.letter_status_updates_queue.sqs_queue_arn
     ]
   }
 }

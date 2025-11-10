@@ -53,7 +53,7 @@ data "aws_iam_policy_document" "api_gateway_execution_policy" {
       module.get_letter_data.function_arn,
       module.get_letters.function_arn,
       module.patch_letter.function_arn,
-      module.post_letters.function_arn,
+      module.post_letters_receiver.function_arn,
       module.post_mi.function_arn
     ]
   }

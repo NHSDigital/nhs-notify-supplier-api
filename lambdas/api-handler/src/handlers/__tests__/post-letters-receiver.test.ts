@@ -92,8 +92,8 @@ describe('postLetters API Handler', () => {
 
     mockedBatchUpdateStatus.mockResolvedValue();
 
-    const postLettersHandler = createPostLettersReceiverHandler(mockedDeps);
-    const result = await postLettersHandler(event, context, callback);
+    const postLettersReceiverHandler = createPostLettersReceiverHandler(mockedDeps);
+    const result = await postLettersReceiverHandler(event, context, callback);
 
     expect(result).toEqual({
       statusCode: 202,
@@ -113,8 +113,8 @@ describe('postLetters API Handler', () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const postLettersHandler = createPostLettersReceiverHandler(mockedDeps);
-    const result = await postLettersHandler(event, context, callback);
+    const postLettersReceiverHandler = createPostLettersReceiverHandler(mockedDeps);
+    const result = await postLettersReceiverHandler(event, context, callback);
 
     expect(mockedProcessError).toHaveBeenCalledWith(new Error('The supplier ID is missing from the request'), 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
@@ -132,8 +132,8 @@ describe('postLetters API Handler', () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const postLettersHandler = createPostLettersReceiverHandler(mockedDeps);
-    const result = await postLettersHandler(event, context, callback);
+    const postLettersReceiverHandler = createPostLettersReceiverHandler(mockedDeps);
+    const result = await postLettersReceiverHandler(event, context, callback);
 
     expect(mockedProcessError).toHaveBeenCalledWith(new Error("The request headers don't contain the APIM correlation id"), undefined, mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
@@ -151,8 +151,8 @@ describe('postLetters API Handler', () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const postLettersHandler = createPostLettersReceiverHandler(mockedDeps);
-    const result = await postLettersHandler(event, context, callback);
+    const postLettersReceiverHandler = createPostLettersReceiverHandler(mockedDeps);
+    const result = await postLettersReceiverHandler(event, context, callback);
 
     expect(mockedProcessError).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingBody), 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
@@ -171,8 +171,8 @@ describe('postLetters API Handler', () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const postLettersHandler = createPostLettersReceiverHandler(mockedDeps);
-    const result = await postLettersHandler(event, context, callback);
+    const postLettersReceiverHandler = createPostLettersReceiverHandler(mockedDeps);
+    const result = await postLettersReceiverHandler(event, context, callback);
 
     expect(mockedProcessError).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestBody), 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
@@ -202,8 +202,8 @@ describe('postLetters API Handler', () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const postLettersHandler = createPostLettersReceiverHandler(mockedDeps);
-    const result = await postLettersHandler(event, context, callback);
+    const postLettersReceiverHandler = createPostLettersReceiverHandler(mockedDeps);
+    const result = await postLettersReceiverHandler(event, context, callback);
 
     expect(mockedProcessError).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestLettersToUpdate, { args: [mockedDeps.env.MAX_LIMIT]}), 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
@@ -222,8 +222,8 @@ describe('postLetters API Handler', () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const postLettersHandler = createPostLettersReceiverHandler(mockedDeps);
-    const result = await postLettersHandler(event, context, callback);
+    const postLettersReceiverHandler = createPostLettersReceiverHandler(mockedDeps);
+    const result = await postLettersReceiverHandler(event, context, callback);
 
     expect(mockedProcessError).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestBody), 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
@@ -247,8 +247,8 @@ describe('postLetters API Handler', () => {
       throw error;
     });
 
-    const postLettersHandler = createPostLettersReceiverHandler(mockedDeps);
-    const result = await postLettersHandler(event, context, callback);
+    const postLettersReceiverHandler = createPostLettersReceiverHandler(mockedDeps);
+    const result = await postLettersReceiverHandler(event, context, callback);
 
     expect(mockedProcessError).toHaveBeenCalledWith(error, 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);

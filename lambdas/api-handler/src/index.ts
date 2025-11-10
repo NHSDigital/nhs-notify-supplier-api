@@ -4,7 +4,7 @@ import { createGetLetterDataHandler } from "./handlers/get-letter-data";
 import { createGetLettersHandler } from "./handlers/get-letters";
 import { createPatchLetterHandler } from "./handlers/patch-letter";
 import { createPostLettersReceiverHandler } from "./handlers/post-letters-receiver";
-import { createPostLettersProcessorHandler } from "./handlers/post-letters-processor";
+import { createLetterStatusUpdateHandler } from "./handlers/letter-status-update";
 import { createPostMIHandler } from "./handlers/post-mi";
 
 const container = createDependenciesContainer();
@@ -13,6 +13,7 @@ export const getLetter = createGetLetterHandler(container);
 export const getLetterData = createGetLetterDataHandler(container);
 export const getLetters = createGetLettersHandler(container);
 export const patchLetter = createPatchLetterHandler(container);
-export const postLetters = createPostLettersHandler(container);
+export const statusUpdateHandler = createLetterStatusUpdateHandler(container);
+export const postLettersReceiver = createPostLettersReceiverHandler(container);
 
 export const postMI = createPostMIHandler(container);

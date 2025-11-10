@@ -22,7 +22,7 @@ module "post_letters_receiver" {
   function_code_base_path = local.aws_lambda_functions_dir_path
   function_code_dir       = "api-handler/dist"
   function_include_common = true
-  handler_function_name   = "postLetters"
+  handler_function_name   = "postLettersReceiver"
   runtime                 = "nodejs22.x"
   memory                  = 128
   timeout                 = 5
@@ -36,7 +36,7 @@ module "post_letters_receiver" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
-    QUEUE_URL = module.post_letters_queue.sqs_queue_url
+    QUEUE_URL = module.letter_status_updates_queue.sqs_queue_url
   })
 }
 
@@ -65,7 +65,7 @@ data "aws_iam_policy_document" "post_letters_receiver" {
     ]
 
     resources = [
-      module.post_letters_queue.sqs_queue_arn
+      module.letter_status_updates_queue.sqs_queue_arn
     ]
   }
 }

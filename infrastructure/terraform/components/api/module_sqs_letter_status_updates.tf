@@ -1,8 +1,8 @@
-module "post_letters_queue" {
+module "letter_status_updates_queue" {
   source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.24/terraform-sqs.zip"
 
-  name = "post_letters_queue"
-  description   = "Queues a collection of letters to update"
+  name = "letter_status_updates_queue"
+  description   = "Queue to transport update letter status messages"
 
   aws_account_id = var.aws_account_id
   component      = var.component
@@ -14,11 +14,11 @@ module "post_letters_queue" {
   sqs_kms_key_arn = module.kms.key_arn
 
   iam_policy_document = {
-    body = data.aws_iam_policy_document.post_letters_queue.json
+    body = data.aws_iam_policy_document.letter_status_updates_queue.json
   }
 }
 
-data "aws_iam_policy_document" "post_letters_queue" {
+data "aws_iam_policy_document" "letter_status_updates_queue" {
 
   statement {
     sid    = "KMSPermissions"

@@ -1,18 +1,14 @@
-import { APIGatewayProxyResult, Context, SQSEvent, SQSRecord } from 'aws-lambda';
+import { Context, SQSEvent, SQSRecord } from 'aws-lambda';
 import { mockDeep } from 'jest-mock-extended';
-import { makeApiGwEvent } from './utils/test-utils';
-import { LetterDto, PostLettersRequest } from '../../contracts/letters';
-import { ValidationError } from '../../errors';
-import * as errors from '../../contracts/errors';
+import { LetterDto } from '../../contracts/letters';
 import { S3Client } from '@aws-sdk/client-s3';
 import pino from 'pino';
 import { LetterRepository } from '@internal/datastore/src';
 import { EnvVars } from '../../config/env';
 import { Deps } from '../../config/deps';
-import { createPostLettersReceiverHandler } from '../post-letters-receiver';
-import { createPostLettersProcessorHandler } from '../post-letters-processor';
+import { createLetterStatusUpdateHandler } from '../letter-status-update';
 
-describe('postLettersProcessorHandler', () => {
+describe('createLetterStatusUpdateHandler', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -63,8 +59,8 @@ describe('postLettersProcessorHandler', () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const postLettersHandler = createPostLettersProcessorHandler(mockedDeps);
-    await postLettersHandler(buildEvent(lettersToUpdate), context, callback);
+    const letterStatusUpdateHandler = createLetterStatusUpdateHandler(mockedDeps);
+    await letterStatusUpdateHandler(buildEvent(lettersToUpdate), context, callback);
 
     expect(mockedDeps.letterRepo.updateLetterStatus).toHaveBeenNthCalledWith(1, lettersToUpdate[0]);
     expect(mockedDeps.letterRepo.updateLetterStatus).toHaveBeenNthCalledWith(2, lettersToUpdate[1]);
@@ -99,8 +95,8 @@ describe('postLettersProcessorHandler', () => {
         supplierId: 's1'
       }];
 
-    const postLettersHandler = createPostLettersProcessorHandler(mockedDeps);
-    await postLettersHandler(buildEvent(letterToUpdate), context, callback);
+    const letterStatusUpdateHandler = createLetterStatusUpdateHandler(mockedDeps);
+    await letterStatusUpdateHandler(buildEvent(letterToUpdate), context, callback);
 
     expect(mockedDeps.letterRepo.updateLetterStatus).toHaveBeenCalledWith(letterToUpdate[0]);
     expect(mockedDeps.logger.error).toHaveBeenCalledWith({ err: mockError},
