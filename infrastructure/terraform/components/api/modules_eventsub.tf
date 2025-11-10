@@ -22,4 +22,5 @@ module "eventsub" {
 
   event_cache_expiry_days = 30
   enable_event_cache      = true
+  shared_infra_account_id = var.shared_infra_account_id
 }
