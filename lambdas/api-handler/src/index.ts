@@ -13,7 +13,7 @@ export const getLetter = createGetLetterHandler(container);
 export const getLetterData = createGetLetterDataHandler(container);
 export const getLetters = createGetLettersHandler(container);
 export const patchLetter = createPatchLetterHandler(container);
-export const statusUpdateHandler = createLetterStatusUpdateHandler(container);
+export const letterStatusUpdate = createLetterStatusUpdateHandler(container);
 export const postLettersReceiver = createPostLettersReceiverHandler(container);
 
 export const postMI = createPostMIHandler(container);

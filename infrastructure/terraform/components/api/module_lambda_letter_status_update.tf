@@ -22,7 +22,7 @@ module "letter_status_update" {
   function_code_base_path = local.aws_lambda_functions_dir_path
   function_code_dir       = "api-handler/dist"
   function_include_common = true
-  handler_function_name   = "statusUpdateHandler"
+  handler_function_name   = "letterStatusUpdate"
   runtime                 = "nodejs22.x"
   memory                  = 128
   timeout                 = 5
@@ -58,6 +58,8 @@ data "aws_iam_policy_document" "letter_status_update" {
     effect = "Allow"
 
     actions = [
+      "dynamodb:GetItem",
+      "dynamodb:Query",
       "dynamodb:UpdateItem",
     ]
 

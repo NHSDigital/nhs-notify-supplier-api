@@ -327,7 +327,7 @@ describe('enqueueLetterUpdateRequests function', () => {
     };
     const deps: Deps = { sqsClient, logger, env } as Deps;
 
-    const result = await enqueueLetterUpdateRequests(updateLettersRequest, 'supplier1', 'correlationId1', deps);
+    await enqueueLetterUpdateRequests(updateLettersRequest, 'supplier1', 'correlationId1', deps);
 
     expect(deps.logger.error).toHaveBeenCalledWith({ err: mockError},
           'Error queuing letterId=id1 supplierId=supplier1 correlationId=correlationId1 for update');

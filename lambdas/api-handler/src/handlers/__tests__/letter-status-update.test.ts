@@ -100,7 +100,7 @@ describe('createLetterStatusUpdateHandler', () => {
 
     expect(mockedDeps.letterRepo.updateLetterStatus).toHaveBeenCalledWith(letterToUpdate[0]);
     expect(mockedDeps.logger.error).toHaveBeenCalledWith({ err: mockError},
-      'Error processing update to letterId=id1 supplierId=s1 correlationId=correlationId-id1');
+      'Error processing update: messageId=mid-id1 correlationId=correlationId-id1');
   });
 });
 

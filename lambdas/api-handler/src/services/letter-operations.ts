@@ -91,6 +91,7 @@ export async function enqueueLetterUpdateRequests(postLettersRequest: PostLetter
         MessageBody: JSON.stringify(mapPostLetterResourceToDto(request, supplierId)),
       });
       await deps.sqsClient.send(command);
+      deps.logger.info(`Enqueued letter update: url=${command.input.QueueUrl}, message=${command.input.MessageBody}, correlationId=${correlationId}`)
     } catch (err) {
       deps.logger.error({ err }, `Error queuing letterId=${request.id} supplierId=${supplierId} correlationId=${correlationId} for update`);
     }
