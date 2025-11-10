@@ -108,3 +108,9 @@ variable "force_destroy" {
   description = "When enabled will force destroy event-cache S3 bucket"
   default     = false
 }
+
+variable "shared_infra_account_id" {
+  type        = string
+  description = "The AWS Account ID of the shared infrastructure account"
+  default     = "000000000000"
+}
