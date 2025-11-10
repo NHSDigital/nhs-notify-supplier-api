@@ -1,5 +1,5 @@
 module "post_mi" {
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.25/terraform-lambda.zip"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-lambda.zip"
 
   function_name = "post_mi"
   description   = "Add management information"

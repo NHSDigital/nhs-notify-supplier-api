@@ -1,5 +1,5 @@
 module "upsert_letter" {
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.25/terraform-lambda.zip"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-lambda.zip"
 
   function_name = "upsert-letter"
   description   = "Update or Insert the letter data in the letters table"

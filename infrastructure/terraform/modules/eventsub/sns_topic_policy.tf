@@ -8,6 +8,14 @@ data "aws_iam_policy_document" "sns_topic_policy" {
   policy_id = "__default_policy_ID"
 
   statement {
+    sid = "AllowAllSNSActionsFromAccount"
+    effect = "Allow"
+
+    principals {
+      type        = "AWS"
+      identifiers = ["*"]
+    }
+
     actions = [
       "SNS:Subscribe",
       "SNS:SetTopicAttributes",
@@ -20,6 +28,10 @@ data "aws_iam_policy_document" "sns_topic_policy" {
       "SNS:AddPermission",
     ]
 
+    resources = [
+      aws_sns_topic.main.arn,
+    ]
+
     condition {
       test     = "StringEquals"
       variable = "AWS:SourceOwner"
@@ -28,46 +40,31 @@ data "aws_iam_policy_document" "sns_topic_policy" {
         var.aws_account_id,
       ]
     }
-
-    effect = "Allow"
-
-    principals {
-      type        = "AWS"
-      identifiers = ["*"]
-    }
-
-    resources = [
-      aws_sns_topic.main.arn,
-    ]
-
-    sid = "AllowAllSNSActionsFromAccount"
   }
 
   statement {
+    sid = "AllowAllSNSActionsFromSharedAccount"
+    effect = "Allow"
     actions = [
       "SNS:Publish",
     ]
 
-    condition {
-      test     = "ArnLike"
-      variable = "AWS:SourceArn"
-
-      values = [
-        "arn:aws:iam::${var.shared_infra_account_id}:role/nhs-*-core-to-supplier-events",
-      ]
-    }
-
-    effect = "Allow"
-
     principals {
-      type        = "AWS"
-      identifiers = ["*"]
+      type        = "Service"
+      identifiers = ["events.amazonaws.com"]
     }
 
     resources = [
       aws_sns_topic.main.arn,
     ]
 
-    sid = "AllowAllSNSActionsFromSharedAccount"
+    condition {
+      test     = "StringEquals"
+      variable = "AWS:SourceAccount"
+
+      values = [
+        var.shared_infra_account_id
+      ]
+    }
   }
 }

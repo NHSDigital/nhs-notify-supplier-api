@@ -1,7 +1,7 @@
-module "letter_update" {
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.25/terraform-lambda.zip"
+module "letter_updates_transformer" {
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-lambda.zip"
 
-  function_name = "letter-update"
+  function_name = "letter-updates-transformer"
   description   = "Letter Update Filter/Producer"
 
   aws_account_id = var.aws_account_id
@@ -15,12 +15,12 @@ module "letter_update" {
   kms_key_arn           = module.kms.key_arn
 
   iam_policy_document = {
-    body = data.aws_iam_policy_document.letter_update_lambda.json
+    body = data.aws_iam_policy_document.letter_updates_transformer_lambda.json
   }
 
   function_s3_bucket      = local.acct.s3_buckets["lambda_function_artefacts"]["id"]
   function_code_base_path = local.aws_lambda_functions_dir_path
-  function_code_dir       = "letter-update/dist"
+  function_code_dir       = "letter-updates-transformer/dist"
   function_include_common = true
   handler_function_name   = "updateLetter"
   runtime                 = "nodejs22.x"
@@ -40,7 +40,7 @@ module "letter_update" {
   })
 }
 
-data "aws_iam_policy_document" "letter_update_lambda" {
+data "aws_iam_policy_document" "letter_updates_transformer_lambda" {
   statement {
     sid    = "KMSPermissions"
     effect = "Allow"

@@ -1,7 +1,7 @@
 module "eventsub" {
   source = "../../modules/eventsub"
 
-  name = "event-subscriber"
+  name = "eventsub"
 
   aws_account_id = var.aws_account_id
   component      = var.component

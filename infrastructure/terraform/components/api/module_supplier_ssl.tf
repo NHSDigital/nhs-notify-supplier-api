@@ -1,7 +1,7 @@
 module "supplier_ssl" {
   count = var.manually_configure_mtls_truststore ? 0 : 1
 
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.25/terraform-ssl.zip"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-ssl.zip"
 
   name                = "sapi_trust"
   aws_account_id      = var.aws_account_id
