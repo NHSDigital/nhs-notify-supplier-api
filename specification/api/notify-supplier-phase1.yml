@@ -49,10 +49,7 @@ paths:
       summary: Health check
 components:
   securitySchemes:
-    app-level3:
-      $ref: https://proxygen.ptl.api.platform.nhs.uk/components/securitySchemes/app-level3
-    app-level0:
-      $ref: https://proxygen.ptl.api.platform.nhs.uk/components/securitySchemes/app-level0
+    $ref: ./components/security-schemes/security-schemes.yml
 
 tags:
   - name: letter
