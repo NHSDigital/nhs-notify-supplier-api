@@ -99,8 +99,12 @@ describe('createLetterStatusUpdateHandler', () => {
     await letterStatusUpdateHandler(buildEvent(letterToUpdate), context, callback);
 
     expect(mockedDeps.letterRepo.updateLetterStatus).toHaveBeenCalledWith(letterToUpdate[0]);
-    expect(mockedDeps.logger.error).toHaveBeenCalledWith({ err: mockError},
-      'Error processing update: messageId=mid-id1 correlationId=correlationId-id1');
+    expect(mockedDeps.logger.error).toHaveBeenCalledWith({
+      err: mockError,
+      messageId: 'mid-id1',
+      correlationId: 'correlationId-id1',
+      messageBody: '{\"id\":\"id1\",\"status\":\"ACCEPTED\",\"supplierId\":\"s1\"}',
+    }, 'Error processing letter status update');
   });
 });
 

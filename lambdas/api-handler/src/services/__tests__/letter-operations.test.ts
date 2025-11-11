@@ -266,6 +266,8 @@ describe('enqueueLetterUpdateRequests function', () => {
 
     const result = await enqueueLetterUpdateRequests(updateLettersRequest, 'supplier1', 'correlationId1', deps);
 
+    expect(result).toBeUndefined();
+
     expect(deps.sqsClient.send).toHaveBeenNthCalledWith(1, expect.objectContaining({
       input: {
         QueueUrl: deps.env.QUEUE_URL,
@@ -313,23 +315,55 @@ describe('enqueueLetterUpdateRequests function', () => {
           id: 'id1',
           type: 'Letter',
           attributes: {
-            status: 'REJECTED',
-            reasonCode: 123,
-            reasonText: 'Reason text',
+            status: 'ACCEPTED'
+          }
+        },
+        {
+          id: 'id2',
+          type: 'Letter',
+          attributes: {
+            status: 'REJECTED'
           }
         }
       ]
     };
-    const sqsClient = { send: jest.fn().mockRejectedValue(mockError) } as unknown as SQSClient;
+    const sqsClient = { send: jest.fn()
+      .mockRejectedValue(mockError)
+      .mockResolvedValueOnce({ MessageId: 'm1' })
+    } as unknown as SQSClient;
     const logger = { error: jest.fn() } as unknown as pino.Logger;
     const env = {
       QUEUE_URL: 'sqsUrl'
     };
     const deps: Deps = { sqsClient, logger, env } as Deps;
 
-    await enqueueLetterUpdateRequests(updateLettersRequest, 'supplier1', 'correlationId1', deps);
+    const result = await enqueueLetterUpdateRequests(updateLettersRequest, 'supplier1', 'correlationId1', deps);
 
-    expect(deps.logger.error).toHaveBeenCalledWith({ err: mockError},
-          'Error queuing letterId=id1 supplierId=supplier1 correlationId=correlationId1 for update');
+    expect(result).toBeUndefined();
+
+    expect(deps.sqsClient.send).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      input: {
+        QueueUrl: deps.env.QUEUE_URL,
+        MessageAttributes: {
+          CorrelationId: {
+            DataType: 'String',
+            StringValue: 'correlationId1',
+          }
+        },
+        MessageBody: JSON.stringify({
+            id: updateLettersRequest.data[1].id,
+            supplierId: 'supplier1',
+            status: updateLettersRequest.data[1].attributes.status
+        })
+      }
+    }));
+
+    expect(deps.logger.error).toHaveBeenCalledWith({
+      err: mockError,
+      correlationId: 'correlationId1',
+      letterId: 'id2',
+      letterStatus: 'REJECTED',
+      supplierId: 'supplier1'
+    }, 'Error enqueuing letter status update');
   });
 });
