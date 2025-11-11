@@ -11,4 +11,8 @@ module "letter_status_updates_queue" {
   region         = var.region
 
   sqs_kms_key_arn = module.kms.key_arn
+
+  allowed_arns = [ module.post_letters_receiver.function_arn ]
+
+  create_dlq = true
 }
