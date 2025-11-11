@@ -46,7 +46,7 @@ describe('letter-mapper', () => {
       supplierStatus: 'supplier1#PENDING',
       supplierStatusSk: Date.now().toString(),
       ttl: 123,
-      reasonCode: 123,
+      reasonCode: 'R01',
       reasonText: 'Reason text'
     };
 
@@ -60,7 +60,7 @@ describe('letter-mapper', () => {
           specificationId: 'spec123',
           status: 'PENDING',
           groupId: 'group123',
-          reasonCode: 123,
+          reasonCode: 'R01',
           reasonText: 'Reason text',
         }
       }
@@ -111,7 +111,7 @@ describe('letter-mapper', () => {
       supplierStatus: 'supplier1#PENDING',
       supplierStatusSk: Date.now().toString(),
       ttl: 123,
-      reasonCode: 123,
+      reasonCode: 'R01',
       reasonText: 'Reason text'
     };
 
@@ -125,7 +125,7 @@ describe('letter-mapper', () => {
           specificationId: 'spec123',
           status: 'PENDING',
           groupId: 'group123',
-          reasonCode: 123,
+          reasonCode: 'R01',
           reasonText: 'Reason text',
         }
       }
@@ -145,7 +145,7 @@ describe('letter-mapper', () => {
       supplierStatus: 'supplier1#PENDING',
       supplierStatusSk: Date.now().toString(),
       ttl: 123,
-      reasonCode: 123,
+      reasonCode: 'R01',
       reasonText: 'Reason text'
     };
 
