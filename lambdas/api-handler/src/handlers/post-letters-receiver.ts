@@ -38,7 +38,7 @@ export function createPostLettersReceiverHandler(deps: Deps): APIGatewayProxyHan
         throw new ValidationError(ApiErrorDetail.InvalidRequestLettersToUpdate, { args: [maxUpdateItems]});
       }
 
-      enqueueLetterUpdateRequests(postLettersRequest, commonHeadersResult.value.supplierId, commonHeadersResult.value.correlationId, deps);
+      await enqueueLetterUpdateRequests(postLettersRequest, commonHeadersResult.value.supplierId, commonHeadersResult.value.correlationId, deps);
 
       return {
         statusCode: 202,
