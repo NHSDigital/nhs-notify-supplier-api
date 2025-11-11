@@ -9,7 +9,7 @@
           "authorizerCredentials": "${APIG_EXECUTION_ROLE_ARN}",
           "authorizerResultTtlInSeconds": 0,
           "authorizerUri": "arn:aws:apigateway:${AWS_REGION}:lambda:path/2015-03-31/functions/${AUTHORIZER_LAMBDA_ARN}/invocations",
-          "identitySource": "method.request.header.apim-application-id",
+          "identitySource": "method.request.header.NHSD-Supplier-ID",
           "type": "request"
         },
         "x-amazon-apigateway-authtype": "custom"
