@@ -6,7 +6,7 @@ resource "aws_cloudwatch_metric_alarm" "alm-apim-client-certificate-near-expiry"
   namespace   = "comms-apim-authorizer"
 
   dimensions = {
-    Environment = local.parameter_bundle.environment
+    Environment = var.environment
   }
 
   period              = 60 * 60 * 4 //4 hours
