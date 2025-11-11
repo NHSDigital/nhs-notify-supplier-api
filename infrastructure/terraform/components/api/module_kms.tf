@@ -31,6 +31,7 @@ data "aws_iam_policy_document" "kms" {
       type = "Service"
 
       identifiers = [
+        "sns.amazon.com",
         "logs.${var.region}.amazonaws.com",
       ]
     }
@@ -40,6 +41,26 @@ data "aws_iam_policy_document" "kms" {
       "kms:Decrypt",
       "kms:GenerateDataKey",
       "kms:DescribeKey"
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
+
+  statement {
+    sid    = "AllowEventsFromSharedInfraAccount"
+    effect = "Allow"
+
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::${var.shared_infra_account_id}:root"]
+    }
+
+    actions = [
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:GenerateDataKey"
     ]
 
     resources = [

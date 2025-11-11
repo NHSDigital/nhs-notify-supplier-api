@@ -50,21 +50,14 @@ data "aws_iam_policy_document" "sns_topic_policy" {
     ]
 
     principals {
-      type        = "Service"
-      identifiers = ["events.amazonaws.com"]
+      type = "AWS"
+      identifiers = [
+        "arn:aws:iam::${var.shared_infra_account_id}:root"
+      ]
     }
 
     resources = [
       aws_sns_topic.main.arn,
     ]
-
-    condition {
-      test     = "StringEquals"
-      variable = "AWS:SourceAccount"
-
-      values = [
-        var.shared_infra_account_id
-      ]
-    }
   }
 }
