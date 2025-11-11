@@ -3,7 +3,6 @@ import { SUPPLIER_LETTERS } from '../../constants/api_constants';
 import { createHeaderWithNoCorrelationId, createInvalidRequestHeaders, createValidRequestHeaders } from '../../constants/request_headers';
 import { getRestApiGatewayBaseUrl } from '../../helpers/awsGatewayHelper';
 import { validateApiResponse } from '../../helpers/validateJsonSchema';
-import { link } from 'fs';
 
 let baseUrl: string;
 

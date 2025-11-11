@@ -82,15 +82,21 @@ const patchLetter = ({ xRequestId, id, body, xCorrelationId }) => new Promise(
   async (resolve, reject) => {
     try {
       const responseData = await ResponseProvider.patchLetterResponse(body);
-      const content  = await fs.readFile(responseData.responsePath);
-      const fileData = JSON.parse(content);
+      if (responseData.responseCode !== 202) {
+        const content  = await fs.readFile(responseData.responsePath);
+        const fileData = JSON.parse(content);
 
-
-      resolve(Service.successResponse({
-        xRequestId,
-        xCorrelationId,
-        data: fileData,
-      }, responseData.responseCode));
+        resolve(Service.successResponse({
+          xRequestId,
+          xCorrelationId,
+          data: fileData,
+        }, responseData.responseCode));
+      } else {
+        resolve(Service.successResponse({
+          xRequestId,
+          xCorrelationId,
+        }, responseData.responseCode));
+      }
     } catch (e) {
       reject(Service.rejectResponse(
         e.message || 'Invalid input',
@@ -112,10 +118,21 @@ const postLetters = ({ xRequestId, body, xCorrelationId }) => new Promise(
     const responseData = await ResponseProvider.postLettersResponse(body);
 
     try {
-      resolve(Service.successResponse({
-        xRequestId,
-        xCorrelationId
-      }, responseData.responseCode));
+      if (responseData.responseCode !== 202) {
+        const content  = await fs.readFile(responseData.responsePath);
+        const fileData = JSON.parse(content);
+
+        resolve(Service.successResponse({
+          xRequestId,
+          xCorrelationId,
+          data: fileData,
+        }, responseData.responseCode));
+      } else {
+        resolve(Service.successResponse({
+          xRequestId,
+          xCorrelationId,
+        }, responseData.responseCode));
+      }
     } catch (e) {
       reject(Service.rejectResponse(
         e.message || 'Invalid input',

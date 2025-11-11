@@ -1,0 +1,6 @@
+description: 202 (Accepted) Acknowledges Letter resource update has been received
+headers:
+  X-Request-ID:
+    $ref: "../responseHeaders/xRequestId.yml"
+  X-Correlation-ID:
+    $ref: "../responseHeaders/xCorrelationId.yml"
