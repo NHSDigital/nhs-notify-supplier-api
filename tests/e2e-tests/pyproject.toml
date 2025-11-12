@@ -1,0 +1,17 @@
+[project]
+name = "e2e-tests"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "namitha.prabhu",email = "namitha.prabhu2@nhs.net"}
+]
+readme = "README.md"
+requires-python = ">=3.12,<4.0"
+dependencies = [
+    "pytest-nhsd-apim (==5.0.6)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
