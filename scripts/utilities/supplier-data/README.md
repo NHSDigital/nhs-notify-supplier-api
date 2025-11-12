@@ -1,4 +1,4 @@
-# Test letter generator
+# Supplier Utility
 
 Simple scripts to manipulate supplier data within the Suppliers table via the internal datastore definitions.
 
