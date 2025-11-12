@@ -12,7 +12,7 @@ locals {
     GET_LETTERS_LAMBDA_ARN              = module.get_letters.function_arn
     GET_LETTER_DATA_LAMBDA_ARN          = module.get_letter_data.function_arn
     PATCH_LETTER_LAMBDA_ARN             = module.patch_letter.function_arn
-    POST_LETTERS_RECEIVER_LAMBDA_ARN    = module.post_letters_receiver.function_arn
+    POST_LETTERS_LAMBDA_ARN             = module.post_letters.function_arn
     POST_MI_LAMBDA_ARN                  = module.post_mi.function_arn
   })
 

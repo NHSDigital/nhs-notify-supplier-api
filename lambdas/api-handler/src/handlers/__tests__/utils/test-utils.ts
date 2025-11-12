@@ -1,4 +1,4 @@
-import type { APIGatewayProxyEvent, SQSEvent } from 'aws-lambda';
+import type { APIGatewayProxyEvent } from 'aws-lambda';
 
 export function makeApiGwEvent(
   overrides: Partial<APIGatewayProxyEvent> = {}

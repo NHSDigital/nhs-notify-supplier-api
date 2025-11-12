@@ -8,7 +8,5 @@ resource "aws_lambda_event_source_mapping" "status_updates_sqs_to_status_update_
   depends_on = [
     module.letter_status_updates_queue,         # ensures queue exists
     module.letter_status_update                 # ensures update handler exists
-    # aws_iam_role_policy.letter_status_update, # ensures permissions exist?
-    # aws_iam_role_policy.post_letters_receiver # ensures permissions exist?
   ]
 }

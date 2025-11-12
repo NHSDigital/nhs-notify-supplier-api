@@ -5,23 +5,20 @@ import { Deps } from '../config/deps';
 export function createLetterStatusUpdateHandler(deps: Deps): SQSHandler {
 
   return async ( event: SQSEvent ) => {
-    for (const message of event.Records) {
-      await processMessageAsync(message, deps);
-    }
-  }
-}
+    const tasks = event.Records.map( async (message) => {
+      try {
+        const letterToUpdate: LetterDto = LetterDtoSchema.parse(JSON.parse(message.body));
+        await deps.letterRepo.updateLetterStatus(letterToUpdate);
+      } catch (error) {
+        deps.logger.error({
+          err: error,
+          messageId: message.messageId,
+          correlationId: message.messageAttributes['CorrelationId'].stringValue,
+          messageBody: message.body
+        }, 'Error processing letter status update');
+      }
+    });
 
-async function processMessageAsync(message: SQSRecord, deps: Deps): Promise<any> {
-
-  try {
-    const letterToUpdate: LetterDto = LetterDtoSchema.parse(JSON.parse(message.body));
-    await deps.letterRepo.updateLetterStatus(letterToUpdate);
-  } catch (error) {
-    deps.logger.error({
-      err: error,
-      messageId: message.messageId,
-      correlationId: message.messageAttributes['CorrelationId'].stringValue,
-      messageBody: message.body
-    }, 'Error processing letter status update');
+    await Promise.all(tasks);
   }
 }

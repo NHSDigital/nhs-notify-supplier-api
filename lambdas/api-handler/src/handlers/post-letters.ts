@@ -7,7 +7,7 @@ import { processError } from '../mappers/error-mapper';
 import { assertNotEmpty, requireEnvVar, validateCommonHeaders } from '../utils/validation';
 import type { Deps } from "../config/deps";
 
-export function createPostLettersReceiverHandler(deps: Deps): APIGatewayProxyHandler {
+export function createPostLettersHandler(deps: Deps): APIGatewayProxyHandler {
 
   return async (event) => {
 
