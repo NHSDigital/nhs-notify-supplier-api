@@ -1,4 +1,5 @@
 import type { ReporterDescription } from '@playwright/test';
+import path from 'path';
 
 const resultsDir = process.env.RESULTS_DIR || 'results';
 const reportsDir = process.env.REPORTS_DIR || 'reports';
@@ -21,7 +22,7 @@ export function getReporters(allureFolder: string) {
     [
       'html',
       {
-        outputFolder: `../target/test-artifacts/${reportsDir}/html-report`,
+        outputFolder: path.resolve(__dirname, '../playwright-report'),
         open: process.env.CI ? 'never' : 'on-failure',
       },
     ],
