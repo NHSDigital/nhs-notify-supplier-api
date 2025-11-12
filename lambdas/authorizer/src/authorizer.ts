@@ -1,16 +1,3 @@
-// A simple request-based authorizer example to demonstrate how to use request
-// parameters to allow or deny a request. In this example, a request is
-// authorized if the client-supplied HeaderAuth1 header and stage variable of StageVar1
-// both match specified values of 'headerValue1' and 'stageValue1', respectively.
-//
-// Example curl request (replace <api-url> and <stage> as appropriate):
-//
-//   curl -H "HeaderAuth1: headerValue1" \
-//        "<api-url>/<stage>/your-resource"
-//
-
-// See https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html for the original JS documentation
-
 import {APIGatewayAuthorizerResult, APIGatewayEventClientCertificate, APIGatewayRequestAuthorizerEvent, APIGatewayRequestAuthorizerEventHeaders, APIGatewayRequestAuthorizerHandler,
   Callback, Context } from 'aws-lambda';
 import { Deps } from './deps';
