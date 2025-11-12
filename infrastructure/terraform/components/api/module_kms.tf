@@ -31,7 +31,7 @@ data "aws_iam_policy_document" "kms" {
       type = "Service"
 
       identifiers = [
-        "sns.amazon.com",
+        "sns.amazonaws.com",
         "logs.${var.region}.amazonaws.com",
       ]
     }
