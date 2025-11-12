@@ -46,56 +46,56 @@ jobs:
         uses: actions/checkout@v5
 
       - name: "Get the artefacts 1"
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           path: ./artifacts/jekyll-docs-${{ inputs.version }}
           name: jekyll-docs-${{ inputs.version }}
 
       - name: "Get the artefacts 2"
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           path: ./artifacts/sdk-html-docs-${{ inputs.version }}
           name: sdk-html-docs-${{ inputs.version }}
 
       - name: "Get the artefacts 3"
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           path: ./artifacts/sdk-swagger-docs-${{ inputs.version }}
           name: sdk-swagger-docs-${{ inputs.version }}
 
       - name: "Get the artefacts 4"
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           path: ./artifacts/sdk-html-${{ inputs.version }}
           name: sdk-html-${{ inputs.version }}
 
       - name: "Get the artefacts 5"
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           path: ./artifacts/sdk-ts-${{ inputs.version }}
           name: sdk-ts-${{ inputs.version }}
 
       - name: "Get the artefacts 6"
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           path: ./artifacts/sdk-python-${{ inputs.version }}
           name: sdk-python-${{ inputs.version }}
 
       - name: "Get the artefacts 7"
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           path: ./artifacts/sdk-csharp-${{ inputs.version }}
           name: sdk-csharp-${{ inputs.version }}
 
       - name: "Get the artefacts 8"
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           path: ./artifacts/api-oas-specification-${{ inputs.version }}
           name: api-oas-specification-${{ inputs.version }}
 
       # Take out for now - might add again in the future
       # - name: "Get the artefacts 9"
-      #   uses: actions/download-artifact@v5
+      #   uses: actions/download-artifact@v6
       #   with:
       #     path: ./artifacts/server-csharp-${{ inputs.version }}
       #     name: server-csharp-${{ inputs.version }}
@@ -252,12 +252,12 @@ jobs:
   #       contents: read
   #     steps:
   #       - name: "Get the artefacts csharp docker"
-  #         uses: actions/download-artifact@v5
+  #         uses: actions/download-artifact@v6
   #         with:
   #           path: .
   #           name: server-csharp-docker-${{ inputs.version }}
   #       - name: "Get the artefacts csharp server"
-  #         uses: actions/download-artifact@v5
+  #         uses: actions/download-artifact@v6
   #         with:
   #           path: ./csharp-server
   #           name: server-csharp-${{ inputs.version }}
@@ -279,7 +279,7 @@ jobs:
       contents: read
     steps:
       - name: "Get the artefacts"
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           path: .
           name: sdk-csharp-${{ inputs.version }}
@@ -335,7 +335,7 @@ jobs:
       contents: read
     steps:
       - name: "Get the artefacts"
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           path: .
           name: sdk-ts-${{ inputs.version }}
@@ -439,7 +439,7 @@ jobs:
   #     contents: read
   #   steps:
   #     - name: "Get the artefacts"
-  #       uses: actions/download-artifact@v5
+  #       uses: actions/download-artifact@v6
   #       with:
   #         path: .
   #         name: libs-letter-${{ inputs.version }}
