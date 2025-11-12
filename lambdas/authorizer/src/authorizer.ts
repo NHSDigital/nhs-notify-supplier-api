@@ -42,16 +42,16 @@ export function createAuthorizerHandler(deps: Deps): APIGatewayRequestAuthorizer
 
 async function getSupplier(headers: APIGatewayRequestAuthorizerEventHeaders | null, deps: Deps): Promise<Supplier> {
   const apimId = Object.entries(headers || {})
-    .find(([headerName, _]) => headerName.toLowerCase() === deps.env.APIM_APPLICATION_ID_HEADER)?.[1] as string;
+    .find(([headerName, _]) => headerName.toLowerCase() === deps.env.APIM_APPLICATION_ID_HEADER.toLowerCase())?.[1] as string;
 
-    if(!apimId) {
-      throw new Error('No APIM application ID found in header');
-    }
-    const supplier = await deps.supplierRepo.getSupplierByApimId(apimId);
-    if (supplier.status === 'DISABLED') {
+  if(!apimId) {
+    throw new Error('No APIM application ID found in header');
+  }
+  const supplier = await deps.supplierRepo.getSupplierByApimId(apimId);
+  if (supplier.status === 'DISABLED') {
       throw new Error(`Supplier ${supplier.id} is disabled`);
-    }
-    return supplier;
+  }
+  return supplier;
 }
 
 

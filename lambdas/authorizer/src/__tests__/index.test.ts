@@ -182,6 +182,32 @@ describe('Authorizer Lambda Function', () => {
         principalId: 'supplier-123',
       }));
     });
+
+    it('Should allow the request when the supplier ID case mismatches', async () => {
+      mockEvent.headers = { 'apim-application-id': 'Valid-Apim-Id' };
+      (mockedDeps.supplierRepo.getSupplierByApimId as jest.Mock).mockResolvedValue({
+        id: 'supplier-123',
+        apimApplicationId: 'valid-apim-id',
+        name: 'Test Supplier',
+        status: 'ENABLED'
+      });
+
+      const handler = createAuthorizerHandler(mockedDeps);
+      handler(mockEvent, mockContext, mockCallback);
+      await new Promise(process.nextTick);
+
+      expect(mockCallback).toHaveBeenCalledWith(null, expect.objectContaining({
+        policyDocument: expect.objectContaining({
+          Statement: [
+            expect.objectContaining({
+              Effect: 'Allow',
+            }),
+          ],
+        }),
+        principalId: 'supplier-123',
+      }));
+    });
+
   });
 
   it('Should deny the request the supplier is disabled', async () => {
