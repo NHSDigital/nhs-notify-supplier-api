@@ -21,7 +21,6 @@ export const LetterStatusSchema = z.enum([
   'DISPATCHED',
   'FAILED',
   'RETURNED',
-  'DESTROYED',
   'FORWARDED',
   'DELIVERED'
 ]);
