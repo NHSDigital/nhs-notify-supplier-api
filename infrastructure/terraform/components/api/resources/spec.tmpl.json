@@ -3,7 +3,7 @@
     "securitySchemes": {
       "LambdaAuthorizer": {
         "in": "header",
-        "name": "apim-application-id",
+        "name": "NHSD-Supplier-ID",
         "type": "apiKey",
         "x-amazon-apigateway-authorizer": {
           "authorizerCredentials": "${APIG_EXECUTION_ROLE_ARN}",

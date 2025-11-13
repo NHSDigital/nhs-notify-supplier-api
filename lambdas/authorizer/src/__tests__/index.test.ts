@@ -9,7 +9,7 @@ const mockedDeps: jest.Mocked<Deps> = {
     env: {
       CLOUDWATCH_NAMESPACE: 'cloudwatch-namespace',
       CLIENT_CERTIFICATE_EXPIRATION_ALERT_DAYS: 14,
-      APIM_APPLICATION_ID_HEADER: 'apim-application-id'
+      APIM_SUPPLIER_ID_HEADER: 'NHSD-Supplier-ID'
     } as unknown as EnvVars,
     supplierRepo: {
       getSupplierByApimId: jest.fn(),
@@ -121,7 +121,7 @@ describe('Authorizer Lambda Function', () => {
       }));
     });
 
-    it('Should deny the request when the APIM application ID header is absent', async () => {
+    it('Should deny the request when the Supplier ID header is absent', async () => {
       mockEvent.headers = {'x-apim-correlation-id': 'correlation-id'};
 
       const handler = createAuthorizerHandler(mockedDeps);
@@ -140,7 +140,7 @@ describe('Authorizer Lambda Function', () => {
     });
 
     it('Should deny the request when no supplier ID is found', async () => {
-      mockEvent.headers = { 'apim-application-id': 'unknown-apim-id' };
+      mockEvent.headers = { 'NHSD-Supplier-ID': 'unknown-apim-id' };
       (mockedDeps.supplierRepo.getSupplierByApimId as jest.Mock).mockRejectedValue(new Error('Supplier not found'));
 
       const handler = createAuthorizerHandler(mockedDeps);
@@ -159,7 +159,7 @@ describe('Authorizer Lambda Function', () => {
     });
 
     it('Should allow the request when the supplier ID is found', async () => {
-      mockEvent.headers = { 'apim-application-id': 'valid-apim-id' };
+      mockEvent.headers = { 'NHSD-Supplier-ID': 'valid-apim-id' };
       (mockedDeps.supplierRepo.getSupplierByApimId as jest.Mock).mockResolvedValue({
         id: 'supplier-123',
         apimApplicationId: 'valid-apim-id',
@@ -184,7 +184,7 @@ describe('Authorizer Lambda Function', () => {
     });
 
     it('Should allow the request when the supplier ID case mismatches', async () => {
-      mockEvent.headers = { 'apim-application-id': 'Valid-Apim-Id' };
+      mockEvent.headers = { 'NHSD-Supplier-ID': 'Valid-Apim-Id' };
       (mockedDeps.supplierRepo.getSupplierByApimId as jest.Mock).mockResolvedValue({
         id: 'supplier-123',
         apimApplicationId: 'valid-apim-id',
@@ -211,7 +211,7 @@ describe('Authorizer Lambda Function', () => {
   });
 
   it('Should deny the request the supplier is disabled', async () => {
-    mockEvent.headers = { 'apim-application-id': 'unknown-apim-id' };
+    mockEvent.headers = { 'NHSD-Supplier-ID': 'unknown-apim-id' };
       (mockedDeps.supplierRepo.getSupplierByApimId as jest.Mock).mockResolvedValue({
         id: 'supplier-123',
         apimApplicationId: 'valid-apim-id',

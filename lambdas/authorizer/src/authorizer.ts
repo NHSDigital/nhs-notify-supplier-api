@@ -1,11 +1,13 @@
-import {APIGatewayAuthorizerResult, APIGatewayEventClientCertificate, APIGatewayRequestAuthorizerEvent, APIGatewayRequestAuthorizerEventHeaders, APIGatewayRequestAuthorizerHandler,
-  Callback, Context } from 'aws-lambda';
+import {
+  APIGatewayAuthorizerResult, APIGatewayEventClientCertificate, APIGatewayRequestAuthorizerEvent, APIGatewayRequestAuthorizerEventHeaders, APIGatewayRequestAuthorizerHandler,
+  Callback, Context
+} from 'aws-lambda';
 import { Deps } from './deps';
 import { Supplier } from '@internal/datastore';
 
 export function createAuthorizerHandler(deps: Deps): APIGatewayRequestAuthorizerHandler {
 
-    return  (
+  return (
     event: APIGatewayRequestAuthorizerEvent,
     context: Context,
     callback: Callback<APIGatewayAuthorizerResult>
@@ -29,41 +31,41 @@ export function createAuthorizerHandler(deps: Deps): APIGatewayRequestAuthorizer
 
 async function getSupplier(headers: APIGatewayRequestAuthorizerEventHeaders | null, deps: Deps): Promise<Supplier> {
   const apimId = Object.entries(headers || {})
-    .find(([headerName, _]) => headerName.toLowerCase() === deps.env.APIM_APPLICATION_ID_HEADER.toLowerCase())?.[1] as string;
+    .find(([headerName, _]) => headerName.toLowerCase() === deps.env.APIM_SUPPLIER_ID_HEADER.toLowerCase())?.[1] as string;
 
-  if(!apimId) {
+  if (!apimId) {
     throw new Error('No APIM application ID found in header');
   }
   const supplier = await deps.supplierRepo.getSupplierByApimId(apimId);
   if (supplier.status === 'DISABLED') {
-      throw new Error(`Supplier ${supplier.id} is disabled`);
+    throw new Error(`Supplier ${supplier.id} is disabled`);
   }
   return supplier;
 }
 
 
-  // Helper function to generate an IAM policy
-  function generatePolicy(
-    principalId: string,
-    effect: 'Allow' | 'Deny',
-    resource: string
-  ): APIGatewayAuthorizerResult {
-    // Required output:
-    const authResponse: APIGatewayAuthorizerResult = {
-      principalId,
-      policyDocument: {
-        Version: '2012-10-17',
-        Statement: [
-          {
-            Action: 'execute-api:Invoke',
-            Effect: effect,
-            Resource: resource,
-          },
-        ],
-      },
-    };
-    return authResponse;
-  }
+// Helper function to generate an IAM policy
+function generatePolicy(
+  principalId: string,
+  effect: 'Allow' | 'Deny',
+  resource: string
+): APIGatewayAuthorizerResult {
+  // Required output:
+  const authResponse: APIGatewayAuthorizerResult = {
+    principalId,
+    policyDocument: {
+      Version: '2012-10-17',
+      Statement: [
+        {
+          Action: 'execute-api:Invoke',
+          Effect: effect,
+          Resource: resource,
+        },
+      ],
+    },
+  };
+  return authResponse;
+}
 
 function generateAllow(resource: string, supplierId: string): APIGatewayAuthorizerResult {
   return generatePolicy(supplierId, 'Allow', resource);
@@ -76,7 +78,7 @@ function generateDeny(resource: string): APIGatewayAuthorizerResult {
 function getCertificateExpiryInDays(certificate: APIGatewayEventClientCertificate): number {
   const now = new Date().getTime();
   const expiry = new Date(certificate.validity.notAfter).getTime();
-  return (expiry - now)  / (1000 * 60 * 60 * 24);
+  return (expiry - now) / (1000 * 60 * 60 * 24);
 }
 
 async function checkCertificateExpiry(certificate: APIGatewayEventClientCertificate | null, deps: Deps): Promise<void> {
@@ -117,7 +119,7 @@ async function checkCertificateExpiry(certificate: APIGatewayEventClientCertific
         ],
       },
       'SUBJECT_DN': certificate.subjectDN,
-      'NOT_AFTER':  certificate.validity.notAfter,
+      'NOT_AFTER': certificate.validity.notAfter,
       'apim-client-certificate-near-expiry': 1,
     };
   }

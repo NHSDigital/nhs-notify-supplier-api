@@ -38,7 +38,7 @@ module "authorizer_lambda" {
   lambda_env_vars = {
     CLOUDWATCH_NAMESPACE                     = "/aws/api-gateway/supplier/alarms",
     CLIENT_CERTIFICATE_EXPIRATION_ALERT_DAYS = 14,
-    APIM_APPLICATION_ID_HEADER               = "NHSD-Supplier-ID",
+    APIM_SUPPLIER_ID_HEADER               = "NHSD-Supplier-ID",
     SUPPLIERS_TABLE_NAME                     = aws_dynamodb_table.suppliers.name
   }
 }
