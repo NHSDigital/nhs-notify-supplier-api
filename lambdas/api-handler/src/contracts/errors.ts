@@ -36,7 +36,8 @@ export enum ApiErrorDetail {
   InvalidRequestLimitOnly = "Only 'limit' query parameter is supported",
   InvalidRequestNoRequestId = 'The request does not contain a request id',
   InvalidRequestTimestamp = 'Timestamps should be UTC date/times in ISO8601 format, with a Z suffix',
-  InvalidRequestLettersToUpdate = 'The request exceeds the maximum of %s items allowed for update'
+  InvalidRequestLettersToUpdate = 'The request exceeds the maximum of %s items allowed for update',
+  InvalidRequestDuplicateLetterId = 'The request cannot include multiple letter objects with the same id'
 }
 
 export function buildApiError(params: {

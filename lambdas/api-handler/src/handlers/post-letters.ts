@@ -38,6 +38,10 @@ export function createPostLettersHandler(deps: Deps): APIGatewayProxyHandler {
         throw new ValidationError(ApiErrorDetail.InvalidRequestLettersToUpdate, { args: [maxUpdateItems]});
       }
 
+      if( duplicateIdsExist(postLettersRequest) ) {
+        throw new ValidationError(ApiErrorDetail.InvalidRequestDuplicateLetterId);
+      }
+
       await enqueueLetterUpdateRequests(postLettersRequest, commonHeadersResult.value.supplierId, commonHeadersResult.value.correlationId, deps);
 
       return {
@@ -50,3 +54,8 @@ export function createPostLettersHandler(deps: Deps): APIGatewayProxyHandler {
     }
   };
 };
+
+function duplicateIdsExist(postLettersRequest: PostLettersRequest) {
+  const ids = postLettersRequest.data.map(item => item.id);
+  return new Set(ids).size !== ids.length;
+}

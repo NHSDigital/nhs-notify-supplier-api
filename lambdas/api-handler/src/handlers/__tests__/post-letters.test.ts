@@ -209,6 +209,44 @@ describe('postLetters API Handler', () => {
     expect(result).toEqual(expectedErrorResponse);
   });
 
+    it('returns error when the request has duplicate letter ids', async () => {
+
+    const event = makeApiGwEvent({
+      path: '/letters',
+      body: JSON.stringify({
+        data: [
+          {
+            id: 'id1',
+            type: 'Letter',
+            attributes: {
+              status: 'ACCEPTED'
+            }
+          },
+          {
+            id: 'id1',
+            type: 'Letter',
+            attributes: {
+              status: 'ACCEPTED'
+            }
+          }
+        ]
+      }),
+      headers: {
+        'nhsd-supplier-id': 'supplier1',
+        'nhsd-correlation-id': 'correlationId',
+        'x-request-id': 'requestId'
+      }
+    });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+
+    const postLettersHandler = createPostLettersHandler(mockedDeps);
+    const result = await postLettersHandler(event, context, callback);
+
+    expect(mockedProcessError).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestDuplicateLetterId), 'correlationId', mockedDeps.logger);
+    expect(result).toEqual(expectedErrorResponse);
+  });
+
   it('returns error when request body is not json', async () => {
     const event = makeApiGwEvent({
       path: '/letters',
