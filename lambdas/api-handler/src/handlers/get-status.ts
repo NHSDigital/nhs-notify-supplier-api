@@ -17,10 +17,14 @@ export function createGetStatusHandler(deps: Deps): APIGatewayProxyHandler {
 
       return {
         statusCode: 200,
-        body: '{}'
+        body: JSON.stringify({ code: 200 }, null, 2)
       };
     } catch (error) {
-      return mapErrorToResponse(error, undefined, deps.logger);
+      deps.logger.error({ err: error }, 'Status endpoint error, services not available');
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ code: 500 }, null, 2)
+      };
     }
   }
 }

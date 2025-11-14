@@ -19,7 +19,7 @@ describe('API Lambda handler', () => {
 
     expect(result).toEqual({
       statusCode: 200,
-      body: '{}',
+      body: JSON.stringify({ code: 200 }, null, 2)
     });
   });
 
@@ -34,9 +34,10 @@ describe('API Lambda handler', () => {
     const getLetterDataHandler = createGetStatusHandler(mockedDeps);
     const result = await getLetterDataHandler(event,  mockDeep<Context>(), jest.fn());
 
-    expect(result).toEqual(expect.objectContaining({
-      statusCode: 500
-    }));
+    expect(result).toEqual({
+      statusCode: 500,
+      body: JSON.stringify({ code: 500 }, null, 2)
+    });
   });
 
 
@@ -51,9 +52,10 @@ describe('API Lambda handler', () => {
     const getLetterDataHandler = createGetStatusHandler(mockedDeps);
     const result = await getLetterDataHandler(event,  mockDeep<Context>(), jest.fn());
 
-    expect(result).toEqual(expect.objectContaining({
-      statusCode: 500
-    }));
+    expect(result).toEqual({
+      statusCode: 500,
+      body: JSON.stringify({ code: 500 }, null, 2)
+    });
   });
 
 
