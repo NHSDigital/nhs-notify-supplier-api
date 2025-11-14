@@ -19,7 +19,7 @@
     "testcontainers": "^11.4.0",
     "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3",
+    "typescript": "^5.8.3",
     "zod-mermaid": "^1.0.9"
   },
   "license": "MIT",

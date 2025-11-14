@@ -8,7 +8,7 @@
     "@types/jest": "^30.0.0",
     "jest": "^30.2.0",
     "jest-mock-extended": "^4.0.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.8.3"
   },
   "name": "nhs-notify-supplier-authorizer",
   "private": true,
