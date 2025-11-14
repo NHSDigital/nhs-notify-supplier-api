@@ -25,6 +25,26 @@
       "format": "uuid",
       "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
     },
+    "type": {
+      "title": "letter.FORWARDED event type",
+      "description": "Event type using reverse-DNS style",
+      "examples": [
+        "uk.nhs.notify.supplier-api.letter.FORWARDED.v1"
+      ],
+      "type": "string",
+      "enum": [
+        "uk.nhs.notify.supplier-api.letter.FORWARDED.v1"
+      ]
+    },
+    "dataschema": {
+      "title": "Data Schema URI",
+      "description": "URI of a schema that describes the event data\n\nData schema version must match the major version indicated by the type",
+      "examples": [
+        "https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.FORWARDED.1.0.0.schema.json"
+      ],
+      "type": "string",
+      "pattern": "^https:\\/\\/notify\\.nhs\\.uk\\/cloudevents\\/schemas\\/supplier-api\\/letter\\.(?<status>FORWARDED)\\.1\\.\\d+\\.\\d+\\.schema.json$"
+    },
     "source": {
       "title": "Event Source",
       "description": "Logical event producer path within the supplier-api domain",
@@ -38,48 +58,7 @@
         "letter-origin/letter-rendering/letter/f47ac10b-58cc-4372-a567-0e02b2c3d479"
       ],
       "type": "string",
-      "pattern": "^letter-origin\\/[a-z0-9-]+\\/letter\\/[^/]+(?:\\/.*)?"
-    },
-    "type": {
-      "title": "Letter FORWARDED event type",
-      "description": "Event type using reverse-DNS style",
-      "examples": [
-        "uk.nhs.notify.supplier-api.letter.FORWARDED.v1"
-      ],
-      "type": "string",
-      "enum": [
-        "uk.nhs.notify.supplier-api.letter.FORWARDED.v1"
-      ]
-    },
-    "time": {
-      "title": "Event Time",
-      "description": "Timestamp when the event occurred (RFC 3339).",
-      "examples": [
-        "2025-10-01T10:15:30.000Z"
-      ],
-      "type": "string",
-      "format": "date-time",
-      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
-    },
-    "datacontenttype": {
-      "title": "Data Content Type",
-      "description": "Media type for the data field (fixed to application/json).",
-      "examples": [
-        "application/json"
-      ],
-      "type": "string",
-      "enum": [
-        "application/json"
-      ]
-    },
-    "dataschema": {
-      "title": "Data Schema URI",
-      "description": "URI of a schema that describes the event data\n\nData schema version must match the major version indicated by the type",
-      "examples": [
-        "https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.ACCEPTED.1.0.0.schema.json"
-      ],
-      "type": "string",
-      "pattern": "^https:\\/\\/notify\\.nhs\\.uk\\/cloudevents\\/schemas\\/supplier-api\\/letter.FORWARDED.1\\.\\d+\\.\\d+\\.schema.json$"
+      "pattern": "^letter-origin\\/[a-z0-9-]+\\/letter\\/[a-z0-9-]+$"
     },
     "data": {
       "type": "object",
@@ -145,9 +124,26 @@
           "type": "string"
         },
         "status": {
+          "title": "Letter Status",
+          "description": "The status of a letter in the supplier-api domain.",
+          "examples": [
+            "ACCEPTED",
+            "REJECTED",
+            "PRINTED"
+          ],
           "type": "string",
           "enum": [
-            "FORWARDED"
+            "PENDING",
+            "ACCEPTED",
+            "REJECTED",
+            "PRINTED",
+            "ENCLOSED",
+            "CANCELLED",
+            "DISPATCHED",
+            "FAILED",
+            "RETURNED",
+            "FORWARDED",
+            "DELIVERED"
           ]
         },
         "reasonCode": {
@@ -175,6 +171,27 @@
         "specificationId",
         "groupId",
         "status"
+      ]
+    },
+    "time": {
+      "title": "Event Time",
+      "description": "Timestamp when the event occurred (RFC 3339).",
+      "examples": [
+        "2025-10-01T10:15:30.000Z"
+      ],
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+    },
+    "datacontenttype": {
+      "title": "Data Content Type",
+      "description": "Media type for the data field (fixed to application/json).",
+      "examples": [
+        "application/json"
+      ],
+      "type": "string",
+      "enum": [
+        "application/json"
       ]
     },
     "traceparent": {
@@ -304,26 +321,19 @@
         "sensitive",
         "special-category"
       ]
-    },
-    "dataschemaversion": {
-      "title": "Data Schema Version",
-      "description": "Matches semantic versioning format with fixed major version (Not part of cloudevents spec?)",
-      "type": "string",
-      "pattern": "^1\\.\\d+\\.\\d+$"
     }
   },
   "required": [
     "specversion",
     "id",
+    "type",
+    "dataschema",
     "source",
     "subject",
-    "type",
-    "time",
-    "dataschema",
     "data",
+    "time",
     "traceparent",
     "recordedtime",
-    "severitynumber",
-    "dataschemaversion"
+    "severitynumber"
   ]
 }
