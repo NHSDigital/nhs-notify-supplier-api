@@ -1,0 +1,45 @@
+{
+  "description": "MI",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "lineItem": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string"
+    },
+    "quantity": {
+      "type": "number"
+    },
+    "specificationId": {
+      "type": "string"
+    },
+    "groupId": {
+      "type": "string"
+    },
+    "stockRemaining": {
+      "type": "number"
+    },
+    "supplierId": {
+      "type": "string"
+    },
+    "createdAt": {
+      "type": "string"
+    },
+    "updatedAt": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "lineItem",
+    "timestamp",
+    "quantity",
+    "supplierId",
+    "createdAt",
+    "updatedAt"
+  ]
+}
