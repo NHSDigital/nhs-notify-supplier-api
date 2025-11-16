@@ -77,11 +77,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5.0.0
 
-      - name: Use Node.js 20
+      - name: Setup NodeJS
         uses: actions/setup-node@v4
         with:
-          node-version: '20.18.2'
-          registry-url: 'https://npm.pkg.github.com'
+          node-version: ${{ inputs.nodejs_version }}
 
       - name: check if local version differs from latest published version
         id: check-version
@@ -111,6 +110,10 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5.0.0
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.nodejs_version }}
       - name: "Install dependencies"
         run: npm ci
       - name: "Run provider contract tests"
@@ -133,10 +136,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5.0.0
 
-      - name: Use Node.js 20
+      - name: Setup NodeJS
         uses: actions/setup-node@v4
         with:
-          node-version: '20.18.2'
+          node-version: ${{ inputs.nodejs_version }}
           registry-url: 'https://npm.pkg.github.com'
 
       - name: Install dependencies
