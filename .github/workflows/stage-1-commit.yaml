@@ -228,7 +228,7 @@ jobs:
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
 
-          if content=$(git show origin/main:internal/events/schemas/package.json 2>/dev/null); then
+          if content=$(git show origin/main:internal/events/package.json 2>/dev/null); then
             version=$(jq -r .version <<< $content);
           else
             version=null;
