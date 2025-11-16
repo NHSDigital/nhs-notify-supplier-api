@@ -248,7 +248,6 @@ jobs:
       - name: "Checkout code"
         uses: actions/checkout@v4
 
-      # Simplified caching - template management has more complex caching of installed modules from another build step
       - name: "Cache node_modules"
         uses: actions/cache@v4
         with:
@@ -260,7 +259,7 @@ jobs:
 
       - name: "Re-generate schemas"
         run: |
-          npm ci --workspace internal/events
+          npm ci
           npm --workspace internal/events run gen:jsonschema
 
       - name: Check for schema changes

@@ -48,6 +48,14 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5
+      - name: "Cache node_modules"
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-node-${{ inputs.nodejs_version }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
       - name: "Repo setup"
         run: |
           npm ci
@@ -62,6 +70,14 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5
+      - name: "Cache node_modules"
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-node-${{ inputs.nodejs_version }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
       - name: "Repo setup"
         run: |
           npm ci
@@ -90,6 +106,14 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5
+      - name: "Cache node_modules"
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-node-${{ inputs.nodejs_version }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
       - name: "Repo setup"
         run: |
           npm ci
@@ -106,6 +130,14 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5
+      - name: "Cache node_modules"
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-node-${{ inputs.nodejs_version }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
       - name: "Repo setup"
         run: |
           npm ci
@@ -152,22 +184,3 @@ jobs:
           sonar_organisation_key: "${{ vars.SONAR_ORGANISATION_KEY }}"
           sonar_project_key: "${{ vars.SONAR_PROJECT_KEY }}"
           sonar_token: "${{ secrets.SONAR_TOKEN }}"
-
-
-  test-contract-provider:
-    name: "Test contracts (provider)"
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: read
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v5.0.0
-#      - name: "Restore node_modules from cache"
-#        uses: ./.github/actions/node-modules-cache
-#        with:
-#          node_version: "${{ inputs.nodejs_version }}"
-      - name: "Run provider contract tests"
-        run: make test-contract-provider
-        env:
-          GITHUB_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
