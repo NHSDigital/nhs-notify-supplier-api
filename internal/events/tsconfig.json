@@ -3,9 +3,9 @@
     "declaration": true,
     "isolatedModules": true,
     "module": "commonjs",
-    "noEmit": false,
     "outDir": "dist",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "rootDir": "src"
   },
   "exclude": [
     "node_modules",
