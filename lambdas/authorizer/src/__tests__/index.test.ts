@@ -183,8 +183,8 @@ describe('Authorizer Lambda Function', () => {
       }));
     });
 
-    it('Should allow the request when the supplier ID case mismatches', async () => {
-      mockEvent.headers = { 'NHSD-Supplier-ID': 'Valid-Apim-Id' };
+    it('Should allow the request when the supplier ID key case mismatches', async () => {
+      mockEvent.headers = { 'nhsd-supplier-id': 'Valid-Apim-Id' };
       (mockedDeps.supplierRepo.getSupplierByApimId as jest.Mock).mockResolvedValue({
         id: 'supplier-123',
         apimApplicationId: 'valid-apim-id',
