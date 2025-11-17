@@ -37,7 +37,7 @@ type RejectedLetterData =
         specificationId: string;
         groupId: string;
         status: string;
-        reasonCode: number;
+        reasonCode: string;
         reasonText: string;
     }
 };
@@ -90,7 +90,7 @@ export const apiSandboxGetLetterStatusTestData: ApiSandboxGetLetterStatusTestCas
                 specificationId: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
                 groupId: 'c5d93f917f5546d08beccf770a915d96',
                 status: 'REJECTED',
-                reasonCode: 100,
+                reasonCode: 'R01',
                 reasonText: "failed validation",
             },
         }
@@ -110,7 +110,7 @@ export const apiSandboxGetLetterStatusTestData: ApiSandboxGetLetterStatusTestCas
                 specificationId: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
                 groupId: 'c5d93f917f5546d08beccf770a915d96',
                 status: 'CANCELLED',
-                reasonCode: 100
+                reasonCode: 'R01'
             },
         }
     }
