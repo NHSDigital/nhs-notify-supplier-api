@@ -29,6 +29,7 @@ export async function createTestData(supplierId: string): Promise<void> {
     supplierId: supplierId,
     environment: envName,
     awsAccountId: '820178564574',
+    letterId: 'letterId',
     groupId: 'TestGroupID',
     specificationId: 'TestSpecificationID',
     status: 'PENDING',
