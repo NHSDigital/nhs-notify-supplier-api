@@ -22,13 +22,16 @@
   "license": "MIT",
   "main": "dist/index.js",
   "name": "@nhsdigital/nhs-notify-event-schemas-supplier-api",
-  "private": true,
+  "private": false,
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
-  "repository": "git@github.com:NHSDigital/nhs-notify-supplier-api.git",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/NHSDigital/nhs-notify-supplier-api.git"
+  },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p ./tsconfig.build.json",
     "dev": "ts-node src/index.ts",
     "gen:asyncapi": "mkdir -p ./dist/asyncapi && ts-node src/cli/bundle-asyncapi.ts",
     "gen:jsonschema": "ts-node src/cli/generate-json.ts",
@@ -40,11 +43,12 @@
     "pregen:asyncapi": "npm run gen:jsonschema",
     "pregen:jsonschema": "rm -rf ./client-config/json",
     "prelint:schema": "npm run gen:jsonschema",
+    "prepublishOnly": "npm run build",
     "pretest:unit": "npm run gen:jsonschema",
     "start": "node dist/index.js",
     "test": "npm run test:unit",
     "test:unit": "jest"
   },
   "types": "dist/index.d.ts",
-  "version": "1.0.0"
+  "version": "1.0.1"
 }
