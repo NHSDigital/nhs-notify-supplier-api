@@ -16,8 +16,8 @@ export type ApiSandboxUpdateLetterStatusTestData = {
 
 export const apiSandboxUpdateLetterStatusTestData: ApiSandboxUpdateLetterStatusTestData[] = [
   {
-    testCase: '200 response if record is updated with status PENDING',
-    id: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
+    testCase: '202 response if record is updated with status PENDING',
+    id: '24L5eYSWGzCHlGmzNxuqVusPxDg',
     header: sandBoxHeader,
     body: {
       data: {
@@ -28,22 +28,12 @@ export const apiSandboxUpdateLetterStatusTestData: ApiSandboxUpdateLetterStatusT
         },
       }
     },
-    expectedStatus: 200,
-        expectedResponse: {
-      data: {
-        type: 'Letter',
-        id: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
-        attributes: {
-          status: 'PENDING',
-          specificationId:'2WL5eYSWGzCHlGmzNxuqVusPxDg',
-        },
-      }
-    },
+    expectedStatus: 202,
   },
 
   {
-    testCase: '200 response if record is updated with status REJECTED',
-    id: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
+    testCase: '202 response if record is updated with status REJECTED',
+    id: '24L5eYSWGzCHlGmzNxuqVusPxDg',
     header: sandBoxHeader,
     body: {
       data: {
@@ -51,24 +41,12 @@ export const apiSandboxUpdateLetterStatusTestData: ApiSandboxUpdateLetterStatusT
         id: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
         attributes: {
           status: 'REJECTED',
-          reasonCode: 'R01',
-          reasonText: 'failed validation',
+          reasonCode: 'R07',
+          reasonText: 'No such address',
         },
       }
     },
-    expectedStatus: 200,
-        expectedResponse: {
-      data: {
-        type: 'Letter',
-        id: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
-        attributes: {
-          reasonCode: 'R01',
-          reasonText: 'failed validation',
-          status: 'REJECTED',
-          specificationId:'2WL5eYSWGzCHlGmzNxuqVusPxDg',
-        },
-      }
-    },
+    expectedStatus: 202,
   },
   {
     testCase: '404 response if no resource is found for the given id',
@@ -112,10 +90,10 @@ export const apiSandboxUpdateLetterStatusTestData: ApiSandboxUpdateLetterStatusT
     },
     expectedStatus: 400,
     expectedResponse: {
-      message: 'request.body.data.attributes.status should be equal to one of the allowed values: PENDING, ACCEPTED, REJECTED, PRINTED, ENCLOSED, CANCELLED, DISPATCHED, DELIVERED, FAILED, RETURNED, DESTROYED, FORWARDED',
+      message: 'request.body.data.attributes.status should be equal to one of the allowed values: PENDING, ACCEPTED, REJECTED, PRINTED, ENCLOSED, CANCELLED, DISPATCHED, DELIVERED, FAILED, RETURNED, FORWARDED',
       errors: [{
           path: '.body.data.attributes.status',
-          message: 'should be equal to one of the allowed values: PENDING, ACCEPTED, REJECTED, PRINTED, ENCLOSED, CANCELLED, DISPATCHED, DELIVERED, FAILED, RETURNED, DESTROYED, FORWARDED',
+          message: 'should be equal to one of the allowed values: PENDING, ACCEPTED, REJECTED, PRINTED, ENCLOSED, CANCELLED, DISPATCHED, DELIVERED, FAILED, RETURNED, FORWARDED',
           errorCode: 'enum.openapi.validation'
       }]
     },
