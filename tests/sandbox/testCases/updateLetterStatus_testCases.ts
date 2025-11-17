@@ -41,8 +41,21 @@ export const apiSandboxUpdateLetterStatusTestData: ApiSandboxUpdateLetterStatusT
         id: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
         attributes: {
           status: 'REJECTED',
-          reasonCode: 'R07',
-          reasonText: 'No such address',
+          reasonCode: 'R01',
+          reasonText: 'failed validation',
+        },
+      }
+    },
+    expectedStatus: 200,
+        expectedResponse: {
+      data: {
+        type: 'Letter',
+        id: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
+        attributes: {
+          reasonCode: 'R01',
+          reasonText: 'failed validation',
+          status: 'REJECTED',
+          specificationId:'2WL5eYSWGzCHlGmzNxuqVusPxDg',
         },
       }
     },
