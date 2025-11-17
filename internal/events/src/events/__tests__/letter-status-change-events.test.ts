@@ -14,7 +14,9 @@ describe("LetterStatus event validations", () => {
     (status) => {
       const json = readJson(`letter.${status}.json`);
 
-      const event = letterEventMap[`letter.${status}`].parse(json);
+      const { data: event, error } =
+        letterEventMap[`letter.${status}`].safeParse(json);
+      expect(error).toBeUndefined();
       expect(event).toBeDefined();
       expect(event).toEqual(
         expect.objectContaining({
@@ -25,7 +27,6 @@ describe("LetterStatus event validations", () => {
           time: "2025-08-28T08:45:00.000Z",
           datacontenttype: "application/json",
           dataschema: `https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.${status}.1.0.0.schema.json`,
-          dataschemaversion: "1.0.0",
           subject:
             "letter-origin/letter-rendering/letter/f47ac10b-58cc-4372-a567-0e02b2c3d479",
           data: expect.objectContaining({
@@ -82,7 +83,7 @@ describe("LetterStatus event validations", () => {
     const json = readJson("letter.ACCEPTED-with-invalid-major-version.json");
 
     expect(() => letterEventMap["letter.ACCEPTED"].parse(json)).toThrow(
-      "dataschemaversion",
+      "dataschema",
     );
   });
 });

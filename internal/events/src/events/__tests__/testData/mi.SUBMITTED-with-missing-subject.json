@@ -1,0 +1,22 @@
+{
+  "data": {
+    "createdAt": "2025-11-16T10:30:00.000Z",
+    "id": "mi-invalid-001",
+    "lineItem": "LETTER_PRINT_A4",
+    "quantity": 150,
+    "supplierId": "supplier-789",
+    "timestamp": "2025-11-16T10:30:00.000Z",
+    "updatedAt": "2025-11-16T10:30:00.000Z"
+  },
+  "datacontenttype": "application/json",
+  "dataschema": "https://notify.nhs.uk/cloudevents/schemas/supplier-api/mi.SUBMITTED.1.0.0.schema.json",
+  "id": "8f2c3b44-4e65-5b1b-a678-1f0bf3d4d222",
+  "recordedtime": "2025-11-16T10:30:00.250Z",
+  "severitynumber": 2,
+  "severitytext": "INFO",
+  "source": "/data-plane/supplier-api/prod/submit-mi",
+  "specversion": "1.0",
+  "time": "2025-11-16T10:30:00.000Z",
+  "traceparent": "00-1bf8762827de54ee9559fc322d91430d-c8be7c8279304442-01",
+  "type": "uk.nhs.notify.supplier-api.mi.SUBMITTED.v1"
+}

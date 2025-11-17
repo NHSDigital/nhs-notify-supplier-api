@@ -144,7 +144,7 @@ jobs:
           asset_content_type: "application/gzip"
 
       - name: "zip html release asset"
-        # Git hub pages needs a single tar called artifact inside the zip.
+        # GitHub pages needs a single tar called artifact inside the zip.
         working-directory: ./artifacts/sdk-html-${{ inputs.version }}
         run: zip -r ../sdk-html-${{ inputs.version }}.zip .
         shell: bash
@@ -160,7 +160,7 @@ jobs:
           asset_content_type: "application/gzip"
 
       - name: "zip sdk ts release asset"
-        # Git hub pages needs a single tar called artifact inside the zip.
+        # GitHub pages needs a single tar called artifact inside the zip.
         working-directory: ./artifacts/sdk-ts-${{ inputs.version }}
         run: zip -r ../sdk-ts-${{ inputs.version }}.zip .
         shell: bash
@@ -176,7 +176,7 @@ jobs:
           asset_content_type: "application/gzip"
 
       - name: "zip sdk python release asset"
-        # Git hub pages needs a single tar called artifact inside the zip.
+        # GitHub pages needs a single tar called artifact inside the zip.
         working-directory: ./artifacts/sdk-python-${{ inputs.version }}
         run: zip -r ../sdk-python-${{ inputs.version }}.zip .
         shell: bash
@@ -192,7 +192,7 @@ jobs:
           asset_content_type: "application/gzip"
 
       - name: "zip sdk csharp release asset"
-        # Git hub pages needs a single tar called artifact inside the zip.
+        # GitHub pages needs a single tar called artifact inside the zip.
         working-directory: ./artifacts/sdk-csharp-${{ inputs.version }}
         run: zip -r ../sdk-csharp-${{ inputs.version }}.zip .
         shell: bash
@@ -208,7 +208,7 @@ jobs:
           asset_content_type: "application/gzip"
 
       - name: "zip api OAS specification release asset"
-        # Git hub pages needs a single tar called artifact inside the zip.
+        # GitHub pages needs a single tar called artifact inside the zip.
         working-directory: ./artifacts/api-oas-specification-${{ inputs.version }}
         run: zip -r ../api-oas-specification-${{ inputs.version }}.zip .
         shell: bash
@@ -225,7 +225,7 @@ jobs:
 
       # Take out for now - might add again in the future
       # - name: "zip csharp server release asset"
-      #   # Git hub pages needs a single tar called artifact inside the zip.
+      #   # GitHub pages needs a single tar called artifact inside the zip.
       #   working-directory: ./artifacts/server-csharp-${{ inputs.version }}
       #   run: zip -r ../server-csharp-${{ inputs.version }}.zip .
       #   shell: bash

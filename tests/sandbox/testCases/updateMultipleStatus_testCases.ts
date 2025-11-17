@@ -15,7 +15,7 @@ type postRequest = {
     type: string;
     id: string;
     attributes: {
-      reasonCode?: string | number;
+      reasonCode?: string;
       reasonText?: string;
       status: string;
     }
@@ -71,7 +71,7 @@ export const apiSandboxMultipleLetterStatusTestData: ApiSandboxUpdateLetterStatu
         },
         {
             attributes: {
-                reasonCode: 100,
+                reasonCode: 'R01',
                 reasonText: 'failed validation',
                 status: 'RETURNED'
             },
@@ -80,7 +80,7 @@ export const apiSandboxMultipleLetterStatusTestData: ApiSandboxUpdateLetterStatu
         },
         {
             attributes: {
-                reasonCode: 100,
+                reasonCode: 'R01',
                 reasonText: 'failed validation',
                 status: 'CANCELLED'
             },
@@ -89,7 +89,7 @@ export const apiSandboxMultipleLetterStatusTestData: ApiSandboxUpdateLetterStatu
         },
         {
             attributes: {
-                reasonCode: 100,
+                reasonCode: 'R01',
                 reasonText: 'failed validation',
                 status: 'FAILED'
             },
@@ -98,7 +98,7 @@ export const apiSandboxMultipleLetterStatusTestData: ApiSandboxUpdateLetterStatu
         },
         {
             attributes: {
-                reasonCode: 100,
+                reasonCode: 'R01',
                 reasonText: 'failed validation',
                 status: 'RETURNED'
             },
