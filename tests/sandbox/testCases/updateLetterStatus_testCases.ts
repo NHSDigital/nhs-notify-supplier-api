@@ -51,7 +51,7 @@ export const apiSandboxUpdateLetterStatusTestData: ApiSandboxUpdateLetterStatusT
         id: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
         attributes: {
           status: 'REJECTED',
-          reasonCode: 100,
+          reasonCode: 'R01',
           reasonText: 'failed validation',
         },
       }
@@ -62,7 +62,7 @@ export const apiSandboxUpdateLetterStatusTestData: ApiSandboxUpdateLetterStatusT
         type: 'Letter',
         id: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
         attributes: {
-          reasonCode: 100,
+          reasonCode: 'R01',
           reasonText: 'failed validation',
           status: 'REJECTED',
           specificationId:'2WL5eYSWGzCHlGmzNxuqVusPxDg',
