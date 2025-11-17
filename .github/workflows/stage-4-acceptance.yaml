@@ -40,23 +40,151 @@ permissions:
   contents: read
 
 jobs:
-  run-acceptance-tests:
-    name: Run Acceptance Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5.0.0
+#  environment-set-up:
+#    name: "Environment set up"
+#    runs-on: ubuntu-latest
+#    timeout-minutes: 5
+#    steps:
+#      - name: "Checkout code"
+#        uses: actions/checkout@v5
+#      - name: "Create infractructure"
+#        run: |
+#          echo "Creating infractructure..."
+#      - name: "Update database"
+#        run: |
+#          echo "Updating database..."
+#      - name: "Deploy application"
+#        run: |
+#          echo "Deploying application..."
 
-      - name: Trigger Acceptance Tests
-        shell: bash
-        env:
-          APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
-          APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
+  test-contract:
+    name: "Contract test"
+    runs-on: ubuntu-latest
+#    needs: environment-set-up
+    timeout-minutes: 10
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v5
+      - name: "Cache node_modules"
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-node-${{ inputs.nodejs_version }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
+      - name: "Run contract test"
         run: |
-          .github/scripts/dispatch_internal_repo_workflow.sh \
-            --targetWorkflow "dispatch-contextual-tests-dynamic-env.yaml" \
-            --infraRepoName "nhs-notify-supplier-api" \
-            --releaseVersion "${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" \
-            --overrideProjectName "nhs" \
-            --targetEnvironment "pr${{ inputs.pr_number }}" \
-            --targetAccountGroup "nhs-notify-supplier-api-dev" \
-            --targetComponent "api"
+          make test-contract
+        env:
+          GITHUB_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: "Save result"
+        run: |
+          echo "Nothing to save"
+
+# Environment-based tests should run from notify-internal repo, not in public repo
+#  test-security:
+#    name: "Security test"
+#    runs-on: ubuntu-latest
+#    needs: environment-set-up
+#    timeout-minutes: 10
+#    steps:
+#      - name: "Checkout code"
+#        uses: actions/checkout@v5
+#      - name: "Run security test"
+#        run: |
+#          make test-security
+#      - name: "Save result"
+#        run: |
+#          echo "Nothing to save"
+#  test-ui:
+#    name: "UI test"
+#    runs-on: ubuntu-latest
+#    needs: environment-set-up
+#    timeout-minutes: 10
+#    steps:
+#      - name: "Checkout code"
+#        uses: actions/checkout@v5
+#      - name: "Run UI test"
+#        run: |
+#          make test-ui
+#      - name: "Save result"
+#        run: |
+#          echo "Nothing to save"
+#  test-ui-performance:
+#    name: "UI performance test"
+#    runs-on: ubuntu-latest
+#    needs: environment-set-up
+#    timeout-minutes: 10
+#    steps:
+#      - name: "Checkout code"
+#        uses: actions/checkout@v5
+#      - name: "Run UI performance test"
+#        run: |
+#          make test-ui-performance
+#      - name: "Save result"
+#        run: |
+#          echo "Nothing to save"
+#  test-integration:
+#    name: "Integration test"
+#    runs-on: ubuntu-latest
+#    needs: environment-set-up
+#    timeout-minutes: 10
+#    steps:
+#      - name: "Checkout code"
+#        uses: actions/checkout@v5
+#      - name: "Run integration test"
+#        run: |
+#          make test-integration
+#      - name: "Save result"
+#        run: |
+#          echo "Nothing to save"
+#  test-accessibility:
+#    name: "Accessibility test"
+#    runs-on: ubuntu-latest
+#    needs: environment-set-up
+#    timeout-minutes: 10
+#    steps:
+#      - name: "Checkout code"
+#        uses: actions/checkout@v5
+#      - name: "Run accessibility test"
+#        run: |
+#          make test-accessibility
+#      - name: "Save result"
+#        run: |
+#          echo "Nothing to save"
+#  test-load:
+#    name: "Load test"
+#    runs-on: ubuntu-latest
+#    needs: environment-set-up
+#    timeout-minutes: 10
+#    steps:
+#      - name: "Checkout code"
+#        uses: actions/checkout@v5
+#      - name: "Run load tests"
+#        run: |
+#          make test-load
+#      - name: "Save result"
+#        run: |
+#          echo "Nothing to save"
+#  environment-tear-down:
+#    name: "Environment tear down"
+#    runs-on: ubuntu-latest
+#    needs:
+#      [
+#        test-accessibility,
+#        test-contract,
+#        test-integration,
+#        test-load,
+#        test-security,
+#        test-ui-performance,
+#        test-ui,
+#      ]
+#    if: always()
+#    timeout-minutes: 5
+#    steps:
+#      - name: "Checkout code"
+#        uses: actions/checkout@v5
+#      - name: "Tear down environment"
+#        run: |
+#          echo "Tearing down environment..."
