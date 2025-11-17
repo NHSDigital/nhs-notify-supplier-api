@@ -35,6 +35,8 @@ channels:
         $ref: '#/components/messages/letter-returned'
       letter-any:
         $ref: '#/components/messages/letter-any'
+      mi-submitted:
+        $ref: '#/components/messages/mi-submitted'
 
 components:
   messages:
@@ -179,6 +181,17 @@ components:
       payload:
         $ref: './events/letter.any.schema.json'
 
+    mi-submitted:
+      name: mi-submitted
+      title: MI Submitted
+      summary: |
+        This indicates that MI data has been submitted to the NHS Notify Supplier API.
+      contentType: application/json
+      payload:
+        $ref: './events/mi.SUBMITTED.schema.json'
+
   schemas:
     letter:
       $ref: './domain/letter.schema.json'
+    mi:
+      $ref: './domain/mi.schema.json'
