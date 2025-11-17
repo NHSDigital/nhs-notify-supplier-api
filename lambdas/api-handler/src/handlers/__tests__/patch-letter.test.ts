@@ -32,7 +32,7 @@ const updateLetterStatusRequest : PatchLetterRequest = {
       type: 'Letter',
       attributes: {
         status: 'REJECTED',
-        reasonCode: 123,
+        reasonCode: 'R01',
         reasonText: 'Reason text',
       }
     }
@@ -81,7 +81,7 @@ describe('patchLetter API Handler', () => {
             status: 'REJECTED',
             specificationId: 'spec1',
             groupId: 'group1',
-            reasonCode: 123,
+            reasonCode: 'R01',
             reasonText: 'Reason text',
           }
         }

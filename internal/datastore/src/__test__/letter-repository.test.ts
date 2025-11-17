@@ -111,14 +111,14 @@ describe('LetterRepository', () => {
       id: 'letter1',
       supplierId: 'supplier1',
       status: 'REJECTED',
-      reasonCode: 1,
+      reasonCode: 'R01',
       reasonText: 'Reason text'
     };
     await letterRepository.updateLetterStatus(letterDto);
 
     const updatedLetter = await letterRepository.getLetterById('supplier1', 'letter1');
     expect(updatedLetter.status).toBe('REJECTED');
-    expect(updatedLetter.reasonCode).toBe(1);
+    expect(updatedLetter.reasonCode).toBe('R01');
     expect(updatedLetter.reasonText).toBe('Reason text');
   });
 

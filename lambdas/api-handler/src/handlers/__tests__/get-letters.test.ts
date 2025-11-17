@@ -65,7 +65,7 @@ describe('API Lambda handler', () => {
         specificationId: 's1',
         groupId: 'g1',
         status: 'PENDING',
-        reasonCode: 123, // shouldn't be returned if present
+        reasonCode: 'R02', // shouldn't be returned if present
         reasonText: 'Reason text' // shouldn't be returned if present
       },
     ]);
