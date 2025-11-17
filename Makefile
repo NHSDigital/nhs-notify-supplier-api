@@ -68,12 +68,9 @@ construct-spec: guard-APIM_ENV
 	$(MAKE) set-access APIM_ENV=$$APIM_ENV
 	$(MAKE) set-security APIM_ENV=$$APIM_ENV
 
-
-
 build-json-oas-spec: guard-APIM_ENV
 	$(MAKE) construct-spec APIM_ENV=$$APIM_ENV
 	$(MAKE) publish-oas
-
 
 build-yml-oas-spec: guard-APIM_ENV
 	$(MAKE) construct-spec APIM_ENV=$$APIM_ENV

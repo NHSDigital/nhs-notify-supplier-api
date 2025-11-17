@@ -37,15 +37,18 @@ export const $Letter = DomainBase("Letter")
           title: "Domain ID",
           description: "The domain which requested this letter",
         }),
+
         source: z.string().meta({
           title: "Event source",
           description: "The source of the event which created this letter",
         }),
+
         subject: z.string().meta({
           title: "Event subject",
           description:
             "The subject of the event which created this letter, scoped to source",
         }),
+
         event: z.string().meta({
           title: "Event ID",
           description: "The ID of the event which created this letter",
@@ -65,12 +68,14 @@ The identifier will be included as the origin domain in the subject of any corre
           },
         ],
       }),
+
     specificationId: z.string().meta({
       title: "Specification ID",
       description:
         "Reference to the letter specification which was used to produce a letter pack for this request.",
       examples: ["1y3q9v1zzzz"],
     }),
+
     groupId: z.string().meta({
       title: "Group ID",
       description:
@@ -80,7 +85,9 @@ The identifier will be included as the origin domain in the subject of any corre
         "00f3b388-bbe9-41c9-9e76-052d37ee8988_20a1ab22-6136-47ae-ac0f-989f382be8df",
       ],
     }),
+
     status: $LetterStatus,
+
     reasonCode: z
       .string()
       .optional()
@@ -90,6 +97,7 @@ The identifier will be included as the origin domain in the subject of any corre
           "Optional reason code for the status change, if applicable.",
         examples: ["R01", "R08"],
       }),
+
     reasonText: z
       .string()
       .optional()

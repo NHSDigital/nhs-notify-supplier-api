@@ -25,6 +25,9 @@ inputs:
     description: "Name of the Component to deploy"
     required: true
     default: 'api'
+  nodejs_version:
+    description: "Node.js version, set by the CI/CD pipeline workflow"
+    required: true
 
 runs:
   using: composite
@@ -34,7 +37,16 @@ runs:
       uses: actions/checkout@v4
     - uses: actions/setup-node@v4
       with:
-        node-version: 22
+        node-version: ${{ inputs.nodejs_version }}
+
+    - name: "Cache node_modules"
+      uses: actions/cache@v4
+      with:
+        path: |
+          **/node_modules
+        key: ${{ runner.os }}-node-${{ inputs.nodejs_version }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
 
     - name: Npm install
       working-directory: .
