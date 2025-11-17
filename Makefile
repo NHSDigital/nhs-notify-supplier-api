@@ -103,9 +103,6 @@ config:: _install-dependencies version # Configure development environment (main
 test-component:
 	(cd tests && npm install && npm run test:component)
 
-test-contract-provider:
-	echo "Contract tests should run here"
-
 version:
 	rm -f .version
 	make version-create-effective-file dir=.
