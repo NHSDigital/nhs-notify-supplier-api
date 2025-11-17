@@ -115,7 +115,6 @@ runs:
       shell: bash
       run: |
         .github/scripts/dispatch_internal_repo_workflow.sh \
-          --internalRef "feature/CCM-12748-supplier-api-mi-proxy-fix" \
           --infraRepoName "nhs-notify-supplier-api" \
           --releaseVersion "${{ inputs.releaseVersion }}" \
           --targetComponent "${{ inputs.targetComponent }}" \
