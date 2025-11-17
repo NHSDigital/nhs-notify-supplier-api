@@ -24,7 +24,7 @@ export const LetterSchemaBase = z.object({
   status: LetterStatus,
   specificationId: z.string(),
   groupId: z.string(),
-  reasonCode: z.number().optional(),
+  reasonCode: z.string().optional(),
   reasonText: z.string().optional()
 });
 

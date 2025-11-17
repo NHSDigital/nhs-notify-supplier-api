@@ -13,7 +13,7 @@ erDiagram
         string status "enum: PENDING, ACCEPTED, REJECTED, PRINTED, ENCLOSED, CANCELLED, DISPATCHED, FAILED, RETURNED, FORWARDED, DELIVERED"
         string specificationId
         string groupId
-        number reasonCode
+        string reasonCode
         string reasonText
         string supplierId
         string url "url"
