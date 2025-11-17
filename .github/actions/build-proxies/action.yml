@@ -125,5 +125,4 @@ runs:
           --apimEnvironment "${{ env.APIM_ENV }}" \
           --boundedContext "notify-supplier" \
           --targetDomain "$TARGET_DOMAIN" \
-          --version "${{ inputs.version }}" \
-          --nodejs_version 22
+          --version "${{ inputs.version }}"
