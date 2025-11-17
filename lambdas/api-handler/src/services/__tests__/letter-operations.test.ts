@@ -102,7 +102,7 @@ describe('patchLetterStatus function', () => {
     id: 'letter1',
     supplierId: 'supplier1',
     status: 'REJECTED',
-    reasonCode: 123,
+    reasonCode: 'R01',
     reasonText: 'Reason text'
   };
 
@@ -223,7 +223,7 @@ function makeLetter(id: string, status: Letter['status']) : Letter {
       supplierStatus: `supplier1#${status}`,
       supplierStatusSk: Date.now().toString(),
       ttl: 123,
-      reasonCode: 123,
+      reasonCode: 'R01',
       reasonText: "Reason text"
   };
 }
