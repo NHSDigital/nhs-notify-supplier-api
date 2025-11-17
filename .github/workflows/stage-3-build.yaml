@@ -109,3 +109,4 @@ jobs:
           runId: "${{ github.run_id }}"
           buildSandbox: true
           releaseVersion: ${{ github.head_ref || github.ref_name }}
+          nodejs_version: ${{ inputs.nodejs_version }}
