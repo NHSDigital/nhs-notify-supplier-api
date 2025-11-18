@@ -41,7 +41,7 @@ export function createPatchLetterHandler(deps: Deps): APIGatewayProxyHandler {
         throw new ValidationError(ApiErrorDetail.InvalidRequestLetterIdsMismatch);
       }
 
-      enqueueLetterUpdateRequests([letterToUpdate], commonHeadersResult.value.correlationId, deps);
+      await enqueueLetterUpdateRequests([letterToUpdate], commonHeadersResult.value.correlationId, deps);
 
       return {
         statusCode: 202,
