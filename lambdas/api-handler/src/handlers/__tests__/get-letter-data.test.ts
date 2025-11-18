@@ -1,12 +1,12 @@
 // mock error mapper
 jest.mock('../../mappers/error-mapper');
-import { mapErrorToResponse } from '../../mappers/error-mapper';
-const mockedMapErrorToResponse = jest.mocked(mapErrorToResponse);
+import { processError } from '../../mappers/error-mapper';
+const mockedProcessError = jest.mocked(processError);
 const expectedErrorResponse: APIGatewayProxyResult = {
   statusCode: 400,
   body: 'Error'
 };
-mockedMapErrorToResponse.mockReturnValue(expectedErrorResponse);
+mockedProcessError.mockReturnValue(expectedErrorResponse);
 
 // mock letterService
 jest.mock('../../services/letter-operations');
@@ -82,7 +82,7 @@ describe('API Lambda handler', () => {
     const getLetterDataHandler = createGetLetterDataHandler(mockedDeps);
     const result = await getLetterDataHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error('The request headers are empty'), undefined, mockedDeps.logger);
+    expect(mockedProcessError).toHaveBeenCalledWith(new Error('The request headers are empty'), undefined, mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -102,7 +102,7 @@ describe('API Lambda handler', () => {
     const getLetterDataHandler = createGetLetterDataHandler(mockedDeps);
     const result = await getLetterDataHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error("The request headers don't contain the APIM correlation id"), undefined, mockedDeps.logger);
+    expect(mockedProcessError).toHaveBeenCalledWith(new Error("The request headers don't contain the APIM correlation id"), undefined, mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -121,7 +121,7 @@ describe('API Lambda handler', () => {
     const getLetterDataHandler = createGetLetterDataHandler(mockedDeps);
     const result = await getLetterDataHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter), 'correlationId', mockedDeps.logger);
+    expect(mockedProcessError).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter), 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 });

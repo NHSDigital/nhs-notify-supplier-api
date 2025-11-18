@@ -459,6 +459,8 @@ paths:
 
         It is not possible to update a letter to status of `PENDING`.
 
+        The request should not contain multiple letter objects with the same ID.
+
         Optionally a `reasonCode` and `reasonText` explaining the status (for example, validation failures) can be included in the request body for each update.
       operationId: postLetters
       parameters:
@@ -561,23 +563,23 @@ paths:
                 example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
                 type: string
               style: simple
-        "404":
+        "400":
           content:
             application/vnd.api+json:
               examples:
-                error-not-found:
+                error-bad-request-invalid-request-body:
                   value:
                     errors:
-                    - code: NOTIFY_RESOURCE_NOT_FOUND
-                      detail: No resource found with that ID
+                    - code: NOTIFY_INVALID_REQUEST
+                      detail: The request body is invalid
                       id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
                       links:
                         about: https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier
-                      status: "404"
-                      title: Resource not found
+                      status: "400"
+                      title: Invalid request
               schema:
                 $ref: "#/components/schemas/listLetters_400_response"
-          description: Resource not found
+          description: "Bad request, invalid input data"
         "429":
           content:
             application/vnd.api+json:
