@@ -5,5 +5,4 @@ content:
       $ref: "../../schemas/errorResponse.yml"
     examples:
       error-server-error:
-        value:
-          $ref: ../../examples/errors/responses/serverError.json
+        $ref: ../../examples/errors/responses/serverError.json

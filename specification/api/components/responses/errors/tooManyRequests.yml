@@ -5,5 +5,4 @@ content:
       $ref: "../../schemas/errorResponse.yml"
     examples:
       error-too-many-requests:
-        value:
-          $ref: ../../examples/errors/responses/tooManyRequests.json
+        $ref: ../../examples/errors/responses/tooManyRequests.json
