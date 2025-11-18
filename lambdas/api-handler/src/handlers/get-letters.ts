@@ -1,13 +1,13 @@
 import { APIGatewayProxyEventQueryStringParameters, APIGatewayProxyHandler } from 'aws-lambda';
 import { getLettersForSupplier } from '../services/letter-operations';
 import { extractCommonIds } from '../utils/commonIds';
+import { requireEnvVar } from '../utils/validation';
 import { ApiErrorDetail } from '../contracts/errors';
-import { mapErrorToResponse } from '../mappers/error-mapper';
+import { processError } from '../mappers/error-mapper';
 import { ValidationError } from '../errors';
 import { mapToGetLettersResponse } from '../mappers/letter-mapper';
 import type { Deps } from '../config/deps';
 import { Logger } from 'pino';
-
 
 // The endpoint should only return pending letters for now
 const status = 'PENDING';
@@ -19,11 +19,11 @@ export function createGetLettersHandler(deps: Deps): APIGatewayProxyHandler {
     const commonIds = extractCommonIds(event.headers, event.requestContext, deps);
 
     if (!commonIds.ok) {
-      return mapErrorToResponse(commonIds.error, commonIds.correlationId, deps.logger);
+      return processError(commonIds.error, commonIds.correlationId, deps.logger);
     }
 
     try {
-      const maxLimit = getMaxLimit(deps);
+      const maxLimit = requireEnvVar(deps.env, "MAX_LIMIT");
 
       const limitNumber = getLimitOrDefault(event.queryStringParameters, maxLimit, deps.logger);
 
@@ -50,7 +50,7 @@ export function createGetLettersHandler(deps: Deps): APIGatewayProxyHandler {
       };
     }
     catch (error) {
-      return mapErrorToResponse(error, commonIds.value.correlationId, deps.logger);
+      return processError(error, commonIds.value.correlationId, deps.logger);
     }
   }
 };
@@ -107,13 +107,4 @@ function assertLimitInRange(limitNumber: number, maxLimit: number, logger: Logge
     });
     throw new ValidationError(ApiErrorDetail.InvalidRequestLimitNotInRange, { args: [maxLimit]});
   }
-}
-
-function getMaxLimit(deps: Deps): number{
-
-  if (deps.env.MAX_LIMIT == null) {
-    throw new Error('MAX_LIMIT is required for getLetters');
-  }
-
-  return deps.env.MAX_LIMIT;
 }

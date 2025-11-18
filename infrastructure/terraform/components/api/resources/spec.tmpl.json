@@ -51,6 +51,43 @@
           "type": "AWS_PROXY",
           "uri": "arn:aws:apigateway:${AWS_REGION}:lambda:path/2015-03-31/functions/${GET_LETTERS_LAMBDA_ARN}/invocations"
         }
+      },
+      "post": {
+        "description": "Update the status of a collection of letters.",
+        "operationId": "postLetters",
+        "requestBody": {
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Acknowledges letters will be updated"
+          },
+          "400": {
+            "description": "Bad request, invalid input data"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        },
+        "security": [
+          {
+            "LambdaAuthorizer": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "contentHandling": "CONVERT_TO_TEXT",
+          "credentials": "${APIG_EXECUTION_ROLE_ARN}",
+          "httpMethod": "POST",
+          "passthroughBehavior": "WHEN_NO_TEMPLATES",
+          "responses": {
+            ".*": {
+              "statusCode": "200"
+            }
+          },
+          "timeoutInMillis": 29000,
+          "type": "AWS_PROXY",
+          "uri": "arn:aws:apigateway:${AWS_REGION}:lambda:path/2015-03-31/functions/${POST_LETTERS_LAMBDA_ARN}/invocations"
+        }
       }
     },
     "/letters/{id}": {

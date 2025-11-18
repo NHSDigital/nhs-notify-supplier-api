@@ -1,12 +1,14 @@
 import { S3Client } from "@aws-sdk/client-s3";
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
+import { SQSClient } from "@aws-sdk/client-sqs";
 import pino from 'pino';
 import { LetterRepository, MIRepository } from '../../../../internal/datastore';
 import { envVars, EnvVars } from "../config/env";
 
 export type Deps = {
   s3Client: S3Client;
+  sqsClient: SQSClient;
   letterRepo: LetterRepository;
   miRepo: MIRepository;
   logger: pino.Logger;
@@ -18,33 +20,35 @@ function createDocumentClient(): DynamoDBDocumentClient {
   return DynamoDBDocumentClient.from(ddbClient);
 }
 
-function createLetterRepository(documentClient: DynamoDBDocumentClient, log: pino.Logger, envVars: EnvVars): LetterRepository {
+function createLetterRepository(log: pino.Logger, envVars: EnvVars): LetterRepository {
+
   const config = {
     lettersTableName: envVars.LETTERS_TABLE_NAME,
     lettersTtlHours: envVars.LETTER_TTL_HOURS
   };
 
-  return new LetterRepository(documentClient, log, config);
+  return new LetterRepository(createDocumentClient(), log, config);
 }
 
-function createMIRepository(documentClient: DynamoDBDocumentClient, log: pino.Logger, envVars: EnvVars): MIRepository {
+function createMIRepository(log: pino.Logger, envVars: EnvVars): MIRepository {
+
   const config = {
     miTableName: envVars.MI_TABLE_NAME,
     miTtlHours: envVars.MI_TTL_HOURS
   };
 
-  return new MIRepository(documentClient, log, config);
+  return new MIRepository(createDocumentClient(), log, config);
 }
 
 export function createDependenciesContainer(): Deps {
 
   const log = pino();
-  const documentClient = createDocumentClient();
 
   return {
     s3Client: new S3Client(),
-    letterRepo: createLetterRepository(documentClient, log, envVars),
-    miRepo: createMIRepository(documentClient, log, envVars),
+    sqsClient: new SQSClient(),
+    letterRepo: createLetterRepository(log, envVars),
+    miRepo: createMIRepository(log, envVars),
     logger: log,
     env: envVars
   };

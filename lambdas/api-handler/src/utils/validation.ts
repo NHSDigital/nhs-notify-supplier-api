@@ -1,5 +1,7 @@
 import { ValidationError } from '../errors';
 import { ApiErrorDetail } from '../contracts/errors';
+import { Deps } from '../config/deps';
+import { EnvVars } from '../config/env';
 
 export function assertNotEmpty<T>(
   value: T | null | undefined,
@@ -46,4 +48,15 @@ export function validateIso8601Timestamp(timestamp: string) {
   if (Number.isNaN(new Date(timestamp).valueOf()) || date.toISOString() != normalisePrecision(groups)) {
       throw new ValidationError(ApiErrorDetail.InvalidRequestTimestamp);
   }
+}
+
+export function requireEnvVar<T extends keyof EnvVars>(
+  envs: EnvVars,
+  name: T
+): NonNullable<EnvVars[T]> {
+  const value = envs[name];
+  if (value === undefined || value === null || value === "") {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  return value as NonNullable<EnvVars[T]>;
 }

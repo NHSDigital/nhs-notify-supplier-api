@@ -2,7 +2,7 @@ import { APIGatewayProxyHandler } from "aws-lambda";
 import { postMI as postMIOperation } from '../services/mi-operations';
 import { ApiErrorDetail } from "../contracts/errors";
 import { ValidationError } from "../errors";
-import { mapErrorToResponse } from "../mappers/error-mapper";
+import { processError } from "../mappers/error-mapper";
 import { assertNotEmpty, validateIso8601Timestamp } from "../utils/validation";
 import { extractCommonIds } from '../utils/commonIds';
 import { PostMIRequest, PostMIRequestSchema } from "../contracts/mi";
@@ -16,7 +16,7 @@ export function createPostMIHandler(deps: Deps): APIGatewayProxyHandler {
     const commonIds = extractCommonIds(event.headers, event.requestContext, deps);
 
     if (!commonIds.ok) {
-      return mapErrorToResponse(commonIds.error, commonIds.correlationId, deps.logger);
+      return processError(commonIds.error, commonIds.correlationId, deps.logger);
     }
 
     try {
@@ -42,7 +42,7 @@ export function createPostMIHandler(deps: Deps): APIGatewayProxyHandler {
       };
 
     } catch (error) {
-      return mapErrorToResponse(error, commonIds.value.correlationId, deps.logger);
+      return processError(error, commonIds.value.correlationId, deps.logger);
     }
   }
 };
