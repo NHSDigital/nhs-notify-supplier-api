@@ -42,7 +42,8 @@
     "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.6",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.27.0"
   },
   "name": "nhs-notify-supplier-api",
   "overrides": {
@@ -80,6 +81,7 @@
     "lambdas/*",
     "internal/*",
     "scripts/test-data",
-    "docs"
+    "docs",
+    "tests"
   ]
 }

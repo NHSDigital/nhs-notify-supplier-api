@@ -10,10 +10,10 @@ The schemas are generated from Zod definitions and provide a visual representati
 erDiagram
     Letter {
         string id
-        string status "enum: PENDING, ACCEPTED, REJECTED, PRINTED, ENCLOSED, CANCELLED, DISPATCHED, FAILED, RETURNED, DESTROYED, FORWARDED, DELIVERED"
+        string status "enum: PENDING, ACCEPTED, REJECTED, PRINTED, ENCLOSED, CANCELLED, DISPATCHED, FAILED, RETURNED, FORWARDED, DELIVERED"
         string specificationId
         string groupId
-        number reasonCode
+        string reasonCode
         string reasonText
         string supplierId
         string url "url"

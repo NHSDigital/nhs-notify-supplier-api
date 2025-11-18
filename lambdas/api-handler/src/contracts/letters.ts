@@ -7,7 +7,7 @@ export type LetterDto = {
   supplierId: string,
   specificationId?: string,
   groupId?: string,
-  reasonCode?: number,
+  reasonCode?: string,
   reasonText?: string
 };
 
@@ -21,7 +21,6 @@ export const LetterStatusSchema = z.enum([
   'DISPATCHED',
   'FAILED',
   'RETURNED',
-  'DESTROYED',
   'FORWARDED',
   'DELIVERED'
 ]);
@@ -31,7 +30,7 @@ export const PatchLetterRequestResourceSchema = z.object({
   type: z.literal('Letter'),
   attributes: z.object({
     status: LetterStatusSchema,
-    reasonCode: z.number().optional(),
+    reasonCode: z.string().optional(),
     reasonText: z.string().optional(),
   }).strict()
 }).strict();
@@ -43,7 +42,7 @@ export const GetLetterResponseResourceSchema = z.object({
     status: LetterStatusSchema,
     specificationId: z.string(),
     groupId: z.string().optional(),
-    reasonCode: z.number().optional(),
+    reasonCode: z.string().optional(),
     reasonText: z.string().optional(),
   }).strict()
 }).strict();

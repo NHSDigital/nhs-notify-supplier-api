@@ -30,9 +30,9 @@ clean:: # Clean-up project resources (main) @Operations
 # (cd src/server && make clean)
 
 guard-%:
-	@ if [ "${${*}}" = "" ]; then \
+	@if [ -z "$${$*}" ]; then \
 		echo "Variable $* not set"; \
-		echo "Usage: make <target> APIM_ENV=<env>"
+		echo "Usage: make <target> $*=<env>"; \
 		exit 1; \
 	fi
 serve:
@@ -59,18 +59,18 @@ set-security: guard-APIM_ENV
 	@ SECURITY=security-$$APIM_ENV.yml \
 	envsubst '$${SECURITY}' \
 	< specification/api/components/security/security-template.yml > specification/api/components/security/security.yml
+	@ SECURITY_SCHEMES=security-schemes-$$APIM_ENV.yml \
+	envsubst '$${SECURITY_SCHEMES}' \
+	< specification/api/components/security-schemes/security-schemes-template.yml > specification/api/components/security-schemes/security-schemes.yml
 
 construct-spec: guard-APIM_ENV
 	$(MAKE) set-target APIM_ENV=$$APIM_ENV
 	$(MAKE) set-access APIM_ENV=$$APIM_ENV
 	$(MAKE) set-security APIM_ENV=$$APIM_ENV
 
-
-
 build-json-oas-spec: guard-APIM_ENV
 	$(MAKE) construct-spec APIM_ENV=$$APIM_ENV
 	$(MAKE) publish-oas
-
 
 build-yml-oas-spec: guard-APIM_ENV
 	$(MAKE) construct-spec APIM_ENV=$$APIM_ENV

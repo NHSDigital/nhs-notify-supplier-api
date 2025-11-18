@@ -15,7 +15,7 @@ export type Supplier = z.infer<typeof SupplierSchema>;
 export const LetterStatus = z.enum([
   'PENDING', 'ACCEPTED', 'REJECTED', 'PRINTED',
   'ENCLOSED', 'CANCELLED', 'DISPATCHED', 'FAILED',
-  'RETURNED', 'DESTROYED', 'FORWARDED', 'DELIVERED']);
+  'RETURNED', 'FORWARDED', 'DELIVERED']);
 
 export type LetterStatusType = z.infer<typeof LetterStatus>;
 
@@ -24,7 +24,7 @@ export const LetterSchemaBase = z.object({
   status: LetterStatus,
   specificationId: z.string(),
   groupId: z.string(),
-  reasonCode: z.number().optional(),
+  reasonCode: z.string().optional(),
   reasonText: z.string().optional()
 });
 
