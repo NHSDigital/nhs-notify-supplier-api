@@ -3,9 +3,9 @@ import { patchLetterStatus } from '../services/letter-operations';
 import { PatchLetterRequest, PatchLetterRequestSchema } from '../contracts/letters';
 import { ApiErrorDetail } from '../contracts/errors';
 import { ValidationError } from '../errors';
-import { mapErrorToResponse } from '../mappers/error-mapper';
+import { processError } from '../mappers/error-mapper';
 import { assertNotEmpty, validateCommonHeaders } from '../utils/validation';
-import { mapToLetterDto } from '../mappers/letter-mapper';
+import { mapPatchLetterToDto } from '../mappers/letter-mapper';
 import type { Deps } from "../config/deps";
 
 
@@ -16,7 +16,7 @@ export function createPatchLetterHandler(deps: Deps): APIGatewayProxyHandler {
     const commonHeadersResult = validateCommonHeaders(event.headers, deps);
 
     if (!commonHeadersResult.ok) {
-      return mapErrorToResponse(commonHeadersResult.error, commonHeadersResult.correlationId, deps.logger);
+      return processError(commonHeadersResult.error, commonHeadersResult.correlationId, deps.logger);
     }
 
     try {
@@ -35,7 +35,7 @@ export function createPatchLetterHandler(deps: Deps): APIGatewayProxyHandler {
         else throw error;
       }
 
-      const updatedLetter = await patchLetterStatus(mapToLetterDto(patchLetterRequest, commonHeadersResult.value.supplierId), letterId, deps.letterRepo);
+      const updatedLetter = await patchLetterStatus(mapPatchLetterToDto(patchLetterRequest, commonHeadersResult.value.supplierId), letterId, deps.letterRepo);
 
       return {
         statusCode: 200,
@@ -43,7 +43,7 @@ export function createPatchLetterHandler(deps: Deps): APIGatewayProxyHandler {
       };
 
     } catch (error) {
-      return mapErrorToResponse(error, commonHeadersResult.value.correlationId, deps.logger);
+      return processError(error, commonHeadersResult.value.correlationId, deps.logger);
     }
   };
 };

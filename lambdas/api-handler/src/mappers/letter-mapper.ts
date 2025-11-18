@@ -1,13 +1,23 @@
 import { LetterBase, LetterStatus } from "@internal/datastore";
-import { GetLetterResponse, GetLetterResponseSchema, GetLettersResponse, GetLettersResponseSchema, LetterDto, PatchLetterRequest, PatchLetterResponse, PatchLetterResponseSchema } from '../contracts/letters';
+import { GetLetterResponse, GetLetterResponseSchema, GetLettersResponse, GetLettersResponseSchema, LetterDto, PatchLetterRequest, PatchLetterResponse, PatchLetterResponseSchema, PostLettersRequest, PostLettersRequestResource } from '../contracts/letters';
 
-export function mapToLetterDto(request: PatchLetterRequest, supplierId: string): LetterDto {
+export function mapPatchLetterToDto(request: PatchLetterRequest, supplierId: string): LetterDto {
   return {
     id: request.data.id,
     supplierId,
     status: LetterStatus.parse(request.data.attributes.status),
     reasonCode: request.data.attributes.reasonCode,
     reasonText: request.data.attributes.reasonText,
+  };
+}
+
+export function mapPostLetterResourceToDto(request: PostLettersRequestResource, supplierId: string): LetterDto {
+  return {
+    id: request.id,
+    supplierId,
+    status: LetterStatus.parse(request.attributes.status),
+    reasonCode: request.attributes.reasonCode,
+    reasonText: request.attributes.reasonText,
   };
 }
 
