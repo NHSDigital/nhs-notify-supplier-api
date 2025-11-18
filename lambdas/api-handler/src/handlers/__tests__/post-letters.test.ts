@@ -33,7 +33,7 @@ const updateLettersRequest : PostLettersRequest = {
       type: 'Letter',
       attributes: {
         status: 'REJECTED',
-        reasonCode: 123,
+        reasonCode: '123',
         reasonText: 'Reason text',
       }
     },

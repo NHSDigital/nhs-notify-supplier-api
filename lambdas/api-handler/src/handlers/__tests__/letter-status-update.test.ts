@@ -23,7 +23,7 @@ describe('createLetterStatusUpdateHandler', () => {
         supplierId: 's1',
         specificationId: 'spec1',
         groupId: 'g1',
-        reasonCode: 123,
+        reasonCode: '123',
         reasonText: 'Reason text'
       },
       {
