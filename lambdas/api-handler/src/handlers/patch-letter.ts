@@ -1,6 +1,6 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { patchLetterStatus } from '../services/letter-operations';
-import { PatchLetterRequest, PatchLetterRequestSchema } from '../contracts/letters';
+import { enqueueLetterUpdateRequests } from '../services/letter-operations';
+import { LetterDto, PatchLetterRequest, PatchLetterRequestSchema } from '../contracts/letters';
 import { ApiErrorDetail } from '../contracts/errors';
 import { ValidationError } from '../errors';
 import { processError } from '../mappers/error-mapper';
@@ -35,11 +35,17 @@ export function createPatchLetterHandler(deps: Deps): APIGatewayProxyHandler {
         else throw error;
       }
 
-      const updatedLetter = await patchLetterStatus(mapPatchLetterToDto(patchLetterRequest, commonHeadersResult.value.supplierId), letterId, deps.letterRepo);
+      const letterToUpdate: LetterDto = mapPatchLetterToDto(patchLetterRequest, commonHeadersResult.value.supplierId);
+
+      if (letterToUpdate.id !== letterId) {
+        throw new ValidationError(ApiErrorDetail.InvalidRequestLetterIdsMismatch);
+      }
+
+      enqueueLetterUpdateRequests([letterToUpdate], commonHeadersResult.value.correlationId, deps);
 
       return {
-        statusCode: 200,
-        body: JSON.stringify(updatedLetter, null, 2)
+        statusCode: 202,
+        body: ''
       };
 
     } catch (error) {

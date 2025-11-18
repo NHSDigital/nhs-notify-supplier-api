@@ -6,6 +6,7 @@ import { ValidationError } from '../errors';
 import { processError } from '../mappers/error-mapper';
 import { assertNotEmpty, requireEnvVar, validateCommonHeaders } from '../utils/validation';
 import type { Deps } from "../config/deps";
+import { mapPostLetterRequestToLetterDtoArray } from '../mappers/letter-mapper';
 
 export function createPostLettersHandler(deps: Deps): APIGatewayProxyHandler {
 
@@ -42,7 +43,11 @@ export function createPostLettersHandler(deps: Deps): APIGatewayProxyHandler {
         throw new ValidationError(ApiErrorDetail.InvalidRequestDuplicateLetterId);
       }
 
-      await enqueueLetterUpdateRequests(postLettersRequest, commonHeadersResult.value.supplierId, commonHeadersResult.value.correlationId, deps);
+      await enqueueLetterUpdateRequests(
+        mapPostLetterRequestToLetterDtoArray(postLettersRequest, commonHeadersResult.value.supplierId),
+        commonHeadersResult.value.correlationId,
+        deps
+      );
 
       return {
         statusCode: 202,

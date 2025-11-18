@@ -11,14 +11,14 @@ export function mapPatchLetterToDto(request: PatchLetterRequest, supplierId: str
   };
 }
 
-export function mapPostLetterResourceToDto(request: PostLettersRequestResource, supplierId: string): LetterDto {
-  return {
-    id: request.id,
+export function mapPostLetterRequestToLetterDtoArray(request: PostLettersRequest, supplierId: string): LetterDto[] {
+  return request.data.map( (letterToUpdate: PostLettersRequestResource) => ({
+    id: letterToUpdate.id,
     supplierId,
-    status: LetterStatus.parse(request.attributes.status),
-    reasonCode: request.attributes.reasonCode,
-    reasonText: request.attributes.reasonText,
-  };
+    status: LetterStatus.parse(letterToUpdate.attributes.status),
+    reasonCode: letterToUpdate.attributes.reasonCode,
+    reasonText: letterToUpdate.attributes.reasonText,
+  }));
 }
 
 export function mapToPatchLetterResponse(letter: LetterBase): PatchLetterResponse {
