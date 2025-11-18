@@ -23,26 +23,92 @@ permissions:
   contents: read
 
 jobs:
+  metadata:
+    name: "Set CI/CD metadata"
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    outputs:
+      build_datetime_london: ${{ steps.variables.outputs.build_datetime_london }}
+      build_datetime: ${{ steps.variables.outputs.build_datetime }}
+      build_timestamp: ${{ steps.variables.outputs.build_timestamp }}
+      build_epoch: ${{ steps.variables.outputs.build_epoch }}
+      nodejs_version: ${{ steps.variables.outputs.nodejs_version }}
+      python_version: ${{ steps.variables.outputs.python_version }}
+      terraform_version: ${{ steps.variables.outputs.terraform_version }}
+      version: ${{ steps.variables.outputs.version }}
+      is_version_prerelease: ${{ steps.variables.outputs.is_version_prerelease }}
+      does_pull_request_exist: ${{ steps.pr_exists.outputs.does_pull_request_exist }}
+      pr_number: ${{ steps.pr_exists.outputs.pr_number }}
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v5
+      - name: "Set CI/CD variables"
+        id: variables
+        run: |
+          datetime=$(date -u +'%Y-%m-%dT%H:%M:%S%z')
+          BUILD_DATETIME=$datetime make version-create-effective-file dir=.
+          version=$(head -n 1 .version 2> /dev/null || echo unknown)
+          echo "build_datetime_london=$(TZ=Europe/London date --date=$datetime +'%Y-%m-%dT%H:%M:%S%z')" >> $GITHUB_OUTPUT
+          echo "build_datetime=$datetime" >> $GITHUB_OUTPUT
+          echo "build_timestamp=$(date --date=$datetime -u +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
+          echo "build_epoch=$(date --date=$datetime -u +'%s')" >> $GITHUB_OUTPUT
+          echo "nodejs_version=$(grep "^nodejs\s" .tool-versions | cut -f2 -d' ')" >> $GITHUB_OUTPUT
+          echo "python_version=$(grep "^python\s" .tool-versions | cut -f2 -d' ')" >> $GITHUB_OUTPUT
+          echo "terraform_version=$(grep "^terraform\s" .tool-versions | cut -f2 -d' ')" >> $GITHUB_OUTPUT
+          echo "version=$(echo $version)" >> $GITHUB_OUTPUT
+          echo "is_version_prerelease=$(if [[ $version == *-* ]]; then echo "true"; else echo "false"; fi)" >> $GITHUB_OUTPUT
+      - name: "Check if pull request exists for this branch"
+        id: pr_exists
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          branch_name=${GITHUB_HEAD_REF:-$(echo $GITHUB_REF | sed 's#refs/heads/##')}
+          echo "Current branch is '$branch_name'"
+
+          pr_json=$(gh pr list --head "$branch_name" --state open --json number --limit 1)
+          pr_number=$(echo "$pr_json" | jq -r '.[0].number // empty')
+
+          if [[ -n "$pr_number" ]]; then
+            echo "Pull request exists: #$pr_number"
+            echo "does_pull_request_exist=true" >> $GITHUB_OUTPUT
+            echo "pr_number=$pr_number" >> $GITHUB_OUTPUT
+          else
+            echo "Pull request doesn't exist"
+            echo "does_pull_request_exist=false" >> $GITHUB_OUTPUT
+            echo "pr_number=" >> $GITHUB_OUTPUT
+          fi
+      - name: "List variables"
+        run: |
+          export BUILD_DATETIME_LONDON="${{ steps.variables.outputs.build_datetime_london }}"
+          export BUILD_DATETIME="${{ steps.variables.outputs.build_datetime }}"
+          export BUILD_TIMESTAMP="${{ steps.variables.outputs.build_timestamp }}"
+          export BUILD_EPOCH="${{ steps.variables.outputs.build_epoch }}"
+          export NODEJS_VERSION="${{ steps.variables.outputs.nodejs_version }}"
+          export PYTHON_VERSION="${{ steps.variables.outputs.python_version }}"
+          export TERRAFORM_VERSION="${{ steps.variables.outputs.terraform_version }}"
+          export VERSION="${{ steps.variables.outputs.version }}"
+          export DOES_PULL_REQUEST_EXIST="${{ steps.pr_exists.outputs.does_pull_request_exist }}"
+          export IS_VERSION_PRERELEASE="${{ steps.variables.outputs.is_version_prerelease }}"
+          make list-variables
   deploy-environment:
     runs-on: ubuntu-latest
     name: Deploy to Environment
+    needs: metadata
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: "${{ needs.metadata.outputs.nodejs_version }}"
 
       - name: Npm install
         working-directory: .
         run: npm ci
         shell: bash
 
-      - name: "Check if pull request exists for this branch and set ENVIRONMENT/APIM_ENV"
-        id: pr_exists
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: "Set ENVIRONMENT/APIM_ENV"
+        id: environments
         run: |
           branch_name=${GITHUB_HEAD_REF:-$(echo $GITHUB_REF | sed 's#refs/heads/##')}
           echo "Current branch is '$branch_name'"
@@ -53,20 +119,15 @@ jobs:
             ENVIRONMENT="${{ inputs.proxy_environment }}"
           fi
 
-          pr_json=$(gh pr list --head "$branch_name" --state open --json number --limit 1)
-          pr_number=$(echo "$pr_json" | jq -r '.[0].number // empty')
+          pr_exists="${{ needs.metadata.outputs.does_pull_request_exist }}"
+          pr_number="${{ needs.metadata.outputs.pr_number }}"
 
-          if [[ -n "$pr_number" ]]; then
-            echo "Pull request exists: #$pr_number"
-            echo "does_pull_request_exist=true" >> $GITHUB_OUTPUT
-            echo "pr_number=$pr_number" >> $GITHUB_OUTPUT
+          if [[ $pr_exists = true ]]; then
             APIM_ENV="$ENVIRONMENT-pr"
             echo "changing environment variable so that PR number is used in proxy pipeline for setting env vars"
             ENVIRONMENT="pr$pr_number"
           else
             echo "Pull request doesn't exist, setting target env to main"
-            echo "does_pull_request_exist=false" >> $GITHUB_OUTPUT
-            echo "pr_number=" >> $GITHUB_OUTPUT
             APIM_ENV="$ENVIRONMENT"
             ENVIRONMENT="main"
           fi
@@ -77,7 +138,7 @@ jobs:
       - name: "Build proxies"
         env:
           PROXYGEN_API_NAME: nhs-notify-supplier
-          PR_NUMBER: ${{ steps.pr_exists.outputs.pr_number }}
+          PR_NUMBER: ${{ needs.metadata.outputs.pr_number }}
           APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
           APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
         uses: ./.github/actions/build-proxies
