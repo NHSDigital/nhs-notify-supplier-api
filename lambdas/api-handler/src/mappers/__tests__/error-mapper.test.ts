@@ -49,7 +49,7 @@ describe("processError", () => {
   });
 
   it("should map generic Error to InternalServerError response", () => {
-    const err = new Error("Something broke");
+    const err = new Error("Low level error message");
 
     const res = processError(err, 'correlationId', { info: jest.fn(), error: jest.fn() } as unknown as Logger);
 
@@ -58,7 +58,7 @@ describe("processError", () => {
       "errors": [
         {
           "code": "NOTIFY_INTERNAL_SERVER_ERROR",
-          "detail": "Something broke",
+          "detail": "Unexpected error",
           "id": "correlationId",
           "links": {
             "about": "https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier"

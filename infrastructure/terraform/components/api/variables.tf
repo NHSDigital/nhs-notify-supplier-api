@@ -122,3 +122,15 @@ variable "max_get_limit" {
   description = "Default limit to apply to GET requests that support pagination"
   default     = 2500
 }
+
+variable "eventpub_data_plane_bus_arn" {
+  type        = string
+  description = "ARN of the EventBridge data plane bus for eventpub"
+  default     = ""
+}
+
+variable "eventpub_control_plane_bus_arn" {
+  type        = string
+  description = "ARN of the EventBridge control plane bus for eventpub"
+  default     = ""
+}
