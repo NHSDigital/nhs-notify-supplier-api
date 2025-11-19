@@ -1,5 +1,5 @@
 import { hideBin } from "yargs/helpers";
-import yargs from "yargs/yargs";
+import yargs from 'yargs';
 import { LetterStatusType } from "@internal/datastore/src/types";
 import { randomUUID } from "crypto";
 import { createLetter, createLetterDto } from "../helpers/create_letter_helpers";

@@ -31,6 +31,7 @@ export async function setupDynamoDBContainer() {
     endpoint,
     lettersTableName: 'letters',
     miTableName: 'management-info',
+    suppliersTableName: 'suppliers',
     lettersTtlHours: 1,
     miTtlHours: 1
   };
@@ -94,6 +95,29 @@ const createMITableCommand = new CreateTableCommand({
     ]
   });
 
+const createSupplierTableCommand = new CreateTableCommand({
+    TableName: 'suppliers',
+    BillingMode: 'PAY_PER_REQUEST',
+    KeySchema: [
+      { AttributeName: 'id', KeyType: 'HASH' }  // Partition key
+    ],
+    GlobalSecondaryIndexes: [
+      {
+        IndexName: 'supplier-apim-index',
+        KeySchema: [
+          { AttributeName: 'apimId', KeyType: 'HASH' } // Partition key for GSI
+        ],
+        Projection: {
+          ProjectionType: 'ALL'
+        }
+      }
+    ],
+    AttributeDefinitions: [
+      { AttributeName: 'id', AttributeType: 'S' },
+      { AttributeName: 'apimId', AttributeType: 'S' }
+    ]
+  });
+
 
 export async function createTables(context: DBContext) {
   const { ddbClient } = context;
@@ -102,6 +126,7 @@ export async function createTables(context: DBContext) {
   await ddbClient.send(updateTimeToLiveCommand);
 
   await ddbClient.send(createMITableCommand);
+  await ddbClient.send(createSupplierTableCommand);
 }
 
 
@@ -114,5 +139,9 @@ export async function deleteTables(context: DBContext) {
 
   await ddbClient.send(new DeleteTableCommand({
     TableName: 'management-info'
+  }));
+
+  await ddbClient.send(new DeleteTableCommand({
+    TableName: 'suppliers'
   }));
 }
