@@ -18,7 +18,7 @@ export function makeApiGwEvent(
     requestContext: {
       accountId: '123456789012',
       apiId: 'api-id',
-      authorizer: {},
+      authorizer: null,
       protocol: 'HTTP/1.1',
       httpMethod: 'GET',
       identity: {} as any,
