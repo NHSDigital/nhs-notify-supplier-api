@@ -104,7 +104,7 @@ jobs:
             --infraRepoName "$(echo ${{ github.repository }} | cut -d'/' -f2)" \
             --releaseVersion ${{ github.head_ref || github.ref_name }} \
             --targetWorkflow "dispatch-deploy-dynamic-env.yaml" \
-            --targetEnvironment "${PR_NUMBER}" \
+            --targetEnvironment "pr${PR_NUMBER}" \
             --targetComponent "api" \
             --targetAccountGroup "nhs-notify-supplier-api-dev" \
             --terraformAction "apply" \
