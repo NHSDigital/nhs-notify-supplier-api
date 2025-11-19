@@ -5,15 +5,16 @@ locals {
   root_domain_nameservers       = local.acct.route53_zone_nameservers["supplier-api"]
 
   openapi_spec = templatefile("${path.module}/resources/spec.tmpl.json", {
-    APIG_EXECUTION_ROLE_ARN     = aws_iam_role.api_gateway_execution_role.arn
-    AWS_REGION                  = var.region
-    AUTHORIZER_LAMBDA_ARN       = module.authorizer_lambda.function_arn
-    GET_LETTER_LAMBDA_ARN       = module.get_letter.function_arn
-    GET_LETTERS_LAMBDA_ARN      = module.get_letters.function_arn
-    GET_LETTER_DATA_LAMBDA_ARN  = module.get_letter_data.function_arn
-    GET_STATUS_LAMBDA_ARN       = module.get_status.function_arn
-    PATCH_LETTER_LAMBDA_ARN     = module.patch_letter.function_arn
-    POST_MI_LAMBDA_ARN          = module.post_mi.function_arn
+    APIG_EXECUTION_ROLE_ARN             = aws_iam_role.api_gateway_execution_role.arn
+    AWS_REGION                          = var.region
+    AUTHORIZER_LAMBDA_ARN               = module.authorizer_lambda.function_arn
+    GET_LETTER_LAMBDA_ARN               = module.get_letter.function_arn
+    GET_LETTERS_LAMBDA_ARN              = module.get_letters.function_arn
+    GET_LETTER_DATA_LAMBDA_ARN          = module.get_letter_data.function_arn
+    GET_STATUS_LAMBDA_ARN               = module.get_status.function_arn
+    PATCH_LETTER_LAMBDA_ARN             = module.patch_letter.function_arn
+    POST_LETTERS_LAMBDA_ARN             = module.post_letters.function_arn
+    POST_MI_LAMBDA_ARN                  = module.post_mi.function_arn
   })
 
   destination_arn = "arn:aws:logs:${var.region}:${var.shared_infra_account_id}:destination:nhs-main-obs-firehose-logs"

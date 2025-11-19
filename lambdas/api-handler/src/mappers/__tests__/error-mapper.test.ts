@@ -1,13 +1,13 @@
-import { mapErrorToResponse } from "../error-mapper";
+import { processError } from "../error-mapper";
 import { ValidationError, NotFoundError } from "../../errors";
 import { ApiErrorDetail } from "../../contracts/errors";
 import { Logger } from 'pino';
 
-describe("mapErrorToResponse", () => {
+describe("processError", () => {
   it("should map ValidationError to InvalidRequest response", () => {
     const err = new ValidationError(ApiErrorDetail.InvalidRequestLetterIdsMismatch);
 
-    const res = mapErrorToResponse(err, 'correlationId', { info: jest.fn(), error: jest.fn() } as unknown as Logger);
+    const res = processError(err, 'correlationId', { info: jest.fn(), error: jest.fn() } as unknown as Logger);
 
     expect(res.statusCode).toEqual(400);
     expect(JSON.parse(res.body)).toEqual({
@@ -29,7 +29,7 @@ describe("mapErrorToResponse", () => {
   it("should map NotFoundError to NotFound response", () => {
     const err = new NotFoundError(ApiErrorDetail.NotFoundLetterId);
 
-    const res = mapErrorToResponse(err, undefined, { info: jest.fn(), error: jest.fn() } as unknown as Logger);
+    const res = processError(err, undefined, { info: jest.fn(), error: jest.fn() } as unknown as Logger);
 
     expect(res.statusCode).toEqual(404);
     expect(JSON.parse(res.body)).toEqual({
@@ -51,7 +51,7 @@ describe("mapErrorToResponse", () => {
   it("should map generic Error to InternalServerError response", () => {
     const err = new Error("Low level error message");
 
-    const res = mapErrorToResponse(err, 'correlationId', { info: jest.fn(), error: jest.fn() } as unknown as Logger);
+    const res = processError(err, 'correlationId', { info: jest.fn(), error: jest.fn() } as unknown as Logger);
 
     expect(res.statusCode).toEqual(500);
     expect(JSON.parse(res.body)).toEqual({
@@ -73,7 +73,7 @@ describe("mapErrorToResponse", () => {
   it("should map unexpected non-error to InternalServerError response", () => {
     const err = 12345; // not an Error
 
-    const res = mapErrorToResponse(err, 'correlationId', { info: jest.fn(), error: jest.fn() } as unknown as Logger);
+    const res = processError(err, 'correlationId', { info: jest.fn(), error: jest.fn() } as unknown as Logger);
 
     expect(res.statusCode).toEqual(500);
     expect(JSON.parse(res.body)).toEqual({

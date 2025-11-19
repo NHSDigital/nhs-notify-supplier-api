@@ -25,6 +25,8 @@ Allowed `status` values that can be used to are:
 
 It is not possible to update a letter to status of `PENDING`.
 
+The request should not contain multiple letter objects with the same ID.
+
 Optionally a `reasonCode` and `reasonText` explaining the status (for example, validation failures) can be included in the request body for each update.
 
 ### Example Error Codes

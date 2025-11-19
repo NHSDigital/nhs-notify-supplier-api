@@ -5,13 +5,13 @@ const mockedPatchLetterStatus = jest.mocked(letterService.patchLetterStatus);
 
 // mock mapper
 jest.mock('../../mappers/error-mapper');
-import { mapErrorToResponse } from '../../mappers/error-mapper';
-const mockedMapErrorToResponse = jest.mocked(mapErrorToResponse);
+import { processError } from '../../mappers/error-mapper';
+const mockedProcessError = jest.mocked(processError);
 const expectedErrorResponse: APIGatewayProxyResult = {
   statusCode: 400,
   body: 'Error'
 };
-mockedMapErrorToResponse.mockReturnValue(expectedErrorResponse);
+mockedProcessError.mockReturnValue(expectedErrorResponse);
 
 import { APIGatewayProxyResult, Context } from 'aws-lambda';
 import { mockDeep } from 'jest-mock-extended';
@@ -113,7 +113,7 @@ describe('patchLetter API Handler', () => {
     const patchLetterHandler = createPatchLetterHandler(mockedDeps);
     const result = await patchLetterHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingBody), 'correlationId', mockedDeps.logger);
+    expect(mockedProcessError).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingBody), 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -133,7 +133,7 @@ describe('patchLetter API Handler', () => {
     const patchLetterHandler = createPatchLetterHandler(mockedDeps);
     const result = await patchLetterHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter), 'correlationId', mockedDeps.logger);
+    expect(mockedProcessError).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter), 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -157,7 +157,7 @@ describe('patchLetter API Handler', () => {
     const patchLetterHandler = createPatchLetterHandler(mockedDeps);
     const result = await patchLetterHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(error, 'correlationId', mockedDeps.logger);
+    expect(mockedProcessError).toHaveBeenCalledWith(error, 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -177,7 +177,7 @@ describe('patchLetter API Handler', () => {
     const patchLetterHandler = createPatchLetterHandler(mockedDeps);
     const result = await patchLetterHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error('The supplier ID is missing from the request'), 'correlationId', mockedDeps.logger);
+    expect(mockedProcessError).toHaveBeenCalledWith(new Error('The supplier ID is missing from the request'), 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -198,7 +198,7 @@ describe('patchLetter API Handler', () => {
     const patchLetterHandler = createPatchLetterHandler(mockedDeps);
     const result = await patchLetterHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestBody), 'correlationId', mockedDeps.logger);
+    expect(mockedProcessError).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestBody), 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -219,7 +219,7 @@ describe('patchLetter API Handler', () => {
     const patchLetterHandler = createPatchLetterHandler(mockedDeps);
     const result = await patchLetterHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestBody), 'correlationId', mockedDeps.logger);
+    expect(mockedProcessError).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestBody), 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -245,7 +245,7 @@ describe('patchLetter API Handler', () => {
     const patchLetterHandler = createPatchLetterHandler(mockedDeps);
     const result = await patchLetterHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(error, 'correlationId', mockedDeps.logger);
+    expect(mockedProcessError).toHaveBeenCalledWith(error, 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
 
     spy.mockRestore();
@@ -267,7 +267,7 @@ describe('patchLetter API Handler', () => {
     const patchLetterHandler = createPatchLetterHandler(mockedDeps);
     const result = await patchLetterHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error("The request headers don't contain the APIM correlation id"), undefined, mockedDeps.logger);
+    expect(mockedProcessError).toHaveBeenCalledWith(new Error("The request headers don't contain the APIM correlation id"), undefined, mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -284,7 +284,7 @@ describe('patchLetter API Handler', () => {
     const patchLetterHandler = createPatchLetterHandler(mockedDeps);
     const result = await patchLetterHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error('The request headers are empty'), undefined, mockedDeps.logger);
+    expect(mockedProcessError).toHaveBeenCalledWith(new Error('The request headers are empty'), undefined, mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -304,7 +304,7 @@ describe('patchLetter API Handler', () => {
     const patchLetterHandler = createPatchLetterHandler(mockedDeps);
     const result = await patchLetterHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error("The request headers don't contain the x-request-id"), 'correlationId', mockedDeps.logger);
+    expect(mockedProcessError).toHaveBeenCalledWith(new Error("The request headers don't contain the x-request-id"), 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 });
