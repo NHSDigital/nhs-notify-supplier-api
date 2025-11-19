@@ -4,7 +4,8 @@ import { LetterDto, PatchLetterRequest, PatchLetterRequestSchema } from '../cont
 import { ApiErrorDetail } from '../contracts/errors';
 import { ValidationError } from '../errors';
 import { processError } from '../mappers/error-mapper';
-import { assertNotEmpty, validateCommonHeaders } from '../utils/validation';
+import { assertNotEmpty } from '../utils/validation';
+import { extractCommonIds } from '../utils/commonIds';
 import { mapPatchLetterToDto } from '../mappers/letter-mapper';
 import type { Deps } from "../config/deps";
 
@@ -13,10 +14,10 @@ export function createPatchLetterHandler(deps: Deps): APIGatewayProxyHandler {
 
   return async (event) => {
 
-    const commonHeadersResult = validateCommonHeaders(event.headers, deps);
+    const commonIds = extractCommonIds(event.headers, event.requestContext, deps);
 
-    if (!commonHeadersResult.ok) {
-      return processError(commonHeadersResult.error, commonHeadersResult.correlationId, deps.logger);
+    if (!commonIds.ok) {
+      return processError(commonIds.error, commonIds.correlationId, deps.logger);
     }
 
     try {
@@ -35,13 +36,13 @@ export function createPatchLetterHandler(deps: Deps): APIGatewayProxyHandler {
         else throw error;
       }
 
-      const letterToUpdate: LetterDto = mapPatchLetterToDto(patchLetterRequest, commonHeadersResult.value.supplierId);
+      const letterToUpdate: LetterDto = mapPatchLetterToDto(patchLetterRequest, commonIds.value.supplierId);
 
       if (letterToUpdate.id !== letterId) {
         throw new ValidationError(ApiErrorDetail.InvalidRequestLetterIdsMismatch);
       }
 
-      await enqueueLetterUpdateRequests([letterToUpdate], commonHeadersResult.value.correlationId, deps);
+      await enqueueLetterUpdateRequests([letterToUpdate], commonIds.value.correlationId, deps);
 
       return {
         statusCode: 202,
@@ -49,7 +50,7 @@ export function createPatchLetterHandler(deps: Deps): APIGatewayProxyHandler {
       };
 
     } catch (error) {
-      return processError(error, commonHeadersResult.value.correlationId, deps.logger);
+      return processError(error, commonIds.value.correlationId, deps.logger);
     }
   };
 };

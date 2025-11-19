@@ -1,21 +1,22 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { enqueueLetterUpdateRequests } from '../services/letter-operations';
-import { PostLettersRequest, PostLettersRequestSchema } from '../contracts/letters';
+import type { Deps } from "../config/deps";
 import { ApiErrorDetail } from '../contracts/errors';
+import { PostLettersRequest, PostLettersRequestSchema } from '../contracts/letters';
 import { ValidationError } from '../errors';
 import { processError } from '../mappers/error-mapper';
-import { assertNotEmpty, requireEnvVar, validateCommonHeaders } from '../utils/validation';
-import type { Deps } from "../config/deps";
 import { mapPostLettersToDtoArray } from '../mappers/letter-mapper';
+import { enqueueLetterUpdateRequests } from '../services/letter-operations';
+import { extractCommonIds } from '../utils/commonIds';
+import { assertNotEmpty, requireEnvVar } from '../utils/validation';
 
 export function createPostLettersHandler(deps: Deps): APIGatewayProxyHandler {
 
   return async (event) => {
 
-    const commonHeadersResult = validateCommonHeaders(event.headers, deps);
+    const commonIds = extractCommonIds(event.headers, event.requestContext, deps);
 
-    if (!commonHeadersResult.ok) {
-      return processError(commonHeadersResult.error, commonHeadersResult.correlationId, deps.logger);
+    if (!commonIds.ok) {
+      return processError(commonIds.error, commonIds.correlationId, deps.logger);
     }
 
     const maxUpdateItems = requireEnvVar(deps.env, "MAX_LIMIT");
@@ -44,8 +45,8 @@ export function createPostLettersHandler(deps: Deps): APIGatewayProxyHandler {
       }
 
       await enqueueLetterUpdateRequests(
-        mapPostLettersToDtoArray(postLettersRequest, commonHeadersResult.value.supplierId),
-        commonHeadersResult.value.correlationId,
+        mapPostLettersToDtoArray(postLettersRequest, commonIds.value.supplierId),
+        commonIds.value.correlationId,
         deps
       );
 
@@ -55,7 +56,7 @@ export function createPostLettersHandler(deps: Deps): APIGatewayProxyHandler {
       };
 
     } catch (error) {
-      return processError(error, commonHeadersResult.value.correlationId, deps.logger);
+      return processError(error, commonIds.value.correlationId, deps.logger);
     }
   };
 };

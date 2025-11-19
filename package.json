@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@aws-sdk/client-api-gateway": "^3.906.0",
+    "@aws-sdk/client-s3": "^3.925.0",
     "@playwright/test": "^1.55.1",
     "ajv": "^8.17.1",
     "js-yaml": "^4.1.0",
@@ -12,8 +13,8 @@
     "@redocly/cli": "^1.34.5",
     "@tsconfig/node22": "^22.0.2",
     "@types/jest": "^30.0.0",
-    "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@types/js-yaml": "^4.0.9",
+    "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.27.0",
     "esbuild": "^0.25.11",
     "eslint": "^9.27.0",
@@ -80,7 +81,7 @@
   "workspaces": [
     "lambdas/*",
     "internal/*",
-    "scripts/test-data",
+    "scripts/utilities/*",
     "docs",
     "tests"
   ]
