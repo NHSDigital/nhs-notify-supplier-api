@@ -4,6 +4,7 @@ import { ApiErrorDetail } from '../contracts/errors';
 import { PostLettersRequest, PostLettersRequestSchema } from '../contracts/letters';
 import { ValidationError } from '../errors';
 import { processError } from '../mappers/error-mapper';
+import { mapPostLettersToDtoArray } from '../mappers/letter-mapper';
 import { enqueueLetterUpdateRequests } from '../services/letter-operations';
 import { extractCommonIds } from '../utils/commonIds';
 import { assertNotEmpty, requireEnvVar } from '../utils/validation';
@@ -43,7 +44,11 @@ export function createPostLettersHandler(deps: Deps): APIGatewayProxyHandler {
         throw new ValidationError(ApiErrorDetail.InvalidRequestDuplicateLetterId);
       }
 
-      await enqueueLetterUpdateRequests(postLettersRequest, commonIds.value.supplierId, commonIds.value.correlationId, deps);
+      await enqueueLetterUpdateRequests(
+        mapPostLettersToDtoArray(postLettersRequest, commonIds.value.supplierId),
+        commonIds.value.correlationId,
+        deps
+      );
 
       return {
         statusCode: 202,

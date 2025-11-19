@@ -1,7 +1,7 @@
 // mock service
 jest.mock('../../services/letter-operations');
 import * as letterService from '../../services/letter-operations';
-const mockedPatchLetterStatus = jest.mocked(letterService.patchLetterStatus);
+const mockedBatchUpdateStatus = jest.mocked(letterService.enqueueLetterUpdateRequests);
 
 // mock mapper
 jest.mock('../../mappers/error-mapper');
@@ -59,7 +59,7 @@ describe('patchLetter API Handler', () => {
       } as unknown as EnvVars
     } as Deps;
 
-  it('returns 200 OK with updated resource', async () => {
+  it('returns 202 Accepted', async () => {
     const event = makeApiGwEvent({
       path: '/letters/id1',
       body: requestBody,
@@ -86,14 +86,14 @@ describe('patchLetter API Handler', () => {
           }
         }
     };
-    mockedPatchLetterStatus.mockResolvedValue(updateLetterServiceResponse);
+    mockedBatchUpdateStatus.mockResolvedValue();
 
     const patchLetterHandler = createPatchLetterHandler(mockedDeps);
     const result = await patchLetterHandler(event, context, callback);
 
     expect(result).toEqual({
-      statusCode: 200,
-      body: JSON.stringify(updateLetterServiceResponse, null, 2)
+      statusCode: 202,
+      body: ''
     });
   });
 
@@ -134,30 +134,6 @@ describe('patchLetter API Handler', () => {
     const result = await patchLetterHandler(event, context, callback);
 
     expect(mockedProcessError).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter), 'correlationId', mockedDeps.logger);
-    expect(result).toEqual(expectedErrorResponse);
-  });
-
-  it('returns error response when error is thrown by service', async () => {
-    const error = new Error('Service error');
-    mockedPatchLetterStatus.mockRejectedValue(error);
-
-    const event = makeApiGwEvent({
-      path: '/letters/id1',
-      body: requestBody,
-      pathParameters: {id: 'id1'},
-      headers: {
-        'nhsd-supplier-id': 'supplier1',
-        'nhsd-correlation-id': 'correlationId',
-        'x-request-id': 'requestId'
-      }
-    });
-    const context = mockDeep<Context>();
-    const callback = jest.fn();
-
-    const patchLetterHandler = createPatchLetterHandler(mockedDeps);
-    const result = await patchLetterHandler(event, context, callback);
-
-    expect(mockedProcessError).toHaveBeenCalledWith(error, 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -220,6 +196,27 @@ describe('patchLetter API Handler', () => {
     const result = await patchLetterHandler(event, context, callback);
 
     expect(mockedProcessError).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestBody), 'correlationId', mockedDeps.logger);
+    expect(result).toEqual(expectedErrorResponse);
+  });
+
+  it('returns error if path letterId and body letterId do not match', async () => {
+    const event = makeApiGwEvent({
+      path: '/letters/id2',
+      body: requestBody,
+      pathParameters: {id: 'id2'},
+      headers: {
+        'nhsd-supplier-id': 'supplier1',
+        'nhsd-correlation-id': 'correlationId',
+        'x-request-id': 'requestId'
+      }
+    });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+
+    const patchLetterHandler = createPatchLetterHandler(mockedDeps);
+    const result = await patchLetterHandler(event, context, callback);
+
+    expect(mockedProcessError).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestLetterIdsMismatch), 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
