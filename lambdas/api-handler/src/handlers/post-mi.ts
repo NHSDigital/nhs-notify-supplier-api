@@ -2,8 +2,9 @@ import { APIGatewayProxyHandler } from "aws-lambda";
 import { postMI as postMIOperation } from '../services/mi-operations';
 import { ApiErrorDetail } from "../contracts/errors";
 import { ValidationError } from "../errors";
-import { mapErrorToResponse } from "../mappers/error-mapper";
-import { assertNotEmpty, validateCommonHeaders, validateIso8601Timestamp } from "../utils/validation";
+import { processError } from "../mappers/error-mapper";
+import { assertNotEmpty, validateIso8601Timestamp } from "../utils/validation";
+import { extractCommonIds } from '../utils/commonIds';
 import { PostMIRequest, PostMIRequestSchema } from "../contracts/mi";
 import { mapToMI } from "../mappers/mi-mapper";
 import { Deps } from "../config/deps";
@@ -12,10 +13,10 @@ export function createPostMIHandler(deps: Deps): APIGatewayProxyHandler {
 
   return async (event) => {
 
-    const commonHeadersResult = validateCommonHeaders(event.headers, deps);
+    const commonIds = extractCommonIds(event.headers, event.requestContext, deps);
 
-    if (!commonHeadersResult.ok) {
-      return mapErrorToResponse(commonHeadersResult.error, commonHeadersResult.correlationId, deps.logger);
+    if (!commonIds.ok) {
+      return processError(commonIds.error, commonIds.correlationId, deps.logger);
     }
 
     try {
@@ -33,7 +34,7 @@ export function createPostMIHandler(deps: Deps): APIGatewayProxyHandler {
       }
       validateIso8601Timestamp(postMIRequest.data.attributes.timestamp);
 
-      const result = await postMIOperation(mapToMI(postMIRequest, commonHeadersResult.value.supplierId), deps.miRepo);
+      const result = await postMIOperation(mapToMI(postMIRequest, commonIds.value.supplierId), deps.miRepo);
 
       return {
         statusCode: 201,
@@ -41,7 +42,7 @@ export function createPostMIHandler(deps: Deps): APIGatewayProxyHandler {
       };
 
     } catch (error) {
-      return mapErrorToResponse(error, commonHeadersResult.value.correlationId, deps.logger);
+      return processError(error, commonIds.value.correlationId, deps.logger);
     }
   }
 };

@@ -111,7 +111,7 @@ const patchLetter = ({ xRequestId, id, body, xCorrelationId }) => new Promise(
 * xRequestId String Unique request identifier, in the format of a GUID
 * postLettersRequest PostLettersRequest
 * xCorrelationId String An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place. The ID will be returned in a response header. (optional)
-* returns listLetters_200_response
+* returns 202
 * */
 const postLetters = ({ xRequestId, body, xCorrelationId }) => new Promise(
   async (resolve, reject) => {

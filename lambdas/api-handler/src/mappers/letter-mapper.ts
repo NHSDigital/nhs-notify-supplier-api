@@ -1,7 +1,7 @@
 import { LetterBase, LetterStatus } from "@internal/datastore";
-import { GetLetterResponse, GetLetterResponseSchema, GetLettersResponse, GetLettersResponseSchema, LetterDto, PatchLetterRequest, PatchLetterResponse, PatchLetterResponseSchema } from '../contracts/letters';
+import { GetLetterResponse, GetLetterResponseSchema, GetLettersResponse, GetLettersResponseSchema, LetterDto, PatchLetterRequest, PatchLetterResponse, PatchLetterResponseSchema, PostLettersRequest, PostLettersRequestResource } from '../contracts/letters';
 
-export function mapToLetterDto(request: PatchLetterRequest, supplierId: string): LetterDto {
+export function mapPatchLetterToDto(request: PatchLetterRequest, supplierId: string): LetterDto {
   return {
     id: request.data.id,
     supplierId,
@@ -9,6 +9,16 @@ export function mapToLetterDto(request: PatchLetterRequest, supplierId: string):
     reasonCode: request.data.attributes.reasonCode,
     reasonText: request.data.attributes.reasonText,
   };
+}
+
+export function mapPostLettersToDtoArray(request: PostLettersRequest, supplierId: string): LetterDto[] {
+  return request.data.map( (letterToUpdate: PostLettersRequestResource) => ({
+    id: letterToUpdate.id,
+    supplierId,
+    status: LetterStatus.parse(letterToUpdate.attributes.status),
+    reasonCode: letterToUpdate.attributes.reasonCode,
+    reasonText: letterToUpdate.attributes.reasonText,
+  }));
 }
 
 export function mapToPatchLetterResponse(letter: LetterBase): PatchLetterResponse {

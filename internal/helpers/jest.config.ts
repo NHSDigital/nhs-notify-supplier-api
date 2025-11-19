@@ -1,6 +1,4 @@
-import type { Config } from "jest";
-
-const config: Config = {
+export default {
   preset: "ts-jest",
   testEnvironment: "node",
   testMatch: ["**/src/__tests__/**/*.ts?(x)", "**/src/?(*.)+(spec|test).ts?(x)"],
@@ -11,5 +9,3 @@ const config: Config = {
     "^.+\\.tsx?$": ["ts-jest", {  }]
   }
 };
-
-export default config;
