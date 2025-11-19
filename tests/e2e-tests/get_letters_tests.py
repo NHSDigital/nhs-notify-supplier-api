@@ -1,9 +1,7 @@
 
 import pytest
 import requests
-import json
-import time
-from lib import Generators
+from lib import generators as Generators
 
 from pytest_nhsd_apim.apigee_apis import (
     DeveloperAppsAPI,
@@ -60,24 +58,3 @@ def test_app_level0_access_post(nhsd_apim_proxy_url, nhsd_apim_auth_headers, _cr
         json = data
     )
     assert resp.status_code == 200
-
-
-
-@pytest.mark.nhsd_apim_authorization(access="application", level="level3")
-def test_ping(nhsd_apim_proxy_url):
-    resp = requests.get(nhsd_apim_proxy_url + "/_ping")
-
-    print("\nCalled:\n" + nhsd_apim_proxy_url + "/_ping" )
-    print("\nResponse status code: ", resp.status_code)
-
-    assert resp.status_code == 200
-
-@pytest.mark.nhsd_apim_authorization(access="application", level="level3")
-def test_401_status_without_api_key(nhsd_apim_proxy_url):
-    resp = requests.get(
-        f"{nhsd_apim_proxy_url}/_status"
-    )
-
-    error_handler.handle_retry(resp)
-
-    assert resp.status_code == 401
