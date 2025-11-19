@@ -11,7 +11,7 @@ export function mapPatchLetterToDto(request: PatchLetterRequest, supplierId: str
   };
 }
 
-export function mapPostLetterRequestToLetterDtoArray(request: PostLettersRequest, supplierId: string): LetterDto[] {
+export function mapPostLettersToDtoArray(request: PostLettersRequest, supplierId: string): LetterDto[] {
   return request.data.map( (letterToUpdate: PostLettersRequestResource) => ({
     id: letterToUpdate.id,
     supplierId,

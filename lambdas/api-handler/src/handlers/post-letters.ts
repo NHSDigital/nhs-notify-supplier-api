@@ -6,7 +6,7 @@ import { ValidationError } from '../errors';
 import { processError } from '../mappers/error-mapper';
 import { assertNotEmpty, requireEnvVar, validateCommonHeaders } from '../utils/validation';
 import type { Deps } from "../config/deps";
-import { mapPostLetterRequestToLetterDtoArray } from '../mappers/letter-mapper';
+import { mapPostLettersToDtoArray } from '../mappers/letter-mapper';
 
 export function createPostLettersHandler(deps: Deps): APIGatewayProxyHandler {
 
@@ -44,7 +44,7 @@ export function createPostLettersHandler(deps: Deps): APIGatewayProxyHandler {
       }
 
       await enqueueLetterUpdateRequests(
-        mapPostLetterRequestToLetterDtoArray(postLettersRequest, commonHeadersResult.value.supplierId),
+        mapPostLettersToDtoArray(postLettersRequest, commonHeadersResult.value.supplierId),
         commonHeadersResult.value.correlationId,
         deps
       );
