@@ -18,7 +18,7 @@ export function logAndMapToApiError(error: unknown, correlationId: string | unde
     return mapToApiError(ApiErrorCode.NotFound, error.detail, correlationId);
   } else if (error instanceof Error) {
     logger.error({ err: error }, `Internal server error correlationId=${correlationId}`);
-    return mapToApiError(ApiErrorCode.InternalServerError, error.message, correlationId);
+    return mapToApiError(ApiErrorCode.InternalServerError, "Unexpected error", correlationId);
   } else {
     logger.error({ err: error }, `Internal server error (non-Error thrown) correlationId=${correlationId}`);
     return mapToApiError(ApiErrorCode.InternalServerError, "Unexpected error", correlationId);
