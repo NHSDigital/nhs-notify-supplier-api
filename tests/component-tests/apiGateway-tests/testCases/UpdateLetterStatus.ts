@@ -8,7 +8,7 @@ export type PatchMessageRequestBody = {
     type: string;
     id: string;
     attributes: {
-      reasonCode?: string | number;
+      reasonCode?: string;
       reasonText?: string;
       status: string;
     };
@@ -20,7 +20,7 @@ export type PatchMessageResponseBody = {
     type: string;
     id: string;
     attributes: {
-      reasonCode?: number;
+      reasonCode?: string;
       reasonText?: string;
       status: string;
       specificationId:string;
@@ -64,7 +64,7 @@ export function patchFailureRequestBody (id: string, status: string) : PatchMess
     data: {
         attributes: {
           status: status,
-          reasonCode: 123,
+          reasonCode: 'R01',
           reasonText: 'Test Reason'
       },
       type: 'Letter',

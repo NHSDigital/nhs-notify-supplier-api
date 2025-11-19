@@ -93,10 +93,10 @@ async function patchLetterResponse(request) {
 }
 
 async function postLettersResponse(request) {
-  const patchLetterFileMap = {
+  const postLettersFileMap = {
     'data/examples/postLetter/requests/postLetters.json': {responsePath: 'data/examples/postLetter/responses/postLetters.json', responseCode: 202},
   };
-  return await mapExampleResponse(request, patchLetterFileMap);
+  return await mapExampleResponse(request, postLettersFileMap);
 }
 
 async function postMIResponse(request) {

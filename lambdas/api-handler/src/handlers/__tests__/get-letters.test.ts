@@ -1,12 +1,12 @@
 // mock error mapper
 jest.mock('../../mappers/error-mapper');
-import { mapErrorToResponse } from '../../mappers/error-mapper';
-const mockedMapErrorToResponse = jest.mocked(mapErrorToResponse);
+import { processError } from '../../mappers/error-mapper';
+const mockedProcessError = jest.mocked(processError);
 const expectedErrorResponse: APIGatewayProxyResult = {
   statusCode: 400,
   body: 'Error'
 };
-mockedMapErrorToResponse.mockReturnValue(expectedErrorResponse);
+mockedProcessError.mockReturnValue(expectedErrorResponse);
 
 //mock letter service
 jest.mock('../../services/letter-operations');
@@ -65,7 +65,7 @@ describe('API Lambda handler', () => {
         specificationId: 's1',
         groupId: 'g1',
         status: 'PENDING',
-        reasonCode: 123, // shouldn't be returned if present
+        reasonCode: 'R02', // shouldn't be returned if present
         reasonText: 'Reason text' // shouldn't be returned if present
       },
     ]);
@@ -175,7 +175,7 @@ describe('API Lambda handler', () => {
     const result = await getLettersHandler(event, context, callback);
 
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotANumber), 'correlationId', mockedDeps.logger);
+    expect(mockedProcessError).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotANumber), 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -195,7 +195,7 @@ describe('API Lambda handler', () => {
     const getLettersHandler = createGetLettersHandler(mockedDeps);
     const result = await getLettersHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(
+    expect(mockedProcessError).toHaveBeenCalledWith(
       new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange, { args: [mockedDeps.env.MAX_LIMIT] }), 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
@@ -216,7 +216,7 @@ describe('API Lambda handler', () => {
     const getLettersHandler = createGetLettersHandler(mockedDeps);
     const result = await getLettersHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(
+    expect(mockedProcessError).toHaveBeenCalledWith(
       new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange, { args: [mockedDeps.env.MAX_LIMIT] }), 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
@@ -237,7 +237,7 @@ describe('API Lambda handler', () => {
     const getLettersHandler = createGetLettersHandler(mockedDeps);
     const result = await getLettersHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(
+    expect(mockedProcessError).toHaveBeenCalledWith(
       new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange, { args: [mockedDeps.env.MAX_LIMIT] }), 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
@@ -258,7 +258,7 @@ describe('API Lambda handler', () => {
     const getLettersHandler = createGetLettersHandler(mockedDeps);
     const result = await getLettersHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitOnly), 'correlationId', mockedDeps.logger);
+    expect(mockedProcessError).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitOnly), 'correlationId', mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -270,7 +270,7 @@ describe('API Lambda handler', () => {
     const getLettersHandler = createGetLettersHandler(mockedDeps);
     const result = await getLettersHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error('The request headers are empty'), undefined, mockedDeps.logger);
+    expect(mockedProcessError).toHaveBeenCalledWith(new Error('The request headers are empty'), undefined, mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -289,7 +289,7 @@ describe('API Lambda handler', () => {
     const getLettersHandler = createGetLettersHandler(mockedDeps);
     const result = await getLettersHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error("The request headers don't contain the APIM correlation id"), undefined, mockedDeps.logger);
+    expect(mockedProcessError).toHaveBeenCalledWith(new Error("The request headers don't contain the APIM correlation id"), undefined, mockedDeps.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 
@@ -313,7 +313,7 @@ describe('API Lambda handler', () => {
     const getLettersHandler = createGetLettersHandler(mockedDepsNoMaxLimit);
     const result = await getLettersHandler(event, context, callback);
 
-    expect(mockedMapErrorToResponse).toHaveBeenCalledWith(new Error('MAX_LIMIT is required for getLetters'), 'correlationId', mockedDepsNoMaxLimit.logger);
+    expect(mockedProcessError).toHaveBeenCalledWith(new Error('Missing required environment variable: MAX_LIMIT'), 'correlationId', mockedDepsNoMaxLimit.logger);
     expect(result).toEqual(expectedErrorResponse);
   });
 });

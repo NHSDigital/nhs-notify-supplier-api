@@ -1,5 +1,5 @@
 module "s3bucket_test_letters" {
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.20/terraform-s3bucket.zip"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-s3bucket.zip"
 
   name = "test-letters"
 

@@ -1,8 +1,8 @@
 {
   "data": {
     "attributes": {
-      "reasonCode": "R01",
-      "reasonText": "failed validation",
+      "reasonCode": "R07",
+      "reasonText": "No such address",
       "specificationId": "2WL5eYSWGzCHlGmzNxuqVusPxDg",
       "status": "REJECTED"
     },
