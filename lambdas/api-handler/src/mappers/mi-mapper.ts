@@ -1,4 +1,4 @@
-import { MIBase } from "../../../../internal/datastore/src";
+import { MIBase } from "@internal/datastore/src";
 import { IncomingMI, PostMIRequest as PostMIRequest, PostMIResponse, PostMIResponseSchema } from "../contracts/mi";
 
 export function mapToMI(request: PostMIRequest, supplierId: string): IncomingMI {
