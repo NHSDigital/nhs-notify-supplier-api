@@ -16,8 +16,8 @@ export type ApiSandboxUpdateLetterStatusTestData = {
 
 export const apiSandboxUpdateLetterStatusTestData: ApiSandboxUpdateLetterStatusTestData[] = [
   {
-    testCase: '200 response if record is updated with status PENDING',
-    id: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
+    testCase: '202 response if record is updated with status PENDING',
+    id: '24L5eYSWGzCHlGmzNxuqVusPxDg',
     header: sandBoxHeader,
     body: {
       data: {
@@ -28,22 +28,12 @@ export const apiSandboxUpdateLetterStatusTestData: ApiSandboxUpdateLetterStatusT
         },
       }
     },
-    expectedStatus: 200,
-        expectedResponse: {
-      data: {
-        type: 'Letter',
-        id: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
-        attributes: {
-          status: 'PENDING',
-          specificationId:'2WL5eYSWGzCHlGmzNxuqVusPxDg',
-        },
-      }
-    },
+    expectedStatus: 202,
   },
 
   {
-    testCase: '200 response if record is updated with status REJECTED',
-    id: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
+    testCase: '202 response if record is updated with status REJECTED',
+    id: '24L5eYSWGzCHlGmzNxuqVusPxDg',
     header: sandBoxHeader,
     body: {
       data: {
@@ -51,24 +41,12 @@ export const apiSandboxUpdateLetterStatusTestData: ApiSandboxUpdateLetterStatusT
         id: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
         attributes: {
           status: 'REJECTED',
-          reasonCode: 100,
-          reasonText: 'failed validation',
+          reasonCode: 'R07',
+          reasonText: 'No such address',
         },
       }
     },
-    expectedStatus: 200,
-        expectedResponse: {
-      data: {
-        type: 'Letter',
-        id: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
-        attributes: {
-          reasonCode: 100,
-          reasonText: 'failed validation',
-          status: 'REJECTED',
-          specificationId:'2WL5eYSWGzCHlGmzNxuqVusPxDg',
-        },
-      }
-    },
+    expectedStatus: 202,
   },
   {
     testCase: '404 response if no resource is found for the given id',

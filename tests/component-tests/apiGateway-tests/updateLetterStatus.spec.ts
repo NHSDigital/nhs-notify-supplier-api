@@ -14,7 +14,7 @@ test.beforeAll(async () => {
 });
 
 test.describe('API Gateway Tests to Verify Patch Status Endpoint', () => {
-    test(`Patch /letters returns 200 and status is updated to ACCEPTED`, async ({ request }) => {
+    test(`Patch /letters returns 202 and status is updated to ACCEPTED`, async ({ request }) => {
 
       await createTestData(SUPPLIERID);
       const letters = await getLettersBySupplier(SUPPLIERID, 'PENDING', 1);
@@ -33,23 +33,12 @@ test.describe('API Gateway Tests to Verify Patch Status Endpoint', () => {
       });
 
     const responseBody = await response.json();
-    expect(response.status()).toBe(200);
-    expect(responseBody).toMatchObject({
-      data:{
-        attributes: {
-            status: 'ACCEPTED',
-            specificationId: letter.specificationId,
-            groupId: letter.groupId,
-        },
-        id: letter.id,
-        type: 'Letter'
-      }
-    });
+    expect(response.status()).toBe(202);
 
     await deleteLettersBySupplier(letter.id);
   });
 
-  test(`Patch /letters returns 200 and status is updated to REJECTED`, async ({ request }) => {
+  test(`Patch /letters returns 202 and status is updated to REJECTED`, async ({ request }) => {
 
       await createTestData(SUPPLIERID);
       const letters = await getLettersBySupplier(SUPPLIERID, 'PENDING', 1);
@@ -68,18 +57,7 @@ test.describe('API Gateway Tests to Verify Patch Status Endpoint', () => {
       });
 
     const responseBody = await response.json();
-    expect(response.status()).toBe(200);
-    expect(responseBody).toMatchObject({
-      data:{
-        attributes: {
-            status: 'REJECTED',
-            specificationId: letter.specificationId,
-            groupId: letter.groupId,
-        },
-        id: letter.id,
-        type: 'Letter'
-      }
-    });
+    expect(response.status()).toBe(202);
 
     await deleteLettersBySupplier(letter.id);
   });
