@@ -6,6 +6,7 @@ import { createPatchLetterHandler } from "./handlers/patch-letter";
 import { createPostLettersHandler } from "./handlers/post-letters";
 import { createLetterStatusUpdateHandler } from "./handlers/letter-status-update";
 import { createPostMIHandler } from "./handlers/post-mi";
+import { createGetStatusHandler } from "./handlers/get-status";
 
 const container = createDependenciesContainer();
 
@@ -17,3 +18,4 @@ export const letterStatusUpdate = createLetterStatusUpdateHandler(container);
 export const postLetters = createPostLettersHandler(container);
 
 export const postMI = createPostMIHandler(container);
+export const getStatus = createGetStatusHandler(container);

@@ -3,7 +3,7 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { SQSClient } from "@aws-sdk/client-sqs";
 import pino from 'pino';
-import { LetterRepository, MIRepository } from '../../../../internal/datastore';
+import { LetterRepository, MIRepository, DBHealthcheck } from '@internal/datastore';
 import { envVars, EnvVars } from "../config/env";
 
 export type Deps = {
@@ -11,6 +11,7 @@ export type Deps = {
   sqsClient: SQSClient;
   letterRepo: LetterRepository;
   miRepo: MIRepository;
+  dbHealthcheck: DBHealthcheck;
   logger: pino.Logger;
   env: EnvVars
 };
@@ -20,6 +21,7 @@ function createDocumentClient(): DynamoDBDocumentClient {
   return DynamoDBDocumentClient.from(ddbClient);
 }
 
+
 function createLetterRepository(log: pino.Logger, envVars: EnvVars): LetterRepository {
 
   const config = {
@@ -28,6 +30,15 @@ function createLetterRepository(log: pino.Logger, envVars: EnvVars): LetterRepos
   };
 
   return new LetterRepository(createDocumentClient(), log, config);
+}
+
+function createDBHealthcheck(envVars: EnvVars): DBHealthcheck {
+  const config = {
+    lettersTableName: envVars.LETTERS_TABLE_NAME,
+    lettersTtlHours: envVars.LETTER_TTL_HOURS
+  };
+
+  return new DBHealthcheck(createDocumentClient(), config);
 }
 
 function createMIRepository(log: pino.Logger, envVars: EnvVars): MIRepository {
@@ -49,6 +60,7 @@ export function createDependenciesContainer(): Deps {
     sqsClient: new SQSClient(),
     letterRepo: createLetterRepository(log, envVars),
     miRepo: createMIRepository(log, envVars),
+    dbHealthcheck: createDBHealthcheck(envVars),
     logger: log,
     env: envVars
   };
