@@ -1,7 +1,6 @@
 import { LetterBase, LetterRepository } from '@internal/datastore';
-import { NotFoundError, ValidationError } from '../errors';
-import { LetterDto, PatchLetterResponse, PostLettersRequest } from '../contracts/letters';
-import { mapPostLetterResourceToDto, mapToPatchLetterResponse } from '../mappers/letter-mapper';
+import { NotFoundError } from '../errors';
+import { LetterDto } from '../contracts/letters';
 import { ApiErrorDetail } from '../contracts/errors';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
@@ -28,26 +27,6 @@ export const getLetterById = async (supplierId: string, letterId: string, letter
   }
 
   return letter;
-}
-
-export const patchLetterStatus = async (letterToUpdate: LetterDto, letterId: string, letterRepo: LetterRepository): Promise<PatchLetterResponse> => {
-
-  if (letterToUpdate.id !== letterId) {
-    throw new ValidationError(ApiErrorDetail.InvalidRequestLetterIdsMismatch);
-  }
-
-  let updatedLetter;
-
-  try {
-    updatedLetter = await letterRepo.updateLetterStatus(letterToUpdate);
-  } catch (error) {
-    if (isNotFoundError(error)) {
-      throw new NotFoundError(ApiErrorDetail.NotFoundLetterId);
-    }
-    throw error;
-  }
-
-  return mapToPatchLetterResponse(updatedLetter);
 }
 
 export const getLetterDataUrl = async (supplierId: string, letterId: string, deps: Deps): Promise<string> => {
@@ -79,16 +58,16 @@ async function getDownloadUrl(s3Uri: string, s3Client: S3Client, expiry: number)
   return await getSignedUrl(s3Client, command, { expiresIn: expiry });
 }
 
-export async function enqueueLetterUpdateRequests(postLettersRequest: PostLettersRequest, supplierId: string, correlationId: string, deps: Deps) {
+export async function enqueueLetterUpdateRequests(updateRequests: LetterDto[], correlationId: string, deps: Deps) {
 
-  const tasks = postLettersRequest.data.map(async (request) => {
+  const tasks = updateRequests.map(async (request: LetterDto) => {
     try {
       const command = new SendMessageCommand({
         QueueUrl: deps.env.QUEUE_URL,
         MessageAttributes: {
           CorrelationId: { DataType: 'String', StringValue: correlationId },
         },
-        MessageBody: JSON.stringify(mapPostLetterResourceToDto(request, supplierId)),
+        MessageBody: JSON.stringify(request),
       });
       await deps.sqsClient.send(command);
     } catch (err) {
@@ -96,8 +75,8 @@ export async function enqueueLetterUpdateRequests(postLettersRequest: PostLetter
         err,
         correlationId: correlationId,
         letterId: request.id,
-        letterStatus: request.attributes.status,
-        supplierId: supplierId
+        letterStatus: request.status,
+        supplierId: request.supplierId
       }, 'Error enqueuing letter status update');
     }
   });
