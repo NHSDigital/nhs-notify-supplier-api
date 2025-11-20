@@ -35,14 +35,20 @@ NHS Notify will seed your Integration (INT) environment with a sample of 2,500 l
 
 The seeded dataset provides a mix of standard and exceptional cases to validate your system's ability to process, identify, and report on different letter types and outcomes.
 
-The sample data will include:
+We use the specification to define the format in which letters should be produced.  An Example of the full range of specifications is:
 
 - Standard letters (English) - Core test cases representing typical production letters in standard format and layout
 - Accessible format letters - Letters designed for accessibility (e.g., large print, braille, or audio) to ensure your system correctly identifies and routes alternative format requests
-- Letters without PDFs - Records that reference missing or unavailable PDF files, used to test your system's error handling and reporting for incomplete data
-- Incorrect letter specifications - Letters containing invalid or incomplete metadata to validate error detection and response handling
-- Non-English letters – Right-to-Left (RTL) - Examples in languages that read from right to left (e.g., Arabic, Urdu) to test layout handling
+- Letters without PDFs - Records that reference missing or unavailable PDF files, used to test your system’s error handling and reporting for incomplete data
+- Incorrect letter specifications - Letters containing invalid or incomplete metadata  to validate error detection and response handling
+- Non-English letters – Right-to-Left (RTL) -  Examples in languages that read from right to left (e.g., Arabic, Urdu) to test layout handling
 - Non-English letters – Left-to-Right (LTR) - Examples in other supported non-English languages
+
+As part of the seeded test data will provide multiple specifications to simulate the above scenarios (Note: the linked PDF data may be a standard English test document):
+
+integration-specification-english
+integration-specification-braille
+integration-specification-arabic
 
 ### Purpose of the Test Data
 
@@ -429,7 +435,7 @@ Demonstrate that your system:
 
 | Criteria | Description |
 |---|---|
-| **Steps** | 1. Read the provided list of letter IDs to be cancelled <br>2. Send a PATCH /letters/{id} request to update targeted letters to CANCELLED or send a POST /letters for a bulk update<br>3. Verify via GET /letters/{id} that status updated to CANCELLED. |
+| **Steps** | 1. Select list of letter IDs to be cancelled <br>2. Send a PATCH /letters/{id} request to update targeted letters to CANCELLED or send a POST /letters for a bulk update<br>3. Verify via GET /letters/{id} that status updated to CANCELLED. |
 | **Acceptance** | - Only letters not yet dispatched or delivered may be cancelled<br>- All targeted letters are successfully updated to CANCELLED<br>- API returns a successful response. |
 | **Evidence** | API audit trail and before/after validation samples. <br> For this test, the key evidence is that you can notify us once your internal cancellation process is complete and that the API correctly reflects those cancellations. The test is not about the cancellation business process itself. |
 | **Business value** | Confirms that suppliers can reliably report letter cancellations to NHS Notify once they have been actioned internally, supporting accurate lifecycle tracking and preparing the foundation for a future automated cancellation integration. |
@@ -528,7 +534,7 @@ This test verifies that your system can submit accurate, complete MI that matche
 **Business outcome:**
 NHS Notify uses MI data for reconciliation, billing, and operational assurance. You must ensure each submission represents a unique data set and does not duplicate previous entries.
 
-A duplicate MI entry is identified when multiple submissions are received with the same combination of reporting date and specification reference for the same groupID.
+A duplicate MI entry is identified when multiple submissions are received with the same combination of  reporting date and specification reference for the same groupID.
 
 **Endpoints:**
 
