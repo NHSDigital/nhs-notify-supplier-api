@@ -5,8 +5,6 @@ content:
       $ref: "../../../schemas/errorResponse.yml"
     examples:
       error-bad-request-unknown-parameter:
-        value:
-          $ref: ../../../examples/errors/responses/getLetter/unknownParameter.json
+        $ref: ../../../examples/errors/responses/getLetter/unknownParameter.json
       error-bad-request-invalid-limit:
-        value:
-          $ref: ../../../examples/errors/responses/getLetter/limitInvalidValue.json
+        $ref: ../../../examples/errors/responses/getLetter/limitInvalidValue.json
