@@ -2,7 +2,7 @@
 
 Use this endpoint to get the current status of a single letter by its ID.
 
-Rate limiting applies. On excess requests, you may receive **429 Too Many Requests** (example error code(s): `NOTIFY_QUOTA`). Back off and retry later
+Rate limiting applies. On excess requests, you may receive **429 Too Many Requests** (example error code(s): `NOTIFY_QUOTA`). Back off and retry later.
 
 ## Sandbox test scenarios
 
@@ -20,3 +20,20 @@ You can test the following scenarios in our sandbox environment
 | Retrieve a CANCELLED letter status      | `2XL5eYSWGzCHlGmzNxuqVusPxDg`|
 | Retrieve a FAILED letter status         | `2YL5eYSWGzCHlGmzNxuqVusPxDg`|
 | Retrieve a RETURNED letter status       | `2ZL5eYSWGzCHlGmzNxuqVusPxDg`|
+
+### Example Error Codes
+
+Examples of reason codes and text that may be returned include (but are not limited to)
+
+| Reason Code | Reason Text                |
+|-------------|----------------------------|
+|R01          |Addressee gone away         |
+|R02          |Address incomplete          |
+|R03          |Address inaccessible        |
+|R04          |Addressee unknown           |
+|R05          |Addressee gone away/Refused |
+|R06          |Not called for              |
+|R07          |No such address             |
+|R08          |No reason given             |
+|R09          |Deceased                    |
+|R10          |Miscellaneous               |

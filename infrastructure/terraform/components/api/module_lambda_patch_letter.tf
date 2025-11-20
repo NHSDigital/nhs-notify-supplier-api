@@ -1,5 +1,5 @@
 module "patch_letter" {
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.24/terraform-lambda.zip"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-lambda.zip"
 
   function_name = "patch_letter"
   description   = "Update the status of a letter"
@@ -35,7 +35,9 @@ module "patch_letter" {
   log_destination_arn       = local.destination_arn
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
-  lambda_env_vars = merge(local.common_lambda_env_vars, {})
+  lambda_env_vars = merge(local.common_lambda_env_vars, {
+    QUEUE_URL = module.letter_status_updates_queue.sqs_queue_url
+  })
 }
 
 data "aws_iam_policy_document" "patch_letter_lambda" {
@@ -54,21 +56,16 @@ data "aws_iam_policy_document" "patch_letter_lambda" {
   }
 
   statement {
-    sid    = "AllowDynamoDBAccess"
+    sid    = "AllowQueueAccess"
     effect = "Allow"
 
     actions = [
-      "dynamodb:BatchGetItem",
-      "dynamodb:BatchWriteItem",
-      "dynamodb:GetItem",
-      "dynamodb:PutItem",
-      "dynamodb:Query",
-      "dynamodb:Scan",
-      "dynamodb:UpdateItem",
+      "sqs:SendMessage",
+      "sqs:GetQueueAttributes",
     ]
 
     resources = [
-      aws_dynamodb_table.letters.arn,
+      module.letter_status_updates_queue.sqs_queue_arn
     ]
   }
 }

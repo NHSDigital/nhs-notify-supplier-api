@@ -5,8 +5,8 @@ description:
 requestBody:
   $ref: "../requests/patchLetterRequest.yml"
 responses:
-  "200":
-    $ref: "../responses/patchLetter200.yml"
+  "202":
+    $ref: "../responses/patchLetter202.yml"
   "400":
     $ref: "../responses/errors/patchLetter/patchLetterBadRequest.yml"
   "404":

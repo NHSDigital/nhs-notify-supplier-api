@@ -9,8 +9,8 @@ requestBody:
 responses:
   '202':
     $ref: "../responses/postLetters202.yml"
-  '404':
-    $ref: "../responses/errors/resourceNotFound.yml"
+  '400':
+    $ref: "../responses/errors/badRequest.yml"
   '429':
     $ref: "../responses/errors/tooManyRequests.yml"
   '500':

@@ -71,10 +71,10 @@ test: # Run all the test tasks @Testing
 _test:
 	set -e
 	script="./scripts/tests/${name}.sh"
-	if [ -e "$${script}" ]; then
-		exec $${script}
-	else
-		echo "make test-${name} not implemented: $${script} not found" >&2
+	if [ -e "$${script}" ]; then \
+		exec $${script}; \
+	else \
+		echo "make test-${name} not implemented: $${script} not found" >&2 ; \
 	fi
 
 ${VERBOSE}.SILENT: \

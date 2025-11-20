@@ -1,17 +1,133 @@
 openapi: 3.0.3
 info:
   description: |
-    API for communication suppliers to integrate with NHS Notify.
+    ## Overview
+
+    API for letter suppliers to integrate with NHS Notify.
+
+    This API lets you:
+
+    * Get lists of letters allocated to you
+    * Download letter PDFs and metadata
+    * Update and manage letter statuses
+    * Submit and retrieve management information (MI)
 
     This specification represents the in-development 'next' version of the API schema
-    and should be treated as unstable.
+    and should be treated as unstable
+
+    Use this API to retrieve letters to be printed
+
+    ## Who can use this API
+
+    The NHS Notify Supplier API is designed for approved print service suppliers who support the delivery of physical letters through the [NHS Notify](https://digital.nhs.uk/services/nhs-notify) platform.
+
+    ## Related APIs
+
+    The [NHS Notify API](https://digital.nhs.uk/developer/api-catalogue/nhs-notify) is used to send messages to citizens via NHS App, email, text message or letter.
+
+    ## API status and roadmap
+
+    This API is [in production, beta](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#statuses). We are onboarding partners to use it.
+
+    We may make additive non-breaking changes to the API without notice, for example the addition of fields to a response or callback, or new optional fields to a request.
+
+    ## Service Level
+
+    This service is a [silver](https://digital.nhs.uk/services/reference-guide#service-levels) service, meaning it is available 24 hours a day, 365 days a year and supported from 8am to 6pm, Monday to Friday excluding bank holidays.
+    For more details, see [service levels](https://digital.nhs.uk/developer/guides-and-documentation/reference-guide#service-levels).
+
+    ## Technology
+
+    This API is a [REST-based](https://digital.nhs.uk/developer/guides-and-documentation/our-api-technologies#basic-rest) API.
+
+    We follow the [JSON:API](https://jsonapi.org/) standard for our request and response schemas.
+
+    ### Response content types
+
+    This API can generate responses in the following format:
+
+    * `application/vnd.api+json` - see [JSON:API specification](https://jsonapi.org/format/#introduction)
+
+    ### Request content types
+
+    This API will accept request payloads of the following types:
+
+    * `application/vnd.api+json` - see [JSON:API specification](https://jsonapi.org/format/#introduction)
+    * `application/json`
+
+    The `Content-Type` header may optionally include a `charset` attribute. If included, it **must** be set to `charset=utf-8` Any other `charset` value will result in a `406` error response. If omitted then `utf-8` is assumed.
+
+    If you attempt to send a payload without the `Content-Type` header set to either of these values then the API will respond with a `415 Unsupported Media Type` response.
+
+    ## Network access
+
+    This API is available on the internet and, indirectly on the [Health and Social Care Network (HSCN)](https://digital.nhs.uk/services/health-and-social-care-network).
+
+    For more details see [Network access for APIs](https://digital.nhs.uk/developer/guides-and-documentation/network-access-for-apis).
+
+    ## Security and authorisation
+
+    This API is [application-restricted](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation#application-restricted-apis), meaning we authenticate the calling application but not the end user.
+
+    Authentication and authorisation of end users is the responsibility of your application.
+
+    To access this API, use the following security pattern:
+
+    * [Application-restricted RESTful API - signed JWT authentication](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation/application-restricted-restful-apis-signed-jwt-authentication)
+
+    ## Environments and testing
+
+    | Environment | Base URL |
+    |------------ | -------- |
+    | Sandbox     | `https://sandbox.api.service.nhs.uk/nhs-notify-supplier` |
+    | Integration test | `https://int.api.service.nhs.uk/nhs-notify-supplier` |
+    | Production | `https://api.service.nhs.uk/nhs-notify-supplier` |
+
+    ### Sandbox testing
+
+    Our [sandbox environment](https://digital.nhs.uk/developer/guides-and-documentation/testing#sandbox-testing):
+
+    * is for early developer testing
+    * only covers a limited set of scenarios
+    * is stateless, so does not actually persist any updates
+    * is open access, so does not allow you to test authorisation
+
+    For details of sandbox test scenarios, or to try out sandbox using our 'Try this API' feature, see the documentation for each endpoint.
+
+    Alternatively, you can try out the sandbox using our Postman collection
+
+    You can find our postman collection source in our [public repository on github](https://github.com/NHSDigital/nhs-notify-supplier-api/tree/main/postman).
+
+    ### Integration testing
+
+    Our integration test environment:
+
+    * is for formal integration sandbox-testing
+    * is stateful, so persists updates
+    * includes authorisation via [signed JWT authentication](https://digital.nhs.uk/developer/guides-and-documentation/security-and-authorisation/application-restricted-restful-apis-signed-jwt-authentication)
+
+    You need to get your software approved by us before it can go live with this API.
+
+    You will also need to follow our steps to - TBD
+
+    ### Production smoke testing
+
+    Before go-live, you must complete a smoke test in the NHS Notify production environment.
+    The smoke test confirms that your live credentials, connectivity, and print workflow operate correctly end-to-end. It will be carried out in coordination with the NHS Notify Supplier API team.
+    You will retrieve and print one or more live test letters through the production API, send the printed output to the address provided, and submit a Management Information (MI) update for verification.
+    The NHS Notify team will configure your production access, review your results, and confirm that your output meets NHS Notify print specifications.
+
+    ### Onboarding
+
+    You need to get your software approved by us before it can go live with this API.
+    You will also need to be an approved NHS letter supplier under the framework agreement (ADD link) and nominate your technical and operational contacts
   title: NHS Notify Supplier API
   version: next
 servers:
+- description: Public sandbox
+  url: https://internal-dev-sandbox.api.service.nhs.uk/nhs-notify-supplier
 - description: Local development server
   url: http://127.0.0.1:9000
-- description: Public sandbox
-  url: https://sandbox-server.nhs.uk/nhs-notify-supplier-api
 tags:
 - description: ""
   name: letter
@@ -22,8 +138,15 @@ tags:
 paths:
   /letters:
     get:
-      description: The key use of this endpoint is to query letters which are ready
-        to be printed
+      description: |
+        ## Overview
+
+        Use this endpoint to poll letters which are ready to be printed.
+
+        Returns letters whose `status` is **PENDING**.
+        Use `limit` to control list size (max 2500).
+
+        Rate limiting applies. On excess requests, you may receive **429 Too Many Requests** (example error code(s): `NOTIFY_QUOTA`). Back off and retry later
       operationId: listLetters
       parameters:
       - description: "Unique request identifier, in the format of a GUID"
@@ -308,6 +431,37 @@ paths:
       - letter
       x-eov-operation-handler: controllers/LetterController
     post:
+      description: |
+        ## Overview
+
+        Use this endpoint to update the status for (example, PRINTED, DISPATCHED, DELIVERED) of multiple letters by providing the new statuses in the request body, optionally including reason codes and text.
+
+        Use this endpoint when you need to report status changes for several letters at once.
+
+        When you make a POST update request with, the endpoint will respond with a successful (202) response code or an unsuccessful (4xx/5xx) response.
+
+        Rate limiting applies. On excess requests, you may receive **429 Too Many Requests** (example error code(s): `NOTIFY_QUOTA`). Back off and retry later.
+
+        ### Statuses
+
+        Allowed `status` values that can be used to are:
+
+        - `ACCEPTED`
+        - `CANCELLED`
+        - `DELIVERED`
+        - `DISPATCHED`
+        - `ENCLOSED`
+        - `FAILED`
+        - `FORWARDED`
+        - `PRINTED`
+        - `REJECTED`
+        - `RETURNED`
+
+        It is not possible to update a letter to status of `PENDING`.
+
+        The request should not contain multiple letter objects with the same ID.
+
+        Optionally a `reasonCode` and `reasonText` explaining the status (for example, validation failures) can be included in the request body for each update.
       operationId: postLetters
       parameters:
       - description: "Unique request identifier, in the format of a GUID"
@@ -362,25 +516,25 @@ paths:
                     id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
                     type: Letter
                   - attributes:
-                      reasonCode: 100
+                      reasonCode: R01
                       reasonText: failed validation
                       status: RETURNED
                     id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
                     type: Letter
                   - attributes:
-                      reasonCode: 100
+                      reasonCode: R01
                       reasonText: failed validation
                       status: CANCELLED
                     id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
                     type: Letter
                   - attributes:
-                      reasonCode: 100
+                      reasonCode: R01
                       reasonText: failed validation
                       status: FAILED
                     id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
                     type: Letter
                   - attributes:
-                      reasonCode: 100
+                      reasonCode: R01
                       reasonText: failed validation
                       status: RETURNED
                     id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
@@ -409,23 +563,23 @@ paths:
                 example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
                 type: string
               style: simple
-        "404":
+        "400":
           content:
             application/vnd.api+json:
               examples:
-                error-not-found:
+                error-bad-request-invalid-request-body:
                   value:
                     errors:
-                    - code: NOTIFY_RESOURCE_NOT_FOUND
-                      detail: No resource found with that ID
+                    - code: NOTIFY_INVALID_REQUEST
+                      detail: The request body is invalid
                       id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
                       links:
                         about: https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier
-                      status: "404"
-                      title: Resource not found
+                      status: "400"
+                      title: Invalid request
               schema:
                 $ref: "#/components/schemas/listLetters_400_response"
-          description: Resource not found
+          description: "Bad request, invalid input data"
         "429":
           content:
             application/vnd.api+json:
@@ -467,9 +621,14 @@ paths:
   /letters/{id}:
     get:
       description: |
-        ## Get details the status of a letter.
+        ## Overview
+
+        Use this endpoint to get the current status of a single letter by its ID.
+
+        Rate limiting applies. On excess requests, you may receive **429 Too Many Requests** (example error code(s): `NOTIFY_QUOTA`). Back off and retry later
 
         ## Sandbox test scenarios
+
         You can test the following scenarios in our sandbox environment
 
         | Scenario                                | Letter Id                    |
@@ -607,8 +766,33 @@ paths:
       - letter
       x-eov-operation-handler: controllers/LetterController
     patch:
-      description: Update the status of a letter by providing the new status in the
-        request body.
+      description: |
+        ## Overview
+
+        Use this endpoint to update the status of a letter by submitting the new status in the request body, optionally providing a reason code and text.
+
+        When you make a PATCH request with your application, the endpoint will respond with a successful (200) response code, along with the updated patient resource or an unsuccessful (4xx/5xx) response.
+
+        Rate limiting applies. On excess requests, you may receive **429 Too Many Requests** (example error code(s): `NOTIFY_QUOTA`). Back off and retry later.
+
+        ### Statuses
+
+        Allowed `status` values that can be used to are:
+
+        - `ACCEPTED`
+        - `CANCELLED`
+        - `DELIVERED`
+        - `DISPATCHED`
+        - `ENCLOSED`
+        - `FAILED`
+        - `FORWARDED`
+        - `PRINTED`
+        - `REJECTED`
+        - `RETURNED`
+
+        It is not possible to update a letter to status of `PENDING`.
+
+        Optionally a `reasonCode` and `reasonText` explaining the status (for example, validation failures) can be included in the request body.
       operationId: patchLetter
       parameters:
       - description: "Unique request identifier, in the format of a GUID"
@@ -671,7 +855,7 @@ paths:
                 value:
                   data:
                     attributes:
-                      reasonCode: 100
+                      reasonCode: R01
                       reasonText: failed validation
                       status: REJECTED
                     id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
@@ -697,7 +881,7 @@ paths:
                 value:
                   data:
                     attributes:
-                      reasonCode: 100
+                      reasonCode: R01
                       reasonText: failed validation
                       status: CANCELLED
                     id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
@@ -723,7 +907,7 @@ paths:
                 value:
                   data:
                     attributes:
-                      reasonCode: 100
+                      reasonCode: R01
                       reasonText: failed validation
                       status: FAILED
                     id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
@@ -733,7 +917,7 @@ paths:
                 value:
                   data:
                     attributes:
-                      reasonCode: 100
+                      reasonCode: R01
                       reasonText: failed validation
                       status: REJECTED
                     id: 2WL5eYSWGzCHlGmzNxuqVusPxDg
@@ -865,6 +1049,21 @@ paths:
       x-eov-operation-handler: controllers/LetterController
   /letters/{id}/data:
     get:
+      description: |
+        ## Overview
+
+        Use this endpoint to get letter data, including downloading the letter's print-ready PDF file.
+
+        Rate limiting applies. On excess requests, you may receive **429 Too Many Requests** (example error code(s): `NOTIFY_QUOTA`). Back off and retry later
+
+        ## Sandbox test scenarios
+
+        You can test the following scenarios in our sandbox environment.
+
+        |Scenario|Request ID|Response|
+        |--------|-------|--------|
+        |Success  | 2AL5eYSWGzCHlGmzNxuqVusPxDg | Returns 303 (See Other) and URL to an example PDF in the Location header |
+        |Not Found |2WL5eYSWGzCHlGmzNxuqVusPxDg | Returns 404 Not found and error details in the response |
       operationId: getDataId
       parameters:
       - description: Unique identifier of this resource
@@ -980,47 +1179,26 @@ paths:
       tags:
       - data
       x-eov-operation-handler: controllers/DataController
-    head:
-      operationId: headDataId
-      parameters:
-      - description: Unique identifier of this resource
-        explode: false
-        in: path
-        name: id
-        required: true
-        schema:
-          example: 24L5eYSWGzCHlGmzNxuqVusPxDg
-          type: string
-        style: simple
-      - description: "Unique request identifier, in the format of a GUID"
-        explode: false
-        in: header
-        name: X-Request-ID
-        required: true
-        schema:
-          example: dcb9c8dc-c2f4-4d5f-8674-a2e913e040b2
-          type: string
-        style: simple
-      - description: |-
-          An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place.
-          The ID will be returned in a response header.
-        explode: false
-        in: header
-        name: X-Correlation-ID
-        required: false
-        schema:
-          example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
-          type: string
-        style: simple
-      responses:
-        "200":
-          description: OK
-      summary: Check for the existence of a data file
-      tags:
-      - data
-      x-eov-operation-handler: controllers/DataController
   /mi:
     post:
+      description: |
+        ## Overview
+
+        Use this endpoint to send management or operational metrics relating to letter processing and print fulfilment
+
+        When you submit a create management information request, the endpoint will respond with a 201 (Created) response code along with the created data including a unique id for the record or an unsuccessful (4xx/5xx) response
+
+        Rate limiting applies. On excess requests, you may receive **429 Too Many Requests** (example error code(s): `NOTIFY_QUOTA`). Back off and retry later
+
+        ## Sandbox test scenarios
+
+        You can test the following scenarios in our sandbox environment.
+
+        |Scenario|Request|Response|
+        |--------|-------|--------|
+        |Success|Request for successful MI record Creation| 201 (Created) with the created management information in the response|
+        |Invalid Request|Invalid Request for MI record Creation| 400 (Bad Request) with the error details in the body|
+        |Unknown specification|Request for MI record Creation for unknown spec|404 (Not Found)  with the error details in the body|
       operationId: createMI
       parameters:
       - description: "Unique request identifier, in the format of a GUID"
@@ -1124,6 +1302,23 @@ paths:
                 example: 11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA
                 type: string
               style: simple
+        "400":
+          content:
+            application/vnd.api+json:
+              examples:
+                error-bad-request:
+                  value:
+                    errors:
+                    - code: NOTIFY_INVALID_REQUEST
+                      detail: "Invalid request, please refer to the API specifications"
+                      id: rrt-1931948104716186917-c-geu2-10664-3111479-3.0
+                      links:
+                        about: https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier
+                      status: "400"
+                      title: Invalid request
+              schema:
+                $ref: "#/components/schemas/listLetters_400_response"
+          description: "Bad request, invalid input data"
         "404":
           content:
             application/vnd.api+json:
@@ -1224,14 +1419,13 @@ components:
           - DELIVERED
           - FAILED
           - RETURNED
-          - DESTROYED
           - FORWARDED
           example: PENDING
           type: string
         reasonCode:
           description: Reason code for the given status
-          example: 100
-          type: number
+          example: R01
+          type: string
         reasonText:
           description: Reason text for the given status
           example: failed validation
@@ -1314,14 +1508,13 @@ components:
           - DELIVERED
           - FAILED
           - RETURNED
-          - DESTROYED
           - FORWARDED
           example: PENDING
           type: string
         reasonCode:
           description: Reason code for the given status
-          example: 100
-          type: number
+          example: R01
+          type: string
         reasonText:
           description: Reason text for the given status
           example: failed validation
@@ -1441,7 +1634,7 @@ components:
       name: apikey
       type: apiKey
 x-nhsd-apim:
-  temporary: true
+  temporary: false
   monitoring: false
   access: []
   target:

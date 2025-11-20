@@ -128,3 +128,51 @@ variable "shared_infra_account_id" {
   description = "The AWS Account ID of the shared infrastructure account"
   default     = "000000000000"
 }
+
+variable "manually_configure_mtls_truststore" {
+  type        = bool
+  description = "Manually manage the truststore used for API Gateway mTLS (e.g. for prod environment)"
+  default     = false
+}
+
+variable "enable_backups" {
+  type        = bool
+  description = "Enable backups"
+  default     = false
+}
+
+variable "ca_pem_filename" {
+  type        = string
+  description = "Filename for the CA truststore file within the s3 bucket"
+  default     = null
+}
+
+variable "force_destroy" {
+  type        = bool
+  description = "Flag to force deletion of S3 buckets"
+  default     = false
+}
+
+variable "letter_table_ttl_hours" {
+  type        = number
+  description = "Number of hours to set as TTL on letters table"
+  default     = 24
+}
+
+variable "max_get_limit" {
+  type        = number
+  description = "Default limit to apply to GET requests that support pagination"
+  default     = 2500
+}
+
+variable "eventpub_data_plane_bus_arn" {
+  type        = string
+  description = "ARN of the EventBridge data plane bus for eventpub"
+  default     = ""
+}
+
+variable "eventpub_control_plane_bus_arn" {
+  type        = string
+  description = "ARN of the EventBridge control plane bus for eventpub"
+  default     = ""
+}

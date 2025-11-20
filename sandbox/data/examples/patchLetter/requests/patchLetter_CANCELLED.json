@@ -1,8 +1,8 @@
 {
   "data": {
     "attributes": {
-      "reasonCode": "R01",
-      "reasonText": "failed validation",
+      "reasonCode": "R10",
+      "reasonText": "Miscellaneous",
       "status": "CANCELLED"
     },
     "id": "2WL5eYSWGzCHlGmzNxuqVusPxDg",

@@ -51,7 +51,7 @@ export const apiSandboxUpdateLetterStatusTestData: ApiSandboxUpdateLetterStatusT
         id: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
         attributes: {
           status: 'REJECTED',
-          reasonCode: 100,
+          reasonCode: 'R01',
           reasonText: 'failed validation',
         },
       }
@@ -62,7 +62,7 @@ export const apiSandboxUpdateLetterStatusTestData: ApiSandboxUpdateLetterStatusT
         type: 'Letter',
         id: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
         attributes: {
-          reasonCode: 100,
+          reasonCode: 'R01',
           reasonText: 'failed validation',
           status: 'REJECTED',
           specificationId:'2WL5eYSWGzCHlGmzNxuqVusPxDg',
@@ -112,10 +112,10 @@ export const apiSandboxUpdateLetterStatusTestData: ApiSandboxUpdateLetterStatusT
     },
     expectedStatus: 400,
     expectedResponse: {
-      message: 'request.body.data.attributes.status should be equal to one of the allowed values: PENDING, ACCEPTED, REJECTED, PRINTED, ENCLOSED, CANCELLED, DISPATCHED, DELIVERED, FAILED, RETURNED, DESTROYED, FORWARDED',
+      message: 'request.body.data.attributes.status should be equal to one of the allowed values: PENDING, ACCEPTED, REJECTED, PRINTED, ENCLOSED, CANCELLED, DISPATCHED, DELIVERED, FAILED, RETURNED, FORWARDED',
       errors: [{
           path: '.body.data.attributes.status',
-          message: 'should be equal to one of the allowed values: PENDING, ACCEPTED, REJECTED, PRINTED, ENCLOSED, CANCELLED, DISPATCHED, DELIVERED, FAILED, RETURNED, DESTROYED, FORWARDED',
+          message: 'should be equal to one of the allowed values: PENDING, ACCEPTED, REJECTED, PRINTED, ENCLOSED, CANCELLED, DISPATCHED, DELIVERED, FAILED, RETURNED, FORWARDED',
           errorCode: 'enum.openapi.validation'
       }]
     },

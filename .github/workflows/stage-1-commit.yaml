@@ -199,3 +199,94 @@ jobs:
           idp_aws_report_upload_region: "${{ secrets.IDP_AWS_REPORT_UPLOAD_REGION }}"
           idp_aws_report_upload_role_name: "${{ secrets.IDP_AWS_REPORT_UPLOAD_ROLE_NAME }}"
           idp_aws_report_upload_bucket_endpoint: "${{ secrets.IDP_AWS_REPORT_UPLOAD_BUCKET_ENDPOINT }}"
+
+  detect-event-schema-package-changes:
+    name: "Check for changes to event schema package compared to main branch"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      changed: ${{ steps.check.outputs.changed }}
+      main_version: ${{ steps.check.outputs.main_version }}
+
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect package changes and current version
+        id: check
+        run: |
+          git fetch origin main
+
+          if git diff --quiet origin/main...HEAD -- internal/events; then
+            echo "No changes in event schemas package"
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "Changes detected in event schemas"
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+          if content=$(git show origin/main:internal/events/package.json 2>/dev/null); then
+            version=$(jq -r .version <<< $content);
+          else
+            version=null;
+          fi
+
+          echo "Detected package version $version in main branch"
+          echo "main_version=$version" >> $GITHUB_OUTPUT
+
+#  check-schemas-generated:
+#    name: Check event schemas have been regenerated
+#    needs: detect-event-schema-package-changes
+#    if: needs.detect-event-schema-package-changes.outputs.changed == 'true'
+#    runs-on: ubuntu-latest
+#    permissions:
+#      contents: read
+#    steps:
+#      - name: "Checkout code"
+#        uses: actions/checkout@v4
+#
+#      - name: "Cache node_modules"
+#        uses: actions/cache@v4
+#        with:
+#          path: |
+#            **/node_modules
+#          key: ${{ runner.os }}-node-${{ inputs.nodejs_version }}-${{ hashFiles('**/package-lock.json') }}
+#          restore-keys: |
+#            ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
+#
+#      - name: "Re-generate schemas"
+#        run: |
+#          npm ci
+#          npm --workspace internal/events run gen:jsonschema
+#
+#      - name: Check for schema changes
+#        run: git diff --quiet internal/events/schemas
+
+  check-schema-version-change:
+    name: Check event schema version has been updated
+    needs: detect-event-schema-package-changes
+    if: needs.detect-event-schema-package-changes.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check schema versions
+        run: |
+          source scripts/is_valid_increment.sh
+
+          main_version="${{ needs.detect-event-schema-package-changes.outputs.main_version }}"
+          echo "Main version: ${{ needs.detect-event-schema-package-changes.outputs.main_version }}"
+
+          local_version=$(jq -r '.version' internal/events/package.json)
+          echo "Local version: $local_version"
+
+          if ! is_valid_increment "$main_version" "$local_version" ; then
+            echo "Error: Event Schema package has changed, but new version ($local_version) is not a valid increment from latest version on main branch ($main_version)."
+            exit 1
+          fi

@@ -10,10 +10,10 @@ The schemas are generated from Zod definitions and provide a visual representati
 erDiagram
     Letter {
         string id
-        string status "enum: PENDING, ACCEPTED, REJECTED, PRINTED, ENCLOSED, CANCELLED, DISPATCHED, FAILED, RETURNED, DESTROYED, FORWARDED, DELIVERED"
+        string status "enum: PENDING, ACCEPTED, REJECTED, PRINTED, ENCLOSED, CANCELLED, DISPATCHED, FAILED, RETURNED, FORWARDED, DELIVERED"
         string specificationId
         string groupId
-        number reasonCode
+        string reasonCode
         string reasonText
         string supplierId
         string url "url"
@@ -31,14 +31,16 @@ erDiagram
 erDiagram
     MI {
         string id
-        string supplierId
+        string lineItem
+        string timestamp
+        number quantity
         string specificationId
         string groupId
-        string lineItem
-        number quantity
         number stockRemaining
+        string supplierId
         string createdAt
         string updatedAt
+        number ttl "min: -9007199254740991, max: 9007199254740991"
     }
 ```
 
