@@ -2,7 +2,7 @@
   "data": {
     "attributes": {
       "reasonCode": "R01",
-      "reasonText": "failed validation",
+      "reasonText": "Addressee gone away",
       "status": "REJECTED"
     },
     "id": "2WL5eYSWGzCHlGmzNxuqVusPxDg",

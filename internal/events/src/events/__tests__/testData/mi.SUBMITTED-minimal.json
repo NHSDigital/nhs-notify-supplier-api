@@ -1,0 +1,24 @@
+{
+  "data": {
+    "createdAt": "2025-11-16T15:00:00.000Z",
+    "id": "mi-envelope-001",
+    "lineItem": "ENVELOPE_DL",
+    "quantity": 300,
+    "stockRemaining": 2500,
+    "supplierId": "supplier-xyz",
+    "timestamp": "2025-11-16T15:00:00.000Z",
+    "updatedAt": "2025-11-16T15:00:00.000Z"
+  },
+  "datacontenttype": "application/json",
+  "dataschema": "https://notify.nhs.uk/cloudevents/schemas/supplier-api/mi.SUBMITTED.1.0.0.schema.json",
+  "id": "9a3d4c55-5f76-6c2c-b789-2f1cf4e5e333",
+  "recordedtime": "2025-11-16T15:00:00.250Z",
+  "severitynumber": 2,
+  "severitytext": "INFO",
+  "source": "/data-plane/supplier-api/prod/submit-mi",
+  "specversion": "1.0",
+  "subject": "mi/mi-envelope-001",
+  "time": "2025-11-16T15:00:00.000Z",
+  "traceparent": "00-2cf9873938ef65ff0660fd433e02541e-d9cf8d9380415553-01",
+  "type": "uk.nhs.notify.supplier-api.mi.SUBMITTED.v1"
+}

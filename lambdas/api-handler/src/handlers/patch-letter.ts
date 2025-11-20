@@ -1,11 +1,12 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { patchLetterStatus } from '../services/letter-operations';
-import { PatchLetterRequest, PatchLetterRequestSchema } from '../contracts/letters';
+import { enqueueLetterUpdateRequests } from '../services/letter-operations';
+import { LetterDto, PatchLetterRequest, PatchLetterRequestSchema } from '../contracts/letters';
 import { ApiErrorDetail } from '../contracts/errors';
 import { ValidationError } from '../errors';
-import { mapErrorToResponse } from '../mappers/error-mapper';
-import { assertNotEmpty, validateCommonHeaders } from '../utils/validation';
-import { mapToLetterDto } from '../mappers/letter-mapper';
+import { processError } from '../mappers/error-mapper';
+import { assertNotEmpty } from '../utils/validation';
+import { extractCommonIds } from '../utils/commonIds';
+import { mapPatchLetterToDto } from '../mappers/letter-mapper';
 import type { Deps } from "../config/deps";
 
 
@@ -13,10 +14,10 @@ export function createPatchLetterHandler(deps: Deps): APIGatewayProxyHandler {
 
   return async (event) => {
 
-    const commonHeadersResult = validateCommonHeaders(event.headers, deps);
+    const commonIds = extractCommonIds(event.headers, event.requestContext, deps);
 
-    if (!commonHeadersResult.ok) {
-      return mapErrorToResponse(commonHeadersResult.error, commonHeadersResult.correlationId, deps.logger);
+    if (!commonIds.ok) {
+      return processError(commonIds.error, commonIds.correlationId, deps.logger);
     }
 
     try {
@@ -35,15 +36,21 @@ export function createPatchLetterHandler(deps: Deps): APIGatewayProxyHandler {
         else throw error;
       }
 
-      const updatedLetter = await patchLetterStatus(mapToLetterDto(patchLetterRequest, commonHeadersResult.value.supplierId), letterId, deps.letterRepo);
+      const letterToUpdate: LetterDto = mapPatchLetterToDto(patchLetterRequest, commonIds.value.supplierId);
+
+      if (letterToUpdate.id !== letterId) {
+        throw new ValidationError(ApiErrorDetail.InvalidRequestLetterIdsMismatch);
+      }
+
+      await enqueueLetterUpdateRequests([letterToUpdate], commonIds.value.correlationId, deps);
 
       return {
-        statusCode: 200,
-        body: JSON.stringify(updatedLetter, null, 2)
+        statusCode: 202,
+        body: ''
       };
 
     } catch (error) {
-      return mapErrorToResponse(error, commonHeadersResult.value.correlationId, deps.logger);
+      return processError(error, commonIds.value.correlationId, deps.logger);
     }
   };
 };

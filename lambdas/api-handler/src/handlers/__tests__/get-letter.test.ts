@@ -78,7 +78,7 @@ describe('API Lambda handler', () => {
       specificationId: 'spec1',
       groupId: 'group1',
       status: 'FAILED',
-      reasonCode: 100,
+      reasonCode: 'R01',
       reasonText: 'failed validation'
     });
 
@@ -97,7 +97,7 @@ describe('API Lambda handler', () => {
           status: 'FAILED',
           specificationId: 'spec1',
           groupId: 'group1',
-          reasonCode: 100,
+          reasonCode: 'R01',
           reasonText: 'failed validation'
         }
       }

@@ -48,6 +48,14 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5
+      - name: "Cache node_modules"
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-node-${{ inputs.nodejs_version }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
       - name: "Repo setup"
         run: |
           npm ci
@@ -62,6 +70,14 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5
+      - name: "Cache node_modules"
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-node-${{ inputs.nodejs_version }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
       - name: "Repo setup"
         run: |
           npm ci
@@ -90,6 +106,14 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5
+      - name: "Cache node_modules"
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-node-${{ inputs.nodejs_version }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
       - name: "Repo setup"
         run: |
           npm ci
@@ -106,6 +130,14 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5
+      - name: "Cache node_modules"
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-node-${{ inputs.nodejs_version }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
       - name: "Repo setup"
         run: |
           npm ci
@@ -143,7 +175,7 @@ jobs:
         with:
           fetch-depth: 0 # Full history is needed to improving relevancy of reporting
       - name: "Download coverage report for SONAR"
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: code-coverage-report
       - name: "Perform static analysis"

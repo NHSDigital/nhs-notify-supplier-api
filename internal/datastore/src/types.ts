@@ -1,13 +1,14 @@
 import { z } from 'zod';
 import { idRef } from '@internal/helpers';
 
-export const SupplerStatus = z.enum(['ENABLED', 'DISABLED']);
+export const SupplierStatus = z.enum(['ENABLED', 'DISABLED']);
 
 export const SupplierSchema = z.object({
   id: z.string(),
   name: z.string(),
   apimId: z.string(),
-  status: SupplerStatus
+  status: SupplierStatus,
+  updatedAt: z.string(),
 }).describe('Supplier');
 
 export type Supplier = z.infer<typeof SupplierSchema>;
@@ -24,7 +25,7 @@ export const LetterSchemaBase = z.object({
   status: LetterStatus,
   specificationId: z.string(),
   groupId: z.string(),
-  reasonCode: z.number().optional(),
+  reasonCode: z.string().optional(),
   reasonText: z.string().optional()
 });
 

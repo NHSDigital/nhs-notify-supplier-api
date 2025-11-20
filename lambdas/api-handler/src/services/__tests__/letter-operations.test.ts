@@ -1,7 +1,7 @@
 import { Letter, LetterRepository } from '@internal/datastore';
 import { Deps } from '../../config/deps';
-import { LetterDto } from '../../contracts/letters';
-import { getLetterById, getLetterDataUrl, getLettersForSupplier, patchLetterStatus } from '../letter-operations';
+import { LetterDto, PostLettersRequest } from '../../contracts/letters';
+import { enqueueLetterUpdateRequests, getLetterById, getLetterDataUrl, getLettersForSupplier } from '../letter-operations';
 import pino from 'pino';
 
 jest.mock('@aws-sdk/s3-request-presigner', () => ({
@@ -16,6 +16,7 @@ jest.mock('@aws-sdk/client-s3', () => {
   };
 });
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 
 describe("getLetterIdsForSupplier", () => {
 
@@ -92,67 +93,6 @@ describe("getLetterById", () => {
 
 });
 
-describe('patchLetterStatus function', () => {
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  const updatedLetterDto: LetterDto = {
-    id: 'letter1',
-    supplierId: 'supplier1',
-    status: 'REJECTED',
-    reasonCode: 123,
-    reasonText: 'Reason text'
-  };
-
-  const updatedLetter = makeLetter("letter1", "REJECTED");
-
-  it('should update the letter status successfully', async () => {
-    const mockRepo = {
-      updateLetterStatus: jest.fn().mockResolvedValue(updatedLetter)
-    };
-
-    const result = await patchLetterStatus(updatedLetterDto, 'letter1', mockRepo as any);
-
-    expect(result).toEqual({
-      data:
-      {
-        id: 'letter1',
-        type: 'Letter',
-        attributes: {
-          status: 'REJECTED',
-          reasonCode: updatedLetter.reasonCode,
-          reasonText: updatedLetter.reasonText,
-          specificationId: updatedLetter.specificationId,
-          groupId: updatedLetter.groupId
-        },
-      }
-    });
-  });
-
-  it('should throw validationError when letterIds differ', async () => {
-    await expect(patchLetterStatus(updatedLetterDto, 'letter2', {} as any)).rejects.toThrow("The letter ID in the request body does not match the letter ID path parameter");
-  });
-
-  it('should throw notFoundError when letter does not exist', async () => {
-    const mockRepo = {
-      updateLetterStatus: jest.fn().mockRejectedValue(new Error('Letter with id l1 not found for supplier s1'))
-    };
-
-    await expect(patchLetterStatus(updatedLetterDto, 'letter1', mockRepo as any)).rejects.toThrow("No resource found with that ID");
-  });
-
-  it('should throw unexpected error', async () => {
-
-    const mockRepo = {
-      updateLetterStatus: jest.fn().mockRejectedValue(new Error('unexpected error'))
-    };
-
-    await expect(patchLetterStatus(updatedLetterDto, 'letter1', mockRepo as any)).rejects.toThrow("unexpected error");
-  });
-});
-
 describe('getLetterDataUrl function', () => {
 
   beforeEach(() => {
@@ -223,7 +163,127 @@ function makeLetter(id: string, status: Letter['status']) : Letter {
       supplierStatus: `supplier1#${status}`,
       supplierStatusSk: Date.now().toString(),
       ttl: 123,
-      reasonCode: 123,
+      reasonCode: 'R01',
       reasonText: "Reason text"
   };
 }
+
+describe('enqueueLetterUpdateRequests function', () => {
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const lettersToUpdate: LetterDto[] = [
+    {
+      id: 'id1',
+      status: 'REJECTED',
+      supplierId: 's1',
+      specificationId: 'spec1',
+      groupId: 'g1',
+      reasonCode: '123',
+      reasonText: 'Reason text'
+    },
+    {
+      id: 'id2',
+      status: 'ACCEPTED',
+      supplierId: 's1'
+    }
+  ];
+
+  it('should update the letter status successfully', async () => {
+
+    const sqsClient = { send: jest.fn() } as unknown as SQSClient;
+    const logger = { error: jest.fn() } as unknown as pino.Logger;
+    const env = {
+      QUEUE_URL: 'sqsUrl'
+    };
+    const deps: Deps = { sqsClient, logger, env } as Deps;
+
+    const result = await enqueueLetterUpdateRequests(lettersToUpdate, 'correlationId1', deps);
+
+    expect(result).toBeUndefined();
+
+    expect(deps.sqsClient.send).toHaveBeenNthCalledWith(1, expect.objectContaining({
+      input: {
+        QueueUrl: deps.env.QUEUE_URL,
+        MessageAttributes: {
+          CorrelationId: {
+            DataType: 'String',
+            StringValue: 'correlationId1',
+          }
+        },
+        MessageBody: JSON.stringify({
+            id: lettersToUpdate[0].id,
+            status: lettersToUpdate[0].status,
+            supplierId: lettersToUpdate[0].supplierId,
+            specificationId: lettersToUpdate[0].specificationId,
+            groupId: lettersToUpdate[0].groupId,
+            reasonCode: lettersToUpdate[0].reasonCode,
+            reasonText: lettersToUpdate[0].reasonText
+        })
+      }
+    }));
+
+    expect(deps.sqsClient.send).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      input: {
+        QueueUrl: deps.env.QUEUE_URL,
+        MessageAttributes: {
+          CorrelationId: {
+            DataType: 'String',
+            StringValue: 'correlationId1',
+          }
+        },
+        MessageBody: JSON.stringify({
+            id: lettersToUpdate[1].id,
+            status: lettersToUpdate[1].status,
+            supplierId: lettersToUpdate[1].supplierId
+        })
+      }
+    }));
+  });
+
+  it('should log error if enqueueing fails', async () => {
+
+    const mockError = new Error('error');
+    const sqsClient = { send: jest.fn()
+      .mockRejectedValueOnce(mockError)
+      .mockResolvedValueOnce({ MessageId: 'm1' })
+    } as unknown as SQSClient;
+    const logger = { error: jest.fn() } as unknown as pino.Logger;
+    const env = {
+      QUEUE_URL: 'sqsUrl'
+    };
+    const deps: Deps = { sqsClient, logger, env } as Deps;
+
+    const result = await enqueueLetterUpdateRequests(lettersToUpdate, 'correlationId1', deps);
+
+    expect(result).toBeUndefined();
+
+    expect(deps.sqsClient.send).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      input: {
+        QueueUrl: deps.env.QUEUE_URL,
+        MessageAttributes: {
+          CorrelationId: {
+            DataType: 'String',
+            StringValue: 'correlationId1',
+          }
+        },
+        MessageBody: JSON.stringify({
+            id: lettersToUpdate[1].id,
+            status: lettersToUpdate[1].status,
+            supplierId: lettersToUpdate[1].supplierId
+        })
+      }
+    }));
+
+    expect(deps.logger.error).toHaveBeenCalledTimes(1);
+    expect(deps.logger.error).toHaveBeenCalledWith({
+      err: mockError,
+      correlationId: 'correlationId1',
+      letterId: lettersToUpdate[0].id,
+      letterStatus: lettersToUpdate[0].status,
+      supplierId: lettersToUpdate[0].supplierId
+    }, 'Error enqueuing letter status update');
+  });
+});
