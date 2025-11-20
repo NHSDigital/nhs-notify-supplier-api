@@ -38,6 +38,6 @@
 
    | Header Name | Header Value |
    |--------------|--------------|
-   | Authorization | Bearer <access token> |
+   | Authorization | `Bearer <access token>` |
 
 ---
