@@ -5,5 +5,4 @@ content:
       $ref: "../../schemas/errorResponse.yml"
     examples:
       error-not-found:
-        value:
-          $ref: ../../examples/errors/responses/resourceNotFound.json
+        $ref: ../../examples/errors/responses/resourceNotFound.json

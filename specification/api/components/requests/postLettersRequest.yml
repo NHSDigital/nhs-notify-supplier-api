@@ -11,5 +11,4 @@ content:
             $ref: ../schemas/letterUpdateItem.yml
     examples:
       post-letter-request:
-        value:
-          $ref: ../examples/postLetter/requests/postLetters.json
+        $ref: ../examples/postLetter/requests/postLetters.json

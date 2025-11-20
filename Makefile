@@ -94,7 +94,7 @@ serve-swagger:
 	npm run serve-swagger-docs
 
 copy-examples:
-	cp -r ./sandbox/data/examples/. ./specification/api/components/examples
+	@scripts/build/copy-examples.sh
 
 config:: _install-dependencies version # Configure development environment (main) @Configuration
 	npm install

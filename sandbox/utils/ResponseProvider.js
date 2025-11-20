@@ -101,9 +101,9 @@ async function postLettersResponse(request) {
 
 async function postMIResponse(request) {
   const postMIFileMap = {
-    'data/examples/createMI/requests/createMI_SUCCESS.json': {responsePath: 'data/examples/createMI/responses/createMI_SUCCESS.json', responseCode: 200},
-    'data/examples/createMI/requests/createMI_INVALID.json': {responsePath:'data/examples/errors/responses/badRequest.json',responseCode: 400},
-    'data/examples/createMI/requests/createMI_NOTFOUND.json': {responsePath:'data/examples/errors/responses/resourceNotFound.json',responseCode: 404},
+    'data/examples/createMI/requests/createMI_request_SUCCESS.json': {responsePath: 'data/examples/createMI/responses/createMI_response_SUCCESS.json', responseCode: 200},
+    'data/examples/createMI/requests/createMI_request_INVALID.json': {responsePath:'data/examples/errors/responses/badRequest.json',responseCode: 400},
+    'data/examples/createMI/requests/createMI_request_NOTFOUND.json': {responsePath:'data/examples/errors/responses/resourceNotFound.json',responseCode: 404},
   };
   return await mapExampleResponse(request, postMIFileMap);
 }

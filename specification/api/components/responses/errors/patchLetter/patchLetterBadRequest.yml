@@ -5,5 +5,4 @@ content:
       $ref: "../../../schemas/errorResponse.yml"
     examples:
       error-bad-request-invalid-request-body:
-        value:
-          $ref: ../../../examples/errors/responses/patchLetter/invalidBody.json
+        $ref: ../../../examples/errors/responses/patchLetter/invalidBody.json
