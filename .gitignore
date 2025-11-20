@@ -27,3 +27,4 @@ dist
 /sandbox/*.log
 /sandbox-staging
 /specification/api/components/examples
+/scripts/JWT/*.pem
