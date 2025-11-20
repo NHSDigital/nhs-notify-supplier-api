@@ -51,52 +51,10 @@ variable "default_tags" {
 # Variables specific to the component
 ##
 
-variable "ca_pem_filename" {
-  type        = string
-  description = "Filename for the CA truststore file within the s3 bucket"
-  default     = null
-}
-
-variable "commit_id" {
-  type        = string
-  description = "The commit to deploy. Must be in the tree for branch_name"
-  default     = "HEAD"
-}
-
-variable "enable_backups" {
-  type        = bool
-  description = "Enable backups"
-  default     = false
-}
-
-variable "force_destroy" {
-  type        = bool
-  description = "Flag to force deletion of S3 buckets"
-  default     = false
-}
-
-variable "force_lambda_code_deploy" {
-  type        = bool
-  description = "If the lambda package in s3 has the same commit id tag as the terraform build branch, the lambda will not update automatically. Set to True if making changes to Lambda code from on the same commit for example during development"
-  default     = false
-}
-
 variable "kms_deletion_window" {
   type        = string
   description = "When a kms key is deleted, how long should it wait in the pending deletion state?"
   default     = "30"
-}
-
-variable "letter_table_ttl_hours" {
-  type        = number
-  description = "Number of hours to set as TTL on letters table"
-  default     = 24
-}
-
-variable "log_level" {
-  type        = string
-  description = "The log level to be used in lambda functions within the component. Any log with a lower severity than the configured value will not be logged: https://docs.python.org/3/library/logging.html#levels"
-  default     = "INFO"
 }
 
 variable "log_retention_in_days" {
@@ -105,16 +63,16 @@ variable "log_retention_in_days" {
   default     = 0
 }
 
-variable "manually_configure_mtls_truststore" {
-  type        = bool
-  description = "Manually manage the truststore used for API Gateway mTLS (e.g. for prod environment)"
-  default     = false
+variable "log_level" {
+  type        = string
+  description = "The log level to be used in lambda functions within the component. Any log with a lower severity than the configured value will not be logged: https://docs.python.org/3/library/logging.html#levels"
+  default     = "INFO"
 }
 
-variable "max_get_limit" {
-  type        = number
-  description = "Default limit to apply to GET requests that support pagination"
-  default     = 2500
+variable "force_lambda_code_deploy" {
+  type        = bool
+  description = "If the lambda package in s3 has the same commit id tag as the terraform build branch, the lambda will not update automatically. Set to True if making changes to Lambda code from on the same commit for example during development"
+  default     = false
 }
 
 variable "parent_acct_environment" {

@@ -35,10 +35,6 @@ on:
         required: true
         type: string
 
-permissions:
-  id-token: write
-  contents: read
-
 jobs:
 #  environment-set-up:
 #    name: "Environment set up"
