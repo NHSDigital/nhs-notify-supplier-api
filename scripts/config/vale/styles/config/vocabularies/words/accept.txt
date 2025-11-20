@@ -1,5 +1,5 @@
 actioned
-API
+API|api
 [A-Z]+s
 Bitwarden
 bot
