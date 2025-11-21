@@ -46,7 +46,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: "Build docs"
         uses: ./.github/actions/build-docs
         with:
@@ -58,7 +58,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: "Build sdks"
         uses: ./.github/actions/build-sdk
         with:
@@ -71,7 +71,7 @@ jobs:
   #   timeout-minutes: 10
   #   steps:
   #     - name: "Checkout code"
-  #       uses: actions/checkout@v5
+  #       uses: actions/checkout@v6
   #     - name: "Build servers"
   #       uses: ./.github/actions/build-server
   #       with:
@@ -82,7 +82,7 @@ jobs:
   #   timeout-minutes: 10
   #   steps:
   #     - name: "Checkout code"
-  #       uses: actions/checkout@v5
+  #       uses: actions/checkout@v6
   #     - name: "Build servers"
   #       uses: ./.github/actions/build-libraries
   #       with:
@@ -91,7 +91,7 @@ jobs:
     name: Create Dynamic Environment
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Trigger dynamic environment creation
         env:
           APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
@@ -122,7 +122,7 @@ jobs:
       APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: "Build proxies"
         uses: ./.github/actions/build-proxies
         with:
