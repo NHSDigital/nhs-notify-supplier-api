@@ -1,5 +1,8 @@
 {
   "autoOpenWorkspace.enableAutoOpenIfSingleWorkspace": true,
+  "cSpell.words": [
+    "envrc"
+  ],
   "files.exclude": {
     "**/.DS_Store": true,
     "**/.git": true,
