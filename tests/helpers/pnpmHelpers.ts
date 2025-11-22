@@ -27,7 +27,7 @@ export async function runCreateLetter(options: {
     count,
   } = options;
 
-    const workspaceRoot = path.resolve(__dirname, '../../scripts/test-data');
+    const workspaceRoot = path.resolve(__dirname, '../../scripts/utilities/letter-test-data');
     const cmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
     const root = path.resolve(workspaceRoot);
     console.log('Workspace root:', root);
