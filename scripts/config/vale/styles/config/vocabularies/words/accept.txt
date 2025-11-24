@@ -5,15 +5,15 @@ Bitwarden
 bot
 Cognito
 Cyber
+[Dd]ev
 Dependabot
-Dev
 devcontainer
 draw.io
 drawio
+[Ee]nv
 endcapture
 endfor
 endraw
-env
 Git[Hh]ub
 Gitleaks
 Grype

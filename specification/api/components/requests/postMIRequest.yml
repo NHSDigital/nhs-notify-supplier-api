@@ -5,13 +5,10 @@ content:
     examples:
       create-mi-request-success:
         summary: Request for successful MI record Creation
-        value:
-          $ref: "../examples/createMI/requests/createMI_SUCCESS.json"
+        $ref: "../examples/createMI/requests/createMI_request_SUCCESS.json"
       create-mi-request-invalid:
         summary: Invalid Request for MI record Creation
-        value:
-          $ref: "../examples/createMI/requests/createMI_INVALID.json"
+        $ref: "../examples/createMI/requests/createMI_request_INVALID.json"
       create-mi-request-notfound:
         summary: Request for MI record Creation for unknown spec
-        value:
-          $ref: "../examples/createMI/requests/createMI_NOTFOUND.json"
+        $ref: "../examples/createMI/requests/createMI_request_NOTFOUND.json"

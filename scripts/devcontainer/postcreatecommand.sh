@@ -8,6 +8,8 @@ source ~/.zshrc
 make _install-dependencies # required before config to ensure python is available due to race between config:: make targets
 make config
 
+pip install --user requests pyjwt cryptography
+
 sudo gem install jekyll bundler
 jekyll --version && cd docs && bundle install
 
