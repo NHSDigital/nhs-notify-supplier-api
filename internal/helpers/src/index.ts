@@ -7,4 +7,4 @@
 export * from './version';
 export * from './environment';
 export * from "./id-ref";
-export * from "./domain-base";
+export * from "../../events/src/domain/domain-base";
