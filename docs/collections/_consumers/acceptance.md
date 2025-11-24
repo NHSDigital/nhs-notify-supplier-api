@@ -35,14 +35,20 @@ NHS Notify will seed your Integration (INT) environment with a sample of 2,500 l
 
 The seeded dataset provides a mix of standard and exceptional cases to validate your system's ability to process, identify, and report on different letter types and outcomes.
 
-The sample data will include:
+We use the specification to define the format in which letters should be produced.  An Example of the full range of specifications is:
 
 - Standard letters (English) - Core test cases representing typical production letters in standard format and layout
 - Accessible format letters - Letters designed for accessibility (e.g., large print, braille, or audio) to ensure your system correctly identifies and routes alternative format requests
-- Letters without PDFs - Records that reference missing or unavailable PDF files, used to test your system's error handling and reporting for incomplete data
-- Incorrect letter specifications - Letters containing invalid or incomplete metadata to validate error detection and response handling
-- Non-English letters – Right-to-Left (RTL) - Examples in languages that read from right to left (e.g., Arabic, Urdu) to test layout handling
+- Letters without PDFs - Records that reference missing or unavailable PDF files, used to test your system’s error handling and reporting for incomplete data
+- Incorrect letter specifications - Letters containing invalid or incomplete metadata  to validate error detection and response handling
+- Non-English letters – Right-to-Left (RTL) -  Examples in languages that read from right to left (e.g., Arabic, Urdu) to test layout handling
 - Non-English letters – Left-to-Right (LTR) - Examples in other supported non-English languages
+
+As part of the seeded test data will provide multiple specifications to simulate the above scenarios (Note: the linked PDF data may be a standard English test document):
+
+integration-specification-english
+integration-specification-braille
+integration-specification-arabic
 
 ### Purpose of the Test Data
 
@@ -79,14 +85,14 @@ Validate that your system can functionally establish a secure, authenticated con
 
 | Criteria | Description |
 |---|---|
-| **Steps** | 1. Authenticate with APIM<br>2. Send a request to GET /_status to confirm service availability<br>3. Call GET /letters to verify that the connection is working correctly<br>4. Confirm the API returns a successful response |
+| **Steps** | 1. Authenticate with APIM<br>2. Send a successful request to GET /_status or any of the endpoints to confirm service availability<br>3. Call GET /letters to verify that the connection is working correctly<br>4. Confirm the API returns a successful response |
 | **Acceptance** | - API connection successfully established for both endpoints<br>- No authentication or connectivity errors observed. |
 | **Evidence** | Screenshot or API log showing successful responses from both endpoints |
 | **Business value** | Demonstrates that your organisation can connect securely to NHS Notify and that authentication is correctly implemented before processing any real letter data. Ensures compliance with NHS Digital security standards and protects patient information from unauthorised access. |
 
 ### AT2 - Receive and prepare letters for production
 
-This test validates that your system can receive and prepare all allocated letters each day by successfully calling the Notify API, fetching multiple pages of letter requests and confirming that all letters are retrieved without omission or duplication.
+This test validates that your system can receive and prepare all allocated letters each day by successfully calling the Notify API and confirming that all letters are retrieved without omission or duplication.
 
 **Business outcome:**
 
@@ -112,22 +118,25 @@ Validate your system's ability to:
 | Criteria | Description |
 |---|---|
 | **Steps** | 1. Call GET /letters to query a list of letters that is ready to be printed. Parameter to use: limit = 2500<br>2. Record total count and confirm 2,500 unique letter IDs are retrieved. |
-|  **Acceptance** | - 2,500 unique letter IDs retrieved.<br>- No missing or duplicated IDs.<br>- All pages are fetched. |
+|  **Acceptance** | - 2,500 unique letter IDs retrieved.<br>- No missing or duplicated IDs.<br>- Letters are retrieved in a single call |
 | **Evidence** | API logs showing successful acknowledgement with total count of 2,500 unique letter IDs. |
 | **Business value** | Confirms your production systems can begin each print run with all allocated letters, ensuring no delays or missed communications. |
 
-### AT3 - Retrieve letter list twice without duplicate processing
+### AT3 - Process letter list twice
 
-This test validates that your system can retrieve the same list of allocated letters multiple times via the Notify API without triggering duplicate processing or re-queuing.
+This test validates that your system can process the same list of allocated letters multiple times without creating duplicate jobs, re-importing data or triggering re-prints.  It is designed to prove that your integration correctly handles repeated API calls and that your processing logic is idempotent.
+
+Please note that the steps described below are part of the test scenario and they are not meant to describe a business workflow. You may demonstrate this behaviour in any suitable way, but the steps below describe our recommended approach.
 
 **Business outcome:**
-Your system safely retrieves the daily list of allocated letters more than once and correctly identifies previously processed items, preventing any duplication in production.
+Your system can safely process the same daily letter list more than once without generating duplicate imports, print jobs, or downstream updates.
 
 **Preconditions:**
 
 - Supplier's INT tenant is seeded with 2,500 letters
 - Supplier has valid API credentials and access to GET /letters endpoint in the integration (INT) environment
 - All letters are in PENDING status
+- No status updates or acknowledgements performed between calls
 
 **Endpoints:**
 
@@ -137,17 +146,16 @@ Your system safely retrieves the daily list of allocated letters more than once 
 
 Demonstrate that your system can:
 
-- Retrieve the full list of allocated letters repeatedly
-- Recognise and ignore letters already retrieved
-- Prevent duplicate print, acceptance, or downstream processing
-- Maintain consistent ordering across repeated calls
+- Process the full list of allocated letters more than once without duplication
+- Detect previously processed letter IDs and safely ignore duplicates
+- Maintain consistent data handling repeated calls
 
 | Criteria | Description |
 |---|---|
-| **Steps** | 1. Call GET /letters?limit=2500 to retrieve the full list of allocated letters<br>2. Call GET /letters again immediately to retrieve the same list of letters<br>3. Compare the second list to the first<br>4. Confirm that:<br> a) The same 2,500 unique IDs are returned.<br> b) No new processing jobs are triggered for already seen letters<br> c) Your system ignores duplicates. |
+| **Steps** | 1. Call GET /letters?limit=2500 to retrieve the full list of allocated letters<br>2. Call GET /letters again immediately to retrieve the same list of letters without updating any statuses<br>3. Compare the second list to the first<br>4. Confirm that:<br> a) The same 2,500 unique IDs are returned.<br> b) No new processing jobs are triggered for already seen letters<br> c) Your system ignores duplicates. |
 | **Acceptance** | - Each letter is processed once.<br>- Duplicate retrievals do not cause re-printing, re-queuing, or duplicate API updates. |
 | **Evidence** | - Retrieval logs showing both API calls and ID comparisons<br>- Processing logs showing no duplicate triggers<br>- Summary of total unique IDs vs. total retrieved records. |
-| **Business value** | Confirms your system can safely retry or re-fetch letter lists without duplicate processing, ensuring data integrity and resilience to transient network or API errors. |
+| **Business value** | Confirms your system is idempotent — repeated API calls do not cause duplication, ensuring operational stability and preventing wasted print runs. |
 
 ### AT4 – Acknowledge that you have accepted a list of letters
 
@@ -171,7 +179,7 @@ Confirm that you can mark letters as ACCEPTED for production readiness.
 
 | Criteria | Description |
 |---|---|
-| **Steps** | 1. Call GET /letters?limit= 1000<br>2. Send POST /letters request with a single bulk payload<br>3. Verify via GET /letters/{id} that status updated to ACCEPTED.<br>4. Fetch another page of letters via GET /letters?limit=1000 and ensure that the letters are no longer in the pending queue. |
+| **Steps** | 1. Call GET /letters?limit= 1000<br>2. Send POST /letters request with a single bulk payload<br>3. Verify via GET /letters/{id} that status updated to ACCEPTED.<br>4. Call GET /letters?limit=1000 and ensure that the letters are no longer in the pending queue. |
 | **Acceptance** | - Targeted letters successfully updated from 'PENDING' status to 'ACCEPTED' status<br>- No letter is skipped <br>- API returns a successful response. |
 | **Evidence** | - Include before and after status<br>- Include total update count. |
 | **Business value** | Confirms that your system can inform NHS Notify of production readiness for each allocated letter. |
@@ -242,6 +250,8 @@ Demonstrate that your system can record the completion of envelope-insertion and
 
 Validate that your system can accurately record the handover of letters to delivery partners. This ensures full traceability beyond internal processing, confirming that all letters leaving your system are properly marked as DISPATCHED.
 
+Please note that the use of GET/ letters/{id} endpoint in this scenario is for verification and evidence purposes only and it is not part of your normal operational process.
+
 **Business outcome:**
 Your system records the postal hand-off of each letter.
 
@@ -264,7 +274,7 @@ Validate that your system promptly reports all dispatched letters by updating th
 
 | Criteria | Description |
 |---|---|
-| **Steps** | 1. Identify letters with status 'ACCEPTED', 'PRINTED', 'ENCLOSED' <br>2. Send a PATCH /letters/{id} request to update targeted letters to DISPATCHED or send a POST /letters for a bulk update <br>3. Verify via GET /letters/{id} that status updated to DISPATCHED. |
+| **Steps** | 1. Identify letters with status 'ACCEPTED', 'PRINTED', 'ENCLOSED' <br>2. Send a PATCH /letters/{id} request to update targeted letters to DISPATCHED or send a POST /letters for a bulk update <br>3. Verify via GET /letters/{id} that status updated to DISPATCHED (This step is for acceptance testing and evidence, not a production requirement) |
 | **Acceptance** | - Only letters currently in ACCEPTED, PRINTED, or ENCLOSED state are targeted<br>- All targeted letters are updated to DISPATCHED<br>- API returns a successful response. |
 | **Evidence** | API responses and before/after samples show correct transition. |
 | **Business value** | Demonstrates postal hand-off tracking. |
@@ -389,8 +399,14 @@ Demonstrate that returned mail is correctly:
 
 This test confirms that your system can process cancellation requests received from NHS Notify via the NHS Notify team and correctly update the associated letters to CANCELLED, ensuring they are immediately excluded from production, print, and dispatch workflows.
 
+Currently the business process if we need letters to be cancelled is that we will contact you and request for cancellation. You will need to confirm whether those letters can be cancelled and once you have completed the cancellation task, to update their status through the API.
+
+Please note, this test focuses on your ability to report cancellations through the API — not on performing the entire business cancellation workflow automatically.
+In future, we expect to automate this process for closer technical integration.
+For now, the test simply ensures you can mark letters as CANCELLED once you’ve completed your internal cancellation steps.
+
 **Business outcome:**
-Your system successfully handles cancellation notifications, removes the affected letters from the active production flow, and records a CANCELLED status.
+You can receive manual cancellation instructions from NHS Notify, act on them in your system, and then inform NHS Notify via the API that the affected letters were successfully cancelled.
 
 **Preconditions:**
 
@@ -419,14 +435,16 @@ Demonstrate that your system:
 
 | Criteria | Description |
 |---|---|
-| **Steps** | 1. Get the letter that needs to be cancelled (list provided by NHS Notify)<br>2. Send a PATCH /letters/{id} request to update targeted letters to CANCELLED or send a POST /letters for a bulk update<br>3. Verify via GET /letters/{id} that status updated to CANCELLED. |
+| **Steps** | 1. Select list of letter IDs to be cancelled <br>2. Send a PATCH /letters/{id} request to update targeted letters to CANCELLED or send a POST /letters for a bulk update<br>3. Verify via GET /letters/{id} that status updated to CANCELLED. |
 | **Acceptance** | - Only letters not yet dispatched or delivered may be cancelled<br>- All targeted letters are successfully updated to CANCELLED<br>- API returns a successful response. |
-| **Evidence** | API audit trail and before/after validation samples. |
-| **Business value** | Prevents unnecessary printing and protects data integrity. |
+| **Evidence** | API audit trail and before/after validation samples. <br> For this test, the key evidence is that you can notify us once your internal cancellation process is complete and that the API correctly reflects those cancellations. The test is not about the cancellation business process itself. |
+| **Business value** | Confirms that suppliers can reliably report letter cancellations to NHS Notify once they have been actioned internally, supporting accurate lifecycle tracking and preparing the foundation for a future automated cancellation integration. |
 
 ### AT12 – Handle failures
 
 This test verifies that your system can flag letters as FAILED when an unrecoverable error occurs during production — for example, when a PDF is corrupted, an address is invalid, the letter has > 5 pages — and that it reports this back to NHS Notify clearly with failure reasons and codes.
+
+A failure refers to a letter that cannot complete its production lifecycle due to a technical or operational issue within your print, packaging, or forwarding process — for example, a corrupted PDF, invalid address, or file structure error.
 
 **Business outcome:**
 Your system reliably records production failures by updating the letter status to FAILED, including a failure code, reason, and timestamp.
@@ -465,9 +483,15 @@ Demonstrate that your system:
 | **Evidence** | API logs showing state transitions, timestamps. |
 | **Business value** | Provides transparent incident reporting by informing of the reason why the letter cannot be processed. |
 
-### AT13 – Reject invalid letters
+### AT13 – Reject invalid letters (Optional Status)
 
 This test verifies that your system can detect and reject malformed letters (i.e: unrecognised specification id, missing PDFs etc) before they reach production by updating their status to REJECTED and providing appropriate reason codes and audit details.
+
+A rejection means that your system has determined a letter cannot enter the printing workflow at all (for example, it fails structural validation or business-rule checks).
+Unlike failures (AT12), rejected letters are never printed, queued, or handled operationally.
+
+Please note that REJECTED is only a valid status immediately after PENDING. It indicates that a letter will not be processed further — you are not attempting to print, enclose, or dispatch it.
+This test ensures you can accurately detect and report such letters before production starts.
 
 **Business outcome:**
 Invalid, malformed, or non-compliant letters are accurately identified and rejected early in the workflow.
@@ -499,21 +523,22 @@ Demonstrate that your system correctly:
 | Criteria | Description |
 |---|---|
 | **Steps** | 1. Identify bad letter requests<br>2. Send a PATCH /letters/{id} request to update targeted letters to REJECTED or send a POST /letters for a bulk update<br>3. Verify via GET /letters/{id} that status updated to REJECTED. |
-| **Acceptance** | - All targeted letters are successfully updated to REJECTED<br>- API response confirms successful updates<br>- Rejected code and rejected reason are updated. |
+| **Acceptance** | - All targeted letters are successfully updated to REJECTED<br>- API response confirms successful updates<br>- Rejected code and rejected reason are updated <br>- No rejected letter proceeds to ACCEPTED or any production status|
 | **Evidence** | API logs showing state transitions, timestamps. |
 | **Business value** | Ensures non-compliant inputs don't enter production.<br>Ensure NHS Notify is informed when supplier quotas are exhausted |
 
 ### AT14 – Submit and reconcile management information (MI)
 
+This test verifies that your system can submit accurate, complete MI that matches the letters you’ve processed and can reconcile this data with NHS Notify’s records. The goal is to confirm that your MI reporting is accurate, complete, and free from duplication or omissions.
+
 **Business outcome:**
-Your MI submissions accurately match the letters you've processed.
+NHS Notify uses MI data for reconciliation, billing, and operational assurance. You must ensure each submission represents a unique data set and does not duplicate previous entries.
+
+A duplicate MI entry is identified when multiple submissions are received with the same combination of  reporting date and specification reference for the same groupID.
 
 **Endpoints:**
 
 - POST /mi
-
-**What this test proves:**
-That you can submit MI data in the correct format and confirm it's recorded correctly.
 
 | Criteria | Description |
 |---|---|
@@ -522,12 +547,27 @@ That you can submit MI data in the correct format and confirm it's recorded corr
 | **Evidence** | MI payloads and responses. |
 | **Business value** | Shows that operational and billing data are aligned and complete. |
 
+**Objectives**:
+
+- Submit MI for all processed letters accurately.
+- Avoid submitting duplicate MI entries for the same supplier and reporting date.
+- Reconcile MI data counts with your own internal production or dispatch logs.
+
 ### AT15 – Performance testing - Retrieve letter list, letter specifications and PDFs
 
-Validate that your system can efficiently retrieve a high volume of allocated letters, their specifications, and associated PDFs within strict performance limits.
+Validate that your system can efficiently retrieve a high volume of allocated letters, their specifications, and associated PDFs within agreed performance limits.
+
+The purpose is to ensure your system performs reliably under expected daily load and can complete a full production data within an acceptable timeframe.
 
 **Business outcome:**
 Your system can retrieve in <=10 secs, 2,500 allocated letters, their specifications, and all associated PDFs.
+
+The NHS Notify reference benchmark for this test is to complete the retrieval and download of 2,500 letters (including metadata and PDFs) within 10 seconds under normal test load.
+This is our **_most rigorous performance target_**, used as a reference for optimal supplier performance.
+
+We recognise that not all suppliers will need or be able to meet this exact metric.
+You will need to agree a realistic performance target with The Supplier API team , taking into account your infrastructure and print workflow.
+The key requirement is that you can evidence consistent and reliable performance at the agreed level.
 
 **Preconditions:**
 
@@ -573,7 +613,23 @@ Once you pass this stage, we'll confirm your readiness for going live.
 
 ## Appendix
 
-Possible Scenarios and Applicable Letter Statuses
+### Letter Status Definitions
+
+| Status | Description | Initiated By | Mandatory/Optional
+|---|---|---|---|
+| PENDING | Initial state for all new letters. Indicates that the letter has been allocated to a supplier but not yet retrieved or accepted | NHS Notify | Mandatory Starting Status |
+| REJECTED | Used when a supplier determines a letter cannot be processed  Occurs immediately after PENDING , before any production begins | Supplier | Conditional |
+| ACCEPTED | Letter has passed validation checks and is ready for production | Supplier | Mandatory (core workflow transition) |
+| PRINTED | Letter has been physically printed and is awaiting enclosure or dispatch. | Supplier | Optional (if print tracking supported) |
+| ENCLOSED | The printed letter and any relevant enclosures have been inserted into the mailing envelope | Supplier | Optional (if enclosure tracking supported) |
+| DISPATCHED | Letter has left the supplier's facility and been handed over to a postal service | Supplier | Mandatory for all successfully sent letters |
+| DELIVERED | Letter has been delivered to the patient | Supplier | Optional (depends on delivery reporting integration) |
+| RETURNED | Letter was undeliverable or returned by the postal service | Supplier | Mandatory |
+| FORWARDED | Letter requires re-direction to a specialist supplier (e.g. RNIB or another accessible-format partner) | Supplier | Conditional (for accessible-format workflows) |
+| CANCELLED | Letter was cancelled following a request from the NHS Notify team | Supplier on Notify request | Conditional (only via NHS Notify instruction) |
+| FAILED | Letter could not complete production due to an unrecoverable issue | Supplier | Conditional (on error detection) |
+
+### Possible Scenarios and Applicable Letter Statuses
 
 | Scenario | Description | Typical Status flow |
 |---|---|---|
