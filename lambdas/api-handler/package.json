@@ -4,7 +4,8 @@
     "@internal/datastore": "*",
     "@internal/helpers": "*",
     "esbuild": "^0.25.11",
-    "pino": "^9.7.0"
+    "pino": "^9.7.0",
+    "uuid": "13.0.0"
   },
   "devDependencies": {
     "@aws-sdk/s3-request-presigner": "^3.901.0",
