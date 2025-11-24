@@ -29,3 +29,33 @@ npm run cli -- create-letter-batch \
   --status PENDING \
   --count 10
 ```
+
+## Batch Creation Script
+
+For creating multiple batches with different specification and group IDs, use the bash wrapper script:
+
+```bash
+./src/create-batch-letters.sh \
+  --supplier-id supplier-id \
+  --environment main \
+  --awsAccountId 820178564574 \
+  --count 25 \
+  --status PENDING
+```
+
+This script creates 3 batches with the following configurations:
+
+- Batch 1: `--specification-id integration-specification-english --group-id group-english`
+- Batch 2: `--specification-id integration-specification-braille --group-id group-accessible`
+- Batch 3: `--specification-id integration-specification-arabic --group-id group-international`
+
+**Note:** The default configuration creates 2,505 letters total (835 letters × 3 batches) with an 18-month TTL.
+
+### Script Options
+
+- `--supplier-id` (required): Supplier ID for the letters
+- `--environment` (required): Environment (e.g., pr147, main)
+- `--awsAccountId` (required): AWS Account ID for S3 bucket resolution
+- `--count` (optional): Number of letters per batch (default: 835)
+- `--status` (optional): Letter status (default: PENDING)
+- `--ttl-hours` (optional): TTL in hours (default: 13140, ~18 months)
