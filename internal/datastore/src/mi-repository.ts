@@ -1,6 +1,6 @@
 import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { Logger } from "pino";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "node:crypto";
 import { MI, MISchema } from "./types";
 
 export type MIRepositoryConfig = {
@@ -21,7 +21,7 @@ export class MIRepository {
     const now = new Date().toISOString();
     const miDb = {
       ...mi,
-      id: uuidv4(),
+      id: randomUUID(),
       createdAt: now,
       updatedAt: now,
       ttl: Math.floor(Date.now() / 1000 + 60 * 60 * this.config.miTtlHours),

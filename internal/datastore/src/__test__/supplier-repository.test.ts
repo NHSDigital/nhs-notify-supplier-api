@@ -1,5 +1,5 @@
 import { Logger } from "pino";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "node:crypto";
 import {
   DBContext,
   createTables,
@@ -12,10 +12,10 @@ import { Supplier } from "../types";
 
 function createSupplier(
   status: "ENABLED" | "DISABLED",
-  apimId = uuidv4(),
+  apimId = randomUUID(),
 ): Omit<Supplier, "updatedAt"> {
   return {
-    id: uuidv4(),
+    id: randomUUID(),
     name: "Supplier One",
     apimId,
     status,
@@ -137,7 +137,7 @@ describe("SupplierRepository", () => {
   });
 
   test("throws an error fetching a supplier by apimId when multiple exist", async () => {
-    const apimId = "duplicate-apim-id";
+    const apimId = randomUUID();
     const supplier1 = createSupplier("ENABLED", apimId);
     const supplier2 = createSupplier("DISABLED", apimId);
 
