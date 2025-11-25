@@ -1,0 +1,9 @@
+name: Authorization
+in: header
+description: |-
+  An OAuth 2.0 bearer token. Required in integration and production environments.
+required: true
+schema:
+  type: string
+  #pattern: ^Bearer [[:ascii:]]+$
+  example: Bearer g1112R_ccQ1Ebbb4gtHBP1aaaNM
