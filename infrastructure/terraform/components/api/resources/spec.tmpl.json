@@ -75,7 +75,7 @@
               "statusCode": "200"
             }
           },
-          "timeoutInMillis": 29000,
+          "timeoutInMillis": 120000,
           "type": "AWS_PROXY",
           "uri": "arn:aws:apigateway:${AWS_REGION}:lambda:path/2015-03-31/functions/${GET_LETTERS_LAMBDA_ARN}/invocations"
         }
