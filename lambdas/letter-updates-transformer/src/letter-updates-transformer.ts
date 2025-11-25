@@ -1,0 +1,44 @@
+
+import { Handler, KinesisStreamEvent } from "aws-lambda";
+import { mapLetterToCloudEvent } from "./mappers/letter-mapper";
+import { PublishBatchCommand, PublishBatchRequestEntry } from "@aws-sdk/client-sns";
+import { LetterEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
+import { Deps } from "./deps";
+
+// SNS PublishBatchCommand supports up to 10 messages per batch
+const BATCH_SIZE = 10;
+
+export function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
+  return async(streamEvent: KinesisStreamEvent) => {
+    deps.logger.info({description: "Received event", streamEvent});
+
+    const cloudEvents: LetterEvent[] = streamEvent.Records
+      .map((record) => {
+        // Kinesis data is base64 encoded
+        const payload = Buffer.from(record.kinesis.data, "base64").toString("utf-8");
+        return JSON.parse(payload);
+      })
+      .map(mapLetterToCloudEvent);
+
+
+    for (let batch of generateBatches(cloudEvents)) {
+      await deps.snsClient.send(new PublishBatchCommand({
+        TopicArn: deps.env.EVENTPUB_SNS_TOPIC_ARN,
+        PublishBatchRequestEntries: batch.map(buildMessage),
+      }));
+    }
+  }
+
+  function* generateBatches(events: LetterEvent[]) {
+    for (let i = 0; i < events.length; i += BATCH_SIZE) {
+      yield events.slice(i, i + BATCH_SIZE);
+    }
+  }
+
+  function buildMessage(event: LetterEvent, index: number): PublishBatchRequestEntry {
+    return {
+      Id: event.id + '-' + index,
+      Message: JSON.stringify(event),
+    }
+  }
+}
