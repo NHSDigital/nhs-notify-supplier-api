@@ -26,6 +26,7 @@ describe("MI event validations", () => {
         datacontenttype: "application/json",
         dataschema:
           "https://notify.nhs.uk/cloudevents/schemas/supplier-api/mi.SUBMITTED.1.0.0.schema.json",
+        dataschemaversion: "1.0.0",
         subject: "mi/mi-test-001",
         data: expect.objectContaining({
           id: "mi-test-001",
