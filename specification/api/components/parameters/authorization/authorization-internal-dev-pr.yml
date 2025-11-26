@@ -1,9 +1,7 @@
-name: Authorization
+name: apikey
 in: header
 description: |-
-  An OAuth 2.0 bearer token. Required in integration and production environments.
+  API Key to authorize in dynamic environments only.
 required: false
 schema:
   type: string
-  pattern: ^Bearer [[:ascii:]]+$
-  example: Bearer g1112R_ccQ1Ebbb4gtHBP1aaaNM
