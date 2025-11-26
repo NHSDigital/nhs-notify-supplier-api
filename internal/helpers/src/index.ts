@@ -4,7 +4,6 @@
  */
 
 // Export all helpers
-export * from './version';
-export * from './environment';
+export * from "./version";
+export { default as $Environment } from "./environment";
 export * from "./id-ref";
-export * from "./domain-base";

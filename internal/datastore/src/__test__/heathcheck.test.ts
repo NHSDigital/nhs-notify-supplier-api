@@ -1,12 +1,15 @@
-import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
-import { DBHealthcheck } from "../healthcheck";
-import { createTables, DBContext, deleteTables, setupDynamoDBContainer } from "./db";
+import DBHealthcheck from "../healthcheck";
+import {
+  DBContext,
+  createTables,
+  deleteTables,
+  setupDynamoDBContainer,
+} from "./db";
 
 // Database tests can take longer, especially with setup and teardown
-jest.setTimeout(30000);
+jest.setTimeout(30_000);
 
-describe('DBHealthcheck', () => {
-
+describe("DBHealthcheck", () => {
   let db: DBContext;
 
   beforeAll(async () => {
@@ -21,14 +24,16 @@ describe('DBHealthcheck', () => {
     await deleteTables(db);
   });
 
-  it('passes when the database is available', async () => {
+  it("passes when the database is available", async () => {
     const dbHealthCheck = new DBHealthcheck(db.docClient, db.config);
-    await dbHealthCheck.check();
+    await expect(dbHealthCheck.check()).resolves.not.toThrow();
   });
 
-  it('fails when the database is unavailable', async () => {
+  it("fails when the database is unavailable", async () => {
     const realFunction = db.docClient.send;
-    db.docClient.send = jest.fn().mockImplementation(() => { throw new Error('Failed to send')});
+    db.docClient.send = jest.fn().mockImplementation(() => {
+      throw new Error("Failed to send");
+    });
 
     const dbHealthCheck = new DBHealthcheck(db.docClient, db.config);
     await expect(dbHealthCheck.check()).rejects.toThrow();

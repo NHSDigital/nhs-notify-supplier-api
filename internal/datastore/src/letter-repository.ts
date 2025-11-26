@@ -1,85 +1,98 @@
 import {
+  BatchWriteCommand,
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
-  BatchWriteCommand,
   QueryCommand,
   UpdateCommand,
-  UpdateCommandOutput
-} from '@aws-sdk/lib-dynamodb';
-import { Letter, LetterBase, LetterSchema, LetterSchemaBase } from './types';
-import { Logger } from 'pino';
-import { z } from 'zod';
-import { LetterDto } from '../../../lambdas/api-handler/src/contracts/letters';
+  UpdateCommandOutput,
+} from "@aws-sdk/lib-dynamodb";
+import { Logger } from "pino";
+import { z } from "zod";
+import { Letter, LetterBase, LetterSchema, LetterSchemaBase } from "./types";
+import { LetterDto } from "../../../lambdas/api-handler/src/contracts/letters";
 
 export type PagingOptions = Partial<{
-  exclusiveStartKey: Record<string, any>,
-  pageSize: number
-}>
+  exclusiveStartKey: Record<string, any>;
+  pageSize: number;
+}>;
 
 const defaultPagingOptions = {
-  pageSize: 50
+  pageSize: 50,
 };
 
 export type LetterRepositoryConfig = {
-  lettersTableName: string,
-  lettersTtlHours: number
-}
+  lettersTableName: string;
+  lettersTtlHours: number;
+};
 
 export class LetterRepository {
-  constructor(readonly ddbClient: DynamoDBDocumentClient,
+  constructor(
+    readonly ddbClient: DynamoDBDocumentClient,
     readonly log: Logger,
-    readonly config: LetterRepositoryConfig) {
-  }
+    readonly config: LetterRepositoryConfig,
+  ) {}
 
-  async putLetter(letter: Omit<Letter, 'ttl' | 'supplierStatus' | 'supplierStatusSk'>): Promise<Letter> {
+  async putLetter(
+    letter: Omit<Letter, "ttl" | "supplierStatus" | "supplierStatusSk">,
+  ): Promise<Letter> {
     const letterDb: Letter = {
       ...letter,
       supplierStatus: `${letter.supplierId}#${letter.status}`,
       supplierStatusSk: new Date().toISOString(),
-      ttl: Math.floor(Date.now() / 1000 + 60 * 60 * this.config.lettersTtlHours)
+      ttl: Math.floor(
+        Date.now() / 1000 + 60 * 60 * this.config.lettersTtlHours,
+      ),
     };
     try {
-      await this.ddbClient.send(new PutCommand({
-        TableName: this.config.lettersTableName,
-        Item: letterDb,
-        ConditionExpression: 'attribute_not_exists(id)', // Ensure id is unique
-      }));
+      await this.ddbClient.send(
+        new PutCommand({
+          TableName: this.config.lettersTableName,
+          Item: letterDb,
+          ConditionExpression: "attribute_not_exists(id)", // Ensure id is unique
+        }),
+      );
     } catch (error) {
-      if (error instanceof Error && error.name === 'ConditionalCheckFailedException') {
-        throw new Error(`Letter with id ${letter.id} already exists for supplier ${letter.supplierId}`);
+      if (
+        error instanceof Error &&
+        error.name === "ConditionalCheckFailedException"
+      ) {
+        throw new Error(
+          `Letter with id ${letter.id} already exists for supplier ${letter.supplierId}`,
+        );
       }
       throw error;
     }
     return LetterSchema.parse(letterDb);
   }
 
-  async putLetterBatch(letters: Omit<Letter, 'ttl' | 'supplierStatus'| 'supplierStatusSk'>[]): Promise<void> {
+  async putLetterBatch(
+    letters: Omit<Letter, "ttl" | "supplierStatus" | "supplierStatusSk">[],
+  ): Promise<void> {
     let lettersDb: Letter[] = [];
     for (let i = 0; i < letters.length; i++) {
-
       const letter = letters[i];
 
-      if(!letter){
-        continue;
+      if (letter) {
+        lettersDb.push({
+          ...letter,
+          supplierStatus: `${letter.supplierId}#${letter.status}`,
+          supplierStatusSk: Date.now().toString(),
+          ttl: Math.floor(
+            Date.now() / 1000 + 60 * 60 * this.config.lettersTtlHours,
+          ),
+        });
       }
-
-      lettersDb.push({
-        ...letter,
-        supplierStatus: `${letter.supplierId}#${letter.status}`,
-        supplierStatusSk: Date.now().toString(),
-        ttl: Math.floor(Date.now() / 1000 + 60 * 60 * this.config.lettersTtlHours)
-      });
 
       if (lettersDb.length === 25 || i === letters.length - 1) {
         const input = {
           RequestItems: {
             [this.config.lettersTableName]: lettersDb.map((item: any) => ({
               PutRequest: {
-                Item: item
-              }
-            }))
-          }
+                Item: item,
+              },
+            })),
+          },
         };
 
         await this.ddbClient.send(new BatchWriteCommand(input));
@@ -90,115 +103,148 @@ export class LetterRepository {
   }
 
   async getLetterById(supplierId: string, letterId: string): Promise<Letter> {
-    const result = await this.ddbClient.send(new GetCommand({
-      TableName: this.config.lettersTableName,
-      Key: {
-        supplierId: supplierId,
-        id: letterId
-      }
-    }));
+    const result = await this.ddbClient.send(
+      new GetCommand({
+        TableName: this.config.lettersTableName,
+        Key: {
+          supplierId,
+          id: letterId,
+        },
+      }),
+    );
 
     if (!result.Item) {
-      throw new Error(`Letter with id ${letterId} not found for supplier ${supplierId}`);
+      throw new Error(
+        `Letter with id ${letterId} not found for supplier ${supplierId}`,
+      );
     }
     return LetterSchema.parse(result.Item);
   }
 
-  async getLettersByStatus(supplierId: string, status: Letter['status'], options?: PagingOptions): Promise<{
-    letters: Letter[],
-    lastEvaluatedKey?: Record<string, any>
+  async getLettersByStatus(
+    supplierId: string,
+    status: Letter["status"],
+    options?: PagingOptions,
+  ): Promise<{
+    letters: Letter[];
+    lastEvaluatedKey?: Record<string, any>;
   }> {
-
     const extendedOptions = { ...defaultPagingOptions, ...options };
 
-    const result = await this.ddbClient.send(new QueryCommand({
-      TableName: this.config.lettersTableName,
-      IndexName: 'supplierStatus-index',
-      KeyConditionExpression: 'supplierStatus = :supplierStatus',
-      ExpressionAttributeValues: { ':supplierStatus': `${supplierId}#${status}` },
-      Limit: extendedOptions.pageSize,
-      ExclusiveStartKey: extendedOptions.exclusiveStartKey
-    }));
+    const result = await this.ddbClient.send(
+      new QueryCommand({
+        TableName: this.config.lettersTableName,
+        IndexName: "supplierStatus-index",
+        KeyConditionExpression: "supplierStatus = :supplierStatus",
+        ExpressionAttributeValues: {
+          ":supplierStatus": `${supplierId}#${status}`,
+        },
+        Limit: extendedOptions.pageSize,
+        ExclusiveStartKey: extendedOptions.exclusiveStartKey,
+      }),
+    );
+
+    // Items is an empty array if no items match the query
+    const letters = result
+      .Items!.map((item) => LetterSchema.safeParse(item))
+      .filter((letterItem) => {
+        if (!letterItem.success) {
+          this.log.warn(`Invalid letter data: ${letterItem.error}`);
+        }
+        return letterItem.success;
+      })
+      .map((successLetterItem) => successLetterItem.data);
 
     return {
-      // Items is an empty array if no items match the query
-      letters: result.Items!.map(item => LetterSchema.safeParse(item))
-        .filter((result) => {
-          if (!result.success) {
-            this.log.warn(`Invalid letter data: ${result.error}`);
-          }
-          return result.success;
-        })
-        .map(result => result.data),
-      lastEvaluatedKey: result.LastEvaluatedKey
-    }
+      letters,
+      lastEvaluatedKey: result.LastEvaluatedKey,
+    };
   }
 
   async updateLetterStatus(letterToUpdate: LetterDto): Promise<Letter> {
-    this.log.debug(`Updating letter ${letterToUpdate.id} to status ${letterToUpdate.status}`);
+    this.log.debug(
+      `Updating letter ${letterToUpdate.id} to status ${letterToUpdate.status}`,
+    );
     let result: UpdateCommandOutput;
     try {
-      let updateExpression = 'set #status = :status, updatedAt = :updatedAt, supplierStatus = :supplierStatus, #ttl = :ttl';
-      let expressionAttributeValues : Record<string, any> = {
-        ':status': letterToUpdate.status,
-        ':updatedAt': new Date().toISOString(),
-        ':supplierStatus': `${letterToUpdate.supplierId}#${letterToUpdate.status}`,
-        ':ttl': Math.floor(Date.now() / 1000 + 60 * 60 * this.config.lettersTtlHours)
+      let updateExpression =
+        "set #status = :status, updatedAt = :updatedAt, supplierStatus = :supplierStatus, #ttl = :ttl";
+      const expressionAttributeValues: Record<string, any> = {
+        ":status": letterToUpdate.status,
+        ":updatedAt": new Date().toISOString(),
+        ":supplierStatus": `${letterToUpdate.supplierId}#${letterToUpdate.status}`,
+        ":ttl": Math.floor(
+          Date.now() / 1000 + 60 * 60 * this.config.lettersTtlHours,
+        ),
       };
 
-      if (letterToUpdate.reasonCode)
-      {
-        updateExpression += ', reasonCode = :reasonCode';
-        expressionAttributeValues[':reasonCode'] = letterToUpdate.reasonCode;
+      if (letterToUpdate.reasonCode) {
+        updateExpression += ", reasonCode = :reasonCode";
+        expressionAttributeValues[":reasonCode"] = letterToUpdate.reasonCode;
       }
 
-      if (letterToUpdate.reasonText)
-      {
-        updateExpression += ', reasonText = :reasonText';
-        expressionAttributeValues[':reasonText'] = letterToUpdate.reasonText;
+      if (letterToUpdate.reasonText) {
+        updateExpression += ", reasonText = :reasonText";
+        expressionAttributeValues[":reasonText"] = letterToUpdate.reasonText;
       }
 
-      result = await this.ddbClient.send(new UpdateCommand({
-        TableName: this.config.lettersTableName,
-        Key: {
-          supplierId: letterToUpdate.supplierId,
-          id: letterToUpdate.id
-        },
-        UpdateExpression: updateExpression,
-        ConditionExpression: 'attribute_exists(id)', // Ensure letter exists
-        ExpressionAttributeNames: {
-          '#status': 'status',
-          '#ttl': 'ttl'
-        },
-        ExpressionAttributeValues: expressionAttributeValues,
-        ReturnValues: 'ALL_NEW'
-      }));
+      result = await this.ddbClient.send(
+        new UpdateCommand({
+          TableName: this.config.lettersTableName,
+          Key: {
+            supplierId: letterToUpdate.supplierId,
+            id: letterToUpdate.id,
+          },
+          UpdateExpression: updateExpression,
+          ConditionExpression: "attribute_exists(id)", // Ensure letter exists
+          ExpressionAttributeNames: {
+            "#status": "status",
+            "#ttl": "ttl",
+          },
+          ExpressionAttributeValues: expressionAttributeValues,
+          ReturnValues: "ALL_NEW",
+        }),
+      );
     } catch (error) {
-      if (error instanceof Error && error.name === 'ConditionalCheckFailedException') {
-        throw new Error(`Letter with id ${letterToUpdate.id} not found for supplier ${letterToUpdate.supplierId}`);
+      if (
+        error instanceof Error &&
+        error.name === "ConditionalCheckFailedException"
+      ) {
+        throw new Error(
+          `Letter with id ${letterToUpdate.id} not found for supplier ${letterToUpdate.supplierId}`,
+        );
       }
       throw error;
     }
 
-    this.log.debug(`Updated letter ${letterToUpdate.id} to status ${letterToUpdate.status}`);
+    this.log.debug(
+      `Updated letter ${letterToUpdate.id} to status ${letterToUpdate.status}`,
+    );
     return LetterSchema.parse(result.Attributes);
   }
 
-  async getLettersBySupplier(supplierId: string, status: string, limit: number): Promise<LetterBase[]> {
+  async getLettersBySupplier(
+    supplierId: string,
+    status: string,
+    limit: number,
+  ): Promise<LetterBase[]> {
     const supplierStatus = `${supplierId}#${status}`;
-    const result = await this.ddbClient.send(new QueryCommand({
-      TableName: this.config.lettersTableName,
-      IndexName: 'supplierStatus-index',
-      KeyConditionExpression: 'supplierStatus = :supplierStatus',
-      Limit: limit,
-      ExpressionAttributeNames: {
-        '#status': 'status' // reserved keyword
-      },
-      ExpressionAttributeValues: {
-        ':supplierStatus': supplierStatus
-      },
-      ProjectionExpression: 'id, #status, specificationId, groupId, reasonCode, reasonText'
-    }));
+    const result = await this.ddbClient.send(
+      new QueryCommand({
+        TableName: this.config.lettersTableName,
+        IndexName: "supplierStatus-index",
+        KeyConditionExpression: "supplierStatus = :supplierStatus",
+        Limit: limit,
+        ExpressionAttributeNames: {
+          "#status": "status", // reserved keyword
+        },
+        ExpressionAttributeValues: {
+          ":supplierStatus": supplierStatus,
+        },
+        ProjectionExpression:
+          "id, #status, specificationId, groupId, reasonCode, reasonText",
+      }),
+    );
     return z.array(LetterSchemaBase).parse(result.Items ?? []);
   }
 }

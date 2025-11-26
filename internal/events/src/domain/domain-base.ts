@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export function DomainBase<T extends string>(
+export default function DomainBase<T extends string>(
   type: T,
 ): z.ZodObject<{ domainId: z.core.$ZodBranded<z.ZodString, T> }> {
   const idType = z

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DomainBase } from "@internal/helpers";
+import DomainBase from "./domain-base";
 
 /**
  * Status values for letters in the supplier-api domain
