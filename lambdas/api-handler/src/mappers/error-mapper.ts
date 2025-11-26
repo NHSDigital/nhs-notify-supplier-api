@@ -1,7 +1,7 @@
 import { APIGatewayProxyResult } from "aws-lambda";
 import { NotFoundError, ValidationError } from "../errors";
 import { buildApiError, ApiErrorCode, ApiErrorTitle, ApiError, ApiErrorStatus, ErrorResponse } from "../contracts/errors";
-import { v4 as uuid } from 'uuid';
+import { randomUUID } from 'node:crypto';
 import { Logger } from "pino";
 
 export function processError(error: unknown, correlationId: string | undefined, logger: Logger): APIGatewayProxyResult
@@ -34,7 +34,7 @@ function mapToErrorResponse(apiError: ApiError)
 }
 
 function mapToApiError(code: ApiErrorCode, detail: string, correlationId: string | undefined): ApiError {
-  const id = correlationId ? correlationId : uuid();
+  const id = correlationId ? correlationId : randomUUID();
   return buildApiError({
     id,
     code,

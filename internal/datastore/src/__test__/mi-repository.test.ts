@@ -1,18 +1,20 @@
 import { Logger } from "pino";
-import { setupDynamoDBContainer, createTables, DBContext, deleteTables } from "./db";
-import { createTestLogger, LogStream } from "./logs";
+import {
+  DBContext,
+  createTables,
+  deleteTables,
+  setupDynamoDBContainer,
+} from "./db";
+import { createTestLogger } from "./logs";
 import { MIRepository } from "../mi-repository";
 
 // Database tests can take longer, especially with setup and teardown
-jest.setTimeout(30000);
+jest.setTimeout(30_000);
 
-
-describe('MiRepository', () => {
+describe("MiRepository", () => {
   let db: DBContext;
   let miRepository: MIRepository;
-  let logStream: LogStream;
   let logger: Logger;
-
 
   beforeAll(async () => {
     db = await setupDynamoDBContainer();
@@ -20,9 +22,7 @@ describe('MiRepository', () => {
 
   beforeEach(async () => {
     await createTables(db);
-    (
-      { logStream, logger } = createTestLogger()
-    );
+    ({ logger } = createTestLogger());
 
     miRepository = new MIRepository(db.docClient, logger, db.config);
   });
@@ -36,32 +36,32 @@ describe('MiRepository', () => {
     await db.container.stop();
   });
 
-  describe('putMi', () => {
-
-    it('creates a letter with id and timestamps', async () => {
-
+  describe("putMi", () => {
+    it("creates a letter with id and timestamps", async () => {
       jest.useFakeTimers();
       // Month is zero-indexed in JS Date
       jest.setSystemTime(new Date(2020, 1, 1));
       const mi = {
-        specificationId: 'spec1',
-        supplierId: 'supplier1',
-        groupId:'group1',
-        lineItem: 'item1',
+        specificationId: "spec1",
+        supplierId: "supplier1",
+        groupId: "group1",
+        lineItem: "item1",
         quantity: 12,
         timestamp: new Date().toISOString(),
-        stockRemaining: 0
+        stockRemaining: 0,
       };
 
-      const persistedMi = await(miRepository.putMI(mi));
+      const persistedMi = await miRepository.putMI(mi);
 
-      expect(persistedMi).toEqual(expect.objectContaining({
-        id: expect.any(String),
-        createdAt: '2020-02-01T00:00:00.000Z',
-        updatedAt: '2020-02-01T00:00:00.000Z',
-        ttl: 1580518800, // 2020-02-01T00:01:00.000Z, seconds since epoch
-        ...mi
-      }));
+      expect(persistedMi).toEqual(
+        expect.objectContaining({
+          id: expect.any(String),
+          createdAt: "2020-02-01T00:00:00.000Z",
+          updatedAt: "2020-02-01T00:00:00.000Z",
+          ttl: 1_580_518_800, // 2020-02-01T00:01:00.000Z, seconds since epoch
+          ...mi,
+        }),
+      );
     });
   });
 });

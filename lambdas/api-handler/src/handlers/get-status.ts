@@ -1,7 +1,6 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { Deps } from "../config/deps";
 import { ListBucketsCommand, S3Client } from "@aws-sdk/client-s3";
-import { mapErrorToResponse } from "../mappers/error-mapper";
 
 export function createGetStatusHandler(deps: Deps): APIGatewayProxyHandler {
 
