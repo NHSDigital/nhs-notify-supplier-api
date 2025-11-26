@@ -11,6 +11,7 @@ export async function runCreateLetter(options: {
   supplierId: string;
   environment: string;
   awsAccountId: string;
+  letterId: string;
   groupId: string;
   specificationId: string;
   status: string;
@@ -21,6 +22,7 @@ export async function runCreateLetter(options: {
     supplierId,
     environment,
     awsAccountId,
+    letterId,
     groupId,
     specificationId,
     status,
@@ -46,6 +48,8 @@ export async function runCreateLetter(options: {
     environment,
     '--awsAccountId',
     awsAccountId,
+    '--letter-id',
+    letterId,
     '--group-id',
     groupId,
     '--specification-id',
