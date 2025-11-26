@@ -272,9 +272,7 @@ describe("EventEnvelope schema validation", () => {
 
       const result = $EnvelopeWithPrefix.safeParse(envelope);
       expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].path).toContain("subject");
-      }
+      expect(result?.error?.issues[0].path).toContain("subject");
     });
 
     it("should reject subject with incomplete prefix", () => {

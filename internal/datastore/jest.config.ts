@@ -1,7 +1,7 @@
-import type { Config } from 'jest';
+import type { Config } from "jest";
 
 export const baseJestConfig: Config = {
-  preset: 'ts-jest',
+  preset: "ts-jest",
 
   // Automatically clear mock calls, instances, contexts and results before every test
   clearMocks: true,
@@ -10,14 +10,14 @@ export const baseJestConfig: Config = {
   collectCoverage: true,
 
   // The directory where Jest should output its coverage files
-  coverageDirectory: './.reports/unit/coverage',
+  coverageDirectory: "./.reports/unit/coverage",
 
   // Indicates which provider should be used to instrument code for coverage
-  coverageProvider: 'babel',
+  coverageProvider: "babel",
 
   // Module name mapper to handle TypeScript path aliases
   moduleNameMapper: {
-    '^@internal/helpers$': '<rootDir>/../helpers/src'
+    "^@internal/helpers$": "<rootDir>/../helpers/src",
   },
 
   coverageThreshold: {
@@ -29,36 +29,36 @@ export const baseJestConfig: Config = {
     },
   },
 
-  coveragePathIgnorePatterns: ['/__tests__/'],
-  transform: { '^.+\\.ts$': 'ts-jest' },
-  testPathIgnorePatterns: ['.build'],
-  testMatch: ['**/?(*.)+(spec|test).[jt]s?(x)'],
+  coveragePathIgnorePatterns: ["/__tests__/"],
+  transform: { "^.+\\.ts$": "ts-jest" },
+  testPathIgnorePatterns: [".build"],
+  testMatch: ["**/?(*.)+(spec|test).[jt]s?(x)"],
 
   // Use this configuration option to add custom reporters to Jest
   reporters: [
-    'default',
+    "default",
     [
-      'jest-html-reporter',
+      "jest-html-reporter",
       {
-        pageTitle: 'Test Report',
-        outputPath: './.reports/unit/test-report.html',
+        pageTitle: "Test Report",
+        outputPath: "./.reports/unit/test-report.html",
         includeFailureMsg: true,
       },
     ],
   ],
 
   // The test environment that will be used for testing
-  testEnvironment: 'jsdom',
+  testEnvironment: "jsdom",
 };
 
 const utilsJestConfig = {
   ...baseJestConfig,
 
-  testEnvironment: 'node',
+  testEnvironment: "node",
 
   coveragePathIgnorePatterns: [
     ...(baseJestConfig.coveragePathIgnorePatterns ?? []),
-    'zod-validators.ts',
+    "zod-validators.ts",
   ],
 };
 
