@@ -43,6 +43,22 @@ module "letter_stream_forwarder" {
 data "aws_iam_policy_document" "letter_stream_forwarder_lambda" {
 
   statement {
+    sid    = "AllowDynamoDBStream"
+    effect = "Allow"
+
+    actions = [
+      "dynamodb:GetRecords",
+      "dynamodb:GetShardIterator",
+      "dynamodb:DescribeStream",
+      "dynamodb:ListStreams",
+    ]
+
+    resources = [
+      aws_kinesis_stream.letter_change_stream.arn
+    ]
+  }
+
+  statement {
     sid    = "AllowKinesisPut"
     effect = "Allow"
 

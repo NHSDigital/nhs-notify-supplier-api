@@ -54,7 +54,7 @@ data "aws_iam_policy_document" "letter_updates_transformer_lambda" {
     ]
   }
 
-    statement {
+  statement {
     sid    = "AllowKinesisGet"
     effect = "Allow"
 
