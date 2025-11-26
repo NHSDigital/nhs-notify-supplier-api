@@ -25,7 +25,7 @@ export interface SupplierApiLetters {
 export async function createTestData(supplierId: string): Promise<void> {
 
     await runCreateLetter({
-    filter: 'nhs-notify-supplier-api-data-generator',
+    filter: 'nhs-notify-supplier-api-letter-test-data-utility',
     supplierId: supplierId,
     environment: envName,
     awsAccountId: '820178564574',
