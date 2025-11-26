@@ -54,7 +54,7 @@ data "aws_iam_policy_document" "letter_stream_forwarder_lambda" {
     ]
 
     resources = [
-      aws_kinesis_stream.letter_change_stream.arn
+      "${aws_dynamodb_table.letters.arn}/stream/*"
     ]
   }
 
