@@ -4,7 +4,6 @@ resource "aws_lambda_event_source_mapping" "letter_stream_forwarder_dynamodb" {
   starting_position                    = "LATEST"
   batch_size                           = 10
   maximum_batching_window_in_seconds   = 1
-  scaling_config { maximum_concurrency = 10 }
 
   depends_on = [
     module.letter_stream_forwarder       # ensures stream forwarder exists
