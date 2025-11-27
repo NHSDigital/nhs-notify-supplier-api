@@ -1,5 +1,5 @@
-import pino from 'pino';
-import { Writable } from 'stream';
+import pino from "pino";
+import { Writable } from "node:stream";
 
 export class LogStream extends Writable {
   logs: string[] = [];
@@ -11,9 +11,9 @@ export class LogStream extends Writable {
 }
 
 export function createTestLogger() {
-  let logStream = new LogStream();
+  const logStream = new LogStream();
   return {
-    logStream: logStream,
-    logger: pino(logStream)
+    logStream,
+    logger: pino(logStream),
   };
 }

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Semantic version (major.minor.patch) with numeric segments only.
@@ -6,7 +6,7 @@ import { z } from 'zod';
  */
 export const $Version = z
   .string()
-  .regex(/^[0-9]+\.[0-9]+\.[0-9]+$/)
-  .brand('Version');
+  .regex(/^\d+\.\d+\.\d+$/)
+  .brand("Version");
 
 export type Version = z.infer<typeof $Version>;

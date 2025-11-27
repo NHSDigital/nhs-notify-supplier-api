@@ -53,5 +53,6 @@ erDiagram
         string name
         string apimId
         string status "enum: ENABLED, DISABLED"
+        string updatedAt
     }
 ```

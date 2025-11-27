@@ -30,7 +30,7 @@ If you have installed the local repository requirements or are utilising the dev
 
 ## Documentation
 
-This documentation is maintained within the [/docs](/docs) folder of the repository and published to [GitHub pages](https://nhsdigital.github.io/nhs-notify-supplier-api/) on PR merge
+This documentation is maintained within the [/docs](https://github.com/NHSDigital/nhs-notify-supplier-api/tree/main/docs) folder of the repository and published to [GitHub pages](https://nhsdigital.github.io/nhs-notify-supplier-api/) on PR merge
 
 ## SDK Assets
 
@@ -54,7 +54,7 @@ It will provide limited, fixed responses and does not require authentication to 
 
 There are two ways to access the sandbox:
 
-- The public sandbox [https://sandbox.api.service.nhs.uk/notify-supplier](https://sandbox.api.service.nhs.uk/notify-supplier)
+- The public sandbox [https://sandbox.api.service.nhs.uk/notify-supplier](https://sandbox.api.service.nhs.uk/nhs-notify-supplier)
 - Local Build
 
 You can build the sandbox locally by installing the repository requirements (or using the devcontainer) and running:

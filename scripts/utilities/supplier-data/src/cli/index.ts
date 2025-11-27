@@ -22,11 +22,11 @@ async function main() {
         },
         "name": {
           type: "string",
-          demandOption: false,
+          demandOption: true,
         },
         "apimId": {
           type: "string",
-          demandOption: false,
+          demandOption: true,
         },
         status: {
           type: "string",

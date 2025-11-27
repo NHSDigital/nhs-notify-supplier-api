@@ -34,7 +34,7 @@ You have 90 calendar days to complete onboarding activities and submit all requi
 
 ---
 
-## Pre-onboarding & Conformance
+## Pre-onboarding and Conformance
 
 Before you can begin technical onboarding, your organisation must:
 
@@ -59,10 +59,8 @@ This triggers an event to make the letter available for you to retrieve.
 ### List of letters and downloads
 
 Retrieve a list of all available letters, including key details such as the letter ID and current status.
-The list only contains the summary information - not the actual PDF files.
-To access each full letter, download the PDF directly by making a request to the `/letters/{id}/data` endpoint.
-This will redirect to a short-lived URL to download the file.
-These links are temporary and expire after about one minute, so downloads should be completed right away or re-requested if the link has expired.
+The list only contains the summary information — not the actual PDF files.
+To access each full letter, download the PDF directly by making a request to the /the GET letters/{id}/data  endpoint. This will redirect to a short-lived URL to download the file. These links are temporary and expire after about one minute, so downloads should be completed right away or re-requested if the link has expired.
 
 ### API access
 
@@ -121,7 +119,6 @@ Refer to the Letter Status Lifecycle diagram below for the complete sequence of 
 ## Prepare your integration
 
 You must prepare your integration before you can get access to the NHS Notify integration environment.
-You’ll need technical or developer support to complete tasks in this step.
 
 ### To set up your APIM application
 
@@ -146,7 +143,7 @@ How you build your integration to meet your needs is your responsibility.
 
 The API is defined using the [OpenAPI Specification (OAS)](https://spec.openapis.org/oas/latest.html) format.
 
-You can find it on [GitHub](https://github.com/NHSDigital/nhs-notify-supplier-api/tree/main/specification/api) and on the [NHS England Developer Catalogue](https://digital.nhs.uk/developer/api-catalogue/Alphabet/N).
+You can find it on [GitHub](https://github.com/NHSDigital/nhs-notify-supplier-api/tree/main/specification/api) and on the [NHS API Catalogue](https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier).
 
 A Postman collection will also be available in [GitHub](https://github.com/NHSDigital/nhs-notify-supplier-api/tree/main/postman) to explore the requests within the API.
 
@@ -206,7 +203,9 @@ You’ll need to submit both digital proofs (for content and layout verification
 
 Only once your proofs have been reviewed and approved will you receive confirmation that your system and outputs are ready to move forward into the live (production) environment.
 
-Digital proof will need to be sent via e-mail using this address: <england.nhsnotifysuppliers@nhs.net> and physical proof will need to be sent to: Mr Wayne Shirt (NHS Notify), 6th Floor, 7 & 8 Wellington Place, Leeds, West Yorkshire, LS1 4AP.
+Digital proof will need to be sent via e-mail using this address: <england.nhsnotifysuppliers@nhs.net> and physical proof will need to be sent to:
+
+        Mr Wayne Shirt (NHS Notify), 6th Floor, 7 & 8 Wellington Place, Leeds, West Yorkshire, LS1 4AP.
 
 ---
 

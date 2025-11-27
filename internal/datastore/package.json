@@ -4,7 +4,8 @@
     "@aws-sdk/lib-dynamodb": "^3.858.0",
     "@internal/helpers": "*",
     "pino": "^9.7.0",
-    "zod": "^4.1.11"
+    "zod": "^4.1.11",
+    "zod-mermaid": "^1.0.9"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^3.1.0",
@@ -19,8 +20,7 @@
     "testcontainers": "^11.4.0",
     "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3",
-    "zod-mermaid": "^1.0.9"
+    "typescript": "^5.9.3"
   },
   "license": "MIT",
   "main": "src/index.ts",

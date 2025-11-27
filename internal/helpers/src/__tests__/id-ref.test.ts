@@ -12,7 +12,9 @@ describe("idRef", () => {
 
     // Should validate UUIDs like the original schema's domainId
     expect(() => refField.parse("not-a-uuid")).toThrow();
-    expect(() => refField.parse("123e4567-e89b-12d3-a456-426614174000")).not.toThrow();
+    expect(() =>
+      refField.parse("123e4567-e89b-12d3-a456-426614174000"),
+    ).not.toThrow();
   });
 
   it("should add reference metadata", () => {
@@ -20,10 +22,12 @@ describe("idRef", () => {
 
     expect(refField).toBeDefined();
     expect(z.globalRegistry.has(refField)).toBe(true);
-    expect(z.globalRegistry.get(refField)).toEqual(expect.objectContaining({
-      title: "TestEntity ID Reference",
-      description: "Reference to a TestEntity by its unique identifier",
-    }));
+    expect(z.globalRegistry.get(refField)).toEqual(
+      expect.objectContaining({
+        title: "TestEntity ID Reference",
+        description: "Reference to a TestEntity by its unique identifier",
+      }),
+    );
   });
 
   it("should use custom ID field name when provided", () => {
