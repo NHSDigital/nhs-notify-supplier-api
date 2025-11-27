@@ -22,7 +22,7 @@ export function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
 
     for (let batch of generateBatches(cloudEvents)) {
       await deps.snsClient.send(new PublishBatchCommand({
-        TopicArn: deps.env.EVENT_PUB_SNS_TOPIC_ARN,
+        TopicArn: deps.env.EVENTPUB_SNS_TOPIC_ARN,
         PublishBatchRequestEntries: batch.map(buildMessage),
       }));
     }
