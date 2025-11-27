@@ -63,8 +63,7 @@ data "aws_iam_policy_document" "letter_stream_forwarder_lambda" {
     effect = "Allow"
 
     actions = [
-      "kinesis:DescribeStream",
-      "kinesis:PutRecord",
+      "kinesis:*",
     ]
 
     resources = [
