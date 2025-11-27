@@ -22,7 +22,7 @@ describe('mi-updates-transformer Lambda', () => {
   snsClient: { send: jest.fn()} as unknown as SNSClient,
   logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
     env: {
-      EVENT_PUB_SNS_TOPIC_ARN: 'arn:aws:sns:region:account:topic',
+      EVENTPUB_SNS_TOPIC_ARN: 'arn:aws:sns:region:account:topic',
     } as unknown as EnvVars
   } as Deps;
 

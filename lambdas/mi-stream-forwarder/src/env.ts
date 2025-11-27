@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 const EnvVarsSchema = z.object({
-  MI_CHANGE_STREAM_NAME: z.string(),
+  MI_CHANGE_STREAM_ARN: z.string(),
 });
 
 export type EnvVars = z.infer<typeof EnvVarsSchema>;

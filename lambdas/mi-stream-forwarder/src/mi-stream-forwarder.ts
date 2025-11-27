@@ -13,7 +13,7 @@ export function createHandler(deps: Deps): Handler<DynamoDBStreamEvent> {
       const newImage = record.dynamodb?.NewImage!;
       const miRecord = unmarshall(newImage as any) as MI;
       await deps.kinesisClient.send(new PutRecordCommand({
-        StreamName: deps.env.MI_CHANGE_STREAM_NAME,
+        StreamARN: deps.env.MI_CHANGE_STREAM_ARN,
         PartitionKey: miRecord.id,
         Data: Buffer.from(JSON.stringify(miRecord)),
       }));
