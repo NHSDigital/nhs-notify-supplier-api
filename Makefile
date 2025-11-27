@@ -45,11 +45,6 @@ publish-oas:
 	$(MAKE) copy-examples
 	npm run publish-oas
 
-set-authorization: guard-APIM_ENV
-	@ AUTHORIZATION=authorization-$$APIM_ENV.yml \
-	envsubst '$${AUTHORIZATION}' \
-	< specification/api/components/parameters/authorization/authorization-template.yml > specification/api/components/parameters/authorization/authorization.yml
-
 set-target: guard-APIM_ENV
 	@ TARGET=target-$$APIM_ENV.yml \
 	envsubst '$${TARGET}' \
@@ -69,7 +64,6 @@ set-security: guard-APIM_ENV
 	< specification/api/components/security-schemes/security-schemes-template.yml > specification/api/components/security-schemes/security-schemes.yml
 
 construct-spec: guard-APIM_ENV
-	$(MAKE) set-authorization APIM_ENV=$$APIM_ENV
 	$(MAKE) set-target APIM_ENV=$$APIM_ENV
 	$(MAKE) set-access APIM_ENV=$$APIM_ENV
 	$(MAKE) set-security APIM_ENV=$$APIM_ENV
