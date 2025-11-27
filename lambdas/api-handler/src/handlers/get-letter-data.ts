@@ -1,37 +1,51 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { assertNotEmpty } from "../utils/validation";
-import { extractCommonIds } from '../utils/commonIds';
-import { ApiErrorDetail } from '../contracts/errors';
+import { extractCommonIds } from "../utils/common-ids";
+import { ApiErrorDetail } from "../contracts/errors";
 import { processError } from "../mappers/error-mapper";
-import { ValidationError } from "../errors";
+import ValidationError from "../errors/validation-error";
 import { getLetterDataUrl } from "../services/letter-operations";
 import type { Deps } from "../config/deps";
 
-
-export function createGetLetterDataHandler(deps: Deps): APIGatewayProxyHandler {
-
+export default function createGetLetterDataHandler(
+  deps: Deps,
+): APIGatewayProxyHandler {
   return async (event) => {
-
-    const commonIds = extractCommonIds(event.headers, event.requestContext, deps);
+    const commonIds = extractCommonIds(
+      event.headers,
+      event.requestContext,
+      deps,
+    );
 
     if (!commonIds.ok) {
-      return processError(commonIds.error, commonIds.correlationId, deps.logger);
+      return processError(
+        commonIds.error,
+        commonIds.correlationId,
+        deps.logger,
+      );
     }
 
     try {
-      const letterId = assertNotEmpty( event.pathParameters?.id,
-        new ValidationError(ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter));
+      const letterId = assertNotEmpty(
+        event.pathParameters?.id,
+        new ValidationError(
+          ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter,
+        ),
+      );
 
       return {
         statusCode: 303,
         headers: {
-          'Location': await getLetterDataUrl(commonIds.value.supplierId, letterId, deps)
+          Location: await getLetterDataUrl(
+            commonIds.value.supplierId,
+            letterId,
+            deps,
+          ),
         },
-        body: ''
+        body: "",
       };
-    }
-    catch (error) {
+    } catch (error) {
       return processError(error, commonIds.value.correlationId, deps.logger);
     }
-  }
-};
+  };
+}

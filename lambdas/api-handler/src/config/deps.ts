@@ -1,10 +1,14 @@
 import { S3Client } from "@aws-sdk/client-s3";
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { SQSClient } from "@aws-sdk/client-sqs";
-import pino from 'pino';
-import { LetterRepository, MIRepository, DBHealthcheck } from '@internal/datastore';
-import { envVars, EnvVars } from "../config/env";
+import pino from "pino";
+import {
+  DBHealthcheck,
+  LetterRepository,
+  MIRepository,
+} from "@internal/datastore";
+import { EnvVars, envVars } from "./env";
 
 export type Deps = {
   s3Client: S3Client;
@@ -13,7 +17,7 @@ export type Deps = {
   miRepo: MIRepository;
   dbHealthcheck: DBHealthcheck;
   logger: pino.Logger;
-  env: EnvVars
+  env: EnvVars;
 };
 
 function createDocumentClient(): DynamoDBDocumentClient {
@@ -21,38 +25,40 @@ function createDocumentClient(): DynamoDBDocumentClient {
   return DynamoDBDocumentClient.from(ddbClient);
 }
 
-
-function createLetterRepository(log: pino.Logger, envVars: EnvVars): LetterRepository {
-
+function createLetterRepository(
+  log: pino.Logger,
+  environment: EnvVars,
+): LetterRepository {
   const config = {
-    lettersTableName: envVars.LETTERS_TABLE_NAME,
-    lettersTtlHours: envVars.LETTER_TTL_HOURS
+    lettersTableName: environment.LETTERS_TABLE_NAME,
+    lettersTtlHours: environment.LETTER_TTL_HOURS,
   };
 
   return new LetterRepository(createDocumentClient(), log, config);
 }
 
-function createDBHealthcheck(envVars: EnvVars): DBHealthcheck {
+function createDBHealthcheck(environment: EnvVars): DBHealthcheck {
   const config = {
-    lettersTableName: envVars.LETTERS_TABLE_NAME,
-    lettersTtlHours: envVars.LETTER_TTL_HOURS
+    lettersTableName: environment.LETTERS_TABLE_NAME,
+    lettersTtlHours: environment.LETTER_TTL_HOURS,
   };
 
   return new DBHealthcheck(createDocumentClient(), config);
 }
 
-function createMIRepository(log: pino.Logger, envVars: EnvVars): MIRepository {
-
+function createMIRepository(
+  log: pino.Logger,
+  environment: EnvVars,
+): MIRepository {
   const config = {
-    miTableName: envVars.MI_TABLE_NAME,
-    miTtlHours: envVars.MI_TTL_HOURS
+    miTableName: environment.MI_TABLE_NAME,
+    miTtlHours: environment.MI_TTL_HOURS,
   };
 
   return new MIRepository(createDocumentClient(), log, config);
 }
 
 export function createDependenciesContainer(): Deps {
-
   const log = pino();
 
   return {
@@ -62,6 +68,6 @@ export function createDependenciesContainer(): Deps {
     miRepo: createMIRepository(log, envVars),
     dbHealthcheck: createDBHealthcheck(envVars),
     logger: log,
-    env: envVars
+    env: envVars,
   };
 }
