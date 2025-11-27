@@ -1,4 +1,4 @@
-import { createHandler } from "./letter-updates-transformer";
+import { createHandler } from "./letter-stream-forwarder";
 import { createDependenciesContainer } from "./deps";
 
 const container = createDependenciesContainer();

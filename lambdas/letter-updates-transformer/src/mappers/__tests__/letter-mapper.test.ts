@@ -1,0 +1,44 @@
+import { $LetterEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
+import { mapLetterToCloudEvent } from "../letter-mapper";
+import { LetterBase } from "@internal/datastore";
+
+describe("letter-mapper", () => {
+  it("maps a letter to a letter event", async() => {
+    const letter: LetterBase = {
+      id: "id1",
+      specificationId: "spec1",
+      groupId: "group1",
+      status: "PRINTED",
+      reasonCode: "R02",
+      reasonText: "Reason text",
+    };
+    jest.useFakeTimers().setSystemTime(new Date("2025-11-24T15:55:18Z"));
+
+    const event = mapLetterToCloudEvent(letter);
+
+    // Check it conforms to the letter event schema - parse will throw an error if not
+    $LetterEvent.parse(event);
+    expect(event.type).toBe("uk.nhs.notify.supplier-api.letter.PRINTED.v1");
+    expect(event.dataschema).toBe("https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.PRINTED.1.0.0.schema.json");
+    expect(event.dataschemaversion).toBe("1.0.0");
+    expect(event.subject).toBe("letter-origin/supplier-api/letter/id1");
+    expect(event.time).toBe("2025-11-24T15:55:18.000Z");
+    expect(event.recordedtime).toBe("2025-11-24T15:55:18.000Z");
+    expect(event.data).toEqual({
+      domainId: "id1",
+      status: "PRINTED",
+      specificationId: "spec1",
+      groupId: "group1",
+      reasonCode: "R02",
+      reasonText: "Reason text",
+      origin: {
+        domain: "supplier-api",
+        source: "/data-plane/supplier-api/letters",
+        subject: "letter-origin/supplier-api/letter/id1",
+        event: event.id,
+      },
+    });
+
+    jest.useRealTimers();
+  })
+});
