@@ -9,6 +9,7 @@ security:
 paths:
   /letters:
     parameters:
+      - $ref: 'components/parameters/authorization/authorization.yml'
       - $ref: 'components/parameters/requestId.yml'
       - $ref: 'components/parameters/correlationId.yml'
     post:
@@ -17,6 +18,7 @@ paths:
       $ref: 'components/endpoints/listLetters.yml'
   '/letters/{id}':
     parameters:
+      - $ref: 'components/parameters/authorization/authorization.yml'
       - $ref: 'components/parameters/requestId.yml'
       - $ref: 'components/parameters/correlationId.yml'
       - $ref: 'components/parameters/resourceId.yml'
@@ -26,6 +28,7 @@ paths:
       $ref: 'components/endpoints/patchLetter.yml'
   '/letters/{id}/data':
     parameters:
+      - $ref: 'components/parameters/authorization/authorization.yml'
       - $ref: 'components/parameters/resourceId.yml'
       - $ref: 'components/parameters/requestId.yml'
       - $ref: 'components/parameters/correlationId.yml'
@@ -35,6 +38,7 @@ paths:
     #  $ref: 'components/endpoints/headDataId.yml'
   /mi:
     parameters:
+      - $ref: 'components/parameters/authorization/authorization.yml'
       - $ref: 'components/parameters/requestId.yml'
       - $ref: 'components/parameters/correlationId.yml'
     post:

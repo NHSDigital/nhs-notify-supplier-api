@@ -1,0 +1,7 @@
+name: apikey
+in: header
+description: |-
+  API Key to authorize in dynamic environments only.
+required: false
+schema:
+  type: string
