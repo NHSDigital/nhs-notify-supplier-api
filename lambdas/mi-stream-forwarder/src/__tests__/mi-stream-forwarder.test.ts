@@ -11,7 +11,7 @@ describe('mi-stream-forwarder Lambda', () => {
   const mockedDeps: jest.Mocked<Deps> = {
     kinesisClient: { send: jest.fn()} as unknown as KinesisClient,
     env: {
-      MI_CHANGE_STREAM_NAME: "test-stream",
+      MI_CHANGE_STREAM_ARN: "test-stream",
     } as unknown as EnvVars
   } as Deps;
 
@@ -36,7 +36,7 @@ describe('mi-stream-forwarder Lambda', () => {
     expect(mockedDeps.kinesisClient.send).toHaveBeenCalledWith(
       expect.objectContaining({
         input: expect.objectContaining({
-          StreamName: 'test-stream',
+          StreamARN: 'test-stream',
           PartitionKey: 'mi-123',
         }),
       })
