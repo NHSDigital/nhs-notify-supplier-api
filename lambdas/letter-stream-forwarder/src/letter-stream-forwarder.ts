@@ -1,11 +1,12 @@
 import { LetterBase } from "@internal/datastore";
-import { DynamoDBStreamEvent, Handler, DynamoDBRecord, AttributeValue } from "aws-lambda";
+import { DynamoDBStreamEvent, Handler, DynamoDBRecord } from "aws-lambda";
 import { PutRecordCommand } from "@aws-sdk/client-kinesis";
 import { Deps } from "./deps";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 
 export function createHandler(deps: Deps): Handler<DynamoDBStreamEvent> {
   return async (event: DynamoDBStreamEvent): Promise<void> => {
+    deps.logger.info({description: 'Received event', event});
     const statusChanges = event.Records
       .filter(record => record.eventName === "MODIFY")
       .filter(record => isChanged(record, 'status') || isChanged(record, 'reasonCode'));
