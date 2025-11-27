@@ -36,7 +36,7 @@ module "mi_stream_forwarder" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
-    MI_CHANGE_STREAM_NAME = "mi_change_stream"
+    MI_CHANGE_STREAM_ARN = "${aws_kinesis_stream.mi_change_stream.arn}"
   })
 }
 
@@ -63,7 +63,8 @@ data "aws_iam_policy_document" "mi_stream_forwarder_lambda" {
     effect = "Allow"
 
     actions = [
-      "kinesis:*"
+      "kinesis:DescribeStream",
+      "kinesis:PutRecord",
     ]
 
     resources = [
