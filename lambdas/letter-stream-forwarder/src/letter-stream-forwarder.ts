@@ -1,5 +1,5 @@
 import { LetterBase } from "@internal/datastore";
-import { DynamoDBStreamEvent, Handler } from "aws-lambda";
+import { DynamoDBStreamEvent, Handler, DynamoDBRecord, AttributeValue } from "aws-lambda";
 import { PutRecordCommand } from "@aws-sdk/client-kinesis";
 import { Deps } from "./deps";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
@@ -8,11 +8,7 @@ export function createHandler(deps: Deps): Handler<DynamoDBStreamEvent> {
   return async (event: DynamoDBStreamEvent): Promise<void> => {
     const statusChanges = event.Records
       .filter(record => record.eventName === "MODIFY")
-      .filter(record => {
-        const oldStatus = record.dynamodb?.OldImage?.status?.S;
-        const newStatus = record.dynamodb?.NewImage?.status?.S;
-        return oldStatus !== newStatus;
-      });
+      .filter(record => isChanged(record, 'status') || isChanged(record, 'reasonCode'));
 
     for (const record of statusChanges) {
       const newImage = record.dynamodb?.NewImage!;
@@ -24,4 +20,10 @@ export function createHandler(deps: Deps): Handler<DynamoDBStreamEvent> {
       }));
     }
   };
+
+  function isChanged(record: DynamoDBRecord, property: string): boolean {
+    const oldValue = record.dynamodb?.OldImage![property];
+    const newValue = record.dynamodb?.NewImage![property];
+      return oldValue?.S !== newValue?.S;
+  }
 }
