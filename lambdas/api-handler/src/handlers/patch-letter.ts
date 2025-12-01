@@ -1,12 +1,16 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
+import {
+  PatchLetterRequest,
+  PatchLetterRequestSchema,
+  UpdateLetterCommand,
+} from "../contracts/letters";
+import { mapToUpdateCommand } from "../mappers/letter-mapper";
 import { enqueueLetterUpdateRequests } from '../services/letter-operations';
-import { LetterDto, PatchLetterRequest, PatchLetterRequestSchema } from '../contracts/letters';
 import { ApiErrorDetail } from '../contracts/errors';
 import { ValidationError } from '../errors';
 import { processError } from '../mappers/error-mapper';
 import { assertNotEmpty } from '../utils/validation';
 import { extractCommonIds } from '../utils/commonIds';
-import { mapPatchLetterToDto } from '../mappers/letter-mapper';
 import type { Deps } from "../config/deps";
 
 
@@ -36,13 +40,16 @@ export function createPatchLetterHandler(deps: Deps): APIGatewayProxyHandler {
         else throw error;
       }
 
-      const letterToUpdate: LetterDto = mapPatchLetterToDto(patchLetterRequest, commonIds.value.supplierId);
+      const updateLetterCommand: UpdateLetterCommand = mapToUpdateCommand(
+        patchLetterRequest,
+        commonIds.value.supplierId,
+      );
 
-      if (letterToUpdate.id !== letterId) {
+      if (updateLetterCommand.id !== letterId) {
         throw new ValidationError(ApiErrorDetail.InvalidRequestLetterIdsMismatch);
       }
 
-      await enqueueLetterUpdateRequests([letterToUpdate], commonIds.value.correlationId, deps);
+      await enqueueLetterUpdateRequests([updateLetterCommand], commonIds.value.correlationId, deps);
 
       return {
         statusCode: 202,

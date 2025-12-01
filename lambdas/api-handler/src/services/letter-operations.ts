@@ -1,6 +1,6 @@
 import { LetterBase, LetterRepository } from '@internal/datastore';
 import { NotFoundError } from '../errors';
-import { LetterDto } from '../contracts/letters';
+import { UpdateLetterCommand } from "../contracts/letters";
 import { ApiErrorDetail } from '../contracts/errors';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
@@ -58,28 +58,36 @@ async function getDownloadUrl(s3Uri: string, s3Client: S3Client, expiry: number)
   return await getSignedUrl(s3Client, command, { expiresIn: expiry });
 }
 
-export async function enqueueLetterUpdateRequests(updateRequests: LetterDto[], correlationId: string, deps: Deps) {
-
-  const tasks = updateRequests.map(async (request: LetterDto) => {
-    try {
-      const command = new SendMessageCommand({
-        QueueUrl: deps.env.QUEUE_URL,
-        MessageAttributes: {
-          CorrelationId: { DataType: 'String', StringValue: correlationId },
-        },
-        MessageBody: JSON.stringify(request),
-      });
-      await deps.sqsClient.send(command);
-    } catch (err) {
-      deps.logger.error({
-        err,
-        correlationId: correlationId,
-        letterId: request.id,
-        letterStatus: request.status,
-        supplierId: request.supplierId
-      }, 'Error enqueuing letter status update');
-    }
-  });
+export async function enqueueLetterUpdateRequests(
+  updateLetterCommands: UpdateLetterCommand[],
+  correlationId: string,
+  deps: Deps,
+) {
+  const tasks = updateLetterCommands.map(
+    async (request: UpdateLetterCommand) => {
+      try {
+        const command = new SendMessageCommand({
+          QueueUrl: deps.env.QUEUE_URL,
+          MessageAttributes: {
+            CorrelationId: { DataType: "String", StringValue: correlationId },
+          },
+          MessageBody: JSON.stringify(request),
+        });
+        await deps.sqsClient.send(command);
+      } catch (error) {
+        deps.logger.error(
+          {
+            err: error,
+            correlationId,
+            letterId: request.id,
+            letterStatus: request.status,
+            supplierId: request.supplierId,
+          },
+          "Error enqueuing letter status update",
+        );
+      }
+    },
+  );
 
   await Promise.all(tasks);
 }

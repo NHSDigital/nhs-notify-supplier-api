@@ -7,15 +7,14 @@ import {
   setupDynamoDBContainer,
 } from "./db";
 import { LetterRepository } from "../letter-repository";
-import { Letter } from "../types";
+import { InsertLetter, Letter, UpdateLetter, UpsertLetter } from "../types";
 import { LogStream, createTestLogger } from "./logs";
-import { LetterDto } from "../../../../lambdas/api-handler/src/contracts/letters";
 
 function createLetter(
   supplierId: string,
   letterId: string,
   status: Letter["status"] = "PENDING",
-): Omit<Letter, "ttl" | "supplierStatus" | "supplierStatusSk"> {
+): InsertLetter {
   return {
     id: letterId,
     supplierId,
@@ -126,14 +125,14 @@ describe("LetterRepository", () => {
     await letterRepository.putLetter(letter);
     await checkLetterStatus("supplier1", "letter1", "PENDING");
 
-    const letterDto: LetterDto = {
+    const updateLetter: UpdateLetter = {
       id: "letter1",
       supplierId: "supplier1",
       status: "REJECTED",
       reasonCode: "R01",
       reasonText: "Reason text",
     };
-    await letterRepository.updateLetterStatus(letterDto);
+    await letterRepository.updateLetterStatus(updateLetter);
 
     const updatedLetter = await letterRepository.getLetterById(
       "supplier1",
@@ -159,7 +158,7 @@ describe("LetterRepository", () => {
     // Month is zero-indexed in JavaScript Date
     // Day is one-indexed
     jest.setSystemTime(new Date(2020, 1, 2));
-    const letterDto: LetterDto = {
+    const letterDto: UpdateLetter = {
       id: "letter1",
       supplierId: "supplier1",
       status: "DELIVERED",
@@ -175,13 +174,13 @@ describe("LetterRepository", () => {
   });
 
   test("can't update a letter that does not exist", async () => {
-    const letterDto: LetterDto = {
+    const updateLetter: UpdateLetter = {
       id: "letter1",
       supplierId: "supplier1",
       status: "DELIVERED",
     };
     await expect(
-      letterRepository.updateLetterStatus(letterDto),
+      letterRepository.updateLetterStatus(updateLetter),
     ).rejects.toThrow(
       "Letter with id letter1 not found for supplier supplier1",
     );
@@ -193,13 +192,13 @@ describe("LetterRepository", () => {
       lettersTableName: "nonexistent-table",
     });
 
-    const letterDto: LetterDto = {
+    const updateLetter: UpdateLetter = {
       id: "letter1",
       supplierId: "supplier1",
       status: "DELIVERED",
     };
     await expect(
-      misconfiguredRepository.updateLetterStatus(letterDto),
+      misconfiguredRepository.updateLetterStatus(updateLetter),
     ).rejects.toThrow("Cannot do operations on a non-existent table");
   });
 
@@ -238,12 +237,12 @@ describe("LetterRepository", () => {
     );
     expect(pendingLetters.letters).toHaveLength(2);
 
-    const letterDto: LetterDto = {
+    const updateLetter: UpdateLetter = {
       id: "letter1",
       supplierId: "supplier1",
       status: "DELIVERED",
     };
-    await letterRepository.updateLetterStatus(letterDto);
+    await letterRepository.updateLetterStatus(updateLetter);
     const remainingLetters = await letterRepository.getLettersByStatus(
       "supplier1",
       "PENDING",
@@ -456,5 +455,120 @@ describe("LetterRepository", () => {
         createLetter("supplier1", "letter1"),
       ]),
     ).rejects.toThrow("Cannot do operations on a non-existent table");
+  });
+
+  test("successful upsert (update status) returns updated letter", async () => {
+    const insertLetter: InsertLetter = createLetter("supplier1", "letter1");
+
+    const existingLetter = await letterRepository.putLetter(insertLetter);
+
+    const result = await letterRepository.upsertLetter({
+      id: "letter1",
+      supplierId: "supplier1",
+      status: "REJECTED",
+      reasonCode: "R01",
+      reasonText: "R01 text",
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        id: "letter1",
+        status: "REJECTED",
+        specificationId: "specification1",
+        groupId: "group1",
+        reasonCode: "R01",
+        reasonText: "R01 text",
+        supplierId: "supplier1",
+        url: "s3://bucket/letter1.pdf",
+        supplierStatus: "supplier1#REJECTED",
+      }),
+    );
+    expect(Date.parse(result.updatedAt)).toBeGreaterThan(
+      Date.parse(existingLetter.updatedAt),
+    );
+    expect(Date.parse(result.updatedAt)).toBeLessThan(Date.now());
+    expect(result.createdAt).toBe(existingLetter.createdAt);
+    expect(result.createdAt).toBe(result.supplierStatusSk);
+    expect(result.ttl).toBe(existingLetter.ttl);
+  });
+
+  test("successful upsert (insert) returns created letter", async () => {
+    const upsertLetter: UpsertLetter = {
+      id: "letter1",
+      status: "PENDING",
+      specificationId: "specification1",
+      groupId: "group1",
+      supplierId: "supplier1",
+      url: "s3://bucket/letter1.pdf",
+    };
+
+    const beforeInsert = Date.now() - 1; // widen window
+
+    const result = await letterRepository.upsertLetter(upsertLetter);
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        id: "letter1",
+        status: "PENDING",
+        specificationId: "specification1",
+        groupId: "group1",
+        supplierId: "supplier1",
+        url: "s3://bucket/letter1.pdf",
+      }),
+    );
+
+    expect(Date.parse(result.updatedAt)).toBeGreaterThan(beforeInsert);
+    expect(Date.parse(result.updatedAt)).toBeLessThan(Date.now());
+    expect(result.createdAt).toBe(result.updatedAt);
+    expect(result.supplierStatusSk).toBe(result.createdAt);
+  });
+
+  test("unsuccessful upsert should throw error", async () => {
+    const mockSend = jest.fn().mockResolvedValue({ Items: null });
+    const mockDdbClient = { send: mockSend } as any;
+    const repo = new LetterRepository(
+      mockDdbClient,
+      { debug: jest.fn() } as any,
+      { lettersTableName: "letters", lettersTtlHours: 1 },
+    );
+
+    await expect(
+      repo.upsertLetter({
+        id: "letter1",
+        status: "PENDING",
+        supplierId: "supplier1",
+      }),
+    ).rejects.toThrow("upsertLetter: no attributes returned");
+  });
+
+  test("successful upsert without status", async () => {
+    const insertLetter: InsertLetter = createLetter("supplier1", "letter1");
+
+    const existingLetter = await letterRepository.putLetter(insertLetter);
+
+    const result = await letterRepository.upsertLetter({
+      id: "letter1",
+      supplierId: "supplier1",
+      url: "s3://updatedBucket/letter1.pdf",
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        id: "letter1",
+        status: "PENDING",
+        specificationId: "specification1",
+        groupId: "group1",
+        supplierId: "supplier1",
+        url: "s3://updatedBucket/letter1.pdf",
+        supplierStatus: "supplier1#PENDING",
+      }),
+    );
+    expect(Date.parse(result.updatedAt)).toBeGreaterThan(
+      Date.parse(existingLetter.updatedAt),
+    );
+    expect(Date.parse(result.updatedAt)).toBeLessThan(Date.now());
+    expect(result.createdAt).toBe(existingLetter.createdAt);
+    expect(result.createdAt).toBe(result.supplierStatusSk);
+    expect(result.ttl).toBe(existingLetter.ttl);
   });
 });

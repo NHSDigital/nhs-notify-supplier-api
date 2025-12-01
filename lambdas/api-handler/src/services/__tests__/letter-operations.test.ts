@@ -1,6 +1,6 @@
 import { Letter, LetterRepository } from '@internal/datastore';
 import { Deps } from '../../config/deps';
-import { LetterDto, PostLettersRequest } from '../../contracts/letters';
+import { UpdateLetterCommand } from "../../contracts/letters";
 import { enqueueLetterUpdateRequests, getLetterById, getLetterDataUrl, getLettersForSupplier } from '../letter-operations';
 import pino from 'pino';
 
@@ -174,7 +174,7 @@ describe('enqueueLetterUpdateRequests function', () => {
     jest.clearAllMocks();
   });
 
-  const lettersToUpdate: LetterDto[] = [
+  const lettersToUpdate: UpdateLetterCommand[] = [
     {
       id: 'id1',
       status: 'REJECTED',

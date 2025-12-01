@@ -15,17 +15,17 @@ export const LetterStatusSchema = z.enum([
   'DELIVERED'
 ]);
 
-export const LetterDtoSchema = z.object({
-  id: z.string(),
-  status: LetterStatusSchema,
-  supplierId: z.string(),
-  specificationId: z.string().optional(),
-  groupId: z.string().optional(),
-  reasonCode: z.string().optional(),
-  reasonText: z.string().optional(),
-}).strict();
+export const UpdateLetterSchema = z
+  .object({
+    id: z.string(),
+    supplierId: z.string(),
+    status: LetterStatusSchema,
+    reasonCode: z.string().optional(),
+    reasonText: z.string().optional(),
+  })
+  .strict();
 
-export type LetterDto = z.infer<typeof LetterDtoSchema>;
+export type UpdateLetterCommand = z.infer<typeof UpdateLetterSchema>;
 
 export const PatchLetterRequestResourceSchema = z.object({
   id: z.string(),

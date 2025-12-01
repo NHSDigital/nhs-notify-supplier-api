@@ -1,10 +1,10 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
+import { mapToUpdateCommands } from "../mappers/letter-mapper";
 import type { Deps } from "../config/deps";
 import { ApiErrorDetail } from '../contracts/errors';
 import { PostLettersRequest, PostLettersRequestSchema } from '../contracts/letters';
 import { ValidationError } from '../errors';
 import { processError } from '../mappers/error-mapper';
-import { mapPostLettersToDtoArray } from '../mappers/letter-mapper';
 import { enqueueLetterUpdateRequests } from '../services/letter-operations';
 import { extractCommonIds } from '../utils/commonIds';
 import { assertNotEmpty, requireEnvVar } from '../utils/validation';
@@ -45,7 +45,7 @@ export function createPostLettersHandler(deps: Deps): APIGatewayProxyHandler {
       }
 
       await enqueueLetterUpdateRequests(
-        mapPostLettersToDtoArray(postLettersRequest, commonIds.value.supplierId),
+        mapToUpdateCommands(postLettersRequest, commonIds.value.supplierId),
         commonIds.value.correlationId,
         deps
       );

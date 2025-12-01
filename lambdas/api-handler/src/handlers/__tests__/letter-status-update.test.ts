@@ -1,9 +1,9 @@
 import { Context, SQSEvent, SQSRecord } from 'aws-lambda';
 import { mockDeep } from 'jest-mock-extended';
-import { LetterDto } from '../../contracts/letters';
 import { S3Client } from '@aws-sdk/client-s3';
 import pino from 'pino';
 import { LetterRepository } from '@internal/datastore/src';
+import { UpdateLetterCommand } from "../contracts/letters";
 import { EnvVars } from '../../config/env';
 import { Deps } from '../../config/deps';
 import { createLetterStatusUpdateHandler } from '../letter-status-update';
@@ -16,13 +16,11 @@ describe('createLetterStatusUpdateHandler', () => {
 
   it('processes letters successfully', async () => {
 
-    const lettersToUpdate: LetterDto[] = [
+    const lettersToUpdate: UpdateLetterCommand[] = [
       {
         id: 'id1',
         status: 'REJECTED',
         supplierId: 's1',
-        specificationId: 'spec1',
-        groupId: 'g1',
         reasonCode: '123',
         reasonText: 'Reason text'
       },
@@ -89,11 +87,13 @@ describe('createLetterStatusUpdateHandler', () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const letterToUpdate: LetterDto[] = [{
+    const letterToUpdate: UpdateLetterCommand[] = [
+      {
         id: 'id1',
         status: 'ACCEPTED',
         supplierId: 's1'
-      }];
+      },
+    ];
 
     const letterStatusUpdateHandler = createLetterStatusUpdateHandler(mockedDeps);
     await letterStatusUpdateHandler(buildEvent(letterToUpdate), context, callback);
@@ -108,9 +108,8 @@ describe('createLetterStatusUpdateHandler', () => {
   });
 });
 
-function buildEvent(lettersToUpdate: LetterDto[]): SQSEvent {
-
-  const records: Partial<SQSRecord>[] = lettersToUpdate.map(letter => {
+function buildEvent(lettersToUpdate: UpdateLetterCommand[]): SQSEvent {
+  const records: Partial<SQSRecord>[] = lettersToUpdate.map((letter) => {
     return {
       messageId: `mid-${letter.id}`,
       body: JSON.stringify(letter),

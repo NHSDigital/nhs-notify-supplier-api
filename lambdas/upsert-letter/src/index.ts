@@ -1,10 +1,7 @@
-// Replace me with the actual code for your Lambda function
-import { Handler } from 'aws-lambda';
+import { createDependenciesContainer } from "./config/deps";
+import createUpsertLetterHandler from "./handler/upsert-handler";
 
-export const handler: Handler = async (event) => {
-  console.log('Received event:', event);
-  return {
-    statusCode: 200,
-    body: 'Event logged',
-  };
-};
+const container = createDependenciesContainer();
+
+const upsertLetterHandler = createUpsertLetterHandler(container);
+export default upsertLetterHandler;

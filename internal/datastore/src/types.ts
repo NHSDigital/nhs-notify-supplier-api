@@ -58,6 +58,29 @@ export const LetterSchema = LetterSchemaBase.extend({
 export type Letter = z.infer<typeof LetterSchema>;
 export type LetterBase = z.infer<typeof LetterSchemaBase>;
 
+export type InsertLetter = Omit<
+  Letter,
+  "ttl" | "supplierStatus" | "supplierStatusSk"
+>;
+export type UpdateLetter = {
+  id: string;
+  supplierId: string;
+  status: Letter["status"];
+  reasonCode?: string;
+  reasonText?: string;
+};
+export type UpsertLetter = {
+  id: string;
+  supplierId: string;
+  // fields that might set/overwrite
+  status?: Letter["status"];
+  specificationId?: string;
+  groupId?: string;
+  url?: string;
+  reasonCode?: string;
+  reasonText?: string;
+};
+
 export const MISchemaBase = z.object({
   id: z.string(),
   lineItem: z.string(),
