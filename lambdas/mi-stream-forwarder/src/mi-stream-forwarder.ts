@@ -3,9 +3,11 @@ import { DynamoDBStreamEvent, Handler } from "aws-lambda";
 import { PutRecordCommand } from "@aws-sdk/client-kinesis";
 import { Deps } from "./deps";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
+import { Logger } from "pino";
 
 export function createHandler(deps: Deps): Handler<DynamoDBStreamEvent> {
   return async (event: DynamoDBStreamEvent): Promise<void> => {
+    deps.logger.info({description: "Received event", event});
     const insertedRecords = event.Records
       .filter(record => record.eventName === "INSERT");
 
