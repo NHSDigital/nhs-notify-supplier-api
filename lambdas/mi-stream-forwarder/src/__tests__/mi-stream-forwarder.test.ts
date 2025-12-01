@@ -1,4 +1,5 @@
 import { KinesisClient } from '@aws-sdk/client-kinesis';
+import * as pino from "pino";
 import { mockDeep } from 'jest-mock-extended';
 import { DynamoDBStreamEvent, Context } from 'aws-lambda';
 import { Deps } from '../deps';
@@ -10,6 +11,7 @@ describe('mi-stream-forwarder Lambda', () => {
 
   const mockedDeps: jest.Mocked<Deps> = {
     kinesisClient: { send: jest.fn()} as unknown as KinesisClient,
+    logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
     env: {
       MI_CHANGE_STREAM_ARN: "test-stream",
     } as unknown as EnvVars
