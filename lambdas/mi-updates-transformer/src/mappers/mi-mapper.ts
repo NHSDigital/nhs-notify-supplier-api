@@ -5,11 +5,15 @@ import { randomUUID, randomBytes } from 'crypto';
 export function mapMIToCloudEvent(mi: MI): MISubmittedEvent {
   const now = new Date().toISOString();
   const eventId = randomUUID();
+    const dataschemaversion = '1.0.0';
+
   return {
     specversion: '1.0',
     id: eventId,
     type: `uk.nhs.notify.supplier-api.mi.SUBMITTED.v1`,
-    dataschema: `https://notify.nhs.uk/cloudevents/schemas/supplier-api/mi.SUBMITTED.1.0.0.schema.json`,
+    plane: 'data-plane',
+    dataschema: `https://notify.nhs.uk/cloudevents/schemas/supplier-api/mi.SUBMITTED.${dataschemaversion}.schema.json`,
+    dataschemaversion,
     source: '/data-plane/supplier-api/mi',
     subject: 'mi/' + mi.id,
 
@@ -26,6 +30,7 @@ export function mapMIToCloudEvent(mi: MI): MISubmittedEvent {
       stockRemaining: mi.stockRemaining
     },
     time: now,
+    datacontenttype: 'application/json',
     traceparent: `00-${randomBytes(16).toString('hex')}-${randomBytes(8).toString('hex')}-01`,
     recordedtime: now,
     severitynumber: 2,
