@@ -3,4 +3,5 @@ import { createDependenciesContainer } from "./deps";
 
 const container = createDependenciesContainer();
 
-export const handler = createHandler(container);
+const handler = createHandler(container);
+export default handler;

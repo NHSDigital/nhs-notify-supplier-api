@@ -1,6 +1,6 @@
-import pino from 'pino';
-import { KinesisClient } from '@aws-sdk/client-kinesis';
-import { envVars, EnvVars } from './env';
+import pino from "pino";
+import { KinesisClient } from "@aws-sdk/client-kinesis";
+import { EnvVars, envVars } from "./env";
 
 export type Deps = {
   kinesisClient: KinesisClient;

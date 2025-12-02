@@ -1,24 +1,24 @@
-import { MI } from '@internal/datastore';
-import { MISubmittedEvent } from '@nhsdigital/nhs-notify-event-schemas-supplier-api/src';
-import { randomUUID, randomBytes } from 'crypto';
+import { MI } from "@internal/datastore";
+import { MISubmittedEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
+import { randomBytes, randomUUID } from "node:crypto";
 
-export function mapMIToCloudEvent(mi: MI): MISubmittedEvent {
+export default function mapMIToCloudEvent(mi: MI): MISubmittedEvent {
   const now = new Date().toISOString();
   const eventId = randomUUID();
-    const dataschemaversion = '1.0.0';
+  const dataschemaversion = "1.0.0";
 
   return {
-    specversion: '1.0',
+    specversion: "1.0",
     id: eventId,
     type: `uk.nhs.notify.supplier-api.mi.SUBMITTED.v1`,
-    plane: 'data-plane',
+    plane: "data-plane",
     dataschema: `https://notify.nhs.uk/cloudevents/schemas/supplier-api/mi.SUBMITTED.${dataschemaversion}.schema.json`,
     dataschemaversion,
-    source: '/data-plane/supplier-api/mi',
-    subject: 'mi/' + mi.id,
+    source: "/data-plane/supplier-api/mi",
+    subject: `mi/${mi.id}`,
 
     data: {
-      id: mi.id as MISubmittedEvent['data']['id'],
+      id: mi.id,
       lineItem: mi.lineItem,
       timestamp: mi.timestamp,
       quantity: mi.quantity,
@@ -27,13 +27,13 @@ export function mapMIToCloudEvent(mi: MI): MISubmittedEvent {
       updatedAt: mi.updatedAt,
       specificationId: mi.specificationId,
       groupId: mi.groupId,
-      stockRemaining: mi.stockRemaining
+      stockRemaining: mi.stockRemaining,
     },
     time: now,
-    datacontenttype: 'application/json',
-    traceparent: `00-${randomBytes(16).toString('hex')}-${randomBytes(8).toString('hex')}-01`,
+    datacontenttype: "application/json",
+    traceparent: `00-${randomBytes(16).toString("hex")}-${randomBytes(8).toString("hex")}-01`,
     recordedtime: now,
     severitynumber: 2,
-    severitytext: 'INFO',
+    severitytext: "INFO",
   };
 }
