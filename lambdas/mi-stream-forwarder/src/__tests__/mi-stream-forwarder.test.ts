@@ -4,7 +4,7 @@ import { mockDeep } from "jest-mock-extended";
 import { Context, DynamoDBStreamEvent } from "aws-lambda";
 import { Deps } from "../deps";
 import { EnvVars } from "../env";
-import createHandler from "../mi-stream-forwarder";
+import { createHandler } from "../mi-stream-forwarder";
 
 describe("mi-stream-forwarder Lambda", () => {
   const mockedDeps: jest.Mocked<Deps> = {

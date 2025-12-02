@@ -4,7 +4,7 @@ import { PutRecordCommand } from "@aws-sdk/client-kinesis";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import { Deps } from "./deps";
 
-export default function createHandler(
+export  function createHandler(
   deps: Deps,
 ): Handler<DynamoDBStreamEvent> {
   return async (event: DynamoDBStreamEvent): Promise<void> => {
