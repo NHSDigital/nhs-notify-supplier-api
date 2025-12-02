@@ -3,5 +3,5 @@ import createUpsertLetterHandler from "./handler/upsert-handler";
 
 const container = createDependenciesContainer();
 
-const upsertLetterHandler = createUpsertLetterHandler(container);
+export const upsertLetterHandler = createUpsertLetterHandler(container);
 export default upsertLetterHandler;
