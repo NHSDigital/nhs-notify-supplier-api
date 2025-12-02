@@ -1,7 +1,12 @@
 {
   "dependencies": {
     "@aws-sdk/client-kinesis": "^3.0.0",
-    "aws-lambda": "^1.0.7"
+    "@aws-sdk/util-dynamodb": "^3.940.0",
+    "@internal/datastore": "^0.1.0",
+    "aws-lambda": "^1.0.7",
+    "jest-mock-extended": "^4.0.0",
+    "pino": "^10.1.0",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.119",

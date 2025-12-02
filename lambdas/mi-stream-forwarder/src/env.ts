@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 const EnvVarsSchema = z.object({
   MI_CHANGE_STREAM_ARN: z.string(),
