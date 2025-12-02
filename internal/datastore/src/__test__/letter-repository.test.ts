@@ -568,7 +568,7 @@ describe("LetterRepository", () => {
     );
     expect(Date.parse(result.updatedAt)).toBeLessThan(Date.now());
     expect(result.createdAt).toBe(existingLetter.createdAt);
-    expect(result.createdAt).toBe(result.supplierStatusSk);
+    expect(result.supplierStatusSk).toBe(existingLetter.supplierStatusSk);
     expect(result.ttl).toBe(existingLetter.ttl);
   });
 });
