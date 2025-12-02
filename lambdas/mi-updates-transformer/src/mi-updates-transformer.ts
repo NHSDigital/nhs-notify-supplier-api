@@ -4,7 +4,7 @@ import {
   PublishBatchRequestEntry,
 } from "@aws-sdk/client-sns";
 import { MISubmittedEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
-import mapMIToCloudEvent from "./mappers/mi-mapper";
+import { mapMIToCloudEvent } from "./mappers/mi-mapper";
 import { Deps } from "./deps";
 // SNS PublishBatchCommand supports up to 10 messages per batch
 const BATCH_SIZE = 10;
@@ -22,7 +22,7 @@ function buildMessage(event: MISubmittedEvent): PublishBatchRequestEntry {
   };
 }
 
-export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
+export function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
   return async (streamEvent: KinesisStreamEvent) => {
     deps.logger.info({ description: "Received event", streamEvent });
 

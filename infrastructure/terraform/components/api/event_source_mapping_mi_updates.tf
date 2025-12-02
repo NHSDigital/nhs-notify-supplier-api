@@ -1,7 +1,7 @@
 resource "aws_lambda_event_source_mapping" "mi_stream_forwarder_dynamodb" {
   event_source_arn                     = aws_dynamodb_table.mi.stream_arn
   function_name                        = module.mi_stream_forwarder.function_arn
-  starting_position                    = "LATEST"
+  starting_position                    = "TRIM_HORIZON"
   batch_size                           = 10
   maximum_batching_window_in_seconds   = 1
 
