@@ -1,4 +1,4 @@
-import {z} from 'zod';
+import { z } from "zod";
 
 const EnvVarsSchema = z.object({
   EVENTPUB_SNS_TOPIC_ARN: z.string(),
