@@ -7,10 +7,10 @@ import {
 } from "aws-lambda";
 import { mockDeep } from "jest-mock-extended";
 import { MI } from "@internal/datastore";
-import createHandler from "../mi-updates-transformer";
+import { createHandler } from "../mi-updates-transformer";
 import { Deps } from "../deps";
 import { EnvVars } from "../env";
-import mapMIToCloudEvent from "../mappers/mi-mapper";
+import { mapMIToCloudEvent } from "../mappers/mi-mapper";
 
 // Make crypto return consistent values, since we're calling it in both prod and test code and comparing the values
 const realCrypto = jest.requireActual("crypto");
