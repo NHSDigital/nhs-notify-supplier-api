@@ -50,10 +50,10 @@ export function EventEnvelope<TData extends z.ZodTypeAny>(
         examples: typeStrings,
       }),
 
-      plane: z.literal("data-plane").meta({
+      plane: z.literal("data").meta({
         title: "plane",
-        description: "Fixed as data-plane",
-        examples: ["data-plane"],
+        description: "The event bus that this event will be published to",
+        examples: ["data"],
       }),
 
       dataschema: z
@@ -72,11 +72,11 @@ export function EventEnvelope<TData extends z.ZodTypeAny>(
 
       dataschemaversion: z
         .string()
-        .regex(/^1.\d+.\d+$/)
+        .regex(/^1\.\d+\.\d+$/)
         .meta({
           title: "Data Schema URI",
           description: `Version of the schema that describes the event data\n\nMust match the version in dataschema`,
-          examples:["1.0.0"],
+          examples: ["1.0.0"],
         }),
 
       source: z

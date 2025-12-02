@@ -15,7 +15,7 @@
   "dataschema": "https://notify.nhs.uk/cloudevents/schemas/supplier-api/mi.SUBMITTED.2.0.0.schema.json",
   "dataschemaversion": "1.0.0",
   "id": "8f2c3b44-4e65-5b1b-a678-1f0bf3d4d222",
-  "plane": "data-plane",
+  "plane": "data",
   "recordedtime": "2025-11-16T10:30:00.250Z",
   "severitynumber": 2,
   "severitytext": "INFO",

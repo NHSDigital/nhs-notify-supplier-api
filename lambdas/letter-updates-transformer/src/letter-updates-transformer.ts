@@ -1,9 +1,12 @@
 
-import { Handler, KinesisStreamEvent } from "aws-lambda";
-import { mapLetterToCloudEvent } from "./mappers/letter-mapper";
+import { DynamoDBRecord, Handler, KinesisStreamEvent, KinesisStreamRecord } from "aws-lambda";
+import { unmarshall } from "@aws-sdk/util-dynamodb";
 import { PublishBatchCommand, PublishBatchRequestEntry } from "@aws-sdk/client-sns";
+import { mapLetterToCloudEvent } from "./mappers/letter-mapper";
 import { LetterEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
 import { Deps } from "./deps";
+import { LetterBase, LetterSchemaBase } from "@internal/datastore";
+
 
 // SNS PublishBatchCommand supports up to 10 messages per batch
 const BATCH_SIZE = 10;
@@ -13,20 +16,38 @@ export function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
     deps.logger.info({description: "Received event", streamEvent});
 
     const cloudEvents: LetterEvent[] = streamEvent.Records
-      .map((record) => {
-        // Kinesis data is base64 encoded
-        const payload = Buffer.from(record.kinesis.data, "base64").toString("utf-8");
-        return JSON.parse(payload);
-      })
+      .map(record => extractPayload(record, deps))
+      .filter(record => record.eventName === "MODIFY")
+      .filter(record => isChanged(record, "status") || isChanged(record, "reasonCode"))
+      .map(extractNewLetter)
       .map(mapLetterToCloudEvent);
 
-
     for (let batch of generateBatches(cloudEvents)) {
+      deps.logger.info({description: "Publishing batch", size: batch.length})
       await deps.snsClient.send(new PublishBatchCommand({
         TopicArn: deps.env.EVENTPUB_SNS_TOPIC_ARN,
         PublishBatchRequestEntries: batch.map(buildMessage),
       }));
     }
+  }
+
+  function extractPayload(record: KinesisStreamRecord, deps: Deps): DynamoDBRecord {
+    // Kinesis data is base64 encoded
+    const payload = Buffer.from(record.kinesis.data, "base64").toString("utf-8");
+    deps.logger.info({description: "Extracted dynamoDBRecord", payload})
+    return JSON.parse(payload);
+  }
+
+  function isChanged(record: DynamoDBRecord, property: string): boolean {
+    const oldValue = record.dynamodb?.OldImage![property];
+    const newValue = record.dynamodb?.NewImage![property];
+      return oldValue?.S !== newValue?.S;
+  }
+
+  function extractNewLetter(record: DynamoDBRecord): LetterBase
+  {
+    const newImage = record.dynamodb?.NewImage!;
+    return LetterSchemaBase.parse(unmarshall(newImage as any));
   }
 
   function* generateBatches(events: LetterEvent[]) {
@@ -41,4 +62,6 @@ export function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
       Message: JSON.stringify(event),
     }
   }
+
+
 }

@@ -5,13 +5,13 @@ import { randomUUID, randomBytes } from "crypto";
 export function mapLetterToCloudEvent(letter: LetterBase): LetterEvent {
   const now = new Date().toISOString();
   const eventId = randomUUID();
-  const dataschemaversion = '1.0.0';
+  const dataschemaversion = "1.1.5";
   return {
     specversion: "1.0",
     id: eventId,
-    type: `uk.nhs.notify.supplier-api.letter.${letter.status}.v1`,
-    plane: 'data-plane',
-    dataschema: `https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.${letter.status}.${dataschemaversion}.schema.json`,
+    type: `uk.nhs.notify.supplier-api.letter.${letter.status.toLowerCase()}.v1`,
+    plane: "data",
+    dataschema: `https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.${letter.status.toLowerCase()}.${dataschemaversion}.schema.json`,
     dataschemaversion,
     source: "/data-plane/supplier-api/letters",
     subject: "letter-origin/supplier-api/letter/" + letter.id,

@@ -1,12 +1,13 @@
 import { SNSClient } from "@aws-sdk/client-sns";
 import * as pino from "pino";
 import { createHandler } from "../letter-updates-transformer";
-import { KinesisStreamEvent, Context, KinesisStreamRecordPayload } from "aws-lambda";
+import { KinesisStreamEvent, Context, KinesisStreamRecordPayload, DynamoDBRecord } from "aws-lambda";
 import { mockDeep } from "jest-mock-extended";
 import { Deps } from "../deps";
 import { EnvVars } from "../env";
 import { LetterBase } from "@internal/datastore";
 import { mapLetterToCloudEvent } from "../mappers/letter-mapper";
+import { LetterStatus } from "../../../api-handler/src/contracts/letters";
 
 // Make crypto return consistent values, since we"re calling it in both prod and test code and comparing the values
 const realCrypto = jest.requireActual("crypto");
@@ -34,84 +35,187 @@ describe("letter-updates-transformer Lambda", () => {
     jest.useRealTimers();
   })
 
-  it("processes Kinesis events and publishes them to SNS", async () => {
+  describe("filtering", () => {
+    it("processes status changes and publishes them to SNS", async () => {
 
-    const handler = createHandler(mockedDeps);
-    const letters = generateLetters(1);
-    const expectedEntries = [expect.objectContaining({Message: JSON.stringify(mapLetterToCloudEvent(letters[0]))})];
+      const handler = createHandler(mockedDeps);
+      const oldLetter = generateLetter("ACCEPTED");
+      const newLetter = generateLetter("PRINTED");
+      const expectedEntries = [expect.objectContaining({Message: JSON.stringify(mapLetterToCloudEvent(newLetter))})];
 
-    await handler(generateKinesisEvent(letters), mockDeep<Context>(), jest.fn());
+      const testData = generateKinesisEvent([generateModifyRecord(oldLetter, newLetter)]);
+      await handler(testData, mockDeep<Context>(), jest.fn());
 
-    expect(mockedDeps.snsClient.send).toHaveBeenCalledWith(expect.objectContaining({
-      input: expect.objectContaining({
-        TopicArn: "arn:aws:sns:region:account:topic",
-        PublishBatchRequestEntries: expectedEntries,
-      })
-    }));
-  });
-
-  it ("batches mutiple records into a single call to SNS", async () => {
-
-    const handler = createHandler(mockedDeps);
-    const letters = generateLetters(10);
-    const expectedEntries = letters.map(letter =>
-      expect.objectContaining({Message: JSON.stringify(mapLetterToCloudEvent(letter))}));
-
-    await handler(generateKinesisEvent(letters), mockDeep<Context>(), jest.fn());
-
-    expect(mockedDeps.snsClient.send).toHaveBeenCalledWith(expect.objectContaining({
-      input: expect.objectContaining({
-        TopicArn: "arn:aws:sns:region:account:topic",
-        PublishBatchRequestEntries: expectedEntries,
-      })
-    }));
-  });
-
-  it("respects SNS's maximumum batch size of 10", async () => {
-
-    const handler = createHandler(mockedDeps);
-    const letters = generateLetters(21);
-    const expectedEntries = [
-      letters.slice(0, 10).map(
-        (letter, index) => expect.objectContaining({
-          Id: expect.stringMatching(new RegExp(`-${index}$`)),
-          Message: JSON.stringify(mapLetterToCloudEvent(letter))})),
-      letters.slice(10, 20).map(
-        (letter, index) => expect.objectContaining({
-          Id: expect.stringMatching(new RegExp(`-${index}$`)),
-          Message: JSON.stringify(mapLetterToCloudEvent(letter))})),
-      letters.slice(20).map(
-        (letter, index) => expect.objectContaining({
-          Id: expect.stringMatching(new RegExp(`-${index}$`)),
-          Message: JSON.stringify(mapLetterToCloudEvent(letter))})),
-    ];
-
-    await handler(generateKinesisEvent(letters), mockDeep<Context>(), jest.fn());
-
-    expect(mockedDeps.snsClient.send).toHaveBeenNthCalledWith(1,
-      expect.objectContaining({
+      expect(mockedDeps.snsClient.send).toHaveBeenCalledWith(expect.objectContaining({
         input: expect.objectContaining({
           TopicArn: "arn:aws:sns:region:account:topic",
-          PublishBatchRequestEntries: expectedEntries[0],
-        })}));
-    expect(mockedDeps.snsClient.send).toHaveBeenNthCalledWith(2,
-      expect.objectContaining({
+          PublishBatchRequestEntries: expectedEntries,
+        })
+      }));
+    });
+
+    it("publishes an event if a reason code is added", async () => {
+
+      const handler = createHandler(mockedDeps);
+      const oldLetter = generateLetter("ACCEPTED");
+      const newLetter = generateLetter("ACCEPTED");
+      newLetter.reasonCode = "R1";
+      const expectedEntries = [expect.objectContaining({Message: JSON.stringify(mapLetterToCloudEvent(newLetter))})];
+
+      const testData = generateKinesisEvent([generateModifyRecord(oldLetter, newLetter)]);
+      await handler(testData, mockDeep<Context>(), jest.fn());
+
+      expect(mockedDeps.snsClient.send).toHaveBeenCalledWith(expect.objectContaining({
         input: expect.objectContaining({
           TopicArn: "arn:aws:sns:region:account:topic",
-          PublishBatchRequestEntries: expectedEntries[1],
-        })}));
-    expect(mockedDeps.snsClient.send).toHaveBeenNthCalledWith(3,
-      expect.objectContaining({
+          PublishBatchRequestEntries: expectedEntries,
+        })
+      }));
+    });
+
+    it("publishes an event if a reason code is changed", async () => {
+
+      const handler = createHandler(mockedDeps);
+      const oldLetter = generateLetter("ACCEPTED");
+      const newLetter = generateLetter("ACCEPTED");
+      oldLetter.reasonCode = "R1";
+      newLetter.reasonCode = "R2";
+      const expectedEntries = [expect.objectContaining({Message: JSON.stringify(mapLetterToCloudEvent(newLetter))})];
+
+      const testData = generateKinesisEvent([generateModifyRecord(oldLetter, newLetter)]);
+      await handler(testData, mockDeep<Context>(), jest.fn());
+
+      expect(mockedDeps.snsClient.send).toHaveBeenCalledWith(expect.objectContaining({
         input: expect.objectContaining({
           TopicArn: "arn:aws:sns:region:account:topic",
-          PublishBatchRequestEntries: expectedEntries[2],
-        })}));
+          PublishBatchRequestEntries: expectedEntries,
+        })
+      }));
+    });
+
+    it("does not publish an event if neither status nor reason code changed", async () => {
+      const handler = createHandler(mockedDeps);
+      const oldLetter = generateLetter("ACCEPTED");
+      const newLetter = generateLetter("ACCEPTED");
+
+      const testData = generateKinesisEvent([generateModifyRecord(oldLetter, newLetter)]);
+      await handler(testData, mockDeep<Context>(), jest.fn());
+
+      expect(mockedDeps.snsClient.send).not.toHaveBeenCalled();
+    });
+
+    it("does not publish non-modify events", async () => {
+      const handler = createHandler(mockedDeps);
+      const newLetter = generateLetter("ACCEPTED");
+
+      const testData = generateKinesisEvent([generateInsertRecord( newLetter)]);
+      await handler(testData, mockDeep<Context>(), jest.fn());
+
+      expect(mockedDeps.snsClient.send).not.toHaveBeenCalled();
+    });
+
+    it("does not publish invalid letter data", async () => {
+      const handler = createHandler(mockedDeps);
+      const oldLetter = generateLetter("ACCEPTED");
+      const newLetter = {id: oldLetter.id} as LetterBase;
+
+      const testData = generateKinesisEvent([generateModifyRecord(oldLetter, newLetter)]);
+      await expect(handler(testData, mockDeep<Context>(), jest.fn())).rejects.toThrow();
+
+      expect(mockedDeps.snsClient.send).not.toHaveBeenCalled();
+    });
   });
 
 
-  function generateLetters(numLetters: number): LetterBase[] {
-    return  Array.from(Array(numLetters).keys())
-      .map(i => ({ id: String(i + 1), status: "PRINTED", specificationId: "spec1", groupId: "group1" }));
+  describe('Batching', () => {
+
+    it("batches mutiple records into a single call to SNS", async () => {
+      const handler = createHandler(mockedDeps);
+      const oldLetters = generateLetters(10, "ACCEPTED");
+      const newLetters = generateLetters(10, "PRINTED");
+      const expectedEntries = newLetters.map(letter =>
+        expect.objectContaining({Message: JSON.stringify(mapLetterToCloudEvent(letter))}));
+
+      const testData = generateKinesisEvent(oldLetters.map((oldLetter, i) => generateModifyRecord(oldLetter, newLetters[i])));
+      await handler(testData, mockDeep<Context>(), jest.fn());
+
+      expect(mockedDeps.snsClient.send).toHaveBeenCalledWith(expect.objectContaining({
+        input: expect.objectContaining({
+          TopicArn: "arn:aws:sns:region:account:topic",
+          PublishBatchRequestEntries: expectedEntries,
+        })
+      }));
+    });
+
+    it("respects SNS's maximumum batch size of 10", async () => {
+
+      const handler = createHandler(mockedDeps);
+      const oldLetters = generateLetters(21, "ACCEPTED");
+      const newLetters = generateLetters(21, "PRINTED");
+      const expectedEntries = [
+        newLetters.slice(0, 10).map(
+          (letter, index) => expect.objectContaining({
+            Id: expect.stringMatching(new RegExp(`-${index}$`)),
+            Message: JSON.stringify(mapLetterToCloudEvent(letter))})),
+        newLetters.slice(10, 20).map(
+          (letter, index) => expect.objectContaining({
+            Id: expect.stringMatching(new RegExp(`-${index}$`)),
+            Message: JSON.stringify(mapLetterToCloudEvent(letter))})),
+        newLetters.slice(20).map(
+          (letter, index) => expect.objectContaining({
+            Id: expect.stringMatching(new RegExp(`-${index}$`)),
+            Message: JSON.stringify(mapLetterToCloudEvent(letter))})),
+      ];
+
+      const testData = generateKinesisEvent(oldLetters.map((oldLetter, i) => generateModifyRecord(oldLetter, newLetters[i])));
+      await handler(testData, mockDeep<Context>(), jest.fn());
+
+      expect(mockedDeps.snsClient.send).toHaveBeenNthCalledWith(1,
+        expect.objectContaining({
+          input: expect.objectContaining({
+            TopicArn: "arn:aws:sns:region:account:topic",
+            PublishBatchRequestEntries: expectedEntries[0],
+          })}));
+      expect(mockedDeps.snsClient.send).toHaveBeenNthCalledWith(2,
+        expect.objectContaining({
+          input: expect.objectContaining({
+            TopicArn: "arn:aws:sns:region:account:topic",
+            PublishBatchRequestEntries: expectedEntries[1],
+          })}));
+      expect(mockedDeps.snsClient.send).toHaveBeenNthCalledWith(3,
+        expect.objectContaining({
+          input: expect.objectContaining({
+            TopicArn: "arn:aws:sns:region:account:topic",
+            PublishBatchRequestEntries: expectedEntries[2],
+          })}));
+    });
+
+  });
+
+  function generateLetter(status: LetterStatus, id?: string): LetterBase {
+    return { id: id || '1', status: status, specificationId: "spec1", groupId: "group1" };
+  }
+
+  function generateLetters(numLetters: number, status: LetterStatus): LetterBase[] {
+    return Array.from(Array(numLetters).keys())
+      .map(i => generateLetter(status, String(i + 1)));
+  }
+
+  function generateModifyRecord(oldLetter: LetterBase, newLetter: LetterBase): DynamoDBRecord {
+    const oldImage = Object.fromEntries(Object.entries(oldLetter).map(([key, value]) => [key, {'S': value}]));
+    const newImage = Object.fromEntries(Object.entries(newLetter).map(([key, value]) => [key, {'S': value}]));
+    return {
+      eventName: "MODIFY",
+      dynamodb: {OldImage: oldImage, NewImage: newImage}
+    }
+  }
+
+  function generateInsertRecord(newLetter: LetterBase): DynamoDBRecord {
+    const newImage = Object.fromEntries(Object.entries(newLetter).map(([key, value]) => [key, {'S': value}]));
+    return {
+      eventName: "INSERT",
+      dynamodb: {NewImage: newImage}
+    }
   }
 
   function generateKinesisEvent(letterEvents: Object[]): KinesisStreamEvent {

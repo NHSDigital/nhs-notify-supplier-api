@@ -17,7 +17,7 @@
   "dataschema": "https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.RETURNED.1.0.0.schema.json",
   "dataschemaversion": "1.0.0",
   "id": "23f1f09c-a555-4d9b-8405-0b33490bc920",
-  "plane": "data-plane",
+  "plane": "data",
   "recordedtime": "2025-08-28T08:45:00.000Z",
   "severitynumber": 2,
   "severitytext": "INFO",
