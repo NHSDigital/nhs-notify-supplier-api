@@ -1,6 +1,6 @@
 import { $MISubmittedEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
 import { MI } from "@internal/datastore";
-import mapMIToCloudEvent from "../mi-mapper";
+import { mapMIToCloudEvent } from "../mi-mapper";
 
 describe("mi-mapper", () => {
   it("maps an MI to an MI event", async () => {
