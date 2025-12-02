@@ -2,7 +2,7 @@ import { MI } from "@internal/datastore";
 import { MISubmittedEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
 import { randomBytes, randomUUID } from "node:crypto";
 
-export default function mapMIToCloudEvent(mi: MI): MISubmittedEvent {
+export function mapMIToCloudEvent(mi: MI): MISubmittedEvent {
   const now = new Date().toISOString();
   const eventId = randomUUID();
   const dataschemaversion = "1.0.0";
