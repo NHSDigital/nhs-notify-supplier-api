@@ -1,9 +1,9 @@
 import { $LetterEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
-import { mapLetterToCloudEvent } from "../letter-mapper";
 import { LetterBase } from "@internal/datastore";
+import mapLetterToCloudEvent from "../letter-mapper";
 
 describe("letter-mapper", () => {
-  it("maps a letter to a letter event", async() => {
+  it("maps a letter to a letter event", async () => {
     const letter: LetterBase = {
       id: "id1",
       specificationId: "spec1",
@@ -42,5 +42,5 @@ describe("letter-mapper", () => {
     });
 
     jest.useRealTimers();
-  })
+  });
 });

@@ -109,14 +109,12 @@ export function EventEnvelope<TData extends z.ZodTypeAny>(
         examples: ["2025-10-01T10:15:30.000Z"],
       }),
 
-      datacontenttype:
-        z.literal("application/json").meta({
-          title: "Data Content Type",
-          description:
-            "Media type for the data field (fixed to application/json).",
-          examples: ["application/json"],
-        },
-      ),
+      datacontenttype: z.literal("application/json").meta({
+        title: "Data Content Type",
+        description:
+          "Media type for the data field (fixed to application/json).",
+        examples: ["application/json"],
+      }),
 
       traceparent: z
         .string()
