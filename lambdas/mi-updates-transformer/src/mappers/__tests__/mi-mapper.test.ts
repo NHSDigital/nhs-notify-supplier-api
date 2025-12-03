@@ -25,8 +25,9 @@ describe("mi-mapper", () => {
     expect(event.type).toBe("uk.nhs.notify.supplier-api.mi.SUBMITTED.v1");
     expect(event.plane).toBe("data");
     expect(event.dataschema).toBe(
-      "https://notify.nhs.uk/cloudevents/schemas/supplier-api/mi.SUBMITTED.1.1.4.schema.json",
+      "https://notify.nhs.uk/cloudevents/schemas/supplier-api/mi.SUBMITTED.1.1.5.schema.json",
     );
+    expect(event.dataschemaversion).toBe("1.1.5");
     expect(event.subject).toBe("mi/id1");
     expect(event.time).toBe("2025-11-24T15:55:18.000Z");
     expect(event.recordedtime).toBe("2025-11-24T15:55:18.000Z");
