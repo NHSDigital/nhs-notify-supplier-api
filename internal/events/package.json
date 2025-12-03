@@ -46,8 +46,9 @@
     "pretest:unit": "npm run gen:jsonschema",
     "start": "node dist/index.js",
     "test": "npm run test:unit",
-    "test:unit": "jest"
+    "test:unit": "jest",
+    "typecheck": "tsc --noEmit"
   },
   "types": "dist/index.d.ts",
-  "version": "1.0.2"
+  "version": "1.0.3"
 }

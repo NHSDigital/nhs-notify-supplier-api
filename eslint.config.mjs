@@ -184,7 +184,7 @@ export default defineConfig([
     rules: { 'no-relative-import-paths/no-relative-import-paths': 2 },
   },
   {
-    files: ['scripts/**'],
+    files: ['scripts/**', '**/__test__/**/*.ts', '**/__tests__/**/*.ts'],
     rules: {
       'import-x/no-extraneous-dependencies': [
         'error',
@@ -229,8 +229,8 @@ export default defineConfig([
       'no-await-in-loop': 0,
       'no-plusplus': [2, { allowForLoopAfterthoughts: true }],
       'unicorn/prefer-top-level-await': 0,
-      'import-x/no-relative-packages': 1,
-      'no-relative-import-paths/no-relative-import-paths': 1
+      'import-x/no-relative-packages': 0,
+      'no-relative-import-paths/no-relative-import-paths': 0
     },
   },
 ]);
