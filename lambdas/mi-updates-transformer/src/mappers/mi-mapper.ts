@@ -5,7 +5,7 @@ import { randomBytes, randomUUID } from "node:crypto";
 export function mapMIToCloudEvent(mi: MI): MISubmittedEvent {
   const now = new Date().toISOString();
   const eventId = randomUUID();
-  const dataschemaversion = "1.1.4";
+  const dataschemaversion = "1.1.5";
 
   return {
     specversion: "1.0",
@@ -13,6 +13,7 @@ export function mapMIToCloudEvent(mi: MI): MISubmittedEvent {
     type: `uk.nhs.notify.supplier-api.mi.SUBMITTED.v1`,
     plane: "data",
     dataschema: `https://notify.nhs.uk/cloudevents/schemas/supplier-api/mi.SUBMITTED.${dataschemaversion}.schema.json`,
+    dataschemaversion,
     source: "/data-plane/supplier-api/mi",
     subject: `mi/${mi.id}`,
 
