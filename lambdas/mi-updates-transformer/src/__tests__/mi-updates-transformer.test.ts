@@ -1,7 +1,9 @@
 import { SNSClient } from "@aws-sdk/client-sns";
 import * as pino from "pino";
 import {
+  AttributeValue,
   Context,
+  DynamoDBRecord,
   KinesisStreamEvent,
   KinesisStreamRecordPayload,
 } from "aws-lambda";
@@ -48,6 +50,25 @@ function generateMIEvents(numMIEvents: number): MI[] {
   }));
 }
 
+function toAttr(value: unknown): AttributeValue {
+  if (value === null || value === undefined) return { NULL: true };
+  if (typeof value === "string") return { S: value };
+  if (typeof value === "number") return { N: String(value) };
+  if (typeof value === "boolean") return { BOOL: value };
+  // fallback: stringify anything else
+  return { S: JSON.stringify(value) };
+}
+
+function generateInsertRecord(newMI: MI): DynamoDBRecord {
+  const newImage = Object.fromEntries(
+    Object.entries(newMI).map(([key, value]) => [key, toAttr(value)]),
+  );
+  return {
+    eventName: "INSERT",
+    dynamodb: { NewImage: newImage },
+  };
+}
+
 describe("mi-updates-transformer Lambda", () => {
   const mockedDeps: jest.Mocked<Deps> = {
     snsClient: { send: jest.fn() } as unknown as SNSClient,
@@ -74,11 +95,9 @@ describe("mi-updates-transformer Lambda", () => {
       }),
     ];
 
-    await handler(
-      generateKinesisEvent(miEvents),
-      mockDeep<Context>(),
-      jest.fn(),
-    );
+    const insertMI = generateInsertRecord(miEvents[0]);
+    const testData = generateKinesisEvent([insertMI]);
+    await handler(testData, mockDeep<Context>(), jest.fn());
 
     expect(mockedDeps.snsClient.send).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -99,11 +118,9 @@ describe("mi-updates-transformer Lambda", () => {
       }),
     );
 
-    await handler(
-      generateKinesisEvent(miEvents),
-      mockDeep<Context>(),
-      jest.fn(),
-    );
+    const insertMIs = miEvents.map((miEvent) => generateInsertRecord(miEvent));
+    const testData = generateKinesisEvent(insertMIs);
+    await handler(testData, mockDeep<Context>(), jest.fn());
 
     expect(mockedDeps.snsClient.send).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -136,11 +153,9 @@ describe("mi-updates-transformer Lambda", () => {
       ),
     ];
 
-    await handler(
-      generateKinesisEvent(miEvents),
-      mockDeep<Context>(),
-      jest.fn(),
-    );
+    const insertMIs = miEvents.map((miEvent) => generateInsertRecord(miEvent));
+    const testData = generateKinesisEvent(insertMIs);
+    await handler(testData, mockDeep<Context>(), jest.fn());
 
     expect(mockedDeps.snsClient.send).toHaveBeenNthCalledWith(
       1,
