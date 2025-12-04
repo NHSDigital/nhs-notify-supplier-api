@@ -4,6 +4,7 @@ import {
   KinesisStreamEvent,
   KinesisStreamRecord,
 } from "aws-lambda";
+import { unmarshall } from "@aws-sdk/util-dynamodb";
 import { MI, MISchema } from "@internal/datastore";
 import {
   PublishBatchCommand,
