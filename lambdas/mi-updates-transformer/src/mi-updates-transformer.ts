@@ -1,5 +1,10 @@
-import { Handler, KinesisStreamEvent, KinesisStreamRecord } from "aws-lambda";
-import { MI } from "@internal/datastore";
+import {
+  DynamoDBRecord,
+  Handler,
+  KinesisStreamEvent,
+  KinesisStreamRecord,
+} from "aws-lambda";
+import { MI, MISchema } from "@internal/datastore";
 import {
   PublishBatchCommand,
   PublishBatchRequestEntry,
@@ -28,18 +33,28 @@ function buildMessage(
   return message;
 }
 
-function extractPayload(record: KinesisStreamRecord, deps: Deps): MI {
+function extractPayload(
+  record: KinesisStreamRecord,
+  deps: Deps,
+): DynamoDBRecord {
   const payload = Buffer.from(record.kinesis.data, "base64").toString("utf8");
   deps.logger.info({ description: "Extracted payload", payload });
   return JSON.parse(payload);
+}
+
+function extractMIData(record: DynamoDBRecord): MI {
+  const newImage = record.dynamodb?.NewImage!;
+  return MISchema.parse(unmarshall(newImage as any));
 }
 
 export function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
   return async (streamEvent: KinesisStreamEvent) => {
     deps.logger.info({ description: "Received event", streamEvent });
 
-    const cloudEvents: MISubmittedEvent[] = streamEvent.Records
-      .map((record) => extractPayload(record, deps))
+    const cloudEvents: MISubmittedEvent[] = streamEvent.Records.map((record) =>
+      extractPayload(record, deps),
+    )
+      .map((element) => extractMIData(element))
       .map((payload) => mapMIToCloudEvent(payload, deps));
 
     for (const batch of generateBatches(cloudEvents)) {
