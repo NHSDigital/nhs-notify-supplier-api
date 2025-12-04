@@ -18,6 +18,7 @@ describe("MI event validations", () => {
     expect(event).toEqual(
       expect.objectContaining({
         type: "uk.nhs.notify.supplier-api.mi.SUBMITTED.v1",
+        plane: "data",
         specversion: "1.0",
         source: "/data-plane/supplier-api/prod/submit-mi",
         id: "8f2c3b44-4e65-5b1b-a678-1f0bf3d4d222",

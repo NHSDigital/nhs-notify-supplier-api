@@ -1,8 +1,8 @@
-module "letter_updates_transformer" {
+module "mi_updates_transformer" {
   source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-lambda.zip"
 
-  function_name = "letter-updates-transformer"
-  description   = "Letter Update Filter/Producer"
+  function_name = "mi-updates-transformer"
+  description   = "MI Update Filter/Producer"
 
   aws_account_id = var.aws_account_id
   component      = var.component
@@ -15,12 +15,12 @@ module "letter_updates_transformer" {
   kms_key_arn           = module.kms.key_arn
 
   iam_policy_document = {
-    body = data.aws_iam_policy_document.letter_updates_transformer_lambda.json
+    body = data.aws_iam_policy_document.mi_updates_transformer_lambda.json
   }
 
   function_s3_bucket      = local.acct.s3_buckets["lambda_function_artefacts"]["id"]
   function_code_base_path = local.aws_lambda_functions_dir_path
-  function_code_dir       = "letter-updates-transformer/dist"
+  function_code_dir       = "mi-updates-transformer/dist"
   function_include_common = true
   handler_function_name   = "handler"
   runtime                 = "nodejs22.x"
@@ -40,7 +40,7 @@ module "letter_updates_transformer" {
   })
 }
 
-data "aws_iam_policy_document" "letter_updates_transformer_lambda" {
+data "aws_iam_policy_document" "mi_updates_transformer_lambda" {
   statement {
     sid    = "AllowSNSPublish"
     effect = "Allow"
@@ -68,7 +68,7 @@ data "aws_iam_policy_document" "letter_updates_transformer_lambda" {
     ]
 
     resources = [
-      aws_kinesis_stream.letter_change_stream.arn
+      aws_kinesis_stream.mi_change_stream.arn
     ]
   }
 }

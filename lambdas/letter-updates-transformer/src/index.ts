@@ -1,12 +1,7 @@
-// Replace me with the actual code for your Lambda function
-import { Handler } from "aws-lambda";
+import createHandler from "./letter-updates-transformer";
+import { createDependenciesContainer } from "./deps";
 
-const handler: Handler = async (event) => {
-  console.log("Received event:", event);
-  return {
-    statusCode: 200,
-    body: "Event logged",
-  };
-};
+const container = createDependenciesContainer();
 
+const handler = createHandler(container);
 export default handler;
