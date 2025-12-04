@@ -12,9 +12,9 @@ export default function mapLetterToCloudEvent(
   return {
     specversion: "1.0",
     id: eventId,
-    type: `uk.nhs.notify.supplier-api.letter.${letter.status.toLowerCase()}.v1`,
+    type: `uk.nhs.notify.supplier-api.letter.${letter.status}.v1`,
     plane: "data",
-    dataschema: `https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.${letter.status.toLowerCase()}.${dataschemaversion}.schema.json`,
+    dataschema: `https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.${letter.status}.${dataschemaversion}.schema.json`,
     dataschemaversion,
     source: "/data-plane/supplier-api/letters",
     subject: `letter-origin/supplier-api/letter/${letter.id}`,
