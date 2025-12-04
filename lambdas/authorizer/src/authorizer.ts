@@ -10,10 +10,34 @@ import {
 import { Supplier } from "@internal/datastore";
 import { Deps } from "./deps";
 
-const getSupplier = async (
+export default function createAuthorizerHandler(
+  deps: Deps,
+): APIGatewayRequestAuthorizerHandler {
+  return (
+    event: APIGatewayRequestAuthorizerEvent,
+    context: Context,
+    callback: Callback<APIGatewayAuthorizerResult>,
+  ): void => {
+    deps.logger.info(event, "Received event");
+
+    checkCertificateExpiry(event.requestContext.identity.clientCert, deps);
+
+    getSupplier(event.headers, deps)
+      .then((supplier: Supplier) => {
+        deps.logger.info("Allow event");
+        callback(null, generateAllow(event.methodArn, supplier.id));
+      })
+      .catch((error) => {
+        deps.logger.info(error, "Deny event");
+        callback(null, generateDeny(event.methodArn));
+      });
+  };
+}
+
+async function getSupplier(
   headers: APIGatewayRequestAuthorizerEventHeaders | null,
   deps: Deps,
-): Promise<Supplier> => {
+): Promise<Supplier> {
   const apimId = Object.entries(headers || {}).find(
     ([headerName, _]) =>
       headerName.toLowerCase() ===
@@ -28,13 +52,13 @@ const getSupplier = async (
     throw new Error(`Supplier ${supplier.id} is disabled`);
   }
   return supplier;
-};
+}
 
-const generatePolicy = (
+function generatePolicy(
   principalId: string,
   effect: "Allow" | "Deny",
   resource: string,
-): APIGatewayAuthorizerResult => {
+): APIGatewayAuthorizerResult {
   const authResponse: APIGatewayAuthorizerResult = {
     principalId,
     policyDocument: {
@@ -49,31 +73,31 @@ const generatePolicy = (
     },
   };
   return authResponse;
-};
+}
 
-const generateAllow = (
+function generateAllow(
   resource: string,
   supplierId: string,
-): APIGatewayAuthorizerResult => {
+): APIGatewayAuthorizerResult {
   return generatePolicy(supplierId, "Allow", resource);
-};
+}
 
-const generateDeny = (resource: string): APIGatewayAuthorizerResult => {
+function generateDeny(resource: string): APIGatewayAuthorizerResult {
   return generatePolicy("invalid-user", "Deny", resource);
-};
+}
 
-const getCertificateExpiryInDays = (
+function getCertificateExpiryInDays(
   certificate: APIGatewayEventClientCertificate,
-): number => {
+): number {
   const now = Date.now();
   const expiry = new Date(certificate.validity.notAfter).getTime();
   return (expiry - now) / (1000 * 60 * 60 * 24);
-};
+}
 
-const buildCloudWatchMetric = (
+function buildCloudWatchMetric(
   namespace: string,
   certificate: APIGatewayEventClientCertificate,
-) => {
+) {
   return {
     _aws: {
       Timestamp: Date.now(),
@@ -95,12 +119,12 @@ const buildCloudWatchMetric = (
     NOT_AFTER: certificate.validity.notAfter,
     "apim-client-certificate-near-expiry": 1,
   };
-};
+}
 
-const checkCertificateExpiry = async (
+async function checkCertificateExpiry(
   certificate: APIGatewayEventClientCertificate | null,
   deps: Deps,
-): Promise<void> => {
+): Promise<void> {
   deps.logger.info({
     description: "Client certificate details",
     issuerDN: certificate?.issuerDN,
@@ -122,30 +146,4 @@ const checkCertificateExpiry = async (
       ),
     );
   }
-};
-
-const createAuthorizerHandler = (
-  deps: Deps,
-): APIGatewayRequestAuthorizerHandler => {
-  return (
-    event: APIGatewayRequestAuthorizerEvent,
-    context: Context,
-    callback: Callback<APIGatewayAuthorizerResult>,
-  ): void => {
-    deps.logger.info(event, "Received event");
-
-    checkCertificateExpiry(event.requestContext.identity.clientCert, deps);
-
-    getSupplier(event.headers, deps)
-      .then((supplier: Supplier) => {
-        deps.logger.info("Allow event");
-        callback(null, generateAllow(event.methodArn, supplier.id));
-      })
-      .catch((error) => {
-        deps.logger.info(error, "Deny event");
-        callback(null, generateDeny(event.methodArn));
-      });
-  };
-};
-
-export default createAuthorizerHandler;
+}
