@@ -13,4 +13,59 @@ module "sqs_letter_updates" {
   visibility_timeout_seconds = 60
 
   create_dlq = true
+  sqs_policy_overload = data.aws_iam_policy_document.letter_updates_queue_policy.json
+}
+
+data "aws_iam_policy_document" "letter_updates_queue_policy" {
+  version = "2012-10-17"
+  statement {
+    sid    = "AllowSNSToSendMessage"
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["sns.amazonaws.com"]
+    }
+
+    actions = [
+      "sqs:SendMessage"
+    ]
+
+    resources = [
+      "arn:aws:sqs:${var.region}:${var.aws_account_id}:${var.project}-${var.environment}-${var.component}-letter-updates-queue"
+    ]
+
+    condition {
+      test     = "ArnEquals"
+      variable = "aws:SourceArn"
+      values   = [module.eventsub.sns_topic.arn]
+    }
+  }
+
+  statement {
+    sid    = "AllowSNSPermissions"
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["sns.amazonaws.com"]
+    }
+
+    actions = [
+      "sqs:SendMessage",
+      "sqs:ListQueueTags",
+      "sqs:GetQueueUrl",
+      "sqs:GetQueueAttributes",
+    ]
+
+    resources = [
+      "arn:aws:sqs:${var.region}:${var.aws_account_id}:${var.project}-${var.environment}-${var.component}-letter-updates-queue"
+    ]
+
+    condition {
+      test     = "ArnEquals"
+      variable = "aws:SourceArn"
+      values   = [module.eventsub.sns_topic.arn]
+    }
+  }
 }
