@@ -1,4 +1,5 @@
-import { Handler, KinesisStreamEvent } from "aws-lambda";
+import { Handler, KinesisStreamEvent, KinesisStreamRecord } from "aws-lambda";
+import { MI } from "@internal/datastore";
 import {
   PublishBatchCommand,
   PublishBatchRequestEntry,
@@ -15,25 +16,30 @@ function* generateBatches(events: MISubmittedEvent[]) {
   }
 }
 
-function buildMessage(event: MISubmittedEvent): PublishBatchRequestEntry {
-  return {
+function buildMessage(
+  event: MISubmittedEvent,
+  deps: Deps,
+): PublishBatchRequestEntry {
+  const message = {
     Id: event.id,
     Message: JSON.stringify(event),
   };
+  deps.logger.info({ description: "Built message", message });
+  return message;
+}
+
+function extractPayload(record: KinesisStreamRecord, deps: Deps): MI {
+  const payload = Buffer.from(record.kinesis.data, "base64").toString("utf8");
+  deps.logger.info({ description: "Extracted payload", payload });
+  return JSON.parse(payload);
 }
 
 export function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
   return async (streamEvent: KinesisStreamEvent) => {
     deps.logger.info({ description: "Received event", streamEvent });
 
-    const cloudEvents: MISubmittedEvent[] = streamEvent.Records.map(
-      (record) => {
-        // Kinesis data is base64 encoded
-        const payload = Buffer.from(record.kinesis.data, "base64").toString(
-          "utf8",
-        );
-        return JSON.parse(payload);
-      },
+    const cloudEvents: MISubmittedEvent[] = streamEvent.Records.map((record) =>
+      extractPayload(record, deps),
     ).map((element) => mapMIToCloudEvent(element));
 
     for (const batch of generateBatches(cloudEvents)) {
@@ -41,7 +47,7 @@ export function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
         new PublishBatchCommand({
           TopicArn: deps.env.EVENTPUB_SNS_TOPIC_ARN,
           PublishBatchRequestEntries: batch.map((element) =>
-            buildMessage(element),
+            buildMessage(element, deps),
           ),
         }),
       );
