@@ -1,10 +1,10 @@
 import { SQSEvent } from "aws-lambda";
 import pino from "pino";
 import { LetterRepository } from "internal/datastore/src";
-import createUpsertLetterHandler from "../handler/upsert-handler";
-import { Deps } from "../config/deps";
-import { EnvVars } from "../config/env";
-import { LetterRequestPreparedEvent } from "../contracts/letters";
+import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
+import createUpsertLetterHandler from "../upsert-handler";
+import { Deps } from "../../config/deps";
+import { EnvVars } from "../../config/env";
 
 function createValidEvent(
   overrides: Partial<any> = {},
@@ -17,15 +17,14 @@ function createValidEvent(
     id: overrides.id ?? "7b9a03ca-342a-4150-b56b-989109c45613",
     source: "/data-plane/letter-rendering/test",
     subject: "client/client1/letter-request/letterRequest1",
-    type: "uk.nhs.notify.letter-rendering.letter-request.PREPARED.v1",
+    type: "uk.nhs.notify.letter-rendering.letter-request.prepared.v1",
     time: now,
     dataschema:
-      "https://notify.nhs.uk/cloudevents/schemas/letter-rendering/letter-request.PREPARED.1.0.0.schema.json",
+      "https://notify.nhs.uk/cloudevents/schemas/letter-rendering/letter-request.prepared.1.0.0.schema.json",
     dataschemaversion: "1.0.0",
     data: {
       domainId: overrides.domainId ?? "letter1",
-      supplierId: overrides.supplierId ?? "supplier1",
-      specificationId: overrides.specificationId ?? "spec1",
+      letterVariantId: overrides.letterVariantId ?? "lv1",
       requestId: overrides.requestId ?? "request1",
       requestItemId: overrides.requestItemId ?? "requestItem1",
       requestItemPlanId: overrides.requestItemPlanId ?? "requestItemPlan1",
@@ -38,11 +37,12 @@ function createValidEvent(
       createdAt: now,
       pageCount: 1,
       status: "PREPARED",
-      urgency: "STANDARD",
     },
     traceparent: "00-0af7651916cd43dd8448eb211c803191-b7ad6b7169203331-01",
     recordedtime: now,
-    severitynumber: 1,
+    severitynumber: 2,
+    severitytext: "INFO",
+    plane: "data",
   };
 }
 
@@ -51,11 +51,17 @@ describe("createUpsertLetterHandler", () => {
     letterRepo: {
       upsertLetter: jest.fn(),
     } as unknown as LetterRepository,
-    logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
+    logger: { error: jest.fn() } as unknown as pino.Logger,
     env: {
       LETTERS_TABLE_NAME: "LETTERS_TABLE_NAME",
       LETTER_TTL_HOURS: 12_960,
-    } as unknown as EnvVars,
+      VARIANT_MAP: {
+        lv1: {
+          supplierId: "supplier1",
+          specId: "spec1",
+        },
+      },
+    } as EnvVars,
   } as Deps;
 
   beforeEach(() => {

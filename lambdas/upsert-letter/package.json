@@ -3,6 +3,7 @@
     "@aws-sdk/client-dynamodb": "^3.858.0",
     "@aws-sdk/lib-dynamodb": "^3.858.0",
     "@internal/datastore": "*",
+    "@nhsdigital/nhs-notify-event-schemas-letter-rendering": "^1.1.5",
     "@types/aws-lambda": "^8.10.148",
     "esbuild": "^0.24.0",
     "pino": "^9.7.0",
