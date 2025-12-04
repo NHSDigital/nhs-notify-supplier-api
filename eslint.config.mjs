@@ -80,7 +80,7 @@ export default defineConfig([
         eslintImportResolverTypescript.createTypeScriptImportResolver({
           project: [
             'lambdas/*/tsconfig.json',
-            'tests/test-team/tsconfig.json',
+            'tests/tsconfig.json',
             'internal/*/tsconfig.json',
           ],
         }),
@@ -219,6 +219,14 @@ export default defineConfig([
       'no-console': 0,
       'security/detect-non-literal-fs-filename': 0
     },
+  },
+
+  // No use before define relaxations
+  {
+    rules: {
+      "no-use-before-define": "off",
+      "@typescript-eslint/no-use-before-define": "error"
+    }
   },
 
   // misc rule overrides

@@ -109,6 +109,7 @@ const checkCertificateExpiry = async (
   });
 
   if (!certificate) {
+    // In a real production environment, we won't have got this far if there wasn't a cert
     return;
   }
 
