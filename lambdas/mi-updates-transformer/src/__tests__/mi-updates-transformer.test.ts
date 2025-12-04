@@ -70,7 +70,7 @@ describe("mi-updates-transformer Lambda", () => {
     const miEvents = generateMIEvents(1);
     const expectedEntries = [
       expect.objectContaining({
-        Message: JSON.stringify(mapMIToCloudEvent(miEvents[0])),
+        Message: JSON.stringify(mapMIToCloudEvent(miEvents[0], mockedDeps)),
       }),
     ];
 
@@ -95,7 +95,7 @@ describe("mi-updates-transformer Lambda", () => {
     const miEvents = generateMIEvents(10);
     const expectedEntries = miEvents.map((miEvent) =>
       expect.objectContaining({
-        Message: JSON.stringify(mapMIToCloudEvent(miEvent)),
+        Message: JSON.stringify(mapMIToCloudEvent(miEvent, mockedDeps)),
       }),
     );
 
@@ -121,17 +121,17 @@ describe("mi-updates-transformer Lambda", () => {
     const expectedEntries = [
       miEvents.slice(0, 10).map((miEvent) =>
         expect.objectContaining({
-          Message: JSON.stringify(mapMIToCloudEvent(miEvent)),
+          Message: JSON.stringify(mapMIToCloudEvent(miEvent, mockedDeps)),
         }),
       ),
       miEvents.slice(10, 20).map((miEvent) =>
         expect.objectContaining({
-          Message: JSON.stringify(mapMIToCloudEvent(miEvent)),
+          Message: JSON.stringify(mapMIToCloudEvent(miEvent, mockedDeps)),
         }),
       ),
       miEvents.slice(20).map((miEvent) =>
         expect.objectContaining({
-          Message: JSON.stringify(mapMIToCloudEvent(miEvent)),
+          Message: JSON.stringify(mapMIToCloudEvent(miEvent, mockedDeps)),
         }),
       ),
     ];
