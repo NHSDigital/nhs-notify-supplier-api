@@ -49,10 +49,10 @@ components:
         This indicates that a letter has been accepted for processing by a supplier.
       contentType: application/json
       payload:
-        $ref: './events/letter.ACCEPTED.schema.json'
+        $ref: './events/letter.accepted.schema.json'
       examples:
         - payload:
-            $ref: './examples/letter.ACCEPTED.json'
+            $ref: './examples/letter.accepted.json'
 
     letter-cancelled:
       name: letter-cancelled
@@ -63,7 +63,7 @@ components:
         This indicates that a letter has been cancelled and will not be printed or dispatched.
       contentType: application/json
       payload:
-        $ref: './events/letter.CANCELLED.schema.json'
+        $ref: './events/letter.cancelled.schema.json'
 
     letter-delivered:
       name: letter-delivered
@@ -74,7 +74,7 @@ components:
         This indicates that a letter has been delivered to the recipient.
       contentType: application/json
       payload:
-        $ref: './events/letter.DELIVERED.schema.json'
+        $ref: './events/letter.delivered.schema.json'
 
     letter-dispatched:
       name: letter-dispatched
@@ -85,7 +85,7 @@ components:
         This indicates that a letter has been dispatched from the supplier to a down-stream access (DSA) provider.
       contentType: application/json
       payload:
-        $ref: './events/letter.DISPATCHED.schema.json'
+        $ref: './events/letter.dispatched.schema.json'
 
     letter-enclosed:
       name: letter-enclosed
@@ -96,7 +96,7 @@ components:
         This indicates that a letter has been printed and packaged in an envelope.
       contentType: application/json
       payload:
-        $ref: './events/letter.ENCLOSED.schema.json'
+        $ref: './events/letter.enclosed.schema.json'
 
     letter-failed:
       name: letter-failed
@@ -107,7 +107,7 @@ components:
         This indicates that a letter has failed to be processed by a supplier.
       contentType: application/json
       payload:
-        $ref: './events/letter.FAILED.schema.json'
+        $ref: './events/letter.failed.schema.json'
 
     letter-forwarded:
       name: letter-forwarded
@@ -118,10 +118,10 @@ components:
         This indicates that a letter has been forwarded to another supplier for processing.
       contentType: application/json
       payload:
-        $ref: './events/letter.FORWARDED.schema.json'
+        $ref: './events/letter.forwarded.schema.json'
       examples:
         - payload:
-            $ref: './examples/letter.FORWARDED.json'
+            $ref: './examples/letter.forwarded.json'
 
     letter-pending:
       name: letter-pending
@@ -132,7 +132,7 @@ components:
         This indicates that a letter has been queued for processing by a supplier.
       contentType: application/json
       payload:
-        $ref: './events/letter.PENDING.schema.json'
+        $ref: './events/letter.pending.schema.json'
 
     letter-printed:
       name: letter-printed
@@ -143,7 +143,7 @@ components:
         This indicates that a letter has been printed by the supplier.
       contentType: application/json
       payload:
-        $ref: './events/letter.PRINTED.schema.json'
+        $ref: './events/letter.printed.schema.json'
 
     letter-rejected:
       name: letter-rejected
@@ -154,7 +154,7 @@ components:
         This indicates that a letter has been rejected by the supplier and will not be processed.
       contentType: application/json
       payload:
-        $ref: './events/letter.REJECTED.schema.json'
+        $ref: './events/letter.rejected.schema.json'
 
     letter-returned:
       name: letter-returned
@@ -165,10 +165,10 @@ components:
         This indicates that a letter has been returned to the supplier.
       contentType: application/json
       payload:
-        $ref: './events/letter.RETURNED.schema.json'
+        $ref: './events/letter.returned.schema.json'
       examples:
         - payload:
-            $ref: './examples/letter.RETURNED.json'
+            $ref: './examples/letter.returned.json'
 
     letter-any:
       name: letter-any
@@ -188,7 +188,7 @@ components:
         This indicates that MI data has been submitted to the NHS Notify Supplier API.
       contentType: application/json
       payload:
-        $ref: './events/mi.SUBMITTED.schema.json'
+        $ref: './events/mi.submitted.schema.json'
 
   schemas:
     letter:

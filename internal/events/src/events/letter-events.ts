@@ -25,21 +25,24 @@ export type LetterEvent = z.infer<typeof $LetterEvent>;
  * Specialise the generic event schema for a single status
  * @param status
  */
-const eventSchema = (status: LetterStatus) =>
-  EventEnvelope(
-    `letter.${status}`,
+const eventSchema = (status: LetterStatus) => {
+  const statusLower = status.toLowerCase();
+
+  return EventEnvelope(
+    `letter.${statusLower}`,
     "letter",
     $Letter,
     [status],
     "letter-origin",
   ).meta({
-    title: `letter.${status} Event`,
+    title: `letter.${statusLower} Event`,
     description: `Event schema for letter status change to ${status}`,
   });
+};
 
 export const letterEventMap = Object.fromEntries(
   $LetterStatus.options.map((status) => [
-    `letter.${status}`,
+    `letter.${status.toLowerCase()}`,
     eventSchema(status),
   ]),
 );
