@@ -252,8 +252,10 @@ describe("letter-updates-transformer Lambda", () => {
   });
 });
 
-
-function generateLetter(status: LetterStatus, id?: string): LetterWithSupplierId {
+function generateLetter(
+  status: LetterStatus,
+  id?: string,
+): LetterWithSupplierId {
   return {
     id: id || "1",
     status,
@@ -267,9 +269,11 @@ function generateLetters(
   numLetters: number,
   status: LetterStatus,
 ): LetterWithSupplierId[] {
-  return [...new Array(numLetters).keys()].map((i) =>
-    generateLetter(status, String(i + 1)),
-  );
+  const letters: LetterWithSupplierId[] = Array.from({ length: numLetters });
+  for (let i = 0; i < numLetters; i++) {
+    letters[i] = generateLetter(status, String(i + 1));
+  }
+  return letters;
 }
 
 function generateModifyRecord(
