@@ -3,7 +3,7 @@
     "esModuleInterop": true,
     "resolveJsonModule": true
   },
-  "extends": "@tsconfig/node22/tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "include": [
     "src/**/*",
     "jest.config.ts"
