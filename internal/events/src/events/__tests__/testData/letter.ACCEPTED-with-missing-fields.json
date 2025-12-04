@@ -8,7 +8,8 @@
       "source": "/data-plane/letter-rendering/prod/render-pdf"
     },
     "specificationId": "1y3q9v1zzzz",
-    "status": "ACCEPTED"
+    "status": "ACCEPTED",
+    "supplierId": "supplier1"
   },
   "datacontenttype": "application/json",
   "dataschema": "https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.ACCEPTED.1.0.0.schema.json",

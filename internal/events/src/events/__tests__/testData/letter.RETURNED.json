@@ -11,7 +11,8 @@
     "reasonCode": "R07",
     "reasonText": "No such address",
     "specificationId": "1y3q9v1zzzz",
-    "status": "RETURNED"
+    "status": "RETURNED",
+    "supplierId": "supplier1"
   },
   "datacontenttype": "application/json",
   "dataschema": "https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.RETURNED.1.0.0.schema.json",

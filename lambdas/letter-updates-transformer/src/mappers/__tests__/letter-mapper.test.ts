@@ -1,17 +1,18 @@
 import { $LetterEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
-import { LetterBase } from "@internal/datastore";
+import { Letter } from "@internal/datastore";
 import mapLetterToCloudEvent from "../letter-mapper";
 
 describe("letter-mapper", () => {
   it("maps a letter to a letter event", async () => {
-    const letter: LetterBase = {
+    const letter = {
       id: "id1",
       specificationId: "spec1",
+      supplierId: "supplier1",
       groupId: "group1",
       status: "PRINTED",
       reasonCode: "R02",
       reasonText: "Reason text",
-    };
+    } as Letter;
     jest.useFakeTimers().setSystemTime(new Date("2025-11-24T15:55:18Z"));
 
     const event = mapLetterToCloudEvent(letter);
@@ -20,9 +21,9 @@ describe("letter-mapper", () => {
     $LetterEvent.parse(event);
     expect(event.type).toBe("uk.nhs.notify.supplier-api.letter.printed.v1");
     expect(event.dataschema).toBe(
-      "https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.printed.1.1.5.schema.json",
+      `https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.printed.${event.dataschemaversion}.schema.json`,
     );
-    expect(event.dataschemaversion).toBe("1.1.5");
+    expect(event.dataschemaversion).toBe("1.0.4");
     expect(event.subject).toBe("letter-origin/supplier-api/letter/id1");
     expect(event.time).toBe("2025-11-24T15:55:18.000Z");
     expect(event.recordedtime).toBe("2025-11-24T15:55:18.000Z");
@@ -30,6 +31,7 @@ describe("letter-mapper", () => {
       domainId: "id1",
       status: "PRINTED",
       specificationId: "spec1",
+      supplierId: "supplier1",
       groupId: "group1",
       reasonCode: "R02",
       reasonText: "Reason text",

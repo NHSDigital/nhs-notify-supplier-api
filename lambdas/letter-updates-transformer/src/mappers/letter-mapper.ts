@@ -1,11 +1,14 @@
-import { LetterBase } from "@internal/datastore";
 import { LetterEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
 import { randomBytes, randomUUID } from "node:crypto";
+import eventSchemaPackage from "@nhsdigital/nhs-notify-event-schemas-supplier-api/package.json";
+import { LetterWithSupplierId } from "../types";
 
-export default function mapLetterToCloudEvent(letter: LetterBase): LetterEvent {
+export default function mapLetterToCloudEvent(
+  letter: LetterWithSupplierId,
+): LetterEvent {
   const now = new Date().toISOString();
   const eventId = randomUUID();
-  const dataschemaversion = "1.1.5";
+  const dataschemaversion = eventSchemaPackage.version;
   return {
     specversion: "1.0",
     id: eventId,
@@ -20,6 +23,7 @@ export default function mapLetterToCloudEvent(letter: LetterBase): LetterEvent {
       domainId: letter.id as LetterEvent["data"]["domainId"],
       status: letter.status,
       specificationId: letter.specificationId,
+      supplierId: letter.supplierId,
       groupId: letter.groupId,
       reasonCode: letter.reasonCode,
       reasonText: letter.reasonText,

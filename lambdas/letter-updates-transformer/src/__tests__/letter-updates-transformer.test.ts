@@ -13,6 +13,7 @@ import { Deps } from "../deps";
 import { EnvVars } from "../env";
 import mapLetterToCloudEvent from "../mappers/letter-mapper";
 import { LetterStatus } from "../../../api-handler/src/contracts/letters";
+import { LetterWithSupplierId } from "../types";
 
 // Make crypto return consistent values, since we"re calling it in both prod and test code and comparing the values
 const realCrypto = jest.requireActual("crypto");
@@ -147,7 +148,7 @@ describe("letter-updates-transformer Lambda", () => {
     it("does not publish invalid letter data", async () => {
       const handler = createHandler(mockedDeps);
       const oldLetter = generateLetter("ACCEPTED");
-      const newLetter = { id: oldLetter.id } as LetterBase;
+      const newLetter = { id: oldLetter.id } as LetterWithSupplierId;
 
       const testData = generateKinesisEvent([
         generateModifyRecord(oldLetter, newLetter),
@@ -252,11 +253,12 @@ describe("letter-updates-transformer Lambda", () => {
 });
 
 
-function generateLetter(status: LetterStatus, id?: string): LetterBase {
+function generateLetter(status: LetterStatus, id?: string): LetterWithSupplierId {
   return {
     id: id || "1",
     status,
     specificationId: "spec1",
+    supplierId: "supplier1",
     groupId: "group1",
   };
 }
@@ -264,15 +266,15 @@ function generateLetter(status: LetterStatus, id?: string): LetterBase {
 function generateLetters(
   numLetters: number,
   status: LetterStatus,
-): LetterBase[] {
+): LetterWithSupplierId[] {
   return [...new Array(numLetters).keys()].map((i) =>
     generateLetter(status, String(i + 1)),
   );
 }
 
 function generateModifyRecord(
-  oldLetter: LetterBase,
-  newLetter: LetterBase,
+  oldLetter: LetterWithSupplierId,
+  newLetter: LetterWithSupplierId,
 ): DynamoDBRecord {
   const oldImage = Object.fromEntries(
     Object.entries(oldLetter).map(([key, value]) => [key, { S: value }]),
