@@ -38,9 +38,9 @@ export function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
   return async (streamEvent: KinesisStreamEvent) => {
     deps.logger.info({ description: "Received event", streamEvent });
 
-    const cloudEvents: MISubmittedEvent[] = streamEvent.Records.map((record) =>
-      extractPayload(record, deps),
-    ).map((element) => mapMIToCloudEvent(element));
+    const cloudEvents: MISubmittedEvent[] = streamEvent.Records
+      .map((record) => extractPayload(record, deps))
+      .map((payload) => mapMIToCloudEvent(payload, deps));
 
     for (const batch of generateBatches(cloudEvents)) {
       await deps.snsClient.send(
