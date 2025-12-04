@@ -3,5 +3,5 @@ import { createDependenciesContainer } from "./deps";
 
 const container = createDependenciesContainer();
 
-const handler = createHandler(container);
-export default handler;
+// eslint-disable-next-line import-x/prefer-default-export
+export const handler = createHandler(container);
