@@ -61,7 +61,9 @@ jobs:
             --targetEnvironment "main" \
             --targetAccountGroup "nhs-notify-supplier-api-dev" \
             --targetComponent "${{ matrix.component }}" \
-            --terraformAction "apply"
+            --terraformAction "apply" \
+            --overrideProjectName "nhs" \
+            --overrideRoleName "nhs-main-acct-supplier-api-github-deploy"
 
   check-event-schemas-version-change:
     name: Check for event schemas package version change
