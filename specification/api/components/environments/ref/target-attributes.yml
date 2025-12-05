@@ -1,0 +1,3 @@
+- name: NHSD-Supplier-ID
+  header: NHSD-Supplier-ID
+  required: true

@@ -1,1 +1,1 @@
-$ref: $AUTHORIZATION
+$ref: ../$ENV_DIR/authorization.yml

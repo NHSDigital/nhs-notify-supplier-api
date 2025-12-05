@@ -68,13 +68,4 @@ servers:
   - url: 'http://127.0.0.1:9000'
     description: Local development server
 x-nhsd-apim:
-  temporary: false
-  monitoring: false
-  access:
-    $ref: ./components/x-nhsd-apim/access.yml
-  target:
-    $ref: ./components/x-nhsd-apim/target.yml
-  target-attributes:
-    $ref: ./components/x-nhsd-apim/target-attributes.yml
-  ratelimiting:
-    $ref: ./components/x-nhsd-apim/rate-limiting.yml
+  $ref: './components/x-nhsd-apim/x-nhsd-apim.yml'

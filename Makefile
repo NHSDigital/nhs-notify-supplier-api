@@ -46,32 +46,26 @@ publish-oas:
 	npm run publish-oas
 
 set-authorization: guard-APIM_ENV
-	@ AUTHORIZATION=authorization-$$APIM_ENV.yml \
-	envsubst '$${AUTHORIZATION}' \
-	< specification/api/components/parameters/authorization/authorization-template.yml > specification/api/components/parameters/authorization/authorization.yml
+	SPEC_DIR=./specification/api/components/environments
+	COMPONENT_DIR=./specification/api/components/parameters/authorization
+	./scripts/build/substitute_build_env.sh $$COMPONENT_DIR/authorization-template.yml $$SPEC_DIR/$$APIM_ENV.env $$COMPONENT_DIR/authorization.yml
 
-set-target: guard-APIM_ENV
-	@ TARGET=target-$$APIM_ENV.yml \
-	envsubst '$${TARGET}' \
-	< specification/api/components/x-nhsd-apim/target-template.yml > specification/api/components/x-nhsd-apim/target.yml
-
-set-access: guard-APIM_ENV
-	@ ACCESS=access-$$APIM_ENV.yml \
-	envsubst '$${ACCESS}' \
-	< specification/api/components/x-nhsd-apim/access-template.yml > specification/api/components/x-nhsd-apim/access.yml
+set-nhsd-apim: guard-APIM_ENV
+	SPEC_DIR=./specification/api/components/environments
+	COMPONENT_DIR=./specification/api/components/x-nhsd-apim
+	./scripts/build/substitute_build_env.sh $$COMPONENT_DIR/x-nhsd-apim-template.yml $$SPEC_DIR/$$APIM_ENV.env $$COMPONENT_DIR/x-nhsd-apim.yml
 
 set-security: guard-APIM_ENV
-	@ SECURITY=security-$$APIM_ENV.yml \
-	envsubst '$${SECURITY}' \
-	< specification/api/components/security/security-template.yml > specification/api/components/security/security.yml
-	@ SECURITY_SCHEMES=security-schemes-$$APIM_ENV.yml \
-	envsubst '$${SECURITY_SCHEMES}' \
-	< specification/api/components/security-schemes/security-schemes-template.yml > specification/api/components/security-schemes/security-schemes.yml
+	SPEC_DIR=./specification/api/components/environments
+	COMPONENT_DIR=./specification/api/components/security
+	./scripts/build/substitute_build_env.sh $$COMPONENT_DIR/security-template.yml $$SPEC_DIR/$$APIM_ENV.env $$COMPONENT_DIR/security.yml
+	COMPONENT_DIR=./specification/api/components/security-schemes
+	./scripts/build/substitute_build_env.sh $$COMPONENT_DIR/security-schemes-template.yml $$SPEC_DIR/$$APIM_ENV.env $$COMPONENT_DIR/security-schemes.yml
+
 
 construct-spec: guard-APIM_ENV
+	$(MAKE) set-nhsd-apim APIM_ENV=$$APIM_ENV
 	$(MAKE) set-authorization APIM_ENV=$$APIM_ENV
-	$(MAKE) set-target APIM_ENV=$$APIM_ENV
-	$(MAKE) set-access APIM_ENV=$$APIM_ENV
 	$(MAKE) set-security APIM_ENV=$$APIM_ENV
 
 build-json-oas-spec: guard-APIM_ENV
