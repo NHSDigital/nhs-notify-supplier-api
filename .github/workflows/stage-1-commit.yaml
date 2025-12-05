@@ -266,7 +266,7 @@ jobs:
   check-event-schemas-version-change:
     name: Check for event schemas package version change
     needs: detect-event-schema-package-changes
-    # if: needs.detect-event-schema-package-changes.outputs.changed == 'true'
+    if: needs.detect-event-schema-package-changes.outputs.changed == 'true'
     outputs:
       version_changed: ${{ steps.check-version.outputs.version_changed }}
     runs-on: ubuntu-latest
