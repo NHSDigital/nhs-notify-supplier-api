@@ -237,42 +237,13 @@ jobs:
           echo "Detected package version $version in main branch"
           echo "main_version=$version" >> $GITHUB_OUTPUT
 
-#  check-schemas-generated:
-#    name: Check event schemas have been regenerated
-#    needs: detect-event-schema-package-changes
-#    if: needs.detect-event-schema-package-changes.outputs.changed == 'true'
-#    runs-on: ubuntu-latest
-#    permissions:
-#      contents: read
-#    steps:
-#      - name: "Checkout code"
-#        uses: actions/checkout@v4
-#
-#      - name: "Cache node_modules"
-#        uses: actions/cache@v4
-#        with:
-#          path: |
-#            **/node_modules
-#          key: ${{ runner.os }}-node-${{ inputs.nodejs_version }}-${{ hashFiles('**/package-lock.json') }}
-#          restore-keys: |
-#            ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
-#
-#      - name: "Re-generate schemas"
-#        run: |
-#          npm ci
-#          npm --workspace internal/events run gen:jsonschema
-#
-#      - name: Check for schema changes
-#        run: git diff --quiet internal/events/schemas
-
   check-schema-version-change:
     name: Check event schema version has been updated
     needs: detect-event-schema-package-changes
-    #if: needs.detect-event-schema-package-changes.outputs.changed == 'true' #REVERT
+    if: needs.detect-event-schema-package-changes.outputs.changed == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -292,12 +263,26 @@ jobs:
             exit 1
           fi
 
+  check-event-schemas-version-change:
+    name: Check for event schemas package version change
+    needs: detect-event-schema-package-changes
+    # if: needs.detect-event-schema-package-changes.outputs.changed == 'true'
+    outputs:
+      version_changed: ${{ steps.check-version.outputs.version_changed }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5.0.0
+
       - name: Setup NodeJS
         uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.nodejs_version }}
 
-      - name: Check if local version differs from latest published version
+      - name: check if local version differs from latest published version
         id: check-version
         run: |
           published_version=$(npm view @nhsdigital/nhs-notify-event-schemas-supplier-api --json 2>/dev/null | jq -r '.["dist-tags"].latest // "null"')
@@ -307,9 +292,10 @@ jobs:
           echo "Local version: $local_version"
 
           if [[ $local_version = $published_version ]]; then
-            echo "Local version is the same as the latest published version - skipping publish"
+            echo "ERROR: Local version is the same as the latest published version, but event schemas have changed"
             echo "version_changed=false" >> $GITHUB_OUTPUT
+            exit 1
           else
-            echo "Local version is different to the latest published version - publishing new version"
+            echo "Local version is different to the latest published version - a new version will be published"
             echo "version_changed=true" >> $GITHUB_OUTPUT
           fi
