@@ -52,6 +52,6 @@ const miJson = z.toJSONSchema($MISubmittedEvent, {
   target: "openapi-3.0",
   reused: "ref",
 });
-const miFile = `schemas/events/mi.SUBMITTED.schema.json`;
+const miFile = `schemas/events/mi.submitted.schema.json`;
 fs.writeFileSync(miFile, JSON.stringify(miJson, null, 2));
-console.info(`Wrote JSON schema for letter.any to ${miFile}`);
+console.info(`Wrote JSON schema for mi.submitted to ${miFile}`);
