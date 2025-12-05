@@ -1,4 +1,7 @@
-import { RequestSandBoxHeaders, sandBoxHeader } from "../../constants/request_headers";
+import {
+  RequestSandBoxHeaders,
+  sandBoxHeader,
+} from "../../constants/request_headers";
 
 export type ApiSandboxUpdateLetterStatusTestData = {
   testCase: string;
@@ -8,118 +11,122 @@ export type ApiSandboxUpdateLetterStatusTestData = {
 };
 
 type PostMessageRequestBody = {
-    data: postRequest []
-}
+  data: postRequest[];
+};
 
 type postRequest = {
-    type: string;
-    id: string;
-    attributes: {
-      reasonCode?: string;
-      reasonText?: string;
-      status: string;
-    }
+  type: string;
+  id: string;
+  attributes: {
+    reasonCode?: string;
+    reasonText?: string;
+    status: string;
+  };
 };
 
 export const apiSandboxMultipleLetterStatusTestData: ApiSandboxUpdateLetterStatusTestData[] =
-[{
-    testCase: '200 response if records are updated',
-    header: sandBoxHeader,
-    body:{
-        data :
-        [{
+  [
+    {
+      testCase: "200 response if records are updated",
+      header: sandBoxHeader,
+      body: {
+        data: [
+          {
             attributes: {
-                status: 'PENDING'
+              status: "PENDING",
             },
-            id: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
-            type: 'Letter'
-        },
-        {
+            id: "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+            type: "Letter",
+          },
+          {
             attributes: {
-                'status': 'ACCEPTED'
+              status: "ACCEPTED",
             },
-            id: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
-            type: 'Letter'
-        },
-        {
+            id: "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+            type: "Letter",
+          },
+          {
             attributes: {
-                status: 'PRINTED'
+              status: "PRINTED",
             },
-            id: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
-            type: 'Letter'
-        },
-        {
-        attributes: {
-            status: 'ENCLOSED'
-        },
-        id: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
-        type: 'Letter'
-        },
-        {
-        attributes: {
-            status: 'DISPATCHED'
-        },
-            id: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
-            type: 'Letter'
-        },
-        {
+            id: "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+            type: "Letter",
+          },
+          {
             attributes: {
-                status: 'DELIVERED'
+              status: "ENCLOSED",
             },
-            id: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
-            type: 'Letter'
-        },
-        {
+            id: "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+            type: "Letter",
+          },
+          {
             attributes: {
-                reasonCode: 'R01',
-                reasonText: 'failed validation',
-                status: 'RETURNED'
+              status: "DISPATCHED",
             },
-            id: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
-            type: 'Letter'
-        },
-        {
+            id: "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+            type: "Letter",
+          },
+          {
             attributes: {
-                reasonCode: 'R01',
-                reasonText: 'failed validation',
-                status: 'CANCELLED'
+              status: "DELIVERED",
             },
-            id: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
-            type: 'Letter'
-        },
-        {
+            id: "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+            type: "Letter",
+          },
+          {
             attributes: {
-                reasonCode: 'R01',
-                reasonText: 'failed validation',
-                status: 'FAILED'
+              reasonCode: "R01",
+              reasonText: "failed validation",
+              status: "RETURNED",
             },
-            id: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
-            type: 'Letter'
-        },
-        {
+            id: "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+            type: "Letter",
+          },
+          {
             attributes: {
-                reasonCode: 'R01',
-                reasonText: 'failed validation',
-                status: 'RETURNED'
+              reasonCode: "R01",
+              reasonText: "failed validation",
+              status: "CANCELLED",
             },
-            id: '2WL5eYSWGzCHlGmzNxuqVusPxDg',
-            type: 'Letter'
-        }
-    ]},
-    expectedStatus: 200
-},
-{
-    testCase: '404 response if invalid request is passed',
-    header: sandBoxHeader,
-    body:{
-        data :
-        [{
+            id: "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+            type: "Letter",
+          },
+          {
             attributes: {
-                status: 'PENDING'
+              reasonCode: "R01",
+              reasonText: "failed validation",
+              status: "FAILED",
             },
-            id: '1234',
-            type: 'Letter'
-        }]
+            id: "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+            type: "Letter",
+          },
+          {
+            attributes: {
+              reasonCode: "R01",
+              reasonText: "failed validation",
+              status: "RETURNED",
+            },
+            id: "2WL5eYSWGzCHlGmzNxuqVusPxDg",
+            type: "Letter",
+          },
+        ],
+      },
+      expectedStatus: 200,
     },
-    expectedStatus:404,
-}];
+    {
+      testCase: "404 response if invalid request is passed",
+      header: sandBoxHeader,
+      body: {
+        data: [
+          {
+            attributes: {
+              status: "PENDING",
+            },
+            id: "1234",
+            type: "Letter",
+          },
+        ],
+      },
+      expectedStatus: 404,
+    },
+  ];

@@ -1,11 +1,21 @@
-import { test, expect } from '@playwright/test';
-import { SUPPLIER_LETTERS, SUPPLIERID } from '../../constants/api_constants';
-import { getRestApiGatewayBaseUrl } from '../../helpers/awsGatewayHelper';
-import { patch400ErrorResponseBody, patch500ErrorResponseBody, patchFailureRequestBody, patchRequestHeaders, patchValidRequestBody } from './testCases/updateLetterStatus';
-import { createTestData, deleteLettersBySupplier, getLettersBySupplier } from '../../helpers/generate_fetch_testData';
-import { randomUUID } from 'crypto';
-import { createInvalidRequestHeaders } from '../../constants/request_headers';
-import { error403ResponseBody } from '../../helpers/commonTypes';
+import { expect, test } from "@playwright/test";
+import { randomUUID } from "node:crypto";
+import { SUPPLIERID, SUPPLIER_LETTERS } from "../../constants/api_constants";
+import { getRestApiGatewayBaseUrl } from "../../helpers/awsGatewayHelper";
+import {
+  patch400ErrorResponseBody,
+  patch500ErrorResponseBody,
+  patchFailureRequestBody,
+  patchRequestHeaders,
+  patchValidRequestBody,
+} from "./testCases/updateLetterStatus";
+import {
+  createTestData,
+  deleteLettersBySupplier,
+  getLettersBySupplier,
+} from "../../helpers/generate_fetch_testData";
+import { createInvalidRequestHeaders } from "../../constants/request_headers";
+import { error400IdError, error403ResponseBody } from "../../helpers/commonTypes";
 
 let baseUrl: string;
 
@@ -13,65 +23,75 @@ test.beforeAll(async () => {
   baseUrl = await getRestApiGatewayBaseUrl();
 });
 
-test.describe('API Gateway Tests to Verify Patch Status Endpoint', () => {
-    test(`Patch /letters returns 202 and status is updated to ACCEPTED`, async ({ request }) => {
+test.describe("API Gateway Tests to Verify Patch Status Endpoint", () => {
+  test(`Patch /letters returns 202 and status is updated to ACCEPTED`, async ({
+    request,
+  }) => {
+    await createTestData(SUPPLIERID);
+    const letters = await getLettersBySupplier(SUPPLIERID, "PENDING", 1);
 
-      await createTestData(SUPPLIERID);
-      const letters = await getLettersBySupplier(SUPPLIERID, 'PENDING', 1);
+    if (!letters?.length) {
+      test.fail(true, `No PENDING letters found for supplier ${SUPPLIERID}`);
+      return;
+    }
+    const letter = letters[0];
+    const headers = patchRequestHeaders();
+    const body = patchValidRequestBody(letter.id, "ACCEPTED");
 
-      if (!letters?.length) {
-        test.fail(true, `No PENDING letters found for supplier ${SUPPLIERID}`);
-        return;
-      }
-      const letter = letters[0];
-      const headers = patchRequestHeaders();
-      const body = patchValidRequestBody(letter.id, 'ACCEPTED');
+    const response = await request.patch(
+      `${baseUrl}/${SUPPLIER_LETTERS}/${letter.id}`,
+      {
+        headers,
+        data: body,
+      },
+    );
 
-      const response = await request.patch(`${baseUrl}/${SUPPLIER_LETTERS}/${letter.id}`, {
-          headers: headers,
-          data: body
-      });
-
-    const responseBody = await response.json();
     expect(response.status()).toBe(202);
 
     await deleteLettersBySupplier(letter.id);
   });
 
-  test(`Patch /letters returns 202 and status is updated to REJECTED`, async ({ request }) => {
+  test(`Patch /letters returns 202 and status is updated to REJECTED`, async ({
+    request,
+  }) => {
+    await createTestData(SUPPLIERID);
+    const letters = await getLettersBySupplier(SUPPLIERID, "PENDING", 1);
 
-      await createTestData(SUPPLIERID);
-      const letters = await getLettersBySupplier(SUPPLIERID, 'PENDING', 1);
+    if (!letters?.length) {
+      test.fail(true, `No PENDING letters found for supplier ${SUPPLIERID}`);
+      return;
+    }
+    const letter = letters[0];
+    const headers = patchRequestHeaders();
+    const body = patchFailureRequestBody(letter.id, "REJECTED");
 
-      if (!letters?.length) {
-        test.fail(true, `No PENDING letters found for supplier ${SUPPLIERID}`);
-        return;
-      }
-      const letter = letters[0];
-      const headers = patchRequestHeaders();
-      const body = patchFailureRequestBody(letter.id, 'REJECTED');
+    const response = await request.patch(
+      `${baseUrl}/${SUPPLIER_LETTERS}/${letter.id}`,
+      {
+        headers,
+        data: body,
+      },
+    );
 
-      const response = await request.patch(`${baseUrl}/${SUPPLIER_LETTERS}/${letter.id}`, {
-          headers: headers,
-          data: body
-      });
-
-    const responseBody = await response.json();
     expect(response.status()).toBe(202);
 
     await deleteLettersBySupplier(letter.id);
   });
 
-  test(`Patch /letters returns 400 if request Body is invalid`, async ({ request }) => {
+  test(`Patch /letters returns 400 if request Body is invalid`, async ({
+    request,
+  }) => {
+    const id = randomUUID();
+    const headers = patchRequestHeaders();
+    const body = patchValidRequestBody(id, "");
 
-      const id = randomUUID()
-      const headers = patchRequestHeaders();
-      const body = patchValidRequestBody(id, '');
-
-      const response = await request.patch(`${baseUrl}/${SUPPLIER_LETTERS}/${id}`, {
-          headers: headers,
-          data: body
-      });
+    const response = await request.patch(
+      `${baseUrl}/${SUPPLIER_LETTERS}/${id}`,
+      {
+        headers,
+        data: body,
+      },
+    );
 
     const responseBody = await response.json();
 
@@ -79,33 +99,43 @@ test.describe('API Gateway Tests to Verify Patch Status Endpoint', () => {
     expect(responseBody).toMatchObject(patch400ErrorResponseBody());
   });
 
-    test(`Patch /letters returns 500 if Id doesn't exist for SupplierId`, async ({ request }) => {
-        const headers = patchRequestHeaders();
-        const id = randomUUID()
-        const body = patchValidRequestBody(id, 'PENDING');
+  test(`Patch /letters returns 400 if Id doesn't match with Id in request`, async ({
+    request,
+  }) => {
+    const headers = patchRequestHeaders();
+    const id = randomUUID();
+    const body = patchValidRequestBody("Id", "PENDING");
 
-        const response = await request.patch(`${baseUrl}/${SUPPLIER_LETTERS}/${id}`, {
-        headers: headers,
-        data: body
-        });
+    const response = await request.patch(
+      `${baseUrl}/${SUPPLIER_LETTERS}/${id}`,
+      {
+        headers,
+        data: body,
+      },
+    );
 
-      const responseBody = await response.json();
-      expect(response.status()).toBe(500);
-      expect(responseBody).toMatchObject(patch500ErrorResponseBody(id));
-    });
+    const responseBody = await response.json();
+    expect(response.status()).toBe(400);
+    expect(responseBody).toMatchObject(error400IdError());
+  });
 
-    test(`Patch /letters returns 403 for invalid headers`, async ({ request }) => {
-        const headers = createInvalidRequestHeaders();
-        const id = randomUUID()
-        const body = patchValidRequestBody(id, 'PENDING');
+  test(`Patch /letters returns 403 for invalid headers`, async ({
+    request,
+  }) => {
+    const headers = createInvalidRequestHeaders();
+    const id = randomUUID();
+    const body = patchValidRequestBody(id, "PENDING");
 
-        const response = await request.patch(`${baseUrl}/${SUPPLIER_LETTERS}/${id}`, {
-            headers: headers,
-            data: body
-        });
+    const response = await request.patch(
+      `${baseUrl}/${SUPPLIER_LETTERS}/${id}`,
+      {
+        headers,
+        data: body,
+      },
+    );
 
-      const responseBody = await response.json();
-      expect(response.status()).toBe(403);
-      expect(responseBody).toMatchObject(error403ResponseBody());
-    });
+    const responseBody = await response.json();
+    expect(response.status()).toBe(403);
+    expect(responseBody).toMatchObject(error403ResponseBody());
+  });
 });
