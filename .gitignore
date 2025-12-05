@@ -27,4 +27,5 @@ dist
 /sandbox/*.log
 /sandbox-staging
 /specification/api/components/examples
+/specification/api/components/x-nhsd-apim/x-nhsd-apim.yml
 /scripts/JWT/*.pem
