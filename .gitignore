@@ -28,4 +28,7 @@ dist
 /sandbox-staging
 /specification/api/components/examples
 /specification/api/components/x-nhsd-apim/x-nhsd-apim.yml
+/specification/api/components/security-schemes/security-schemes.yml
+/specification/api/components/security/security.yml
+/specification/api/components/parameters/authorization/authorization.yml
 /scripts/JWT/*.pem
