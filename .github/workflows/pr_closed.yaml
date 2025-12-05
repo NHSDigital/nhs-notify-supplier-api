@@ -61,9 +61,7 @@ jobs:
             --targetEnvironment "main" \
             --targetAccountGroup "nhs-notify-supplier-api-dev" \
             --targetComponent "${{ matrix.component }}" \
-            --terraformAction "apply" \
-            --overrideProjectName "nhs" \
-            --overrideRoleName "nhs-main-acct-supplier-api-github-deploy"
+            --terraformAction "apply"
 
   check-event-schemas-version-change:
     name: Check for event schemas package version change
@@ -83,6 +81,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.nodejs_version }}
+          registry-url: 'https://npm.pkg.github.com'
 
       - name: check if local version differs from latest published version
         id: check-version
@@ -116,7 +115,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.nodejs_version }}
+          registry-url: 'https://npm.pkg.github.com'
       - name: "Install dependencies"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm ci
       - name: "Run provider contract tests"
         run: make test-contract
@@ -145,6 +147,8 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
 
       - name: Install dependencies
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm ci
 
       - name: Publish to GitHub Packages
