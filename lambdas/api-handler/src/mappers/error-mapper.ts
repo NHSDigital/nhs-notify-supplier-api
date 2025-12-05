@@ -1,65 +1,120 @@
 import { APIGatewayProxyResult } from "aws-lambda";
-import { NotFoundError, ValidationError } from "../errors";
-import { buildApiError, ApiErrorCode, ApiErrorTitle, ApiError, ApiErrorStatus, ErrorResponse } from "../contracts/errors";
-import { randomUUID } from 'node:crypto';
+import { randomUUID } from "node:crypto";
 import { Logger } from "pino";
+import NotFoundError from "../errors/not-found-error";
+import ValidationError from "../errors/validation-error";
+import {
+  ApiError,
+  ApiErrorCode,
+  ApiErrorStatus,
+  ApiErrorTitle,
+  ErrorResponse,
+  buildApiError,
+} from "../contracts/errors";
 
-export function processError(error: unknown, correlationId: string | undefined, logger: Logger): APIGatewayProxyResult
-{
-  return mapToErrorResponse(logAndMapToApiError(error, correlationId, logger));
-}
-
-export function logAndMapToApiError(error: unknown, correlationId: string | undefined, logger: Logger): ApiError {
-  if (error instanceof ValidationError) {
-    logger.info({ err: error }, `Validation error correlationId=${correlationId}`);
-    return mapToApiError(ApiErrorCode.InvalidRequest, error.detail, correlationId);
-  } else if (error instanceof NotFoundError) {
-    logger.info({ err: error }, `Not found error correlationId=${correlationId}`);
-    return mapToApiError(ApiErrorCode.NotFound, error.detail, correlationId);
-  } else if (error instanceof Error) {
-    logger.error({ err: error }, `Internal server error correlationId=${correlationId}`);
-    return mapToApiError(ApiErrorCode.InternalServerError, "Unexpected error", correlationId);
-  } else {
-    logger.error({ err: error }, `Internal server error (non-Error thrown) correlationId=${correlationId}`);
-    return mapToApiError(ApiErrorCode.InternalServerError, "Unexpected error", correlationId);
+function codeToTitle(code: ApiErrorCode): ApiErrorTitle {
+  switch (code) {
+    case ApiErrorCode.InvalidRequest: {
+      return ApiErrorTitle.InvalidRequest;
+    }
+    case ApiErrorCode.NotFound: {
+      return ApiErrorTitle.NotFound;
+    }
+    default: {
+      return ApiErrorTitle.InternalServerError;
+    }
   }
-}
-
-function mapToErrorResponse(apiError: ApiError)
-{
-  return {
-    statusCode: +apiError.status,
-    body: JSON.stringify(buildErrorResponseFromError(apiError), null, 2)
-  };
-}
-
-function mapToApiError(code: ApiErrorCode, detail: string, correlationId: string | undefined): ApiError {
-  const id = correlationId ? correlationId : randomUUID();
-  return buildApiError({
-    id,
-    code,
-    status: codeToStatus(code),
-    title: codeToTitle(code),
-    detail
-  });
 }
 
 function codeToStatus(code: ApiErrorCode): ApiErrorStatus {
-  switch(code) {
-    case ApiErrorCode.InvalidRequest: return ApiErrorStatus.InvalidRequest;
-    case ApiErrorCode.NotFound: return ApiErrorStatus.NotFound;
-    default: return ApiErrorStatus.InternalServerError;
-  }
-}
-
-function codeToTitle(code: ApiErrorCode): ApiErrorTitle {
-  switch(code) {
-    case ApiErrorCode.InvalidRequest: return ApiErrorTitle.InvalidRequest;
-    case ApiErrorCode.NotFound: return ApiErrorTitle.NotFound;
-    default: return ApiErrorTitle.InternalServerError;
+  switch (code) {
+    case ApiErrorCode.InvalidRequest: {
+      return ApiErrorStatus.InvalidRequest;
+    }
+    case ApiErrorCode.NotFound: {
+      return ApiErrorStatus.NotFound;
+    }
+    default: {
+      return ApiErrorStatus.InternalServerError;
+    }
   }
 }
 
 function buildErrorResponseFromError(error: ApiError): ErrorResponse {
   return { errors: [error] };
+}
+
+function mapToErrorResponse(apiError: ApiError) {
+  return {
+    statusCode: +apiError.status,
+    body: JSON.stringify(buildErrorResponseFromError(apiError), null, 2),
+  };
+}
+
+function mapToApiError(
+  code: ApiErrorCode,
+  detail: string,
+  correlationId: string | undefined,
+): ApiError {
+  const id = correlationId || randomUUID();
+  return buildApiError({
+    id,
+    code,
+    status: codeToStatus(code),
+    title: codeToTitle(code),
+    detail,
+  });
+}
+
+export function logAndMapToApiError(
+  error: unknown,
+  correlationId: string | undefined,
+  logger: Logger,
+): ApiError {
+  if (error instanceof ValidationError) {
+    logger.info(
+      { err: error },
+      `Validation error correlationId=${correlationId}`,
+    );
+    return mapToApiError(
+      ApiErrorCode.InvalidRequest,
+      error.detail,
+      correlationId,
+    );
+  }
+  if (error instanceof NotFoundError) {
+    logger.info(
+      { err: error },
+      `Not found error correlationId=${correlationId}`,
+    );
+    return mapToApiError(ApiErrorCode.NotFound, error.detail, correlationId);
+  }
+  if (error instanceof Error) {
+    logger.error(
+      { err: error },
+      `Internal server error correlationId=${correlationId}`,
+    );
+    return mapToApiError(
+      ApiErrorCode.InternalServerError,
+      "Unexpected error",
+      correlationId,
+    );
+  }
+  logger.error(
+    { err: error },
+    `Internal server error (non-Error thrown) correlationId=${correlationId}`,
+  );
+  return mapToApiError(
+    ApiErrorCode.InternalServerError,
+    "Unexpected error",
+    correlationId,
+  );
+}
+
+export function processError(
+  error: unknown,
+  correlationId: string | undefined,
+  logger: Logger,
+): APIGatewayProxyResult {
+  return mapToErrorResponse(logAndMapToApiError(error, correlationId, logger));
 }

@@ -1,67 +1,88 @@
-import { APIGatewayProxyHandler } from 'aws-lambda';
-import { mapToUpdateCommands } from "../mappers/letter-mapper";
+import { APIGatewayProxyHandler } from "aws-lambda";
 import type { Deps } from "../config/deps";
-import { ApiErrorDetail } from '../contracts/errors';
-import { PostLettersRequest, PostLettersRequestSchema } from '../contracts/letters';
-import { ValidationError } from '../errors';
-import { processError } from '../mappers/error-mapper';
-import { enqueueLetterUpdateRequests } from '../services/letter-operations';
-import { extractCommonIds } from '../utils/commonIds';
-import { assertNotEmpty, requireEnvVar } from '../utils/validation';
+import { ApiErrorDetail } from "../contracts/errors";
+import {
+  PostLettersRequest,
+  PostLettersRequestSchema,
+} from "../contracts/letters";
+import ValidationError from "../errors/validation-error";
+import { processError } from "../mappers/error-mapper";
+import { mapToUpdateCommands } from "../mappers/letter-mapper";
+import { enqueueLetterUpdateRequests } from "../services/letter-operations";
+import { extractCommonIds } from "../utils/common-ids";
+import { assertNotEmpty, requireEnvVar } from "../utils/validation";
 
-export function createPostLettersHandler(deps: Deps): APIGatewayProxyHandler {
+function duplicateIdsExist(postLettersRequest: PostLettersRequest) {
+  const ids = postLettersRequest.data.map((item) => item.id);
+  return new Set(ids).size !== ids.length;
+}
 
+export default function createPostLettersHandler(
+  deps: Deps,
+): APIGatewayProxyHandler {
   return async (event) => {
-
-    const commonIds = extractCommonIds(event.headers, event.requestContext, deps);
+    const commonIds = extractCommonIds(
+      event.headers,
+      event.requestContext,
+      deps,
+    );
 
     if (!commonIds.ok) {
-      return processError(commonIds.error, commonIds.correlationId, deps.logger);
+      return processError(
+        commonIds.error,
+        commonIds.correlationId,
+        deps.logger,
+      );
     }
 
     const maxUpdateItems = requireEnvVar(deps.env, "MAX_LIMIT");
     requireEnvVar(deps.env, "QUEUE_URL");
 
     try {
-      const body = assertNotEmpty(event.body, new ValidationError(ApiErrorDetail.InvalidRequestMissingBody));
+      const body = assertNotEmpty(
+        event.body,
+        new ValidationError(ApiErrorDetail.InvalidRequestMissingBody),
+      );
 
       let postLettersRequest: PostLettersRequest;
 
       try {
         postLettersRequest = PostLettersRequestSchema.parse(JSON.parse(body));
       } catch (error) {
-        if (error instanceof Error) {
-          throw new ValidationError(ApiErrorDetail.InvalidRequestBody, { cause: error});
-        }
-        else throw error;
+        const typedError =
+          error instanceof Error
+            ? new ValidationError(ApiErrorDetail.InvalidRequestBody, {
+                cause: error,
+              })
+            : error;
+        throw typedError;
       }
 
       if (postLettersRequest.data.length > maxUpdateItems) {
-        throw new ValidationError(ApiErrorDetail.InvalidRequestLettersToUpdate, { args: [maxUpdateItems]});
+        throw new ValidationError(
+          ApiErrorDetail.InvalidRequestLettersToUpdate,
+          { args: [maxUpdateItems] },
+        );
       }
 
-      if( duplicateIdsExist(postLettersRequest) ) {
-        throw new ValidationError(ApiErrorDetail.InvalidRequestDuplicateLetterId);
+      if (duplicateIdsExist(postLettersRequest)) {
+        throw new ValidationError(
+          ApiErrorDetail.InvalidRequestDuplicateLetterId,
+        );
       }
 
       await enqueueLetterUpdateRequests(
         mapToUpdateCommands(postLettersRequest, commonIds.value.supplierId),
         commonIds.value.correlationId,
-        deps
+        deps,
       );
 
       return {
         statusCode: 202,
-        body: ''
+        body: "",
       };
-
     } catch (error) {
       return processError(error, commonIds.value.correlationId, deps.logger);
     }
   };
-};
-
-function duplicateIdsExist(postLettersRequest: PostLettersRequest) {
-  const ids = postLettersRequest.data.map(item => item.id);
-  return new Set(ids).size !== ids.length;
 }

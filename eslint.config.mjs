@@ -80,7 +80,7 @@ export default defineConfig([
         eslintImportResolverTypescript.createTypeScriptImportResolver({
           project: [
             'lambdas/*/tsconfig.json',
-            'tests/test-team/tsconfig.json',
+            'tests/tsconfig.json',
             'internal/*/tsconfig.json',
           ],
         }),
@@ -167,7 +167,7 @@ export default defineConfig([
     rules: { 'import-x/no-unresolved': 0 },
   },
   {
-    files: ['tests/test-team/**'],
+    files: ['tests/**'],
     rules: {
       'import-x/no-extraneous-dependencies': [
         2,
@@ -176,7 +176,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['**/utils/**', 'tests/test-team/**'],
+    files: ['**/utils/**', 'tests/**'],
     rules: { 'import-x/prefer-default-export': 0 },
   },
   {
@@ -219,6 +219,20 @@ export default defineConfig([
       'no-console': 0,
       'security/detect-non-literal-fs-filename': 0
     },
+  },
+
+  // No use before define relaxations
+  {
+    rules: {
+      "no-use-before-define": "off",
+      "@typescript-eslint/no-use-before-define": [ "error", {"functions": false}]
+    }
+  },
+
+  // Lambda specific relaxations
+  {
+    files: ['lambdas/**'],
+    rules: { 'import-x/prefer-default-export': 1 },
   },
 
   // misc rule overrides

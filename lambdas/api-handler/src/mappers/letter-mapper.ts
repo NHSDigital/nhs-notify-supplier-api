@@ -12,6 +12,32 @@ import {
   UpdateLetterCommand,
 } from "../contracts/letters";
 
+function letterToResourceResponse(letter: LetterBase) {
+  return {
+    id: letter.id,
+    type: "Letter",
+    attributes: {
+      status: letter.status,
+      specificationId: letter.specificationId,
+      groupId: letter.groupId,
+      ...(letter.reasonCode != null && { reasonCode: letter.reasonCode }),
+      ...(letter.reasonText != null && { reasonText: letter.reasonText }),
+    },
+  };
+}
+
+function letterToGetLettersResourceResponse(letter: LetterBase) {
+  return {
+    id: letter.id,
+    type: "Letter",
+    attributes: {
+      status: letter.status,
+      specificationId: letter.specificationId,
+      groupId: letter.groupId,
+    },
+  };
+}
+
 // --------------------------
 //  Map request to command
 // --------------------------
@@ -62,46 +88,24 @@ export function mapToUpdateLetter(
 //  Map internal datastore letter to response
 // ---------------------------------------------
 
-export function mapToPatchLetterResponse(letter: LetterBase): PatchLetterResponse {
+export function mapToPatchLetterResponse(
+  letter: LetterBase,
+): PatchLetterResponse {
   return PatchLetterResponseSchema.parse({
-    data: letterToResourceResponse(letter)
+    data: letterToResourceResponse(letter),
   });
 }
 
-export function mapToGetLettersResponse(letters: LetterBase[]): GetLettersResponse {
+export function mapToGetLettersResponse(
+  letters: LetterBase[],
+): GetLettersResponse {
   return GetLettersResponseSchema.parse({
-    data: letters.map(letterToGetLettersResourceResponse)
+    data: letters.map((letter) => letterToGetLettersResourceResponse(letter)),
   });
 }
 
 export function mapToGetLetterResponse(letter: LetterBase): GetLetterResponse {
   return GetLetterResponseSchema.parse({
-    data:letterToResourceResponse(letter)
+    data: letterToResourceResponse(letter),
   });
 }
-
-function letterToResourceResponse(letter: LetterBase) {
-  return {
-    id: letter.id,
-    type: 'Letter',
-    attributes: {
-      status: letter.status,
-      specificationId: letter.specificationId,
-      groupId: letter.groupId,
-      ...(letter.reasonCode != null && { reasonCode: letter.reasonCode }),
-      ...(letter.reasonText != null && { reasonText: letter.reasonText })
-    }
-  };
-};
-
-function letterToGetLettersResourceResponse(letter: LetterBase) {
-  return {
-    id: letter.id,
-    type: 'Letter',
-    attributes: {
-      status: letter.status,
-      specificationId: letter.specificationId,
-      groupId: letter.groupId
-    }
-  };
-};

@@ -1,8 +1,12 @@
-import { ValidationError } from "../../errors";
-import { assertNotEmpty, lowerCaseKeys, validateIso8601Timestamp } from "../validation";
+import ValidationError from "../../errors/validation-error";
+import {
+  assertNotEmpty,
+  lowerCaseKeys,
+  validateIso8601Timestamp,
+} from "../validation";
 
 describe("assertNotEmpty", () => {
-  const error = new Error();
+  const error = new Error("unexpected error");
 
   it("throws for null", () => {
     expect(() => assertNotEmpty(null, error)).toThrow(Error);
@@ -20,10 +24,9 @@ describe("assertNotEmpty", () => {
     expect(() => assertNotEmpty("   ", error)).toThrow(Error);
   });
 
-    it("does not throw for empty array", () => {
+  it("does not throw for empty array", () => {
     const arr: any[] = [];
     expect(() => assertNotEmpty(arr, error)).toThrow(Error);
-
   });
 
   it("does not throw for empty object", () => {
@@ -56,9 +59,9 @@ describe("assertNotEmpty", () => {
 
 describe("lowerCaseKeys", () => {
   it("lowers case on header keys", () => {
-    const headers: Record<string, number> = {'Aa_Bb-Cc':1, 'b':2};
+    const headers: Record<string, number> = { "Aa_Bb-Cc": 1, b: 2 };
     const result = lowerCaseKeys(headers);
-    expect(result).toEqual({'aa_bb-cc':1, 'b':2});
+    expect(result).toEqual({ "aa_bb-cc": 1, b: 2 });
   });
 
   it("handles empty input", () => {
@@ -67,15 +70,22 @@ describe("lowerCaseKeys", () => {
   });
 });
 
-describe('validateIso8601Timestamp', () => {
-  it.each([['2025-10-16T00:00:00.000Z'], ['2025-10-16T00:00:00Z'], ['2025-10-16T00:00:00.0Z'], ['2025-10-16T00:00:00.999999Z']])
-    ('permits valid timestamps', (timestamp: string) => {
+describe("validateIso8601Timestamp", () => {
+  it.each([
+    ["2025-10-16T00:00:00.000Z"],
+    ["2025-10-16T00:00:00Z"],
+    ["2025-10-16T00:00:00.0Z"],
+    ["2025-10-16T00:00:00.999999Z"],
+  ])("permits valid timestamps", (timestamp: string) => {
     validateIso8601Timestamp(timestamp);
   });
 
-  it.each([['not a date string'], ['2025-10-16T00:00:00'], ['2025-16-10T00:00:00Z'], ['2025-02-31T00:00:00Z']])
-    ('rejects invalid timestamps', (timestamp: string) => {
+  it.each([
+    ["not a date string"],
+    ["2025-10-16T00:00:00"],
+    ["2025-16-10T00:00:00Z"],
+    ["2025-02-31T00:00:00Z"],
+  ])("rejects invalid timestamps", (timestamp: string) => {
     expect(() => validateIso8601Timestamp(timestamp)).toThrow(ValidationError);
   });
-
 });
