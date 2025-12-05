@@ -83,7 +83,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.nodejs_version }}
-          registry-url: 'https://npm.pkg.github.com'
 
       - name: check if local version differs from latest published version
         id: check-version
@@ -117,7 +116,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.nodejs_version }}
-          registry-url: 'https://npm.pkg.github.com'
       - name: "Install dependencies"
         run: npm ci
       - name: "Run provider contract tests"

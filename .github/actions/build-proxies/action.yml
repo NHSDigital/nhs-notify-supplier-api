@@ -38,7 +38,6 @@ runs:
     - uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.nodejs_version }}
-        registry-url: 'https://npm.pkg.github.com'
 
     - name: "Cache node_modules"
       uses: actions/cache@v4
