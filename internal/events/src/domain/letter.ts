@@ -76,6 +76,12 @@ The identifier will be included as the origin domain in the subject of any corre
       examples: ["1y3q9v1zzzz"],
     }),
 
+    supplierId: z.string().meta({
+      title: "Supplier ID",
+      description: "Supplier ID allocated to the letter during creation.",
+      examples: ["supplier-1"],
+    }),
+
     groupId: z.string().meta({
       title: "Group ID",
       description:
