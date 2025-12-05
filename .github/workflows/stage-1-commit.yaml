@@ -286,6 +286,7 @@ jobs:
       - name: check if local version differs from latest published version
         id: check-version
         run: |
+          npm view @nhsdigital/nhs-notify-event-schemas-supplier-api --json
           published_version=$(npm view @nhsdigital/nhs-notify-event-schemas-supplier-api --json 2>/dev/null | jq -r '.["dist-tags"].latest // "null"')
           echo "Published version: $published_version"
 
