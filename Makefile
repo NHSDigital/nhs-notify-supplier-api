@@ -69,9 +69,9 @@ set-security: guard-APIM_ENV
 	< specification/api/components/security-schemes/security-schemes-template.yml > specification/api/components/security-schemes/security-schemes.yml
 
 construct-spec: guard-APIM_ENV
+	SPEC_DIR=./specification/api/components/x-nhsd-apim
+	./scripts/build/substitute_build_env.sh $$SPEC_DIR/x-nhsd-apim-template.yml $$SPEC_DIR/$$APIM_ENV.env $$SPEC_DIR/x-nhsd-apim.yml
 	$(MAKE) set-authorization APIM_ENV=$$APIM_ENV
-	$(MAKE) set-target APIM_ENV=$$APIM_ENV
-	$(MAKE) set-access APIM_ENV=$$APIM_ENV
 	$(MAKE) set-security APIM_ENV=$$APIM_ENV
 
 build-json-oas-spec: guard-APIM_ENV
