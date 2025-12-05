@@ -273,6 +273,8 @@ jobs:
     permissions:
       contents: read
       packages: read
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v5.0.0
