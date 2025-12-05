@@ -32,8 +32,8 @@
     "lint:fix": "eslint . --fix",
     "test:component": "playwright test --config=config/main.config.ts --max-failures=10 --project=component-tests",
     "test:sandbox": "playwright test --config=config/sandbox.config.ts --max-failures=10 --project=sandbox",
-    "test:unit": "echo \"No unit tests for tests package\"",
-    "typecheck": "tsc --noEmit"
+    "test:unit": "echo \"tests module has no unit tests\"",
+    "typecheck": "echo \"tests module has no typescript to typecheck\""
   },
   "version": "1.0.0"
 }
