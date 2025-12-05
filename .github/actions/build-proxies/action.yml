@@ -55,7 +55,7 @@ runs:
     - name: Npm install
       working-directory: .
       env:
-        NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NODE_AUTH_TOKEN: ${{ inputs.NODE_AUTH_TOKEN }}
       run: npm ci
       shell: bash
 
