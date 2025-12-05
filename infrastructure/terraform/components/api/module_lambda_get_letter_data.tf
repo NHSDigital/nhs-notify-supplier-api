@@ -69,10 +69,10 @@ data "aws_iam_policy_document" "get_letter_data_lambda" {
   }
 
   statement {
-    sid       = "S3GetObjectForPresign"
-    actions   = [
+    sid = "S3GetObjectForPresign"
+    actions = [
       "s3:GetObject",
-      "s3:ListBucket"] # allows 404 response instead of 403 if object missing
+    "s3:ListBucket"] # allows 404 response instead of 403 if object missing
     resources = ["${module.s3bucket_test_letters.arn}/*"]
   }
 }
