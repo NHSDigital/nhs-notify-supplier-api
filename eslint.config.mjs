@@ -167,7 +167,7 @@ export default defineConfig([
     rules: { 'import-x/no-unresolved': 0 },
   },
   {
-    files: ['tests/test-team/**'],
+    files: ['tests/**'],
     rules: {
       'import-x/no-extraneous-dependencies': [
         2,
@@ -176,7 +176,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['**/utils/**', 'tests/test-team/**'],
+    files: ['**/utils/**', 'tests/**'],
     rules: { 'import-x/prefer-default-export': 0 },
   },
   {
@@ -227,6 +227,12 @@ export default defineConfig([
       "no-use-before-define": "off",
       "@typescript-eslint/no-use-before-define": [ "error", {"functions": false}]
     }
+  },
+
+  // Lambda specific relaxations
+  {
+    files: ['lambdas/**'],
+    rules: { 'import-x/prefer-default-export': 1 },
   },
 
   // misc rule overrides

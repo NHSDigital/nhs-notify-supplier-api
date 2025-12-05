@@ -5,4 +5,4 @@ const container = createDependenciesContainer();
 
 const handler = createAuthorizerHandler(container);
 
-export default handler;
+export { handler };
