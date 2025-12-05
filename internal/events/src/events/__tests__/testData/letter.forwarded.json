@@ -11,7 +11,8 @@
     "reasonCode": "RNIB",
     "reasonText": "RNIB",
     "specificationId": "1y3q9v1zzzz",
-    "status": "FORWARDED"
+    "status": "FORWARDED",
+    "supplierId": "supplier_12345"
   },
   "datacontenttype": "application/json",
   "dataschema": "https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.forwarded.1.0.0.schema.json",

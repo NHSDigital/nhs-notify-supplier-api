@@ -108,15 +108,11 @@ The identifier will be included as the origin domain in the subject of any corre
         examples: ["Undeliverable", "Recipient moved"],
       }),
 
-    supplierId: z
-      .string()
-      .optional()
-      .meta({
-        title: "Supplier ID",
-        description:
-          "Optional identifier for the supplier handling this letter, if applicable.",
-        examples: ["supplier-12345"],
-      }),
+    supplierId: z.string().meta({
+      title: "Supplier ID",
+      description: "Identifier for the supplier handling this letter.",
+      examples: ["supplier-12345"],
+    }),
   })
   .meta({
     title: "Letter",

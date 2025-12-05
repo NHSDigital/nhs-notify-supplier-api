@@ -42,6 +42,7 @@ describe("LetterStatus event validations", () => {
             specificationId: "1y3q9v1zzzz",
             groupId: "client_template",
             status,
+            supplierId: "supplier_12345",
           }),
         }),
       );
