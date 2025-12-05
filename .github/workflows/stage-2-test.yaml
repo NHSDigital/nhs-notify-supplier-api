@@ -39,6 +39,7 @@ env:
 permissions:
   id-token: write # This is required for requesting the JWT
   contents: read  # This is required for actions/checkout
+  packages: read # This is required for downloading from GitHub Package Registry
 
 jobs:
   check-generated-dependencies:
@@ -57,6 +58,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
       - name: "Repo setup"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npm ci
       - name: "Generate dependencies"
@@ -79,6 +82,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
       - name: "Repo setup"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npm ci
       - name: "Generate dependencies"
@@ -115,6 +120,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
       - name: "Repo setup"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npm ci
       - name: "Generate dependencies"
@@ -139,6 +146,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
       - name: "Repo setup"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npm ci
       - name: "Generate dependencies"

@@ -30,6 +30,7 @@ No requirements.
 | <a name="input_project"></a> [project](#input\_project) | The name of the tfscaffold project | `string` | n/a | yes |
 | <a name="input_region"></a> [region](#input\_region) | The AWS Region | `string` | n/a | yes |
 | <a name="input_shared_infra_account_id"></a> [shared\_infra\_account\_id](#input\_shared\_infra\_account\_id) | The AWS Account ID of the shared infrastructure account | `string` | `"000000000000"` | no |
+| <a name="input_variant_map"></a> [variant\_map](#input\_variant\_map) | n/a | `map(object({ supplier_id = string, spec_id = string }))` | <pre>{<br/>  "lv1": {<br/>    "spec_id": "spec1",<br/>    "supplier_id": "supplier1"<br/>  },<br/>  "lv2": {<br/>    "spec_id": "spec2",<br/>    "supplier_id": "supplier1"<br/>  },<br/>  "lv3": {<br/>    "spec_id": "spec3",<br/>    "supplier_id": "supplier2"<br/>  }<br/>}</pre> | no |
 ## Modules
 
 | Name | Source | Version |

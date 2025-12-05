@@ -28,6 +28,9 @@ inputs:
   nodejs_version:
     description: "Node.js version, set by the CI/CD pipeline workflow"
     required: true
+  NODE_AUTH_TOKEN:
+    description: "Token for access to github package registry"
+    required: true
 
 runs:
   using: composite
@@ -38,6 +41,7 @@ runs:
     - uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.nodejs_version }}
+        registry-url: 'https://npm.pkg.github.com'
 
     - name: "Cache node_modules"
       uses: actions/cache@v4
@@ -50,6 +54,8 @@ runs:
 
     - name: Npm install
       working-directory: .
+      env:
+        NODE_AUTH_TOKEN: ${{ inputs.NODE_AUTH_TOKEN }}
       run: npm ci
       shell: bash
 

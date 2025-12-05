@@ -1,7 +1,7 @@
 module "upsert_letter" {
   source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-lambda.zip"
 
-  function_name = "upsert-letter"
+  function_name = "upsert_letter"
   description   = "Update or Insert the letter data in the letters table"
 
   aws_account_id = var.aws_account_id
@@ -22,7 +22,7 @@ module "upsert_letter" {
   function_code_base_path = local.aws_lambda_functions_dir_path
   function_code_dir       = "upsert-letter/dist"
   function_include_common = true
-  handler_function_name   = "handler"
+  handler_function_name   = "upsertLetterHandler"
   runtime                 = "nodejs22.x"
   memory                  = 128
   timeout                 = 5
@@ -35,7 +35,18 @@ module "upsert_letter" {
   log_destination_arn       = local.destination_arn
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
-  lambda_env_vars = merge(local.common_lambda_env_vars, {})
+  lambda_env_vars = merge(local.common_lambda_env_vars, {
+    VARIANT_MAP = jsonencode(var.variant_map)
+  })
+}
+
+variable "variant_map" {
+  type = map(object({ supplier_id = string, spec_id = string }))
+  default = {
+    "lv1" = { supplier_id = "supplier1", spec_id = "spec1" },
+    "lv2" = { supplier_id = "supplier1", spec_id = "spec2" },
+    "lv3" = { supplier_id = "supplier2", spec_id = "spec3" }
+  }
 }
 
 data "aws_iam_policy_document" "upsert_letter_lambda" {

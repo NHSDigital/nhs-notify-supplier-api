@@ -21,6 +21,7 @@ on:
 
 permissions:
   contents: read
+  packages: read
 
 jobs:
   deploy-environment:
@@ -36,6 +37,8 @@ jobs:
 
       - name: Npm install
         working-directory: .
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm ci
         shell: bash
 
@@ -87,3 +90,4 @@ jobs:
           runId: "${{ github.run_id }}"
           buildSandbox: ${{ inputs.build_sandbox }}
           releaseVersion: ${{ github.ref_name }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

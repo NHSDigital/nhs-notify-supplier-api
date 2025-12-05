@@ -9,8 +9,15 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 import { Logger } from "pino";
 import { z } from "zod";
-import { Letter, LetterBase, LetterSchema, LetterSchemaBase } from "./types";
-import { LetterDto } from "../../../lambdas/api-handler/src/contracts/letters";
+import {
+  InsertLetter,
+  Letter,
+  LetterBase,
+  LetterSchema,
+  LetterSchemaBase,
+  UpdateLetter,
+  UpsertLetter,
+} from "./types";
 
 export type PagingOptions = Partial<{
   exclusiveStartKey: Record<string, any>;
@@ -33,9 +40,7 @@ export class LetterRepository {
     readonly config: LetterRepositoryConfig,
   ) {}
 
-  async putLetter(
-    letter: Omit<Letter, "ttl" | "supplierStatus" | "supplierStatusSk">,
-  ): Promise<Letter> {
+  async putLetter(letter: InsertLetter): Promise<Letter> {
     const letterDb: Letter = {
       ...letter,
       supplierStatus: `${letter.supplierId}#${letter.status}`,
@@ -66,9 +71,7 @@ export class LetterRepository {
     return LetterSchema.parse(letterDb);
   }
 
-  async putLetterBatch(
-    letters: Omit<Letter, "ttl" | "supplierStatus" | "supplierStatusSk">[],
-  ): Promise<void> {
+  async putLetterBatch(letters: InsertLetter[]): Promise<void> {
     let lettersDb: Letter[] = [];
     for (let i = 0; i < letters.length; i++) {
       const letter = letters[i];
@@ -161,7 +164,7 @@ export class LetterRepository {
     };
   }
 
-  async updateLetterStatus(letterToUpdate: LetterDto): Promise<Letter> {
+  async updateLetterStatus(letterToUpdate: UpdateLetter): Promise<Letter> {
     this.log.debug(
       `Updating letter ${letterToUpdate.id} to status ${letterToUpdate.status}`,
     );
@@ -246,5 +249,93 @@ export class LetterRepository {
       }),
     );
     return z.array(LetterSchemaBase).parse(result.Items ?? []);
+  }
+
+  async upsertLetter(upsert: UpsertLetter): Promise<Letter> {
+    const now = new Date();
+    const ttl = Math.floor(
+      now.valueOf() / 1000 + 60 * 60 * this.config.lettersTtlHours,
+    );
+
+    const setParts: string[] = [];
+    const exprAttrNames: Record<string, string> = {};
+    const exprAttrValues: Record<string, any> = {};
+
+    // updateAt is always updated
+    setParts.push("updatedAt = :updatedAt");
+    exprAttrValues[":updatedAt"] = now.toISOString();
+
+    // ttl is always updated
+    setParts.push("#ttl = :ttl");
+    exprAttrNames["#ttl"] = "ttl";
+    exprAttrValues[":ttl"] = ttl;
+
+    // createdAt only if first time
+    setParts.push("createdAt = if_not_exists(createdAt, :createdAt)");
+    exprAttrValues[":createdAt"] = now.toISOString();
+
+    // status and related supplierStatus if provided
+    if (upsert.status !== undefined) {
+      exprAttrNames["#status"] = "status";
+      setParts.push("#status = :status");
+      exprAttrValues[":status"] = upsert.status;
+
+      setParts.push("supplierStatus = :supplierStatus");
+      exprAttrValues[":supplierStatus"] =
+        `${upsert.supplierId}#${upsert.status}`;
+
+      // supplierStatusSk should replicate createdAt
+      setParts.push(
+        "supplierStatusSk = if_not_exists(supplierStatusSk, :supplierStatusSk)",
+      );
+      exprAttrValues[":supplierStatusSk"] = now.toISOString();
+    }
+
+    // fields that could be updated
+
+    if (upsert.specificationId !== undefined) {
+      setParts.push("specificationId = :specificationId");
+      exprAttrValues[":specificationId"] = upsert.specificationId;
+    }
+
+    if (upsert.url !== undefined) {
+      setParts.push("#url = :url");
+      exprAttrNames["#url"] = "url";
+      exprAttrValues[":url"] = upsert.url;
+    }
+
+    if (upsert.groupId !== undefined) {
+      setParts.push("groupId = :groupId");
+      exprAttrValues[":groupId"] = upsert.groupId;
+    }
+
+    if (upsert.reasonCode !== undefined) {
+      setParts.push("reasonCode = :reasonCode");
+      exprAttrValues[":reasonCode"] = upsert.reasonCode;
+    }
+    if (upsert.reasonText !== undefined) {
+      setParts.push("reasonText = :reasonText");
+      exprAttrValues[":reasonText"] = upsert.reasonText;
+    }
+
+    const updateExpression = `SET ${setParts.join(", ")}`;
+
+    const command = new UpdateCommand({
+      TableName: this.config.lettersTableName,
+      Key: { supplierId: upsert.supplierId, id: upsert.id },
+      UpdateExpression: updateExpression,
+      ExpressionAttributeNames: exprAttrNames,
+      ExpressionAttributeValues: exprAttrValues,
+      ReturnValues: "ALL_NEW",
+    });
+
+    const result = await this.ddbClient.send(command);
+
+    if (!result.Attributes) {
+      throw new Error("upsertLetter: no attributes returned");
+    }
+
+    this.log.debug({ exprAttrValues }, `Upsert to letter=${upsert.id}`);
+    return LetterSchema.parse(result.Attributes);
   }
 }
