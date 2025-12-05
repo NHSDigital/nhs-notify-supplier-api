@@ -28,6 +28,9 @@ inputs:
   nodejs_version:
     description: "Node.js version, set by the CI/CD pipeline workflow"
     required: true
+  NODE_AUTH_TOKEN:
+    description: "Token for access to github package registry"
+    required: true
 
 runs:
   using: composite

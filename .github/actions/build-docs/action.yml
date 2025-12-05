@@ -4,6 +4,9 @@ inputs:
   version:
     description: "Version number"
     required: true
+  NODE_AUTH_TOKEN:
+    description: "Token for access to github package registry"
+    required: true
 runs:
   using: "composite"
   steps:
@@ -16,7 +19,7 @@ runs:
     - name: Npm cli install
       working-directory: .
       env:
-        NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NODE_AUTH_TOKEN: ${{ inputs.NODE_AUTH_TOKEN }}
       run: npm ci
       shell: bash
     - name: Setup Ruby

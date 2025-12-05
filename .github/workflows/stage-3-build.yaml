@@ -51,6 +51,7 @@ jobs:
         uses: ./.github/actions/build-docs
         with:
           version: "${{ inputs.version }}"
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   artefact-sdks:
     name: "Build SDKs"
@@ -63,6 +64,7 @@ jobs:
         uses: ./.github/actions/build-sdk
         with:
           version: "${{ inputs.version }}"
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # Take out for now - might add again in the future
   # artefact-servers:
@@ -133,3 +135,4 @@ jobs:
           buildSandbox: true
           releaseVersion: ${{ github.head_ref || github.ref_name }}
           nodejs_version: ${{ inputs.nodejs_version }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

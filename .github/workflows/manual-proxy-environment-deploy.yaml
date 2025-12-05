@@ -89,3 +89,4 @@ jobs:
           runId: "${{ github.run_id }}"
           buildSandbox: ${{ inputs.build_sandbox }}
           releaseVersion: ${{ github.ref_name }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
