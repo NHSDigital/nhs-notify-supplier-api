@@ -2,7 +2,7 @@ name: Authorization
 in: header
 description: |-
   An OAuth 2.0 bearer token. Required in integration and production environments.
-required: false
+required: true
 schema:
   type: string
   pattern: ^Bearer [[:ascii:]]+$
