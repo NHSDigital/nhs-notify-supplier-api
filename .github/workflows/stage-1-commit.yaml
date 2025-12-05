@@ -272,6 +272,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -289,4 +290,26 @@ jobs:
           if ! is_valid_increment "$main_version" "$local_version" ; then
             echo "Error: Event Schema package has changed, but new version ($local_version) is not a valid increment from latest version on main branch ($main_version)."
             exit 1
+          fi
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.nodejs_version }}
+
+      - name: Check if local version differs from latest published version
+        id: check-version
+        run: |
+          published_version=$(npm view @nhsdigital/nhs-notify-event-schemas-supplier-api --json 2>/dev/null | jq -r '.["dist-tags"].latest // "null"')
+          echo "Published version: $published_version"
+
+          local_version=$(jq -r '.version' internal/events/package.json)
+          echo "Local version: $local_version"
+
+          if [[ $local_version = $published_version ]]; then
+            echo "Local version is the same as the latest published version - skipping publish"
+            echo "version_changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "Local version is different to the latest published version - publishing new version"
+            echo "version_changed=true" >> $GITHUB_OUTPUT
           fi
