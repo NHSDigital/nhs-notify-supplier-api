@@ -107,6 +107,12 @@ The identifier will be included as the origin domain in the subject of any corre
           "Optional human-readable reason for the status change, if applicable.",
         examples: ["Undeliverable", "Recipient moved"],
       }),
+
+    supplierId: z.string().meta({
+      title: "Supplier ID",
+      description: "Identifier for the supplier handling this letter.",
+      examples: ["supplier-12345"],
+    }),
   })
   .meta({
     title: "Letter",

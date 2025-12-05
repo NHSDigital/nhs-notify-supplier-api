@@ -7,12 +7,12 @@ describe("EventEnvelope schema validation", () => {
 
   const baseValidEnvelope: Envelope = {
     dataschema:
-      "https://notify.nhs.uk/cloudevents/schemas/supplier-api/order.READ.1.0.0.schema.json",
+      "https://notify.nhs.uk/cloudevents/schemas/supplier-api/order.read.1.0.0.schema.json",
     specversion: "1.0",
     id: "6f1c2a53-3d54-4a0a-9a0b-0e9ae2d4c111",
     source: "/data-plane/supplier-api/ordering",
     subject: "order/769acdd4",
-    type: "uk.nhs.notify.supplier-api.order.READ.v1",
+    type: "uk.nhs.notify.supplier-api.order.read.v1",
     time: "2025-10-01T10:15:30.000Z",
     data: {
       "notify-payload": {
@@ -230,7 +230,7 @@ describe("EventEnvelope schema validation", () => {
 
   describe("subject prefix validation", () => {
     const $EnvelopeWithPrefix = EventEnvelope(
-      "letter.CREATED",
+      "letter.created",
       "letter",
       z.any(),
       ["CREATED"],
@@ -240,9 +240,9 @@ describe("EventEnvelope schema validation", () => {
     const baseLetterEnvelope = {
       specversion: "1.0" as const,
       id: "6f1c2a53-3d54-4a0a-9a0b-0e02b2c3d479",
-      type: "uk.nhs.notify.supplier-api.letter.CREATED.v1" as const,
+      type: "uk.nhs.notify.supplier-api.letter.created.v1" as const,
       dataschema:
-        "https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.CREATED.1.0.0.schema.json",
+        "https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.created.1.0.0.schema.json",
       source: "/data-plane/supplier-api/letters",
       time: "2025-10-01T10:15:30.000Z",
       data: { status: "CREATED" },
@@ -286,16 +286,16 @@ describe("EventEnvelope schema validation", () => {
     });
 
     it("should accept subject without prefix when no prefix is specified", () => {
-      const $EnvelopeNoPrefix = EventEnvelope("order.READ", "order", z.any(), [
+      const $EnvelopeNoPrefix = EventEnvelope("order.read", "order", z.any(), [
         "READ",
       ]);
 
       const envelope = {
         specversion: "1.0" as const,
         id: "6f1c2a53-3d54-4a0a-9a0b-0e9ae2d4c111",
-        type: "uk.nhs.notify.supplier-api.order.READ.v1" as const,
+        type: "uk.nhs.notify.supplier-api.order.read.v1" as const,
         dataschema:
-          "https://notify.nhs.uk/cloudevents/schemas/supplier-api/order.READ.1.0.0.schema.json",
+          "https://notify.nhs.uk/cloudevents/schemas/supplier-api/order.read.1.0.0.schema.json",
         source: "/data-plane/supplier-api/ordering",
         subject: "order/769acdd4",
         time: "2025-10-01T10:15:30.000Z",
@@ -313,7 +313,7 @@ describe("EventEnvelope schema validation", () => {
 
     it("should accept various prefix formats", () => {
       const $EnvelopeMultiSegmentPrefix = EventEnvelope(
-        "letter.CREATED",
+        "letter.created",
         "letter",
         z.any(),
         ["CREATED"],

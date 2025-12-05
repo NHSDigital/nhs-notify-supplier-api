@@ -8,7 +8,7 @@ export function EventEnvelope<TData extends z.ZodTypeAny>(
   statuses: readonly string[],
   subjectPrefix?: string,
 ) {
-  const statusRegex = statuses.join("|");
+  const statusRegex = statuses.map((status) => status.toLowerCase()).join("|");
   const subjectPrefixRegex = subjectPrefix
     ? `${subjectPrefix}/[a-z0-9-]+/`
     : "";
@@ -19,12 +19,12 @@ export function EventEnvelope<TData extends z.ZodTypeAny>(
   // Pre-compute type strings to avoid repeated inference
   const typeStrings = statuses.map(
     (status) =>
-      `uk.nhs.notify.supplier-api.${resourceName}.${status}.v1` as const,
+      `uk.nhs.notify.supplier-api.${resourceName}.${status.toLowerCase()}.v1` as const,
   );
 
   const schemaExamples = statuses.map(
     (status) =>
-      `https://notify.nhs.uk/cloudevents/schemas/supplier-api/${resourceName}.${status}.1.0.0.schema.json`,
+      `https://notify.nhs.uk/cloudevents/schemas/supplier-api/${resourceName}.${status.toLowerCase()}.1.0.0.schema.json`,
   );
 
   return z
