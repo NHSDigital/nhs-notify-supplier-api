@@ -268,7 +268,7 @@ jobs:
   check-schema-version-change:
     name: Check event schema version has been updated
     needs: detect-event-schema-package-changes
-    if: needs.detect-event-schema-package-changes.outputs.changed == 'true'
+    #if: needs.detect-event-schema-package-changes.outputs.changed == 'true' #REVERT
     runs-on: ubuntu-latest
     permissions:
       contents: read
