@@ -119,6 +119,8 @@ jobs:
           node-version: ${{ inputs.nodejs_version }}
           registry-url: 'https://npm.pkg.github.com'
       - name: "Install dependencies"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm ci
       - name: "Run provider contract tests"
         run: make test-contract
@@ -147,6 +149,8 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
 
       - name: Install dependencies
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm ci
 
       - name: Publish to GitHub Packages

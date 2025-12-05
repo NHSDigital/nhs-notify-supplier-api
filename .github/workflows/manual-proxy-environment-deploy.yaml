@@ -36,6 +36,8 @@ jobs:
 
       - name: Npm install
         working-directory: .
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm ci
         shell: bash
 

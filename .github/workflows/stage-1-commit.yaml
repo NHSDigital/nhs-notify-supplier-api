@@ -288,8 +288,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cat .npmrc
-          npm view @nhsdigital/nhs-notify-event-schemas-supplier-api --json
           published_version=$(npm view @nhsdigital/nhs-notify-event-schemas-supplier-api --json 2>/dev/null | jq -r '.["dist-tags"].latest // "null"')
           echo "Published version: $published_version"
 
