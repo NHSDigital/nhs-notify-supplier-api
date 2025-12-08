@@ -1,7 +1,6 @@
-/* eslint-disable prefer-const */
-import { RequestHeaders } from "../../../constants/request_headers";
-import { SUPPLIERID } from "../../../constants/api_constants";
-import { ErrorMessageBody } from "../../../helpers/commonTypes";
+import { RequestHeaders } from "../../../constants/request-headers";
+import { SUPPLIERID } from "../../../constants/api-constants";
+import { ErrorMessageBody } from "../../../helpers/common-types";
 
 export type PatchMessageRequestBody = {
   data: {

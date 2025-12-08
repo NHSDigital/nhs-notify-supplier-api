@@ -1,6 +1,6 @@
 /* eslint-disable prefer-const */
 import { randomUUID } from "node:crypto";
-import { SUPPLIERID } from "./api_constants";
+import { SUPPLIERID } from "./api-constants";
 
 export const sandBoxHeader: RequestSandBoxHeaders = {
   "X-Request-ID": randomUUID(),

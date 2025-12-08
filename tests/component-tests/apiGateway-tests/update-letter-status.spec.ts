@@ -1,21 +1,23 @@
 import { expect, test } from "@playwright/test";
 import { randomUUID } from "node:crypto";
-import { SUPPLIERID, SUPPLIER_LETTERS } from "../../constants/api_constants";
-import { getRestApiGatewayBaseUrl } from "../../helpers/awsGatewayHelper";
+import { SUPPLIERID, SUPPLIER_LETTERS } from "../../constants/api-constants";
+import { getRestApiGatewayBaseUrl } from "../../helpers/aws-gateway-helper";
 import {
   patch400ErrorResponseBody,
-  patch500ErrorResponseBody,
   patchFailureRequestBody,
   patchRequestHeaders,
   patchValidRequestBody,
-} from "./testCases/updateLetterStatus";
+} from "./testCases/update-letter-status";
 import {
   createTestData,
   deleteLettersBySupplier,
   getLettersBySupplier,
-} from "../../helpers/generate_fetch_testData";
-import { createInvalidRequestHeaders } from "../../constants/request_headers";
-import { error400IdError, error403ResponseBody } from "../../helpers/commonTypes";
+} from "../../helpers/generate-fetch-test-data";
+import { createInvalidRequestHeaders } from "../../constants/request-headers";
+import {
+  error400IdError,
+  error403ResponseBody,
+} from "../../helpers/common-types";
 
 let baseUrl: string;
 

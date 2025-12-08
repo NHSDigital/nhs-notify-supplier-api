@@ -1,23 +1,23 @@
 import { expect, test } from "@playwright/test";
-import { getRestApiGatewayBaseUrl } from "../../helpers/awsGatewayHelper";
-import { MI_ENDPOINT } from "../../constants/api_constants";
+import { getRestApiGatewayBaseUrl } from "../../helpers/aws-gateway-helper";
+import { MI_ENDPOINT } from "../../constants/api-constants";
 import {
   createHeaderWithNoCorrelationId,
   createHeaderWithNoRequestId,
   createInvalidRequestHeaders,
   createValidRequestHeaders,
-} from "../../constants/request_headers";
+} from "../../constants/request-headers";
 import {
   miInvalidDateRequest,
   miInvalidRequest,
   miValidRequest,
-} from "./testCases/createMi";
+} from "./testCases/create-mi";
 import {
   error400InvalidDate,
   error400ResponseBody,
   error403ResponseBody,
   requestId500Error,
-} from "../../helpers/commonTypes";
+} from "../../helpers/common-types";
 
 let baseUrl: string;
 

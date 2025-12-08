@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import {
   SUPPLIER_API_URL_SANDBOX,
   SUPPLIER_LETTERS,
-} from "../constants/api_constants";
+} from "../constants/api-constants";
 import { apiSandboxUpdateLetterStatusTestData } from "./testCases/updateLetterStatus_testCases";
 
 test.describe("Sandbox Tests To Update Letter Status", () => {

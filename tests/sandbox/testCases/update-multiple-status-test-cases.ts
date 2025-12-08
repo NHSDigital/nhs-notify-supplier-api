@@ -1,7 +1,7 @@
 import {
   RequestSandBoxHeaders,
   sandBoxHeader,
-} from "../../constants/request_headers";
+} from "../../constants/request-headers";
 
 export type ApiSandboxUpdateLetterStatusTestData = {
   testCase: string;
