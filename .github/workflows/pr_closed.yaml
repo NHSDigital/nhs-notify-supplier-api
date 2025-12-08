@@ -167,6 +167,7 @@ jobs:
       contents: read
       packages: write
     strategy:
+      max-parallel: 1
       matrix:
         apim-env: [internal-dev, int, ref, prod]
     steps:
