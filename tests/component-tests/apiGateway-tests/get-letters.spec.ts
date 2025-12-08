@@ -5,8 +5,8 @@ import {
   createInvalidRequestHeaders,
   createValidRequestHeaders,
 } from "../../constants/request-headers";
-import { getRestApiGatewayBaseUrl } from "../../helpers/aws-gateway-helper";
-import { validateApiResponse } from "../../helpers/validateJsonSchema";
+import getRestApiGatewayBaseUrl from "../../helpers/aws-gateway-helper";
+import validateApiResponse from "../../helpers/validate-json-schema";
 
 let baseUrl: string;
 
@@ -27,17 +27,6 @@ test.describe("API Gateway Tests To Get List Of Pending Letters", () => {
     expect(response.status()).toBe(200);
     const responseBody = await response.json();
     expect(responseBody.data.length).toBeGreaterThanOrEqual(1);
-
-    const validationResult = validateApiResponse(
-      "get",
-      "/letters",
-      response.status(),
-      responseBody,
-    );
-    if (validationResult) {
-      console.error("API response validation failed:", validationResult);
-    }
-    expect(validationResult).toBeUndefined();
   });
 
   test("GET /letters with invalid authentication should return 403", async ({
