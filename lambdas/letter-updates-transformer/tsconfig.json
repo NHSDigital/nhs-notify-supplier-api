@@ -1,5 +1,10 @@
 {
-  "compilerOptions": {},
+  "compilerOptions": {
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
   "extends": "../../tsconfig.base.json",
   "include": [
     "src/**/*",
