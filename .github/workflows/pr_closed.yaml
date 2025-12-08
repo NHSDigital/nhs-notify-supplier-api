@@ -159,10 +159,11 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
-#  publish-api-specs:
+  publish-api-specs:
     name: Generate and publish API specs to APIM pre-release artefacts
     needs:
       - publish-event-schemas
+    #if: needs.check-merge-or-workflow-dispatch.outputs.deploy == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
