@@ -186,10 +186,10 @@ jobs:
       - name: Generate OpenAPI specification
         run: |
           echo "Building env specific OAS spec"
-          make build-json-oas-spec APIM_ENV=${{ matrix.APIM_ENV }}
+          make build-json-oas-spec APIM_ENV=${{ matrix.apim-env }}
 
       - name: Upload API spec artefact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.APIM_ENV }}-build-output
+          name: ${{ matrix.apim-env }}-build-output
           path: ./build
