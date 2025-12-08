@@ -1,5 +1,5 @@
 import { test, expect, request } from '@playwright/test';
-import {  SUPPLIER_API_URL_SANDBOX, SUPPLIER_LETTERS} from '../constants/api_constants';
+import {  SUPPLIER_API_URL_SANDBOX, SUPPLIER_LETTERS} from '../constants/api-constants';
 import { apiSandboxMultipleLetterStatusTestData } from './testCases/updateMultipleStatus_testCases';
 
 

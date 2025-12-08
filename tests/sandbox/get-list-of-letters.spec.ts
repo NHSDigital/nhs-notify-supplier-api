@@ -1,6 +1,6 @@
 import { test, expect, request } from '@playwright/test';
-import {  SUPPLIER_API_URL_SANDBOX, SUPPLIER_LETTERS} from '../constants/api_constants';
-import { apiSandboxGetLettersRequestTestData } from './testCases/getListOfLetters_testCases';
+import {  SUPPLIER_API_URL_SANDBOX, SUPPLIER_LETTERS} from '../constants/api-constants';
+import { apiSandboxGetLettersRequestTestData } from './testCases/get-list-of-letters-test-cases';
 
 
 test.describe('Sandbox Tests To Get List Of Pending Letters ', () =>

@@ -1,11 +1,11 @@
 import { expect, test } from "@playwright/test";
-import { SUPPLIER_LETTERS } from "../../constants/api_constants";
+import { SUPPLIER_LETTERS } from "../../constants/api-constants";
 import {
   createHeaderWithNoCorrelationId,
   createInvalidRequestHeaders,
   createValidRequestHeaders,
-} from "../../constants/request_headers";
-import { getRestApiGatewayBaseUrl } from "../../helpers/awsGatewayHelper";
+} from "../../constants/request-headers";
+import { getRestApiGatewayBaseUrl } from "../../helpers/aws-gateway-helper";
 import { validateApiResponse } from "../../helpers/validateJsonSchema";
 
 let baseUrl: string;
