@@ -1,61 +1,63 @@
 // mock error mapper
-jest.mock('../../mappers/error-mapper');
-import { processError } from '../../mappers/error-mapper';
+import type { APIGatewayProxyResult, Context } from "aws-lambda";
+import { mockDeep } from "jest-mock-extended";
+import { S3Client } from "@aws-sdk/client-s3";
+import pino from "pino";
+import { LetterRepository } from "@internal/datastore/src";
+import { processError } from "../../mappers/error-mapper";
+import * as letterService from "../../services/letter-operations";
+
+import { makeApiGwEvent } from "./utils/test-utils";
+import ValidationError from "../../errors/validation-error";
+import * as errors from "../../contracts/errors";
+import createGetLetterDataHandler from "../get-letter-data";
+import { EnvVars } from "../../config/env";
+import { Deps } from "../../config/deps";
+
+jest.mock("../../mappers/error-mapper");
 const mockedProcessError = jest.mocked(processError);
 const expectedErrorResponse: APIGatewayProxyResult = {
   statusCode: 400,
-  body: 'Error'
+  body: "Error",
 };
 mockedProcessError.mockReturnValue(expectedErrorResponse);
 
 // mock letterService
-jest.mock('../../services/letter-operations');
-import * as letterService from '../../services/letter-operations';
+jest.mock("../../services/letter-operations");
 
-import type { APIGatewayProxyResult, Context } from 'aws-lambda';
-import { mockDeep } from 'jest-mock-extended';
-import { makeApiGwEvent } from './utils/test-utils';
-import { ValidationError } from '../../errors';
-import * as errors from '../../contracts/errors';
-import { createGetLetterDataHandler } from '../get-letter-data';
-import { S3Client } from '@aws-sdk/client-s3';
-import pino from 'pino';
-import { LetterRepository } from '@internal/datastore/src';
-import { EnvVars } from '../../config/env';
-import { Deps } from "../../config/deps";
-
-describe('API Lambda handler', () => {
-
+describe("API Lambda handler", () => {
   const mockedDeps: jest.Mocked<Deps> = {
     s3Client: {} as unknown as S3Client,
     letterRepo: {} as unknown as LetterRepository,
     logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
     env: {
-      SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
-      APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
-      LETTERS_TABLE_NAME: 'LETTERS_TABLE_NAME',
-      LETTER_TTL_HOURS: 12960,
-      DOWNLOAD_URL_TTL_SECONDS: 60
-    } as unknown as EnvVars
+      SUPPLIER_ID_HEADER: "nhsd-supplier-id",
+      APIM_CORRELATION_HEADER: "nhsd-correlation-id",
+      LETTERS_TABLE_NAME: "LETTERS_TABLE_NAME",
+      LETTER_TTL_HOURS: 12_960,
+      DOWNLOAD_URL_TTL_SECONDS: 60,
+    } as unknown as EnvVars,
   } as Deps;
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('returns 303 Found with a pre signed url', async () => {
-
-    const mockedGetLetterDataUrlService = letterService.getLetterDataUrl as jest.Mock;
-    mockedGetLetterDataUrlService.mockResolvedValue('https://somePreSignedUrl.com');
+  it("returns 303 Found with a pre signed url", async () => {
+    const mockedGetLetterDataUrlService =
+      letterService.getLetterDataUrl as jest.Mock;
+    mockedGetLetterDataUrlService.mockResolvedValue(
+      "https://somePreSignedUrl.com",
+    );
 
     const event = makeApiGwEvent({
-      path: '/letters/letter1/data',
+      path: "/letters/letter1/data",
       headers: {
-        'nhsd-supplier-id': 'supplier1',
-        'nhsd-correlation-id': 'correlationId',
-        'x-request-id': 'requestId'
+        "nhsd-supplier-id": "supplier1",
+        "nhsd-correlation-id": "correlationId",
+        "x-request-id": "requestId",
       },
-      pathParameters: {id: 'id1'}
+      pathParameters: { id: "id1" },
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
@@ -66,15 +68,17 @@ describe('API Lambda handler', () => {
     expect(result).toEqual({
       statusCode: 303,
       headers: {
-        'Location': 'https://somePreSignedUrl.com',
+        Location: "https://somePreSignedUrl.com",
       },
-      body: ''
+      body: "",
     });
   });
 
-  it('returns error if headers are empty', async () => {
-    const event = makeApiGwEvent({ path: '/letters/letter1/data', headers: {},
-      pathParameters: {id: 'id1'}
+  it("returns error if headers are empty", async () => {
+    const event = makeApiGwEvent({
+      path: "/letters/letter1/data",
+      headers: {},
+      pathParameters: { id: "id1" },
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
@@ -82,19 +86,23 @@ describe('API Lambda handler', () => {
     const getLetterDataHandler = createGetLetterDataHandler(mockedDeps);
     const result = await getLetterDataHandler(event, context, callback);
 
-    expect(mockedProcessError).toHaveBeenCalledWith(new Error('The request headers are empty'), undefined, mockedDeps.logger);
+    expect(mockedProcessError).toHaveBeenCalledWith(
+      new Error("The request headers are empty"),
+      undefined,
+      mockedDeps.logger,
+    );
     expect(result).toEqual(expectedErrorResponse);
   });
 
-  it('returns error if correlation id not provided in request', async () => {
+  it("returns error if correlation id not provided in request", async () => {
     const event = makeApiGwEvent({
-      path: '/letters/letter1/data',
-      queryStringParameters: { limit: '2000' },
+      path: "/letters/letter1/data",
+      queryStringParameters: { limit: "2000" },
       headers: {
-        'nhsd-supplier-id': 'supplier1',
-        'x-request-id': 'requestId'
+        "nhsd-supplier-id": "supplier1",
+        "x-request-id": "requestId",
       },
-      pathParameters: {id: 'id1'}
+      pathParameters: { id: "id1" },
     });
     const context = mockDeep<Context>();
     const callback = jest.fn();
@@ -102,17 +110,21 @@ describe('API Lambda handler', () => {
     const getLetterDataHandler = createGetLetterDataHandler(mockedDeps);
     const result = await getLetterDataHandler(event, context, callback);
 
-    expect(mockedProcessError).toHaveBeenCalledWith(new Error("The request headers don't contain the APIM correlation id"), undefined, mockedDeps.logger);
+    expect(mockedProcessError).toHaveBeenCalledWith(
+      new Error("The request headers don't contain the APIM correlation id"),
+      undefined,
+      mockedDeps.logger,
+    );
     expect(result).toEqual(expectedErrorResponse);
   });
 
-  it('returns error response when path parameter letterId is not found', async () => {
+  it("returns error response when path parameter letterId is not found", async () => {
     const event = makeApiGwEvent({
-      path: '/letters/',
+      path: "/letters/",
       headers: {
-        'nhsd-supplier-id': 'supplier1',
-        'nhsd-correlation-id': 'correlationId',
-        'x-request-id': 'requestId'
+        "nhsd-supplier-id": "supplier1",
+        "nhsd-correlation-id": "correlationId",
+        "x-request-id": "requestId",
       },
     });
     const context = mockDeep<Context>();
@@ -121,7 +133,13 @@ describe('API Lambda handler', () => {
     const getLetterDataHandler = createGetLetterDataHandler(mockedDeps);
     const result = await getLetterDataHandler(event, context, callback);
 
-    expect(mockedProcessError).toHaveBeenCalledWith(new ValidationError(errors.ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter), 'correlationId', mockedDeps.logger);
+    expect(mockedProcessError).toHaveBeenCalledWith(
+      new ValidationError(
+        errors.ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter,
+      ),
+      "correlationId",
+      mockedDeps.logger,
+    );
     expect(result).toEqual(expectedErrorResponse);
   });
 });
