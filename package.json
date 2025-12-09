@@ -79,10 +79,12 @@
     "deps:check": "npx syncpack list-mismatches"
   },
   "workspaces": [
-    "lambdas/*",
-    "internal/*",
-    "scripts/utilities/*",
     "docs",
+    "internal/*",
+    "lambdas/*",
+    "pact-contracts/*",
+    "pact-tests/*",
+    "scripts/utilities/*",
     "tests"
   ]
 }

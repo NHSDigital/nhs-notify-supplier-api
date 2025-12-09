@@ -1,0 +1,35 @@
+{
+  "dependencies": {
+    "@nhsdigital/nhs-notify-event-schemas-letter-rendering": "^2.0.1",
+    "@pact-foundation/pact": "^16.0.2",
+    "zod": "^4.1.11"
+  },
+  "description": "Package to run PACT tests for consumer and to generate consumer contracts",
+  "devDependencies": {
+    "@stylistic/eslint-plugin": "^3.1.0",
+    "@tsconfig/node22": "^22.0.2",
+    "@types/jest": "^29.5.14",
+    "@typescript-eslint/eslint-plugin": "^8.27.0",
+    "@typescript-eslint/parser": "^8.27.0",
+    "eslint": "^9.27.0",
+    "eslint-plugin-jest": "^29.0.1",
+    "jest": "^30.1.3",
+    "ts-jest": "^29.4.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "license": "MIT",
+  "main": "src/index.ts",
+  "name": "@nhs-notify-supplier/pact-tests",
+  "private": true,
+  "scripts": {
+    "build": "echo Build not required",
+    "lint:fix": "eslint . --fix",
+    "lint": "eslint .",
+    "pact": "./run-pact-tests.sh",
+    "test:unit": "echo  Unit tests not required",
+    "test": "echo Unit tests not required",
+    "typecheck": "tsc --noEmit"
+  },
+  "version": "0.1.0"
+}

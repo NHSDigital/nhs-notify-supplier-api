@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "resolveJsonModule": true
+  },
+  "exclude": [
+    "node_modules",
+    "dist"
+  ],
+  "extends": "../tsconfig.base.json",
+  "include": [
+    "src/**/*",
+    "jest.config.ts"
+  ]
+}
