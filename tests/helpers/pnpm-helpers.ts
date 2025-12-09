@@ -60,7 +60,8 @@ export default async function runCreateLetter(options: {
     String(count),
   ];
 
-await new Promise<void>((resolve, reject) => {
+  await new Promise<void>((resolve, reject) => {
+    let output = "";
     const child = spawn(cmd, args, {
       stdio: "inherit",
       cwd: root,

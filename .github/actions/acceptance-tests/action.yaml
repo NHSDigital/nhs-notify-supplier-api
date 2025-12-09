@@ -37,10 +37,3 @@ runs:
       shell: bash
       run: |
         make test-${{ inputs.testType }}
-
-    - name: Archive test results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: ${{ inputs.testType }} - test report
-        path: "tests/acceptance-test-report"
