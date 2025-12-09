@@ -82,8 +82,8 @@
     "docs",
     "internal/*",
     "lambdas/*",
-    "pact-contracts/*",
-    "pact-tests/*",
+    "pact-contracts",
+    "pact-tests",
     "scripts/utilities/*",
     "tests"
   ]

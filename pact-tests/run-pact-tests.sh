@@ -11,7 +11,7 @@ rm -rf ./.pacts
 jest ./src/consumer
 
 # # Check the pact contracts by running them against the sample events published by the provider
-jest ./src/provider --runInBand
+jest ./src/provider
 
 rm -rf ../pact-contracts/pacts
 mkdir -p ../pact-contracts/pacts

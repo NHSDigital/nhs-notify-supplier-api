@@ -5,9 +5,10 @@ import {
   MessageConsumerPact,
   asynchronousBodyHandler,
 } from "@pact-foundation/pact";
-// import { $LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
+import { $LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 
 async function handle(event: unknown) {
+  $LetterRequestPreparedEventV2.parse(event);
 }
 
 describe("Pact Message Consumer - LetterRequestPrepared Event", () => {
