@@ -3,7 +3,7 @@ import {
   SUPPLIER_API_URL_SANDBOX,
   SUPPLIER_LETTERS,
 } from "../constants/api-constants";
-import { apiSandboxUpdateLetterStatusTestData } from "./testCases/updateLetterStatus_testCases";
+import { apiSandboxUpdateLetterStatusTestData } from "./testCases/update-letter-status-test-cases";
 
 test.describe("Sandbox Tests To Update Letter Status", () => {
   for (const {

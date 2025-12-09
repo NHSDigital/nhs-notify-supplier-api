@@ -1,4 +1,3 @@
-import { SUPPLIERID } from "../constants/api-constants";
 
 export type ErrorLink = {
   about: string;
