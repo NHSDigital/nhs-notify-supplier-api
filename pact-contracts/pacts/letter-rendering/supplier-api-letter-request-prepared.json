@@ -21,7 +21,7 @@
           "url": "s3://comms-123456789012-eu-west-2-pdf-pipeline/rendered/client/35b9VJ4ejJZXk0Z9HtQI9khryiz_35b9VgjHJYKoseXAHWT9i44qSbz.pdf"
         },
         "datacontenttype": "application/json",
-        "dataschema": "https://notify.nhs.uk/cloudevents/schemas/letter-rendering/letter-request.prepared.2.0.1.schema.json",
+        "dataschema": "https://notify.nhs.uk/cloudevents/schemas/letter-rendering/letter-request.prepared.2.0.0.schema.json",
         "dataschemaversion": "2.0.0",
         "id": "12f1f09c-a555-4d9b-8405-0b33490bc929",
         "plane": "data",

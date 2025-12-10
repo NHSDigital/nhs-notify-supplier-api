@@ -2,7 +2,7 @@
 import path from "node:path";
 import { readdirSync } from "node:fs";
 
-export const getSampleEvent = (eventType: string, version = "v2.0.1") => {
+export const getSampleEvent = (eventType: string, version = "v2.0.0") => {
   const basePath = path.join(
     __dirname,
     "../../node_modules/@nhsdigital/nhs-notify-event-schemas-letter-rendering/examples",

@@ -83,7 +83,6 @@
     "internal/*",
     "lambdas/*",
     "pact-contracts",
-    "pact-tests",
     "scripts/utilities/*",
     "tests"
   ]

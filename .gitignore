@@ -28,3 +28,6 @@ dist
 /sandbox-staging
 /specification/api/components/examples
 /scripts/JWT/*.pem
+
+# ignore PACTS
+.pacts
