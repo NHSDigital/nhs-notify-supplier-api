@@ -7,3 +7,4 @@ export const API_NAME = `nhs-${envName}-supapi`;
 export const LETTERSTABLENAME = `nhs-${envName}-supapi-letters`;
 export const SUPPLIERID = "TestSupplier1";
 export const MI_ENDPOINT = "mi";
+export const SUPPLIERTABLENAME = `nhs-${envName}-supapi-suppliers`;

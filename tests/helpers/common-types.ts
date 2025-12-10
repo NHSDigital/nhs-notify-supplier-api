@@ -17,8 +17,7 @@ export type ErrorMessageBody = {
 };
 
 export function error404ResponseBody(): ErrorMessageBody {
-  let responseBody: ErrorMessageBody;
-  responseBody = {
+  const responseBody: ErrorMessageBody = {
     errors: [
       {
         id: "12345",
@@ -36,9 +35,8 @@ export function error404ResponseBody(): ErrorMessageBody {
   return responseBody;
 }
 
-export function error500ResponseBody(id: string): ErrorMessageBody {
-  let responseBody: ErrorMessageBody;
-  responseBody = {
+export function error500ResponseBody(): ErrorMessageBody {
+  const responseBody: ErrorMessageBody = {
     errors: [
       {
         id: "12345",
@@ -57,8 +55,7 @@ export function error500ResponseBody(id: string): ErrorMessageBody {
 }
 
 export function error400ResponseBody(): ErrorMessageBody {
-  let responseBody: ErrorMessageBody;
-  responseBody = {
+  const responseBody: ErrorMessageBody = {
     errors: [
       {
         id: "12345",
@@ -77,9 +74,7 @@ export function error400ResponseBody(): ErrorMessageBody {
 }
 
 export function requestId500Error(): ErrorMessageBody {
-  let responseBody: ErrorMessageBody;
-
-  responseBody = {
+  const responseBody: ErrorMessageBody = {
     errors: [
       {
         id: "1234",
@@ -105,8 +100,7 @@ export function error403ResponseBody(): { Message: string } {
 }
 
 export function error400InvalidDate(): ErrorMessageBody {
-  let responseBody: ErrorMessageBody;
-  responseBody = {
+  const responseBody: ErrorMessageBody = {
     errors: [
       {
         id: "12345",
@@ -126,8 +120,7 @@ export function error400InvalidDate(): ErrorMessageBody {
 }
 
 export function error400IdError(): ErrorMessageBody {
-  let responseBody: ErrorMessageBody;
-  responseBody = {
+  const responseBody: ErrorMessageBody = {
     errors: [
       {
         id: "12344",

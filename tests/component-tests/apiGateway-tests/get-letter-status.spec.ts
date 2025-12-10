@@ -12,7 +12,6 @@ let baseUrl: string;
 
 test.beforeAll(async () => {
   baseUrl = await getRestApiGatewayBaseUrl();
-  console.log(`Base URL for API Gateway: ${baseUrl}`);
 });
 
 test.describe("API Gateway Tests to Verify Get Letter Status Endpoint", () => {
@@ -75,6 +74,6 @@ test.describe("API Gateway Tests to Verify Get Letter Status Endpoint", () => {
 
     const responseBody = await response.json();
     expect(response.status()).toBe(500);
-    expect(responseBody).toMatchObject(error500ResponseBody(id));
+    expect(responseBody).toMatchObject(error500ResponseBody());
   });
 });

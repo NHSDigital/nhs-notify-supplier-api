@@ -7,9 +7,10 @@ import {
 import {
   LETTERSTABLENAME,
   SUPPLIERID,
+  SUPPLIERTABLENAME,
   envName,
 } from "../constants/api-constants";
-import runCreateLetter from "./pnpm-helpers";
+import { createSupplierData, runCreateLetter } from "./pnpm-helpers";
 
 const ddb = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(ddb);
@@ -78,3 +79,34 @@ export const deleteLettersBySupplier = async (id: string) => {
   );
   return resp.Attributes;
 };
+
+export async function checkSupplierExists(
+  supplierId: string,
+): Promise<boolean> {
+  try {
+    const params = {
+      TableName: SUPPLIERTABLENAME,
+      KeyConditionExpression: "id = :id",
+      ExpressionAttributeValues: {
+        ":id": supplierId,
+      },
+    };
+
+    const { Items } = await docClient.send(new QueryCommand(params));
+    return Items !== undefined && Items.length > 0;
+  } catch (error) {
+    console.error("Error checking supplier existence:", error);
+    return false;
+  }
+}
+
+export async function createSupplierEntry(supplierId: string): Promise<void> {
+  await createSupplierData({
+    filter: "nhs-notify-supplier-api-letter-test-data-utility",
+    supplierId,
+    apimId: supplierId,
+    name: "TestSupplier",
+    environment: envName,
+    status: "ENABLED",
+  });
+}
