@@ -1,0 +1,10 @@
+temporary: false
+monitoring: false
+access:
+  $ref: ../environments/sandbox/access.yml
+target:
+  $ref: ../environments/sandbox/target.yml
+target-attributes:
+  $ref: ../environments/sandbox/target-attributes.yml
+ratelimiting:
+  $ref: ../environments/sandbox/rate-limiting.yml
