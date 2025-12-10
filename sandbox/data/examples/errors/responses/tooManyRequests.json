@@ -1,14 +1,10 @@
 {
-  "errors": [
-    {
-      "code": "NOTIFY_QUOTA",
-      "detail": "You have made too many requests. Please try again later.",
-      "id": "rrt-1931948104716186917-c-geu2-10664-3111479-3.0",
-      "links": {
-        "about": "https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier"
-      },
-      "status": "429",
-      "title": "Too many requests"
-    }
-  ]
+  "interval": 1,
+  "limit": 1,
+  "message": "Your application, Notify-Supplier-App-Restricted - Internal Dev 2, has exceeded its quota of 1 requests every 1 minute(s) and is being rate limited.",
+  "message_id": "rrt-4773181658036170775-c-geu2-321623-73628915-2",
+  "policy": "quota",
+  "ratelimiting_expiry_time_ms": 1765372560000,
+  "scope": "application",
+  "timeunit": "minute"
 }
