@@ -33,7 +33,11 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
       .map((element) => mapLetterToCloudEvent(element));
 
     for (const batch of generateBatches(cloudEvents)) {
-      deps.logger.info({ description: "Publishing batch", size: batch.length });
+      deps.logger.info({
+        description: "Publishing batch",
+        size: batch.length,
+        entries: batch,
+      });
       await deps.snsClient.send(
         new PublishBatchCommand({
           TopicArn: deps.env.EVENTPUB_SNS_TOPIC_ARN,
