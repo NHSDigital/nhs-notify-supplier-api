@@ -37,6 +37,4 @@ jobs:
             --targetEnvironment "main" \
             --targetAccountGroup "nhs-notify-supplier-api-nonprod" \
             --targetComponent "${{ matrix.component }}" \
-            --terraformAction "apply" \
-            --overrideProjectName "nhs" \
-            --overrideRoleName "nhs-main-acct-supplier-api-github-deploy"
+            --terraformAction "apply"
