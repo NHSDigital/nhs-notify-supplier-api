@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { getRestApiGatewayBaseUrl } from "../../helpers/aws-gateway-helper";
+import getRestApiGatewayBaseUrl from "../../helpers/aws-gateway-helper";
 import { MI_ENDPOINT } from "../../constants/api-constants";
 import {
   createHeaderWithNoCorrelationId,

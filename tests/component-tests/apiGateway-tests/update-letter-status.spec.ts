@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 import { SUPPLIERID, SUPPLIER_LETTERS } from "../../constants/api-constants";
-import { getRestApiGatewayBaseUrl } from "../../helpers/aws-gateway-helper";
+import getRestApiGatewayBaseUrl from "../../helpers/aws-gateway-helper";
 import {
   patch400ErrorResponseBody,
   patchFailureRequestBody,

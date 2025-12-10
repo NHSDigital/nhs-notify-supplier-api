@@ -9,7 +9,7 @@ import {
   SUPPLIERID,
   envName,
 } from "../constants/api-constants";
-import { runCreateLetter } from "./pnpm-helpers";
+import runCreateLetter from "./pnpm-helpers";
 
 const ddb = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(ddb);
