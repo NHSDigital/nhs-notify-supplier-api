@@ -31,7 +31,10 @@ export interface SupplierApiLetters {
   status: string;
 }
 
-export async function createTestData(supplierId: string): Promise<void> {
+export async function createTestData(
+  supplierId: string,
+  count?: number,
+): Promise<void> {
   await runCreateLetter({
     filter: "nhs-notify-supplier-api-letter-test-data-utility",
     supplierId,
@@ -40,7 +43,7 @@ export async function createTestData(supplierId: string): Promise<void> {
     groupId: "TestGroupID",
     specificationId: "TestSpecificationID",
     status: "PENDING",
-    count: 1,
+    count: count || 1,
   });
 }
 

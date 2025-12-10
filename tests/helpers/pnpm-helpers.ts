@@ -42,7 +42,7 @@ export async function runCreateLetter(options: {
     "run",
     "cli",
     "--",
-    "create-letter",
+    "create-letter-batch",
     "--supplier-id",
     supplierId,
     "--environment",
