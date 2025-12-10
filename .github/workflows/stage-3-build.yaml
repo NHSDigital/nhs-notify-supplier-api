@@ -55,9 +55,27 @@ jobs:
           version: "${{ inputs.version }}"
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  artefact-oas-spec:
+    name: "Build OAS spec"
+    runs-on: ubuntu-latest
+    needs: [artefact-jekyll-docs]
+    timeout-minutes: 10
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v5
+      - name: "Build proxies"
+        uses: ./.github/actions/build-oas-spec
+        with:
+          version: "${{ inputs.version }}"
+          apimEnv: "internal-dev-sandbox"
+          buildSandbox: true
+          nodejs_version: ${{ inputs.nodejs_version }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   artefact-sdks:
     name: "Build SDKs"
     runs-on: ubuntu-latest
+    needs: [artefact-oas-spec]
     timeout-minutes: 10
     steps:
       - name: "Checkout code"
@@ -117,7 +135,7 @@ jobs:
   artefact-proxies:
     name: "Build proxies"
     runs-on: ubuntu-latest
-    needs: [pr-create-dynamic-environment]
+    needs: [artefact-oas-spec, pr-create-dynamic-environment]
     timeout-minutes: 10
     env:
       PROXYGEN_API_NAME: nhs-notify-supplier
@@ -136,5 +154,3 @@ jobs:
           runId: "${{ github.run_id }}"
           buildSandbox: true
           releaseVersion: ${{ github.head_ref || github.ref_name }}
-          nodejs_version: ${{ inputs.nodejs_version }}
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
