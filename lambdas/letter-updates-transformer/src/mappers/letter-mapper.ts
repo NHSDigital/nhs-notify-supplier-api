@@ -1,12 +1,11 @@
 import { LetterEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
 import { randomBytes, randomUUID } from "node:crypto";
 import eventSchemaPackage from "@nhsdigital/nhs-notify-event-schemas-supplier-api/package.json";
-import { LetterWithSupplierId } from "../types";
+import { LetterForEventPub } from "../types";
 
 export default function mapLetterToCloudEvent(
-  letter: LetterWithSupplierId,
+  letter: LetterForEventPub,
 ): LetterEvent {
-  const now = new Date().toISOString();
   const eventId = randomUUID();
   const dataschemaversion = eventSchemaPackage.version;
   return {
@@ -34,10 +33,10 @@ export default function mapLetterToCloudEvent(
         event: eventId,
       },
     },
-    time: now,
+    time: letter.updatedAt,
     datacontenttype: "application/json",
     traceparent: `00-${randomBytes(16).toString("hex")}-${randomBytes(8).toString("hex")}-01`,
-    recordedtime: now,
+    recordedtime: letter.updatedAt,
     severitynumber: 2,
     severitytext: "INFO",
   };

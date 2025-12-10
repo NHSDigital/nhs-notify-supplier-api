@@ -13,7 +13,7 @@ import { Deps } from "../deps";
 import { EnvVars } from "../env";
 import mapLetterToCloudEvent from "../mappers/letter-mapper";
 import { LetterStatus } from "../../../api-handler/src/contracts/letters";
-import { LetterWithSupplierId } from "../types";
+import { LetterForEventPub } from "../types";
 
 // Make crypto return consistent values, since we"re calling it in both prod and test code and comparing the values
 const realCrypto = jest.requireActual("crypto");
@@ -148,7 +148,7 @@ describe("letter-updates-transformer Lambda", () => {
     it("does not publish invalid letter data", async () => {
       const handler = createHandler(mockedDeps);
       const oldLetter = generateLetter("ACCEPTED");
-      const newLetter = { id: oldLetter.id } as LetterWithSupplierId;
+      const newLetter = { id: oldLetter.id } as LetterForEventPub;
 
       const testData = generateKinesisEvent([
         generateModifyRecord(oldLetter, newLetter),
@@ -252,24 +252,22 @@ describe("letter-updates-transformer Lambda", () => {
   });
 });
 
-function generateLetter(
-  status: LetterStatus,
-  id?: string,
-): LetterWithSupplierId {
+function generateLetter(status: LetterStatus, id?: string): LetterForEventPub {
   return {
     id: id || "1",
     status,
     specificationId: "spec1",
     supplierId: "supplier1",
     groupId: "group1",
+    updatedAt: "2025-12-10T11:13:54Z",
   };
 }
 
 function generateLetters(
   numLetters: number,
   status: LetterStatus,
-): LetterWithSupplierId[] {
-  const letters: LetterWithSupplierId[] = Array.from({ length: numLetters });
+): LetterForEventPub[] {
+  const letters: LetterForEventPub[] = Array.from({ length: numLetters });
   for (let i = 0; i < numLetters; i++) {
     letters[i] = generateLetter(status, String(i + 1));
   }
@@ -277,8 +275,8 @@ function generateLetters(
 }
 
 function generateModifyRecord(
-  oldLetter: LetterWithSupplierId,
-  newLetter: LetterWithSupplierId,
+  oldLetter: LetterForEventPub,
+  newLetter: LetterForEventPub,
 ): DynamoDBRecord {
   const oldImage = Object.fromEntries(
     Object.entries(oldLetter).map(([key, value]) => [key, { S: value }]),

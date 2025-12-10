@@ -12,9 +12,8 @@ describe("letter-mapper", () => {
       status: "PRINTED",
       reasonCode: "R02",
       reasonText: "Reason text",
+      updatedAt: "2025-11-24T15:55:18.000Z",
     } as Letter;
-    jest.useFakeTimers().setSystemTime(new Date("2025-11-24T15:55:18Z"));
-
     const event = mapLetterToCloudEvent(letter);
 
     // Check it conforms to the letter event schema - parse will throw an error if not
@@ -42,7 +41,5 @@ describe("letter-mapper", () => {
         event: event.id,
       },
     });
-
-    jest.useRealTimers();
   });
 });

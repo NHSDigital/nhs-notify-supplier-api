@@ -12,7 +12,7 @@ import {
 import { LetterEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
 import mapLetterToCloudEvent from "./mappers/letter-mapper";
 import { Deps } from "./deps";
-import { LetterSchemaWithSupplierId, LetterWithSupplierId } from "./types";
+import { LetterForEventPub, LetterSchemaForEventPub } from "./types";
 
 // SNS PublishBatchCommand supports up to 10 messages per batch
 const BATCH_SIZE = 10;
@@ -62,9 +62,9 @@ function isChanged(record: DynamoDBRecord, property: string): boolean {
   return oldValue?.S !== newValue?.S;
 }
 
-function extractNewLetter(record: DynamoDBRecord): LetterWithSupplierId {
+function extractNewLetter(record: DynamoDBRecord): LetterForEventPub {
   const newImage = record.dynamodb?.NewImage!;
-  return LetterSchemaWithSupplierId.parse(unmarshall(newImage as any));
+  return LetterSchemaForEventPub.parse(unmarshall(newImage as any));
 }
 
 function* generateBatches(events: LetterEvent[]) {
