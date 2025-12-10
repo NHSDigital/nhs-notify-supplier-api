@@ -36,7 +36,7 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
       deps.logger.info({
         description: "Publishing batch",
         size: batch.length,
-        entries: batch,
+        letterEvents: batch,
       });
       await deps.snsClient.send(
         new PublishBatchCommand({
