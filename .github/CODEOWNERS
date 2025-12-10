@@ -7,6 +7,9 @@
 /docs/                      @NHSDigital/nhs-notify-supplier-api
 /infrastructure/terraform/  @NHSDigital/nhs-notify-platform @NHSDigital/nhs-notify-supplier-api-admins
 
+# Root level AGENTS.md owned by platform.
+AGENTS.md                   @NHSDigital/nhs-notify-platform
+
 # Codeowners must be final check
 /.github/CODEOWNERS         @NHSDigital/nhs-notify-code-owners
 /CODEOWNERS                 @NHSDigital/nhs-notify-code-owners
