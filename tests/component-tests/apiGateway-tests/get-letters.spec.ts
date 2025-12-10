@@ -6,7 +6,6 @@ import {
   createValidRequestHeaders,
 } from "../../constants/request-headers";
 import getRestApiGatewayBaseUrl from "../../helpers/aws-gateway-helper";
-import validateApiResponse from "../../helpers/validate-json-schema";
 
 let baseUrl: string;
 

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { getRestApiGatewayBaseUrl } from "../../helpers/aws-gateway-helper";
+import getRestApiGatewayBaseUrl from "../../helpers/aws-gateway-helper";
 import { getLettersBySupplier } from "../../helpers/generate-fetch-test-data";
 import { SUPPLIERID, SUPPLIER_LETTERS } from "../../constants/api-constants";
 import { createValidRequestHeaders } from "../../constants/request-headers";
@@ -12,6 +12,7 @@ let baseUrl: string;
 
 test.beforeAll(async () => {
   baseUrl = await getRestApiGatewayBaseUrl();
+  console.log(`Base URL for API Gateway: ${baseUrl}`);
 });
 
 test.describe("API Gateway Tests to Verify Get Letter Status Endpoint", () => {
