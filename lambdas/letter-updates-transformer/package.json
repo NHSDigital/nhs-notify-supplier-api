@@ -1,6 +1,14 @@
 {
   "dependencies": {
-    "esbuild": "^0.24.0"
+    "@aws-sdk/client-sns": "^3.943.0",
+    "@aws-sdk/util-dynamodb": "^3.943.0",
+    "@internal/datastore": "^0.1.0",
+    "@internal/helpers": "^0.1.0",
+    "@nhsdigital/nhs-notify-event-schemas-supplier-api": "*",
+    "aws-lambda": "^1.0.7",
+    "esbuild": "^0.24.0",
+    "pino": "^10.1.0",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.2",
