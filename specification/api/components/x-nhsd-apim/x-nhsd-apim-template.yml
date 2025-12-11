@@ -1,0 +1,10 @@
+temporary: $TEMPORARY_FLAG
+monitoring: $MONITORING_FLAG
+access:
+  $ref: $ENV_DIR/access.yml
+target:
+  $ref: $ENV_DIR/target.yml
+target-attributes:
+  $ref: $ENV_DIR/target-attributes.yml
+ratelimiting:
+  $ref: $ENV_DIR/rate-limiting.yml
