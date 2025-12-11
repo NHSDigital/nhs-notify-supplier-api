@@ -52,7 +52,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          registry-url: 'https://npm.pkg.github.com'
       - name: "Cache node_modules"
         uses: actions/cache@v4
         with:
@@ -112,6 +111,38 @@ jobs:
         with:
           name: code-coverage-report
           path: ".reports/lcov.info"
+  test-pact:
+    name: "Pact tests"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: "Cache node_modules"
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-node-${{ inputs.nodejs_version }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
+      - name: "Repo setup"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm ci
+      - name: "Generate dependencies"
+        run: |
+          npm run generate-dependencies --workspaces --if-present
+      - name: "Run PACT tests"
+        run: |
+          npm run test:pact --workspace tests
+      - name: Publish Pact Contracts
+        run: |
+          ./scripts/publish-pact-contracts.sh
   test-lint:
     name: "Linting"
     runs-on: ubuntu-latest

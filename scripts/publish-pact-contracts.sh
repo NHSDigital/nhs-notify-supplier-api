@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
-
 published_version=$(npm view @nhsdigital/notify-supplier-api-consumer-contracts --json 2>/dev/null | jq -r '.["dist-tags"].latest')
+
+set -euo pipefail
 
 # Fail if there are uncommitted changes as this indicates unexpected changes to the contracts
 git diff --quiet tests/pact-tests
@@ -22,4 +22,4 @@ if [[ $local_version == $published_version ]]; then
 fi
 
 echo "Local version is different to the latest published version - publishing new version"
-npm publish ./pact-contracts
+npm pack ./pact-contracts
