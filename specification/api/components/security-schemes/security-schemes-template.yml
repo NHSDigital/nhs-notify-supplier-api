@@ -1,1 +1,1 @@
-$ref: $SECURITY_SCHEMES
+$ref: $ENV_DIR/security-schemes.yml
