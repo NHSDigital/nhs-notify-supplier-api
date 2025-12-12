@@ -61,6 +61,7 @@ jobs:
         uses: ./.github/actions/node-install
         with:
           node-version: 22
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Generate dependencies"
         run: |
           npm run generate-dependencies --workspaces --if-present
@@ -84,6 +85,7 @@ jobs:
         uses: ./.github/actions/node-install
         with:
           node-version: 22
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Generate dependencies"
         run: |
           npm run generate-dependencies --workspaces --if-present
@@ -121,6 +123,7 @@ jobs:
         uses: ./.github/actions/node-install
         with:
           node-version: 22
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Generate dependencies"
         run: npm run generate-dependencies --workspaces --if-present
       - name: "Run PACT tests"
@@ -146,6 +149,7 @@ jobs:
         uses: ./.github/actions/node-install
         with:
           node-version: 22
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Generate dependencies"
         run: |
           npm run generate-dependencies --workspaces --if-present
@@ -171,6 +175,7 @@ jobs:
         uses: ./.github/actions/node-install
         with:
           node-version: 22
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Generate dependencies"
         run: |
           npm run generate-dependencies --workspaces --if-present
