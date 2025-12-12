@@ -41,7 +41,7 @@ module "upsert_letter" {
 }
 
 variable "variant_map" {
-  type = map(object({ supplier_id = string, spec_id = string }))
+  type = map(object({ supplierId = string, specId = string }))
   default = {
     "lv1" = { supplierId = "supplier1", specId = "spec1" },
     "lv2" = { supplierId = "supplier1", specId = "spec2" },
