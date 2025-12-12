@@ -35,5 +35,5 @@
     "test:unit": "echo \"No unit tests for tests package\"",
     "typecheck": "tsc --noEmit"
   },
-  "version": "1.0.0"
+  "version": "0.0.1"
 }
