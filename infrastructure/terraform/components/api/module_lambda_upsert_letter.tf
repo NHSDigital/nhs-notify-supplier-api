@@ -69,7 +69,10 @@ data "aws_iam_policy_document" "upsert_letter_lambda" {
     effect = "Allow"
 
     actions = [
-      "dynamodb:PutItem"
+      "dynamodb:PutItem",
+      "dynamodb:GetItem",
+      "dynamodb:Query",
+      "dynamodb:UpdateItem"
     ]
 
     resources = [
