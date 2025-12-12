@@ -61,12 +61,6 @@ runs:
           make build-json-oas-spec APIM_ENV=${{ env.APIM_ENV }}
         fi
 
-        if [[ $APIM_ENV == *-pr ]]; then
-          echo "Removing pr suffix from APIM_ENV after building OAS and calling proxygen"
-          APIM_ENV=$(echo "$APIM_ENV" | sed 's/-pr$//')
-        fi
-        echo "APIM_ENV=$APIM_ENV" >> $GITHUB_ENV
-
     - name: Upload API OAS specification artifact
       uses: actions/upload-artifact@v4
       with:
