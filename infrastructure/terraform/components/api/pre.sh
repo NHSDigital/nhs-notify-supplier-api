@@ -2,9 +2,9 @@
 # # It ensures all Node.js dependencies are installed, generates any required dependencies,
 # # and builds all Lambda functions in the workspace before Terraform provisions infrastructure.
 
-ROOT_DIR="$(git rev-parse --show-toplevel)"
+echo "Running pre.sh"
 
-$ROOT_DIR/scripts/set_github_packages_token.sh
+npm config --location user set //npm.pkg.github.com/:_authToken $GITHUB_TOKEN
 
 npm ci
 
