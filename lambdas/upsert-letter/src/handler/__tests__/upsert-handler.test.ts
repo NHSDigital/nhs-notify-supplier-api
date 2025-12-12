@@ -1,10 +1,29 @@
-import { SQSEvent } from "aws-lambda";
+import { SNSMessage, SQSEvent } from "aws-lambda";
 import pino from "pino";
 import { LetterRepository } from "internal/datastore/src";
 import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import createUpsertLetterHandler from "../upsert-handler";
 import { Deps } from "../../config/deps";
 import { EnvVars } from "../../config/env";
+
+function createNotification(
+  event: LetterRequestPreparedEvent,
+): Partial<SNSMessage> {
+  return {
+    SignatureVersion: "",
+    Timestamp: "",
+    Signature: "",
+    SigningCertUrl: "",
+    MessageId: "",
+    Message: JSON.stringify(event),
+    MessageAttributes: {},
+    Type: "Notification",
+    UnsubscribeUrl: "",
+    TopicArn: "",
+    Subject: "",
+    Token: "",
+  };
+}
 
 function createValidEvent(
   overrides: Partial<any> = {},
@@ -74,7 +93,7 @@ describe("createUpsertLetterHandler", () => {
         {
           messageId: "msg1",
           receiptHandle: "rh1",
-          body: JSON.stringify(createValidEvent()),
+          body: JSON.stringify(createNotification(createValidEvent())),
           attributes: {
             ApproximateReceiveCount: "",
             SentTimestamp: "",
@@ -91,11 +110,13 @@ describe("createUpsertLetterHandler", () => {
           messageId: "msg2",
           receiptHandle: "rh2",
           body: JSON.stringify(
-            createValidEvent({
-              id: "7b9a03ca-342a-4150-b56b-989109c45614",
-              domainId: "letter2",
-              url: "s3://letterDataBucket/letter2.pdf",
-            }),
+            createNotification(
+              createValidEvent({
+                id: "7b9a03ca-342a-4150-b56b-989109c45614",
+                domainId: "letter2",
+                url: "s3://letterDataBucket/letter2.pdf",
+              }),
+            ),
           ),
           attributes: {
             ApproximateReceiveCount: "",
@@ -179,11 +200,13 @@ describe("createUpsertLetterHandler", () => {
     expect(result.batchItemFailures).toHaveLength(1);
     expect(result.batchItemFailures[0].itemIdentifier).toBe("bad-json");
 
-    expect(mockedDeps.logger.error).toHaveBeenCalled();
+    expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][1]).toBe(
+      "Error processing upsert",
+    );
     expect(mockedDeps.letterRepo.upsertLetter).not.toHaveBeenCalled();
   });
 
-  test("invalid schema produces batch failure and logs error", async () => {
+  test("invalid notification schema produces batch failure and logs error", async () => {
     const evt: SQSEvent = {
       Records: [
         {
@@ -216,7 +239,51 @@ describe("createUpsertLetterHandler", () => {
     expect(result.batchItemFailures).toHaveLength(1);
     expect(result.batchItemFailures[0].itemIdentifier).toBe("bad-schema");
 
-    expect(mockedDeps.logger.error).toHaveBeenCalled();
+    expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][1]).toBe(
+      "Error processing upsert",
+    );
+    expect(mockedDeps.letterRepo.upsertLetter).not.toHaveBeenCalled();
+  });
+
+  test("invalid event schema produces batch failure and logs error", async () => {
+    const evt: SQSEvent = {
+      Records: [
+        {
+          messageId: "bad-schema",
+          receiptHandle: "rh1",
+          body: JSON.stringify({
+            Type: "Notification",
+            Message: JSON.stringify({ bad: "shape" }),
+          }),
+          attributes: {
+            ApproximateReceiveCount: "",
+            SentTimestamp: "",
+            SenderId: "",
+            ApproximateFirstReceiveTimestamp: "",
+          },
+          messageAttributes: {},
+          md5OfBody: "",
+          eventSource: "",
+          eventSourceARN: "",
+          awsRegion: "",
+        },
+      ],
+    };
+
+    const result = await createUpsertLetterHandler(mockedDeps)(
+      evt,
+      {} as any,
+      {} as any,
+    );
+
+    expect(result).toBeDefined();
+    if (!result) throw new Error("expected BatchResponse, got void");
+    expect(result.batchItemFailures).toHaveLength(1);
+    expect(result.batchItemFailures[0].itemIdentifier).toBe("bad-schema");
+
+    expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][1]).toBe(
+      "Error parsing letter event in upsert",
+    );
     expect(mockedDeps.letterRepo.upsertLetter).not.toHaveBeenCalled();
   });
 
@@ -231,10 +298,12 @@ describe("createUpsertLetterHandler", () => {
           messageId: "ok-msg",
           receiptHandle: "rh1",
           body: JSON.stringify(
-            createValidEvent({
-              id: "7b9a03ca-342a-4150-b56b-989109c45615",
-              data: { domainId: "ok" },
-            }),
+            createNotification(
+              createValidEvent({
+                id: "7b9a03ca-342a-4150-b56b-989109c45615",
+                data: { domainId: "ok" },
+              }),
+            ),
           ),
           attributes: {
             ApproximateReceiveCount: "",
@@ -252,10 +321,12 @@ describe("createUpsertLetterHandler", () => {
           messageId: "fail-msg",
           receiptHandle: "rh2",
           body: JSON.stringify(
-            createValidEvent({
-              id: "7b9a03ca-342a-4150-b56b-989109c45616",
-              data: { domainId: "ok" },
-            }),
+            createNotification(
+              createValidEvent({
+                id: "7b9a03ca-342a-4150-b56b-989109c45616",
+                data: { domainId: "ok" },
+              }),
+            ),
           ),
           attributes: {
             ApproximateReceiveCount: "",

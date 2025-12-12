@@ -1,4 +1,4 @@
-import { SQSBatchItemFailure, SQSEvent, SQSHandler } from "aws-lambda";
+import { SQSBatchItemFailure, SQSEvent, SQSHandler, SNSMessage } from "aws-lambda";
 import { UpsertLetter } from "@internal/datastore";
 import {
   $LetterRequestPreparedEvent,
@@ -6,6 +6,7 @@ import {
 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import { ZodError } from "zod";
 import { Deps } from "../config/deps";
+import { no } from "zod/v4/locales";
 
 type SupplierSpec = { supplierId: string; specId: string };
 
@@ -41,8 +42,18 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
 
     const tasks = event.Records.map(async (record) => {
       try {
+        const notification = JSON.parse(record.body) as Partial<SNSMessage>;
+        if (
+          notification.Type !== "Notification" ||
+          typeof notification.Message !== "string"
+        ) {
+          throw new Error(
+            "SQS record does not contain SNS Notification with string Message",
+          );
+        }
+
         const upsertRequest: LetterRequestPreparedEvent =
-          $LetterRequestPreparedEvent.parse(JSON.parse(record.body));
+          $LetterRequestPreparedEvent.parse(JSON.parse(notification.Message));
 
         const supplierSpec: SupplierSpec = resolveSupplierForVariant(
           upsertRequest.data.letterVariantId,
@@ -58,7 +69,7 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
       } catch (error) {
         if (error instanceof ZodError) {
           deps.logger.error(
-            { issues: error.issues },
+            { issues: error.issues, body: record.body },
             "Error parsing letter event in upsert",
           );
         }
