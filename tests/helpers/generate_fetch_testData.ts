@@ -19,7 +19,8 @@ export interface SupplierApiLetters {
     url: string,
     ttl: string,
     reasonText: string,
-    status: string
+    status: string,
+    source: string
 };
 
 export async function createTestData(supplierId: string): Promise<void> {

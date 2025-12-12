@@ -1,16 +1,16 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { enqueueLetterUpdateRequests } from "../services/letter-operations";
 import {
-  LetterDto,
   PatchLetterRequest,
   PatchLetterRequestSchema,
+  UpdateLetterCommand,
 } from "../contracts/letters";
 import { ApiErrorDetail } from "../contracts/errors";
 import ValidationError from "../errors/validation-error";
 import { processError } from "../mappers/error-mapper";
 import { assertNotEmpty } from "../utils/validation";
 import { extractCommonIds } from "../utils/common-ids";
-import { mapPatchLetterToDto } from "../mappers/letter-mapper";
+import { mapToUpdateCommand } from "../mappers/letter-mapper";
 import type { Deps } from "../config/deps";
 
 export default function createPatchLetterHandler(
@@ -57,19 +57,19 @@ export default function createPatchLetterHandler(
         throw typedError;
       }
 
-      const letterToUpdate: LetterDto = mapPatchLetterToDto(
+      const updateLetterCommand: UpdateLetterCommand = mapToUpdateCommand(
         patchLetterRequest,
         commonIds.value.supplierId,
       );
 
-      if (letterToUpdate.id !== letterId) {
+      if (updateLetterCommand.id !== letterId) {
         throw new ValidationError(
           ApiErrorDetail.InvalidRequestLetterIdsMismatch,
         );
       }
 
       await enqueueLetterUpdateRequests(
-        [letterToUpdate],
+        [updateLetterCommand],
         commonIds.value.correlationId,
         deps,
       );
