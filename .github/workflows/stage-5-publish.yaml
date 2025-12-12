@@ -1,6 +1,7 @@
 name: "Publish stage"
 
 on:
+  workflow_dispatch: # Temporary - remove this!
   workflow_call:
     inputs:
       build_datetime:
