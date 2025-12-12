@@ -42,6 +42,7 @@ export async function createLetter(params: {
     status: status,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+    source: "/data-plane/letter-rendering/letter-test-data",
   };
 
   const letterRecord = await letterRepository.putLetter(letter);
@@ -74,6 +75,7 @@ export function createLetterDto(params: {
     status: status,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+    source: "/data-plane/letter-rendering/letter-test-data",
   };
 
   return letter;

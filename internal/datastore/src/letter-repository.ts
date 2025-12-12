@@ -44,7 +44,7 @@ export class LetterRepository {
     const letterDb: Letter = {
       ...letter,
       supplierStatus: `${letter.supplierId}#${letter.status}`,
-      supplierStatusSk: new Date().toISOString(),
+      supplierStatusSk: letter.createdAt, // needs to be an ISO timestamp
       ttl: Math.floor(
         Date.now() / 1000 + 60 * 60 * this.config.lettersTtlHours,
       ),
@@ -80,7 +80,7 @@ export class LetterRepository {
         lettersDb.push({
           ...letter,
           supplierStatus: `${letter.supplierId}#${letter.status}`,
-          supplierStatusSk: Date.now().toString(),
+          supplierStatusSk: letter.createdAt,
           ttl: Math.floor(
             Date.now() / 1000 + 60 * 60 * this.config.lettersTtlHours,
           ),
@@ -316,6 +316,12 @@ export class LetterRepository {
     if (upsert.reasonText !== undefined) {
       setParts.push("reasonText = :reasonText");
       exprAttrValues[":reasonText"] = upsert.reasonText;
+    }
+
+    if (upsert.source !== undefined) {
+      setParts.push("#source = :source");
+      exprAttrNames["#source"] = "source";
+      exprAttrValues[":source"] = upsert.source;
     }
 
     const updateExpression = `SET ${setParts.join(", ")}`;

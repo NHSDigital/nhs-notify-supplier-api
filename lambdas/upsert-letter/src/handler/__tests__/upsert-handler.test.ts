@@ -132,6 +132,7 @@ describe("createUpsertLetterHandler", () => {
     expect(firstArg.url).toBe("s3://letterDataBucket/letter1.pdf");
     expect(firstArg.status).toBe("PENDING");
     expect(firstArg.groupId).toBe("client1campaign1template1");
+    expect(firstArg.source).toBe("/data-plane/letter-rendering/test");
 
     const secondArg = (mockedDeps.letterRepo.upsertLetter as jest.Mock).mock
       .calls[1][0];
@@ -141,6 +142,8 @@ describe("createUpsertLetterHandler", () => {
     expect(secondArg.url).toBe("s3://letterDataBucket/letter2.pdf");
     expect(secondArg.status).toBe("PENDING");
     expect(secondArg.groupId).toBe("client1campaign1template1");
+    expect(secondArg.groupId).toBe("client1campaign1template1");
+    expect(firstArg.source).toBe("/data-plane/letter-rendering/test");
   });
 
   test("invalid JSON body produces batch failure and logs error", async () => {

@@ -24,8 +24,7 @@ function mapToUpsertLetter(
       upsertRequest.data.campaignId +
       upsertRequest.data.templateId,
     url: upsertRequest.data.url,
-    // TODO CCM-12997 source
-    // TODO CCM-12997 queueVisibility
+    source: upsertRequest.source,
   };
 }
 

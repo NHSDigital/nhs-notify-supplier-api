@@ -38,6 +38,7 @@ function makeLetter(id: string, status: Letter["status"]): Letter {
     ttl: 123,
     reasonCode: "R01",
     reasonText: "Reason text",
+    source: "/data-plane/letter-rendering/pdf",
   };
 }
 
