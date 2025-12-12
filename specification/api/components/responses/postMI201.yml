@@ -10,5 +10,4 @@ content:
       $ref: "../schemas/miResponse.yml"
     examples:
       create-mi-response:
-        value:
-          $ref: "../examples/createMI/responses/createMI_SUCCESS.json"
+        $ref: "../examples/createMI/responses/createMI_response_SUCCESS.json"

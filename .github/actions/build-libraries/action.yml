@@ -4,6 +4,9 @@ inputs:
   version:
     description: "Version number"
     required: true
+  NODE_AUTH_TOKEN:
+    description: "Token for access to github package registry"
+    required: true
 runs:
   using: "composite"
   steps:
@@ -11,10 +14,13 @@ runs:
       uses: actions/checkout@v4
     - uses: actions/setup-node@v4
       with:
-        node-version: 24
+        node-version: 22
+        registry-url: 'https://npm.pkg.github.com'
 
     - name: Npm install
       working-directory: .
+      env:
+        NODE_AUTH_TOKEN: ${{ inputs.NODE_AUTH_TOKEN }}
       run: npm ci
       shell: bash
 

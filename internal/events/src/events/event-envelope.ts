@@ -50,6 +50,12 @@ export function EventEnvelope<TData extends z.ZodTypeAny>(
         examples: typeStrings,
       }),
 
+      plane: z.literal("data").meta({
+        title: "plane",
+        description: "The event bus that this event will be published to",
+        examples: ["data"],
+      }),
+
       dataschema: z
         .string()
         .regex(
@@ -64,6 +70,15 @@ export function EventEnvelope<TData extends z.ZodTypeAny>(
           examples: schemaExamples,
         }),
 
+      dataschemaversion: z
+        .string()
+        .regex(/^1\.\d+\.\d+$/)
+        .meta({
+          title: "Data Schema URI",
+          description: `Version of the schema that describes the event data\n\nMust match the version in dataschema`,
+          examples: ["1.0.0"],
+        }),
+
       source: z
         .string()
         .regex(/^\/data-plane\/supplier-api(?:\/.*)?$/)
@@ -76,11 +91,7 @@ export function EventEnvelope<TData extends z.ZodTypeAny>(
       subject: z
         .string()
 
-        .regex(
-          new RegExp(
-            `^${subjectPrefixRegex}${resourceName}/[a-z0-9-]+$`,
-          ),
-        )
+        .regex(new RegExp(`^${subjectPrefixRegex}${resourceName}/[a-z0-9-]+$`))
         .meta({
           title: "Event Subject",
           description:
@@ -98,14 +109,12 @@ export function EventEnvelope<TData extends z.ZodTypeAny>(
         examples: ["2025-10-01T10:15:30.000Z"],
       }),
 
-      datacontenttype: z.optional(
-        z.literal("application/json").meta({
-          title: "Data Content Type",
-          description:
-            "Media type for the data field (fixed to application/json).",
-          examples: ["application/json"],
-        }),
-      ),
+      datacontenttype: z.literal("application/json").meta({
+        title: "Data Content Type",
+        description:
+          "Media type for the data field (fixed to application/json).",
+        examples: ["application/json"],
+      }),
 
       traceparent: z
         .string()

@@ -9,6 +9,7 @@ security:
 paths:
   /letters:
     parameters:
+      - $ref: 'components/parameters/authorization/authorization.yml'
       - $ref: 'components/parameters/requestId.yml'
       - $ref: 'components/parameters/correlationId.yml'
     post:
@@ -17,6 +18,7 @@ paths:
       $ref: 'components/endpoints/listLetters.yml'
   '/letters/{id}':
     parameters:
+      - $ref: 'components/parameters/authorization/authorization.yml'
       - $ref: 'components/parameters/requestId.yml'
       - $ref: 'components/parameters/correlationId.yml'
       - $ref: 'components/parameters/resourceId.yml'
@@ -26,6 +28,7 @@ paths:
       $ref: 'components/endpoints/patchLetter.yml'
   '/letters/{id}/data':
     parameters:
+      - $ref: 'components/parameters/authorization/authorization.yml'
       - $ref: 'components/parameters/resourceId.yml'
       - $ref: 'components/parameters/requestId.yml'
       - $ref: 'components/parameters/correlationId.yml'
@@ -35,6 +38,7 @@ paths:
     #  $ref: 'components/endpoints/headDataId.yml'
   /mi:
     parameters:
+      - $ref: 'components/parameters/authorization/authorization.yml'
       - $ref: 'components/parameters/requestId.yml'
       - $ref: 'components/parameters/correlationId.yml'
     post:
@@ -64,13 +68,4 @@ servers:
   - url: 'http://127.0.0.1:9000'
     description: Local development server
 x-nhsd-apim:
-  temporary: false
-  monitoring: false
-  access:
-    $ref: ./components/x-nhsd-apim/access.yml
-  target:
-    $ref: ./components/x-nhsd-apim/target.yml
-  target-attributes:
-    $ref: ./components/x-nhsd-apim/target-attributes.yml
-  ratelimiting:
-    $ref: ./components/x-nhsd-apim/rate-limiting.yml
+  $ref: './components/x-nhsd-apim/x-nhsd-apim.yml'

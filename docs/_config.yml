@@ -75,7 +75,7 @@ mermaid:
   version: "10.9.1"
 
 aux_links:
-  "NHS Notify Supplier API Template on GitHub":
+  "NHS Notify Supplier API on GitHub":
     - "//github.com/NHSDigital/nhs-notify-supplier-api"
 
 aux_links_new_tab: false

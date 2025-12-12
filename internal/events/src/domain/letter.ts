@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DomainBase } from "@internal/helpers";
+import DomainBase from "./domain-base";
 
 /**
  * Status values for letters in the supplier-api domain
@@ -74,6 +74,12 @@ The identifier will be included as the origin domain in the subject of any corre
       description:
         "Reference to the letter specification which was used to produce a letter pack for this request.",
       examples: ["1y3q9v1zzzz"],
+    }),
+
+    supplierId: z.string().meta({
+      title: "Supplier ID",
+      description: "Supplier ID allocated to the letter during creation.",
+      examples: ["supplier-1"],
     }),
 
     groupId: z.string().meta({

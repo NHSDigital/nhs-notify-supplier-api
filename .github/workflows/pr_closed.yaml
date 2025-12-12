@@ -81,9 +81,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.nodejs_version }}
+          registry-url: 'https://npm.pkg.github.com'
 
       - name: check if local version differs from latest published version
         id: check-version
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           published_version=$(npm view @nhsdigital/nhs-notify-event-schemas-supplier-api --json 2>/dev/null | jq -r '.["dist-tags"].latest // "null"')
           echo "Published version: $published_version"
@@ -99,7 +102,7 @@ jobs:
             echo "version_changed=true" >> $GITHUB_OUTPUT
           fi
 
-  test-contract-provider:
+  test-contract:
     name: "Test contracts (provider)"
     needs: check-event-schemas-version-change
     if: needs.check-event-schemas-version-change.outputs.version_changed == 'true'
@@ -114,10 +117,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.nodejs_version }}
+          registry-url: 'https://npm.pkg.github.com'
       - name: "Install dependencies"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm ci
       - name: "Run provider contract tests"
-        run: make test-contract-provider
+        run: make test-contract
         env:
           GITHUB_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -125,7 +131,7 @@ jobs:
     name: Publish event schemas package to GitHub package registry
     needs:
       - check-event-schemas-version-change
-      - test-contract-provider
+      - test-contract
     if: needs.check-event-schemas-version-change.outputs.version_changed == 'true'
     runs-on: ubuntu-latest
     permissions:
@@ -143,6 +149,8 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
 
       - name: Install dependencies
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm ci
 
       - name: Publish to GitHub Packages

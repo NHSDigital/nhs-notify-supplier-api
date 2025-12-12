@@ -1,16 +1,14 @@
+import type { Deps } from "../deps";
 
-import type { Deps } from '../deps';
-
-describe('createDependenciesContainer', () => {
-
+describe("createDependenciesContainer", () => {
   const env = {
-    LETTERS_TABLE_NAME: 'LettersTable',
-    LETTER_TTL_HOURS: 12960,
-    MI_TABLE_NAME: 'MITable',
+    LETTERS_TABLE_NAME: "LettersTable",
+    LETTER_TTL_HOURS: 12_960,
+    MI_TABLE_NAME: "MITable",
     MI_TTL_HOURS: 2160,
-    SUPPLIER_ID_HEADER: 'nhsd-supplier-id',
-    APIM_CORRELATION_HEADER: 'nhsd-correlation-id',
-    DOWNLOAD_URL_TTL_SECONDS: 60
+    SUPPLIER_ID_HEADER: "nhsd-supplier-id",
+    APIM_CORRELATION_HEADER: "nhsd-correlation-id",
+    DOWNLOAD_URL_TTL_SECONDS: 60,
   };
 
   beforeEach(() => {
@@ -18,7 +16,7 @@ describe('createDependenciesContainer', () => {
     jest.resetModules();
 
     // pino
-    jest.mock('pino', () => ({
+    jest.mock("pino", () => ({
       __esModule: true,
       default: jest.fn(() => ({
         info: jest.fn(),
@@ -28,47 +26,57 @@ describe('createDependenciesContainer', () => {
       })),
     }));
 
-    jest.mock('@aws-sdk/client-s3', () => ({
+    jest.mock("@aws-sdk/client-s3", () => ({
       S3Client: jest.fn(),
     }));
 
+    jest.mock("@aws-sdk/client-sqs", () => ({
+      SQSClient: jest.fn(),
+    }));
+
     // Repo client
-    jest.mock('@internal/datastore', () => ({
+    jest.mock("@internal/datastore", () => ({
       LetterRepository: jest.fn(),
       MIRepository: jest.fn(),
+      DBHealthcheck: jest.fn(),
     }));
 
     // Env
-    jest.mock('../env', () => ({envVars: env}));
+    jest.mock("../env", () => ({ envVars: env }));
   });
 
-  test('constructs deps and wires repository config correctly', async () => {
+  test("constructs deps and wires repository config correctly", async () => {
     // get current mock instances
-    const { S3Client } = jest.requireMock('@aws-sdk/client-s3') as { S3Client: jest.Mock };
-    const pinoMock = jest.requireMock('pino') as { default: jest.Mock };
-    const { LetterRepository, MIRepository } = jest.requireMock('@internal/datastore') as {
-      LetterRepository: jest.Mock,
-      MIRepository: jest.Mock
-    };
+    const { S3Client } = jest.requireMock("@aws-sdk/client-s3");
+    const { SQSClient } = jest.requireMock("@aws-sdk/client-sqs");
+    const pinoMock = jest.requireMock("pino");
+    const { LetterRepository, MIRepository } = jest.requireMock(
+      "@internal/datastore",
+    );
 
-    const { createDependenciesContainer } = require('../deps');
+    // allow re-import of deps to leverage mocks
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { createDependenciesContainer } = require("../deps");
     const deps: Deps = createDependenciesContainer();
 
     expect(S3Client).toHaveBeenCalledTimes(1);
+
+    expect(SQSClient).toHaveBeenCalledTimes(1);
+
     expect(pinoMock.default).toHaveBeenCalledTimes(1);
 
     expect(LetterRepository).toHaveBeenCalledTimes(1);
-    const letterRepoCtorArgs = (LetterRepository as jest.Mock).mock.calls[0];
+    const letterRepoCtorArgs = LetterRepository.mock.calls[0];
     expect(letterRepoCtorArgs[2]).toEqual({
-      lettersTableName: 'LettersTable',
-      lettersTtlHours: 12960
+      lettersTableName: "LettersTable",
+      lettersTtlHours: 12_960,
     });
 
     expect(MIRepository).toHaveBeenCalledTimes(1);
-    const miRepoCtorArgs = (MIRepository as jest.Mock).mock.calls[0];
+    const miRepoCtorArgs = MIRepository.mock.calls[0];
     expect(miRepoCtorArgs[2]).toEqual({
-      miTableName: 'MITable',
-      miTtlHours: 2160
+      miTableName: "MITable",
+      miTtlHours: 2160,
     });
 
     expect(deps.env).toEqual(env);

@@ -1,14 +1,14 @@
-import type { APIGatewayProxyEvent } from 'aws-lambda';
+import type { APIGatewayProxyEvent } from "aws-lambda";
 
 export function makeApiGwEvent(
-  overrides: Partial<APIGatewayProxyEvent> = {}
+  overrides: Partial<APIGatewayProxyEvent> = {},
 ): APIGatewayProxyEvent {
   return {
-    resource: '/{proxy+}',
-    path: '/',
-    httpMethod: 'GET',
+    resource: "/{proxy+}",
+    path: "/",
+    httpMethod: "GET",
     headers: {
-      'NHSD-Supplier-ID': 'supplier1'
+      "NHSD-Supplier-ID": "supplier1",
     },
     multiValueHeaders: {},
     queryStringParameters: null,
@@ -16,18 +16,18 @@ export function makeApiGwEvent(
     pathParameters: null,
     stageVariables: null,
     requestContext: {
-      accountId: '123456789012',
-      apiId: 'api-id',
-      authorizer: {},
-      protocol: 'HTTP/1.1',
-      httpMethod: 'GET',
+      accountId: "123456789012",
+      apiId: "api-id",
+      authorizer: null,
+      protocol: "HTTP/1.1",
+      httpMethod: "GET",
       identity: {} as any,
-      path: '/',
-      stage: 'test',
-      requestId: 'req-id',
+      path: "/",
+      stage: "test",
+      requestId: "req-id",
       requestTimeEpoch: Date.now(),
-      resourceId: 'res-id',
-      resourcePath: '/{proxy+}',
+      resourceId: "res-id",
+      resourcePath: "/{proxy+}",
     },
     body: null,
     isBase64Encoded: false,

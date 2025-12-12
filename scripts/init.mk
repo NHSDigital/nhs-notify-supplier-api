@@ -46,8 +46,8 @@ _install-dependency: # Install asdf dependency - mandatory: name=[listed in the 
 	asdf install ${name} $(or ${version},)
 
 _install-dependencies: # Install all the dependencies listed in .tool-versions
-	for plugin in $$(grep ^[a-z] .tool-versions | sed 's/[[:space:]].*//'); do
-		make _install-dependency name="$${plugin}"
+	for plugin in $$(grep '^[a-z]' .tool-versions | cut -f1 -d' '); do \
+		echo "Installing $${plugin}..."; \
 	done
 
 clean:: # Remove all generated and temporary files (common) @Operations

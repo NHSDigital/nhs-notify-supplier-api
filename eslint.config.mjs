@@ -80,7 +80,7 @@ export default defineConfig([
         eslintImportResolverTypescript.createTypeScriptImportResolver({
           project: [
             'lambdas/*/tsconfig.json',
-            'tests/test-team/tsconfig.json',
+            'tests/tsconfig.json',
             'internal/*/tsconfig.json',
           ],
         }),
@@ -167,7 +167,7 @@ export default defineConfig([
     rules: { 'import-x/no-unresolved': 0 },
   },
   {
-    files: ['tests/test-team/**'],
+    files: ['tests/**'],
     rules: {
       'import-x/no-extraneous-dependencies': [
         2,
@@ -176,7 +176,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['**/utils/**', 'tests/test-team/**'],
+    files: ['**/utils/**', 'tests/**'],
     rules: { 'import-x/prefer-default-export': 0 },
   },
   {
@@ -184,7 +184,7 @@ export default defineConfig([
     rules: { 'no-relative-import-paths/no-relative-import-paths': 2 },
   },
   {
-    files: ['scripts/**'],
+    files: ['scripts/**', '**/__test__/**/*.ts', '**/__tests__/**/*.ts'],
     rules: {
       'import-x/no-extraneous-dependencies': [
         'error',
@@ -221,6 +221,20 @@ export default defineConfig([
     },
   },
 
+  // No use before define relaxations
+  {
+    rules: {
+      "no-use-before-define": "off",
+      "@typescript-eslint/no-use-before-define": [ "error", {"functions": false}]
+    }
+  },
+
+  // Lambda specific relaxations
+  {
+    files: ['lambdas/**'],
+    rules: { 'import-x/prefer-default-export': 1 },
+  },
+
   // misc rule overrides
   {
     rules: {
@@ -229,8 +243,8 @@ export default defineConfig([
       'no-await-in-loop': 0,
       'no-plusplus': [2, { allowForLoopAfterthoughts: true }],
       'unicorn/prefer-top-level-await': 0,
-      'import-x/no-relative-packages': 1,
-      'no-relative-import-paths/no-relative-import-paths': 1
+      'import-x/no-relative-packages': 0,
+      'no-relative-import-paths/no-relative-import-paths': 0
     },
   },
 ]);

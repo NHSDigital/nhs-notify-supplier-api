@@ -1,7 +1,6 @@
 {
   "dependencies": {
     "@asyncapi/bundler": "^0.6.4",
-    "@internal/helpers": "*",
     "zod": "^4.1.11"
   },
   "description": "Schemas for NHS Notify Supplier API events",
@@ -47,8 +46,9 @@
     "pretest:unit": "npm run gen:jsonschema",
     "start": "node dist/index.js",
     "test": "npm run test:unit",
-    "test:unit": "jest"
+    "test:unit": "jest",
+    "typecheck": "tsc --noEmit"
   },
   "types": "dist/index.d.ts",
-  "version": "1.0.1"
+  "version": "1.0.5"
 }
