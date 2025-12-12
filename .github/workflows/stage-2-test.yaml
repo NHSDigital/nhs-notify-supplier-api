@@ -49,9 +49,6 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
       - name: "Cache node_modules"
         uses: actions/cache@v4
         with:
@@ -61,10 +58,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
       - name: "Repo setup"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          npm ci
+        uses: ./.github/actions/node-install
+        with:
+          node-version: 22
       - name: "Generate dependencies"
         run: |
           npm run generate-dependencies --workspaces --if-present
@@ -76,10 +72,6 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          registry-url: 'https://npm.pkg.github.com'
       - name: "Cache node_modules"
         uses: actions/cache@v4
         with:
@@ -89,10 +81,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
       - name: "Repo setup"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          npm ci
+        uses: ./.github/actions/node-install
+        with:
+          node-version: 22
       - name: "Generate dependencies"
         run: |
           npm run generate-dependencies --workspaces --if-present
@@ -118,9 +109,6 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
       - name: "Cache node_modules"
         uses: actions/cache@v4
         with:
@@ -130,19 +118,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
       - name: "Repo setup"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          npm ci
+        uses: ./.github/actions/node-install
+        with:
+          node-version: 22
       - name: "Generate dependencies"
-        run: |
-          npm run generate-dependencies --workspaces --if-present
+        run: npm run generate-dependencies --workspaces --if-present
       - name: "Run PACT tests"
-        run: |
-          npm run test:pact --workspace tests
+        run: npm run test:pact --workspace tests
       - name: Publish Pact Contracts
-        run: |
-          ./scripts/publish-pact-contracts.sh
+        run: ./scripts/publish-pact-contracts.sh
   test-lint:
     name: "Linting"
     runs-on: ubuntu-latest
@@ -150,10 +134,6 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          registry-url: 'https://npm.pkg.github.com'
       - name: "Cache node_modules"
         uses: actions/cache@v4
         with:
@@ -163,10 +143,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
       - name: "Repo setup"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          npm ci
+        uses: ./.github/actions/node-install
+        with:
+          node-version: 22
       - name: "Generate dependencies"
         run: |
           npm run generate-dependencies --workspaces --if-present
@@ -180,10 +159,6 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          registry-url: 'https://npm.pkg.github.com'
       - name: "Cache node_modules"
         uses: actions/cache@v4
         with:
@@ -193,10 +168,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
       - name: "Repo setup"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          npm ci
+        uses: ./.github/actions/node-install
+        with:
+          node-version: 22
       - name: "Generate dependencies"
         run: |
           npm run generate-dependencies --workspaces --if-present

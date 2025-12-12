@@ -1,0 +1,21 @@
+name: 'npm install and setup'
+description: 'Setup node, authenticate github package repository and perform clean npm install'
+
+inputs:
+  node_version:
+    description: 'Node.js version'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Use Node.js'
+      uses: actions/setup-node@v6
+      with:
+        node-version: '${{ inputs.node_version }}'
+
+    - name: 'Install dependencies'
+      shell: bash
+      run: |
+        ./scripts/set-github-token.sh
+        npm ci
