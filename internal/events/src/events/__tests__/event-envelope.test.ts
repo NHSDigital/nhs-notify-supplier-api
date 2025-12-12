@@ -8,12 +8,15 @@ describe("EventEnvelope schema validation", () => {
   const baseValidEnvelope: Envelope = {
     dataschema:
       "https://notify.nhs.uk/cloudevents/schemas/supplier-api/order.READ.1.0.0.schema.json",
+    dataschemaversion: "1.0.0",
     specversion: "1.0",
     id: "6f1c2a53-3d54-4a0a-9a0b-0e9ae2d4c111",
     source: "/data-plane/supplier-api/ordering",
     subject: "order/769acdd4",
     type: "uk.nhs.notify.supplier-api.order.READ.v1",
+    plane: "data",
     time: "2025-10-01T10:15:30.000Z",
+    datacontenttype: "application/json",
     data: {
       "notify-payload": {
         "notify-data": { nhsNumber: "9434765919" },
@@ -241,10 +244,13 @@ describe("EventEnvelope schema validation", () => {
       specversion: "1.0" as const,
       id: "6f1c2a53-3d54-4a0a-9a0b-0e02b2c3d479",
       type: "uk.nhs.notify.supplier-api.letter.CREATED.v1" as const,
+      plane: "data",
       dataschema:
         "https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.CREATED.1.0.0.schema.json",
+      dataschemaversion: "1.0.0",
       source: "/data-plane/supplier-api/letters",
       time: "2025-10-01T10:15:30.000Z",
+      datacontenttype: "application/json",
       data: { status: "CREATED" },
       traceparent: "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01",
       recordedtime: "2025-10-01T10:15:30.250Z",
@@ -294,11 +300,14 @@ describe("EventEnvelope schema validation", () => {
         specversion: "1.0" as const,
         id: "6f1c2a53-3d54-4a0a-9a0b-0e9ae2d4c111",
         type: "uk.nhs.notify.supplier-api.order.READ.v1" as const,
+        plane: "data",
         dataschema:
           "https://notify.nhs.uk/cloudevents/schemas/supplier-api/order.READ.1.0.0.schema.json",
+        dataschemaversion: "1.0.0",
         source: "/data-plane/supplier-api/ordering",
         subject: "order/769acdd4",
         time: "2025-10-01T10:15:30.000Z",
+        datacontenttype: "application/json",
         data: { status: "READ" },
         traceparent: "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01",
         recordedtime: "2025-10-01T10:15:30.250Z",
@@ -341,6 +350,7 @@ describe("EventEnvelope schema validation", () => {
         type: "uk.nhs.notify.supplier-api.order.read.v1" as const,
         dataschema:
           "https://notify.nhs.uk/cloudevents/schemas/supplier-api/order.read.1.0.0.schema.json",
+        dataschemaversion: "1.0.0",
         source: "/data-plane/supplier-api/ordering",
         subject: "prefix/letter-rendering/order/769acdd4",
         time: "2025-10-01T10:15:30.000Z",
