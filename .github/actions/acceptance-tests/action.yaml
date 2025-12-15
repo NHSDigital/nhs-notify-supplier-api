@@ -19,6 +19,11 @@ inputs:
     description: Name of the component under test
     required: true
 
+  pr_number:
+      description: PR under test
+      required: true
+
+
 runs:
   using: "composite"
 
