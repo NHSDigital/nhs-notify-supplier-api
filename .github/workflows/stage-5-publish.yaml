@@ -281,107 +281,107 @@ jobs:
   #           CR_PAT: ${{ secrets.GITHUB_TOKEN }}
 
   ### PUBLISH NUGET
-  publishnuget:
-    name: "Publish nuget packages to nuget.pkg.github.com"
-    runs-on: ubuntu-latest
-    needs: [publish]
-    permissions:
-      packages: write
-      contents: read
-    steps:
-      - name: "Get the artefacts"
-        uses: actions/download-artifact@v6
-        with:
-          path: .
-          name: sdk-csharp-${{ inputs.version }}
-      - run: |
-          ls -la
-      - run: |
-          dotnet nuget add source \
-          --username nhs-notify-supplier-api \
-          --password ${{ secrets.GITHUB_TOKEN }} \
-          --store-password-in-clear-text \
-          --name github \
-          "https://nuget.pkg.github.com/NHSDigital/index.json"
-      - run: |
-          echo "ROOT .version file is: $(cat .version)"
-          echo "GH variable version is: ${{ inputs.version }}"
-        name: Showing the base versions
+  # publishnuget:
+  #   name: "Publish nuget packages to nuget.pkg.github.com"
+  #   runs-on: ubuntu-latest
+  #   needs: [publish]
+  #   permissions:
+  #     packages: write
+  #     contents: read
+  #   steps:
+  #     - name: "Get the artefacts"
+  #       uses: actions/download-artifact@v6
+  #       with:
+  #         path: .
+  #         name: sdk-csharp-${{ inputs.version }}
+  #     - run: |
+  #         ls -la
+  #     - run: |
+  #         dotnet nuget add source \
+  #         --username nhs-notify-supplier-api \
+  #         --password ${{ secrets.GITHUB_TOKEN }} \
+  #         --store-password-in-clear-text \
+  #         --name github \
+  #         "https://nuget.pkg.github.com/NHSDigital/index.json"
+  #     - run: |
+  #         echo "ROOT .version file is: $(cat .version)"
+  #         echo "GH variable version is: ${{ inputs.version }}"
+  #       name: Showing the base versions
 
-      - run: |
-          VERSION=${{ inputs.version }}
-          SHORT_VERSION="$(echo $VERSION | rev | cut -d"." -f2-  | rev)"
-          NUGET_VERSION="$(echo "$VERSION" | tr + .)"
-          echo $VERSION
-          echo $SHORT_VERSION
-          echo $NUGET_VERSION
-          SHORT_NUGET_VERSION="$(echo $NUGET_VERSION | rev | cut -d"." -f2-  | rev)"
-          echo $SHORT_NUGET_VERSION
-          SHORTER_NUGET_VERSION="$(echo $SHORT_NUGET_VERSION | rev | cut -d"." -f2-  | rev)"
-          echo $SHORTER_NUGET_VERSION
-          TEST_NUGET_VERSION="$(echo $NUGET_VERSION | sed -E 's/.([^.]*)$/\1/')"
-          TEST_NUGET_VERSION="$(echo $TEST_NUGET_VERSION | sed -E 's/.([^.]*)$/\1/')"
-          echo $TEST_NUGET_VERSION
-          echo "TEST_NUGET_VERSION=$TEST_NUGET_VERSION" >> "$GITHUB_OUTPUT"
-        name: Set the nuget version
-        id: set-nuget-version
+  #     - run: |
+  #         VERSION=${{ inputs.version }}
+  #         SHORT_VERSION="$(echo $VERSION | rev | cut -d"." -f2-  | rev)"
+  #         NUGET_VERSION="$(echo "$VERSION" | tr + .)"
+  #         echo $VERSION
+  #         echo $SHORT_VERSION
+  #         echo $NUGET_VERSION
+  #         SHORT_NUGET_VERSION="$(echo $NUGET_VERSION | rev | cut -d"." -f2-  | rev)"
+  #         echo $SHORT_NUGET_VERSION
+  #         SHORTER_NUGET_VERSION="$(echo $SHORT_NUGET_VERSION | rev | cut -d"." -f2-  | rev)"
+  #         echo $SHORTER_NUGET_VERSION
+  #         TEST_NUGET_VERSION="$(echo $NUGET_VERSION | sed -E 's/.([^.]*)$/\1/')"
+  #         TEST_NUGET_VERSION="$(echo $TEST_NUGET_VERSION | sed -E 's/.([^.]*)$/\1/')"
+  #         echo $TEST_NUGET_VERSION
+  #         echo "TEST_NUGET_VERSION=$TEST_NUGET_VERSION" >> "$GITHUB_OUTPUT"
+  #       name: Set the nuget version
+  #       id: set-nuget-version
 
-      - run: |
-          dotnet nuget push \
-          nhsnotifysupplier.${TEST_NUGET_VERSION}.nupkg \
-          --source github \
-          --api-key $GITHUB_TOKEN
-        env:
-          TEST_NUGET_VERSION: ${{ steps.set-nuget-version.outputs.TEST_NUGET_VERSION }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     - run: |
+  #         dotnet nuget push \
+  #         nhsnotifysupplier.${TEST_NUGET_VERSION}.nupkg \
+  #         --source github \
+  #         --api-key $GITHUB_TOKEN
+  #       env:
+  #         TEST_NUGET_VERSION: ${{ steps.set-nuget-version.outputs.TEST_NUGET_VERSION }}
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  ### Publish NPM
+  # ### Publish NPM
 
-  publishnpm:
-    name: "Publish npm packages to npm.pkg.github.com"
-    runs-on: ubuntu-latest
-    needs: [publish]
-    permissions:
-      packages: write
-      contents: read
-    steps:
-      - name: "Get the artefacts"
-        uses: actions/download-artifact@v6
-        with:
-          path: .
-          name: sdk-ts-${{ inputs.version }}
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "24.3"
-          registry-url: "https://npm.pkg.github.com"
-          scope: "@NHSDigital"
+  # publishnpm:
+  #   name: "Publish npm packages to npm.pkg.github.com"
+  #   runs-on: ubuntu-latest
+  #   needs: [publish]
+  #   permissions:
+  #     packages: write
+  #     contents: read
+  #   steps:
+  #     - name: "Get the artefacts"
+  #       uses: actions/download-artifact@v6
+  #       with:
+  #         path: .
+  #         name: sdk-ts-${{ inputs.version }}
+  #     - uses: actions/setup-node@v6
+  #       with:
+  #         node-version: "24.3"
+  #         registry-url: "https://npm.pkg.github.com"
+  #         scope: "@NHSDigital"
 
-      - run: ls -la
-      - run: npm cache clear --force
-      - run: npm i
-      - run: npm run build
-      - run: ls -la
-      - run: npm publish --verbose --tag next
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     - run: ls -la
+  #     - run: npm cache clear --force
+  #     - run: npm i
+  #     - run: npm run build
+  #     - run: ls -la
+  #     - run: npm publish --verbose --tag next
+  #       env:
+  #         NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  success:
-    name: "Success notification"
-    runs-on: ubuntu-latest
-    needs: [publish, publishnpm]
-    steps:
-      - name: "Check prerequisites for notification"
-        id: check
-        run: echo "secret_exist=${{ secrets.TEAMS_NOTIFICATION_WEBHOOK_URL != '' }}" >> $GITHUB_OUTPUT
-      - name: "Notify on publishing packages"
-        if: steps.check.outputs.secret_exist == 'true'
-        uses: nhs-england-tools/notify-msteams-action@v1.0.0
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          teams-webhook-url: ${{ secrets.TEAMS_NOTIFICATION_WEBHOOK_URL }}
-          message-title: "Notification title"
-          message-text: "This is a notification body"
-          link: ${{ github.event.pull_request.html_url }}
+  # success:
+  #   name: "Success notification"
+  #   runs-on: ubuntu-latest
+  #   needs: [publish, publishnpm]
+  #   steps:
+  #     - name: "Check prerequisites for notification"
+  #       id: check
+  #       run: echo "secret_exist=${{ secrets.TEAMS_NOTIFICATION_WEBHOOK_URL != '' }}" >> $GITHUB_OUTPUT
+  #     - name: "Notify on publishing packages"
+  #       if: steps.check.outputs.secret_exist == 'true'
+  #       uses: nhs-england-tools/notify-msteams-action@v1.0.0
+  #       with:
+  #         github-token: ${{ secrets.GITHUB_TOKEN }}
+  #         teams-webhook-url: ${{ secrets.TEAMS_NOTIFICATION_WEBHOOK_URL }}
+  #         message-title: "Notification title"
+  #         message-text: "This is a notification body"
+  #         link: ${{ github.event.pull_request.html_url }}
 
   # Take out for now - might add again in the future
   # ### PUBLISH LIBS ABSTRACTION NUGET
