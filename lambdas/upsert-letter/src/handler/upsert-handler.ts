@@ -1,17 +1,21 @@
-import { SQSBatchItemFailure, SQSEvent, SQSHandler, SNSMessage } from "aws-lambda";
+import {
+  SNSMessage,
+  SQSBatchItemFailure,
+  SQSEvent,
+  SQSHandler,
+} from "aws-lambda";
 import { UpsertLetter } from "@internal/datastore";
 import {
-  $LetterRequestPreparedEvent,
-  LetterRequestPreparedEvent,
+  $LetterRequestPreparedEventV2,
+  LetterRequestPreparedEventV2,
 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import { ZodError } from "zod";
 import { Deps } from "../config/deps";
-import { no } from "zod/v4/locales";
 
 type SupplierSpec = { supplierId: string; specId: string };
 
 function mapToUpsertLetter(
-  upsertRequest: LetterRequestPreparedEvent,
+  upsertRequest: LetterRequestPreparedEventV2,
   supplier: string,
   spec: string,
 ): UpsertLetter {
@@ -52,8 +56,8 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
           );
         }
 
-        const upsertRequest: LetterRequestPreparedEvent =
-          $LetterRequestPreparedEvent.parse(JSON.parse(notification.Message));
+        const upsertRequest: LetterRequestPreparedEventV2 =
+          $LetterRequestPreparedEventV2.parse(JSON.parse(notification.Message));
 
         const supplierSpec: SupplierSpec = resolveSupplierForVariant(
           upsertRequest.data.letterVariantId,

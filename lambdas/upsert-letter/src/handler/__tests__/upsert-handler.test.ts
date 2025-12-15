@@ -1,13 +1,13 @@
 import { SNSMessage, SQSEvent } from "aws-lambda";
 import pino from "pino";
 import { LetterRepository } from "internal/datastore/src";
-import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
+import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import createUpsertLetterHandler from "../upsert-handler";
 import { Deps } from "../../config/deps";
 import { EnvVars } from "../../config/env";
 
 function createNotification(
-  event: LetterRequestPreparedEvent,
+  event: LetterRequestPreparedEventV2,
 ): Partial<SNSMessage> {
   return {
     SignatureVersion: "",
@@ -27,7 +27,7 @@ function createNotification(
 
 function createValidEvent(
   overrides: Partial<any> = {},
-): LetterRequestPreparedEvent {
+): LetterRequestPreparedEventV2 {
   // minimal valid event matching the prepared letter schema
   const now = new Date().toISOString();
 
@@ -36,11 +36,11 @@ function createValidEvent(
     id: overrides.id ?? "7b9a03ca-342a-4150-b56b-989109c45613",
     source: "/data-plane/letter-rendering/test",
     subject: "client/client1/letter-request/letterRequest1",
-    type: "uk.nhs.notify.letter-rendering.letter-request.prepared.v1",
+    type: "uk.nhs.notify.letter-rendering.letter-request.prepared.v2",
     time: now,
     dataschema:
-      "https://notify.nhs.uk/cloudevents/schemas/letter-rendering/letter-request.prepared.1.0.0.schema.json",
-    dataschemaversion: "1.0.0",
+      "https://notify.nhs.uk/cloudevents/schemas/letter-rendering/letter-request.prepared.2.0.0.schema.json",
+    dataschemaversion: "2.0.0",
     data: {
       domainId: overrides.domainId ?? "letter1",
       letterVariantId: overrides.letterVariantId ?? "lv1",
