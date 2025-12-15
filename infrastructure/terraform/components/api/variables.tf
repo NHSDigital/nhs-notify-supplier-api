@@ -140,3 +140,9 @@ variable "eventpub_control_plane_bus_arn" {
   description = "ARN of the EventBridge control plane bus for eventpub"
   default     = ""
 }
+
+variable "disable_gateway_execute_endpoint" {
+  type        = bool
+  description = "Disable the execution endpoint for the API Gateway"
+  default     = true
+}
