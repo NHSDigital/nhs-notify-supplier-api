@@ -175,7 +175,7 @@ if [[ -z "$overrides" ]]; then
 fi
 
 if [[ -z "$internalRef" ]]; then
-  internalRef="feature/CCM-13038"
+  internalRef="main"
 fi
 
 if [[ -z "$runId" ]]; then

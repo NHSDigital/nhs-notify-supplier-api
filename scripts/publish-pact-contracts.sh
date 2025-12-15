@@ -11,7 +11,7 @@ local_version=$(cat pact-contracts/package.json | jq -r '.version')
 
 branch=$(git branch --show-current)
 
-if [[ ! $branch == "feature/CCM-13038_pact-tests" ]]; then
+if [[ ! $branch == "main" ]]; then
     echo "Not publishing package because this is not the main branch"
     exit 0
 fi
