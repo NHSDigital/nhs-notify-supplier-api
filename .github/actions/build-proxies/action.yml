@@ -8,6 +8,10 @@ inputs:
   releaseVersion:
     description: "Release, tag, branch, or commit ID to be used for deployment"
     required: true
+  isRelease:
+    description: "True if releaseVersion is a release tag (if set, downloads from release assets instead of workflow artifacts)"
+    required: false
+    default: false
   environment:
     description: "Deployment environment"
     required: true
@@ -30,11 +34,28 @@ runs:
   using: composite
 
   steps:
-    - name: Download OAS Spec artifact
+    - name: Download OAS Spec artifact from workflow
+      if: ${{ inputs.isRelease == 'false' }}
       uses: actions/download-artifact@v4
       with:
         name: api-oas-specification-${{ inputs.apimEnv }}${{ inputs.version != '' && format('-{0}', inputs.version) || '' }}
         path: ./build
+
+    - name: Download OAS Spec artifact from release
+      if: ${{ inputs.isRelease == 'true' }}
+      shell: bash
+      run: |
+        mkdir ./build
+        ASSET_PATTERN="api-oas-specification-${{ inputs.apimEnv }}-*.zip"
+        gh release download "${{ inputs.releaseVersion }}" \
+          --pattern "$ASSET_PATTERN" \
+          --dir ./build
+        # Unzip the downloaded file (there should be exactly one match)
+        ASSET_FILE=$(ls ./build/api-oas-specification-${{ inputs.apimEnv }}-*.zip)
+        unzip "$ASSET_FILE" -d ./build
+        rm "$ASSET_FILE"
+      env:
+        GH_TOKEN: ${{ github.token }}
 
     - name: Setup Proxy Name and target
       shell: bash
