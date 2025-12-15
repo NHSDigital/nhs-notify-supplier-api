@@ -34,6 +34,8 @@ runs:
         npm ci
 
     - name: Run test - ${{ inputs.testType }}
+      env:
+          PR_NUMBER: ${{ inputs.pr_number }}
       shell: bash
       run: |
         make test-${{ inputs.testType }}
