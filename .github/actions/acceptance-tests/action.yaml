@@ -19,11 +19,6 @@ inputs:
     description: Name of the component under test
     required: true
 
-  pr_number:
-      description: PR under test
-      required: true
-
-
 runs:
   using: "composite"
 
@@ -41,7 +36,7 @@ runs:
     - name: "Set PR NUMBER"
       shell: bash
       run: |
-          echo "PR_NUMBER=${{ inputs.pr_number }}" >> $GITHUB_ENV
+          echo "PR_NUMBER=${{ inputs.targetEnvironment }}" >> $GITHUB_ENV
 
     - name: Run test - ${{ inputs.testType }}
       shell: bash
