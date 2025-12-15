@@ -4,12 +4,9 @@
     "@aws-sdk/client-api-gateway": "^3.906.0",
     "@aws-sdk/client-dynamodb": "^3.858.0",
     "@aws-sdk/lib-dynamodb": "^3.858.0",
-    "@playwright/test": "1.56.1",
+    "@playwright/test": "^1.57.0",
     "allure-js-commons": "^3.3.3",
-    "charenc": "^0.0.2",
-    "crypt": "^0.0.2",
     "dotenv": "^17.2.2",
-    "is-buffer": "^1.1.6",
     "md5": "^2.3.0",
     "openapi-response-validator": "^12.1.3",
     "undici-types": "^7.10.0"
@@ -24,6 +21,10 @@
   "license": "ISC",
   "main": "index.js",
   "name": "nhs-notify-supplier-api-tests",
+  "overrides": {
+    "@playwright/test": "1.57.0",
+    "playwright-core": "1.57.0"
+  },
   "scripts": {
     "clean": "rimraf $(pwd)/target",
     "lint": "eslint .",
