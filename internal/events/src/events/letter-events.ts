@@ -13,7 +13,7 @@ export const $LetterEvent = EventEnvelope(
   "letter",
   "letter",
   $Letter,
-  $LetterStatus.options.map((status) => status.toLowerCase()),
+  $LetterStatus.options,
   "letter-origin",
 ).meta({
   title: `letter.* Event`,
@@ -27,13 +27,13 @@ export type LetterEvent = z.infer<typeof $LetterEvent>;
  */
 const eventSchema = (status: LetterStatus) =>
   EventEnvelope(
-    `letter.${status.toLowerCase()}`,
+    `letter.${status}`,
     "letter",
     $Letter,
     [status],
     "letter-origin",
   ).meta({
-    title: `letter.${status.toLowerCase()} Event`,
+    title: `letter.${status} Event`,
     description: `Event schema for letter status change to ${status}`,
   });
 
