@@ -57,6 +57,7 @@ jobs:
 
   artefact-oas-spec:
     name: "Build OAS spec (${{ matrix.apimEnv }})"
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     needs: [artefact-jekyll-docs]
     timeout-minutes: 10
