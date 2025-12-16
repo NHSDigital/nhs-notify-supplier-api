@@ -324,6 +324,11 @@ export class LetterRepository {
       exprAttrValues[":source"] = upsert.source;
     }
 
+    if (upsert.subject !== undefined) {
+      setParts.push("subject = :subject");
+      exprAttrValues[":subject"] = upsert.subject;
+    }
+
     const updateExpression = `SET ${setParts.join(", ")}`;
 
     const command = new UpdateCommand({

@@ -48,7 +48,8 @@ export const LetterSchema = LetterSchemaBase.extend({
   supplierStatus: z.string().describe("Secondary index PK"),
   supplierStatusSk: z.string().describe("Secondary index SK"),
   ttl: z.int(),
-  source: z.string()
+  source: z.string(),
+  subject: z.string(),
 }).describe("Letter");
 
 /**
@@ -81,6 +82,7 @@ export type UpsertLetter = {
   reasonCode?: string;
   reasonText?: string;
   source?: string;
+  subject?: string;
 };
 
 export const MISchemaBase = z.object({

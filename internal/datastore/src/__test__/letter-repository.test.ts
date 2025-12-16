@@ -25,7 +25,8 @@ function createLetter(
     status,
     createdAt: date,
     updatedAt: date,
-    source: "/data-plane/letter-rendering/pdf"
+    source: "/data-plane/letter-rendering/pdf",
+    subject: `client/1/letter-request/${letterId}`,
   };
 }
 
@@ -68,8 +69,12 @@ describe("LetterRepository", () => {
   }
 
   function assertTtl(ttl: number, before: number, after: number) {
-    const expectedLower = Math.floor(before / 1000 + 60 * 60 * db.config.lettersTtlHours);
-    const expectedUpper = Math.floor(after / 1000 + 60 * 60 * db.config.lettersTtlHours);
+    const expectedLower = Math.floor(
+      before / 1000 + 60 * 60 * db.config.lettersTtlHours,
+    );
+    const expectedUpper = Math.floor(
+      after / 1000 + 60 * 60 * db.config.lettersTtlHours,
+    );
     expect(ttl).toBeGreaterThanOrEqual(expectedLower);
     expect(ttl).toBeLessThanOrEqual(expectedUpper);
   }
@@ -79,7 +84,9 @@ describe("LetterRepository", () => {
     const letterId = "letter1";
     const date = new Date().toISOString();
 
-    await letterRepository.putLetter(createLetter(supplierId, letterId, "PENDING", date));
+    await letterRepository.putLetter(
+      createLetter(supplierId, letterId, "PENDING", date),
+    );
 
     const letter = await letterRepository.getLetterById(supplierId, letterId);
     expect(letter).toBeDefined();
@@ -94,6 +101,7 @@ describe("LetterRepository", () => {
     expect(letter.groupId).toBe("group1");
     expect(letter.reasonCode).toBeUndefined();
     expect(letter.reasonText).toBeUndefined();
+    expect(letter.subject).toBe(`client/1/letter-request/${letterId}`);
   });
 
   test("fetches a letter by id", async () => {
@@ -106,6 +114,9 @@ describe("LetterRepository", () => {
         specificationId: "specification1",
         groupId: "group1",
         status: "PENDING",
+        url: "s3://bucket/letter1.pdf",
+        source: "/data-plane/letter-rendering/pdf",
+        subject: "client/1/letter-request/letter1",
       }),
     );
   });
@@ -475,7 +486,12 @@ describe("LetterRepository", () => {
   });
 
   test("successful upsert (update status) returns updated letter", async () => {
-    const letter: InsertLetter = createLetter("supplier1", "letter1", "PENDING", new Date(2020, 0, 1).toISOString());
+    const letter: InsertLetter = createLetter(
+      "supplier1",
+      "letter1",
+      "PENDING",
+      new Date(2020, 0, 1).toISOString(),
+    );
     const existingLetter: Letter = await letterRepository.putLetter(letter);
 
     const updateLetterStatus: UpsertLetter = {
@@ -485,6 +501,7 @@ describe("LetterRepository", () => {
       reasonCode: "R01",
       reasonText: "R01 text",
       source: "/data-plane/letter-rendering/pdf",
+      subject: "client/1/letter-request/letter1",
     };
 
     const before = Date.now();
@@ -506,6 +523,7 @@ describe("LetterRepository", () => {
         url: "s3://bucket/letter1.pdf",
         supplierStatus: "supplier1#REJECTED",
         source: "/data-plane/letter-rendering/pdf",
+        subject: "client/1/letter-request/letter1",
       }),
     );
     expect(Date.parse(result.updatedAt)).toBeGreaterThan(
@@ -525,6 +543,7 @@ describe("LetterRepository", () => {
       supplierId: "supplier1",
       url: "s3://bucket/letter1.pdf",
       source: "/data-plane/letter-rendering/pdf",
+      subject: "client/1/letter-request/letter1",
     };
 
     const before = Date.now();
@@ -541,6 +560,8 @@ describe("LetterRepository", () => {
         groupId: "group1",
         supplierId: "supplier1",
         url: "s3://bucket/letter1.pdf",
+        source: "/data-plane/letter-rendering/pdf",
+        subject: "client/1/letter-request/letter1",
       }),
     );
 
@@ -552,7 +573,12 @@ describe("LetterRepository", () => {
   });
 
   test("successful upsert without status change (update url)", async () => {
-    const insertLetter: InsertLetter = createLetter("supplier1", "letter1", "PENDING", new Date(2020, 0, 1).toISOString());
+    const insertLetter: InsertLetter = createLetter(
+      "supplier1",
+      "letter1",
+      "PENDING",
+      new Date(2020, 0, 1).toISOString(),
+    );
     const existingLetter = await letterRepository.putLetter(insertLetter);
 
     const before = Date.now();
@@ -574,6 +600,8 @@ describe("LetterRepository", () => {
         supplierId: "supplier1",
         url: "s3://updateToPdf",
         supplierStatus: "supplier1#PENDING",
+        source: "/data-plane/letter-rendering/pdf",
+        subject: "client/1/letter-request/letter1",
       }),
     );
     expect(Date.parse(result.updatedAt)).toBeGreaterThan(

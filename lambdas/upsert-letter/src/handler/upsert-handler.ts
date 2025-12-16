@@ -34,6 +34,7 @@ function mapToUpsertLetter(
       upsertRequest.data.templateId,
     url: upsertRequest.data.url,
     source: upsertRequest.source,
+    subject: upsertRequest.subject,
   };
 }
 
