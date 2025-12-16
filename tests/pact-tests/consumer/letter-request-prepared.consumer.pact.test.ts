@@ -31,7 +31,7 @@ describe("Pact Message Consumer - LetterRequestPrepared Event", () => {
         ),
         type: "uk.nhs.notify.letter-rendering.letter-request.prepared.v2",
         source: MatchersV3.string(
-          "/data-plane/letter-rendering/prod/render-pdf",
+          "/data-plane/letter-rendering/comms-mgr-prod/prod",
         ),
         specversion: MatchersV3.regex(/\d+\.\d+/, "1.0"),
         datacontenttype: "application/json",
