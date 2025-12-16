@@ -9,7 +9,6 @@ def _get(url, headers=None, timeout=10):
 def test_ping(nhsd_apim_proxy_url):
     resp = requests.get(nhsd_apim_proxy_url + "/_ping")
     assert resp.status_code == 200
-    print("Ping Response Body:", resp.text)
 
 @pytest.mark.smoketest
 def test_401_status_without_api_key(nhsd_apim_proxy_url):
@@ -27,10 +26,9 @@ def test_invalid_jwt_rejected(nhsd_apim_proxy_url, nhsd_apim_auth_headers):
     """
     headers = {
         **nhsd_apim_auth_headers,
-        "headerauth1": "headervalue1",
         "x-request-id": "123456"
     }
-    print(headers)
+
     # If no Authorization configured in project headers, skip
     if "Authorization" not in headers:
         pytest.skip("JWT auth not configured for this environment")

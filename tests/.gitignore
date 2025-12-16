@@ -11,3 +11,4 @@ node_modules/
 /allure-report
 /e2e-tests/.pytest_cache
 /e2e-tests/__pycache__/
+/e2e-tests/_lib/_pycache__/
