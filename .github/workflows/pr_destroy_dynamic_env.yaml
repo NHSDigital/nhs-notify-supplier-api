@@ -1,8 +1,10 @@
 name: PR Destroy Environment
 
 on:
-  pull_request_target:
+  pull_request:
     types: [closed]
+    branches:
+      - '*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
