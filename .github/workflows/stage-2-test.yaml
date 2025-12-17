@@ -60,7 +60,7 @@ jobs:
       - name: "Repo setup"
         uses: ./.github/actions/node-install
         with:
-          node-version: 22
+          node-version: ${{ inputs.nodejs_version }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Generate dependencies"
         run: |
@@ -84,7 +84,7 @@ jobs:
       - name: "Repo setup"
         uses: ./.github/actions/node-install
         with:
-          node-version: 22
+          node-version: ${{ inputs.nodejs_version }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Generate dependencies"
         run: |
@@ -125,7 +125,7 @@ jobs:
       - name: "Repo setup"
         uses: ./.github/actions/node-install
         with:
-          node-version: 22
+          node-version: ${{ inputs.nodejs_version }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Generate dependencies"
         run: npm run generate-dependencies --workspaces --if-present
@@ -153,7 +153,7 @@ jobs:
       - name: "Repo setup"
         uses: ./.github/actions/node-install
         with:
-          node-version: 22
+          node-version: ${{ inputs.nodejs_version }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Generate dependencies"
         run: |
@@ -179,7 +179,7 @@ jobs:
       - name: "Repo setup"
         uses: ./.github/actions/node-install
         with:
-          node-version: 22
+          node-version: ${{ inputs.nodejs_version }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Generate dependencies"
         run: |
