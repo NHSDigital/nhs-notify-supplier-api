@@ -1,2 +1,2 @@
-VALID_ENDPOINTS = ["/letters", "/mi"]
-METHODS = ["get", "post", "patch", "head"]
+VALID_ENDPOINTS = ["/letters"]
+METHODS = ["get", "post"]
