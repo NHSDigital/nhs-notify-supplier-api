@@ -1,10 +1,10 @@
-temporary: false
+temporary: true
 monitoring: false
 access:
-  $ref: ../environments/sandbox/access.yml
+  $ref: ../environments/internal-dev-pr/access.yml
 target:
-  $ref: ../environments/sandbox/target.yml
+  $ref: ../environments/internal-dev-pr/target.yml
 target-attributes:
-  $ref: ../environments/sandbox/target-attributes.yml
+  $ref: ../environments/internal-dev-pr/target-attributes.yml
 ratelimiting:
-  $ref: ../environments/sandbox/rate-limiting.yml
+  $ref: ../environments/internal-dev-pr/rate-limiting.yml
