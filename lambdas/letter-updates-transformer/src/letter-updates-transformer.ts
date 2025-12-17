@@ -34,7 +34,7 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
 
     for (const batch of generateBatches(cloudEvents)) {
       deps.logger.info({
-      description: "Publishing batch",
+        description: "Publishing batch",
         size: batch.length,
         letterEvents: batch,
       });
