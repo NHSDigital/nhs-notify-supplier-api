@@ -136,6 +136,15 @@
               }
             ]
           },
+          "$.dataschema": {
+            "combine": "AND",
+            "matchers": [
+              {
+                "match": "regex",
+                "regex": "^https:\\/\\/notify\\.nhs\\.uk\\/cloudevents\\/schemas\\/letter-rendering\\/letter-request\\.prepared\\.2\\.\\d+\\.\\d+\\.schema\\.json$"
+              }
+            ]
+          },
           "$.dataschemaversion": {
             "combine": "AND",
             "matchers": [
