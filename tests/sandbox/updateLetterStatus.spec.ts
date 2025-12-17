@@ -7,16 +7,18 @@ test.describe('Sandbox Tests To Update Letter Status', () =>
 {
   apiSandboxUpdateLetterStatusTestData.forEach(({ testCase, header, id, body, expectedStatus, expectedResponse }) => {
     test(`Patch /Letters endpoint returns ${testCase}`, async ({ request }) => {
-
         const response = await request.patch(`${SUPPLIER_API_URL_SANDBOX}/${SUPPLIER_LETTERS}/${id}` ,{
                 headers: header,
                 data: body
           });
 
-        const res = await response.json();
-        expect(response.status()).toBe(expectedStatus);
-        expect(res).toEqual(expectedResponse);
+        console.log("URL", `${SUPPLIER_API_URL_SANDBOX}/${SUPPLIER_LETTERS}/${id}`);
 
+        expect(response.status()).toBe(expectedStatus);
+        if (response.status() != 202){
+          const res = await response.json();
+          expect(res).toEqual(expectedResponse);
+        }
     });
   });
 });

@@ -23,7 +23,7 @@ type postRequest = {
 
 export const apiSandboxMultipleLetterStatusTestData: ApiSandboxUpdateLetterStatusTestData[] =
 [{
-    testCase: '200 response if records are updated',
+    testCase: '202 response if records are updated',
     header: sandBoxHeader,
     body:{
         data :
@@ -106,7 +106,7 @@ export const apiSandboxMultipleLetterStatusTestData: ApiSandboxUpdateLetterStatu
             type: 'Letter'
         }
     ]},
-    expectedStatus: 200
+    expectedStatus: 202
 },
 {
     testCase: '404 response if invalid request is passed',
