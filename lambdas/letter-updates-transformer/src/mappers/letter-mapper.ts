@@ -5,6 +5,7 @@ import { LetterForEventPub } from "../types";
 
 export default function mapLetterToCloudEvent(
   letter: LetterForEventPub,
+  source: string
 ): LetterEvent {
   const eventId = randomUUID();
   const dataschemaversion = eventSchemaPackage.version;
@@ -15,7 +16,7 @@ export default function mapLetterToCloudEvent(
     plane: "data",
     dataschema: `https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.${letter.status}.${dataschemaversion}.schema.json`,
     dataschemaversion,
-    source: "/data-plane/supplier-api/letters",
+    source: source,
     subject: `letter-origin/supplier-api/letter/${letter.id}`,
 
     data: {

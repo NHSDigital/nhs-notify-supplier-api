@@ -26,14 +26,17 @@ jest.mock("crypto", () => ({
   randomBytes: (size: number) => randomBytes[String(size)],
 }));
 
-describe("letter-updates-transformer Lambda", () => {
-  const mockedDeps: jest.Mocked<Deps> = {
+const eventSource = "/data-plane/supplier-api/nhs-supplier-api-dev/main/letters";
+const mockedDeps: jest.Mocked<Deps> = {
     snsClient: { send: jest.fn() } as unknown as SNSClient,
     logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
     env: {
       EVENTPUB_SNS_TOPIC_ARN: "arn:aws:sns:region:account:topic",
+      EVENT_SOURCE: "/data-plane/supplier-api/nhs-supplier-api-dev/main/letters"
     } as unknown as EnvVars,
   } as Deps;
+
+describe("letter-updates-transformer Lambda", () => {
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -50,7 +53,7 @@ describe("letter-updates-transformer Lambda", () => {
       const newLetter = generateLetter("PRINTED");
       const expectedEntries = [
         expect.objectContaining({
-          Message: JSON.stringify(mapLetterToCloudEvent(newLetter)),
+          Message: JSON.stringify(mapLetterToCloudEvent(newLetter, eventSource)),
         }),
       ];
 
@@ -76,7 +79,7 @@ describe("letter-updates-transformer Lambda", () => {
       newLetter.reasonCode = "R1";
       const expectedEntries = [
         expect.objectContaining({
-          Message: JSON.stringify(mapLetterToCloudEvent(newLetter)),
+          Message: JSON.stringify(mapLetterToCloudEvent(newLetter, eventSource)),
         }),
       ];
 
@@ -103,7 +106,7 @@ describe("letter-updates-transformer Lambda", () => {
       newLetter.reasonCode = "R2";
       const expectedEntries = [
         expect.objectContaining({
-          Message: JSON.stringify(mapLetterToCloudEvent(newLetter)),
+          Message: JSON.stringify(mapLetterToCloudEvent(newLetter, eventSource)),
         }),
       ];
 
@@ -168,7 +171,7 @@ describe("letter-updates-transformer Lambda", () => {
       const newLetters = generateLetters(10, "PRINTED");
       const expectedEntries = newLetters.map((letter) =>
         expect.objectContaining({
-          Message: JSON.stringify(mapLetterToCloudEvent(letter)),
+          Message: JSON.stringify(mapLetterToCloudEvent(letter, eventSource)),
         }),
       );
 
@@ -197,19 +200,19 @@ describe("letter-updates-transformer Lambda", () => {
         newLetters.slice(0, 10).map((letter, index) =>
           expect.objectContaining({
             Id: expect.stringMatching(new RegExp(`-${index}$`)),
-            Message: JSON.stringify(mapLetterToCloudEvent(letter)),
+            Message: JSON.stringify(mapLetterToCloudEvent(letter, eventSource)),
           }),
         ),
         newLetters.slice(10, 20).map((letter, index) =>
           expect.objectContaining({
             Id: expect.stringMatching(new RegExp(`-${index}$`)),
-            Message: JSON.stringify(mapLetterToCloudEvent(letter)),
+            Message: JSON.stringify(mapLetterToCloudEvent(letter, eventSource)),
           }),
         ),
         newLetters.slice(20).map((letter, index) =>
           expect.objectContaining({
             Id: expect.stringMatching(new RegExp(`-${index}$`)),
-            Message: JSON.stringify(mapLetterToCloudEvent(letter)),
+            Message: JSON.stringify(mapLetterToCloudEvent(letter, eventSource)),
           }),
         ),
       ];
