@@ -25,7 +25,7 @@ module "get_letters" {
   handler_function_name   = "getLetters"
   runtime                 = "nodejs22.x"
   memory                  = 128
-  timeout                 = 5
+  timeout                 = 29
   log_level               = var.log_level
 
   force_lambda_code_deploy = var.force_lambda_code_deploy
