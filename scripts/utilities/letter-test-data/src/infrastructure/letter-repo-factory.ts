@@ -3,7 +3,7 @@ import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { pino } from "pino";
 import { LetterRepository } from "@internal/datastore";
 
-export function createLetterRepository(
+export default function createLetterRepository(
   environment: string,
   ttlHours: number,
 ): LetterRepository {

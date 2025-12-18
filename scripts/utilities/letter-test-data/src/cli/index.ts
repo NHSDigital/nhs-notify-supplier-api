@@ -5,9 +5,9 @@ import { randomUUID } from "node:crypto";
 import {
   createLetter,
   createLetterDto,
-} from "../helpers/create_letter_helpers";
+} from "../helpers/create-letter-helpers";
 import { createLetterRepository } from "../infrastructure/letter-repo-factory";
-import { uploadFile } from "../helpers/s3_helpers";
+import { uploadFile } from "../helpers/s3-helpers";
 
 async function main() {
   await yargs(hideBin(process.argv))
@@ -64,13 +64,11 @@ async function main() {
       },
       async (argv) => {
         const { supplierId } = argv;
-        const letterId = argv.letterId ? argv.letterId : randomUUID();
+        const letterId = argv.letterId ?? randomUUID();
         const bucketName = `nhs-${argv.awsAccountId}-eu-west-2-${argv.environment}-supapi-test-letters`;
         const targetFilename = `${letterId}.pdf`;
-        const groupId = argv.groupId ? argv.groupId : randomUUID();
-        const specificationId = argv.specificationId
-          ? argv.specificationId
-          : randomUUID();
+        const groupId = argv.groupId ?? randomUUID();
+        const specificationId = argv.specificationId ?? randomUUID();
         const { status } = argv;
         const { environment } = argv;
         const { ttlHours } = argv;
@@ -145,10 +143,8 @@ async function main() {
 
         // parse args
         const { supplierId } = argv;
-        const groupId = argv.groupId ? argv.groupId : randomUUID();
-        const specificationId = argv.specificationId
-          ? argv.specificationId
-          : randomUUID();
+        const groupId = argv.groupId ?? randomUUID();
+        const specificationId = argv.specificationId ?? randomUUID();
         const { status } = argv;
         const { environment } = argv;
         const { ttlHours } = argv;

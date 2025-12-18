@@ -2,7 +2,7 @@ import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
-export async function uploadFile(
+export default async function uploadFile(
   bucketName: string,
   supplierId: string,
   sourceFilename: string,
@@ -24,5 +24,6 @@ export async function uploadFile(
     return await s3.send(command);
   } catch (error) {
     console.error("Error uploading file:", error);
+    throw error;
   }
 }
