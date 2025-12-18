@@ -70,3 +70,6 @@ generated_code = true
 
 [/internal/events/**/*.schema.json]
 insert_final_newline = unset
+
+[/pact-contracts/pacts/**/*.json]
+insert_final_newline = unset

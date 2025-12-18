@@ -33,3 +33,6 @@ dist
 /specification/api/components/security/security.yml
 /specification/api/components/parameters/authorization/authorization.yml
 /scripts/JWT/*.pem
+
+# ignore PACTS
+.pacts
