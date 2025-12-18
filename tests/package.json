@@ -36,8 +36,8 @@
   "name": "nhs-notify-supplier-api-tests",
   "scripts": {
     "clean": "rimraf $(pwd)/target",
-    "lint:fix": "eslint . --fix",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "test:component": "playwright test --config=config/main.config.ts --max-failures=10 --project=component-tests",
     "test:pact": "./pact-tests/run-pact-tests.sh",
     "test:sandbox": "playwright test --config=config/sandbox.config.ts --max-failures=10 --project=sandbox",
