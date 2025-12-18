@@ -3,26 +3,73 @@ import {
   SQSBatchItemFailure,
   SQSEvent,
   SQSHandler,
+  SQSRecord,
 } from "aws-lambda";
-import { UpsertLetter } from "@internal/datastore";
+import { InsertLetter, UpdateLetter } from "@internal/datastore";
 import {
   $LetterRequestPreparedEvent,
   LetterRequestPreparedEvent,
 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
 import {
+  $LetterEvent,
+  LetterEvent,
+} from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
+import {
   $LetterRequestPreparedEventV2,
   LetterRequestPreparedEventV2,
 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
-import { ZodError } from "zod";
+import z from "zod";
 import { Deps } from "../config/deps";
 
 type SupplierSpec = { supplierId: string; specId: string };
+type PreparedEvents = LetterRequestPreparedEventV2 | LetterRequestPreparedEvent;
+type UpsertOperation = {
+  name: "Insert" | "Update";
+  schemas: z.ZodSchema[];
+  handler: (request: unknown, deps: Deps) => Promise<void>;
+};
 
-function mapToUpsertLetter(
-  upsertRequest: LetterRequestPreparedEventV2 | LetterRequestPreparedEvent,
+// small envelope that must exist in all inputs
+const TypeEnvelope = z.object({ type: z.string().min(1) });
+
+function getOperationFromType(type: string): UpsertOperation {
+  if (type.startsWith("uk.nhs.notify.letter-rendering.letter-request.prepared"))
+    return {
+      name: "Insert",
+      schemas: [$LetterRequestPreparedEventV2, $LetterRequestPreparedEvent],
+      handler: async (request, deps) => {
+        const preparedRequest = request as PreparedEvents;
+        const supplierSpec: SupplierSpec = resolveSupplierForVariant(
+          preparedRequest.data.letterVariantId,
+          deps,
+        );
+        const letterToInsert: InsertLetter = mapToInsertLetter(
+          preparedRequest,
+          supplierSpec.supplierId,
+          supplierSpec.specId,
+        );
+        await deps.letterRepo.putLetter(letterToInsert);
+      },
+    };
+  if (type.startsWith("uk.nhs.notify.supplier-api.letter"))
+    return {
+      name: "Update",
+      schemas: [$LetterEvent],
+      handler: async (request, deps) => {
+        const supplierEvent = request as LetterEvent;
+        const letterToUpdate: UpdateLetter = mapToUpdateLetter(supplierEvent);
+        await deps.letterRepo.updateLetterStatus(letterToUpdate);
+      },
+    };
+  throw new Error(`Unknown operation from type=${type}`);
+}
+
+function mapToInsertLetter(
+  upsertRequest: PreparedEvents,
   supplier: string,
   spec: string,
-): UpsertLetter {
+): InsertLetter {
+  const now = new Date().toISOString();
   return {
     id: upsertRequest.data.domainId,
     supplierId: supplier,
@@ -35,6 +82,18 @@ function mapToUpsertLetter(
     url: upsertRequest.data.url,
     source: upsertRequest.source,
     subject: upsertRequest.subject,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+function mapToUpdateLetter(upsertRequest: LetterEvent): UpdateLetter {
+  return {
+    id: upsertRequest.data.domainId,
+    supplierId: upsertRequest.data.supplierId,
+    status: upsertRequest.data.status,
+    reasonCode: upsertRequest.data.reasonCode,
+    reasonText: upsertRequest.data.reasonText,
   };
 }
 
@@ -45,25 +104,41 @@ function resolveSupplierForVariant(
   return deps.env.VARIANT_MAP[variantId];
 }
 
-function parseLetterRequestPreparedEvent(
-  message: string,
-  deps: Deps,
-): LetterRequestPreparedEvent | LetterRequestPreparedEventV2 {
-  const parsedMessage = JSON.parse(message);
-
-  try {
-    const upsertRequest: LetterRequestPreparedEventV2 =
-      $LetterRequestPreparedEventV2.parse(parsedMessage);
-    return upsertRequest;
-  } catch (error) {
-    deps.logger.info(
-      { err: error, message },
-      "Trying to parse message with V1 schema",
+function parseSNSNotification(record: SQSRecord) {
+  const notification = JSON.parse(record.body) as Partial<SNSMessage>;
+  if (
+    notification.Type !== "Notification" ||
+    typeof notification.Message !== "string"
+  ) {
+    throw new Error(
+      "SQS record does not contain SNS Notification with string Message",
     );
-    const upsertRequest: LetterRequestPreparedEvent =
-      $LetterRequestPreparedEvent.parse(parsedMessage);
-    return upsertRequest;
   }
+  return notification.Message;
+}
+
+function getType(event: unknown) {
+  const env = TypeEnvelope.safeParse(event);
+  if (!env.success) {
+    throw new Error("Missing or invalid envelope.type field");
+  }
+  return env.data.type;
+}
+
+async function runUpsert(
+  operation: UpsertOperation,
+  letterEvent: unknown,
+  deps: Deps,
+) {
+  for (const schema of operation.schemas) {
+    const r = schema.safeParse(letterEvent);
+    if (r.success) {
+      await operation.handler(r.data, deps);
+      return;
+    }
+  }
+  // none matched
+  throw new Error("No matching schema for received message");
 }
 
 export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
@@ -72,43 +147,20 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
 
     const tasks = event.Records.map(async (record) => {
       try {
-        const notification = JSON.parse(record.body) as Partial<SNSMessage>;
-        if (
-          notification.Type !== "Notification" ||
-          typeof notification.Message !== "string"
-        ) {
-          throw new Error(
-            "SQS record does not contain SNS Notification with string Message",
-          );
-        }
+        const message: string = parseSNSNotification(record);
 
-        const upsertRequest:
-          | LetterRequestPreparedEvent
-          | LetterRequestPreparedEventV2 = parseLetterRequestPreparedEvent(
-          notification.Message,
-          deps,
-        );
+        const letterEvent: unknown = JSON.parse(message);
 
-        const supplierSpec: SupplierSpec = resolveSupplierForVariant(
-          upsertRequest.data.letterVariantId,
-          deps,
-        );
-        const letterToUpsert: UpsertLetter = mapToUpsertLetter(
-          upsertRequest,
-          supplierSpec.supplierId,
-          supplierSpec.specId,
-        );
+        const type = getType(letterEvent);
 
-        await deps.letterRepo.upsertLetter(letterToUpsert);
+        const operation = getOperationFromType(type);
+
+        await runUpsert(operation, letterEvent, deps);
       } catch (error) {
-        if (error instanceof ZodError) {
-          deps.logger.error(
-            { issues: error.issues, body: record.body },
-            "Error parsing letter event in upsert",
-          );
-        } else {
-          deps.logger.error({ err: error }, "Error processing upsert");
-        }
+        deps.logger.error(
+          { err: error, message: record.body },
+          `Error processing upsert of record ${record.messageId}`,
+        );
         batchItemFailures.push({ itemIdentifier: record.messageId });
       }
     });

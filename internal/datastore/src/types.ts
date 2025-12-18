@@ -71,19 +71,6 @@ export type UpdateLetter = {
   reasonCode?: string;
   reasonText?: string;
 };
-export type UpsertLetter = {
-  id: string;
-  supplierId: string;
-  // fields that might set/overwrite
-  status?: Letter["status"];
-  specificationId?: string;
-  groupId?: string;
-  url?: string;
-  reasonCode?: string;
-  reasonText?: string;
-  source?: string;
-  subject?: string;
-};
 
 export const MISchemaBase = z.object({
   id: z.string(),
