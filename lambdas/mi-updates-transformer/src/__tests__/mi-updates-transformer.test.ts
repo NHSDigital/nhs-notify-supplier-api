@@ -109,6 +109,19 @@ describe("mi-updates-transformer Lambda", () => {
     );
   });
 
+  it("does not publish invalid MI data", async () => {
+    const handler = createHandler(mockedDeps);
+    const miEvent = { id: String(1232) } as MI; // missing required fields
+
+    const insertMI = generateInsertRecord(miEvent);
+    const testData = generateKinesisEvent([insertMI]);
+    await expect(
+      handler(testData, mockDeep<Context>(), jest.fn()),
+    ).rejects.toThrow();
+
+    expect(mockedDeps.snsClient.send).not.toHaveBeenCalled();
+  });
+
   it("batches mutiple records into a single call to SNS", async () => {
     const handler = createHandler(mockedDeps);
     const miEvents = generateMIEvents(10);
