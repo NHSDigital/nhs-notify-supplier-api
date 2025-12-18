@@ -1,6 +1,9 @@
 import { LetterRepository } from "@internal/datastore/src/letter-repository";
 import { LetterStatusType } from "@internal/datastore";
-import { createLetter, createLetterDto } from "../../helpers/create_letter_helpers";
+import {
+  createLetter,
+  createLetterDto,
+} from "../../helpers/create_letter_helpers";
 import { uploadFile } from "../../helpers/s3_helpers";
 
 jest.mock("../../helpers/s3_helpers");
