@@ -11,4 +11,7 @@ node_modules/
 /allure-report
 */__pycache__/
 **/__pycache__/
+__pycache__/
+*/__pycache__/
+**/__pycache__/
 *.pyc

@@ -1,10 +1,13 @@
 import pytest
 import os
 import re
+
+
 # for now this is the same as PROXY_NAME
 # this is here to illustrate how these can be decoupled
 @pytest.fixture(scope='session')
 def api_product_name():
+    print("PROXY_NAME =", os.environ.get("PROXY_NAME"))
     api_proxy = os.environ.get("API_PROXY")
     proxy_name = os.environ.get("PROXY_NAME")
 
