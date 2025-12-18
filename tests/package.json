@@ -4,7 +4,7 @@
     "@aws-sdk/client-api-gateway": "^3.906.0",
     "@aws-sdk/client-dynamodb": "^3.858.0",
     "@aws-sdk/lib-dynamodb": "^3.858.0",
-    "@nhsdigital/nhs-notify-event-schemas-letter-rendering": "^2.0.0",
+    "@nhsdigital/nhs-notify-event-schemas-letter-rendering": "^2.0.1",
     "@pact-foundation/pact": "^16.0.2",
     "allure-js-commons": "^3.3.3",
     "charenc": "^0.0.2",
