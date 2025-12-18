@@ -43,7 +43,7 @@ export class LetterRepository {
     const letterDb: Letter = {
       ...letter,
       supplierStatus: `${letter.supplierId}#${letter.status}`,
-      supplierStatusSk: letter.createdAt, // needs to be an ISO timestamp
+      supplierStatusSk: new Date().toISOString(), // needs to be an ISO timestamp as Db sorts alphabetically
       ttl: Math.floor(
         Date.now() / 1000 + 60 * 60 * this.config.lettersTtlHours,
       ),
@@ -79,7 +79,7 @@ export class LetterRepository {
         lettersDb.push({
           ...letter,
           supplierStatus: `${letter.supplierId}#${letter.status}`,
-          supplierStatusSk: letter.createdAt,
+          supplierStatusSk: new Date().toISOString(), // needs to be an ISO timestamp as Db sorts alphabetically
           ttl: Math.floor(
             Date.now() / 1000 + 60 * 60 * this.config.lettersTtlHours,
           ),

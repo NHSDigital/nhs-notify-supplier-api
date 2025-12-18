@@ -14,8 +14,8 @@ function createLetter(
   supplierId: string,
   letterId: string,
   status: Letter["status"] = "PENDING",
-  date: string = new Date().toISOString(),
 ): InsertLetter {
+  const now = new Date().toISOString();
   return {
     id: letterId,
     supplierId,
@@ -23,11 +23,16 @@ function createLetter(
     groupId: "group1",
     url: `s3://bucket/${letterId}.pdf`,
     status,
-    createdAt: date,
-    updatedAt: date,
+    createdAt: now,
+    updatedAt: now,
     source: "/data-plane/letter-rendering/pdf",
     subject: `client/1/letter-request/${letterId}`,
   };
+}
+
+function assertDateBetween(date: number, before: number, after: number) {
+  expect(date).toBeGreaterThanOrEqual(before);
+  expect(date).toBeLessThanOrEqual(after);
 }
 
 // Database tests can take longer, especially with setup and teardown
@@ -82,19 +87,24 @@ describe("LetterRepository", () => {
   test("adds a letter to the database", async () => {
     const supplierId = "supplier1";
     const letterId = "letter1";
-    const date = new Date().toISOString();
 
-    await letterRepository.putLetter(
-      createLetter(supplierId, letterId, "PENDING", date),
-    );
+    const before = Date.now();
+
+    await letterRepository.putLetter(createLetter(supplierId, letterId));
+
+    const after = Date.now();
 
     const letter = await letterRepository.getLetterById(supplierId, letterId);
     expect(letter).toBeDefined();
     expect(letter.id).toBe(letterId);
     expect(letter.supplierId).toBe(supplierId);
-    expect(letter.createdAt).toBe(date);
-    expect(letter.updatedAt).toBe(date);
-    expect(letter.supplierStatusSk).toBe(date);
+    assertDateBetween(new Date(letter.createdAt).valueOf(), before, after);
+    assertDateBetween(new Date(letter.updatedAt).valueOf(), before, after);
+    assertDateBetween(
+      new Date(letter.supplierStatusSk).valueOf(),
+      before,
+      after,
+    );
     expect(letter.supplierStatus).toBe("supplier1#PENDING");
     expect(letter.url).toBe("s3://bucket/letter1.pdf");
     expect(letter.specificationId).toBe("specification1");
@@ -102,6 +112,7 @@ describe("LetterRepository", () => {
     expect(letter.reasonCode).toBeUndefined();
     expect(letter.reasonText).toBeUndefined();
     expect(letter.subject).toBe(`client/1/letter-request/${letterId}`);
+    assertTtl(letter.ttl, before, after);
   });
 
   test("fetches a letter by id", async () => {
@@ -149,7 +160,7 @@ describe("LetterRepository", () => {
   });
 
   test("updates a letter's status in the database", async () => {
-    const letter = createLetter("supplier1", "letter1", "PENDING");
+    const letter = createLetter("supplier1", "letter1");
     await letterRepository.putLetter(letter);
     await checkLetterStatus("supplier1", "letter1", "PENDING");
 
@@ -174,9 +185,7 @@ describe("LetterRepository", () => {
   test("updates a letter's updatedAt date", async () => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date(2020, 1, 1));
-    await letterRepository.putLetter(
-      createLetter("supplier1", "letter1", "PENDING"),
-    );
+    await letterRepository.putLetter(createLetter("supplier1", "letter1"));
     const originalLetter = await letterRepository.getLetterById(
       "supplier1",
       "letter1",
@@ -432,15 +441,36 @@ describe("LetterRepository", () => {
   });
 
   test("should batch write letters to the database", async () => {
-    const letters = [
+    const before = Date.now();
+
+    await letterRepository.putLetterBatch([
       createLetter("supplier1", "letter1"),
       createLetter("supplier1", "letter2"),
       createLetter("supplier1", "letter3"),
-    ];
+    ]);
 
-    await letterRepository.putLetterBatch(letters);
+    const after = Date.now();
 
-    await checkLetterStatus("supplier1", "letter1", "PENDING");
+    const letter = await letterRepository.getLetterById("supplier1", "letter1");
+    expect(letter).toBeDefined();
+    expect(letter.id).toBe("letter1");
+    expect(letter.supplierId).toBe("supplier1");
+    assertDateBetween(new Date(letter.createdAt).valueOf(), before, after);
+    assertDateBetween(new Date(letter.updatedAt).valueOf(), before, after);
+    assertDateBetween(
+      new Date(letter.supplierStatusSk).valueOf(),
+      before,
+      after,
+    );
+    expect(letter.supplierStatus).toBe("supplier1#PENDING");
+    expect(letter.url).toBe("s3://bucket/letter1.pdf");
+    expect(letter.specificationId).toBe("specification1");
+    expect(letter.groupId).toBe("group1");
+    expect(letter.reasonCode).toBeUndefined();
+    expect(letter.reasonText).toBeUndefined();
+    expect(letter.subject).toBe("client/1/letter-request/letter1");
+    assertTtl(letter.ttl, before, after);
+
     await checkLetterStatus("supplier1", "letter2", "PENDING");
     await checkLetterStatus("supplier1", "letter3", "PENDING");
   });
