@@ -3,7 +3,7 @@ import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { pino } from "pino";
 import { SupplierRepository } from "@internal/datastore";
 
-export function createSupplierRepository(
+export default function createSupplierRepository(
   environment: string,
 ): SupplierRepository {
   const ddbClient = new DynamoDBClient({});
