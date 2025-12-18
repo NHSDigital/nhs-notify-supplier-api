@@ -4,7 +4,7 @@
     "@aws-sdk/client-api-gateway": "^3.906.0",
     "@aws-sdk/client-dynamodb": "^3.858.0",
     "@aws-sdk/lib-dynamodb": "^3.858.0",
-    "@nhsdigital/nhs-notify-event-schemas-letter-rendering": "^2.0.0",
+    "@nhsdigital/nhs-notify-event-schemas-letter-rendering": "^2.0.1",
     "@pact-foundation/pact": "^16.0.2",
     "allure-js-commons": "^3.3.3",
     "charenc": "^0.0.2",
@@ -36,8 +36,8 @@
   "name": "nhs-notify-supplier-api-tests",
   "scripts": {
     "clean": "rimraf $(pwd)/target",
-    "lint:fix": "eslint . --fix",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "test:component": "playwright test --config=config/main.config.ts --max-failures=10 --project=component-tests",
     "test:pact": "./pact-tests/run-pact-tests.sh",
     "test:sandbox": "playwright test --config=config/sandbox.config.ts --max-failures=10 --project=sandbox",
