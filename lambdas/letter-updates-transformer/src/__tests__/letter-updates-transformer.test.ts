@@ -32,7 +32,7 @@ const mockedDeps: jest.Mocked<Deps> = {
     logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
     env: {
       EVENTPUB_SNS_TOPIC_ARN: "arn:aws:sns:region:account:topic",
-      EVENT_SOURCE: "/data-plane/supplier-api/nhs-supplier-api-dev/main/letters"
+      EVENT_SOURCE: eventSource
     } as unknown as EnvVars,
   } as Deps;
 
