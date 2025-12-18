@@ -36,17 +36,8 @@ module "upsert_letter" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
-    VARIANT_MAP = jsonencode(var.variant_map)
+    VARIANT_MAP = jsonencode(var.letter_variant_map)
   })
-}
-
-variable "variant_map" {
-  type = map(object({ supplierId = string, specId = string }))
-  default = {
-    "lv1" = { supplierId = "supplier1", specId = "spec1" },
-    "lv2" = { supplierId = "supplier1", specId = "spec2" },
-    "lv3" = { supplierId = "supplier2", specId = "spec3" }
-  }
 }
 
 data "aws_iam_policy_document" "upsert_letter_lambda" {

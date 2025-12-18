@@ -22,6 +22,7 @@ No requirements.
 | <a name="input_group"></a> [group](#input\_group) | The group variables are being inherited from (often synonmous with account short-name) | `string` | n/a | yes |
 | <a name="input_kms_deletion_window"></a> [kms\_deletion\_window](#input\_kms\_deletion\_window) | When a kms key is deleted, how long should it wait in the pending deletion state? | `string` | `"30"` | no |
 | <a name="input_letter_table_ttl_hours"></a> [letter\_table\_ttl\_hours](#input\_letter\_table\_ttl\_hours) | Number of hours to set as TTL on letters table | `number` | `24` | no |
+| <a name="input_letter_variant_map"></a> [letter\_variant\_map](#input\_letter\_variant\_map) | n/a | `map(object({ supplierId = string, specId = string }))` | <pre>{<br/>  "lv1": {<br/>    "specId": "spec1",<br/>    "supplierId": "supplier1"<br/>  },<br/>  "lv2": {<br/>    "specId": "spec2",<br/>    "supplierId": "supplier1"<br/>  },<br/>  "lv3": {<br/>    "specId": "spec3",<br/>    "supplierId": "supplier2"<br/>  }<br/>}</pre> | no |
 | <a name="input_log_level"></a> [log\_level](#input\_log\_level) | The log level to be used in lambda functions within the component. Any log with a lower severity than the configured value will not be logged: https://docs.python.org/3/library/logging.html#levels | `string` | `"INFO"` | no |
 | <a name="input_log_retention_in_days"></a> [log\_retention\_in\_days](#input\_log\_retention\_in\_days) | The retention period in days for the Cloudwatch Logs events to be retained, default of 0 is indefinite | `number` | `0` | no |
 | <a name="input_manually_configure_mtls_truststore"></a> [manually\_configure\_mtls\_truststore](#input\_manually\_configure\_mtls\_truststore) | Manually manage the truststore used for API Gateway mTLS (e.g. for prod environment) | `bool` | `false` | no |
@@ -30,7 +31,6 @@ No requirements.
 | <a name="input_project"></a> [project](#input\_project) | The name of the tfscaffold project | `string` | n/a | yes |
 | <a name="input_region"></a> [region](#input\_region) | The AWS Region | `string` | n/a | yes |
 | <a name="input_shared_infra_account_id"></a> [shared\_infra\_account\_id](#input\_shared\_infra\_account\_id) | The AWS Account ID of the shared infrastructure account | `string` | `"000000000000"` | no |
-| <a name="input_variant_map"></a> [variant\_map](#input\_variant\_map) | n/a | `map(object({ supplierId = string, specId = string }))` | <pre>{<br/>  "lv1": {<br/>    "specId": "spec1",<br/>    "supplierId": "supplier1"<br/>  },<br/>  "lv2": {<br/>    "specId": "spec2",<br/>    "supplierId": "supplier1"<br/>  },<br/>  "lv3": {<br/>    "specId": "spec3",<br/>    "supplierId": "supplier2"<br/>  }<br/>}</pre> | no |
 ## Modules
 
 | Name | Source | Version |
