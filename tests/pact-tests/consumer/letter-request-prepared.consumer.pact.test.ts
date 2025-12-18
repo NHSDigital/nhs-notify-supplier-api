@@ -37,7 +37,7 @@ describe("Pact Message Consumer - LetterRequestPrepared Event", () => {
         datacontenttype: "application/json",
         dataschema: MatchersV3.regex(
           /^https:\/\/notify\.nhs\.uk\/cloudevents\/schemas\/letter-rendering\/letter-request\.prepared\.2\.\d+\.\d+\.schema\.json$/,
-          "https://notify.nhs.uk/cloudevents/schemas/letter-rendering/letter-request.prepared.2.0.0.schema.json",
+          "https://notify.nhs.uk/cloudevents/schemas/letter-rendering/letter-request.prepared.2.0.1.schema.json",
         ),
         dataschemaversion: MatchersV3.regex(/\d+\.\d+\.\d+/, "2.0.0"),
         traceparent: MatchersV3.string(
