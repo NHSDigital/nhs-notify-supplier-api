@@ -55,6 +55,12 @@ runs:
       run: |
         make build VERSION="${{ inputs.version }}"
 
+    - name: Upload API OAS specification artifact
+      uses: actions/upload-artifact@v4
+      with:
+        path: "build"
+        name: api-oas-specification-${{ inputs.version }}
+
     - name: Upload html artifact
       uses: actions/upload-artifact@v4
       with:
