@@ -58,10 +58,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
       - name: "Repo setup"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          npm ci
+        uses: ./.github/actions/node-install
+        with:
+          node-version: ${{ inputs.nodejs_version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Generate dependencies"
         run: |
           npm run generate-dependencies --workspaces --if-present
@@ -82,10 +82,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
       - name: "Repo setup"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          npm ci
+        uses: ./.github/actions/node-install
+        with:
+          node-version: ${{ inputs.nodejs_version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Generate dependencies"
         run: |
           npm run generate-dependencies --workspaces --if-present
@@ -104,6 +104,37 @@ jobs:
         with:
           name: code-coverage-report
           path: ".reports/lcov.info"
+  test-pact:
+    name: "Pact tests"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v5
+      - name: "Cache node_modules"
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-node-${{ inputs.nodejs_version }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
+      - name: "Repo setup"
+        uses: ./.github/actions/node-install
+        with:
+          node-version: ${{ inputs.nodejs_version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: "Generate dependencies"
+        run: npm run generate-dependencies --workspaces --if-present
+      - name: "Run PACT tests"
+        run: npm run test:pact --workspace tests
+      - name: Publish Pact Contracts
+        run: ./scripts/publish-pact-contracts.sh
   test-lint:
     name: "Linting"
     runs-on: ubuntu-latest
@@ -120,10 +151,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
       - name: "Repo setup"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          npm ci
+        uses: ./.github/actions/node-install
+        with:
+          node-version: ${{ inputs.nodejs_version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Generate dependencies"
         run: |
           npm run generate-dependencies --workspaces --if-present
@@ -146,10 +177,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
       - name: "Repo setup"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          npm ci
+        uses: ./.github/actions/node-install
+        with:
+          node-version: ${{ inputs.nodejs_version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Generate dependencies"
         run: |
           npm run generate-dependencies --workspaces --if-present
