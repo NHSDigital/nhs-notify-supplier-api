@@ -1,6 +1,8 @@
 resource "aws_sns_topic" "main" {
-  name              = local.csi
-  kms_master_key_id = var.kms_key_arn
+  name                        = local.csi
+  kms_master_key_id           = var.kms_key_arn
+  fifo_topic                  = true
+  content_based_deduplication = true
 
   application_failure_feedback_role_arn    = var.enable_sns_delivery_logging == true ? aws_iam_role.sns_delivery_logging_role[0].arn : null
   application_success_feedback_role_arn    = var.enable_sns_delivery_logging == true ? aws_iam_role.sns_delivery_logging_role[0].arn : null
