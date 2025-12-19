@@ -1,0 +1,8 @@
+description: "Bad gateway"
+content:
+  application/vnd.api+json:
+    schema:
+      $ref: "../../schemas/apiGatewayError.yml"
+    examples:
+      error-bad-request:
+        $ref: ../../examples/errors/responses/bad-gateway.json

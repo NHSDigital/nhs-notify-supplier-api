@@ -1,8 +1,33 @@
 description: Too many requests
 content:
-  application/vnd.api+json:
+  application/json:
     schema:
-      $ref: "../../schemas/errorResponse.yml"
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Your application has exceeded its quota"
+        scope:
+          type: string
+          example: "application"
+        policy:
+          type: string
+          example: "quota"
+        limit:
+          type: integer
+          example: 300
+        interval:
+          type: integer
+          example: 1
+        timeunit:
+          type: string
+          example: "minute"
+        ratelimiting_expiry_time_ms:
+          type: integer
+          example: 1625498765123
+        message_id:
+          type: string
+          example: "rrt-4773181658036170775-c-geu2-321623-73628915-2"
     examples:
       error-too-many-requests:
         $ref: ../../examples/errors/responses/tooManyRequests.json
