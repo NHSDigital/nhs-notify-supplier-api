@@ -4,9 +4,9 @@ import {
   createLetter,
   createLetterDto,
 } from "../../helpers/create-letter-helpers";
-import { uploadFile } from "../../helpers/s3-helpers";
+import uploadFile from "../../helpers/s3-helpers";
 
-jest.mock("../../helpers/s3_helpers");
+jest.mock("../../helpers/s3-helpers");
 
 describe("Create letter helpers", () => {
   beforeEach(() => {
