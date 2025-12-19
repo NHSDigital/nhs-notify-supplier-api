@@ -40,6 +40,9 @@ jobs:
     name: "Publish packages"
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    outputs:
+      release_id: ${{ steps.create_release.outputs.id }}
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
 
     steps:
       - name: "Checkout code"
@@ -86,12 +89,6 @@ jobs:
         with:
           path: ./artifacts/sdk-csharp-${{ inputs.version }}
           name: sdk-csharp-${{ inputs.version }}
-
-      - name: "Get the artefacts 8"
-        uses: actions/download-artifact@v6
-        with:
-          path: ./artifacts/api-oas-specification-${{ inputs.version }}
-          name: api-oas-specification-${{ inputs.version }}
 
       # Take out for now - might add again in the future
       # - name: "Get the artefacts 9"
@@ -207,22 +204,6 @@ jobs:
           asset_name: sdk-csharp-${{ inputs.version }}.zip
           asset_content_type: "application/gzip"
 
-      - name: "zip api OAS specification release asset"
-        # GitHub pages needs a single tar called artifact inside the zip.
-        working-directory: ./artifacts/api-oas-specification-${{ inputs.version }}
-        run: zip -r ../api-oas-specification-${{ inputs.version }}.zip .
-        shell: bash
-
-      - name: "Upload api OAS specification release asset"
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: "${{ steps.create_release.outputs.upload_url }}"
-          asset_path: ./artifacts/api-oas-specification-${{ inputs.version }}.zip
-          asset_name: api-oas-specification-${{ inputs.version }}.zip
-          asset_content_type: "application/gzip"
-
       # Take out for now - might add again in the future
       # - name: "zip csharp server release asset"
       #   # GitHub pages needs a single tar called artifact inside the zip.
@@ -240,6 +221,39 @@ jobs:
       #     asset_path: ./artifacts/server-csharp-${{ inputs.version }}.zip
       #     asset_name: server-csharp-${{ inputs.version }}.zip
       #     asset_content_type: "application/gzip"
+
+  publish-oas-specs:
+    name: "Publish OAS spec (${{ matrix.apimEnv }})"
+    runs-on: ubuntu-latest
+    needs: [publish]
+    permissions:
+      id-token: write # This is required for requesting the JWT
+      contents: read # This is required for actions/checkout
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        apimEnv: [internal-dev, int, ref, prod]
+    steps:
+      - name: "Download OAS spec artifact"
+        uses: actions/download-artifact@v6
+        with:
+          path: ./artifacts/api-oas-specification-${{ matrix.apimEnv }}-${{ inputs.version }}
+          name: api-oas-specification-${{ matrix.apimEnv }}-${{ inputs.version }}
+
+      - name: "Zip OAS specification"
+        working-directory: ./artifacts/api-oas-specification-${{ matrix.apimEnv }}-${{ inputs.version }}
+        run: zip -r ../api-oas-specification-${{ matrix.apimEnv }}-${{ inputs.version }}.zip .
+        shell: bash
+
+      - name: "Upload OAS specification release asset"
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.publish.outputs.upload_url }}
+          asset_path: ./artifacts/api-oas-specification-${{ matrix.apimEnv }}-${{ inputs.version }}.zip
+          asset_name: api-oas-specification-${{ matrix.apimEnv }}-${{ inputs.version }}.zip
+          asset_content_type: "application/zip"
 
   # Take out for now - might add again in the future
   # ### PUBLISH DOCKER  - THIS NEEDS CHANGING TO DO THE DOCKER BUILD IN THE BUILD STAGE AND ARTIFACT IT. SEE publishlibhostdocker below how how and the buildlibs action.
