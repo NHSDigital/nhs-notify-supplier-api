@@ -46,11 +46,19 @@ jobs:
     steps:
       - uses: actions/checkout@v5.0.0
 
+      - name: 'Use Node.js'
+        uses: actions/setup-node@v6
+        with:
+          node-version: '${{ inputs.nodejs_version }}'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@nhsdigital'
+
       - name: Trigger Acceptance Tests
         shell: bash
         env:
           APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
           APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           .github/scripts/dispatch_internal_repo_workflow.sh \
             --targetWorkflow "dispatch-contextual-tests-dynamic-env.yaml" \
