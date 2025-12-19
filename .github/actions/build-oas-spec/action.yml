@@ -1,0 +1,68 @@
+name: "Build OAS Spec"
+description: "Build OAS Spec"
+
+inputs:
+  version:
+    description: "Version number"
+    required: true
+  apimEnv:
+    description: "APIM environment"
+    required: true
+  buildSandbox:
+    description: "Whether to build the sandbox OAS spec"
+    required: false
+    default: false
+  nodejs_version:
+    description: "Node.js version, set by the CI/CD pipeline workflow"
+    required: true
+  NODE_AUTH_TOKEN:
+    description: "Token for access to github package registry"
+    required: true
+
+runs:
+  using: composite
+
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.nodejs_version }}
+        registry-url: 'https://npm.pkg.github.com'
+
+    - name: "Cache node_modules"
+      uses: actions/cache@v4
+      with:
+        path: |
+          **/node_modules
+        key: ${{ runner.os }}-node-${{ inputs.nodejs_version }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
+
+    - name: Npm install
+      working-directory: .
+      env:
+        NODE_AUTH_TOKEN: ${{ inputs.NODE_AUTH_TOKEN }}
+      run: npm ci
+      shell: bash
+
+    - name: Build ${{ inputs.apimEnv }} oas
+      working-directory: .
+      env:
+        APIM_ENV: ${{ inputs.apimEnv }}
+      shell: bash
+      run: |
+        if [ ${{ env.APIM_ENV }} == "internal-dev-sandbox" ] && [ ${{ inputs.buildSandbox }} == true ]
+        then
+          echo "Building sandbox OAS spec"
+          make build-json-oas-spec APIM_ENV=sandbox
+        else
+          echo "Building env specific OAS spec"
+          make build-json-oas-spec APIM_ENV=${{ env.APIM_ENV }}
+        fi
+
+    - name: Upload API OAS specification artifact
+      uses: actions/upload-artifact@v4
+      with:
+        path: "build"
+        name: api-oas-specification-${{ inputs.apimEnv }}${{ inputs.version != '' && format('-{0}', inputs.version) || '' }}
