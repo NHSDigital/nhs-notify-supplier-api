@@ -29,9 +29,11 @@ runs:
         name: terraform-output-${{ inputs.targetComponent }}
 
     - name: "Repo setup"
-      shell: bash
-      run: |
-        npm ci
+      uses: actions/setup-node@v6
+      with:
+        node-version: '${{ inputs.node-version }}'
+        registry-url: 'https://npm.pkg.github.com'
+        scope: '@nhsdigital'
 
     - name: "Set PR NUMBER"
       shell: bash
