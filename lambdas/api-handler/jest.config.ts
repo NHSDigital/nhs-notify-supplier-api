@@ -1,7 +1,11 @@
-import type { Config } from "jest";
-
-export const baseJestConfig: Config = {
+export const baseJestConfig = {
   preset: "ts-jest",
+  extensionsToTreatAsEsm: [".ts"],
+  transform: {
+    "^.+\\.ts$": ["ts-jest", {
+      useESM: true
+    }]
+  },
 
   // Automatically clear mock calls, instances, contexts and results before every test
   clearMocks: true,
@@ -25,7 +29,6 @@ export const baseJestConfig: Config = {
   },
 
   coveragePathIgnorePatterns: ["/__tests__/"],
-  transform: { "^.+\\.ts$": "ts-jest" },
   testPathIgnorePatterns: [".build"],
   testMatch: ["**/?(*.)+(spec|test).[jt]s?(x)"],
 
