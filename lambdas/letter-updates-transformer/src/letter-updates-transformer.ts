@@ -20,6 +20,7 @@ const BATCH_SIZE = 10;
 export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
   return async (streamEvent: KinesisStreamEvent) => {
     deps.logger.info({ description: "Received event", streamEvent });
+    deps.logger.info({ description: "Number of records", count: streamEvent.Records?.length || 0 });
 
     // Ensure logging by extracting all records first
     const ddbRecords: DynamoDBRecord[] = streamEvent.Records.map((record) =>
@@ -76,11 +77,20 @@ function extractPayload(
   record: KinesisStreamRecord,
   deps: Deps,
 ): DynamoDBRecord {
-  // Kinesis data is base64 encoded
-  const payload = Buffer.from(record.kinesis.data, "base64").toString("utf8");
-  const jsonParsed = JSON.parse(payload);
-  deps.logger.info({ description: "Extracted dynamoDBRecord", jsonParsed });
-  return jsonParsed
+  try {
+    deps.logger.info({ description: "Processing Kinesis record", recordId: record.kinesis.sequenceNumber });
+
+    // Kinesis data is base64 encoded
+    const payload = Buffer.from(record.kinesis.data, "base64").toString("utf8");
+    deps.logger.info({ description: "Decoded payload", payload });
+
+    const jsonParsed = JSON.parse(payload);
+    deps.logger.info({ description: "Extracted dynamoDBRecord", jsonParsed });
+    return jsonParsed;
+  } catch (error) {
+    deps.logger.error({ description: "Error extracting payload", error, record });
+    throw error;
+  }
 }
 
 function isChanged(record: DynamoDBRecord, property: string): boolean {
