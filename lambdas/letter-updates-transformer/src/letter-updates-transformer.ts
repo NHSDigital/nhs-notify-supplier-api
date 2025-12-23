@@ -78,8 +78,9 @@ function extractPayload(
 ): DynamoDBRecord {
   // Kinesis data is base64 encoded
   const payload = Buffer.from(record.kinesis.data, "base64").toString("utf8");
-  deps.logger.info({ description: "Extracted dynamoDBRecord", payload });
-  return JSON.parse(payload);
+  const jsonParsed = JSON.parse(payload);
+  deps.logger.info({ description: "Extracted dynamoDBRecord", jsonParsed });
+  return jsonParsed
 }
 
 function isChanged(record: DynamoDBRecord, property: string): boolean {
