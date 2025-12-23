@@ -152,9 +152,16 @@ jobs:
     timeout-minutes: 10
     needs: detect-terraform-changes
     if: needs.detect-terraform-changes.outputs.terraform_changed == 'true'
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.nodejs_version }}
+          registry-url: 'https://npm.pkg.github.com'
       - name: "Setup ASDF"
         uses: asdf-vm/actions/setup@v4
       - name: "Perform Setup"
