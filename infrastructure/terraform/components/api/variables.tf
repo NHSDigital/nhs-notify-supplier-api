@@ -142,7 +142,7 @@ variable "core_account_id" {
 }
 
 variable "core_environment" {
-  type       = string
+  type        = string
   description = "Environment of Core"
   default     = "prod"
 }

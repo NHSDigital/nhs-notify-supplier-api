@@ -71,12 +71,12 @@ data "aws_iam_policy_document" "get_letter_data_lambda" {
   statement {
     sid = "S3ListBucketForPresign"
     actions = [
-    "s3:ListBucket"
+      "s3:ListBucket"
     ]
     resources = [
       module.s3bucket_test_letters.arn,
       local.core_pdf_bucket_arn
-      ]
+    ]
   }
 
   statement {
@@ -88,7 +88,7 @@ data "aws_iam_policy_document" "get_letter_data_lambda" {
     resources = [
       "${module.s3bucket_test_letters.arn}/*",
       "${local.core_pdf_bucket_arn}/*",
-      ]
+    ]
   }
 
   statement {
@@ -102,9 +102,9 @@ data "aws_iam_policy_document" "get_letter_data_lambda" {
       "arn:aws:kms:${var.region}:${var.core_account_id}:key/*"
     ]
     condition {
-      test = "ForAnyValue:StringEquals"
+      test     = "ForAnyValue:StringEquals"
       variable = "kms:ResourceAliases"
-      values = [local.core_s3_kms_key_alias_name]
+      values   = [local.core_s3_kms_key_alias_name]
     }
   }
 }
