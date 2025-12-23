@@ -26,18 +26,18 @@ jest.mock("crypto", () => ({
   randomBytes: (size: number) => randomBytes[String(size)],
 }));
 
-const eventSource = "/data-plane/supplier-api/nhs-supplier-api-dev/main/letters";
+const eventSource =
+  "/data-plane/supplier-api/nhs-supplier-api-dev/main/letters";
 const mockedDeps: jest.Mocked<Deps> = {
-    snsClient: { send: jest.fn() } as unknown as SNSClient,
-    logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
-    env: {
-      EVENTPUB_SNS_TOPIC_ARN: "arn:aws:sns:region:account:topic",
-      EVENT_SOURCE: eventSource
-    } as unknown as EnvVars,
-  } as Deps;
+  snsClient: { send: jest.fn() } as unknown as SNSClient,
+  logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
+  env: {
+    EVENTPUB_SNS_TOPIC_ARN: "arn:aws:sns:region:account:topic",
+    EVENT_SOURCE: eventSource,
+  } as unknown as EnvVars,
+} as Deps;
 
 describe("letter-updates-transformer Lambda", () => {
-
   beforeEach(() => {
     jest.useFakeTimers();
   });
@@ -53,7 +53,9 @@ describe("letter-updates-transformer Lambda", () => {
       const newLetter = generateLetter("PRINTED");
       const expectedEntries = [
         expect.objectContaining({
-          Message: JSON.stringify(mapLetterToCloudEvent(newLetter, eventSource)),
+          Message: JSON.stringify(
+            mapLetterToCloudEvent(newLetter, eventSource),
+          ),
         }),
       ];
 
@@ -79,7 +81,9 @@ describe("letter-updates-transformer Lambda", () => {
       newLetter.reasonCode = "R1";
       const expectedEntries = [
         expect.objectContaining({
-          Message: JSON.stringify(mapLetterToCloudEvent(newLetter, eventSource)),
+          Message: JSON.stringify(
+            mapLetterToCloudEvent(newLetter, eventSource),
+          ),
         }),
       ];
 
@@ -106,7 +110,9 @@ describe("letter-updates-transformer Lambda", () => {
       newLetter.reasonCode = "R2";
       const expectedEntries = [
         expect.objectContaining({
-          Message: JSON.stringify(mapLetterToCloudEvent(newLetter, eventSource)),
+          Message: JSON.stringify(
+            mapLetterToCloudEvent(newLetter, eventSource),
+          ),
         }),
       ];
 
@@ -138,14 +144,28 @@ describe("letter-updates-transformer Lambda", () => {
       expect(mockedDeps.snsClient.send).not.toHaveBeenCalled();
     });
 
-    it("does not publish non-modify events", async () => {
+    it("publishes INSERT events", async () => {
       const handler = createHandler(mockedDeps);
       const newLetter = generateLetter("ACCEPTED");
+      const expectedEntries = [
+        expect.objectContaining({
+          Message: JSON.stringify(
+            mapLetterToCloudEvent(newLetter, eventSource),
+          ),
+        }),
+      ];
 
       const testData = generateKinesisEvent([generateInsertRecord(newLetter)]);
       await handler(testData, mockDeep<Context>(), jest.fn());
 
-      expect(mockedDeps.snsClient.send).not.toHaveBeenCalled();
+      expect(mockedDeps.snsClient.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: expect.objectContaining({
+            TopicArn: "arn:aws:sns:region:account:topic",
+            PublishBatchRequestEntries: expectedEntries,
+          }),
+        }),
+      );
     });
 
     it("does not publish invalid letter data", async () => {

@@ -21,14 +21,13 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
   return async (streamEvent: KinesisStreamEvent) => {
     deps.logger.info({ description: "Received event", streamEvent });
 
-    const cloudEvents: LetterEvent[] = streamEvent.Records.map((record) =>
+    // Ensure logging by extracting all records first
+    const ddbRecords: DynamoDBRecord[] = streamEvent.Records.map((record) =>
       extractPayload(record, deps),
-    )
-      .filter((record) => record.eventName === "MODIFY")
-      .filter(
-        (record) =>
-          isChanged(record, "status") || isChanged(record, "reasonCode"),
-      )
+    );
+
+    const cloudEvents: LetterEvent[] = ddbRecords
+      .filter((record) => filterRecord(record, deps))
       .map((element) => extractNewLetter(element))
       .map((element) => mapLetterToCloudEvent(element, deps.env.EVENT_SOURCE));
 
@@ -48,6 +47,29 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
       );
     }
   };
+}
+
+function filterRecord(record: DynamoDBRecord, deps: Deps): boolean {
+  let allowEvent = false;
+  if (record.eventName === "INSERT") {
+    allowEvent = true;
+  }
+
+  if (
+    record.eventName === "MODIFY" &&
+    (isChanged(record, "status") || isChanged(record, "reasonCode"))
+  ) {
+    allowEvent = true;
+  }
+
+  deps.logger.info({
+    description: "Filtering record",
+    eventName: record.eventName,
+    eventId: record.eventID,
+    allowEvent,
+  });
+
+  return allowEvent;
 }
 
 function extractPayload(
