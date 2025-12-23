@@ -109,8 +109,8 @@ export class LetterRepository {
       new GetCommand({
         TableName: this.config.lettersTableName,
         Key: {
-          supplierId,
           id: letterId,
+          supplierId,
         },
       }),
     );
@@ -194,8 +194,8 @@ export class LetterRepository {
         new UpdateCommand({
           TableName: this.config.lettersTableName,
           Key: {
-            supplierId: letterToUpdate.supplierId,
             id: letterToUpdate.id,
+            supplierId: letterToUpdate.supplierId,
           },
           UpdateExpression: updateExpression,
           ConditionExpression: "attribute_exists(id)", // Ensure letter exists
