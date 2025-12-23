@@ -11,6 +11,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   check-merge-or-workflow-dispatch:
     runs-on: ubuntu-latest
@@ -39,7 +43,6 @@ jobs:
 
     permissions:
       id-token: write
-      contents: read
 
     strategy:
       max-parallel: 1
@@ -70,9 +73,6 @@ jobs:
     outputs:
       version_changed: ${{ steps.check-version.outputs.version_changed }}
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v5.0.0
@@ -107,9 +107,6 @@ jobs:
     needs: check-event-schemas-version-change
     if: needs.check-event-schemas-version-change.outputs.version_changed == 'true'
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: read
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5.0.0
@@ -135,7 +132,6 @@ jobs:
     if: needs.check-event-schemas-version-change.outputs.version_changed == 'true'
     runs-on: ubuntu-latest
     permissions:
-      contents: read
       packages: write
 
     steps:
