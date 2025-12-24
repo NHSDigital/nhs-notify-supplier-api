@@ -142,6 +142,7 @@ variable "letter_variant_map" {
     "lv2" = { supplierId = "supplier1", specId = "spec2" },
     "lv3" = { supplierId = "supplier2", specId = "spec3" }
   }
+}
 
 variable "core_account_id" {
   type        = string
