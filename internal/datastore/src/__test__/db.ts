@@ -51,8 +51,8 @@ const createLetterTableCommand = new CreateTableCommand({
   TableName: "letters",
   BillingMode: "PAY_PER_REQUEST",
   KeySchema: [
-    { AttributeName: "supplierId", KeyType: "HASH" }, // Partition key
-    { AttributeName: "id", KeyType: "RANGE" }, // Sort key
+    { AttributeName: "id", KeyType: "HASH" }, // Partition key (letter ID)
+    { AttributeName: "supplierId", KeyType: "RANGE" }, // Sort key
   ],
   GlobalSecondaryIndexes: [
     {

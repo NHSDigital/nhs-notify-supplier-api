@@ -72,7 +72,7 @@ jobs:
     needs: detect-terraform-changes
     if: needs.detect-terraform-changes.outputs.terraform_changed == 'true'
     permissions:
-        contents: write
+      contents: write
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5
@@ -164,8 +164,6 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - name: "Setup ASDF"
         uses: asdf-vm/actions/setup@v4
-      - name: "Perform Setup"
-        uses: ./.github/actions/setup
       - name: "Trivy Scan"
         uses: ./.github/actions/trivy
   count-lines-of-code:
@@ -288,7 +286,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.nodejs_version }}
-          registry-url: 'https://npm.pkg.github.com'
+          registry-url: "https://npm.pkg.github.com"
 
       - name: check if local version differs from latest published version
         id: check-version
