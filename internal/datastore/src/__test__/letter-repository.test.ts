@@ -27,6 +27,7 @@ function createLetter(
     updatedAt: now,
     source: "/data-plane/letter-rendering/pdf",
     subject: `client/1/letter-request/${letterId}`,
+    billingRef: "specification1",
   };
 }
 
@@ -112,6 +113,7 @@ describe("LetterRepository", () => {
     expect(letter.reasonCode).toBeUndefined();
     expect(letter.reasonText).toBeUndefined();
     expect(letter.subject).toBe(`client/1/letter-request/${letterId}`);
+    expect(letter.billingRef).toBe("specification1");
     assertTtl(letter.ttl, before, after);
   });
 

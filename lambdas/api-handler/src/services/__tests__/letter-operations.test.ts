@@ -29,6 +29,7 @@ function makeLetter(id: string, status: Letter["status"]): Letter {
     status,
     supplierId: "supplier1",
     specificationId: "spec123",
+    billingRef: "spec123",
     groupId: "group123",
     url: `s3://letterDataBucket/${id}.pdf`,
     createdAt: new Date().toISOString(),
@@ -39,6 +40,7 @@ function makeLetter(id: string, status: Letter["status"]): Letter {
     reasonCode: "R01",
     reasonText: "Reason text",
     source: "/data-plane/letter-rendering/pdf",
+    subject: "letter-rendering/source/letter/letter-id",
   };
 }
 
