@@ -14,6 +14,7 @@ export async function createLetter(params: {
   groupId: string;
   status: LetterStatusType;
   letterRepository: LetterRepository;
+  testLetter: string;
 }) {
   const {
     bucketName,
@@ -24,14 +25,17 @@ export async function createLetter(params: {
     status,
     supplierId,
     targetFilename,
+    testLetter,
   } = params;
 
-  await uploadFile(
-    bucketName,
-    supplierId,
-    "../../test_letter.pdf",
-    targetFilename,
-  );
+  if(testLetter !== 'none') {
+    await uploadFile(
+      bucketName,
+      supplierId,
+      `../test-letters/${testLetter}.pdf`,
+      targetFilename,
+    );
+  }
 
   const letter: Omit<Letter, "ttl" | "supplierStatus" | "supplierStatusSk"> = {
     id: letterId,

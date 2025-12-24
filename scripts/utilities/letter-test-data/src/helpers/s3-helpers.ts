@@ -10,7 +10,7 @@ export default async function uploadFile(
 ) {
   try {
     const s3 = new S3Client();
-    const filePath = path.join(__dirname, sourceFilename);
+    const filePath = path.join(__dirname, 'test-letters', sourceFilename);
     const fileContent = readFileSync(filePath);
 
     const uploadParams = {

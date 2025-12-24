@@ -13,7 +13,7 @@ describe("Create letter helpers", () => {
     jest.resetAllMocks();
   });
 
-  it("create letter", async () => {
+  it("create letter should create and upload a test letter", async () => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date(2020, 1, 1));
 
@@ -30,6 +30,7 @@ describe("Create letter helpers", () => {
     const groupId = "groupId";
     const specificationId = "specificationId";
     const status = "PENDING" as LetterStatusType;
+    const testLetter = "test-letter-standard";
 
     await createLetter({
       letterId,
@@ -40,12 +41,13 @@ describe("Create letter helpers", () => {
       specificationId,
       status,
       letterRepository: mockedLetterRepository,
+      testLetter,
     });
 
     expect(mockedUploadFile).toHaveBeenCalledWith(
       "bucketName",
       "supplierId",
-      "../../test_letter.pdf",
+      "../test-letters/test-letter-standard.pdf",
       "targetFilename",
     );
     expect(mockPutLetter).toHaveBeenCalledWith({
@@ -60,6 +62,51 @@ describe("Create letter helpers", () => {
       source: "/data-plane/letter-rendering/letter-test-data",
       subject: "supplier-api/letter-test-data/letterId",
       billingRef: "specificationId",
+    });
+  });
+
+  it("should not upload a letter for none", async () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date(2020, 1, 1));
+
+    const mockPutLetter = jest.fn();
+    const mockedLetterRepository = {
+      putLetter: mockPutLetter,
+    } as any as LetterRepository;
+    const mockedUploadFile = uploadFile as jest.Mock;
+
+    const supplierId = "supplierId";
+    const letterId = "letterId";
+    const bucketName = "bucketName";
+    const targetFilename = "targetFilename";
+    const groupId = "groupId";
+    const specificationId = "specificationId";
+    const status = "PENDING" as LetterStatusType;
+    const testLetter = "none";
+
+    await createLetter({
+      letterId,
+      bucketName,
+      supplierId,
+      targetFilename,
+      groupId,
+      specificationId,
+      status,
+      letterRepository: mockedLetterRepository,
+      testLetter,
+    });
+
+    expect(mockedUploadFile).not.toHaveBeenCalled();
+
+    expect(mockPutLetter).toHaveBeenCalledWith({
+      createdAt: "2020-02-01T00:00:00.000Z",
+      groupId: "groupId",
+      id: "letterId",
+      specificationId: "specificationId",
+      status: "PENDING",
+      supplierId: "supplierId",
+      updatedAt: "2020-02-01T00:00:00.000Z",
+      url: "s3://bucketName/supplierId/targetFilename",
     });
   });
 
