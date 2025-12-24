@@ -9,8 +9,14 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 import { Logger } from "pino";
 import { z } from "zod";
-import { Letter, LetterBase, LetterSchema, LetterSchemaBase } from "./types";
-import { LetterDto } from "../../../lambdas/api-handler/src/contracts/letters";
+import {
+  InsertLetter,
+  Letter,
+  LetterBase,
+  LetterSchema,
+  LetterSchemaBase,
+  UpdateLetter,
+} from "./types";
 
 export type PagingOptions = Partial<{
   exclusiveStartKey: Record<string, any>;
@@ -33,13 +39,11 @@ export class LetterRepository {
     readonly config: LetterRepositoryConfig,
   ) {}
 
-  async putLetter(
-    letter: Omit<Letter, "ttl" | "supplierStatus" | "supplierStatusSk">,
-  ): Promise<Letter> {
+  async putLetter(letter: InsertLetter): Promise<Letter> {
     const letterDb: Letter = {
       ...letter,
       supplierStatus: `${letter.supplierId}#${letter.status}`,
-      supplierStatusSk: new Date().toISOString(),
+      supplierStatusSk: new Date().toISOString(), // needs to be an ISO timestamp as Db sorts alphabetically
       ttl: Math.floor(
         Date.now() / 1000 + 60 * 60 * this.config.lettersTtlHours,
       ),
@@ -66,9 +70,7 @@ export class LetterRepository {
     return LetterSchema.parse(letterDb);
   }
 
-  async putLetterBatch(
-    letters: Omit<Letter, "ttl" | "supplierStatus" | "supplierStatusSk">[],
-  ): Promise<void> {
+  async putLetterBatch(letters: InsertLetter[]): Promise<void> {
     let lettersDb: Letter[] = [];
     for (let i = 0; i < letters.length; i++) {
       const letter = letters[i];
@@ -77,7 +79,7 @@ export class LetterRepository {
         lettersDb.push({
           ...letter,
           supplierStatus: `${letter.supplierId}#${letter.status}`,
-          supplierStatusSk: Date.now().toString(),
+          supplierStatusSk: new Date().toISOString(), // needs to be an ISO timestamp as Db sorts alphabetically
           ttl: Math.floor(
             Date.now() / 1000 + 60 * 60 * this.config.lettersTtlHours,
           ),
@@ -161,7 +163,7 @@ export class LetterRepository {
     };
   }
 
-  async updateLetterStatus(letterToUpdate: LetterDto): Promise<Letter> {
+  async updateLetterStatus(letterToUpdate: UpdateLetter): Promise<Letter> {
     this.log.debug(
       `Updating letter ${letterToUpdate.id} to status ${letterToUpdate.status}`,
     );
