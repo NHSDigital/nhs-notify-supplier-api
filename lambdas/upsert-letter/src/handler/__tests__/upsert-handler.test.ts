@@ -122,6 +122,7 @@ function createSupplierStatusChangeEvent(
       reasonCode: "R07",
       reasonText: "No such address",
       specificationId: "1y3q9v1zzzz",
+      billingRef: "1y3q9v1zzzz",
       status: "RETURNED",
       supplierId: "supplier1",
     },
