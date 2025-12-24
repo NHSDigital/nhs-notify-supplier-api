@@ -12,6 +12,8 @@ No requirements.
 | <a name="input_aws_account_id"></a> [aws\_account\_id](#input\_aws\_account\_id) | The AWS Account ID (numeric) | `string` | n/a | yes |
 | <a name="input_ca_pem_filename"></a> [ca\_pem\_filename](#input\_ca\_pem\_filename) | Filename for the CA truststore file within the s3 bucket | `string` | `null` | no |
 | <a name="input_component"></a> [component](#input\_component) | The variable encapsulating the name of this component | `string` | `"supapi"` | no |
+| <a name="input_core_account_id"></a> [core\_account\_id](#input\_core\_account\_id) | AWS Account ID for Core | `string` | `"000000000000"` | no |
+| <a name="input_core_environment"></a> [core\_environment](#input\_core\_environment) | Environment of Core | `string` | `"prod"` | no |
 | <a name="input_default_tags"></a> [default\_tags](#input\_default\_tags) | A map of default tags to apply to all taggable resources within the component | `map(string)` | `{}` | no |
 | <a name="input_enable_backups"></a> [enable\_backups](#input\_enable\_backups) | Enable backups | `bool` | `false` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | The name of the tfscaffold environment | `string` | n/a | yes |
