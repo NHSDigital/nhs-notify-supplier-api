@@ -70,7 +70,7 @@ export class LetterRepository {
     return LetterSchema.parse(letterDb);
   }
 
-  async putLetterBatch(letters: InsertLetter[]): Promise<void> {
+  async unsafePutLetterBatch(letters: InsertLetter[]): Promise<void> {
     let lettersDb: Letter[] = [];
     for (let i = 0; i < letters.length; i++) {
       const letter = letters[i];
