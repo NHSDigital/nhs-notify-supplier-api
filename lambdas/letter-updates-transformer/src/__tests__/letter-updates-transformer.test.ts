@@ -182,6 +182,53 @@ describe("letter-updates-transformer Lambda", () => {
 
       expect(mockedDeps.snsClient.send).not.toHaveBeenCalled();
     });
+
+    it("throws error when kinesis data contains malformed JSON", async () => {
+      const handler = createHandler(mockedDeps);
+
+      // Create a Kinesis event with malformed JSON data
+      const malformedKinesisEvent: KinesisStreamEvent = {
+        Records: [{
+          kinesis: {
+            data: Buffer.from("invalid-json-data").toString("base64"),
+            sequenceNumber: "12345"
+          }
+        } as any]
+      };
+
+      await expect(
+        handler(malformedKinesisEvent, mockDeep<Context>(), jest.fn())
+      ).rejects.toThrow();
+
+      expect(mockedDeps.logger.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          description: "Error extracting payload",
+          error: expect.any(Error),
+          record: expect.objectContaining({
+            kinesis: expect.objectContaining({
+              data: Buffer.from("invalid-json-data").toString("base64")
+            })
+          })
+        })
+      );
+    });
+
+    it("handles events with no records", async () => {
+      const handler = createHandler(mockedDeps);
+
+      // Create a Kinesis event with empty Records array
+      const emptyKinesisEvent: KinesisStreamEvent = { Records: [] };
+
+      await handler(emptyKinesisEvent, mockDeep<Context>(), jest.fn());
+
+      expect(mockedDeps.logger.info).toHaveBeenCalledWith(
+        expect.objectContaining({
+          description: "Number of records",
+          count: 0
+        })
+      );
+      expect(mockedDeps.snsClient.send).not.toHaveBeenCalled();
+    });
   });
 
   describe("Batching", () => {
