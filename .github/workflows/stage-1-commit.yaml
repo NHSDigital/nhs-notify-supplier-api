@@ -1,5 +1,8 @@
 name: "Commit stage"
 
+permissions:
+  contents: read
+
 on:
   workflow_call:
     inputs:
@@ -35,10 +38,6 @@ on:
         description: "Version of the software, set by the CI/CD pipeline workflow"
         required: true
         type: string
-
-
-permissions:
-  contents: read
 
 jobs:
   scan-secrets:
