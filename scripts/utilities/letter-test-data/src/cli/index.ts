@@ -58,6 +58,15 @@ async function main() {
             "DELIVERED",
           ],
         },
+        "test-letter": {
+          type: "string",
+          demandOption: true,
+          choices: [
+            "test-letter-large",
+            "test-letter-standard",
+            "none", //none exists to specify letter without pdf for error testing scenarios
+          ]
+        },
       },
       async (argv) => {
         const supplierId = argv.supplierId;
@@ -72,6 +81,7 @@ async function main() {
         const environment = argv.environment;
         const ttlHours = argv.ttlHours;
         const letterRepository = createLetterRepository(environment, ttlHours);
+        const testLetter = argv.testLetter;
 
         createLetter({
           letterId,
@@ -82,6 +92,7 @@ async function main() {
           specificationId,
           status: status as LetterStatusType,
           letterRepository,
+          testLetter
         });
       },
     )
@@ -135,6 +146,15 @@ async function main() {
             "DELIVERED",
           ],
         },
+        "test-letter": {
+          type: "string",
+          demandOption: true,
+          choices: [
+            "test-letter-large",
+            "test-letter-standard",
+            "none", //none exists to specify letter without pdf for error testing scenarios
+          ]
+        },
       },
       async (argv) => {
 
@@ -152,13 +172,22 @@ async function main() {
         const ttlHours = argv.ttlHours;
         const letterRepository = createLetterRepository(environment, ttlHours);
         const count = argv.count;
+        const testLetter = argv.testLetter;
 
-
-        // Upload a test file for this batch
+        // Setup file attributes
         const bucketName = `nhs-${argv.awsAccountId}-eu-west-2-${argv.environment}-supapi-test-letters`;
         const targetFilename = `${batchId}-${status}.pdf`;
         const url = `s3://${bucketName}/${batchId}/${targetFilename}`;
-        await uploadFile(bucketName, batchId, "../../test_letter.pdf", targetFilename);
+
+        // Upload a test file for this batch if it is not an 'none' batch
+        if(testLetter !== 'none') {
+          await uploadFile(
+            bucketName,
+            supplierId,
+            `../test-letters/${testLetter}.pdf`,
+            targetFilename,
+          );
+        }
 
         // Create letter DTOs
         let letterDtos = [];
