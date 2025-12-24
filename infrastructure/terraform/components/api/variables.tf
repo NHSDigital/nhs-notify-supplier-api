@@ -134,3 +134,15 @@ variable "eventpub_control_plane_bus_arn" {
   description = "ARN of the EventBridge control plane bus for eventpub"
   default     = ""
 }
+
+variable "core_account_id" {
+  type        = string
+  description = "AWS Account ID for Core"
+  default     = "000000000000"
+}
+
+variable "core_environment" {
+  type        = string
+  description = "Environment of Core"
+  default     = "prod"
+}
