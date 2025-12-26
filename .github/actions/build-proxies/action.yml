@@ -8,6 +8,10 @@ inputs:
   releaseVersion:
     description: "Release, tag, branch, or commit ID to be used for deployment"
     required: true
+  isRelease:
+    description: "True if releaseVersion is a release tag (if set, downloads from release assets instead of workflow artifacts)"
+    required: false
+    default: false
   environment:
     description: "Deployment environment"
     required: true
@@ -25,39 +29,33 @@ inputs:
     description: "Name of the Component to deploy"
     required: true
     default: 'api'
-  nodejs_version:
-    description: "Node.js version, set by the CI/CD pipeline workflow"
-    required: true
-  NODE_AUTH_TOKEN:
-    description: "Token for access to github package registry"
-    required: true
 
 runs:
   using: composite
 
   steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
+    - name: Download OAS Spec artifact from workflow
+      if: ${{ inputs.isRelease == 'false' }}
+      uses: actions/download-artifact@v4
       with:
-        node-version: ${{ inputs.nodejs_version }}
-        registry-url: 'https://npm.pkg.github.com'
+        name: api-oas-specification-${{ inputs.apimEnv }}${{ inputs.version != '' && format('-{0}', inputs.version) || '' }}
+        path: ./build
 
-    - name: "Cache node_modules"
-      uses: actions/cache@v4
-      with:
-        path: |
-          **/node_modules
-        key: ${{ runner.os }}-node-${{ inputs.nodejs_version }}-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
-
-    - name: Npm install
-      working-directory: .
-      env:
-        NODE_AUTH_TOKEN: ${{ inputs.NODE_AUTH_TOKEN }}
-      run: npm ci
+    - name: Download OAS Spec artifact from release
+      if: ${{ inputs.isRelease == 'true' }}
       shell: bash
+      run: |
+        mkdir ./build
+        ASSET_PATTERN="api-oas-specification-${{ inputs.apimEnv }}-*.zip"
+        gh release download "${{ inputs.releaseVersion }}" \
+          --pattern "$ASSET_PATTERN" \
+          --dir ./build
+        # Unzip the downloaded file (there should be exactly one match)
+        ASSET_FILE=$(ls ./build/api-oas-specification-${{ inputs.apimEnv }}-*.zip)
+        unzip "$ASSET_FILE" -d ./build
+        rm "$ASSET_FILE"
+      env:
+        GH_TOKEN: ${{ github.token }}
 
     - name: Setup Proxy Name and target
       shell: bash
@@ -87,21 +85,10 @@ runs:
           echo "MTLS_NAME=notify-supplier-mtls-pr$PR_NUMBER" >> $GITHUB_ENV
         fi
 
-    - name: Build ${{ inputs.apimEnv }} oas
-      working-directory: .
-      env:
-        APIM_ENV: ${{ inputs.apimEnv }}
+    - name: Set APIM_ENV
       shell: bash
       run: |
-        if [ ${{ env.APIM_ENV }} == "internal-dev-sandbox" ] && [ ${{ inputs.buildSandbox }} == true ]
-        then
-          echo "Building sandbox OAS spec"
-          make build-json-oas-spec APIM_ENV=sandbox
-        else
-          echo "Building env specific OAS spec"
-          make build-json-oas-spec APIM_ENV=${{ env.APIM_ENV }}
-        fi
-
+        APIM_ENV="${{ inputs.apimEnv }}"
         if [[ $APIM_ENV == *-pr ]]; then
           echo "Removing pr suffix from APIM_ENV after building OAS and calling proxygen"
           APIM_ENV=$(echo "$APIM_ENV" | sed 's/-pr$//')
