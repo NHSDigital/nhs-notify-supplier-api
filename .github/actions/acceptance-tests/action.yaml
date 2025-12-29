@@ -28,10 +28,17 @@ runs:
       with:
         name: terraform-output-${{ inputs.targetComponent }}
 
-    - name: "Repo setup"
+    - name: Get Node version
+      id: nodejs_version
       shell: bash
       run: |
-        npm ci
+        echo "nodejs_version=$(grep "^nodejs\s" .tool-versions | cut -f2 -d' ')" >> $GITHUB_OUTPUT
+
+    - name: "Repo setup"
+      uses: ./.github/actions/node-install
+      with:
+        node-version: ${{ steps.nodejs_version.outputs.nodejs_version }}
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 
     - name: "Set PR NUMBER"
       shell: bash
