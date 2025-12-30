@@ -146,3 +146,15 @@ variable "disable_gateway_execute_endpoint" {
   description = "Disable the execution endpoint for the API Gateway"
   default     = true
 }
+
+variable "core_account_id" {
+  type        = string
+  description = "AWS Account ID for Core"
+  default     = "000000000000"
+}
+
+variable "core_environment" {
+  type        = string
+  description = "Environment of Core"
+  default     = "prod"
+}
