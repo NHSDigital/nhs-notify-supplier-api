@@ -268,7 +268,6 @@ describe("createUpsertLetterHandler", () => {
     expect(secondArg.url).toBe("s3://letterDataBucket/letter2.pdf");
     expect(secondArg.status).toBe("PENDING");
     expect(secondArg.groupId).toBe("client1campaign1template1");
-    expect(secondArg.groupId).toBe("client1campaign1template1");
     expect(firstArg.source).toBe("/data-plane/letter-rendering/test");
   });
 
