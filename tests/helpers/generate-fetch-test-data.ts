@@ -105,7 +105,7 @@ export async function checkSupplierExists(
 
 export async function createSupplierEntry(supplierId: string): Promise<void> {
   await createSupplierData({
-    filter: "nhs-notify-supplier-api-letter-test-data-utility",
+    filter: "nhs-notify-supplier-api-suppliers-data-utility",
     supplierId,
     apimId: supplierId,
     name: "TestSupplier",
