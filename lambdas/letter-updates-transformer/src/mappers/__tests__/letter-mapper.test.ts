@@ -7,12 +7,15 @@ describe("letter-mapper", () => {
     const letter = {
       id: "id1",
       specificationId: "spec1",
+      billingRef: "spec1",
       supplierId: "supplier1",
       groupId: "group1",
       status: "PRINTED",
       reasonCode: "R02",
       reasonText: "Reason text",
       updatedAt: "2025-11-24T15:55:18.000Z",
+      source: "letter-rendering/source/test",
+      subject: "letter-rendering/source/letter/letter-id",
     } as Letter;
     const event = mapLetterToCloudEvent(letter);
 
@@ -30,14 +33,15 @@ describe("letter-mapper", () => {
       domainId: "id1",
       status: "PRINTED",
       specificationId: "spec1",
+      billingRef: "spec1",
       supplierId: "supplier1",
       groupId: "group1",
       reasonCode: "R02",
       reasonText: "Reason text",
       origin: {
         domain: "supplier-api",
-        source: "/data-plane/supplier-api/letters",
-        subject: "letter-origin/supplier-api/letter/id1",
+        source: "letter-rendering/source/test",
+        subject: "letter-rendering/source/letter/letter-id",
         event: event.id,
       },
     });

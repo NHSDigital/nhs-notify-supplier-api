@@ -50,6 +50,7 @@ export const LetterSchema = LetterSchemaBase.extend({
   ttl: z.int(),
   source: z.string(),
   subject: z.string(),
+  billingRef: z.string(),
 }).describe("Letter");
 
 /**

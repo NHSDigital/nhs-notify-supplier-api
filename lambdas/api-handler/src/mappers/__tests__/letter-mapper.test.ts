@@ -18,6 +18,7 @@ describe("letter-mapper", () => {
       status: "PENDING",
       supplierId: "supplier1",
       specificationId: "spec123",
+      billingRef: "spec123",
       groupId: "group123",
       url: "https://example.com/letter/abc123",
       createdAt: date,
@@ -26,6 +27,7 @@ describe("letter-mapper", () => {
       supplierStatusSk: date,
       ttl: 123,
       source: "/data-plane/letter-rendering/pdf",
+      subject: "letter-rendering/source/letter/letter-id",
     };
 
     const result: PatchLetterResponse = mapToPatchLetterResponse(letter);
@@ -50,6 +52,7 @@ describe("letter-mapper", () => {
       status: "PENDING",
       supplierId: "supplier1",
       specificationId: "spec123",
+      billingRef: "spec123",
       groupId: "group123",
       url: "https://example.com/letter/abc123",
       createdAt: date,
@@ -60,6 +63,7 @@ describe("letter-mapper", () => {
       reasonCode: "R01",
       reasonText: "Reason text",
       source: "/data-plane/letter-rendering/pdf",
+      subject: "letter-rendering/source/letter/letter-id",
     };
 
     const result: PatchLetterResponse = mapToPatchLetterResponse(letter);
@@ -86,6 +90,7 @@ describe("letter-mapper", () => {
       status: "PENDING",
       supplierId: "supplier1",
       specificationId: "spec123",
+      billingRef: "spec123",
       groupId: "group123",
       url: "https://example.com/letter/abc123",
       createdAt: date,
@@ -94,6 +99,7 @@ describe("letter-mapper", () => {
       supplierStatusSk: date,
       ttl: 123,
       source: "/data-plane/letter-rendering/pdf",
+      subject: "letter-rendering/source/letter/letter-id",
     };
 
     const result: GetLetterResponse = mapToGetLetterResponse(letter);
@@ -118,6 +124,7 @@ describe("letter-mapper", () => {
       status: "PENDING",
       supplierId: "supplier1",
       specificationId: "spec123",
+      billingRef: "spec123",
       groupId: "group123",
       url: "https://example.com/letter/abc123",
       createdAt: date,
@@ -128,6 +135,7 @@ describe("letter-mapper", () => {
       reasonCode: "R01",
       reasonText: "Reason text",
       source: "/data-plane/letter-rendering/pdf",
+      subject: "letter-rendering/source/letter/letter-id",
     };
 
     const result: GetLetterResponse = mapToGetLetterResponse(letter);
@@ -154,6 +162,7 @@ describe("letter-mapper", () => {
       status: "PENDING",
       supplierId: "supplier1",
       specificationId: "spec123",
+      billingRef: "spec123",
       groupId: "group123",
       url: "https://example.com/letter/abc123",
       createdAt: date,
@@ -164,6 +173,7 @@ describe("letter-mapper", () => {
       reasonCode: "R01",
       reasonText: "Reason text",
       source: "/data-plane/letter-rendering/pdf",
+      subject: "letter-rendering/source/letter/letter-id",
     };
 
     const result: GetLettersResponse = mapToGetLettersResponse([

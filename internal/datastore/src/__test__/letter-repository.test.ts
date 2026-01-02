@@ -27,6 +27,7 @@ function createLetter(
     updatedAt: now,
     source: "/data-plane/letter-rendering/pdf",
     subject: `client/1/letter-request/${letterId}`,
+    billingRef: "specification1",
   };
 }
 
@@ -112,6 +113,7 @@ describe("LetterRepository", () => {
     expect(letter.reasonCode).toBeUndefined();
     expect(letter.reasonText).toBeUndefined();
     expect(letter.subject).toBe(`client/1/letter-request/${letterId}`);
+    expect(letter.billingRef).toBe("specification1");
     assertTtl(letter.ttl, before, after);
   });
 
@@ -443,7 +445,7 @@ describe("LetterRepository", () => {
   test("should batch write letters to the database", async () => {
     const before = Date.now();
 
-    await letterRepository.putLetterBatch([
+    await letterRepository.unsafePutLetterBatch([
       createLetter("supplier1", "letter1"),
       createLetter("supplier1", "letter2"),
       createLetter("supplier1", "letter3"),
@@ -483,7 +485,7 @@ describe("LetterRepository", () => {
 
     const sendSpy = jest.spyOn(db.docClient, "send");
 
-    await letterRepository.putLetterBatch(letters);
+    await letterRepository.unsafePutLetterBatch(letters);
 
     expect(sendSpy).toHaveBeenCalledTimes(3);
 
@@ -497,7 +499,7 @@ describe("LetterRepository", () => {
     letters[0] = createLetter("supplier1", "letter1");
     letters[2] = createLetter("supplier1", "letter3");
 
-    await letterRepository.putLetterBatch(letters);
+    await letterRepository.unsafePutLetterBatch(letters);
 
     await checkLetterStatus("supplier1", "letter1", "PENDING");
     await checkLetterStatus("supplier1", "letter3", "PENDING");
@@ -509,7 +511,7 @@ describe("LetterRepository", () => {
       lettersTableName: "nonexistent-table",
     });
     await expect(
-      misconfiguredRepository.putLetterBatch([
+      misconfiguredRepository.unsafePutLetterBatch([
         createLetter("supplier1", "letter1"),
       ]),
     ).rejects.toThrow("Cannot do operations on a non-existent table");

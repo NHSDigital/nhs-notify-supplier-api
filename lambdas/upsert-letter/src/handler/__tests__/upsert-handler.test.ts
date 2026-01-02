@@ -1,4 +1,4 @@
-import { SNSMessage, SQSEvent } from "aws-lambda";
+import { SNSMessage, SQSEvent, SQSRecord } from "aws-lambda";
 import pino from "pino";
 import { LetterRepository } from "internal/datastore/src";
 import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
@@ -11,7 +11,13 @@ import createUpsertLetterHandler from "../upsert-handler";
 import { Deps } from "../../config/deps";
 import { EnvVars } from "../../config/env";
 
-function createSqsRecord(msgId: string, body: string) {
+function createSQSEvent(records: SQSRecord[]): SQSEvent {
+  return {
+    Records: records,
+  };
+}
+
+function createSqsRecord(msgId: string, body: string): SQSRecord {
   return {
     messageId: msgId,
     receiptHandle: "",
@@ -122,6 +128,7 @@ function createSupplierStatusChangeEvent(
       reasonCode: "R07",
       reasonText: "No such address",
       specificationId: "1y3q9v1zzzz",
+      billingRef: "1y3q9v1zzzz",
       status: "RETURNED",
       supplierId: "supplier1",
     },
@@ -168,18 +175,16 @@ describe("createUpsertLetterHandler", () => {
   });
 
   test("processes all records successfully and returns no batch failures", async () => {
-    const evt: SQSEvent = {
-      Records: [
-        createSqsRecord(
-          "msg1",
-          JSON.stringify(createNotification(createPreparedV2Event())),
-        ),
-        createSqsRecord(
-          "msg2",
-          JSON.stringify(createNotification(createSupplierStatusChangeEvent())),
-        ),
-      ],
-    };
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord(
+        "msg1",
+        JSON.stringify(createNotification(createPreparedV2Event())),
+      ),
+      createSqsRecord(
+        "msg2",
+        JSON.stringify(createNotification(createSupplierStatusChangeEvent())),
+      ),
+    ]);
 
     const result = await createUpsertLetterHandler(mockedDeps)(
       evt,
@@ -214,26 +219,24 @@ describe("createUpsertLetterHandler", () => {
   });
 
   test("processes all v1 records successfully and returns no batch failures", async () => {
-    const evt: SQSEvent = {
-      Records: [
-        createSqsRecord(
-          "msg1",
-          JSON.stringify(createNotification(createPreparedV1Event())),
-        ),
-        createSqsRecord(
-          "msg2",
-          JSON.stringify(
-            createNotification(
-              createPreparedV1Event({
-                id: "7b9a03ca-342a-4150-b56b-989109c45614",
-                domainId: "letter2",
-                url: "s3://letterDataBucket/letter2.pdf",
-              }),
-            ),
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord(
+        "msg1",
+        JSON.stringify(createNotification(createPreparedV1Event())),
+      ),
+      createSqsRecord(
+        "msg2",
+        JSON.stringify(
+          createNotification(
+            createPreparedV1Event({
+              id: "7b9a03ca-342a-4150-b56b-989109c45614",
+              domainId: "letter2",
+              url: "s3://letterDataBucket/letter2.pdf",
+            }),
           ),
         ),
-      ],
-    };
+      ),
+    ]);
 
     const result = await createUpsertLetterHandler(mockedDeps)(
       evt,
@@ -265,14 +268,13 @@ describe("createUpsertLetterHandler", () => {
     expect(secondArg.url).toBe("s3://letterDataBucket/letter2.pdf");
     expect(secondArg.status).toBe("PENDING");
     expect(secondArg.groupId).toBe("client1campaign1template1");
-    expect(secondArg.groupId).toBe("client1campaign1template1");
     expect(firstArg.source).toBe("/data-plane/letter-rendering/test");
   });
 
   test("invalid JSON body produces batch failure and logs error", async () => {
-    const evt: SQSEvent = {
-      Records: [createSqsRecord("bad-json", "this-is-not-json")],
-    };
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("bad-json", "this-is-not-json"),
+    ]);
 
     const result = await createUpsertLetterHandler(mockedDeps)(
       evt,
@@ -292,14 +294,12 @@ describe("createUpsertLetterHandler", () => {
   });
 
   test("invalid notification schema produces batch failure and logs error", async () => {
-    const evt: SQSEvent = {
-      Records: [
-        createSqsRecord(
-          "bad-notification-schema",
-          JSON.stringify({ not: "unexpected notification shape" }),
-        ),
-      ],
-    };
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord(
+        "bad-notification-schema",
+        JSON.stringify({ not: "unexpected notification shape" }),
+      ),
+    ]);
 
     const result = await createUpsertLetterHandler(mockedDeps)(
       evt,
@@ -321,17 +321,15 @@ describe("createUpsertLetterHandler", () => {
   });
 
   test("no event type produces batch failure and logs error", async () => {
-    const evt: SQSEvent = {
-      Records: [
-        createSqsRecord(
-          "bad-event-type",
-          JSON.stringify({
-            Type: "Notification",
-            Message: JSON.stringify({ no: "type" }),
-          }),
-        ),
-      ],
-    };
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord(
+        "bad-event-type",
+        JSON.stringify({
+          Type: "Notification",
+          Message: JSON.stringify({ no: "type" }),
+        }),
+      ),
+    ]);
 
     const result = await createUpsertLetterHandler(mockedDeps)(
       evt,
@@ -351,17 +349,15 @@ describe("createUpsertLetterHandler", () => {
   });
 
   test("invalid event type produces batch failure and logs error", async () => {
-    const evt: SQSEvent = {
-      Records: [
-        createSqsRecord(
-          "bad-event-type",
-          JSON.stringify({
-            Type: "Notification",
-            Message: JSON.stringify({ type: "unexpected type" }),
-          }),
-        ),
-      ],
-    };
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord(
+        "bad-event-type",
+        JSON.stringify({
+          Type: "Notification",
+          Message: JSON.stringify({ type: "unexpected type" }),
+        }),
+      ),
+    ]);
 
     const result = await createUpsertLetterHandler(mockedDeps)(
       evt,
@@ -381,20 +377,18 @@ describe("createUpsertLetterHandler", () => {
   });
 
   test("valid event type and invalid schema produces batch failure and logs error", async () => {
-    const evt: SQSEvent = {
-      Records: [
-        createSqsRecord(
-          "bad-event-schema",
-          JSON.stringify({
-            Type: "Notification",
-            Message: JSON.stringify({
-              type: "uk.nhs.notify.letter-rendering.letter-request.prepared",
-              some: "unexpected shape",
-            }),
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord(
+        "bad-event-schema",
+        JSON.stringify({
+          Type: "Notification",
+          Message: JSON.stringify({
+            type: "uk.nhs.notify.letter-rendering.letter-request.prepared",
+            some: "unexpected shape",
           }),
-        ),
-      ],
-    };
+        }),
+      ),
+    ]);
 
     const result = await createUpsertLetterHandler(mockedDeps)(
       evt,
@@ -418,32 +412,30 @@ describe("createUpsertLetterHandler", () => {
       .mockResolvedValueOnce({})
       .mockRejectedValueOnce(new Error("ddb error"));
 
-    const evt: SQSEvent = {
-      Records: [
-        createSqsRecord(
-          "ok-msg",
-          JSON.stringify(
-            createNotification(
-              createPreparedV2Event({
-                id: "7b9a03ca-342a-4150-b56b-989109c45615",
-                domainId: "ok",
-              }),
-            ),
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord(
+        "ok-msg",
+        JSON.stringify(
+          createNotification(
+            createPreparedV2Event({
+              id: "7b9a03ca-342a-4150-b56b-989109c45615",
+              domainId: "ok",
+            }),
           ),
         ),
-        createSqsRecord(
-          "fail-msg",
-          JSON.stringify(
-            createNotification(
-              createPreparedV2Event({
-                id: "7b9a03ca-342a-4150-b56b-989109c45616",
-                domainId: "fail",
-              }),
-            ),
+      ),
+      createSqsRecord(
+        "fail-msg",
+        JSON.stringify(
+          createNotification(
+            createPreparedV2Event({
+              id: "7b9a03ca-342a-4150-b56b-989109c45616",
+              domainId: "fail",
+            }),
           ),
         ),
-      ],
-    };
+      ),
+    ]);
 
     const result = await createUpsertLetterHandler(mockedDeps)(
       evt,
