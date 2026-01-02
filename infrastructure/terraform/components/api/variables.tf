@@ -155,3 +155,15 @@ variable "letter_variant_map" {
     "lv3" = { supplierId = "supplier2", specId = "spec3" }
   }
 }
+
+variable "core_account_id" {
+  type        = string
+  description = "AWS Account ID for Core"
+  default     = "000000000000"
+}
+
+variable "core_environment" {
+  type        = string
+  description = "Environment of Core"
+  default     = "prod"
+}
