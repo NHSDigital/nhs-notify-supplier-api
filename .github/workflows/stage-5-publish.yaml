@@ -228,7 +228,7 @@ jobs:
     needs: [publish]
     permissions:
       id-token: write # This is required for requesting the JWT
-      contents: read # This is required for actions/checkout
+      contents: write # This is required for publishing release asset
     timeout-minutes: 10
     strategy:
       matrix:
