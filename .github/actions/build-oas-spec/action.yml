@@ -58,7 +58,7 @@ runs:
           make build-json-oas-spec APIM_ENV=sandbox
         else
           echo "Building env specific OAS spec"
-          make build-json-oas-spec APIM_ENV=${{ env.APIM_ENV }}
+          make build-yml-oas-spec APIM_ENV=${{ env.APIM_ENV }}
         fi
 
     - name: Upload API OAS specification artifact
