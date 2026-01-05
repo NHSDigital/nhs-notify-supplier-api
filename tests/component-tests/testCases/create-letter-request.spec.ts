@@ -94,6 +94,5 @@ test.describe("initial describe", () => {
       }),
     );
     console.log(eventResponse);
-    console.log("trigger another build");
   });
 });
