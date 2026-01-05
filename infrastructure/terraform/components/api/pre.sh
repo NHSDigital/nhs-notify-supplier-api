@@ -12,7 +12,7 @@ $ROOT_DIR/scripts/set-github-token.sh
 
 echo "Completed."
 
-npm ci --loglevel verbose
+npm ci
 
 npm run generate-dependencies --workspaces --if-present
 
