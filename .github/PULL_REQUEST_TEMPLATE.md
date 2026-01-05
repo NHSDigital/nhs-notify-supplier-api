@@ -25,7 +25,8 @@
 - [ ] I have added tests to cover my changes
 - [ ] I have updated the documentation accordingly
 - [ ] This PR is a result of pair or mob programming
-- [ ] If I have used the skip-trivy-package label I have done so responsibly and in the knowledge that this is being fixed as part of a separate ticket/PR.
+- [ ] If I have used the 'skip-trivy-package' label I have done so responsibly and in the knowledge that this is being fixed as part of a separate ticket/PR.
+
 ---
 
 ## Sensitive Information Declaration
