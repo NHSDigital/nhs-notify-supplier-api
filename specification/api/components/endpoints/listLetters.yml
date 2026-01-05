@@ -18,3 +18,5 @@ responses:
     $ref: "../responses/errors/tooManyRequests.yml"
   '500':
     $ref: "../responses/errors/serverError.yml"
+  '502':
+    $ref: "../responses/errors/badGateway.yml"

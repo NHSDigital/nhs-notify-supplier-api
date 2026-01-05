@@ -1,0 +1,9 @@
+description: API gateway error response
+content:
+  application/json:
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Bad Gateway"

@@ -1,5 +1,5 @@
 module "authorizer_lambda" {
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-lambda.zip"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip"
 
   aws_account_id = var.aws_account_id
   component      = var.component
@@ -31,7 +31,6 @@ module "authorizer_lambda" {
   enable_lambda_insights   = false
   force_lambda_code_deploy = var.force_lambda_code_deploy
 
-  send_to_firehose          = true
   log_destination_arn       = local.destination_arn
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
