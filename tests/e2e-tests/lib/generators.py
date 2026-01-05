@@ -10,3 +10,11 @@ class Generators:
                 "type": "Letter"
             }
         }
+
+    @staticmethod
+    def generate_valid_headers(auth):
+        return {
+            "Authorization": auth,
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        }

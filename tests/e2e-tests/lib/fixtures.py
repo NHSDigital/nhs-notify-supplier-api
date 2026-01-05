@@ -1,7 +1,7 @@
 import pytest
 import os
 import re
-
+from .authentication import AuthenticationCache
 
 # for now this is the same as PROXY_NAME
 # this is here to illustrate how these can be decoupled
@@ -43,3 +43,10 @@ def url(api_product_name):
     # Everything else (dev, test, pr environments, internal-dev)
     else:
         return f"https://{environment}.api.service.nhs.uk/{suffix}"
+
+# By setting the scope to session on the cache but leaving session scope OFF
+# the fixtures for each bearer token, we ensure the cache is checked and has a
+# chance to refresh before any test which might depend on a bearer token
+@pytest.fixture(scope='session')
+def authentication_cache():
+    return AuthenticationCache()
