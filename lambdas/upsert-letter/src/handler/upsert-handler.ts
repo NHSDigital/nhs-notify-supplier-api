@@ -108,6 +108,7 @@ function resolveSupplierForVariant(
 }
 
 function parseSNSNotification(record: SQSRecord) {
+  console.log("record in parseSNSNotificatino: ", record);
   const notification = JSON.parse(record.body) as Partial<SNSMessage>;
   if (
     notification.Type !== "Notification" ||
@@ -149,9 +150,11 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
     const batchItemFailures: SQSBatchItemFailure[] = [];
 
     const tasks = event.Records.map(async (record) => {
+      console.log("record in createUpsertLetterHandler: ", record);
       try {
         const message: string = parseSNSNotification(record);
 
+        console.log("message after parsing: ", message);
         const letterEvent: unknown = JSON.parse(message);
 
         const type = getType(letterEvent);
