@@ -31,16 +31,27 @@ erDiagram
 erDiagram
     MI {
         string id
-        string supplierId "ref: Supplier"
+        string lineItem
+        string timestamp
+        number quantity
         string specificationId
         string groupId
-        string lineItem
-        number quantity
         number stockRemaining
+        string supplierId
         string createdAt
         string updatedAt
+        number ttl "min: -9007199254740991, max: 9007199254740991"
     }
+```
+
+## Supplier schema
+
+```mermaid
+erDiagram
     Supplier {
+        string id
+        string name
+        string apimId
+        string status "enum: ENABLED, DISABLED"
     }
-    MI }o--|| Supplier : "supplierId"
 ```
