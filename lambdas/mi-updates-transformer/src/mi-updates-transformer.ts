@@ -13,6 +13,7 @@ import {
 import { MISubmittedEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
 import { mapMIToCloudEvent } from "./mappers/mi-mapper";
 import { Deps } from "./deps";
+
 // SNS PublishBatchCommand supports up to 10 messages per batch
 const BATCH_SIZE = 10;
 
@@ -48,13 +49,14 @@ function extractMIData(record: DynamoDBRecord): MI {
   return MISchema.parse(unmarshall(newImage as any));
 }
 
-export function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
+export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
   return async (streamEvent: KinesisStreamEvent) => {
     deps.logger.info({ description: "Received event", streamEvent });
 
     const cloudEvents: MISubmittedEvent[] = streamEvent.Records.map((record) =>
       extractPayload(record, deps),
     )
+      .filter((record) => record.eventName === "INSERT")
       .map((element) => extractMIData(element))
       .map((payload) => mapMIToCloudEvent(payload, deps));
 

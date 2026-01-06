@@ -9,7 +9,7 @@ import {
 } from "aws-lambda";
 import { mockDeep } from "jest-mock-extended";
 import { MI } from "@internal/datastore";
-import { createHandler } from "../mi-updates-transformer";
+import createHandler from "../mi-updates-transformer";
 import { Deps } from "../deps";
 import { EnvVars } from "../env";
 import { mapMIToCloudEvent } from "../mappers/mi-mapper";
@@ -69,6 +69,29 @@ function generateInsertRecord(newMI: MI): DynamoDBRecord {
   };
 }
 
+function generateDeleteRecord(oldMI: MI): DynamoDBRecord {
+  const oldImage = Object.fromEntries(
+    Object.entries(oldMI).map(([key, value]) => [key, toAttr(value)]),
+  );
+  return {
+    eventName: "REMOVE",
+    dynamodb: { OldImage: oldImage },
+  };
+}
+
+function generateModifyRecord(oldMI: MI, newMI: MI): DynamoDBRecord {
+  const oldImage = Object.fromEntries(
+    Object.entries(oldMI).map(([key, value]) => [key, toAttr(value)]),
+  );
+  const newImage = Object.fromEntries(
+    Object.entries(newMI).map(([key, value]) => [key, toAttr(value)]),
+  );
+  return {
+    eventName: "MODIFY",
+    dynamodb: { OldImage: oldImage, NewImage: newImage },
+  };
+}
+
 describe("mi-updates-transformer Lambda", () => {
   const mockedDeps: jest.Mocked<Deps> = {
     snsClient: { send: jest.fn() } as unknown as SNSClient,
@@ -118,6 +141,28 @@ describe("mi-updates-transformer Lambda", () => {
     await expect(
       handler(testData, mockDeep<Context>(), jest.fn()),
     ).rejects.toThrow();
+
+    expect(mockedDeps.snsClient.send).not.toHaveBeenCalled();
+  });
+
+  it("does not publish modify data", async () => {
+    const handler = createHandler(mockedDeps);
+    const miEvents = generateMIEvents(2);
+
+    const updateMI = generateModifyRecord(miEvents[0], miEvents[1]);
+    const testData = generateKinesisEvent([updateMI]);
+    await handler(testData, mockDeep<Context>(), jest.fn());
+
+    expect(mockedDeps.snsClient.send).not.toHaveBeenCalled();
+  });
+
+  it("does not publish delete data", async () => {
+    const handler = createHandler(mockedDeps);
+    const miEvents = generateMIEvents(2);
+
+    const deleteMI = generateDeleteRecord(miEvents[0]);
+    const testData = generateKinesisEvent([deleteMI]);
+    await handler(testData, mockDeep<Context>(), jest.fn());
 
     expect(mockedDeps.snsClient.send).not.toHaveBeenCalled();
   });
