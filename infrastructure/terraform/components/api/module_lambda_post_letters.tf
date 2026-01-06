@@ -1,5 +1,5 @@
 module "post_letters" {
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.24/terraform-lambda.zip"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip"
 
   function_name = "post_letters"
   description   = "Receives and accepts collection of letters to update"
@@ -31,7 +31,6 @@ module "post_letters" {
   force_lambda_code_deploy = var.force_lambda_code_deploy
   enable_lambda_insights   = false
 
-  send_to_firehose          = true
   log_destination_arn       = local.destination_arn
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
