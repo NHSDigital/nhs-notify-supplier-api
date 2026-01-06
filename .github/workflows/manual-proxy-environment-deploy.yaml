@@ -77,6 +77,13 @@ jobs:
           echo "ENVIRONMENT=$ENVIRONMENT" >> $GITHUB_ENV
           echo "APIM_ENV=$APIM_ENV" >> $GITHUB_ENV
 
+      - name: "Build OAS spec"
+        uses: ./.github/actions/build-oas-spec
+        with:
+          apimEnv: "${{ env.APIM_ENV }}"
+          buildSandbox: ${{ inputs.build_sandbox }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: "Build proxies"
         env:
           PROXYGEN_API_NAME: nhs-notify-supplier
@@ -90,4 +97,3 @@ jobs:
           runId: "${{ github.run_id }}"
           buildSandbox: ${{ inputs.build_sandbox }}
           releaseVersion: ${{ github.ref_name }}
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
