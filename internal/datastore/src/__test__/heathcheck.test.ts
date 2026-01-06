@@ -24,6 +24,10 @@ describe("DBHealthcheck", () => {
     await deleteTables(db);
   });
 
+  afterAll(async () => {
+    await db.container.stop();
+  });
+
   it("passes when the database is available", async () => {
     const dbHealthCheck = new DBHealthcheck(db.docClient, db.config);
     await expect(dbHealthCheck.check()).resolves.not.toThrow();

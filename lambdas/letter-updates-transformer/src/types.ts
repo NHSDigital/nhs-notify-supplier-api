@@ -1,10 +1,10 @@
-import { LetterSchemaBase, SupplierSchema } from "@internal/datastore";
-import { idRef } from "@internal/helpers";
+import { LetterSchema } from "@internal/datastore";
 import { z } from "zod";
 
-export const LetterSchemaForEventPub = LetterSchemaBase.extend({
-  supplierId: idRef(SupplierSchema, "id"),
-  updatedAt: z.string(),
+export const LetterSchemaForEventPub = LetterSchema.omit({
+  supplierStatus: true,
+  supplierStatusSk: true,
+  ttl: true,
 });
 
 export type LetterForEventPub = z.infer<typeof LetterSchemaForEventPub>;
