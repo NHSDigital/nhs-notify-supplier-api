@@ -31,18 +31,23 @@ class AuthenticationCache():
         # For the test_url, note that we don't need a message_id that actually exists in
         # the backend. The test will only check that the API doesn't return a 401,
         # a 404 response means the authentication is working.
-        test_url = f"{base_url}/v1/messages/message_id"
+        test_url = f"{base_url}/letters"
 
-        if env in ["internal-dev", "ref"]:
+        if env == "internal-dev":
             api_key = os.environ["NON_PROD_API_KEY"]
             private_key = os.environ["NON_PROD_PRIVATE_KEY"]
             url = "https://internal-dev.api.service.nhs.uk/oauth2/token"
-            kid = "local"
+            kid = "internal-dev-test-1"
+        elif env == "ref":
+            api_key = os.environ["NON_PROD_API_KEY"]
+            private_key = os.environ["NON_PROD_PRIVATE_KEY"]
+            url = "https://ref.api.service.nhs.uk/oauth2/token"
+            kid = "internal-dev-test-1"
         elif env == "int":
             api_key = os.environ.get("INTEGRATION_API_KEY")
             private_key = os.environ.get("INTEGRATION_PRIVATE_KEY")
             url = "https://int.api.service.nhs.uk/oauth2/token"
-            kid = "local"
+            kid = "internal-dev-test-1"
         elif env == "prod":
             api_key = os.environ.get("PRODUCTION_API_KEY")
             private_key = os.environ.get("PRODUCTION_PRIVATE_KEY")
@@ -65,7 +70,7 @@ class AuthenticationCache():
         valid_auth = False
 
         for i in range(self.max_tests):
-            print(f"Testing new token, attemp #{i+1}")
+            print(f"Testing new token, attempt #{i+1}")
             if new_token is None:
                 new_token = self.generate_new_token(api_key, private_key, url, kid)
                 time_since_new_token = int(time())
@@ -92,6 +97,8 @@ class AuthenticationCache():
         pk_pem = None
         with open(private_key, "r") as f:
             pk_pem = f.read()
+
+        private_key_file = f"{private_key}"
 
         token_expiry = int(time()) + self.token_validity
 

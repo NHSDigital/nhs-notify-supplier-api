@@ -15,6 +15,5 @@ class Generators:
     def generate_valid_headers(auth):
         return {
             "Authorization": auth,
-            "Content-Type": "application/json",
-            "Accept": "application/json"
+            "X-Request-ID":"123e4567-e89b-12d3-a456-426614174000",
         }

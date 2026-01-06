@@ -36,8 +36,8 @@ def url(api_product_name):
     if environment == "prod":
         return f"https://api.service.nhs.uk/{suffix}"
 
-    # REF / REF2 share internal-dev gateway
-    elif environment in ["ref", "ref2"]:
+    # REF share internal-dev gateway
+    elif environment in ["ref"]:
         return f"https://internal-dev.api.service.nhs.uk/{suffix}"
 
     # Everything else (dev, test, pr environments, internal-dev)
@@ -50,3 +50,15 @@ def url(api_product_name):
 @pytest.fixture(scope='session')
 def authentication_cache():
     return AuthenticationCache()
+
+@pytest.fixture()
+def bearer_token(authentication_cache):
+    environment = os.environ['API_ENVIRONMENT']
+    if environment == "prod":
+        url = "https://api.service.nhs.uk/nhs-notify-supplier"
+    # the ref2 url is structured slightly differently so it needs to be explicitly called out here
+    elif environment == "ref":
+        url = "https://internal-dev.api.service.nhs.uk/nhs-notify-supplier"
+    else:
+        url = f"https://{environment}.api.service.nhs.uk/nhs-notify-supplier"
+    return authentication_cache.generate_authentication(environment, url)
