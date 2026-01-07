@@ -16,17 +16,20 @@ usage() {
     echo ""
     echo "Optional parameters:"
     echo "  --count           Number of letters per batch (default: 835)"
+    echo "  --missing-count   Number of letters with missing PDFs (default: 5)"
     echo "  --status          Letter status (default: PENDING)"
     echo "  --ttl-hours       TTL in hours (default: 13140)"
     echo ""
     echo "Example:"
     echo "  $0 --supplier-id supplier-123 --environment pr147 --awsAccountId 820178564574"
     echo "  $0 --supplier-id supplier-123 --environment main --awsAccountId 820178564574 --count 25 --status ACCEPTED"
+    echo "  $0 --supplier-id supplier-123 --environment main --awsAccountId 820178564574 --count 25 --status ACCEPTED --missing-count 3"
     exit 1
 }
 
 # Default values
 COUNT=835 #3 batches = 2505 letters
+MISSING_COUNT=5 # Number of letters with missing PDFs
 STATUS="PENDING"
 TTL_HOURS=13140 # Approximately 18 months
 
@@ -47,6 +50,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --count)
             COUNT="$2"
+            shift 2
+            ;;
+        --missing-count)
+            MISSING_COUNT="$2"
             shift 2
             ;;
         --status)
@@ -87,11 +94,18 @@ if ! [[ "$COUNT" =~ ^[1-9][0-9]*$ ]]; then
     exit 1
 fi
 
+# Validate missing count is a positive number
+if ! [[ "$MISSING_COUNT" =~ ^[1-9][0-9]*$ ]]; then
+    echo "Error: Missing count must be a positive integer"
+    exit 1
+fi
+
 echo "Creating letter batches with the following configuration:"
 echo "  Supplier ID: $SUPPLIER_ID"
 echo "  Environment: $ENVIRONMENT"
 echo "  AWS Account ID: $AWS_ACCOUNT_ID"
 echo "  Count per batch: $COUNT"
+echo "  Letters missing PDFs count: $MISSING_COUNT"
 echo "  Status: $STATUS"
 echo "  TTL Hours: $TTL_HOURS"
 echo ""
@@ -105,9 +119,10 @@ cd "$PROJECT_DIR"
 
 # Define the three batches with different specification and group IDs
 BATCHES=(
-    "integration-specification-english:group-english:test-letter-standard"
-    "integration-specification-braille:group-accessible:test-letter-standard"
-    "integration-specification-arabic:group-international:test-letter-large"
+    "integration-specification-english:group-english:test-letter-standard:${COUNT}"
+    "integration-specification-braille:group-accessible:test-letter-standard:${COUNT}"
+    "integration-specification-arabic:group-international:test-letter-large:${COUNT}"
+    "integration-specification-missing-pdf:group-error:none:${MISSING_COUNT}"
 )
 
 # Counter for tracking batch creation
@@ -121,7 +136,7 @@ echo ""
 # Create each batch
 for batch in "${BATCHES[@]}"; do
     # Parse specification-id and group-id from the batch definition
-    IFS=':' read -r SPEC_ID GROUP_ID TEST_LETTER <<< "$batch"
+    IFS=':' read -r SPEC_ID GROUP_ID TEST_LETTER BATCH_COUNT <<< "$batch"
 
     echo "[$BATCH_COUNTER/$TOTAL_BATCHES] Creating batch with specification-id: $SPEC_ID, group-id: $GROUP_ID-$SUPPLIER_ID"
 
@@ -133,7 +148,7 @@ for batch in "${BATCHES[@]}"; do
         --specification-id "$SPEC_ID" \
         --group-id "$GROUP_ID-$SUPPLIER_ID" \
         --status "$STATUS" \
-        --count "$COUNT" \
+        --count "$BATCH_COUNT" \
         --ttl-hours "$TTL_HOURS" \
         --test-letter "$TEST_LETTER"
 

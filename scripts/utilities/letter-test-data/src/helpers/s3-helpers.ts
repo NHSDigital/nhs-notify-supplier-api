@@ -4,18 +4,18 @@ import path from "node:path";
 
 export default async function uploadFile(
   bucketName: string,
-  supplierId: string,
+  folder: string,
   sourceFilename: string,
   targetFilename: string,
 ) {
   try {
     const s3 = new S3Client();
-    const filePath = path.join(__dirname, 'test-letters', sourceFilename);
+    const filePath = path.join(__dirname, '..', 'test-letters', sourceFilename);
     const fileContent = readFileSync(filePath);
 
     const uploadParams = {
       Bucket: bucketName,
-      Key: `${supplierId}/${targetFilename}`,
+      Key: `${folder}/${targetFilename}`,
       Body: fileContent,
       ContentType: "application/pdf",
     };
