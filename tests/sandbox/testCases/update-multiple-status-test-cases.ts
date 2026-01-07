@@ -2,26 +2,13 @@ import {
   RequestSandBoxHeaders,
   sandBoxHeader,
 } from "../../constants/request-headers";
+import { PostMessageRequestBody } from "../../helpers/common-types";
 
 export type ApiSandboxUpdateLetterStatusTestData = {
   testCase: string;
   header: RequestSandBoxHeaders;
   body: PostMessageRequestBody;
   expectedStatus: number;
-};
-
-type PostMessageRequestBody = {
-  data: postRequest[];
-};
-
-type postRequest = {
-  type: string;
-  id: string;
-  attributes: {
-    reasonCode?: string;
-    reasonText?: string;
-    status: string;
-  };
 };
 
 export const apiSandboxMultipleLetterStatusTestData: ApiSandboxUpdateLetterStatusTestData[] =
