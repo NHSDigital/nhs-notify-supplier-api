@@ -7,6 +7,7 @@ import {
   postDuplicateIDResponseBody,
   postInvalidStatusRequestBody,
   postInvalidStatusResponseBody,
+  postLettersInvalidRequestHeaders,
   postLettersRequestHeaders,
   postValidRequestBody,
 } from "./testCases/update-multiple-letter-status";
@@ -80,7 +81,7 @@ test.describe("API Gateway Tests to Verify post Status Endpoint", () => {
       return;
     }
 
-    const headers = postRequestHeaders();
+    const headers = postLettersRequestHeaders();
     const body = postDuplicateIDRequestBody(letters);
 
     const response = await request.post(`${baseUrl}/${SUPPLIER_LETTERS}`, {
@@ -105,7 +106,7 @@ test.describe("API Gateway Tests to Verify post Status Endpoint", () => {
       return;
     }
 
-    const headers = postInvalidRequestHeaders();
+    const headers = postLettersInvalidRequestHeaders();
     const body = postValidRequestBody(letters);
 
     const response = await request.post(`${baseUrl}/${SUPPLIER_LETTERS}`, {
