@@ -1,8 +1,10 @@
-import { APIGatewayClient, GetRestApisCommand } from "@aws-sdk/client-api-gateway";
-import { AWS_REGION, API_NAME } from "../constants/api_constants";
+import {
+  APIGatewayClient,
+  GetRestApisCommand,
+} from "@aws-sdk/client-api-gateway";
+import { API_NAME, AWS_REGION } from "../constants/api-constants";
 
-export async function getRestApiGatewayBaseUrl(): Promise<string> {
-
+export default async function getRestApiGatewayBaseUrl(): Promise<string> {
   const region = AWS_REGION;
   const client = new APIGatewayClient({ region });
 
