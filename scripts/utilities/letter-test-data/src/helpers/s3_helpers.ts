@@ -6,7 +6,7 @@ import path from "path";
 export async function uploadFile(bucketName: string, supplierId: string, sourceFilename: string, targetFilename: string) {
   try {
     const s3 = new S3Client();
-    const filePath = path.join(__dirname, sourceFilename);
+    const filePath = path.join(__dirname, 'test-letters', sourceFilename);
     const fileContent = readFileSync(filePath);
 
     const uploadParams = {

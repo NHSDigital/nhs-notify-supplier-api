@@ -105,9 +105,9 @@ cd "$PROJECT_DIR"
 
 # Define the three batches with different specification and group IDs
 BATCHES=(
-    "integration-specification-english:group-english"
-    "integration-specification-braille:group-accessible"
-    "integration-specification-arabic:group-international"
+    "integration-specification-english:group-english:test-letter-standard"
+    "integration-specification-braille:group-accessible:test-letter-standard"
+    "integration-specification-arabic:group-international:test-letter-large"
 )
 
 # Counter for tracking batch creation
@@ -121,7 +121,7 @@ echo ""
 # Create each batch
 for batch in "${BATCHES[@]}"; do
     # Parse specification-id and group-id from the batch definition
-    IFS=':' read -r SPEC_ID GROUP_ID <<< "$batch"
+    IFS=':' read -r SPEC_ID GROUP_ID TEST_LETTER <<< "$batch"
 
     echo "[$BATCH_COUNTER/$TOTAL_BATCHES] Creating batch with specification-id: $SPEC_ID, group-id: $GROUP_ID-$SUPPLIER_ID"
 
@@ -134,7 +134,8 @@ for batch in "${BATCHES[@]}"; do
         --group-id "$GROUP_ID-$SUPPLIER_ID" \
         --status "$STATUS" \
         --count "$COUNT" \
-        --ttl-hours "$TTL_HOURS"
+        --ttl-hours "$TTL_HOURS" \
+        --test-letter "$TEST_LETTER"
 
     if [[ $? -eq 0 ]]; then
         echo "✓ Batch $BATCH_COUNTER completed successfully"
