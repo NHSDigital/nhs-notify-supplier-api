@@ -23,6 +23,10 @@ async function main() {
         awsAccountId: {
           type: "string",
           demandOption: true,
+          choices: [
+            "820178564574", // Supplier Dev
+            "885964308133" //Supplier Nonprod
+          ],
         },
         "letter-id": {
           type: "string",
@@ -111,6 +115,10 @@ async function main() {
         awsAccountId: {
           type: "string",
           demandOption: true,
+          choices: [
+            "820178564574", // Supplier Dev
+            "885964308133" //Supplier Nonprod
+          ],
         },
         "group-id": {
           type: "string",
@@ -177,14 +185,15 @@ async function main() {
         // Setup file attributes
         const bucketName = `nhs-${argv.awsAccountId}-eu-west-2-${argv.environment}-supapi-test-letters`;
         const targetFilename = `${batchId}-${status}.pdf`;
-        const url = `s3://${bucketName}/${batchId}/${targetFilename}`;
+        const folder = `${supplierId}/${batchId}`;
+        const url = `s3://${bucketName}/${folder}/${targetFilename}`;
 
         // Upload a test file for this batch if it is not an 'none' batch
         if(testLetter !== 'none') {
           await uploadFile(
             bucketName,
-            supplierId,
-            `../test-letters/${testLetter}.pdf`,
+            folder,
+            `${testLetter}.pdf`,
             targetFilename,
           );
         }
@@ -205,7 +214,7 @@ async function main() {
         // Upload Letters
         await letterRepository.putLetterBatch(letterDtos);
 
-        console.log(`Created batch ${batchId} of ${letterDtos.length}`);
+        console.log(`Created batch ${batchId} of ${letterDtos.length} letters`);
       },
     )
     .demandCommand(1)

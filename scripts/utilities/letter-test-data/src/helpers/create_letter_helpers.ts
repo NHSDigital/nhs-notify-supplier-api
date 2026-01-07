@@ -32,7 +32,7 @@ export async function createLetter(params: {
     await uploadFile(
       bucketName,
       supplierId,
-      `../test-letters/${testLetter}.pdf`,
+      `${testLetter}.pdf`,
       targetFilename,
     );
   }
