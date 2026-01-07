@@ -22,6 +22,9 @@ erDiagram
         string supplierStatus
         string supplierStatusSk
         number ttl "min: -9007199254740991, max: 9007199254740991"
+        string source
+        string subject
+        string billingRef
     }
 ```
 

@@ -1,12 +1,13 @@
 // Replace me with the actual code for your Lambda function
-import { Handler } from "aws-lambda";
+import { SQSEvent, SQSHandler } from "aws-lambda";
+import pino from "pino";
 
-const handler: Handler = async (event) => {
-  console.log("Received event:", event);
-  return {
-    statusCode: 200,
-    body: "Event logged",
-  };
+const log = pino();
+
+export const handler: SQSHandler = async (event: SQSEvent) => {
+  for (const record of event.Records) {
+    log.info({ description: "Received event", message: record.body });
+  }
 };
 
 export default handler;

@@ -247,6 +247,7 @@ describe("enqueueLetterUpdateRequests function", () => {
             reasonCode: lettersToUpdate[0].reasonCode,
             reasonText: lettersToUpdate[0].reasonText,
           }),
+          MessageGroupId: lettersToUpdate[0].id,
         },
       }),
     );
@@ -267,6 +268,7 @@ describe("enqueueLetterUpdateRequests function", () => {
             status: lettersToUpdate[1].status,
             supplierId: lettersToUpdate[1].supplierId,
           }),
+          MessageGroupId: lettersToUpdate[1].id,
         },
       }),
     );
@@ -310,6 +312,7 @@ describe("enqueueLetterUpdateRequests function", () => {
             status: lettersToUpdate[1].status,
             supplierId: lettersToUpdate[1].supplierId,
           }),
+          MessageGroupId: lettersToUpdate[1].id,
         },
       }),
     );

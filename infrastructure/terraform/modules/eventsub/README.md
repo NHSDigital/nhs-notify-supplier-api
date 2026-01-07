@@ -39,8 +39,10 @@
 
 | Name | Description |
 |------|-------------|
+| <a name="output_firehose_delivery_stream"></a> [firehose\_delivery\_stream](#output\_firehose\_delivery\_stream) | Kinesis Firehose Delivery Stream ARN and Name |
 | <a name="output_s3_bucket_event_cache"></a> [s3\_bucket\_event\_cache](#output\_s3\_bucket\_event\_cache) | S3 Bucket ARN and Name for event cache |
-| <a name="output_sns_topic"></a> [sns\_topic](#output\_sns\_topic) | SNS Topic ARN and Name |
+| <a name="output_sns_topic_event_bus"></a> [sns\_topic\_event\_bus](#output\_sns\_topic\_event\_bus) | SNS Topic ARN and Name |
+| <a name="output_sns_topic_supplier"></a> [sns\_topic\_supplier](#output\_sns\_topic\_supplier) | SNS Topic ARN and Name |
 <!-- vale on -->
 <!-- markdownlint-enable -->
 <!-- END_TF_DOCS -->

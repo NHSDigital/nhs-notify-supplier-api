@@ -35,7 +35,7 @@ module "post_letters" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
-    QUEUE_URL = module.letter_status_updates_queue.sqs_queue_url,
+    QUEUE_URL = module.supplier_requests_queue.sqs_queue_url,
     MAX_LIMIT = var.max_get_limit
   })
 }
@@ -65,7 +65,7 @@ data "aws_iam_policy_document" "post_letters" {
     ]
 
     resources = [
-      module.letter_status_updates_queue.sqs_queue_arn
+      module.supplier_requests_queue.sqs_queue_arn
     ]
   }
 }
