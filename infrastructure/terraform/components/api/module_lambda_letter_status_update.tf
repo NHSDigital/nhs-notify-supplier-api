@@ -79,7 +79,7 @@ data "aws_iam_policy_document" "letter_status_update" {
     ]
 
     resources = [
-      module.letter_status_updates_queue.sqs_queue_arn
+      module.supplier_requests_queue.sqs_queue_arn
     ]
   }
 }

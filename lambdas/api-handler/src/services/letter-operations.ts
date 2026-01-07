@@ -111,6 +111,7 @@ export async function enqueueLetterUpdateRequests(
         const entries = batch.map((request, idx) => ({
           Id: `${i + batchIdx}-${idx}`, // unique per batch entry
           MessageBody: JSON.stringify(request),
+          MessageGroupId: request.id,
           MessageAttributes: {
             CorrelationId: { DataType: "String", StringValue: correlationId },
           },
