@@ -95,6 +95,7 @@ export async function enqueueLetterUpdateRequests(
             CorrelationId: { DataType: "String", StringValue: correlationId },
           },
           MessageBody: JSON.stringify(request),
+          MessageGroupId: request.id,
         });
         await deps.sqsClient.send(command);
       } catch (error) {

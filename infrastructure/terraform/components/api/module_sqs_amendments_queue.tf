@@ -1,4 +1,4 @@
-module "sqs_letter_updates" {
+module "amendments_queue" {
   source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-sqs.zip"
 
   aws_account_id = var.aws_account_id
@@ -6,7 +6,10 @@ module "sqs_letter_updates" {
   environment    = var.environment
   project        = var.project
   region         = var.region
-  name           = "letter-updates"
+  name           = "${local.csi}-amendments-queue"
+
+  fifo_queue                  = true
+  content_based_deduplication = true
 
   sqs_kms_key_arn = module.kms.key_arn
 
@@ -38,7 +41,7 @@ data "aws_iam_policy_document" "letter_updates_queue_policy" {
     condition {
       test     = "ArnEquals"
       variable = "aws:SourceArn"
-      values   = [module.eventsub.sns_topic.arn]
+      values   = [module.eventsub.sns_topic_event_bus.arn]
     }
   }
 
@@ -65,7 +68,7 @@ data "aws_iam_policy_document" "letter_updates_queue_policy" {
     condition {
       test     = "ArnEquals"
       variable = "aws:SourceArn"
-      values   = [module.eventsub.sns_topic.arn]
+      values   = [module.eventsub.sns_topic_event_bus.arn]
     }
   }
 }
