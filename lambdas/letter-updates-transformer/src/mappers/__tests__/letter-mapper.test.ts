@@ -20,7 +20,7 @@ describe("letter-mapper", () => {
     $LetterEvent.parse(event);
     expect(event.type).toBe("uk.nhs.notify.supplier-api.letter.PRINTED.v1");
     expect(event.dataschema).toBe(
-      `https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.PRINTED.${event.dataschemaversion}.schema.json`
+      `https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.PRINTED.${event.dataschemaversion}.schema.json`,
     );
     expect(event.dataschemaversion).toBe("1.0.7");
     expect(event.subject).toBe("letter-origin/supplier-api/letter/id1");
