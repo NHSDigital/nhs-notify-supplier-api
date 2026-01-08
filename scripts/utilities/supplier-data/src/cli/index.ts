@@ -1,6 +1,6 @@
 import { hideBin } from "yargs/helpers";
 import yargs from "yargs";
-import { createSupplierRepository } from "../infrastructure/suppliers-repo-factory";
+import createSupplierRepository from "../infrastructure/suppliers-repo-factory";
 
 async function main() {
   await yargs(hideBin(process.argv))

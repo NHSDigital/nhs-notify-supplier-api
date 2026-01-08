@@ -14,7 +14,6 @@
   "extends": "../../tsconfig.base.json",
   "include": [
     "src/**/*",
-    "package.json",
-    "jest.config.ts"
+    "package.json"
   ]
 }

@@ -6,8 +6,8 @@ import {
   createLetter,
   createLetterDto,
 } from "../helpers/create-letter-helpers";
-import { createLetterRepository } from "../infrastructure/letter-repo-factory";
-import { uploadFile } from "../helpers/s3-helpers";
+import createLetterRepository from "../infrastructure/letter-repo-factory";
+import uploadFile from "../helpers/s3-helpers";
 
 async function main() {
   await yargs(hideBin(process.argv))
