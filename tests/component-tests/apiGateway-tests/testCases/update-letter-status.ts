@@ -29,23 +29,19 @@ export type PatchMessageResponseBody = {
 };
 
 export function patchRequestHeaders(): RequestHeaders {
-  let requestHeaders: RequestHeaders;
-  requestHeaders = {
+  return {
     headerauth1: process.env.HEADERAUTH || "",
     "NHSD-Supplier-ID": SUPPLIERID,
     "NHSD-Correlation-ID": "12344",
     "X-Request-ID": "requestId1",
   };
-  return requestHeaders;
 }
 
 export function patchValidRequestBody(
   id: string,
   status: string,
 ): PatchMessageRequestBody {
-  let requestBody: PatchMessageRequestBody;
-
-  requestBody = {
+  return {
     data: {
       attributes: {
         status,
@@ -54,16 +50,13 @@ export function patchValidRequestBody(
       id,
     },
   };
-  return requestBody;
 }
 
 export function patchFailureRequestBody(
   id: string,
   status: string,
 ): PatchMessageRequestBody {
-  let requestBody: PatchMessageRequestBody;
-
-  requestBody = {
+  return {
     data: {
       attributes: {
         status,
@@ -74,12 +67,10 @@ export function patchFailureRequestBody(
       id,
     },
   };
-  return requestBody;
 }
 
 export function patch400ErrorResponseBody(): ErrorMessageBody {
-  let responseBody: ErrorMessageBody;
-  responseBody = {
+  return {
     errors: [
       {
         id: "12344",
@@ -94,12 +85,10 @@ export function patch400ErrorResponseBody(): ErrorMessageBody {
       },
     ],
   };
-  return responseBody;
 }
 
 export function patch500ErrorResponseBody(id: string): ErrorMessageBody {
-  let responseBody: ErrorMessageBody;
-  responseBody = {
+  return {
     errors: [
       {
         id: "12344",
@@ -114,5 +103,4 @@ export function patch500ErrorResponseBody(id: string): ErrorMessageBody {
       },
     ],
   };
-  return responseBody;
 }

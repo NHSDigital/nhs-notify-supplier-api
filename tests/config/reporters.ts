@@ -2,7 +2,6 @@ import type { ReporterDescription } from "@playwright/test";
 import path from "node:path";
 
 const resultsDir = process.env.RESULTS_DIR || "results";
-const reportsDir = process.env.REPORTS_DIR || "reports";
 
 export function getReporters(allureFolder: string) {
   return [

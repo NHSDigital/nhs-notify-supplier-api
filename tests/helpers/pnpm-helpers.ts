@@ -69,7 +69,7 @@ export async function runCreateLetter(options: {
     child.stdout?.on("id", (id) => {
       const text = id.toString();
       output += text;
-      process.stdout.write(text);
+      process.stdout.write(output);
     });
 
     child.on("close", (code) =>
@@ -127,7 +127,7 @@ export async function createSupplierData(options: {
     child.stdout?.on("id", (id) => {
       const text = id.toString();
       output += text;
-      process.stdout.write(text);
+      process.stdout.write(output);
     });
 
     child.on("close", (code) =>
