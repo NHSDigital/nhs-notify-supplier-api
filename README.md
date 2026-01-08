@@ -3,7 +3,7 @@
 [![1. CI/CD pull request](https://github.com/NHSDigital/nhs-notify-supplier-api/actions/workflows/cicd-1-pull-request.yaml/badge.svg)](https://github.com/NHSDigital/nhs-notify-supplier-api/actions/workflows/cicd-1-pull-request.yaml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=NHSDigital_nhs-notify-supplier-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=NHSDigital_nhs-notify-supplier-api)
 
-The NHS Notify Supplier API is intended primarily for print suppliers to integrate with the NHS Notify message request queueing system.
+The NHS Notify Supplier API is intended for print suppliers to integrate with the NHS Notify message request queueing system.
 
 It models the concepts needed to configure production of letters and other printed materials to specific specifications, provide proofs of these materials, receive batch production requests, provide details of returned letters and correspondence, and to report on the status of these artifacts and associated management information such as volumes and associated costs.
 
