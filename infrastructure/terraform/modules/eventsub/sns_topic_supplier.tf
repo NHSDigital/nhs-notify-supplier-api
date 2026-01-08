@@ -1,5 +1,5 @@
 resource "aws_sns_topic" "sns_topic_supplier" {
-  name              = "${local.csi}-supplier-events"
+  name              = "${local.csi}-supplier-events.fifo"
   kms_master_key_id = var.kms_key_arn
 
   fifo_topic                  = true
