@@ -1,7 +1,7 @@
 import type { PlaywrightTestConfig } from "@playwright/test";
+import path from "node:path";
 import { config as baseConfig } from "./playwright.base.config";
 import { getReporters } from "./reporters";
-import path from "path";
 
 const localConfig: PlaywrightTestConfig = {
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */

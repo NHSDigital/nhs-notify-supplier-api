@@ -7,31 +7,25 @@ import {
 import { SupplierApiLetters } from "../../../helpers/generate-fetch-test-data";
 
 export function postLettersRequestHeaders(): RequestHeaders {
-  let requestHeaders: RequestHeaders;
-  requestHeaders = {
+  return {
     "NHSD-Supplier-ID": SUPPLIERID,
     "NHSD-Correlation-ID": "12344",
     "X-Request-ID": "requestId1",
   };
-  return requestHeaders;
 }
 
 export function postLettersInvalidRequestHeaders(): RequestHeaders {
-  let requestHeaders: RequestHeaders;
-  requestHeaders = {
+  return {
     "NHSD-Supplier-ID": SUPPLIERID,
     "NHSD-Correlation-ID": "12344",
     // Request Id is missing
   };
-  return requestHeaders;
 }
 
 export function postValidRequestBody(
   letters: SupplierApiLetters[],
 ): PostMessageRequestBody {
-  let requestBody: PostMessageRequestBody;
-
-  requestBody = {
+  return {
     data: [
       {
         type: "Letter",
@@ -65,15 +59,12 @@ export function postValidRequestBody(
       },
     ],
   };
-  return requestBody;
 }
 
 export function postInvalidStatusRequestBody(
   letters: SupplierApiLetters[],
 ): PostMessageRequestBody {
-  let requestBody: PostMessageRequestBody;
-
-  requestBody = {
+  return {
     data: [
       {
         type: "Letter",
@@ -91,15 +82,12 @@ export function postInvalidStatusRequestBody(
       },
     ],
   };
-  return requestBody;
 }
 
 export function postDuplicateIDRequestBody(
   letters: SupplierApiLetters[],
 ): PostMessageRequestBody {
-  let requestBody: PostMessageRequestBody;
-
-  requestBody = {
+  return {
     data: [
       {
         type: "Letter",
@@ -117,13 +105,10 @@ export function postDuplicateIDRequestBody(
       },
     ],
   };
-  return requestBody;
 }
 
 export function postInvalidStatusResponseBody(): ErrorMessageBody {
-  let responseBody: ErrorMessageBody;
-
-  responseBody = {
+  return {
     errors: [
       {
         id: "12344",
@@ -138,13 +123,10 @@ export function postInvalidStatusResponseBody(): ErrorMessageBody {
       },
     ],
   };
-  return responseBody;
 }
 
 export function postDuplicateIDResponseBody(): ErrorMessageBody {
-  let responseBody: ErrorMessageBody;
-
-  responseBody = {
+  return {
     errors: [
       {
         id: "12344",
@@ -160,13 +142,10 @@ export function postDuplicateIDResponseBody(): ErrorMessageBody {
       },
     ],
   };
-  return responseBody;
 }
 
 export function post500ErrorResponseBody(): ErrorMessageBody {
-  let responseBody: ErrorMessageBody;
-
-  responseBody = {
+  return {
     errors: [
       {
         id: "12344",
@@ -181,5 +160,4 @@ export function post500ErrorResponseBody(): ErrorMessageBody {
       },
     ],
   };
-  return responseBody;
 }

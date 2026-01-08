@@ -1,10 +1,6 @@
 import { hideBin } from "yargs/helpers";
-import yargs from 'yargs';
-import { LetterStatusType } from "@internal/datastore/src/types";
-import { randomUUID } from "crypto";
-import { createSupplierRepository } from "../infrastructure/suppliers-repo-factory";
-
-
+import yargs from "yargs";
+import createSupplierRepository from "../infrastructure/suppliers-repo-factory";
 
 async function main() {
   await yargs(hideBin(process.argv))
@@ -16,35 +12,32 @@ async function main() {
           type: "string",
           demandOption: true,
         },
-        "id": {
+        id: {
           type: "string",
           demandOption: true,
         },
-        "name": {
+        name: {
           type: "string",
           demandOption: true,
         },
-        "apimId": {
+        apimId: {
           type: "string",
           demandOption: true,
         },
         status: {
           type: "string",
           demandOption: true,
-          choices: [
-            "ENABLED",
-            "DISABLED"
-          ],
+          choices: ["ENABLED", "DISABLED"],
         },
       },
       async (argv) => {
         // parse args
-        const id = argv.id;
-        const name = argv.name;
-        const apimId = argv.apimId;
+        const { id } = argv;
+        const { name } = argv;
+        const { apimId } = argv;
         const status = argv.status as "ENABLED" | "DISABLED";
 
-        const environment = argv.environment;
+        const { environment } = argv;
 
         const supplierRepository = createSupplierRepository(environment);
 
@@ -56,13 +49,13 @@ async function main() {
         });
 
         console.log(`PUT successful ${JSON.stringify(putResult)}`);
-      }
+      },
     )
     .command(
       "get-supplier-by-id",
       "Get a supplier by their Supplier ID",
       {
-        "id": {
+        id: {
           type: "string",
           demandOption: true,
         },
@@ -72,9 +65,8 @@ async function main() {
         },
       },
       async (argv) => {
-
-        const id = argv.id;
-        const environment = argv.environment;
+        const { id } = argv;
+        const { environment } = argv;
 
         const supplierRepository = createSupplierRepository(environment);
 
@@ -87,7 +79,7 @@ async function main() {
       "get-supplier-by-apim-id",
       "Get a supplier by their APIM ID",
       {
-        "apimId": {
+        apimId: {
           type: "string",
           demandOption: true,
         },
@@ -97,9 +89,8 @@ async function main() {
         },
       },
       async (argv) => {
-
-        const apimId = argv.apimId;
-        const environment = argv.environment;
+        const { apimId } = argv;
+        const { environment } = argv;
 
         const supplierRepository = createSupplierRepository(environment);
 
@@ -113,8 +104,8 @@ async function main() {
 }
 
 if (require.main === module) {
-  main().catch((err) => {
-    console.error(err);
+  main().catch((error) => {
+    console.error(error);
     process.exitCode = 1;
   });
 }

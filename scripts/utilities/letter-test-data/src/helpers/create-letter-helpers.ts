@@ -1,9 +1,9 @@
 import {
-  LetterRepository,
   Letter,
+  LetterRepository,
   LetterStatusType,
 } from "@internal/datastore";
-import { uploadFile } from "./s3_helpers";
+import uploadFile from "./s3-helpers";
 
 export async function createLetter(params: {
   letterId: string;
