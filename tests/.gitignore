@@ -9,3 +9,10 @@ node_modules/
 /target
 /playwright/.auth/
 /allure-report
+*/__pycache__/
+**/__pycache__/
+__pycache__/
+*/__pycache__/
+**/__pycache__/
+*.pyc
+tests/e2e-tests/lib/internal-dev-test-1.pem
