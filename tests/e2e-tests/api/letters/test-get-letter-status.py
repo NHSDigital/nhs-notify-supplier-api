@@ -12,13 +12,12 @@ from lib.generators import Generators
 def test_200_get_letter_status(url, bearer_token):
 
     headers = Generators.generate_valid_headers(bearer_token.value)
-    get_messages = requests.get(f"{url}/{LETTERS_ENDPOINT}/", headers=headers)
+    get_letters = requests.get(f"{url}/{LETTERS_ENDPOINT}/", headers=headers)
 
-    letter_id = get_messages.json().get("data")[0].get("id")
+    letter_id = get_letters.json().get("data")[0].get("id")
     get_message_response = requests.get(f"{url}/{LETTERS_ENDPOINT}/{letter_id}", headers=headers)
 
     assert get_message_response.status_code == 200
-    print(get_message_response.json().get("data").get("id"))
 
 
 @pytest.mark.test
