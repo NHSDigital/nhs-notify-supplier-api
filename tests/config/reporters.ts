@@ -1,18 +1,18 @@
-import type { ReporterDescription } from '@playwright/test';
-import path from 'path';
+import type { ReporterDescription } from "@playwright/test";
+import path from "path";
 
-const resultsDir = process.env.RESULTS_DIR || 'results';
-const reportsDir = process.env.REPORTS_DIR || 'reports';
+const resultsDir = process.env.RESULTS_DIR || "results";
+const reportsDir = process.env.REPORTS_DIR || "reports";
 
 export function getReporters(allureFolder: string) {
   return [
     [
-      'allure-playwright',
+      "allure-playwright",
       {
         outputFolder: `./target/reports/allure-results/${allureFolder}`,
         detail: false,
         suiteTitle: true,
-        open: 'always',
+        open: "always",
         environmentInfo: {
           E2E_NODE_VERSION: process.env.ENVIRONMENT,
           E2E_OS: process.platform,
@@ -20,21 +20,21 @@ export function getReporters(allureFolder: string) {
       },
     ],
     [
-      'html',
+      "html",
       {
-        outputFolder: path.resolve(__dirname, '../playwright-report'),
-        open: process.env.CI ? 'never' : 'on-failure',
+        outputFolder: path.resolve(__dirname, "../playwright-report"),
+        open: process.env.CI ? "never" : "on-failure",
       },
     ],
-    ['list', { printSteps: true }],
+    ["list", { printSteps: true }],
     [
-      'junit',
+      "junit",
       {
         outputFile: `../target/test-artifacts/${resultsDir}/junit-results.xml`,
       },
     ],
     [
-      'json',
+      "json",
       {
         outputFile: `../target/test-artifacts/${resultsDir}/json-results.json`,
       },

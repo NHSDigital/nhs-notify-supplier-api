@@ -1,3 +1,16 @@
+export type PostMessageRequestBody = {
+  data: PostLettersRequest[];
+};
+
+type PostLettersRequest = {
+  type: string;
+  id: string;
+  attributes: {
+    reasonCode?: string;
+    reasonText?: string;
+    status: string;
+  };
+};
 
 export type ErrorLink = {
   about: string;

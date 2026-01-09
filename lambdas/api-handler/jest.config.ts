@@ -2,9 +2,12 @@ export const baseJestConfig = {
   preset: "ts-jest",
   extensionsToTreatAsEsm: [".ts"],
   transform: {
-    "^.+\\.ts$": ["ts-jest", {
-      useESM: true
-    }]
+    "^.+\\.ts$": [
+      "ts-jest",
+      {
+        useESM: true,
+      },
+    ],
   },
 
   // Automatically clear mock calls, instances, contexts and results before every test
