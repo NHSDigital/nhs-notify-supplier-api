@@ -1,5 +1,11 @@
-resource "aws_sns_topic_policy" "main" {
-  arn = aws_sns_topic.main.arn
+resource "aws_sns_topic_policy" "sns_topic_event_bus" {
+  arn = aws_sns_topic.sns_topic_event_bus.arn
+
+  policy = data.aws_iam_policy_document.sns_topic_policy.json
+}
+
+resource "aws_sns_topic_policy" "sns_topic_supplier" {
+  arn = aws_sns_topic.sns_topic_event_bus.arn
 
   policy = data.aws_iam_policy_document.sns_topic_policy.json
 }
@@ -29,7 +35,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
     ]
 
     resources = [
-      aws_sns_topic.main.arn,
+      aws_sns_topic.sns_topic_event_bus.arn,
     ]
 
     condition {
@@ -57,7 +63,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
     }
 
     resources = [
-      aws_sns_topic.main.arn,
+      aws_sns_topic.sns_topic_event_bus.arn,
     ]
   }
 }
