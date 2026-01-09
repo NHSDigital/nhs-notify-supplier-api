@@ -2,7 +2,6 @@ resource "aws_lambda_event_source_mapping" "status_updates_sqs_to_status_update_
   event_source_arn                   = module.supplier_requests_queue.sqs_queue_arn
   function_name                      = module.letter_status_update.function_arn
   batch_size                         = 10
-  maximum_batching_window_in_seconds = 1
   scaling_config { maximum_concurrency = 10 }
 
   depends_on = [
