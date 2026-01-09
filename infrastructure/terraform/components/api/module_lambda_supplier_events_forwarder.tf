@@ -68,4 +68,19 @@ data "aws_iam_policy_document" "supplier_events_forwarder_lambda" {
       module.eventsub.firehose_delivery_stream.arn,
     ]
   }
+
+  statement {
+    sid    = "SQSPermissions"
+    effect = "Allow"
+
+    actions = [
+      "sqs:ReceiveMessage",
+      "sqs:DeleteMessage",
+      "sqs:GetQueueAttributes",
+    ]
+
+    resources = [
+      module.supplier_events_queue.sqs_queue_arn,
+    ]
+  }
 }
