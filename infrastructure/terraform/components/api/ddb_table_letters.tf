@@ -2,8 +2,8 @@ resource "aws_dynamodb_table" "letters" {
   name         = "${local.csi}-letters"
   billing_mode = "PAY_PER_REQUEST"
 
-  hash_key  = "supplierId"
-  range_key = "id"
+  hash_key  = "id"
+  range_key = "supplierId"
 
   ttl {
     attribute_name = "ttl"

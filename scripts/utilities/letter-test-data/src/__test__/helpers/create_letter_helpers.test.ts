@@ -54,6 +54,9 @@ describe("Create letter helpers", () => {
       supplierId: "supplierId",
       updatedAt: "2020-02-01T00:00:00.000Z",
       url: "s3://bucketName/supplierId/targetFilename",
+      source: "/data-plane/letter-rendering/letter-test-data",
+      subject: "supplier-api/letter-test-data/letterId",
+      billingRef: "specificationId"
     });
   });
 
@@ -81,6 +84,9 @@ describe("Create letter helpers", () => {
       status: "PENDING",
       createdAt: "2020-02-01T00:00:00.000Z",
       updatedAt: "2020-02-01T00:00:00.000Z",
+      source: "/data-plane/letter-rendering/letter-test-data",
+      subject: "supplier-api/letter-test-data/testLetterId",
+      billingRef: "testSpecId"
     });
   });
 });

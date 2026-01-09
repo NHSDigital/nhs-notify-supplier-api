@@ -7,7 +7,7 @@ import {
 } from "../contracts/letters";
 import ValidationError from "../errors/validation-error";
 import { processError } from "../mappers/error-mapper";
-import { mapPostLettersToDtoArray } from "../mappers/letter-mapper";
+import { mapToUpdateCommands } from "../mappers/letter-mapper";
 import { enqueueLetterUpdateRequests } from "../services/letter-operations";
 import { extractCommonIds } from "../utils/common-ids";
 import { assertNotEmpty, requireEnvVar } from "../utils/validation";
@@ -72,10 +72,7 @@ export default function createPostLettersHandler(
       }
 
       await enqueueLetterUpdateRequests(
-        mapPostLettersToDtoArray(
-          postLettersRequest,
-          commonIds.value.supplierId,
-        ),
+        mapToUpdateCommands(postLettersRequest, commonIds.value.supplierId),
         commonIds.value.correlationId,
         deps,
       );

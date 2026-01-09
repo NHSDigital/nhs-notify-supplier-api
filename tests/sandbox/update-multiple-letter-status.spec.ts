@@ -18,7 +18,7 @@ test.describe("Sandbox Tests To Update Multiple Letter Status", () => {
         {
           headers: header,
           data: body,
-        }
+        },
       );
       expect(response.status()).toBe(expectedStatus);
     });

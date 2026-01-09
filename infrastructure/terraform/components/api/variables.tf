@@ -147,6 +147,15 @@ variable "disable_gateway_execute_endpoint" {
   default     = true
 }
 
+variable "letter_variant_map" {
+  type = map(object({ supplierId = string, specId = string }))
+  default = {
+    "lv1" = { supplierId = "supplier1", specId = "spec1" },
+    "lv2" = { supplierId = "supplier1", specId = "spec2" },
+    "lv3" = { supplierId = "supplier2", specId = "spec3" }
+  }
+}
+
 variable "core_account_id" {
   type        = string
   description = "AWS Account ID for Core"
