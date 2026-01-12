@@ -9,7 +9,7 @@ import { logger } from "tests/helpers/pino-logger";
 import { envName } from "tests/constants/api-constants";
 import PREPARED_LETTER from "../../resources/prepared-letter.json";
 
-test.describe("initial describe", () => {
+test.describe("Performance test checking how long it takes letter requests from the EventSub SNS to reach the Letters Database ", () => {
   test("send 2500 letter requests", async () => {
     const MESSAGES_TO_SEND = 2500;
     const FIVE_MINUTES = 1000 * 60 * 5;

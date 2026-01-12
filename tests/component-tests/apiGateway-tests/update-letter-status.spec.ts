@@ -45,7 +45,7 @@ test.describe("API Gateway Tests to Verify Patch Status Endpoint", () => {
       {
         headers,
         data: body,
-      },
+      }
     );
 
     expect(response.status()).toBe(202);
@@ -72,7 +72,7 @@ test.describe("API Gateway Tests to Verify Patch Status Endpoint", () => {
       {
         headers,
         data: body,
-      },
+      }
     );
 
     expect(response.status()).toBe(202);
@@ -92,7 +92,7 @@ test.describe("API Gateway Tests to Verify Patch Status Endpoint", () => {
       {
         headers,
         data: body,
-      },
+      }
     );
 
     const responseBody = await response.json();
@@ -113,7 +113,7 @@ test.describe("API Gateway Tests to Verify Patch Status Endpoint", () => {
       {
         headers,
         data: body,
-      },
+      }
     );
 
     const responseBody = await response.json();
@@ -133,7 +133,7 @@ test.describe("API Gateway Tests to Verify Patch Status Endpoint", () => {
       {
         headers,
         data: body,
-      },
+      }
     );
 
     const responseBody = await response.json();

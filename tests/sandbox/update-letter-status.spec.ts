@@ -20,7 +20,7 @@ test.describe("Sandbox Tests To Update Letter Status", () => {
         {
           headers: header,
           data: body,
-        },
+        }
       );
 
       const res = await response.json();

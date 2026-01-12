@@ -33,7 +33,7 @@ export interface SupplierApiLetters {
 
 export async function createTestData(
   supplierId: string,
-  count?: number,
+  count?: number
 ): Promise<void> {
   await runCreateLetter({
     filter: "nhs-notify-supplier-api-letter-test-data-utility",
@@ -50,7 +50,7 @@ export async function createTestData(
 export const getLettersBySupplier = async (
   supplierId: string,
   status: string,
-  limit: number,
+  limit: number
 ) => {
   const supplierStatus = `${supplierId}#${status}`;
   const params = {
@@ -78,13 +78,13 @@ export const deleteLettersBySupplier = async (id: string) => {
       TableName: LETTERSTABLENAME,
       Key: { supplierId: SUPPLIERID, id },
       ReturnValues: "ALL_OLD",
-    }),
+    })
   );
   return resp.Attributes;
 };
 
 export async function checkSupplierExists(
-  supplierId: string,
+  supplierId: string
 ): Promise<boolean> {
   try {
     const params = {

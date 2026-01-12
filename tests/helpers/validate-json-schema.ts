@@ -19,7 +19,7 @@ export default async function validateApiResponse(
   method: string,
   pathVar: string,
   status: number,
-  body: any,
+  body: any
 ): Promise<ValidationResult> {
   const openapiDoc = await import(paths);
 
@@ -36,7 +36,7 @@ export default async function validateApiResponse(
     operation.responses[status] || operation.responses.default;
   if (!responseSchema) {
     throw new Error(
-      `No schema defined for status ${status} at ${method.toUpperCase()} ${pathVar}`,
+      `No schema defined for status ${status} at ${method.toUpperCase()} ${pathVar}`
     );
   }
 

@@ -41,7 +41,7 @@ export function patchRequestHeaders(): RequestHeaders {
 
 export function patchValidRequestBody(
   id: string,
-  status: string,
+  status: string
 ): PatchMessageRequestBody {
   let requestBody: PatchMessageRequestBody;
 
@@ -59,7 +59,7 @@ export function patchValidRequestBody(
 
 export function patchFailureRequestBody(
   id: string,
-  status: string,
+  status: string
 ): PatchMessageRequestBody {
   let requestBody: PatchMessageRequestBody;
 

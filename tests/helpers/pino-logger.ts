@@ -6,7 +6,7 @@ export const logger: pino.Logger = pino({
     options: {
       colorize: true,
       levelFirst: true,
-      translateTime: false, // disable time
+      translateTime: true,
       ignore: "pid,hostname,time",
     },
   },
