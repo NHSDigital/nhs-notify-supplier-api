@@ -8,7 +8,7 @@
     "@aws-sdk/client-sns": "^3.955.0",
     "@aws-sdk/lib-dynamodb": "^3.858.0",
     "@nhsdigital/nhs-notify-event-schemas-letter-rendering": "^2.0.1",
-    "@pact-foundation/pact": "^16.0.2",
+    "@pact-foundation/pact": "^16.0.4",
     "@playwright/test": "^1.57.0",
     "allure-js-commons": "^3.3.3",
     "dotenv": "^17.2.2",
@@ -45,8 +45,8 @@
     "lint:fix": "eslint . --fix",
     "test:component": "playwright test --config=config/main.config.ts --max-failures=10 --project=component-tests",
     "test:pact": "./pact-tests/run-pact-tests.sh",
-    "test:sandbox": "playwright test --config=config/sandbox.config.ts --max-failures=10 --project=sandbox",
     "test:performance": "playwright test --config=config/performance/performance.config.ts --max-failures=10 --project=performance",
+    "test:sandbox": "playwright test --config=config/sandbox.config.ts --max-failures=10 --project=sandbox",
     "test:unit": "echo \"No unit tests for tests package\"",
     "typecheck": "tsc --noEmit"
   },
