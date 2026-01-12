@@ -3,10 +3,10 @@ import { LetterStatusType } from "@internal/datastore";
 import {
   createLetter,
   createLetterDto,
-} from "../../helpers/create_letter_helpers";
-import { uploadFile } from "../../helpers/s3_helpers";
+} from "../../helpers/create-letter-helpers";
+import uploadFile from "../../helpers/s3-helpers";
 
-jest.mock("../../helpers/s3_helpers");
+jest.mock("../../helpers/s3-helpers");
 
 describe("Create letter helpers", () => {
   beforeEach(() => {
