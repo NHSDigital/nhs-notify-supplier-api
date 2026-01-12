@@ -53,6 +53,15 @@ jobs:
           registry-url: "https://npm.pkg.github.com"
           scope: "@nhsdigital"
 
+      - name: "Set environment"
+        shell: bash
+        run: |
+          if [ "${{ inputs.pr_number }}" != "" ]; then
+            echo "ENVIRONMENT=pr${{ inputs.pr_number }}" >> $GITHUB_ENV
+          else
+            echo "ENVIRONMENT=main" >> $GITHUB_ENV
+          fi
+
       - name: Trigger Acceptance Tests
         shell: bash
         env:
@@ -65,6 +74,6 @@ jobs:
             --infraRepoName "nhs-notify-supplier-api" \
             --releaseVersion "${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" \
             --overrideProjectName "nhs" \
-            --targetEnvironment "pr${{ inputs.pr_number }}" \
+            --targetEnvironment "$ENVIRONMENT" \
             --targetAccountGroup "nhs-notify-supplier-api-dev" \
             --targetComponent "api"
