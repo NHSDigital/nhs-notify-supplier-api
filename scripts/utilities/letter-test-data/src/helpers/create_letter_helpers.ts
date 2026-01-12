@@ -1,6 +1,6 @@
 import {
-  LetterRepository,
   Letter,
+  LetterRepository,
   LetterStatusType,
 } from "@internal/datastore";
 import { uploadFile } from "./s3_helpers";
@@ -44,7 +44,7 @@ export async function createLetter(params: {
     updatedAt: new Date().toISOString(),
     source: "/data-plane/letter-rendering/letter-test-data",
     subject: `supplier-api/letter-test-data/${letterId}`,
-    billingRef: specificationId
+    billingRef: specificationId,
   };
 
   const letterRecord = await letterRepository.putLetter(letter);
@@ -73,7 +73,7 @@ export function createLetterDto(params: {
     updatedAt: new Date().toISOString(),
     source: "/data-plane/letter-rendering/letter-test-data",
     subject: `supplier-api/letter-test-data/${letterId}`,
-    billingRef: specificationId
+    billingRef: specificationId,
   };
 
   return letter;

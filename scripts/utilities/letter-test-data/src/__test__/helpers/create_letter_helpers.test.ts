@@ -1,6 +1,9 @@
 import { LetterRepository } from "@internal/datastore/src/letter-repository";
 import { LetterStatusType } from "@internal/datastore";
-import { createLetter, createLetterDto } from "../../helpers/create_letter_helpers";
+import {
+  createLetter,
+  createLetterDto,
+} from "../../helpers/create_letter_helpers";
 import { uploadFile } from "../../helpers/s3_helpers";
 
 jest.mock("../../helpers/s3_helpers");
@@ -56,7 +59,7 @@ describe("Create letter helpers", () => {
       url: "s3://bucketName/supplierId/targetFilename",
       source: "/data-plane/letter-rendering/letter-test-data",
       subject: "supplier-api/letter-test-data/letterId",
-      billingRef: "specificationId"
+      billingRef: "specificationId",
     });
   });
 
@@ -86,7 +89,7 @@ describe("Create letter helpers", () => {
       updatedAt: "2020-02-01T00:00:00.000Z",
       source: "/data-plane/letter-rendering/letter-test-data",
       subject: "supplier-api/letter-test-data/testLetterId",
-      billingRef: "testSpecId"
+      billingRef: "testSpecId",
     });
   });
 });
