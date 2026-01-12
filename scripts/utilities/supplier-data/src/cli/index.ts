@@ -1,8 +1,6 @@
 import { hideBin } from "yargs/helpers";
 import yargs from "yargs";
-import { LetterStatusType } from "@internal/datastore/src/types";
-import { randomUUID } from "node:crypto";
-import { createSupplierRepository } from "../infrastructure/suppliers-repo-factory";
+import createSupplierRepository from "../infrastructure/suppliers-repo-factory";
 
 async function main() {
   await yargs(hideBin(process.argv))
