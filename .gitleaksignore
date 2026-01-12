@@ -23,3 +23,4 @@ e12407e09151898bfd8d049d57eee9db9977d56b:.github/copilot-instructions.md:generic
 debc75a97cfe551a69fd1e8694be483213322a9d:pact-contracts/pacts/letter-rendering/supplier-api-letter-request-prepared.json:generic-api-key:10
 793b2ab7a3e698f5848fbe24d2718f88664ec0fc:.npmrc:npm-access-token:8
 793b2ab7a3e698f5848fbe24d2718f88664ec0fc:.npmrc:github-pat:6
+777eb4047ad06b9e939a292ee18664a0ffee4f29:tests/resources/prepared-letter.json:generic-api-key:4
