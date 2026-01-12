@@ -51,16 +51,46 @@ variable "default_tags" {
 # Variables specific to the component
 ##
 
+variable "ca_pem_filename" {
+  type        = string
+  description = "Filename for the CA truststore file within the s3 bucket"
+  default     = null
+}
+
+variable "commit_id" {
+  type        = string
+  description = "The commit to deploy. Must be in the tree for branch_name"
+  default     = "HEAD"
+}
+
+variable "enable_backups" {
+  type        = bool
+  description = "Enable backups"
+  default     = false
+}
+
+variable "force_destroy" {
+  type        = bool
+  description = "Flag to force deletion of S3 buckets"
+  default     = false
+}
+
+variable "force_lambda_code_deploy" {
+  type        = bool
+  description = "If the lambda package in s3 has the same commit id tag as the terraform build branch, the lambda will not update automatically. Set to True if making changes to Lambda code from on the same commit for example during development"
+  default     = false
+}
+
 variable "kms_deletion_window" {
   type        = string
   description = "When a kms key is deleted, how long should it wait in the pending deletion state?"
   default     = "30"
 }
 
-variable "log_retention_in_days" {
+variable "letter_table_ttl_hours" {
   type        = number
-  description = "The retention period in days for the Cloudwatch Logs events to be retained, default of 0 is indefinite"
-  default     = 0
+  description = "Number of hours to set as TTL on letters table"
+  default     = 24
 }
 
 variable "log_level" {
@@ -69,10 +99,22 @@ variable "log_level" {
   default     = "INFO"
 }
 
-variable "force_lambda_code_deploy" {
+variable "log_retention_in_days" {
+  type        = number
+  description = "The retention period in days for the Cloudwatch Logs events to be retained, default of 0 is indefinite"
+  default     = 0
+}
+
+variable "manually_configure_mtls_truststore" {
   type        = bool
-  description = "If the lambda package in s3 has the same commit id tag as the terraform build branch, the lambda will not update automatically. Set to True if making changes to Lambda code from on the same commit for example during development"
+  description = "Manually manage the truststore used for API Gateway mTLS (e.g. for prod environment)"
   default     = false
+}
+
+variable "max_get_limit" {
+  type        = number
+  description = "Default limit to apply to GET requests that support pagination"
+  default     = 2500
 }
 
 variable "parent_acct_environment" {
@@ -85,42 +127,6 @@ variable "shared_infra_account_id" {
   type        = string
   description = "The AWS Account ID of the shared infrastructure account"
   default     = "000000000000"
-}
-
-variable "manually_configure_mtls_truststore" {
-  type        = bool
-  description = "Manually manage the truststore used for API Gateway mTLS (e.g. for prod environment)"
-  default     = false
-}
-
-variable "enable_backups" {
-  type        = bool
-  description = "Enable backups"
-  default     = false
-}
-
-variable "ca_pem_filename" {
-  type        = string
-  description = "Filename for the CA truststore file within the s3 bucket"
-  default     = null
-}
-
-variable "force_destroy" {
-  type        = bool
-  description = "Flag to force deletion of S3 buckets"
-  default     = false
-}
-
-variable "letter_table_ttl_hours" {
-  type        = number
-  description = "Number of hours to set as TTL on letters table"
-  default     = 24
-}
-
-variable "max_get_limit" {
-  type        = number
-  description = "Default limit to apply to GET requests that support pagination"
-  default     = 2500
 }
 
 variable "eventpub_data_plane_bus_arn" {
@@ -142,6 +148,12 @@ variable "letter_variant_map" {
     "lv2" = { supplierId = "supplier1", specId = "spec2" },
     "lv3" = { supplierId = "supplier2", specId = "spec3" }
   }
+}
+
+variable "disable_gateway_execute_endpoint" {
+  type        = bool
+  description = "Disable the execution endpoint for the API Gateway"
+  default     = true
 }
 
 variable "core_account_id" {
