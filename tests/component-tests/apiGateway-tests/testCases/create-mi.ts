@@ -13,9 +13,7 @@ export type MiRequestBody = {
 };
 
 export function miValidRequest(): MiRequestBody {
-  let requestBody: MiRequestBody;
-
-  requestBody = {
+  return {
     data: {
       attributes: {
         groupId: "group123",
@@ -28,13 +26,10 @@ export function miValidRequest(): MiRequestBody {
       type: "ManagementInformation",
     },
   };
-  return requestBody;
 }
 
 export function miInvalidRequest(): MiRequestBody {
-  let requestBody: MiRequestBody;
-
-  requestBody = {
+  return {
     data: {
       attributes: {
         groupId: "group123",
@@ -47,13 +42,10 @@ export function miInvalidRequest(): MiRequestBody {
       type: "?",
     },
   };
-  return requestBody;
 }
 
 export function miInvalidDateRequest(): MiRequestBody {
-  let requestBody: MiRequestBody;
-
-  requestBody = {
+  return {
     data: {
       attributes: {
         groupId: "group123",
@@ -66,5 +58,4 @@ export function miInvalidDateRequest(): MiRequestBody {
       type: "ManagementInformation",
     },
   };
-  return requestBody;
 }

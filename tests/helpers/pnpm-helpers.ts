@@ -60,7 +60,6 @@ export async function runCreateLetter(options: {
   ];
 
   await new Promise<void>((resolve, reject) => {
-    let output = "";
     const child = spawn(cmd, args, {
       stdio: "inherit",
       cwd: root,
@@ -68,7 +67,6 @@ export async function runCreateLetter(options: {
     });
     child.stdout?.on("id", (id) => {
       const text = id.toString();
-      output += text;
       process.stdout.write(text);
     });
 
@@ -118,7 +116,6 @@ export async function createSupplierData(options: {
   ];
 
   await new Promise<void>((resolve, reject) => {
-    let output = "";
     const child = spawn(cmd, args, {
       stdio: "inherit",
       cwd: root,
@@ -126,7 +123,6 @@ export async function createSupplierData(options: {
     });
     child.stdout?.on("id", (id) => {
       const text = id.toString();
-      output += text;
       process.stdout.write(text);
     });
 
