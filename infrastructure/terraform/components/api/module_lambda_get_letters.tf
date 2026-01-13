@@ -1,5 +1,5 @@
 module "get_letters" {
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-lambda.zip"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip"
 
   function_name = "get_letters"
   description   = "Get paginated letter ids"
@@ -25,13 +25,12 @@ module "get_letters" {
   handler_function_name   = "getLetters"
   runtime                 = "nodejs22.x"
   memory                  = 128
-  timeout                 = 5
+  timeout                 = 29
   log_level               = var.log_level
 
   force_lambda_code_deploy = var.force_lambda_code_deploy
   enable_lambda_insights   = false
 
-  send_to_firehose          = true
   log_destination_arn       = local.destination_arn
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 

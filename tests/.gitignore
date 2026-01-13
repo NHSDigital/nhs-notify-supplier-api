@@ -9,5 +9,9 @@ node_modules/
 /target
 /playwright/.auth/
 /allure-report
-/e2e-tests/.pytest_cache
-/e2e-tests/__pycache__/
+*/__pycache__/
+**/__pycache__/
+__pycache__/
+*/__pycache__/
+**/__pycache__/
+*.pyc
