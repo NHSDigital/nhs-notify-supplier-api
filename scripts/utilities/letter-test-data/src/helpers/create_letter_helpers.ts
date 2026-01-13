@@ -17,8 +17,12 @@ export async function createLetter(params: {
   testLetter: string;
 }) {
   const {
-    letterId,
     bucketName,
+    groupId,
+    letterId,
+    letterRepository,
+    specificationId,
+    status,
     supplierId,
     targetFilename,
     specificationId,
@@ -28,7 +32,7 @@ export async function createLetter(params: {
     testLetter,
   } = params;
 
-  if(testLetter !== 'none') {
+  if (testLetter !== "none") {
     await uploadFile(
       bucketName,
       supplierId,
@@ -43,7 +47,7 @@ export async function createLetter(params: {
     specificationId,
     groupId,
     url: `s3://${bucketName}/${supplierId}/${targetFilename}`,
-    status: status,
+    status,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -60,22 +64,16 @@ export function createLetterDto(params: {
   status: LetterStatusType;
   url: string;
 }) {
-  const {
-    letterId,
-    supplierId,
-    specificationId,
-    groupId,
-    status,
-    url,
-  } = params;
+  const { groupId, letterId, specificationId, status, supplierId, url } =
+    params;
 
   const letter: Omit<Letter, "ttl" | "supplierStatus" | "supplierStatusSk"> = {
     id: letterId,
     supplierId,
     specificationId,
     groupId,
-    url: url,
-    status: status,
+    url,
+    status,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };

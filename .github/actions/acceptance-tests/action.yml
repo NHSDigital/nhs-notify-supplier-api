@@ -1,0 +1,51 @@
+name: Acceptance tests
+description: "Run acceptance tests for this repo"
+
+inputs:
+  testType:
+    description: Type of test to run
+    required: true
+
+  targetEnvironment:
+    description: Name of the environment under test
+    required: true
+
+  targetAccountGroup:
+    description: Name of the account group under test
+    default: nhs-notify-template-management-dev
+    required: true
+
+  targetComponent:
+    description: Name of the component under test
+    required: true
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Fetch terraform output
+      uses: actions/download-artifact@v5
+      with:
+        name: terraform-output-${{ inputs.targetComponent }}
+
+    - name: Get Node version
+      id: nodejs_version
+      shell: bash
+      run: |
+        echo "nodejs_version=$(grep "^nodejs\s" .tool-versions | cut -f2 -d' ')" >> $GITHUB_OUTPUT
+
+    - name: "Repo setup"
+      uses: ./.github/actions/node-install
+      with:
+        node-version: ${{ steps.nodejs_version.outputs.nodejs_version }}
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+
+    - name: "Set PR NUMBER"
+      shell: bash
+      run: |
+          echo "PR_NUMBER=${{ inputs.targetEnvironment }}" >> $GITHUB_ENV
+
+    - name: Run test - ${{ inputs.testType }}
+      shell: bash
+      run: |
+        make test-${{ inputs.testType }}
