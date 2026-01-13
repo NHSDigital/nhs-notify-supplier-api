@@ -96,6 +96,7 @@ jobs:
         with:
           node-version: ${{ inputs.nodejs_version }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Generate dependencies"
         run: |
           npm run generate-dependencies --workspaces --if-present
