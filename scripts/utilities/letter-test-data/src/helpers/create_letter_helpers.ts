@@ -25,10 +25,6 @@ export async function createLetter(params: {
     status,
     supplierId,
     targetFilename,
-    specificationId,
-    groupId,
-    status,
-    letterRepository,
     testLetter,
   } = params;
 
