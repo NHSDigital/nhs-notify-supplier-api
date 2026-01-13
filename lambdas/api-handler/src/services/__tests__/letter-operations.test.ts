@@ -9,7 +9,7 @@ import {
   getLetterDataUrl,
   getLettersForSupplier,
 } from "../letter-operations";
-import { LetterDto } from "../../contracts/letters";
+import { UpdateLetterCommand } from "../../contracts/letters";
 import { Deps } from "../../config/deps";
 
 jest.mock("@aws-sdk/s3-request-presigner", () => ({
@@ -29,6 +29,7 @@ function makeLetter(id: string, status: Letter["status"]): Letter {
     status,
     supplierId: "supplier1",
     specificationId: "spec123",
+    billingRef: "spec123",
     groupId: "group123",
     url: `s3://letterDataBucket/${id}.pdf`,
     createdAt: new Date().toISOString(),
@@ -38,6 +39,8 @@ function makeLetter(id: string, status: Letter["status"]): Letter {
     ttl: 123,
     reasonCode: "R01",
     reasonText: "Reason text",
+    source: "/data-plane/letter-rendering/pdf",
+    subject: "letter-rendering/source/letter/letter-id",
   };
 }
 
@@ -194,13 +197,11 @@ describe("enqueueLetterUpdateRequests function", () => {
     jest.clearAllMocks();
   });
 
-  const lettersToUpdate: LetterDto[] = [
+  const updateLetterCommands: UpdateLetterCommand[] = [
     {
       id: "id1",
       status: "REJECTED",
       supplierId: "s1",
-      specificationId: "spec1",
-      groupId: "g1",
       reasonCode: "123",
       reasonText: "Reason text",
     },
@@ -220,7 +221,7 @@ describe("enqueueLetterUpdateRequests function", () => {
     const deps: Deps = { sqsClient, logger, env } as Deps;
 
     const result = await enqueueLetterUpdateRequests(
-      lettersToUpdate,
+      updateLetterCommands,
       "correlationId1",
       deps,
     );
@@ -239,13 +240,11 @@ describe("enqueueLetterUpdateRequests function", () => {
             },
           },
           MessageBody: JSON.stringify({
-            id: lettersToUpdate[0].id,
-            status: lettersToUpdate[0].status,
-            supplierId: lettersToUpdate[0].supplierId,
-            specificationId: lettersToUpdate[0].specificationId,
-            groupId: lettersToUpdate[0].groupId,
-            reasonCode: lettersToUpdate[0].reasonCode,
-            reasonText: lettersToUpdate[0].reasonText,
+            id: updateLetterCommands[0].id,
+            status: updateLetterCommands[0].status,
+            supplierId: updateLetterCommands[0].supplierId,
+            reasonCode: updateLetterCommands[0].reasonCode,
+            reasonText: updateLetterCommands[0].reasonText,
           }),
         },
       }),
@@ -263,9 +262,9 @@ describe("enqueueLetterUpdateRequests function", () => {
             },
           },
           MessageBody: JSON.stringify({
-            id: lettersToUpdate[1].id,
-            status: lettersToUpdate[1].status,
-            supplierId: lettersToUpdate[1].supplierId,
+            id: updateLetterCommands[1].id,
+            status: updateLetterCommands[1].status,
+            supplierId: updateLetterCommands[1].supplierId,
           }),
         },
       }),
@@ -287,7 +286,7 @@ describe("enqueueLetterUpdateRequests function", () => {
     const deps: Deps = { sqsClient, logger, env } as Deps;
 
     const result = await enqueueLetterUpdateRequests(
-      lettersToUpdate,
+      updateLetterCommands,
       "correlationId1",
       deps,
     );
@@ -306,9 +305,9 @@ describe("enqueueLetterUpdateRequests function", () => {
             },
           },
           MessageBody: JSON.stringify({
-            id: lettersToUpdate[1].id,
-            status: lettersToUpdate[1].status,
-            supplierId: lettersToUpdate[1].supplierId,
+            id: updateLetterCommands[1].id,
+            status: updateLetterCommands[1].status,
+            supplierId: updateLetterCommands[1].supplierId,
           }),
         },
       }),
@@ -319,9 +318,9 @@ describe("enqueueLetterUpdateRequests function", () => {
       {
         err: mockError,
         correlationId: "correlationId1",
-        letterId: lettersToUpdate[0].id,
-        letterStatus: lettersToUpdate[0].status,
-        supplierId: lettersToUpdate[0].supplierId,
+        letterId: updateLetterCommands[0].id,
+        letterStatus: updateLetterCommands[0].status,
+        supplierId: updateLetterCommands[0].supplierId,
       },
       "Error enqueuing letter status update",
     );

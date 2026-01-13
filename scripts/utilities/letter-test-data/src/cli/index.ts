@@ -174,7 +174,7 @@ async function main() {
         };
 
         // Upload Letters
-        await letterRepository.putLetterBatch(letterDtos);
+        await letterRepository.unsafePutLetterBatch(letterDtos);
 
         console.log(`Created batch ${batchId} of ${letterDtos.length}`);
       },
