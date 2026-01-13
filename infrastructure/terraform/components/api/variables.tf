@@ -141,12 +141,6 @@ variable "eventpub_control_plane_bus_arn" {
   default     = ""
 }
 
-variable "disable_gateway_execute_endpoint" {
-  type        = bool
-  description = "Disable the execution endpoint for the API Gateway"
-  default     = true
-}
-
 variable "letter_variant_map" {
   type = map(object({ supplierId = string, specId = string }))
   default = {
@@ -154,6 +148,12 @@ variable "letter_variant_map" {
     "lv2" = { supplierId = "supplier1", specId = "spec2" },
     "lv3" = { supplierId = "supplier2", specId = "spec3" }
   }
+}
+
+variable "disable_gateway_execute_endpoint" {
+  type        = bool
+  description = "Disable the execution endpoint for the API Gateway"
+  default     = true
 }
 
 variable "core_account_id" {
