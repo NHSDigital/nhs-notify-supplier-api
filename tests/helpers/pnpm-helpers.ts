@@ -15,6 +15,7 @@ export async function runCreateLetter(options: {
   specificationId: string;
   status: string;
   count: number;
+  testLetter: string;
 }) {
   const {
     awsAccountId,
@@ -25,11 +26,12 @@ export async function runCreateLetter(options: {
     specificationId,
     status,
     supplierId,
+    testLetter,
   } = options;
 
   const workspaceRoot = path.resolve(
     __dirname,
-    "../../scripts/utilities/letter-test-data"
+    "../../scripts/utilities/letter-test-data",
   );
   const cmd = process.platform === "win32" ? "npm.cmd" : "npm";
   const root = path.resolve(workspaceRoot);
@@ -57,6 +59,8 @@ export async function runCreateLetter(options: {
     status,
     "--count",
     String(count),
+    "--test-letter",
+    testLetter,
   ];
 
   await new Promise<void>((resolve, reject) => {
@@ -73,7 +77,7 @@ export async function runCreateLetter(options: {
     });
 
     child.on("close", (code) =>
-      code === 0 ? resolve() : reject(new Error(`pnpm exited with ${code}`))
+      code === 0 ? resolve() : reject(new Error(`pnpm exited with ${code}`)),
     );
     child.on("error", reject);
   });
@@ -91,7 +95,7 @@ export async function createSupplierData(options: {
 
   const workspaceRoot = path.resolve(
     __dirname,
-    "../../scripts/utilities/supplier-data"
+    "../../scripts/utilities/supplier-data",
   );
   const cmd = process.platform === "win32" ? "npm.cmd" : "npm";
   const root = path.resolve(workspaceRoot);
@@ -131,7 +135,7 @@ export async function createSupplierData(options: {
     });
 
     child.on("close", (code) =>
-      code === 0 ? resolve() : reject(new Error(`pnpm exited with ${code}`))
+      code === 0 ? resolve() : reject(new Error(`pnpm exited with ${code}`)),
     );
     child.on("error", reject);
   });
