@@ -2,10 +2,7 @@ name: Github Release Created
 
 on:
   release:
-    types:
-      - edited
-      - published
-      - released
+    types: ["published"] # Inherits all input defaults
   workflow_dispatch:
 
 concurrency:
