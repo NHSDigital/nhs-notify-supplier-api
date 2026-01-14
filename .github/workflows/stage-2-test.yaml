@@ -38,7 +38,7 @@ env:
 
 permissions:
   id-token: write # This is required for requesting the JWT
-  contents: read  # This is required for actions/checkout
+  contents: read # This is required for actions/checkout
   packages: read # This is required for downloading from GitHub Package Registry
 
 jobs:
@@ -49,6 +49,11 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.nodejs_version }}
+          registry-url: "https://npm.pkg.github.com"
       - name: "Cache node_modules"
         uses: actions/cache@v4
         with:
@@ -73,6 +78,11 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.nodejs_version }}
+          registry-url: "https://npm.pkg.github.com"
       - name: "Cache node_modules"
         uses: actions/cache@v4
         with:
@@ -142,6 +152,11 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.nodejs_version }}
+          registry-url: "https://npm.pkg.github.com"
       - name: "Cache node_modules"
         uses: actions/cache@v4
         with:
@@ -168,6 +183,11 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.nodejs_version }}
+          registry-url: "https://npm.pkg.github.com"
       - name: "Cache node_modules"
         uses: actions/cache@v4
         with:

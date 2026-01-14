@@ -20,7 +20,7 @@ test.describe("Sandbox Tests To Get Letter Status", () => {
         `${SUPPLIER_API_URL_SANDBOX}/${SUPPLIER_LETTERS}/${id}`,
         {
           headers: header,
-        }
+        },
       );
 
       expect(response.status()).toBe(expectedStatus);
