@@ -1,6 +1,10 @@
 import { SQSEvent, SQSHandler } from "aws-lambda";
-import { LetterDto, LetterDtoSchema } from "../contracts/letters";
+import {
+  UpdateLetterCommand,
+  UpdateLetterCommandSchema,
+} from "../contracts/letters";
 import { Deps } from "../config/deps";
+import { mapToUpdateLetter } from "../mappers/letter-mapper";
 
 export default function createLetterStatusUpdateHandler(
   deps: Deps,
@@ -8,10 +12,11 @@ export default function createLetterStatusUpdateHandler(
   return async (event: SQSEvent) => {
     const tasks = event.Records.map(async (message) => {
       try {
-        const letterToUpdate: LetterDto = LetterDtoSchema.parse(
-          JSON.parse(message.body),
+        const letterToUpdate: UpdateLetterCommand =
+          UpdateLetterCommandSchema.parse(JSON.parse(message.body));
+        await deps.letterRepo.updateLetterStatus(
+          mapToUpdateLetter(letterToUpdate),
         );
-        await deps.letterRepo.updateLetterStatus(letterToUpdate);
       } catch (error) {
         deps.logger.error(
           {
