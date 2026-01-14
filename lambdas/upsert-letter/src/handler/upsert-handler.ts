@@ -47,7 +47,7 @@ function getOperationFromType(type: string): UpsertOperation {
           preparedRequest,
           supplierSpec.supplierId,
           supplierSpec.specId,
-          supplierSpec.specId, //use specId for now
+          supplierSpec.specId, // use specId for now
         );
         await deps.letterRepo.putLetter(letterToInsert);
       },
@@ -86,7 +86,7 @@ function mapToInsertLetter(
     subject: upsertRequest.subject,
     createdAt: now,
     updatedAt: now,
-    billingRef: billingRef,
+    billingRef,
   };
 }
 
