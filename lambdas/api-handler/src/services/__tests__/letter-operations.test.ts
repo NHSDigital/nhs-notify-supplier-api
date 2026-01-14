@@ -9,7 +9,7 @@ import {
   getLetterDataUrl,
   getLettersForSupplier,
 } from "../letter-operations";
-import { LetterDto } from "../../contracts/letters";
+import { UpdateLetterCommand } from "../../contracts/letters";
 import { Deps } from "../../config/deps";
 
 jest.mock("@aws-sdk/s3-request-presigner", () => ({
@@ -29,6 +29,7 @@ function makeLetter(id: string, status: Letter["status"]): Letter {
     status,
     supplierId: "supplier1",
     specificationId: "spec123",
+    billingRef: "spec123",
     groupId: "group123",
     url: `s3://letterDataBucket/${id}.pdf`,
     createdAt: new Date().toISOString(),
@@ -38,6 +39,8 @@ function makeLetter(id: string, status: Letter["status"]): Letter {
     ttl: 123,
     reasonCode: "R01",
     reasonText: "Reason text",
+    source: "/data-plane/letter-rendering/pdf",
+    subject: "letter-rendering/source/letter/letter-id",
   };
 }
 
@@ -189,7 +192,7 @@ describe("getLetterDataUrl function", () => {
   });
 });
 
-function makeLetterDto(n: number): LetterDto {
+function makeUpdateLetterCommand(n: number): UpdateLetterCommand {
   return {
     id: `letter${n}`,
     status: "PENDING",
@@ -210,15 +213,15 @@ describe("enqueueLetterUpdateRequests function", () => {
     };
     const deps: Deps = { sqsClient, logger, env } as Deps;
 
-    const lettersToUpdate = Array.from({ length: 25 }, (_, i) =>
-      makeLetterDto(i),
+    const updateLetterCommands = Array.from({ length: 25 }, (_, i) =>
+      makeUpdateLetterCommand(i),
     );
 
     const sqsClientSendMock = sqsClient.send as jest.Mock;
     sqsClientSendMock.mockResolvedValue({ Failed: [] });
 
     const result = await enqueueLetterUpdateRequests(
-      lettersToUpdate,
+      updateLetterCommands,
       "correlationId1",
       deps,
     );
@@ -270,12 +273,12 @@ describe("enqueueLetterUpdateRequests function", () => {
     };
     const deps: Deps = { sqsClient, logger, env } as Deps;
 
-    const lettersToUpdate = Array.from({ length: 12 }, (_, i) =>
-      makeLetterDto(i),
+    const updateLetterCommands = Array.from({ length: 12 }, (_, i) =>
+      makeUpdateLetterCommand(i),
     );
 
     const result = await enqueueLetterUpdateRequests(
-      lettersToUpdate,
+      updateLetterCommands,
       "correlationId1",
       deps,
     );
@@ -309,7 +312,7 @@ describe("enqueueLetterUpdateRequests function", () => {
     const deps: Deps = { sqsClient, logger, env } as Deps;
 
     const lettersToUpdate = Array.from({ length: 21 }, (_, i) =>
-      makeLetterDto(i),
+      makeUpdateLetterCommand(i),
     );
 
     await enqueueLetterUpdateRequests(lettersToUpdate, "correlationId1", deps);

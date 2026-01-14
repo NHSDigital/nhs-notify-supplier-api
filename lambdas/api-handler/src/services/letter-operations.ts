@@ -3,7 +3,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { SendMessageBatchCommand } from "@aws-sdk/client-sqs";
 import NotFoundError from "../errors/not-found-error";
-import { LetterDto } from "../contracts/letters";
+import { UpdateLetterCommand } from "../contracts/letters";
 import { ApiErrorDetail } from "../contracts/errors";
 import { Deps } from "../config/deps";
 
@@ -81,21 +81,25 @@ export const getLetterDataUrl = async (
   }
 };
 
-function chunk(arr: LetterDto[], size: number): LetterDto[][] {
-  const out: LetterDto[][] = [];
-  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-  return out;
+function chunk(
+  arr: UpdateLetterCommand[],
+  size: number,
+): UpdateLetterCommand[][] {
+  const chunks: UpdateLetterCommand[][] = [];
+  for (let i = 0; i < arr.length; i += size)
+    chunks.push(arr.slice(i, i + size));
+  return chunks;
 }
 
 export async function enqueueLetterUpdateRequests(
-  updateRequests: LetterDto[],
+  updateLetterCommands: UpdateLetterCommand[],
   correlationId: string,
   deps: Deps,
 ) {
   const BATCH_SIZE = 10; // SQS SendMessageBatch max
   const CONCURRENCY = 5; // number of parallel batch API calls
 
-  const batches = chunk(updateRequests, BATCH_SIZE);
+  const batches = chunk(updateLetterCommands, BATCH_SIZE);
 
   // send batches in groups with limited concurrency
   // BATCH_SIZE * CONCURRENCY is the number of total updates / db calls in-flight
