@@ -21,7 +21,7 @@ test.describe("Sandbox Tests To Get List Of Pending Letters ", () => {
           params: {
             limit,
           },
-        }
+        },
       );
 
       const res = await response.json();
