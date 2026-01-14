@@ -166,4 +166,5 @@ variable "core_environment" {
   type        = string
   description = "Environment of Core"
   default     = "prod"
+
 }

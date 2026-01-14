@@ -5,7 +5,7 @@ import {
   SQSHandler,
   SQSRecord,
 } from "aws-lambda";
-import { InsertLetter, Letter, UpdateLetter } from "@internal/datastore";
+import { InsertLetter, UpdateLetter } from "@internal/datastore";
 import {
   $LetterRequestPreparedEvent,
   LetterRequestPreparedEvent,
@@ -26,7 +26,7 @@ type PreparedEvents = LetterRequestPreparedEventV2 | LetterRequestPreparedEvent;
 type UpsertOperation = {
   name: "Insert" | "Update";
   schemas: z.ZodSchema[];
-  handler: (request: unknown, deps: Deps) => Promise<Letter>;
+  handler: (request: unknown, deps: Deps) => Promise<void>;
 };
 
 // small envelope that must exist in all inputs
@@ -37,7 +37,7 @@ function getOperationFromType(type: string): UpsertOperation {
     return {
       name: "Insert",
       schemas: [$LetterRequestPreparedEventV2, $LetterRequestPreparedEvent],
-      handler: async (request, deps): Promise<Letter> => {
+      handler: async (request, deps) => {
         const preparedRequest = request as PreparedEvents;
         const supplierSpec: SupplierSpec = resolveSupplierForVariant(
           preparedRequest.data.letterVariantId,
@@ -47,19 +47,19 @@ function getOperationFromType(type: string): UpsertOperation {
           preparedRequest,
           supplierSpec.supplierId,
           supplierSpec.specId,
-          supplierSpec.specId, // use specId for now
+          supplierSpec.specId, //use specId for now
         );
-        return deps.letterRepo.putLetter(letterToInsert);
+        await deps.letterRepo.putLetter(letterToInsert);
       },
     };
   if (type.startsWith("uk.nhs.notify.supplier-api.letter"))
     return {
       name: "Update",
       schemas: [$LetterEvent],
-      handler: async (request, deps): Promise<Letter> => {
+      handler: async (request, deps) => {
         const supplierEvent = request as LetterEvent;
         const letterToUpdate: UpdateLetter = mapToUpdateLetter(supplierEvent);
-        return deps.letterRepo.updateLetterStatus(letterToUpdate);
+        await deps.letterRepo.updateLetterStatus(letterToUpdate);
       },
     };
   throw new Error(`Unknown operation from type=${type}`);
@@ -86,7 +86,7 @@ function mapToInsertLetter(
     subject: upsertRequest.subject,
     createdAt: now,
     updatedAt: now,
-    billingRef,
+    billingRef: billingRef,
   };
 }
 
@@ -108,7 +108,6 @@ function resolveSupplierForVariant(
 }
 
 function parseSNSNotification(record: SQSRecord) {
-  console.log("record in parseSNSNotificatino:", record);
   const notification = JSON.parse(record.body) as Partial<SNSMessage>;
   if (
     notification.Type !== "Notification" ||
@@ -137,8 +136,7 @@ async function runUpsert(
   for (const schema of operation.schemas) {
     const r = schema.safeParse(letterEvent);
     if (r.success) {
-      const letterSchemaParseResponse = await operation.handler(r.data, deps);
-      console.log("operation handler response:", letterSchemaParseResponse);
+      await operation.handler(r.data, deps);
       return;
     }
   }
@@ -151,11 +149,9 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
     const batchItemFailures: SQSBatchItemFailure[] = [];
 
     const tasks = event.Records.map(async (record) => {
-      console.log("record in createUpsertLetterHandler:", record);
       try {
         const message: string = parseSNSNotification(record);
 
-        console.log("message after parsing:", message);
         const letterEvent: unknown = JSON.parse(message);
 
         const type = getType(letterEvent);
