@@ -29,7 +29,7 @@ export async function runCreateLetter(options: {
 
   const workspaceRoot = path.resolve(
     __dirname,
-    "../../scripts/utilities/letter-test-data"
+    "../../scripts/utilities/letter-test-data",
   );
   const cmd = process.platform === "win32" ? "npm.cmd" : "npm";
   const root = path.resolve(workspaceRoot);
@@ -60,7 +60,6 @@ export async function runCreateLetter(options: {
   ];
 
   await new Promise<void>((resolve, reject) => {
-    let output = "";
     const child = spawn(cmd, args, {
       stdio: "inherit",
       cwd: root,
@@ -68,12 +67,11 @@ export async function runCreateLetter(options: {
     });
     child.stdout?.on("id", (id) => {
       const text = id.toString();
-      output += text;
       process.stdout.write(text);
     });
 
     child.on("close", (code) =>
-      code === 0 ? resolve() : reject(new Error(`pnpm exited with ${code}`))
+      code === 0 ? resolve() : reject(new Error(`pnpm exited with ${code}`)),
     );
     child.on("error", reject);
   });
@@ -87,11 +85,11 @@ export async function createSupplierData(options: {
   environment: string;
   status: string;
 }) {
-  const { apimId, environment, name, status, supplierId, filter } = options;
+  const { apimId, environment, filter, name, status, supplierId } = options;
 
   const workspaceRoot = path.resolve(
     __dirname,
-    "../../scripts/utilities/supplier-data"
+    "../../scripts/utilities/supplier-data",
   );
   const cmd = process.platform === "win32" ? "npm.cmd" : "npm";
   const root = path.resolve(workspaceRoot);
@@ -118,7 +116,6 @@ export async function createSupplierData(options: {
   ];
 
   await new Promise<void>((resolve, reject) => {
-    let output = "";
     const child = spawn(cmd, args, {
       stdio: "inherit",
       cwd: root,
@@ -126,12 +123,11 @@ export async function createSupplierData(options: {
     });
     child.stdout?.on("id", (id) => {
       const text = id.toString();
-      output += text;
       process.stdout.write(text);
     });
 
     child.on("close", (code) =>
-      code === 0 ? resolve() : reject(new Error(`pnpm exited with ${code}`))
+      code === 0 ? resolve() : reject(new Error(`pnpm exited with ${code}`)),
     );
     child.on("error", reject);
   });
