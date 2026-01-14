@@ -2,8 +2,14 @@ name: Github Release Created
 
 on:
   release:
-    types: ["published"] # Inherits all input defaults
+    types: ["released"] # Inherits all input defaults
   workflow_dispatch:
+    inputs:
+      releaseVersion:
+        description: Release, tag, branch, or commit ID to be used for deployment
+        required: false
+        default: "main"
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -28,7 +34,7 @@ jobs:
           APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
         run: |
           bash .github/scripts/dispatch_internal_repo_workflow.sh \
-            --releaseVersion "${{ github.event.release.tag_name }}" \
+            --releaseVersion "${{ github.event.release.tag_name || inputs.releaseVersion }}" \
             --targetWorkflow "dispatch-deploy-static-notify-supplier-api-env.yaml" \
             --targetEnvironment "main" \
             --targetAccountGroup "nhs-notify-supplier-api-nonprod" \
@@ -59,5 +65,5 @@ jobs:
           environment: "main"
           apimEnv: "int"
           runId: "${{ github.run_id }}"
-          releaseVersion: "${{ github.event.release.tag_name }}"
+          releaseVersion: "${{ github.event.release.tag_name || inputs.releaseVersion }}"
           isRelease: true
