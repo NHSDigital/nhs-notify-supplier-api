@@ -2,7 +2,11 @@ name: Github Release Created
 
 on:
   release:
-    types: ["published"] # Inherits all input defaults
+    types:
+      - edited
+      - published
+      - released
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
