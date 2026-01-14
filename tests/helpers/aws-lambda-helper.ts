@@ -1,7 +1,7 @@
 import {
-  LambdaClient,
-  GetFunctionConfigurationCommandOutput,
   GetFunctionConfigurationCommand,
+  GetFunctionConfigurationCommandOutput,
+  LambdaClient,
   UpdateFunctionConfigurationCommand,
 } from "@aws-sdk/client-lambda";
 import { AWS_REGION } from "tests/constants/api-constants";

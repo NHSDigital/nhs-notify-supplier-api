@@ -12,7 +12,7 @@ export default async function performanceTeardown() {
     return;
   }
 
-  const originalEnv = JSON.parse(fs.readFileSync(ORIGINAL_ENV, "utf-8"));
+  const originalEnv = JSON.parse(fs.readFileSync(ORIGINAL_ENV, "utf8"));
 
   await updateLambdaEnv(UPSERT_LETTER_LAMBDA_ARN, originalEnv);
   fs.unlinkSync(ORIGINAL_ENV);
