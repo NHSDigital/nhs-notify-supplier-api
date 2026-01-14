@@ -44,7 +44,7 @@ describe("Create letter helpers", () => {
     expect(mockedUploadFile).toHaveBeenCalledWith(
       "bucketName",
       "supplierId",
-      "../test-letters/test-letter-standard.pdf",
+      "test-letter-standard.pdf",
       "targetFilename",
     );
     expect(mockPutLetter).toHaveBeenCalledWith({
@@ -104,6 +104,9 @@ describe("Create letter helpers", () => {
       supplierId: "supplierId",
       updatedAt: "2020-02-01T00:00:00.000Z",
       url: "s3://bucketName/supplierId/targetFilename",
+      billingRef: "specificationId",
+      source: "/data-plane/letter-rendering/letter-test-data",
+      subject: "supplier-api/letter-test-data/letterId",
     });
   });
 

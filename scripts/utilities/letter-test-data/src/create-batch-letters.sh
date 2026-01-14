@@ -117,7 +117,7 @@ PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 # Change to the project directory
 cd "$PROJECT_DIR"
 
-# Define the three batches with different specification and group IDs
+# Define the batches with different specification and group IDs
 BATCHES=(
     "integration-specification-english:group-english:test-letter-standard:${COUNT}"
     "integration-specification-braille:group-accessible:test-letter-standard:${COUNT}"
@@ -135,7 +135,7 @@ echo ""
 
 # Create each batch
 for batch in "${BATCHES[@]}"; do
-    # Parse specification-id and group-id from the batch definition
+    # Parse specification-id, group-id and batch volume from the batch definition
     IFS=':' read -r SPEC_ID GROUP_ID TEST_LETTER BATCH_COUNT <<< "$batch"
 
     echo "[$BATCH_COUNTER/$TOTAL_BATCHES] Creating batch with specification-id: $SPEC_ID, group-id: $GROUP_ID-$SUPPLIER_ID"
