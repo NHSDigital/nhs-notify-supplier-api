@@ -24,7 +24,7 @@ module "upsert_letter" {
   function_include_common = true
   handler_function_name   = "upsertLetterHandler"
   runtime                 = "nodejs22.x"
-  memory                  = 128
+  memory                  = 512
   timeout                 = 29
   log_level               = var.log_level
 
