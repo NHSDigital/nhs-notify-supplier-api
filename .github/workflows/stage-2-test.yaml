@@ -75,6 +75,8 @@ jobs:
     name: "Unit tests"
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5
@@ -96,7 +98,6 @@ jobs:
         with:
           node-version: ${{ inputs.nodejs_version }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Generate dependencies"
         run: |
           npm run generate-dependencies --workspaces --if-present
