@@ -30,7 +30,7 @@ test.describe("API Gateway Tests to Verify Get Letter Status Endpoint", () => {
       `${baseUrl}/${SUPPLIER_LETTERS}/${letter.id}`,
       {
         headers,
-      }
+      },
     );
 
     const responseBody = await response.json();

@@ -1,9 +1,12 @@
 import { LetterRepository } from "@internal/datastore/src/letter-repository";
 import { LetterStatusType } from "@internal/datastore";
-import { createLetter, createLetterDto } from "../../helpers/create_letter_helpers";
-import { uploadFile } from "../../helpers/s3_helpers";
+import {
+  createLetter,
+  createLetterDto,
+} from "../../helpers/create-letter-helpers";
+import uploadFile from "../../helpers/s3-helpers";
 
-jest.mock("../../helpers/s3_helpers");
+jest.mock("../../helpers/s3-helpers");
 
 describe("Create letter helpers", () => {
   beforeEach(() => {
@@ -54,6 +57,9 @@ describe("Create letter helpers", () => {
       supplierId: "supplierId",
       updatedAt: "2020-02-01T00:00:00.000Z",
       url: "s3://bucketName/supplierId/targetFilename",
+      source: "/data-plane/letter-rendering/letter-test-data",
+      subject: "supplier-api/letter-test-data/letterId",
+      billingRef: "specificationId",
     });
   });
 
@@ -81,6 +87,9 @@ describe("Create letter helpers", () => {
       status: "PENDING",
       createdAt: "2020-02-01T00:00:00.000Z",
       updatedAt: "2020-02-01T00:00:00.000Z",
+      source: "/data-plane/letter-rendering/letter-test-data",
+      subject: "supplier-api/letter-test-data/testLetterId",
+      billingRef: "testSpecId",
     });
   });
 });
