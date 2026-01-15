@@ -77,7 +77,7 @@ data "aws_iam_policy_document" "upsert_letter_lambda" {
     ]
 
     resources = [
-      module.amendments_queue.sqs_queue_arn
+      module.sqs_letter_updates.sqs_queue_arn
     ]
   }
 }
