@@ -327,9 +327,14 @@ function generateLetter(status: LetterStatus, id?: string): LetterForEventPub {
     id: id || "1",
     status,
     specificationId: "spec1",
+    billingRef: "spec1",
     supplierId: "supplier1",
     groupId: "group1",
+    createdAt: "2025-12-10T11:12:54Z",
     updatedAt: "2025-12-10T11:13:54Z",
+    url: "https://example.com/letter.pdf",
+    source: "test-source",
+    subject: "test-source/subject-id",
   };
 }
 

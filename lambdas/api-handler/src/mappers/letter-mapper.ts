@@ -1,15 +1,15 @@
-import { LetterBase, LetterStatus } from "@internal/datastore";
+import { LetterBase, LetterStatus, UpdateLetter } from "@internal/datastore";
 import {
   GetLetterResponse,
   GetLetterResponseSchema,
   GetLettersResponse,
   GetLettersResponseSchema,
-  LetterDto,
   PatchLetterRequest,
   PatchLetterResponse,
   PatchLetterResponseSchema,
   PostLettersRequest,
   PostLettersRequestResource,
+  UpdateLetterCommand,
 } from "../contracts/letters";
 
 function letterToResourceResponse(letter: LetterBase) {
@@ -38,10 +38,14 @@ function letterToGetLettersResourceResponse(letter: LetterBase) {
   };
 }
 
-export function mapPatchLetterToDto(
+// --------------------------
+//  Map request to command
+// --------------------------
+
+export function mapToUpdateCommand(
   request: PatchLetterRequest,
   supplierId: string,
-): LetterDto {
+): UpdateLetterCommand {
   return {
     id: request.data.id,
     supplierId,
@@ -51,10 +55,10 @@ export function mapPatchLetterToDto(
   };
 }
 
-export function mapPostLettersToDtoArray(
+export function mapToUpdateCommands(
   request: PostLettersRequest,
   supplierId: string,
-): LetterDto[] {
+): UpdateLetterCommand[] {
   return request.data.map((letterToUpdate: PostLettersRequestResource) => ({
     id: letterToUpdate.id,
     supplierId,
@@ -63,6 +67,26 @@ export function mapPostLettersToDtoArray(
     reasonText: letterToUpdate.attributes.reasonText,
   }));
 }
+
+// ---------------------------------------------
+//  Map letter command to repository type
+// ---------------------------------------------
+
+export function mapToUpdateLetter(
+  updateLetter: UpdateLetterCommand,
+): UpdateLetter {
+  return {
+    id: updateLetter.id,
+    supplierId: updateLetter.supplierId,
+    status: updateLetter.status,
+    reasonCode: updateLetter.reasonCode,
+    reasonText: updateLetter.reasonText,
+  };
+}
+
+// ---------------------------------------------
+//  Map internal datastore letter to response
+// ---------------------------------------------
 
 export function mapToPatchLetterResponse(
   letter: LetterBase,
