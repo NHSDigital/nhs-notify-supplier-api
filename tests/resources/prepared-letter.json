@@ -1,7 +1,7 @@
 {
   "data": {
     "campaignId": "campaign_456",
-    "clientId": "00f3b388-bbe9-41c9-9e76-052d37ee8988",
+    "clientId": "testClientId",
     "createdAt": "2025-08-28T08:45:00.000Z",
     "domainId": "letter1",
     "letterVariantId": "lv1",

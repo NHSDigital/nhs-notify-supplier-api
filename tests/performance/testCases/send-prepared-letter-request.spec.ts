@@ -8,6 +8,7 @@ import { retrieveKinesisRecordsAtTimestamp } from "tests/helpers/aws-kinesis-hel
 import { logger } from "tests/helpers/pino-logger";
 import { envName } from "tests/constants/api-constants";
 import PREPARED_LETTER from "../../resources/prepared-letter.json";
+import { assert } from "console";
 
 test.describe("Performance test checking how long it takes letter requests from the EventSub SNS to reach the Letters Database ", () => {
   test("send 2500 letter requests", async () => {

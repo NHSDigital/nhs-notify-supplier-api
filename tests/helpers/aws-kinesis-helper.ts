@@ -12,10 +12,11 @@ import { AWS_REGION } from "tests/constants/api-constants";
 export const kinesisClient = new KinesisClient({ region: AWS_REGION });
 
 /**
- * Wait for a matching record on a Kinesis stream.
+ * Get all records from a given start time for the specified Kinesis Stream.
+ * Any records before the given start time will be ignored
  *
  * @param streamARN - existing Kinesis stream ARN
- * @param opts - optional settings
+ * @param startTimeMs - Start Time in milliseconds
  */
 export async function retrieveKinesisRecordsAtTimestamp(
   streamARN: string,

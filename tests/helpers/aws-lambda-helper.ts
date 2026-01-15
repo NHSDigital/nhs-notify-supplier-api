@@ -24,7 +24,7 @@ export async function updateLambdaEnv(
   functionArn: string,
   variables: Record<string, string>,
 ) {
-  await lambdaClient.send(
+  return await lambdaClient.send(
     new UpdateFunctionConfigurationCommand({
       FunctionName: functionArn,
       Environment: { Variables: variables },

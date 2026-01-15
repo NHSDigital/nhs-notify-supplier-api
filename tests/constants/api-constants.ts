@@ -8,3 +8,4 @@ export const LETTERSTABLENAME = `nhs-${envName}-supapi-letters`;
 export const SUPPLIERID = "TestSupplier1";
 export const MI_ENDPOINT = "mi";
 export const SUPPLIERTABLENAME = `nhs-${envName}-supapi-suppliers`;
+export const UPSERT_LETTER_LAMBDA_ARN = `arn:aws:lambda:eu-west-2:820178564574:function:nhs-${envName}-supapi-upsertletter`;
