@@ -1,19 +1,20 @@
 {
+  "name": "@nhsdigital/notify-supplier-api-consumer-contracts",
+  "version": "1.0.1",
   "description": "NHS Notify Supplier API Pact contracts",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/NHSDigital/nhs-notify-supplier-api.git"
+  },
   "exports": {
     "./pacts/*.json": {
       "default": "./pacts/*.json"
     }
   },
-  "license": "MIT",
-  "name": "@nhsdigital/notify-supplier-api-consumer-contracts",
   "publishConfig": {
     "access": "public",
     "registry": "https://npm.pkg.github.com"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com/NHSDigital/nhs-notify-supplier-api.git"
   },
   "scripts": {
     "lint": "echo Linting not required",
@@ -21,6 +22,5 @@
     "test:unit": "echo Unit tests not required",
     "test:unit:coverage": "echo Unit tests not required",
     "typecheck": "echo Typecheck not required"
-  },
-  "version": "1.0.1"
+  }
 }
