@@ -105,7 +105,7 @@ function createPreparedV2Event(
     type: "uk.nhs.notify.letter-rendering.letter-request.prepared.v2",
     dataschema:
       "https://notify.nhs.uk/cloudevents/schemas/letter-rendering/letter-request.prepared.2.0.0.schema.json",
-    dataschemaversion: "2.0.0",
+    dataschemaversion: "2.0.1",
   };
 }
 
