@@ -188,16 +188,18 @@ describe("letter-updates-transformer Lambda", () => {
 
       // Create a Kinesis event with malformed JSON data
       const malformedKinesisEvent: KinesisStreamEvent = {
-        Records: [{
-          kinesis: {
-            data: Buffer.from("invalid-json-data").toString("base64"),
-            sequenceNumber: "12345"
-          }
-        } as any]
+        Records: [
+          {
+            kinesis: {
+              data: Buffer.from("invalid-json-data").toString("base64"),
+              sequenceNumber: "12345",
+            },
+          } as any,
+        ],
       };
 
       await expect(
-        handler(malformedKinesisEvent, mockDeep<Context>(), jest.fn())
+        handler(malformedKinesisEvent, mockDeep<Context>(), jest.fn()),
       ).rejects.toThrow();
 
       expect(mockedDeps.logger.error).toHaveBeenCalledWith(
@@ -206,10 +208,10 @@ describe("letter-updates-transformer Lambda", () => {
           error: expect.any(Error),
           record: expect.objectContaining({
             kinesis: expect.objectContaining({
-              data: Buffer.from("invalid-json-data").toString("base64")
-            })
-          })
-        })
+              data: Buffer.from("invalid-json-data").toString("base64"),
+            }),
+          }),
+        }),
       );
     });
 
@@ -224,8 +226,8 @@ describe("letter-updates-transformer Lambda", () => {
       expect(mockedDeps.logger.info).toHaveBeenCalledWith(
         expect.objectContaining({
           description: "Number of records",
-          count: 0
-        })
+          count: 0,
+        }),
       );
       expect(mockedDeps.snsClient.send).not.toHaveBeenCalled();
     });
