@@ -1,5 +1,5 @@
-resource "aws_sns_topic" "main_orig" {
-  name              = local.csi
+resource "aws_sns_topic" "main_clone" {
+  name              = "${local.csi}-clone"
   kms_master_key_id = var.kms_key_arn
 
   application_failure_feedback_role_arn    = var.enable_sns_delivery_logging == true ? aws_iam_role.sns_delivery_logging_role[0].arn : null

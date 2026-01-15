@@ -1,8 +1,16 @@
 output "sns_topic" {
   description = "SNS Topic ARN and Name"
   value = {
-    arn  = aws_sns_topic.main.arn
-    name = aws_sns_topic.main.name
+    arn  = aws_sns_topic.main_orig.arn
+    name = aws_sns_topic.main_orig.name
+  }
+}
+
+output "sns_topic_clone" {
+  description = "SNS Topic ARN and Name"
+  value = {
+    arn  = aws_sns_topic.main_clone.arn
+    name = aws_sns_topic.main_clone.name
   }
 }
 
