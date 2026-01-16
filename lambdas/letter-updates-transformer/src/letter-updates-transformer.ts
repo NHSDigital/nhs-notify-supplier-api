@@ -20,17 +20,20 @@ const BATCH_SIZE = 10;
 export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
   return async (streamEvent: KinesisStreamEvent) => {
     deps.logger.info({ description: "Received event", streamEvent });
+    deps.logger.info({
+      description: "Number of records",
+      count: streamEvent.Records?.length || 0,
+    });
 
-    const cloudEvents: LetterEvent[] = streamEvent.Records.map((record) =>
+    // Ensure logging by extracting all records first
+    const ddbRecords: DynamoDBRecord[] = streamEvent.Records.map((record) =>
       extractPayload(record, deps),
-    )
-      .filter((record) => record.eventName === "MODIFY")
-      .filter(
-        (record) =>
-          isChanged(record, "status") || isChanged(record, "reasonCode"),
-      )
+    );
+
+    const cloudEvents: LetterEvent[] = ddbRecords
+      .filter((record) => filterRecord(record, deps))
       .map((element) => extractNewLetter(element))
-      .map((element) => mapLetterToCloudEvent(element));
+      .map((element) => mapLetterToCloudEvent(element, deps.env.EVENT_SOURCE));
 
     for (const batch of generateBatches(cloudEvents)) {
       deps.logger.info({
@@ -50,14 +53,54 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
   };
 }
 
+function filterRecord(record: DynamoDBRecord, deps: Deps): boolean {
+  let allowEvent = false;
+  if (record.eventName === "INSERT") {
+    allowEvent = true;
+  }
+
+  if (
+    record.eventName === "MODIFY" &&
+    (isChanged(record, "status") || isChanged(record, "reasonCode"))
+  ) {
+    allowEvent = true;
+  }
+
+  deps.logger.info({
+    description: "Filtering record",
+    eventName: record.eventName,
+    eventId: record.eventID,
+    allowEvent,
+  });
+
+  return allowEvent;
+}
+
 function extractPayload(
   record: KinesisStreamRecord,
   deps: Deps,
 ): DynamoDBRecord {
-  // Kinesis data is base64 encoded
-  const payload = Buffer.from(record.kinesis.data, "base64").toString("utf8");
-  deps.logger.info({ description: "Extracted dynamoDBRecord", payload });
-  return JSON.parse(payload);
+  try {
+    deps.logger.info({
+      description: "Processing Kinesis record",
+      recordId: record.kinesis.sequenceNumber,
+    });
+
+    // Kinesis data is base64 encoded
+    const payload = Buffer.from(record.kinesis.data, "base64").toString("utf8");
+    deps.logger.info({ description: "Decoded payload", payload });
+
+    const jsonParsed = JSON.parse(payload);
+    deps.logger.info({ description: "Extracted dynamoDBRecord", jsonParsed });
+    return jsonParsed;
+  } catch (error) {
+    deps.logger.error({
+      description: "Error extracting payload",
+      error,
+      record,
+    });
+    throw error;
+  }
 }
 
 function isChanged(record: DynamoDBRecord, property: string): boolean {

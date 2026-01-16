@@ -18,7 +18,7 @@
   "recordedtime": "2025-08-28T08:45:00.000Z",
   "severitynumber": 2,
   "severitytext": "INFO",
-  "source": "/data-plane/supplier-api/prod/update-status",
+  "source": "/data-plane/supplier-api/nhs-supplier-api-prod/main/update-status",
   "specversion": "1.0",
   "subject": "letter-origin/letter-rendering/letter/f47ac10b-58cc-4372-a567-0e02b2c3d479",
   "time": "2025-08-28T08:45:00.000Z",
