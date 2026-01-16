@@ -80,7 +80,12 @@ function createNotification(
   };
 }
 
-function createEventBridgeEvent(event: any): string {
+function createEventBridgeEvent(
+  event:
+    | LetterRequestPreparedEventV2
+    | LetterRequestPreparedEvent
+    | LetterEvent,
+  ): string {
   const now = new Date().toISOString();
   const eventBridgeEnvelope = {
     version: "0",
