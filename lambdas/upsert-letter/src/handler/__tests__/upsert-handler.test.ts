@@ -36,11 +36,13 @@ function createSqsRecord(msgId: string, body: string): SQSRecord {
   };
 }
 
+type SupportedEvent =
+  | LetterRequestPreparedEventV2
+  | LetterRequestPreparedEvent
+  | LetterEvent;
+
 function createEventBridgeNotification(
-  event:
-    | LetterRequestPreparedEventV2
-    | LetterRequestPreparedEvent
-    | LetterEvent,
+  event: SupportedEvent,
 ): Partial<SNSMessage> {
   return {
     SignatureVersion: "",
@@ -58,12 +60,7 @@ function createEventBridgeNotification(
   };
 }
 
-function createNotification(
-  event:
-    | LetterRequestPreparedEventV2
-    | LetterRequestPreparedEvent
-    | LetterEvent,
-): Partial<SNSMessage> {
+function createNotification(event: SupportedEvent): Partial<SNSMessage> {
   return {
     SignatureVersion: "",
     Timestamp: "",
@@ -80,12 +77,7 @@ function createNotification(
   };
 }
 
-function createEventBridgeEvent(
-  event:
-    | LetterRequestPreparedEventV2
-    | LetterRequestPreparedEvent
-    | LetterEvent,
-  ): string {
+function createEventBridgeEvent(event: SupportedEvent): string {
   const now = new Date().toISOString();
   const eventBridgeEnvelope = {
     version: "0",
