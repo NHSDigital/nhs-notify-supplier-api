@@ -66,7 +66,6 @@ data "aws_iam_policy_document" "letter_updates_queue_policy" {
       test     = "ArnEquals"
       variable = "aws:SourceArn"
       values   = [
-        module.eventsub.sns_topic.arn,
         module.eventsub.sns_topic_clone.arn
       ]
     }
