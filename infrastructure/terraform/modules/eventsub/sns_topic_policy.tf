@@ -7,7 +7,7 @@ resource "aws_sns_topic_policy" "main_orig" {
 resource "aws_sns_topic_policy" "main_clone" {
   arn = aws_sns_topic.main_clone.arn
 
-  policy = data.aws_iam_policy_document.sns_topic_policy.json
+  policy = data.aws_iam_policy_document.sns_topic_policy_clone.json
 }
 
 data "aws_iam_policy_document" "sns_topic_policy" {

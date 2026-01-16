@@ -21,3 +21,11 @@ output "s3_bucket_event_cache" {
     bucket = module.s3bucket_event_cache[0].bucket
   } : {}
 }
+
+output "firehose_delivery_stream" {
+  description = "Kinesis Firehose Delivery Stream ARN and Name"
+  value =  {
+    arn  = aws_kinesis_firehose_delivery_stream.main[0].arn
+    name = aws_kinesis_firehose_delivery_stream.main[0].name
+  }
+}

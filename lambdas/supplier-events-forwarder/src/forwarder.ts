@@ -9,6 +9,7 @@ export default function createForwarder(deps: Deps): SQSHandler {
     );
 
     for (const firehoseCommand of firehoseCommands) {
+      deps.logger.info({ description: "Sending firehose command" });
       await deps.firehoseClient.send(firehoseCommand);
     }
   };
