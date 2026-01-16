@@ -121,7 +121,7 @@ function parseSNSNotification(record: SQSRecord) {
 }
 
 function removeEventBridgeWrapper(event: any) {
-  const maybeEventBridge = event as any;
+  const maybeEventBridge = event;
   if (maybeEventBridge.source && maybeEventBridge.detail) {
     return maybeEventBridge.detail;
   }
@@ -160,9 +160,9 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
       try {
         const message: string = parseSNSNotification(record);
 
-        const event = JSON.parse(message);
+        const snsEvent = JSON.parse(message);
 
-        const letterEvent: unknown = removeEventBridgeWrapper(event);
+        const letterEvent: unknown = removeEventBridgeWrapper(snsEvent);
 
         const type = getType(letterEvent);
 
