@@ -40,7 +40,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm ci
-        shell: bash
 
       - name: "Check if pull request exists for this branch and set ENVIRONMENT/APIM_ENV"
         id: pr_exists
