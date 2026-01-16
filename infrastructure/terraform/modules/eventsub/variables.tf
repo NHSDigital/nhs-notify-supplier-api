@@ -70,7 +70,7 @@ variable "event_cache_buffer_interval" {
 variable "enable_sns_delivery_logging" {
   type        = bool
   description = "Enable SNS Delivery Failure Notifications"
-  default     = false
+  default     = true
 }
 
 variable "sns_success_logging_sample_percent" {
@@ -94,13 +94,13 @@ variable "event_cache_expiry_days" {
 variable "enable_event_cache" {
   type        = bool
   description = "Enable caching of events to an S3 bucket"
-  default     = false
+  default     = true
 }
 
 variable "enable_firehose_raw_message_delivery" {
   type        = bool
   description = "Enables raw message delivery on firehose subscription"
-  default     = false
+  default     = true
 }
 
 variable "force_destroy" {
