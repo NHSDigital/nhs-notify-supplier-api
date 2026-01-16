@@ -79,7 +79,9 @@
     "test:unit": "npm run test:unit --workspaces",
     "typecheck": "npm run typecheck --workspaces",
     "deps:sync": "npx syncpack fix-mismatches",
-    "deps:check": "npx syncpack list-mismatches"
+    "deps:check": "npx syncpack list-mismatches",
+    "clean": "find . -type d -name 'node_modules' -prune -exec rm -rf '{}' + && rm package-lock.json",
+    "clean_install": "find . -type d -name 'node_modules' -prune -exec rm -rf '{}' + && rm package-lock.json && npm install"
   },
   "workspaces": [
     "docs",
