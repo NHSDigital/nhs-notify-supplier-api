@@ -46,7 +46,7 @@ runs:
       run: npm ci
       shell: bash
 
-    - name: Build ${{ inputs.apimEnv }} oas
+    - name: Build OAS File
       working-directory: .
       env:
         APIM_ENV: ${{ inputs.apimEnv }}
@@ -54,10 +54,16 @@ runs:
       run: |
         if [ ${{ env.APIM_ENV }} == "internal-dev-sandbox" ] && [ ${{ inputs.buildSandbox }} == true ]
         then
-          echo "Building sandbox OAS spec"
+          echo "Building JSON sandbox OAS spec"
           make build-json-oas-spec APIM_ENV=sandbox
+
+          echo "Building YML sandbox OAS spec"
+          make build-yml-oas-spec APIM_ENV=sandbox
         else
-          echo "Building env specific OAS spec"
+          echo "Building env specific JSON OAS spec"
+          make build-json-oas-spec APIM_ENV=${{ env.APIM_ENV }}
+
+          echo "Building env specific YML OAS spec"
           make build-yml-oas-spec APIM_ENV=${{ env.APIM_ENV }}
         fi
 
