@@ -16,6 +16,8 @@ module "eventpub" {
   log_retention_in_days = var.log_retention_in_days
   log_level             = "INFO"
 
+  force_destroy = var.force_destroy
+
   event_cache_buffer_interval        = 500
   enable_sns_delivery_logging        = true
   sns_success_logging_sample_percent = 0
