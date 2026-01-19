@@ -17,7 +17,7 @@ export default function mapLetterToCloudEvent(
     dataschema: `https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.${letter.status}.${dataschemaversion}.schema.json`,
     dataschemaversion,
     source,
-    subject: `letter-origin/supplier-api/letter/${letter.id}`,
+    subject: `letter-origin/letter-rendering/letter/${letter.id}`,
 
     data: {
       domainId: letter.id as LetterEvent["data"]["domainId"],
@@ -29,7 +29,7 @@ export default function mapLetterToCloudEvent(
       reasonCode: letter.reasonCode,
       reasonText: letter.reasonText,
       origin: {
-        domain: "supplier-api",
+        domain: "letter-rendering",
         source: letter.source,
         subject: letter.subject,
         event: eventId,
