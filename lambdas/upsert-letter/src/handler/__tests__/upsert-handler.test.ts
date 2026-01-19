@@ -36,12 +36,31 @@ function createSqsRecord(msgId: string, body: string): SQSRecord {
   };
 }
 
-function createNotification(
-  event:
-    | LetterRequestPreparedEventV2
-    | LetterRequestPreparedEvent
-    | LetterEvent,
+type SupportedEvent =
+  | LetterRequestPreparedEventV2
+  | LetterRequestPreparedEvent
+  | LetterEvent;
+
+function createEventBridgeNotification(
+  event: SupportedEvent,
 ): Partial<SNSMessage> {
+  return {
+    SignatureVersion: "",
+    Timestamp: "",
+    Signature: "",
+    SigningCertUrl: "",
+    MessageId: "",
+    Message: createEventBridgeEvent(event),
+    MessageAttributes: {},
+    Type: "Notification",
+    UnsubscribeUrl: "",
+    TopicArn: "",
+    Subject: "",
+    Token: "",
+  };
+}
+
+function createNotification(event: SupportedEvent): Partial<SNSMessage> {
   return {
     SignatureVersion: "",
     Timestamp: "",
@@ -56,6 +75,22 @@ function createNotification(
     Subject: "",
     Token: "",
   };
+}
+
+function createEventBridgeEvent(event: SupportedEvent): string {
+  const now = new Date().toISOString();
+  const eventBridgeEnvelope = {
+    version: "0",
+    id: "4f28e649-6832-18e8-7261-4b63e6dcd3b5",
+    "detail-type": event.type,
+    source: "custom.event",
+    account: "815490582396",
+    time: now,
+    region: "eu-west-2",
+    resources: [],
+    detail: event,
+  };
+  return JSON.stringify(eventBridgeEnvelope);
 }
 
 function createPreparedV1Event(
@@ -178,7 +213,7 @@ describe("createUpsertLetterHandler", () => {
     const evt: SQSEvent = createSQSEvent([
       createSqsRecord(
         "msg1",
-        JSON.stringify(createNotification(createPreparedV2Event())),
+        JSON.stringify(createEventBridgeNotification(createPreparedV2Event())),
       ),
       createSqsRecord(
         "msg2",
