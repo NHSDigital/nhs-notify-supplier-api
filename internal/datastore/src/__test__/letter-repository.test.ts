@@ -494,6 +494,7 @@ describe("LetterRepository", () => {
     await checkLetterStatus("supplier1", "letter59", "PENDING");
   });
 
+  // eslint-disable-next-line jest/expect-expect
   test("should skip array gaps", async () => {
     const letters = [];
     letters[0] = createLetter("supplier1", "letter1");
@@ -515,5 +516,72 @@ describe("LetterRepository", () => {
         createLetter("supplier1", "letter1"),
       ]),
     ).rejects.toThrow("Cannot do operations on a non-existent table");
+  });
+
+  test("should paginate through multiple pages when fetching letters by supplier", async () => {
+    const mockSend = jest
+      .fn()
+      // first call returns 30 items with a LastEvaluatedKey
+      .mockResolvedValueOnce({
+        Items: Array.from({ length: 30 }, (_, i) => ({
+          id: `letter${(i + 1).toString().padStart(3, "0")}`,
+          status: "PENDING",
+          specificationId: "specification1",
+          groupId: "group1",
+        })),
+        LastEvaluatedKey: { id: "letter030", supplierId: "supplier1" },
+      })
+      // second call returns remaining 20 items without LastEvaluatedKey
+      .mockResolvedValueOnce({
+        Items: Array.from({ length: 20 }, (_, i) => ({
+          id: `letter${(i + 31).toString().padStart(3, "0")}`,
+          status: "PENDING",
+          specificationId: "specification1",
+          groupId: "group1",
+        })),
+        LastEvaluatedKey: undefined,
+      });
+
+    const mockDdbClient = { send: mockSend } as any;
+    const repo = new LetterRepository(mockDdbClient, logger, db.config);
+
+    // request 50 letters - should require 2 DynamoDB queries due to mocked pagination
+    const letters = await repo.getLettersBySupplier("supplier1", "PENDING", 50);
+
+    // verify all 50 letters were returned
+    expect(letters).toHaveLength(50);
+
+    // verify two send calls were made (2 pages)
+    expect(mockSend).toHaveBeenCalledTimes(2);
+
+    // verify the second call included the ExclusiveStartKey from first response
+    const secondCallInput = mockSend.mock.calls[1][0].input;
+    expect(secondCallInput.ExclusiveStartKey).toEqual({
+      id: "letter030",
+      supplierId: "supplier1",
+    });
+  });
+
+  test("should respect limit when fewer items available than requested", async () => {
+    // create only 10 letters
+    for (let i = 1; i <= 10; i++) {
+      await letterRepository.putLetter(
+        createLetter(
+          "supplier1",
+          `letter${i.toString().padStart(2, "0")}`,
+          "PENDING",
+        ),
+      );
+    }
+
+    // request 50 letters but only 10 exist
+    const letters = await letterRepository.getLettersBySupplier(
+      "supplier1",
+      "PENDING",
+      50,
+    );
+
+    expect(letters).toHaveLength(10);
+    expect(letters.every((l) => l.status === "PENDING")).toBe(true);
   });
 });
