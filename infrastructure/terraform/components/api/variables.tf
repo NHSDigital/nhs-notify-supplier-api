@@ -63,12 +63,6 @@ variable "commit_id" {
   default     = "HEAD"
 }
 
-variable "enable_backups" {
-  type        = bool
-  description = "Enable backups"
-  default     = false
-}
-
 variable "force_destroy" {
   type        = bool
   description = "Flag to force deletion of S3 buckets"
