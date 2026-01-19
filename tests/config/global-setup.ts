@@ -1,3 +1,4 @@
+import { logger } from "tests/helpers/pino-logger";
 import {
   checkSupplierExists,
   createSupplierEntry,
@@ -6,9 +7,9 @@ import {
 import { SUPPLIERID } from "../constants/api-constants";
 
 async function globalSetup() {
-  console.log("");
-  console.log("*** BEGINNING GLOBAL SETUP ***");
-  console.log("");
+  logger.info("");
+  logger.info("*** BEGINNING GLOBAL SETUP ***");
+  logger.info("");
 
   // create test data
 
@@ -17,19 +18,19 @@ async function globalSetup() {
   // check supplier exists
   const supplier = await checkSupplierExists(SUPPLIERID);
   if (supplier) {
-    console.log(`Supplier with ID ${SUPPLIERID} already exists.`);
-    console.log("");
-    console.log("*** GLOBAL SETUP COMPLETE ***");
-    console.log("");
+    logger.info(`Supplier with ID ${SUPPLIERID} already exists.`);
+    logger.info("");
+    logger.info("*** GLOBAL SETUP COMPLETE ***");
+    logger.info("");
     return;
   }
 
-  console.log(`Creating supplier entry with ID: ${SUPPLIERID}`);
+  logger.info(`Creating supplier entry with ID: ${SUPPLIERID}`);
   await createSupplierEntry(SUPPLIERID);
 
-  console.log("");
-  console.log("*** GLOBAL SETUP COMPLETE ***");
-  console.log("");
+  logger.info("");
+  logger.info("*** GLOBAL SETUP COMPLETE ***");
+  logger.info("");
 }
 
 export default globalSetup;
