@@ -22,6 +22,5 @@ module "eventsub" {
   sns_success_logging_sample_percent = 0
 
   event_cache_expiry_days = 30
-  enable_event_cache      = true
   shared_infra_account_id = var.shared_infra_account_id
 }
