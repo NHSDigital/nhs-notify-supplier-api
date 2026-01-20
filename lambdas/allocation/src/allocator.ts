@@ -1,9 +1,7 @@
 import { SNSEvent, SNSEventRecord, SNSHandler } from "aws-lambda";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
-import {
-  $LetterEvent,
-  LetterEvent,
-} from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
+import { randomUUID } from "node:crypto";
+
 import { Deps } from "./deps";
 
 export default function createAllocator(deps: Deps): SNSHandler {
@@ -11,8 +9,8 @@ export default function createAllocator(deps: Deps): SNSHandler {
     // Allocation will be done under a future ticket. For now, just place events on the queue,
     // adding a message group ID to permit the use of a FIFO queue
     const sqsCommands: SendMessageCommand[] = event.Records.map((record) =>
-      extractLetterEvent(record),
-    ).map((letterEvent) => buildSendMessageCommand(letterEvent, deps.queueUrl));
+      buildSendMessageCommand(record, deps.queueUrl),
+    );
 
     for (const sqsCommand of sqsCommands) {
       deps.logger.info({
@@ -24,14 +22,12 @@ export default function createAllocator(deps: Deps): SNSHandler {
   };
 }
 
-function extractLetterEvent(record: SNSEventRecord): LetterEvent {
-  return $LetterEvent.parse(JSON.parse(record.Sns.Message));
-}
-
-function buildSendMessageCommand(letterEvent: LetterEvent, queueUrl: string) {
+function buildSendMessageCommand(snsRecord: SNSEventRecord, queueUrl: string) {
   return new SendMessageCommand({
     QueueUrl: queueUrl,
-    MessageBody: JSON.stringify(letterEvent),
-    MessageGroupId: letterEvent.data.domainId,
+    MessageBody: JSON.stringify(snsRecord),
+    // Using a random UUID here effectively means that the amendments queue is not FIFO for new pending
+    // letters. Pragmatically this is OK because we shouldn't be getting updates from the supplier yet.
+    MessageGroupId: randomUUID(),
   });
 }
