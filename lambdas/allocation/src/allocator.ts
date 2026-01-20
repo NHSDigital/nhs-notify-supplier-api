@@ -25,7 +25,7 @@ export default function createAllocator(deps: Deps): SNSHandler {
 function buildSendMessageCommand(snsRecord: SNSEventRecord, queueUrl: string) {
   return new SendMessageCommand({
     QueueUrl: queueUrl,
-    MessageBody: JSON.stringify(snsRecord),
+    MessageBody: JSON.stringify(snsRecord.Sns),
     // Using a random UUID here effectively means that the amendments queue is not FIFO for new pending
     // letters. Pragmatically this is OK because we shouldn't be getting updates from the supplier yet.
     MessageGroupId: randomUUID(),

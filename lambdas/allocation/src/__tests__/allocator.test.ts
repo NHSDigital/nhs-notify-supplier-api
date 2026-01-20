@@ -92,7 +92,7 @@ describe("allocator", () => {
         expect.objectContaining({
           input: {
             QueueUrl: mockQueueUrl,
-            MessageBody: JSON.stringify(snsEvent.Records[0]),
+            MessageBody: JSON.stringify(snsEvent.Records[0].Sns),
             MessageGroupId: expect.any(String),
           },
         }),
@@ -120,7 +120,7 @@ describe("allocator", () => {
         expect.objectContaining({
           input: {
             QueueUrl: mockQueueUrl,
-            MessageBody: JSON.stringify(snsEvent.Records[0]),
+            MessageBody: JSON.stringify(snsEvent.Records[0].Sns),
             MessageGroupId: expect.any(String),
           },
         }),
@@ -130,7 +130,7 @@ describe("allocator", () => {
         expect.objectContaining({
           input: {
             QueueUrl: mockQueueUrl,
-            MessageBody: JSON.stringify(snsEvent.Records[1]),
+            MessageBody: JSON.stringify(snsEvent.Records[1].Sns),
             MessageGroupId: expect.any(String),
           },
         }),
@@ -140,7 +140,7 @@ describe("allocator", () => {
         expect.objectContaining({
           input: {
             QueueUrl: mockQueueUrl,
-            MessageBody: JSON.stringify(snsEvent.Records[2]),
+            MessageBody: JSON.stringify(snsEvent.Records[2].Sns),
             MessageGroupId: expect.any(String),
           },
         }),
