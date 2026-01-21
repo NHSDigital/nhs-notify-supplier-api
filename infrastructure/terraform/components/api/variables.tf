@@ -162,3 +162,22 @@ variable "core_environment" {
   default     = "prod"
 
 }
+
+# Event Pub/Sub cache settings
+variable "enable_event_cache" {
+  type        = bool
+  description = "Enable caching of events to an S3 bucket"
+  default     = false
+}
+
+variable "enable_sns_delivery_logging" {
+  type        = bool
+  description = "Enable SNS Delivery Failure Notifications"
+  default     = false
+}
+
+variable "sns_success_logging_sample_percent" {
+  type        = number
+  description = "Enable SNS Delivery Successful Sample Percentage"
+  default     = 0
+}
