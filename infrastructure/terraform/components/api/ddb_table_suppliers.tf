@@ -30,5 +30,10 @@ resource "aws_dynamodb_table" "suppliers" {
     enabled = true
   }
 
-  tags = var.default_tags
+  tags = merge(
+    local.default_tags,
+    {
+      NHSE-Enable-Dynamo-Backup-Acct = "True"
+    }
+  )
 }

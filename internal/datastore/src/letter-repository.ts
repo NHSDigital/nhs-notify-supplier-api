@@ -230,23 +230,39 @@ export class LetterRepository {
     status: string,
     limit: number,
   ): Promise<LetterBase[]> {
+    const items: Record<string, any>[] = [];
+    let ExclusiveStartKey: Record<string, any> | undefined;
     const supplierStatus = `${supplierId}#${status}`;
-    const result = await this.ddbClient.send(
-      new QueryCommand({
-        TableName: this.config.lettersTableName,
-        IndexName: "supplierStatus-index",
-        KeyConditionExpression: "supplierStatus = :supplierStatus",
-        Limit: limit,
-        ExpressionAttributeNames: {
-          "#status": "status", // reserved keyword
-        },
-        ExpressionAttributeValues: {
-          ":supplierStatus": supplierStatus,
-        },
-        ProjectionExpression:
-          "id, #status, specificationId, groupId, reasonCode, reasonText",
-      }),
-    );
-    return z.array(LetterSchemaBase).parse(result.Items ?? []);
+    let res;
+
+    do {
+      const remaining = limit - items.length;
+
+      res = await this.ddbClient.send(
+        new QueryCommand({
+          TableName: this.config.lettersTableName,
+          IndexName: "supplierStatus-index",
+          KeyConditionExpression: "supplierStatus = :supplierStatus",
+          ExpressionAttributeNames: {
+            "#status": "status", // reserved keyword
+          },
+          ExpressionAttributeValues: {
+            ":supplierStatus": supplierStatus,
+          },
+          ProjectionExpression:
+            "id, #status, specificationId, groupId, reasonCode, reasonText",
+          Limit: remaining, // limit is a per-page cap
+          ExclusiveStartKey,
+        }),
+      );
+
+      if (res.Items?.length) {
+        items.push(...res.Items);
+      }
+
+      ExclusiveStartKey = res.LastEvaluatedKey;
+    } while (res.LastEvaluatedKey && items.length < limit);
+
+    return z.array(LetterSchemaBase).parse(items);
   }
 }

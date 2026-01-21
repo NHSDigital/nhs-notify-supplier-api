@@ -75,6 +75,8 @@ jobs:
     name: "Unit tests"
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5
@@ -149,6 +151,8 @@ jobs:
     name: "Linting"
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5
@@ -180,6 +184,8 @@ jobs:
     name: "Typecheck"
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5

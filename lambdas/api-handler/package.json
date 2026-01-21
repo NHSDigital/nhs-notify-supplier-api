@@ -7,6 +7,7 @@
     "@aws-sdk/s3-request-presigner": "^3.925.0",
     "@internal/datastore": "*",
     "@internal/helpers": "*",
+    "aws-lambda": "^1.0.7",
     "esbuild": "^0.25.11",
     "pino": "^9.7.0",
     "zod": "^4.1.11"
@@ -18,7 +19,8 @@
     "jest": "^30.2.0",
     "jest-mock-extended": "^4.0.0",
     "ts-jest": "^29.4.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "zod": "^4.1.11"
   },
   "name": "nhs-notify-supplier-api-handler",
   "private": true,

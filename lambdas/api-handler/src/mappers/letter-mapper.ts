@@ -59,7 +59,7 @@ export function mapToUpdateCommands(
   request: PostLettersRequest,
   supplierId: string,
 ): UpdateLetterCommand[] {
-  return request.data.map( (letterToUpdate: PostLettersRequestResource) => ({
+  return request.data.map((letterToUpdate: PostLettersRequestResource) => ({
     id: letterToUpdate.id,
     supplierId,
     status: LetterStatus.parse(letterToUpdate.attributes.status),

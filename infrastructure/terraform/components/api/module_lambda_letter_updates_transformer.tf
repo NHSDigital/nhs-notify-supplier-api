@@ -24,7 +24,7 @@ module "letter_updates_transformer" {
   function_include_common = true
   handler_function_name   = "handler"
   runtime                 = "nodejs22.x"
-  memory                  = 128
+  memory                  = 512
   timeout                 = 29
   log_level               = var.log_level
 
@@ -35,7 +35,8 @@ module "letter_updates_transformer" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
-    EVENTPUB_SNS_TOPIC_ARN = "${module.eventpub.sns_topic.arn}"
+    EVENTPUB_SNS_TOPIC_ARN = "${module.eventpub.sns_topic.arn}",
+    EVENT_SOURCE = "/data-plane/supplier-api/${var.group}/${var.environment}/letters"
   })
 }
 

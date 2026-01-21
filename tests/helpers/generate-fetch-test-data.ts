@@ -29,6 +29,7 @@ export interface SupplierApiLetters {
   ttl: string;
   reasonText: string;
   status: string;
+  source: string;
 }
 
 export async function createTestData(

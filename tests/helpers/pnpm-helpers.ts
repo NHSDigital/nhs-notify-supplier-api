@@ -64,7 +64,6 @@ export async function runCreateLetter(options: {
   ];
 
   await new Promise<void>((resolve, reject) => {
-    let output = "";
     const child = spawn(cmd, args, {
       stdio: "inherit",
       cwd: root,
@@ -72,7 +71,6 @@ export async function runCreateLetter(options: {
     });
     child.stdout?.on("id", (id) => {
       const text = id.toString();
-      output += text;
       process.stdout.write(text);
     });
 
@@ -91,7 +89,7 @@ export async function createSupplierData(options: {
   environment: string;
   status: string;
 }) {
-  const { apimId, environment, name, status, supplierId, filter } = options;
+  const { apimId, environment, filter, name, status, supplierId } = options;
 
   const workspaceRoot = path.resolve(
     __dirname,
@@ -122,7 +120,6 @@ export async function createSupplierData(options: {
   ];
 
   await new Promise<void>((resolve, reject) => {
-    let output = "";
     const child = spawn(cmd, args, {
       stdio: "inherit",
       cwd: root,
@@ -130,7 +127,6 @@ export async function createSupplierData(options: {
     });
     child.stdout?.on("id", (id) => {
       const text = id.toString();
-      output += text;
       process.stdout.write(text);
     });
 

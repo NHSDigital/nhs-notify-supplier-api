@@ -47,7 +47,7 @@ function getOperationFromType(type: string): UpsertOperation {
           preparedRequest,
           supplierSpec.supplierId,
           supplierSpec.specId,
-          supplierSpec.specId, //use specId for now
+          supplierSpec.specId, // use specId for now
         );
         await deps.letterRepo.putLetter(letterToInsert);
       },
@@ -86,7 +86,7 @@ function mapToInsertLetter(
     subject: upsertRequest.subject,
     createdAt: now,
     updatedAt: now,
-    billingRef: billingRef,
+    billingRef,
   };
 }
 
@@ -118,6 +118,14 @@ function parseSNSNotification(record: SQSRecord) {
     );
   }
   return notification.Message;
+}
+
+function removeEventBridgeWrapper(event: any) {
+  const maybeEventBridge = event;
+  if (maybeEventBridge.source && maybeEventBridge.detail) {
+    return maybeEventBridge.detail;
+  }
+  return event;
 }
 
 function getType(event: unknown) {
@@ -152,7 +160,9 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
       try {
         const message: string = parseSNSNotification(record);
 
-        const letterEvent: unknown = JSON.parse(message);
+        const snsEvent = JSON.parse(message);
+
+        const letterEvent: unknown = removeEventBridgeWrapper(snsEvent);
 
         const type = getType(letterEvent);
 

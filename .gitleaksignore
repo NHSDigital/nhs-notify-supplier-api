@@ -22,3 +22,6 @@ e12407e09151898bfd8d049d57eee9db9977d56b:.github/copilot-instructions.md:generic
 82f6be3e657b46d8447e77cdc1894fba0b855c26:tests/component-tests/testCases/create-letter-request.spec.ts:generic-api-key:10
 debc75a97cfe551a69fd1e8694be483213322a9d:pact-contracts/pacts/letter-rendering/supplier-api-letter-request-prepared.json:generic-api-key:10
 777eb4047ad06b9e939a292ee18664a0ffee4f29:tests/resources/prepared-letter.json:generic-api-key:4
+4fa1923947bbff2387218d698d766cbb7c121a0f:pact-contracts/pacts/letter-rendering/supplier-api-letter-request-prepared.json:generic-api-key:10
+d005112adcfd286c3bef076214836dbb2fe8d0b5:.npmrc:npm-access-token:9
+d005112adcfd286c3bef076214836dbb2fe8d0b5:.npmrc:github-pat:7

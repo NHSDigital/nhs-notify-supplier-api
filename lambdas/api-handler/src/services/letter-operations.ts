@@ -1,7 +1,7 @@
 import { LetterBase, LetterRepository } from "@internal/datastore";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { SendMessageCommand } from "@aws-sdk/client-sqs";
+import { SendMessageBatchCommand } from "@aws-sdk/client-sqs";
 import NotFoundError from "../errors/not-found-error";
 import { UpdateLetterCommand } from "../contracts/letters";
 import { ApiErrorDetail } from "../contracts/errors";
@@ -81,36 +81,64 @@ export const getLetterDataUrl = async (
   }
 };
 
+function chunk(
+  arr: UpdateLetterCommand[],
+  size: number,
+): UpdateLetterCommand[][] {
+  const chunks: UpdateLetterCommand[][] = [];
+  for (let i = 0; i < arr.length; i += size)
+    chunks.push(arr.slice(i, i + size));
+  return chunks;
+}
+
 export async function enqueueLetterUpdateRequests(
   updateLetterCommands: UpdateLetterCommand[],
   correlationId: string,
   deps: Deps,
 ) {
-  const tasks = updateLetterCommands.map(
-    async (request: UpdateLetterCommand) => {
-      try {
-        const command = new SendMessageCommand({
-          QueueUrl: deps.env.QUEUE_URL,
+  const BATCH_SIZE = 10; // SQS SendMessageBatch max
+  const CONCURRENCY = 5; // number of parallel batch API calls
+
+  const batches = chunk(updateLetterCommands, BATCH_SIZE);
+
+  // send batches in groups with limited concurrency
+  // BATCH_SIZE * CONCURRENCY is the number of total updates / db calls in-flight
+  for (let i = 0; i < batches.length; i += CONCURRENCY) {
+    const window = batches.slice(i, i + CONCURRENCY);
+
+    await Promise.all(
+      window.map(async (batch, batchIdx) => {
+        const entries = batch.map((request, idx) => ({
+          Id: `${i + batchIdx}-${idx}`, // unique per batch entry
+          MessageBody: JSON.stringify(request),
           MessageAttributes: {
             CorrelationId: { DataType: "String", StringValue: correlationId },
           },
-          MessageBody: JSON.stringify(request),
-        });
-        await deps.sqsClient.send(command);
-      } catch (error) {
-        deps.logger.error(
-          {
-            err: error,
-            correlationId,
-            letterId: request.id,
-            letterStatus: request.status,
-            supplierId: request.supplierId,
-          },
-          "Error enqueuing letter status update",
-        );
-      }
-    },
-  );
+        }));
 
-  await Promise.all(tasks);
+        const cmd = new SendMessageBatchCommand({
+          QueueUrl: deps.env.QUEUE_URL,
+          Entries: entries,
+        });
+
+        try {
+          const result = await deps.sqsClient.send(cmd);
+          if (result.Failed && result.Failed.length > 0) {
+            deps.logger.error(
+              { failed: result.Failed },
+              "Some batch entries failed",
+            );
+          }
+        } catch (error) {
+          deps.logger.error(
+            {
+              err: error,
+              correlationId,
+            },
+            "Error enqueuing letter status updates",
+          );
+        }
+      }),
+    );
+  }
 }

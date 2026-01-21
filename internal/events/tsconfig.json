@@ -4,8 +4,7 @@
     "isolatedModules": true,
     "module": "commonjs",
     "outDir": "dist",
-    "resolveJsonModule": true,
-    "rootDir": "src"
+    "resolveJsonModule": true
   },
   "exclude": [
     "node_modules",
@@ -14,6 +13,7 @@
   "extends": "../../tsconfig.base.json",
   "include": [
     "src/**/*",
-    "package.json"
+    "package.json",
+    "jest.config.ts"
   ]
 }
