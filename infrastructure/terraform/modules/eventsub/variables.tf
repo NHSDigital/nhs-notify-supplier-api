@@ -100,7 +100,7 @@ variable "enable_event_cache" {
 variable "enable_firehose_raw_message_delivery" {
   type        = bool
   description = "Enables raw message delivery on firehose subscription"
-  default     = true
+  default     = false
 }
 
 variable "force_destroy" {
@@ -113,4 +113,9 @@ variable "shared_infra_account_id" {
   type        = string
   description = "The AWS Account ID of the shared infrastructure account"
   default     = "000000000000"
+}
+
+variable "glue_role_arn" {
+  type        = string
+  description = "ARN of the Glue execution role from the parent"
 }
