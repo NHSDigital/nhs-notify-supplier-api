@@ -19,7 +19,7 @@ import {
   LetterRequestPreparedEventV2,
 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import z from "zod";
-import { metricScope, Unit } from "aws-embedded-metrics";
+import { Unit, metricScope } from "aws-embedded-metrics";
 import { Deps } from "../config/deps";
 
 type SupplierSpec = { supplierId: string; specId: string };
@@ -154,15 +154,18 @@ async function runUpsert(
 }
 
 export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
-  return metricScope(async (metrics) => {
+  return metricScope((metrics) => {
     return async (event: SQSEvent) => {
+      console.log("The SQSEvent:", event);
       const batchItemFailures: SQSBatchItemFailure[] = [];
 
       const tasks = event.Records.map(async (record) => {
         try {
           const message: string = parseSNSNotification(record);
+          console.log("the message:", message);
 
           const snsEvent = JSON.parse(message);
+          console.log("the snsEvent:", snsEvent);
 
           const letterEvent: unknown = removeEventBridgeWrapper(snsEvent);
 
@@ -189,7 +192,6 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
             // eslint-disable-next-line sonarjs/pseudo-random
             OddOrEven: `${Math.floor(Math.random() * 10) % 2}`,
           });
-          metrics.setProperty("operation", operation.name);
           metrics.putMetric("MessageFailed", 1, Unit.Count);
           batchItemFailures.push({ itemIdentifier: record.messageId });
         }
