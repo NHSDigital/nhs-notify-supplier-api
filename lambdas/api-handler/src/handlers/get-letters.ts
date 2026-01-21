@@ -125,7 +125,7 @@ export default function createGetLettersHandler(
 
       return {
         statusCode: 200,
-        body: JSON.stringify(response, null, 2),
+        body: JSON.stringify(response),
       };
     } catch (error) {
       return processError(error, commonIds.value.correlationId, deps.logger);
