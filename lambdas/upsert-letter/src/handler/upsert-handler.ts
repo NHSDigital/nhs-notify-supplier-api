@@ -19,6 +19,7 @@ import {
   LetterRequestPreparedEventV2,
 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import z from "zod";
+import { metricScope, Unit } from "aws-embedded-metrics";
 import { Deps } from "../config/deps";
 
 type SupplierSpec = { supplierId: string; specId: string };
@@ -153,33 +154,50 @@ async function runUpsert(
 }
 
 export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
-  return async (event: SQSEvent) => {
-    const batchItemFailures: SQSBatchItemFailure[] = [];
+  return metricScope(async (metrics) => {
+    return async (event: SQSEvent) => {
+      const batchItemFailures: SQSBatchItemFailure[] = [];
 
-    const tasks = event.Records.map(async (record) => {
-      try {
-        const message: string = parseSNSNotification(record);
+      const tasks = event.Records.map(async (record) => {
+        try {
+          const message: string = parseSNSNotification(record);
 
-        const snsEvent = JSON.parse(message);
+          const snsEvent = JSON.parse(message);
 
-        const letterEvent: unknown = removeEventBridgeWrapper(snsEvent);
+          const letterEvent: unknown = removeEventBridgeWrapper(snsEvent);
 
-        const type = getType(letterEvent);
+          const type = getType(letterEvent);
 
-        const operation = getOperationFromType(type);
+          const operation = getOperationFromType(type);
 
-        await runUpsert(operation, letterEvent, deps);
-      } catch (error) {
-        deps.logger.error(
-          { err: error, message: record.body },
-          `Error processing upsert of record ${record.messageId}`,
-        );
-        batchItemFailures.push({ itemIdentifier: record.messageId });
-      }
-    });
+          await runUpsert(operation, letterEvent, deps);
+          metrics.putDimensions({
+            FunctionName: "upsertLambda",
+            // eslint-disable-next-line sonarjs/pseudo-random
+            OddOrEven: `${Math.floor(Math.random() * 10) % 2}`,
+            OperationType: operation.name,
+          });
+          metrics.setProperty("operation", operation.name);
+          metrics.putMetric("MessagesProcessed", 1, Unit.Count);
+        } catch (error) {
+          deps.logger.error(
+            { err: error, message: record.body },
+            `Error processing upsert of record ${record.messageId}`,
+          );
+          metrics.putDimensions({
+            FunctionName: "upsertLambda",
+            // eslint-disable-next-line sonarjs/pseudo-random
+            OddOrEven: `${Math.floor(Math.random() * 10) % 2}`,
+          });
+          metrics.setProperty("operation", operation.name);
+          metrics.putMetric("MessageFailed", 1, Unit.Count);
+          batchItemFailures.push({ itemIdentifier: record.messageId });
+        }
+      });
 
-    await Promise.all(tasks);
+      await Promise.all(tasks);
 
-    return { batchItemFailures };
-  };
+      return { batchItemFailures };
+    };
+  });
 }
