@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@aws-sdk/client-cloudwatch": "^3.972.0",
     "@aws-sdk/client-dynamodb": "^3.858.0",
     "@aws-sdk/lib-dynamodb": "^3.858.0",
     "@internal/datastore": "*",
