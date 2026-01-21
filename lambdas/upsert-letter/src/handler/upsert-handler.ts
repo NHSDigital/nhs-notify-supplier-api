@@ -20,13 +20,7 @@ import {
 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import z from "zod";
 import { Unit, metricScope } from "aws-embedded-metrics";
-import {
-  CloudWatchClient,
-  PutMetricDataCommand,
-} from "@aws-sdk/client-dynamodb";
 import { Deps } from "../config/deps";
-
-const cwClient = new CloudWatchClient({ region: "eu-west-2" });
 
 type SupplierSpec = { supplierId: string; specId: string };
 type PreparedEvents = LetterRequestPreparedEventV2 | LetterRequestPreparedEvent;
