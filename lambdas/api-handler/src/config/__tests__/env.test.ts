@@ -25,6 +25,8 @@ describe("lambdaEnv", () => {
     process.env.DOWNLOAD_URL_TTL_SECONDS = "60";
     process.env.MAX_LIMIT = "2500";
     process.env.QUEUE_URL = "url";
+    process.env.EVENT_SOURCE = "supplier-api";
+    process.env.SNS_TOPIC_ARN = "sns-topic.arn";
 
     const { envVars } = require("../env");
 
@@ -38,6 +40,8 @@ describe("lambdaEnv", () => {
       DOWNLOAD_URL_TTL_SECONDS: 60,
       MAX_LIMIT: 2500,
       QUEUE_URL: "url",
+      EVENT_SOURCE: "supplier-api",
+      SNS_TOPIC_ARN: "sns-topic.arn",
     });
   });
 
@@ -61,6 +65,8 @@ describe("lambdaEnv", () => {
     process.env.LETTER_TTL_HOURS = "12960";
     process.env.MI_TTL_HOURS = "2160";
     process.env.DOWNLOAD_URL_TTL_SECONDS = "60";
+    process.env.EVENT_SOURCE = "supplier-api";
+    process.env.SNS_TOPIC_ARN = "sns-topic.arn";
 
     const { envVars } = require("../env");
 
@@ -73,6 +79,8 @@ describe("lambdaEnv", () => {
       MI_TTL_HOURS: 2160,
       DOWNLOAD_URL_TTL_SECONDS: 60,
       MAX_LIMIT: undefined,
+      EVENT_SOURCE: "supplier-api",
+      SNS_TOPIC_ARN: "sns-topic.arn",
     });
   });
 });

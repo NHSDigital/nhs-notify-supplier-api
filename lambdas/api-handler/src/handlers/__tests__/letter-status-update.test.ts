@@ -1,12 +1,24 @@
 import { Context, SQSEvent, SQSRecord } from "aws-lambda";
 import { mockDeep } from "jest-mock-extended";
-import { S3Client } from "@aws-sdk/client-s3";
 import pino from "pino";
-import { LetterRepository } from "@internal/datastore/src";
+import { SNSClient } from "@aws-sdk/client-sns";
+import { mapLetterToCloudEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-mapper";
+import { Letter, LetterRepository } from "@internal/datastore/src";
 import { UpdateLetterCommand } from "../../contracts/letters";
 import { EnvVars } from "../../config/env";
 import { Deps } from "../../config/deps";
 import createLetterStatusUpdateHandler from "../letter-status-update";
+
+// Make crypto return consistent values, since we"re calling it in both prod and test code and comparing the values
+const realCrypto = jest.requireActual("crypto");
+const randomBytes: Record<string, any> = {
+  "8": realCrypto.randomBytes(8),
+  "16": realCrypto.randomBytes(16),
+};
+jest.mock("crypto", () => ({
+  randomUUID: () => "4616b2d9-b7a5-45aa-8523-fa7419626b69",
+  randomBytes: (size: number) => randomBytes[String(size)],
+}));
 
 const buildEvent = (updateLetterCommand: UpdateLetterCommand[]): SQSEvent => {
   const records: Partial<SQSRecord>[] = updateLetterCommand.map((letter) => {
@@ -30,51 +42,64 @@ const buildEvent = (updateLetterCommand: UpdateLetterCommand[]): SQSEvent => {
 };
 
 describe("createLetterStatusUpdateHandler", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.clearAllMocks();
   });
 
-  it("processes letters successfully", async () => {
-    const updateLetterCommands: UpdateLetterCommand[] = [
-      {
-        id: "id1",
-        status: "REJECTED",
-        supplierId: "s1",
-        reasonCode: "123",
-        reasonText: "Reason text",
-      },
-      {
-        id: "id2",
-        supplierId: "s2",
-        status: "ACCEPTED",
-      },
-      {
-        id: "id3",
-        supplierId: "s3",
-        status: "DELIVERED",
-      },
-    ];
+  const mockedDeps: jest.Mocked<Deps> = {
+    snsClient: { send: jest.fn() } as unknown as SNSClient,
+    letterRepo: {
+      getLetterById: jest.fn(),
+    } as unknown as LetterRepository,
+    logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
+    env: {
+      EVENT_SOURCE: "supplier-api",
+      SNS_TOPIC_ARN: "sns_topic.arn",
+    } as unknown as EnvVars,
+  } as Deps;
 
-    const mockedDeps: jest.Mocked<Deps> = {
-      s3Client: {} as unknown as S3Client,
-      letterRepo: {
-        updateLetterStatus: jest
-          .fn()
-          .mockResolvedValueOnce(updateLetterCommands[0])
-          .mockResolvedValueOnce(updateLetterCommands[1])
-          .mockResolvedValueOnce(updateLetterCommands[2]),
-      } as unknown as LetterRepository,
-      logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
-      env: {
-        SUPPLIER_ID_HEADER: "nhsd-supplier-id",
-        APIM_CORRELATION_HEADER: "nhsd-correlation-id",
-        LETTERS_TABLE_NAME: "LETTERS_TABLE_NAME",
-        LETTER_TTL_HOURS: 12_960,
-        DOWNLOAD_URL_TTL_SECONDS: 60,
-        MAX_LIMIT: 2500,
-        QUEUE_URL: "SQS_URL",
-      } as unknown as EnvVars,
-    } as Deps;
+  const letters: Letter[] = [
+    {
+      id: "id1",
+      supplierId: "s1",
+      status: "PENDING",
+    } as Letter,
+    {
+      id: "id2",
+      supplierId: "s2",
+      status: "PENDING",
+    } as Letter,
+    {
+      id: "id3",
+      supplierId: "s3",
+      status: "PENDING",
+    } as Letter,
+  ];
+
+  const updateLetterCommands: UpdateLetterCommand[] = [
+    {
+      ...letters[0],
+      status: "REJECTED",
+      reasonCode: "123",
+      reasonText: "Reason text",
+    },
+    { ...letters[1], status: "ACCEPTED" },
+    { ...letters[2], status: "DELIVERED" },
+  ];
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it("processes letters successfully", async () => {
+    (mockedDeps.letterRepo.getLetterById as jest.Mock)
+      .mockResolvedValueOnce(letters[0])
+      .mockResolvedValueOnce(letters[1])
+      .mockResolvedValueOnce(letters[2]);
 
     const context = mockDeep<Context>();
     const callback = jest.fn();
@@ -87,70 +112,74 @@ describe("createLetterStatusUpdateHandler", () => {
       callback,
     );
 
-    expect(mockedDeps.letterRepo.updateLetterStatus).toHaveBeenNthCalledWith(
-      1,
-      updateLetterCommands[0],
-    );
-    expect(mockedDeps.letterRepo.updateLetterStatus).toHaveBeenNthCalledWith(
-      2,
-      updateLetterCommands[1],
-    );
-    expect(mockedDeps.letterRepo.updateLetterStatus).toHaveBeenNthCalledWith(
-      3,
-      updateLetterCommands[2],
-    );
+    for (let i = 0; i < 3; i++) {
+      expect(mockedDeps.snsClient.send).toHaveBeenNthCalledWith(
+        i + 1,
+        expect.objectContaining({
+          input: expect.objectContaining({
+            TopicArn: mockedDeps.env.SNS_TOPIC_ARN,
+            Message: JSON.stringify(
+              mapLetterToCloudEvent(
+                updateLetterCommands[i] as Letter,
+                mockedDeps.env.EVENT_SOURCE,
+              ),
+            ),
+          }),
+        }),
+      );
+    }
   });
 
   it("logs error if error thrown when updating", async () => {
     const mockError = new Error("Update error");
-
-    const mockedDeps: jest.Mocked<Deps> = {
-      s3Client: {} as unknown as S3Client,
-      letterRepo: {
-        updateLetterStatus: jest.fn().mockRejectedValue(mockError),
-      } as unknown as LetterRepository,
-      logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
-      env: {
-        SUPPLIER_ID_HEADER: "nhsd-supplier-id",
-        APIM_CORRELATION_HEADER: "nhsd-correlation-id",
-        LETTERS_TABLE_NAME: "LETTERS_TABLE_NAME",
-        LETTER_TTL_HOURS: 12_960,
-        DOWNLOAD_URL_TTL_SECONDS: 60,
-        MAX_LIMIT: 2500,
-        QUEUE_URL: "SQS_URL",
-      } as unknown as EnvVars,
-    } as Deps;
+    (mockedDeps.snsClient.send as jest.Mock).mockRejectedValue(mockError);
+    (mockedDeps.letterRepo.getLetterById as jest.Mock).mockResolvedValueOnce(
+      letters[1],
+    );
 
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const updateLetterCommands: UpdateLetterCommand[] = [
-      {
-        id: "id1",
-        status: "ACCEPTED",
-        supplierId: "s1",
-      },
-    ];
-
     const letterStatusUpdateHandler =
       createLetterStatusUpdateHandler(mockedDeps);
     await letterStatusUpdateHandler(
-      buildEvent(updateLetterCommands),
+      buildEvent([updateLetterCommands[1]]),
       context,
       callback,
     );
 
-    expect(mockedDeps.letterRepo.updateLetterStatus).toHaveBeenCalledWith(
-      updateLetterCommands[0],
-    );
     expect(mockedDeps.logger.error).toHaveBeenCalledWith(
       {
         err: mockError,
-        messageId: "mid-id1",
-        correlationId: "correlationId-id1",
-        messageBody: '{"id":"id1","status":"ACCEPTED","supplierId":"s1"}',
+        messageId: "mid-id2",
+        correlationId: "correlationId-id2",
+        messageBody: '{"id":"id2","supplierId":"s2","status":"ACCEPTED"}',
       },
       "Error processing letter status update",
     );
+  });
+
+  it("returns batch update failures in the response", async () => {
+    (mockedDeps.letterRepo.getLetterById as jest.Mock)
+      .mockResolvedValueOnce(letters[0])
+      .mockResolvedValueOnce(letters[1])
+      .mockResolvedValueOnce(letters[2]);
+    (mockedDeps.snsClient.send as jest.Mock).mockResolvedValueOnce({});
+    (mockedDeps.snsClient.send as jest.Mock).mockRejectedValueOnce(
+      new Error("Update error"),
+    );
+    (mockedDeps.snsClient.send as jest.Mock).mockResolvedValueOnce({});
+
+    const letterStatusUpdateHandler =
+      createLetterStatusUpdateHandler(mockedDeps);
+    const sqsBatchResponse = await letterStatusUpdateHandler(
+      buildEvent(updateLetterCommands),
+      mockDeep<Context>(),
+      jest.fn(),
+    );
+
+    expect(sqsBatchResponse?.batchItemFailures).toEqual([
+      { itemIdentifier: "mid-id2" },
+    ]);
   });
 });
