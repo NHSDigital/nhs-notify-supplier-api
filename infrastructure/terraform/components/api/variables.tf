@@ -163,6 +163,12 @@ variable "core_environment" {
 
 }
 
+variable "enable_backups" {
+  type        = bool
+  description = "Enable backups"
+  default     = false
+}
+
 # Event Pub/Sub cache settings
 variable "enable_event_cache" {
   type        = bool
