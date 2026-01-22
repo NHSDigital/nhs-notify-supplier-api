@@ -95,4 +95,17 @@ data "aws_iam_policy_document" "amendment_event_transformer" {
       module.eventsub.sns_topic.arn
     ]
   }
+
+  statement {
+    sid    = "AllowSNSPublish"
+    effect = "Allow"
+
+    actions = [
+      "sns:Publish"
+    ]
+
+    resources = [
+      module.eventsub.sns_topic.arn
+    ]
+  }
 }
