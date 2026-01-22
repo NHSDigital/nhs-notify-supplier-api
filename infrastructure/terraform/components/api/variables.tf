@@ -181,3 +181,9 @@ variable "sns_success_logging_sample_percent" {
   description = "Enable SNS Delivery Successful Sample Percentage"
   default     = 0
 }
+
+variable "enable_api_data_trace" {
+  type        = bool
+  description = "Enable API Gateway data trace logging"
+  default     = false
+}
