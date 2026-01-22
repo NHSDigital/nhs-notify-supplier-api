@@ -176,6 +176,8 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
           metrics.putDimensions({
             FunctionName: "upsertLambda",
             OperationType: operation.name,
+            // eslint-disable-next-line sonarjs/pseudo-random
+            OddOrEven: `${Math.floor(Math.random() * 10) % 2}`,
           });
 
           await runUpsert(operation, letterEvent, deps);
@@ -189,6 +191,8 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
           );
           metrics.putDimensions({
             FunctionName: "upsertLambda",
+            // eslint-disable-next-line sonarjs/pseudo-random
+            OddOrEven: `${Math.floor(Math.random() * 10) % 2}`,
           });
           metrics.putMetric("MessageFailed", 1, Unit.Count);
           batchItemFailures.push({ itemIdentifier: record.messageId });
