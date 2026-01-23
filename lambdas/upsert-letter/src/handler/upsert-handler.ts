@@ -175,7 +175,6 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
           const operation = getOperationFromType(type);
           metrics.putDimensions({
             FunctionName: "upsertLambda",
-            OperationType: operation.name,
             // eslint-disable-next-line sonarjs/pseudo-random
             OddOrEven: `${Math.floor(Math.random() * 10) % 2}`,
           });
