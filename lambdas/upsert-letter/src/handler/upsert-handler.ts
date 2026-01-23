@@ -156,6 +156,10 @@ async function runUpsert(
 export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
   return metricScope((metrics) => {
     return async (event: SQSEvent) => {
+      console.log(
+        "the environment variables:",
+        JSON.stringify(process.env, null, 2),
+      );
       console.log("The SQSEvent:", event);
       const batchItemFailures: SQSBatchItemFailure[] = [];
       metrics.setNamespace("vlasis_upsertLetter");
