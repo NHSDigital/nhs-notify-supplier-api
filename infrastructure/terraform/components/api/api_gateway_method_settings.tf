@@ -6,6 +6,6 @@ resource "aws_api_gateway_method_settings" "main" {
   settings {
     metrics_enabled    = true
     logging_level      = "INFO"
-    data_trace_enabled = true
+    data_trace_enabled = var.enable_api_data_trace
   }
 }

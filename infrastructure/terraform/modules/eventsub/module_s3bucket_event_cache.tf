@@ -1,5 +1,5 @@
 module "s3bucket_event_cache" {
-  source = "git::https://github.com/NHSDigital/nhs-notify-shared-modules.git//infrastructure/modules/s3bucket?ref=v1.0.8"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-s3bucket.zip"
 
   count = var.enable_event_cache ? 1 : 0
 
@@ -49,6 +49,7 @@ module "s3bucket_event_cache" {
 
   default_tags = {
     Name = "Event Cache Storage"
+    NHSE-Enable-S3-Backup-Acct = "True"
   }
 }
 

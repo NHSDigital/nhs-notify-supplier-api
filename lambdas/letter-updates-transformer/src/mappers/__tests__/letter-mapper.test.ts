@@ -27,7 +27,7 @@ describe("letter-mapper", () => {
       `https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.PRINTED.${event.dataschemaversion}.schema.json`,
     );
     expect(event.dataschemaversion).toMatch(/1\.\d+\.\d+/);
-    expect(event.subject).toBe("letter-origin/supplier-api/letter/id1");
+    expect(event.subject).toBe("letter-origin/letter-rendering/letter/id1");
     expect(event.time).toBe("2025-11-24T15:55:18.000Z");
     expect(event.recordedtime).toBe("2025-11-24T15:55:18.000Z");
     expect(event.data).toEqual({
@@ -40,7 +40,7 @@ describe("letter-mapper", () => {
       reasonCode: "R02",
       reasonText: "Reason text",
       origin: {
-        domain: "supplier-api",
+        domain: "letter-rendering",
         source: "letter-rendering/source/test",
         subject: "letter-rendering/source/letter/letter-id",
         event: event.id,
