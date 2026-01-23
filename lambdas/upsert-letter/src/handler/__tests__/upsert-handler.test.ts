@@ -237,6 +237,7 @@ describe("createUpsertLetterHandler", () => {
     const firstArg = (mockedDeps.letterRepo.putLetter as jest.Mock).mock
       .calls[0][0];
     expect(firstArg.id).toBe("letter1");
+    expect(firstArg.eventId).toBe("7b9a03ca-342a-4150-b56b-989109c45613");
     expect(firstArg.supplierId).toBe("supplier1");
     expect(firstArg.specificationId).toBe("spec1");
     expect(firstArg.url).toBe("s3://letterDataBucket/letter1.pdf");

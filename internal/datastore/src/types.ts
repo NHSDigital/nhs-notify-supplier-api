@@ -42,6 +42,7 @@ export const LetterSchemaBase = z.object({
 
 export const LetterSchema = LetterSchemaBase.extend({
   supplierId: idRef(SupplierSchema, "id"),
+  eventId: z.string().optional(),
   url: z.url(),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -67,6 +68,7 @@ export type InsertLetter = Omit<
 >;
 export type UpdateLetter = {
   id: string;
+  eventId: string;
   supplierId: string;
   status: Letter["status"];
   reasonCode?: string;

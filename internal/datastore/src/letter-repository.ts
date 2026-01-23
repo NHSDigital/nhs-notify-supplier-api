@@ -7,6 +7,7 @@ import {
   UpdateCommand,
   UpdateCommandOutput,
 } from "@aws-sdk/lib-dynamodb";
+import { ConditionalCheckFailedException } from "@aws-sdk/client-dynamodb";
 import { Logger } from "pino";
 import { z } from "zod";
 import {
@@ -163,32 +164,16 @@ export class LetterRepository {
     };
   }
 
-  async updateLetterStatus(letterToUpdate: UpdateLetter): Promise<Letter> {
+  async updateLetterStatus(
+    letterToUpdate: UpdateLetter,
+  ): Promise<Letter | undefined> {
     this.log.debug(
       `Updating letter ${letterToUpdate.id} to status ${letterToUpdate.status}`,
     );
     let result: UpdateCommandOutput;
     try {
-      let updateExpression =
-        "set #status = :status, updatedAt = :updatedAt, supplierStatus = :supplierStatus, #ttl = :ttl";
-      const expressionAttributeValues: Record<string, any> = {
-        ":status": letterToUpdate.status,
-        ":updatedAt": new Date().toISOString(),
-        ":supplierStatus": `${letterToUpdate.supplierId}#${letterToUpdate.status}`,
-        ":ttl": Math.floor(
-          Date.now() / 1000 + 60 * 60 * this.config.lettersTtlHours,
-        ),
-      };
-
-      if (letterToUpdate.reasonCode) {
-        updateExpression += ", reasonCode = :reasonCode";
-        expressionAttributeValues[":reasonCode"] = letterToUpdate.reasonCode;
-      }
-
-      if (letterToUpdate.reasonText) {
-        updateExpression += ", reasonText = :reasonText";
-        expressionAttributeValues[":reasonText"] = letterToUpdate.reasonText;
-      }
+      const { expressionAttributeValues, updateExpression } =
+        this.buildUpdateExpression(letterToUpdate);
 
       result = await this.ddbClient.send(
         new UpdateCommand({
@@ -198,31 +183,61 @@ export class LetterRepository {
             supplierId: letterToUpdate.supplierId,
           },
           UpdateExpression: updateExpression,
-          ConditionExpression: "attribute_exists(id)", // Ensure letter exists
+          ConditionExpression:
+            "attribute_exists(id) AND (attribute_not_exists(eventId) OR eventId <> :eventId)",
           ExpressionAttributeNames: {
             "#status": "status",
             "#ttl": "ttl",
           },
           ExpressionAttributeValues: expressionAttributeValues,
           ReturnValues: "ALL_NEW",
+          ReturnValuesOnConditionCheckFailure: "ALL_OLD",
         }),
       );
+
+      this.log.debug(
+        `Updated letter ${letterToUpdate.id} to status ${letterToUpdate.status}`,
+      );
+      return LetterSchema.parse(result.Attributes);
     } catch (error) {
-      if (
-        error instanceof Error &&
-        error.name === "ConditionalCheckFailedException"
-      ) {
+      if (error instanceof ConditionalCheckFailedException) {
+        if (error.Item?.eventId.S === letterToUpdate.eventId) {
+          this.log.warn(
+            `Skipping update for letter ${letterToUpdate.id}: eventId ${letterToUpdate.eventId} already processed`,
+          );
+          return undefined;
+        }
         throw new Error(
           `Letter with id ${letterToUpdate.id} not found for supplier ${letterToUpdate.supplierId}`,
         );
       }
       throw error;
     }
+  }
 
-    this.log.debug(
-      `Updated letter ${letterToUpdate.id} to status ${letterToUpdate.status}`,
-    );
-    return LetterSchema.parse(result.Attributes);
+  private buildUpdateExpression(letterToUpdate: UpdateLetter) {
+    let updateExpression =
+      "set #status = :status, updatedAt = :updatedAt, supplierStatus = :supplierStatus, #ttl = :ttl, eventId = :eventId";
+    const expressionAttributeValues: Record<string, any> = {
+      ":status": letterToUpdate.status,
+      ":updatedAt": new Date().toISOString(),
+      ":supplierStatus": `${letterToUpdate.supplierId}#${letterToUpdate.status}`,
+      ":ttl": Math.floor(
+        Date.now() / 1000 + 60 * 60 * this.config.lettersTtlHours,
+      ),
+      ":eventId": letterToUpdate.eventId,
+    };
+
+    if (letterToUpdate.reasonCode) {
+      updateExpression += ", reasonCode = :reasonCode";
+      expressionAttributeValues[":reasonCode"] = letterToUpdate.reasonCode;
+    }
+
+    if (letterToUpdate.reasonText) {
+      updateExpression += ", reasonText = :reasonText";
+      expressionAttributeValues[":reasonText"] = letterToUpdate.reasonText;
+    }
+    return { updateExpression, expressionAttributeValues };
   }
 
   async getLettersBySupplier(
