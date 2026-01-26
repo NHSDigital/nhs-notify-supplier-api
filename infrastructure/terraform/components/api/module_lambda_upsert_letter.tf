@@ -85,16 +85,4 @@ data "aws_iam_policy_document" "upsert_letter_lambda" {
       module.sqs_letter_updates.sqs_queue_arn
     ]
   }
-
-  statement {
-    sid = "AllowCloudWatchMetrics"
-    effect = "Allow"
-
-    actions = [
-      "cloudwatch:PutMetricData"
-    ]
-
-    resources = ["*"]
-  }
-
 }

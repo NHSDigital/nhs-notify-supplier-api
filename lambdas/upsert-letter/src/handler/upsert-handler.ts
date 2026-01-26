@@ -162,7 +162,9 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
       );
       console.log("The SQSEvent:", event);
       const batchItemFailures: SQSBatchItemFailure[] = [];
-      metrics.setNamespace("vlasis_upsertLetter");
+      metrics.setNamespace(
+        process.env.AWS_LAMBDA_FUNCTION_NAME || "upsertletter",
+      );
 
       const tasks = event.Records.map(async (record) => {
         try {
@@ -177,8 +179,9 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
           const type = getType(letterEvent);
 
           const operation = getOperationFromType(type);
+          console.log("letterEvent: ", letterEvent);
+          console.log("operation: ", operation);
           metrics.putDimensions({
-            FunctionName: "upsertLambda",
             // eslint-disable-next-line sonarjs/pseudo-random
             OddOrEven: `${Math.floor(Math.random() * 10) % 2}`,
           });
@@ -193,7 +196,6 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
             `Error processing upsert of record ${record.messageId}`,
           );
           metrics.putDimensions({
-            FunctionName: "upsertLambda",
             // eslint-disable-next-line sonarjs/pseudo-random
             OddOrEven: `${Math.floor(Math.random() * 10) % 2}`,
           });
