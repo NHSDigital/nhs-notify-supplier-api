@@ -179,8 +179,8 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
           const type = getType(letterEvent);
 
           const operation = getOperationFromType(type);
-          console.log("letterEvent: ", letterEvent);
-          console.log("operation: ", operation);
+          console.log("letterEvent:", letterEvent);
+          console.log("operation:", operation);
           metrics.putDimensions({
             // eslint-disable-next-line sonarjs/pseudo-random
             OddOrEven: `${Math.floor(Math.random() * 10) % 2}`,
