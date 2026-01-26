@@ -216,8 +216,8 @@ export class LetterRepository {
   }
 
   private buildUpdateExpression(letterToUpdate: UpdateLetter) {
-    let updateExpression =
-      "set #status = :status, updatedAt = :updatedAt, supplierStatus = :supplierStatus, #ttl = :ttl, eventId = :eventId";
+    let updateExpression = `set #status = :status, previousStatus = #status, updatedAt = :updatedAt, supplierStatus = :supplierStatus,
+                                #ttl = :ttl, eventId = :eventId`;
     const expressionAttributeValues: Record<string, any> = {
       ":status": letterToUpdate.status,
       ":updatedAt": new Date().toISOString(),

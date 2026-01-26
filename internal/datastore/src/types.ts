@@ -46,6 +46,7 @@ export const LetterSchema = LetterSchemaBase.extend({
   url: z.url(),
   createdAt: z.string(),
   updatedAt: z.string(),
+  previousStatus: LetterStatus.optional(),
   supplierStatus: z.string().describe("Secondary index PK"),
   supplierStatusSk: z.string().describe("Secondary index SK"),
   ttl: z.int(),

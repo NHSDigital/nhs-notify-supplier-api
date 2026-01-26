@@ -183,6 +183,7 @@ describe("LetterRepository", () => {
       "letter1",
     );
     expect(updatedLetter.status).toBe("REJECTED");
+    expect(updatedLetter.previousStatus).toBe("PENDING");
     expect(updatedLetter.reasonCode).toBe("R01");
     expect(updatedLetter.reasonText).toBe("Reason text");
   });
