@@ -19,7 +19,7 @@ import {
   LetterRequestPreparedEventV2,
 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import z from "zod";
-import { Unit, metricScope } from "aws-embedded-metrics";
+import { MetricsLogger, Unit, metricScope } from "aws-embedded-metrics";
 import { Deps } from "../config/deps";
 
 type SupplierSpec = { supplierId: string; specId: string };
@@ -153,58 +153,70 @@ async function runUpsert(
   throw new Error("No matching schema for received message");
 }
 
+async function emitMetrics(
+  metrics: MetricsLogger,
+  successMetrics: Map<string, number>,
+  failMetrics: Map<string, number>,
+) {
+  metrics.setNamespace(process.env.AWS_LAMBDA_FUNCTION_NAME || `upsertLetter`);
+  // emit success metrics
+  for (const [supplier, count] of Object.entries(successMetrics)) {
+    metrics.putDimensions({
+      Supplier: supplier,
+    });
+    metrics.putMetric("MessagesProcessed", count, Unit.Count);
+  }
+  // emit failure metrics
+  for (const [supplier, count] of Object.entries(failMetrics)) {
+    metrics.putDimensions({
+      Supplier: supplier,
+    });
+    metrics.putMetric("MessageFailed", count, Unit.Count);
+  }
+}
+
 export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
   return metricScope((metrics) => {
     return async (event: SQSEvent) => {
-      console.log(
-        "the environment variables:",
-        JSON.stringify(process.env, null, 2),
-      );
-      console.log("The SQSEvent:", event);
       const batchItemFailures: SQSBatchItemFailure[] = [];
-      metrics.setNamespace(
-        process.env.AWS_LAMBDA_FUNCTION_NAME || "upsertletter",
-      );
+      const perSupplierSuccess: Map<string, number> = new Map<string, number>();
+      const perSupplierFailure: Map<string, number> = new Map<string, number>();
 
       const tasks = event.Records.map(async (record) => {
+        let supplier = "unknown";
         try {
           const message: string = parseSNSNotification(record);
-          console.log("the message:", message);
-
           const snsEvent = JSON.parse(message);
-          console.log("the snsEvent:", snsEvent);
-
+          supplier = snsEvent.data.supplierId || "unknown";
           const letterEvent: unknown = removeEventBridgeWrapper(snsEvent);
-
           const type = getType(letterEvent);
 
           const operation = getOperationFromType(type);
-          console.log("letterEvent:", letterEvent);
-          console.log("operation:", operation);
           metrics.putDimensions({
-            // eslint-disable-next-line sonarjs/pseudo-random
-            OddOrEven: `${Math.floor(Math.random() * 10) % 2}`,
+            supplier: snsEvent.data.supplierId || "unknown",
           });
 
           await runUpsert(operation, letterEvent, deps);
-          metrics.setProperty("operation", operation.name);
 
-          metrics.putMetric("MessagesProcessed", 1, Unit.Count);
+          perSupplierSuccess.set(
+            supplier,
+            (perSupplierSuccess.get(supplier) || 0) + 1,
+          );
         } catch (error) {
           deps.logger.error(
             { err: error, message: record.body },
             `Error processing upsert of record ${record.messageId}`,
           );
-          metrics.putDimensions({
-            // eslint-disable-next-line sonarjs/pseudo-random
-            OddOrEven: `${Math.floor(Math.random() * 10) % 2}`,
-          });
-          metrics.putMetric("MessageFailed", 1, Unit.Count);
+          perSupplierFailure.set(
+            supplier,
+            (perSupplierFailure.get(supplier) || 0) + 1,
+          );
           batchItemFailures.push({ itemIdentifier: record.messageId });
         }
       });
 
       await Promise.all(tasks);
+      await emitMetrics(metrics, perSupplierSuccess, perSupplierFailure);
 
       return { batchItemFailures };
     };
