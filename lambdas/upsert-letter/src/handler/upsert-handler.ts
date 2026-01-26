@@ -160,19 +160,26 @@ async function emitMetrics(
 ) {
   metrics.setNamespace(process.env.AWS_LAMBDA_FUNCTION_NAME || `upsertLetter`);
   // emit success metrics
-  for (const [supplier, count] of Object.entries(successMetrics)) {
+  for (const [supplier, count] of successMetrics) {
     metrics.putDimensions({
       Supplier: supplier,
     });
     metrics.putMetric("MessagesProcessed", count, Unit.Count);
   }
   // emit failure metrics
-  for (const [supplier, count] of Object.entries(failMetrics)) {
+  for (const [supplier, count] of failMetrics) {
     metrics.putDimensions({
       Supplier: supplier,
     });
     metrics.putMetric("MessageFailed", count, Unit.Count);
   }
+}
+
+function getSupplierId(snsEvent: any): string {
+  if (snsEvent && snsEvent.data && snsEvent.data.supplierId) {
+    return snsEvent.data.supplierId;
+  }
+  return "unknown";
 }
 
 export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
@@ -187,14 +194,11 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
         try {
           const message: string = parseSNSNotification(record);
           const snsEvent = JSON.parse(message);
-          supplier = snsEvent.data.supplierId || "unknown";
+          supplier = getSupplierId(snsEvent);
           const letterEvent: unknown = removeEventBridgeWrapper(snsEvent);
           const type = getType(letterEvent);
 
           const operation = getOperationFromType(type);
-          metrics.putDimensions({
-            supplier: snsEvent.data.supplierId || "unknown",
-          });
 
           await runUpsert(operation, letterEvent, deps);
 
@@ -216,8 +220,8 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
       });
 
       await Promise.all(tasks);
-      await emitMetrics(metrics, perSupplierSuccess, perSupplierFailure);
 
+      await emitMetrics(metrics, perSupplierSuccess, perSupplierFailure);
       return { batchItemFailures };
     };
   });
