@@ -59,7 +59,6 @@ data "aws_iam_policy_document" "letter_status_update" {
     actions = [
       "dynamodb:GetItem",
       "dynamodb:Query",
-      "dynamodb:UpdateItem",
     ]
 
     resources = [
@@ -79,7 +78,20 @@ data "aws_iam_policy_document" "letter_status_update" {
     ]
 
     resources = [
-      module.letter_status_updates_queue.sqs_queue_arn
+    module.letter_status_updates_queue.sqs_queue_arn
+    ]
+  }
+
+  statement {
+    sid    = "AllowSNSPublish"
+    effect = "Allow"
+
+    actions = [
+      "sns:Publish"
+    ]
+
+    resources = [
+      module.eventsub.sns_topic.arn
     ]
   }
 }

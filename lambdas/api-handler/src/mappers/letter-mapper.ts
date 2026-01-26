@@ -1,4 +1,4 @@
-import { LetterBase, LetterStatus, UpdateLetter } from "@internal/datastore";
+import { LetterBase, LetterStatus } from "@internal/datastore";
 import {
   GetLetterResponse,
   GetLetterResponseSchema,
@@ -66,22 +66,6 @@ export function mapToUpdateCommands(
     reasonCode: letterToUpdate.attributes.reasonCode,
     reasonText: letterToUpdate.attributes.reasonText,
   }));
-}
-
-// ---------------------------------------------
-//  Map letter command to repository type
-// ---------------------------------------------
-
-export function mapToUpdateLetter(
-  updateLetter: UpdateLetterCommand,
-): UpdateLetter {
-  return {
-    id: updateLetter.id,
-    supplierId: updateLetter.supplierId,
-    status: updateLetter.status,
-    reasonCode: updateLetter.reasonCode,
-    reasonText: updateLetter.reasonText,
-  };
 }
 
 // ---------------------------------------------

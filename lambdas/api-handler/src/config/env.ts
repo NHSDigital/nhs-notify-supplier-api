@@ -10,6 +10,8 @@ const EnvVarsSchema = z.object({
   DOWNLOAD_URL_TTL_SECONDS: z.coerce.number().int(),
   MAX_LIMIT: z.coerce.number().int().optional(),
   QUEUE_URL: z.coerce.string().optional(),
+  EVENT_SOURCE: z.string(),
+  SNS_TOPIC_ARN: z.string(),
 });
 
 export type EnvVars = z.infer<typeof EnvVarsSchema>;

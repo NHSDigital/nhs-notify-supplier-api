@@ -3,8 +3,7 @@
     "declaration": true,
     "isolatedModules": true,
     "module": "commonjs",
-    "outDir": "dist",
-    "resolveJsonModule": true
+    "outDir": "dist"
   },
   "exclude": [
     "node_modules",
