@@ -1,5 +1,5 @@
 resource "aws_glue_catalog_table" "events" {
-  name          = "events_history"
+  name          = "${local.csi}-events_history"
   database_name = aws_glue_catalog_database.supplier.name
 
   table_type = "EXTERNAL_TABLE"
