@@ -1,7 +1,7 @@
 import path from "node:path";
 import fs from "node:fs";
 
-const LETTER_STATUSES = [
+export const LETTER_STATUSES = [
   "ACCEPTED",
   "CANCELLED",
   "DELIVERED",
@@ -40,14 +40,15 @@ export function getPactUrlForStatus(
   consumerPackage: string,
   status: LetterStatus,
 ): string {
-  const contractsDir = path.join(
+  return path.join(
     __dirname,
-    "../../.contracts",
+    "../../",
+    ".contracts",
     consumerPackage,
-    "pacts/supplier-api",
+    "pacts",
+    "supplier-api",
+    `core-letter-${status.toLowerCase()}.json`,
   );
-
-  return path.join(contractsDir, `core-letter-${status.toLowerCase()}.json`);
 }
 
 export function getAllLetterStatuses(): readonly LetterStatus[] {
