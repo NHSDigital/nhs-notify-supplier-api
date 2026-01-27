@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "test:contracts": "./scripts/test.sh"
+    "test:contracts": "./scripts/test.sh",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@nhsdigital/nhs-notify-event-schemas-supplier-api": "*",

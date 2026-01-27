@@ -1,6 +1,5 @@
 import path from "node:path";
 import fs from "node:fs";
-import { globSync } from "glob";
 
 const LETTER_STATUSES = [
   "ACCEPTED",
@@ -22,15 +21,15 @@ export function getExampleEvent(status: LetterStatus): unknown {
   const examplePath = path.join(
     __dirname,
     "../../../../../internal/events/schemas/examples",
-    `letter.${status}.json`
+    `letter.${status}.json`,
   );
 
-  const content = fs.readFileSync(examplePath, "utf-8");
+  const content = fs.readFileSync(examplePath, "utf8");
   return JSON.parse(content);
 }
 
 export function getMessageProviderForStatus(
-  status: LetterStatus
+  status: LetterStatus,
 ): Record<string, () => Promise<unknown>> {
   return {
     [`letter-${status.toLowerCase()}`]: async () => getExampleEvent(status),
@@ -39,13 +38,13 @@ export function getMessageProviderForStatus(
 
 export function getPactUrlForStatus(
   consumerPackage: string,
-  status: LetterStatus
+  status: LetterStatus,
 ): string {
   const contractsDir = path.join(
     __dirname,
     "../../.contracts",
     consumerPackage,
-    "pacts/supplier-api"
+    "pacts/supplier-api",
   );
 
   return path.join(contractsDir, `core-letter-${status.toLowerCase()}.json`);
