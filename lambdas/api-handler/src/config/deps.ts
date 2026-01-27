@@ -2,6 +2,7 @@ import { S3Client } from "@aws-sdk/client-s3";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { SQSClient } from "@aws-sdk/client-sqs";
+import { SNSClient } from "@aws-sdk/client-sns";
 import pino from "pino";
 import {
   DBHealthcheck,
@@ -13,6 +14,7 @@ import { EnvVars, envVars } from "./env";
 export type Deps = {
   s3Client: S3Client;
   sqsClient: SQSClient;
+  snsClient: SNSClient;
   letterRepo: LetterRepository;
   miRepo: MIRepository;
   dbHealthcheck: DBHealthcheck;
@@ -64,6 +66,7 @@ export function createDependenciesContainer(): Deps {
   return {
     s3Client: new S3Client(),
     sqsClient: new SQSClient(),
+    snsClient: new SNSClient(),
     letterRepo: createLetterRepository(log, envVars),
     miRepo: createMIRepository(log, envVars),
     dbHealthcheck: createDBHealthcheck(envVars),
