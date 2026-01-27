@@ -89,6 +89,7 @@
     "lambdas/*",
     "pact-contracts",
     "scripts/utilities/*",
-    "tests"
+    "tests",
+    "tests/contracts/*"
   ]
 }
