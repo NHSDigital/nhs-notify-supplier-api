@@ -23,6 +23,9 @@ export default function createLetterStatusUpdateHandler(
           updateLetterCommand.id,
         );
         letter.status = updateLetterCommand.status;
+        if (letter.status === "REJECTED") {
+          throw new Error("error");
+        }
         letter.reasonCode = updateLetterCommand.reasonCode;
         letter.reasonText = updateLetterCommand.reasonText;
 
