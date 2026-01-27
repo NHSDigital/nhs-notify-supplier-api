@@ -26,15 +26,18 @@ jest.mock("crypto", () => ({
   randomBytes: (size: number) => randomBytes[String(size)],
 }));
 
-describe("letter-updates-transformer Lambda", () => {
-  const mockedDeps: jest.Mocked<Deps> = {
-    snsClient: { send: jest.fn() } as unknown as SNSClient,
-    logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
-    env: {
-      EVENTPUB_SNS_TOPIC_ARN: "arn:aws:sns:region:account:topic",
-    } as unknown as EnvVars,
-  } as Deps;
+const eventSource =
+  "/data-plane/supplier-api/nhs-supplier-api-dev/main/letters";
+const mockedDeps: jest.Mocked<Deps> = {
+  snsClient: { send: jest.fn() } as unknown as SNSClient,
+  logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
+  env: {
+    EVENTPUB_SNS_TOPIC_ARN: "arn:aws:sns:region:account:topic",
+    EVENT_SOURCE: eventSource,
+  } as unknown as EnvVars,
+} as Deps;
 
+describe("letter-updates-transformer Lambda", () => {
   beforeEach(() => {
     jest.useFakeTimers();
   });
@@ -50,7 +53,9 @@ describe("letter-updates-transformer Lambda", () => {
       const newLetter = generateLetter("PRINTED");
       const expectedEntries = [
         expect.objectContaining({
-          Message: JSON.stringify(mapLetterToCloudEvent(newLetter)),
+          Message: JSON.stringify(
+            mapLetterToCloudEvent(newLetter, eventSource),
+          ),
         }),
       ];
 
@@ -76,7 +81,9 @@ describe("letter-updates-transformer Lambda", () => {
       newLetter.reasonCode = "R1";
       const expectedEntries = [
         expect.objectContaining({
-          Message: JSON.stringify(mapLetterToCloudEvent(newLetter)),
+          Message: JSON.stringify(
+            mapLetterToCloudEvent(newLetter, eventSource),
+          ),
         }),
       ];
 
@@ -103,7 +110,9 @@ describe("letter-updates-transformer Lambda", () => {
       newLetter.reasonCode = "R2";
       const expectedEntries = [
         expect.objectContaining({
-          Message: JSON.stringify(mapLetterToCloudEvent(newLetter)),
+          Message: JSON.stringify(
+            mapLetterToCloudEvent(newLetter, eventSource),
+          ),
         }),
       ];
 
@@ -135,14 +144,28 @@ describe("letter-updates-transformer Lambda", () => {
       expect(mockedDeps.snsClient.send).not.toHaveBeenCalled();
     });
 
-    it("does not publish non-modify events", async () => {
+    it("publishes INSERT events", async () => {
       const handler = createHandler(mockedDeps);
       const newLetter = generateLetter("ACCEPTED");
+      const expectedEntries = [
+        expect.objectContaining({
+          Message: JSON.stringify(
+            mapLetterToCloudEvent(newLetter, eventSource),
+          ),
+        }),
+      ];
 
       const testData = generateKinesisEvent([generateInsertRecord(newLetter)]);
       await handler(testData, mockDeep<Context>(), jest.fn());
 
-      expect(mockedDeps.snsClient.send).not.toHaveBeenCalled();
+      expect(mockedDeps.snsClient.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: expect.objectContaining({
+            TopicArn: "arn:aws:sns:region:account:topic",
+            PublishBatchRequestEntries: expectedEntries,
+          }),
+        }),
+      );
     });
 
     it("does not publish invalid letter data", async () => {
@@ -159,6 +182,55 @@ describe("letter-updates-transformer Lambda", () => {
 
       expect(mockedDeps.snsClient.send).not.toHaveBeenCalled();
     });
+
+    it("throws error when kinesis data contains malformed JSON", async () => {
+      const handler = createHandler(mockedDeps);
+
+      // Create a Kinesis event with malformed JSON data
+      const malformedKinesisEvent: KinesisStreamEvent = {
+        Records: [
+          {
+            kinesis: {
+              data: Buffer.from("invalid-json-data").toString("base64"),
+              sequenceNumber: "12345",
+            },
+          } as any,
+        ],
+      };
+
+      await expect(
+        handler(malformedKinesisEvent, mockDeep<Context>(), jest.fn()),
+      ).rejects.toThrow();
+
+      expect(mockedDeps.logger.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          description: "Error extracting payload",
+          error: expect.any(Error),
+          record: expect.objectContaining({
+            kinesis: expect.objectContaining({
+              data: Buffer.from("invalid-json-data").toString("base64"),
+            }),
+          }),
+        }),
+      );
+    });
+
+    it("handles events with no records", async () => {
+      const handler = createHandler(mockedDeps);
+
+      // Create a Kinesis event with empty Records array
+      const emptyKinesisEvent: KinesisStreamEvent = { Records: [] };
+
+      await handler(emptyKinesisEvent, mockDeep<Context>(), jest.fn());
+
+      expect(mockedDeps.logger.info).toHaveBeenCalledWith(
+        expect.objectContaining({
+          description: "Number of records",
+          count: 0,
+        }),
+      );
+      expect(mockedDeps.snsClient.send).not.toHaveBeenCalled();
+    });
   });
 
   describe("Batching", () => {
@@ -168,7 +240,7 @@ describe("letter-updates-transformer Lambda", () => {
       const newLetters = generateLetters(10, "PRINTED");
       const expectedEntries = newLetters.map((letter) =>
         expect.objectContaining({
-          Message: JSON.stringify(mapLetterToCloudEvent(letter)),
+          Message: JSON.stringify(mapLetterToCloudEvent(letter, eventSource)),
         }),
       );
 
@@ -197,19 +269,19 @@ describe("letter-updates-transformer Lambda", () => {
         newLetters.slice(0, 10).map((letter, index) =>
           expect.objectContaining({
             Id: expect.stringMatching(new RegExp(`-${index}$`)),
-            Message: JSON.stringify(mapLetterToCloudEvent(letter)),
+            Message: JSON.stringify(mapLetterToCloudEvent(letter, eventSource)),
           }),
         ),
         newLetters.slice(10, 20).map((letter, index) =>
           expect.objectContaining({
             Id: expect.stringMatching(new RegExp(`-${index}$`)),
-            Message: JSON.stringify(mapLetterToCloudEvent(letter)),
+            Message: JSON.stringify(mapLetterToCloudEvent(letter, eventSource)),
           }),
         ),
         newLetters.slice(20).map((letter, index) =>
           expect.objectContaining({
             Id: expect.stringMatching(new RegExp(`-${index}$`)),
-            Message: JSON.stringify(mapLetterToCloudEvent(letter)),
+            Message: JSON.stringify(mapLetterToCloudEvent(letter, eventSource)),
           }),
         ),
       ];

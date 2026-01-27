@@ -27,3 +27,5 @@ d005112adcfd286c3bef076214836dbb2fe8d0b5:.npmrc:github-pat:7
 d005112adcfd286c3bef076214836dbb2fe8d0b5:.npmrc:npm-access-token:9
 4fa1923947bbff2387218d698d766cbb7c121a0f:pact-contracts/pacts/letter-rendering/supplier-api-letter-request-prepared.json:generic-api-key:10
 777eb4047ad06b9e939a292ee18664a0ffee4f29:tests/resources/prepared-letter.json:generic-api-key:4
+d005112adcfd286c3bef076214836dbb2fe8d0b5:.npmrc:npm-access-token:9
+d005112adcfd286c3bef076214836dbb2fe8d0b5:.npmrc:github-pat:7
