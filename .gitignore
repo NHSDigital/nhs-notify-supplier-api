@@ -32,6 +32,13 @@ dist
 /specification/api/components/security/security.yml
 /specification/api/components/parameters/authorization/authorization.yml
 /scripts/JWT/*.pem
+/tests/e2e-tests/test-report.xml
 
 # ignore PACTS
 .pacts
+
+# python venvs
+.venv/
+venv/
+env/
+ENV/
