@@ -6,6 +6,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test:contracts": "./scripts/test.sh",
+    "test:unit": "echo Unit tests not required",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
