@@ -10,11 +10,11 @@
       "subject": "client/e9dc9ee9-b2f8-4ef2-8351-73a9a29f8e96/letter-request/38U220Ghb1WXF8hCK6hL0LGya3Y_38U23YjtnKSZypvaCSb07adMOlq"
     },
     "specificationId": "1y3q9v1zzzz",
-    "status": "ACCEPTED",
+    "status": "PENDING",
     "supplierId": "supplier-12345"
   },
   "datacontenttype": "application/json",
-  "dataschema": "https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.ACCEPTED.1.0.0.schema.json",
+  "dataschema": "https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.PENDING.1.0.0.schema.json",
   "dataschemaversion": "1.0.0",
   "id": "23f1f09c-a555-4d9b-8405-0b33490bc920",
   "plane": "data",
@@ -26,5 +26,5 @@
   "subject": "letter-origin/letter-rendering/letter/e9dc9ee9-b2f8-4ef2-8351-73a9a29f8e96_38U220Ghb1WXF8hCK6hL0LGya3Y_38U23YjtnKSZypvaCSb07adMOlq",
   "time": "2025-08-28T08:45:00.000Z",
   "traceparent": "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01",
-  "type": "uk.nhs.notify.supplier-api.letter.ACCEPTED.v1"
+  "type": "uk.nhs.notify.supplier-api.letter.PENDING.v1"
 }
