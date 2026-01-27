@@ -1,7 +1,2 @@
-# Downloaded contracts and packages
 .contracts/
 .packages/
-
-# Build artifacts
-dist/
-node_modules/
