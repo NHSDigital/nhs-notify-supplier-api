@@ -1,7 +1,11 @@
 import { expect, test } from "@playwright/test";
 import getRestApiGatewayBaseUrl from "../../helpers/aws-gateway-helper";
 import { getLettersBySupplier } from "../../helpers/generate-fetch-test-data";
-import { SUPPLIERID, SUPPLIER_LETTERS, DATA } from "../../constants/api-constants";
+import {
+  DATA,
+  SUPPLIERID,
+  SUPPLIER_LETTERS,
+} from "../../constants/api-constants";
 import { createValidRequestHeaders } from "../../constants/request-headers";
 import {
   error404ResponseBody,
