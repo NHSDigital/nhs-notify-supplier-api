@@ -173,13 +173,13 @@ variable "enable_backups" {
 variable "enable_event_cache" {
   type        = bool
   description = "Enable caching of events to an S3 bucket"
-  default     = false
+  default     = true
 }
 
 variable "enable_sns_delivery_logging" {
   type        = bool
   description = "Enable SNS Delivery Failure Notifications"
-  default     = false
+  default     = true
 }
 
 variable "sns_success_logging_sample_percent" {
@@ -192,4 +192,10 @@ variable "enable_api_data_trace" {
   type        = bool
   description = "Enable API Gateway data trace logging"
   default     = false
+}
+
+variable "enable_firehose_raw_message_delivery" {
+  type        = bool
+  description = "Enables raw message delivery on firehose subscription"
+  default     = true
 }

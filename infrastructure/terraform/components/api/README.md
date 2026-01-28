@@ -19,8 +19,9 @@ No requirements.
 | <a name="input_disable_gateway_execute_endpoint"></a> [disable\_gateway\_execute\_endpoint](#input\_disable\_gateway\_execute\_endpoint) | Disable the execution endpoint for the API Gateway | `bool` | `true` | no |
 | <a name="input_enable_api_data_trace"></a> [enable\_api\_data\_trace](#input\_enable\_api\_data\_trace) | Enable API Gateway data trace logging | `bool` | `false` | no |
 | <a name="input_enable_backups"></a> [enable\_backups](#input\_enable\_backups) | Enable backups | `bool` | `false` | no |
-| <a name="input_enable_event_cache"></a> [enable\_event\_cache](#input\_enable\_event\_cache) | Enable caching of events to an S3 bucket | `bool` | `false` | no |
-| <a name="input_enable_sns_delivery_logging"></a> [enable\_sns\_delivery\_logging](#input\_enable\_sns\_delivery\_logging) | Enable SNS Delivery Failure Notifications | `bool` | `false` | no |
+| <a name="input_enable_event_cache"></a> [enable\_event\_cache](#input\_enable\_event\_cache) | Enable caching of events to an S3 bucket | `bool` | `true` | no |
+| <a name="input_enable_firehose_raw_message_delivery"></a> [enable\_firehose\_raw\_message\_delivery](#input\_enable\_firehose\_raw\_message\_delivery) | Enables raw message delivery on firehose subscription | `bool` | `true` | no |
+| <a name="input_enable_sns_delivery_logging"></a> [enable\_sns\_delivery\_logging](#input\_enable\_sns\_delivery\_logging) | Enable SNS Delivery Failure Notifications | `bool` | `true` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | The name of the tfscaffold environment | `string` | n/a | yes |
 | <a name="input_eventpub_control_plane_bus_arn"></a> [eventpub\_control\_plane\_bus\_arn](#input\_eventpub\_control\_plane\_bus\_arn) | ARN of the EventBridge control plane bus for eventpub | `string` | `""` | no |
 | <a name="input_eventpub_data_plane_bus_arn"></a> [eventpub\_data\_plane\_bus\_arn](#input\_eventpub\_data\_plane\_bus\_arn) | ARN of the EventBridge data plane bus for eventpub | `string` | `""` | no |
