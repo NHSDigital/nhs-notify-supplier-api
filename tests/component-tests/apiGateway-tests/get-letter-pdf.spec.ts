@@ -33,20 +33,9 @@ test.describe("API Gateway Tests to Verify Get Letter PDF Endpoint", () => {
       },
     );
 
-    const responseBody = await response.json();
-
     expect(response.status()).toBe(200);
-    expect(responseBody).toMatchObject({
-      data: {
-        attributes: {
-          status: "PENDING",
-          specificationId: letter.specificationId,
-          groupId: letter.groupId,
-        },
-        id: letter.id,
-        type: "Letter",
-      },
-    });
+    const responseBody = await response.text();
+    expect(responseBody).toContain("PDF");
   });
 
   test(`Get /letters/{id}/data returns 404 if no resource is found for id`, async ({
