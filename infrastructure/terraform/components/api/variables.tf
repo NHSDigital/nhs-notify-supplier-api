@@ -181,3 +181,9 @@ variable "sns_success_logging_sample_percent" {
   description = "Enable SNS Delivery Successful Sample Percentage"
   default     = 0
 }
+
+variable "letter_event_source" {
+  type        = string
+  description = "Source value to use for the letter status event updates"
+  default     = "/data-plane/supplier-api/nhs-supplier-api-prod/main/letters"
+}
