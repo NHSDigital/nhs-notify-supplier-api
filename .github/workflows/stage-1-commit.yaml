@@ -53,13 +53,11 @@ jobs:
       - name: "Repo setup"
         uses: ./.github/actions/node-install
         with:
-          node-version: 22.15.0
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Run provider contract tests"
         run: make test-contract
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   scan-secrets:
     name: "Scan secrets"
