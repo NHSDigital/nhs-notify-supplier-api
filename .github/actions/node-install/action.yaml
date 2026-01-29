@@ -2,9 +2,6 @@ name: 'npm install and setup'
 description: 'Setup node, authenticate github package repository and perform clean npm install'
 
 inputs:
-  node-version:
-    description: 'Node.js version'
-    required: true
   GITHUB_TOKEN:
     description: "Token for access to github package registry"
     required: true
@@ -15,7 +12,7 @@ runs:
     - name: 'Use Node.js'
       uses: actions/setup-node@v6
       with:
-        node-version: '${{ inputs.node-version }}'
+        node-version-file: '.tool-versions'
         registry-url: 'https://npm.pkg.github.com'
         scope: '@nhsdigital'
 

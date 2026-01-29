@@ -37,7 +37,6 @@ runs:
     - name: "Repo setup"
       uses: ./.github/actions/node-install
       with:
-        node-version: ${{ steps.nodejs_version.outputs.nodejs_version }}
         GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 
     - name: "Set PR NUMBER"
