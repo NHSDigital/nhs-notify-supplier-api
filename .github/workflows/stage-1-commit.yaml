@@ -50,15 +50,11 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5.0.0
-      - name: Setup NodeJS
-        uses: actions/setup-node@v4
+      - name: "Repo setup"
+        uses: ./.github/actions/node-install
         with:
           node-version: 22.15.0
-          registry-url: "https://npm.pkg.github.com"
-      - name: "Install dependencies"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm ci
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Run provider contract tests"
         run: make test-contract
         env:
