@@ -53,6 +53,12 @@ export default function createPostMIHandler(
         deps.miRepo,
       );
 
+      deps.logger.info({
+        description: "Posted management information",
+        supplierId: commonIds.value.supplierId,
+        correlationId: commonIds.value.correlationId,
+      });
+
       return {
         statusCode: 201,
         body: JSON.stringify(result, null, 2),

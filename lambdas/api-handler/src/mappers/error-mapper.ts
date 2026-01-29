@@ -72,10 +72,7 @@ export function logAndMapToApiError(
   logger: Logger,
 ): ApiError {
   if (error instanceof ValidationError) {
-    logger.info(
-      { err: error },
-      `Validation error correlationId=${correlationId}`,
-    );
+    logger.info({ description: "Validation error", err: error, correlationId });
     return mapToApiError(
       ApiErrorCode.InvalidRequest,
       error.detail,
@@ -83,27 +80,25 @@ export function logAndMapToApiError(
     );
   }
   if (error instanceof NotFoundError) {
-    logger.info(
-      { err: error },
-      `Not found error correlationId=${correlationId}`,
-    );
+    logger.info({ description: "Not found error", err: error, correlationId });
     return mapToApiError(ApiErrorCode.NotFound, error.detail, correlationId);
   }
   if (error instanceof Error) {
-    logger.error(
-      { err: error },
-      `Internal server error correlationId=${correlationId}`,
-    );
+    logger.error({
+      description: "Internal server error",
+      err: error,
+      correlationId,
+    });
     return mapToApiError(
       ApiErrorCode.InternalServerError,
       "Unexpected error",
       correlationId,
     );
   }
-  logger.error(
-    { err: error },
-    `Internal server error (non-Error thrown) correlationId=${correlationId}`,
-  );
+  logger.error({
+    description: "Internal server error  (non-Error thrown)",
+    correlationId,
+  });
   return mapToApiError(
     ApiErrorCode.InternalServerError,
     "Unexpected error",

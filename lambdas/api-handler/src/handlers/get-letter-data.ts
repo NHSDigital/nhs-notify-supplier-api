@@ -33,14 +33,23 @@ export default function createGetLetterDataHandler(
         ),
       );
 
+      const presignedUrl = await getLetterDataUrl(
+        commonIds.value.supplierId,
+        letterId,
+        deps,
+      );
+
+      deps.logger.info({
+        description: "Generated presigned URL",
+        supplierId: commonIds.value.supplierId,
+        letterId,
+        correlationId: commonIds.value.correlationId,
+      });
+
       return {
         statusCode: 303,
         headers: {
-          Location: await getLetterDataUrl(
-            commonIds.value.supplierId,
-            letterId,
-            deps,
-          ),
+          Location: presignedUrl,
         },
         body: "",
       };

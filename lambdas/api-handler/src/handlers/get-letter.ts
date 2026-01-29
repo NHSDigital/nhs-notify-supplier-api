@@ -46,6 +46,7 @@ export default function createGetLetterHandler(
         description: "Letter successfully fetched by id",
         supplierId: commonIds.value.supplierId,
         letterId,
+        correlationId: commonIds.value.correlationId,
       });
 
       return {

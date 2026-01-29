@@ -205,7 +205,7 @@ describe("letter-updates-transformer Lambda", () => {
       expect(mockedDeps.logger.error).toHaveBeenCalledWith(
         expect.objectContaining({
           description: "Error extracting payload",
-          error: expect.any(Error),
+          err: expect.any(Error),
           record: expect.objectContaining({
             kinesis: expect.objectContaining({
               data: Buffer.from("invalid-json-data").toString("base64"),

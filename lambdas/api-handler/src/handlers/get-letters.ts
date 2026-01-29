@@ -121,6 +121,7 @@ export default function createGetLettersHandler(
         limitNumber,
         status,
         lettersCount: letters.length,
+        correlationId: commonIds.value.correlationId,
       });
 
       return {

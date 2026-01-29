@@ -18,17 +18,23 @@ export default function createAuthorizerHandler(
     context: Context,
     callback: Callback<APIGatewayAuthorizerResult>,
   ): void => {
-    deps.logger.info(event, "Received event");
-
     checkCertificateExpiry(event.requestContext.identity.clientCert, deps);
 
     getSupplier(event.headers, deps)
       .then((supplier: Supplier) => {
-        deps.logger.info("Allow event");
+        deps.logger.info({
+          description: "Allowed event",
+          methodArn: event.methodArn,
+          supplierId: supplier.id,
+        });
         callback(null, generateAllow(event.methodArn, supplier.id));
       })
       .catch((error) => {
-        deps.logger.info(error, "Deny event");
+        deps.logger.warn({
+          description: "Denied event",
+          err: error,
+          methodArn: event.methodArn,
+        });
         callback(null, generateDeny(event.methodArn));
       });
   };
@@ -127,9 +133,9 @@ async function checkCertificateExpiry(
 ): Promise<void> {
   deps.logger.info({
     description: "Client certificate details",
-    issuerDN: certificate?.issuerDN,
-    subjectDN: certificate?.subjectDN,
-    validity: certificate?.validity,
+    issuerDN: certificate?.issuerDN || "-",
+    subjectDN: certificate?.subjectDN || "-",
+    validity: certificate?.validity || "-",
   });
 
   if (!certificate) {
