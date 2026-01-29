@@ -121,7 +121,6 @@ jobs:
         run: make test-contract
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish-event-schemas:
     name: Publish event schemas package to GitHub package registry
