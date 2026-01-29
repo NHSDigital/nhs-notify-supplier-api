@@ -82,4 +82,17 @@ data "aws_iam_policy_document" "letter_status_update" {
       module.letter_status_updates_queue.sqs_queue_arn
     ]
   }
+
+  statement {
+    sid    = "AllowSNSPublish"
+    effect = "Allow"
+
+    actions = [
+      "sns:Publish"
+    ]
+
+    resources = [
+      module.eventsub.sns_topic.arn
+    ]
+  }
 }

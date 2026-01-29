@@ -18,6 +18,10 @@ on:
         required: false
         default: false
         type: boolean
+      nodejs_version:
+        description: "Node.js version, set by the CI/CD pipeline workflow"
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -36,11 +40,10 @@ jobs:
           node-version: 22
 
       - name: Npm install
-        working-directory: .
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm ci
-        shell: bash
+        uses: ./.github/actions/node-install
+        with:
+          node-version: ${{ inputs.nodejs_version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Check if pull request exists for this branch and set ENVIRONMENT/APIM_ENV"
         id: pr_exists
