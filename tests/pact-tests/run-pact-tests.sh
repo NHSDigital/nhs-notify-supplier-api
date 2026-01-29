@@ -2,23 +2,8 @@
 
 set -euo pipefail
 
-install_package() {
-  local package=$1
-  local tmplog
-  tmplog="$(mktemp)"
-
-  pnpm install --no-lockfile "$package" 2>&1 | tee "$tmplog"
-
-  if grep -q 'ERR_PNPM' "$tmplog"; then
-    echo "Error: pnpm install failed for $package" >&2
-    exit 1
-  fi
-
-  pnpm list "$package"
-}
-
 # Ensure we have the latest package matching the major version
-install_package @nhsdigital/nhs-notify-event-schemas-letter-rendering@^2
+npm install --no-lockfile @nhsdigital/nhs-notify-event-schemas-letter-rendering@^2
 
 # Remove old PACTs
 rm -rf ./.pacts
