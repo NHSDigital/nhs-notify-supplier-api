@@ -95,6 +95,7 @@ export async function enqueueLetterUpdateRequests(
   updateLetterCommands: UpdateLetterCommand[],
   correlationId: string,
   deps: Deps,
+  statusesMapping?: Map<string, number>,
 ) {
   const BATCH_SIZE = 10; // SQS SendMessageBatch max
   const CONCURRENCY = 5; // number of parallel batch API calls
@@ -108,13 +109,21 @@ export async function enqueueLetterUpdateRequests(
 
     await Promise.all(
       window.map(async (batch, batchIdx) => {
-        const entries = batch.map((request, idx) => ({
-          Id: `${i + batchIdx}-${idx}`, // unique per batch entry
-          MessageBody: JSON.stringify(request),
-          MessageAttributes: {
-            CorrelationId: { DataType: "String", StringValue: correlationId },
-          },
-        }));
+        const entries = batch.map((request, idx) => {
+          if (statusesMapping) {
+            statusesMapping.set(
+              request.status,
+              (statusesMapping.get(request.status) || 0) + 1,
+            );
+          }
+          return {
+            Id: `${i + batchIdx}-${idx}`, // unique per batch entry
+            MessageBody: JSON.stringify(request),
+            MessageAttributes: {
+              CorrelationId: { DataType: "String", StringValue: correlationId },
+            },
+          };
+        });
 
         const cmd = new SendMessageBatchCommand({
           QueueUrl: deps.env.QUEUE_URL,

@@ -156,7 +156,7 @@ async function runUpsert(
 async function emitMetrics(
   metrics: MetricsLogger,
   successMetrics: Map<string, number>,
-  failMetrics: Map<string, number>,
+  failedMetrics: Map<string, number>,
 ) {
   metrics.setNamespace(process.env.AWS_LAMBDA_FUNCTION_NAME || `upsertLetter`);
   // emit success metrics
@@ -167,7 +167,7 @@ async function emitMetrics(
     metrics.putMetric("MessagesProcessed", count, Unit.Count);
   }
   // emit failure metrics
-  for (const [supplier, count] of failMetrics) {
+  for (const [supplier, count] of failedMetrics) {
     metrics.putDimensions({
       Supplier: supplier,
     });
@@ -183,7 +183,7 @@ function getSupplierId(snsEvent: any): string {
 }
 
 export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
-  return metricScope((metrics) => {
+  return metricScope((metrics: MetricsLogger) => {
     return async (event: SQSEvent) => {
       const batchItemFailures: SQSBatchItemFailure[] = [];
       const perSupplierSuccess: Map<string, number> = new Map<string, number>();

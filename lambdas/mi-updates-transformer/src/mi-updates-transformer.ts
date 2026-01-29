@@ -11,6 +11,7 @@ import {
   PublishBatchRequestEntry,
 } from "@aws-sdk/client-sns";
 import { MISubmittedEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
+import { MetricsLogger, Unit, metricScope } from "aws-embedded-metrics";
 import { mapMIToCloudEvent } from "./mappers/mi-mapper";
 import { Deps } from "./deps";
 
@@ -49,26 +50,49 @@ function extractMIData(record: DynamoDBRecord): MI {
   return MISchema.parse(unmarshall(newImage as any));
 }
 
+async function emitMetrics(
+  metrics: MetricsLogger,
+  eventTypeCount: Map<string, number>,
+) {
+  metrics.setNamespace(
+    process.env.AWS_LAMBDA_FUNCTION_NAME || "letter-updates-transformer",
+  );
+  for (const [type, count] of eventTypeCount) {
+    metrics.putDimensions({
+      eventType: type,
+    });
+    metrics.putMetric("events published", count, Unit.Count);
+  }
+}
+
 export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
-  return async (streamEvent: KinesisStreamEvent) => {
-    deps.logger.info({ description: "Received event", streamEvent });
+  return metricScope((metrics: MetricsLogger) => {
+    return async (streamEvent: KinesisStreamEvent) => {
+      deps.logger.info({ description: "Received event", streamEvent });
 
-    const cloudEvents: MISubmittedEvent[] = streamEvent.Records.map((record) =>
-      extractPayload(record, deps),
-    )
-      .filter((record) => record.eventName === "INSERT")
-      .map((element) => extractMIData(element))
-      .map((payload) => mapMIToCloudEvent(payload, deps));
+      const cloudEvents: MISubmittedEvent[] = streamEvent.Records.map(
+        (record) => extractPayload(record, deps),
+      )
+        .filter((record) => record.eventName === "INSERT")
+        .map((element) => extractMIData(element))
+        .map((payload) => mapMIToCloudEvent(payload, deps));
 
-    for (const batch of generateBatches(cloudEvents)) {
-      await deps.snsClient.send(
-        new PublishBatchCommand({
-          TopicArn: deps.env.EVENTPUB_SNS_TOPIC_ARN,
-          PublishBatchRequestEntries: batch.map((element) =>
-            buildMessage(element, deps),
-          ),
-        }),
-      );
-    }
-  };
+      const eventTypeCount = new Map<string, number>();
+      for (const batch of generateBatches(cloudEvents)) {
+        await deps.snsClient.send(
+          new PublishBatchCommand({
+            TopicArn: deps.env.EVENTPUB_SNS_TOPIC_ARN,
+            PublishBatchRequestEntries: batch.map((element) => {
+              eventTypeCount.set(
+                element.type,
+                (eventTypeCount.get(element.type) || 0) + 1,
+              );
+              return buildMessage(element, deps);
+            }),
+          }),
+        );
+      }
+      await emitMetrics(metrics, eventTypeCount);
+    };
+  });
 }
