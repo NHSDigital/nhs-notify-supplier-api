@@ -16,7 +16,7 @@ export function emitForSingleSupplier(
   metrics.putMetric(message, count, Unit.Count);
 }
 
-export declare enum MetricStatus {
+export enum MetricStatus {
   Success = "success",
   Failure = "failure",
 }

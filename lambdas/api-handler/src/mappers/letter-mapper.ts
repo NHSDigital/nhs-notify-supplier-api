@@ -58,14 +58,24 @@ export function mapToUpdateCommand(
 export function mapToUpdateCommands(
   request: PostLettersRequest,
   supplierId: string,
+  statusesMapping?: Map<string, number>,
 ): UpdateLetterCommand[] {
-  return request.data.map((letterToUpdate: PostLettersRequestResource) => ({
-    id: letterToUpdate.id,
-    supplierId,
-    status: LetterStatus.parse(letterToUpdate.attributes.status),
-    reasonCode: letterToUpdate.attributes.reasonCode,
-    reasonText: letterToUpdate.attributes.reasonText,
-  }));
+  return request.data.map((letterToUpdate: PostLettersRequestResource) => {
+    const letterCommand = {
+      id: letterToUpdate.id,
+      supplierId,
+      status: LetterStatus.parse(letterToUpdate.attributes.status),
+      reasonCode: letterToUpdate.attributes.reasonCode,
+      reasonText: letterToUpdate.attributes.reasonText,
+    };
+    if (statusesMapping) {
+      statusesMapping.set(
+        letterCommand.status,
+        (statusesMapping.get(letterCommand.status) || 0) + 1,
+      );
+    }
+    return letterCommand;
+  });
 }
 
 // ---------------------------------------------

@@ -3,14 +3,55 @@ import {
   mapToGetLetterResponse,
   mapToGetLettersResponse,
   mapToPatchLetterResponse,
+  mapToUpdateCommands,
 } from "../letter-mapper";
 import {
   GetLetterResponse,
   GetLettersResponse,
   PatchLetterResponse,
+  PostLettersRequest,
 } from "../../contracts/letters";
 
 describe("letter-mapper", () => {
+  it("maps PostLetterRequest to UpdateLetterCommands", () => {
+    const request: PostLettersRequest = {
+      data: [
+        {
+          id: "id1",
+          type: "Letter",
+          attributes: {
+            status: "REJECTED",
+            reasonCode: "123",
+            reasonText: "Reason text",
+          },
+        },
+        { id: "id2", type: "Letter", attributes: { status: "ACCEPTED" } },
+        { id: "id3", type: "Letter", attributes: { status: "DELIVERED" } },
+      ],
+    };
+    const supplierId = "testSupplierId";
+    const updateLetterCommands = mapToUpdateCommands(request, supplierId);
+    expect(updateLetterCommands).toEqual([
+      {
+        id: "id1",
+        reasonCode: "123",
+        reasonText: "Reason text",
+        supplierId: "testSupplierId",
+        status: "REJECTED",
+      },
+      {
+        id: "id2",
+        supplierId: "testSupplierId",
+        status: "ACCEPTED",
+      },
+      {
+        id: "id3",
+        supplierId: "testSupplierId",
+        status: "DELIVERED",
+      },
+    ]);
+  });
+
   it("maps an internal Letter to a PatchLetterResponse", () => {
     const date = new Date().toISOString();
     const letter: Letter = {

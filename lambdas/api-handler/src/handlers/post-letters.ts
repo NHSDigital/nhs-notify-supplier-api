@@ -1,5 +1,4 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
-import { Metrics$ } from "@aws-sdk/client-s3";
 import { MetricsLogger, Unit, metricScope } from "aws-embedded-metrics";
 import type { Deps } from "../config/deps";
 import { ApiErrorDetail } from "../contracts/errors";
@@ -98,10 +97,9 @@ export default function createPostLettersHandler(
 
         const statusesMapping = new Map<string, number>();
         await enqueueLetterUpdateRequests(
-          mapToUpdateCommands(postLettersRequest, supplierId),
+          mapToUpdateCommands(postLettersRequest, supplierId, statusesMapping),
           commonIds.value.correlationId,
           deps,
-          statusesMapping,
         );
 
         await emitMetics(metrics, supplierId, statusesMapping);
