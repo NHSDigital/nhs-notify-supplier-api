@@ -52,6 +52,55 @@ describe("letter-mapper", () => {
     ]);
   });
 
+  it("maps PostLetterRequest to UpdateLetterCommands and populates statuses map", () => {
+    const request: PostLettersRequest = {
+      data: [
+        {
+          id: "id1",
+          type: "Letter",
+          attributes: {
+            status: "REJECTED",
+            reasonCode: "123",
+            reasonText: "Reason text",
+          },
+        },
+        { id: "id2", type: "Letter", attributes: { status: "ACCEPTED" } },
+        { id: "id3", type: "Letter", attributes: { status: "DELIVERED" } },
+      ],
+    };
+    const supplierId = "testSupplierId";
+    const statusesMap = new Map<string, number>();
+    const updateLetterCommands = mapToUpdateCommands(
+      request,
+      supplierId,
+      statusesMap,
+    );
+    expect(updateLetterCommands).toEqual([
+      {
+        id: "id1",
+        reasonCode: "123",
+        reasonText: "Reason text",
+        supplierId: "testSupplierId",
+        status: "REJECTED",
+      },
+      {
+        id: "id2",
+        supplierId: "testSupplierId",
+        status: "ACCEPTED",
+      },
+      {
+        id: "id3",
+        supplierId: "testSupplierId",
+        status: "DELIVERED",
+      },
+    ]);
+    expect(Object.fromEntries(statusesMap)).toEqual({
+      REJECTED: 1,
+      ACCEPTED: 1,
+      DELIVERED: 1,
+    });
+  });
+
   it("maps an internal Letter to a PatchLetterResponse", () => {
     const date = new Date().toISOString();
     const letter: Letter = {
