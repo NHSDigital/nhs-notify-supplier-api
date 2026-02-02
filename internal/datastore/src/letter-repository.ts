@@ -9,8 +9,14 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 import { Logger } from "pino";
 import { z } from "zod";
-import { Letter, LetterBase, LetterSchema, LetterSchemaBase } from "./types";
-import { LetterDto } from "../../../lambdas/api-handler/src/contracts/letters";
+import {
+  InsertLetter,
+  Letter,
+  LetterBase,
+  LetterSchema,
+  LetterSchemaBase,
+  UpdateLetter,
+} from "./types";
 
 export type PagingOptions = Partial<{
   exclusiveStartKey: Record<string, any>;
@@ -33,13 +39,11 @@ export class LetterRepository {
     readonly config: LetterRepositoryConfig,
   ) {}
 
-  async putLetter(
-    letter: Omit<Letter, "ttl" | "supplierStatus" | "supplierStatusSk">,
-  ): Promise<Letter> {
+  async putLetter(letter: InsertLetter): Promise<Letter> {
     const letterDb: Letter = {
       ...letter,
       supplierStatus: `${letter.supplierId}#${letter.status}`,
-      supplierStatusSk: new Date().toISOString(),
+      supplierStatusSk: new Date().toISOString(), // needs to be an ISO timestamp as Db sorts alphabetically
       ttl: Math.floor(
         Date.now() / 1000 + 60 * 60 * this.config.lettersTtlHours,
       ),
@@ -66,9 +70,7 @@ export class LetterRepository {
     return LetterSchema.parse(letterDb);
   }
 
-  async putLetterBatch(
-    letters: Omit<Letter, "ttl" | "supplierStatus" | "supplierStatusSk">[],
-  ): Promise<void> {
+  async unsafePutLetterBatch(letters: InsertLetter[]): Promise<void> {
     let lettersDb: Letter[] = [];
     for (let i = 0; i < letters.length; i++) {
       const letter = letters[i];
@@ -77,7 +79,7 @@ export class LetterRepository {
         lettersDb.push({
           ...letter,
           supplierStatus: `${letter.supplierId}#${letter.status}`,
-          supplierStatusSk: Date.now().toString(),
+          supplierStatusSk: new Date().toISOString(), // needs to be an ISO timestamp as Db sorts alphabetically
           ttl: Math.floor(
             Date.now() / 1000 + 60 * 60 * this.config.lettersTtlHours,
           ),
@@ -107,8 +109,8 @@ export class LetterRepository {
       new GetCommand({
         TableName: this.config.lettersTableName,
         Key: {
-          supplierId,
           id: letterId,
+          supplierId,
         },
       }),
     );
@@ -161,7 +163,7 @@ export class LetterRepository {
     };
   }
 
-  async updateLetterStatus(letterToUpdate: LetterDto): Promise<Letter> {
+  async updateLetterStatus(letterToUpdate: UpdateLetter): Promise<Letter> {
     this.log.debug(
       `Updating letter ${letterToUpdate.id} to status ${letterToUpdate.status}`,
     );
@@ -192,8 +194,8 @@ export class LetterRepository {
         new UpdateCommand({
           TableName: this.config.lettersTableName,
           Key: {
-            supplierId: letterToUpdate.supplierId,
             id: letterToUpdate.id,
+            supplierId: letterToUpdate.supplierId,
           },
           UpdateExpression: updateExpression,
           ConditionExpression: "attribute_exists(id)", // Ensure letter exists
@@ -228,23 +230,39 @@ export class LetterRepository {
     status: string,
     limit: number,
   ): Promise<LetterBase[]> {
+    const items: Record<string, any>[] = [];
+    let ExclusiveStartKey: Record<string, any> | undefined;
     const supplierStatus = `${supplierId}#${status}`;
-    const result = await this.ddbClient.send(
-      new QueryCommand({
-        TableName: this.config.lettersTableName,
-        IndexName: "supplierStatus-index",
-        KeyConditionExpression: "supplierStatus = :supplierStatus",
-        Limit: limit,
-        ExpressionAttributeNames: {
-          "#status": "status", // reserved keyword
-        },
-        ExpressionAttributeValues: {
-          ":supplierStatus": supplierStatus,
-        },
-        ProjectionExpression:
-          "id, #status, specificationId, groupId, reasonCode, reasonText",
-      }),
-    );
-    return z.array(LetterSchemaBase).parse(result.Items ?? []);
+    let res;
+
+    do {
+      const remaining = limit - items.length;
+
+      res = await this.ddbClient.send(
+        new QueryCommand({
+          TableName: this.config.lettersTableName,
+          IndexName: "supplierStatus-index",
+          KeyConditionExpression: "supplierStatus = :supplierStatus",
+          ExpressionAttributeNames: {
+            "#status": "status", // reserved keyword
+          },
+          ExpressionAttributeValues: {
+            ":supplierStatus": supplierStatus,
+          },
+          ProjectionExpression:
+            "id, #status, specificationId, groupId, reasonCode, reasonText",
+          Limit: remaining, // limit is a per-page cap
+          ExclusiveStartKey,
+        }),
+      );
+
+      if (res.Items?.length) {
+        items.push(...res.Items);
+      }
+
+      ExclusiveStartKey = res.LastEvaluatedKey;
+    } while (res.LastEvaluatedKey && items.length < limit);
+
+    return z.array(LetterSchemaBase).parse(items);
   }
 }

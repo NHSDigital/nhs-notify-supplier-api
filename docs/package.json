@@ -14,6 +14,8 @@
     "build": "JEKYLL_ENV=production bundle exec jekyll build --trace --config _config.yml,_config.version.yml",
     "debug": "JEKYLL_ENV=development BUNDLE_GEMFILE=Gemfile bundle exec jekyll serve --config _config.yml,_config.dev.yml,_config.version.yml --limit_posts 100 --trace",
     "generate-includes": "./generate-includes.sh",
+    "lint": "echo \"Documentation module has no code to lint\"",
+    "lint:fix": "echo \"Documentation module has no code to lint\"",
     "test:unit": "echo \"Documentation module has no unit tests\"",
     "typecheck": "echo \"Documentation module has no typescript to typecheck\""
   },

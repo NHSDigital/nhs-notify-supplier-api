@@ -2,7 +2,14 @@ name: Github Release Created
 
 on:
   release:
-    types: ["published"] # Inherits all input defaults
+    types: ["released"] # Inherits all input defaults
+  workflow_dispatch:
+    inputs:
+      releaseVersion:
+        description: Release, tag, branch, or commit ID to be used for deployment
+        required: false
+        default: "main"
+        type: string
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -17,11 +24,6 @@ jobs:
       id-token: write
       contents: read
 
-    strategy:
-      max-parallel: 1
-      matrix:
-        component: [api]
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -32,9 +34,36 @@ jobs:
           APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
         run: |
           bash .github/scripts/dispatch_internal_repo_workflow.sh \
-            --releaseVersion "${{ github.event.release.tag_name }}" \
+            --releaseVersion "${{ github.event.release.tag_name || inputs.releaseVersion }}" \
             --targetWorkflow "dispatch-deploy-static-notify-supplier-api-env.yaml" \
             --targetEnvironment "main" \
             --targetAccountGroup "nhs-notify-supplier-api-nonprod" \
-            --targetComponent "${{ matrix.component }}" \
+            --targetComponent "api" \
             --terraformAction "apply"
+  deploy-proxy:
+    name: "Deploy proxy"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    permissions:
+      id-token: write
+      contents: read
+      actions: read
+
+    env:
+      PROXYGEN_API_NAME: nhs-notify-supplier
+      APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
+      APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
+
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v5
+
+      - name: "Build proxies"
+        uses: ./.github/actions/build-proxies
+        with:
+          environment: "main"
+          apimEnv: "int"
+          runId: "${{ github.run_id }}"
+          releaseVersion: "${{ github.event.release.tag_name || inputs.releaseVersion }}"
+          isRelease: true

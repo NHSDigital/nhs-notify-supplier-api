@@ -9,7 +9,7 @@ import {
   getLetterDataUrl,
   getLettersForSupplier,
 } from "../letter-operations";
-import { LetterDto } from "../../contracts/letters";
+import { UpdateLetterCommand } from "../../contracts/letters";
 import { Deps } from "../../config/deps";
 
 jest.mock("@aws-sdk/s3-request-presigner", () => ({
@@ -29,6 +29,7 @@ function makeLetter(id: string, status: Letter["status"]): Letter {
     status,
     supplierId: "supplier1",
     specificationId: "spec123",
+    billingRef: "spec123",
     groupId: "group123",
     url: `s3://letterDataBucket/${id}.pdf`,
     createdAt: new Date().toISOString(),
@@ -38,6 +39,8 @@ function makeLetter(id: string, status: Letter["status"]): Letter {
     ttl: 123,
     reasonCode: "R01",
     reasonText: "Reason text",
+    source: "/data-plane/letter-rendering/pdf",
+    subject: "letter-rendering/source/letter/letter-id",
   };
 }
 
@@ -189,27 +192,18 @@ describe("getLetterDataUrl function", () => {
   });
 });
 
+function makeUpdateLetterCommand(n: number): UpdateLetterCommand {
+  return {
+    id: `letter${n}`,
+    status: "PENDING",
+    supplierId: `testSupplier}`,
+  };
+}
+
 describe("enqueueLetterUpdateRequests function", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-
-  const lettersToUpdate: LetterDto[] = [
-    {
-      id: "id1",
-      status: "REJECTED",
-      supplierId: "s1",
-      specificationId: "spec1",
-      groupId: "g1",
-      reasonCode: "123",
-      reasonText: "Reason text",
-    },
-    {
-      id: "id2",
-      status: "ACCEPTED",
-      supplierId: "s1",
-    },
-  ];
 
   it("should update the letter status successfully", async () => {
     const sqsClient = { send: jest.fn() } as unknown as SQSClient;
@@ -219,66 +213,59 @@ describe("enqueueLetterUpdateRequests function", () => {
     };
     const deps: Deps = { sqsClient, logger, env } as Deps;
 
+    const updateLetterCommands = Array.from({ length: 25 }, (_, i) =>
+      makeUpdateLetterCommand(i),
+    );
+
+    const sqsClientSendMock = sqsClient.send as jest.Mock;
+    sqsClientSendMock.mockResolvedValue({ Failed: [] });
+
     const result = await enqueueLetterUpdateRequests(
-      lettersToUpdate,
+      updateLetterCommands,
       "correlationId1",
       deps,
     );
 
     expect(result).toBeUndefined();
 
-    expect(deps.sqsClient.send).toHaveBeenNthCalledWith(
-      1,
-      expect.objectContaining({
-        input: {
-          QueueUrl: deps.env.QUEUE_URL,
-          MessageAttributes: {
-            CorrelationId: {
-              DataType: "String",
-              StringValue: "correlationId1",
-            },
-          },
-          MessageBody: JSON.stringify({
-            id: lettersToUpdate[0].id,
-            status: lettersToUpdate[0].status,
-            supplierId: lettersToUpdate[0].supplierId,
-            specificationId: lettersToUpdate[0].specificationId,
-            groupId: lettersToUpdate[0].groupId,
-            reasonCode: lettersToUpdate[0].reasonCode,
-            reasonText: lettersToUpdate[0].reasonText,
-          }),
-        },
-      }),
-    );
+    // processes 10 at a time (25 -> 10+10+5)
+    expect(sqsClientSendMock).toHaveBeenCalledTimes(3);
 
-    expect(deps.sqsClient.send).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({
-        input: {
-          QueueUrl: deps.env.QUEUE_URL,
-          MessageAttributes: {
-            CorrelationId: {
-              DataType: "String",
-              StringValue: "correlationId1",
-            },
-          },
-          MessageBody: JSON.stringify({
-            id: lettersToUpdate[1].id,
-            status: lettersToUpdate[1].status,
-            supplierId: lettersToUpdate[1].supplierId,
-          }),
-        },
-      }),
-    );
+    const firstCallArg = sqsClientSendMock.mock.calls[0][0];
+    const firstInput = firstCallArg.input;
+
+    expect(firstInput.QueueUrl).toBe(deps.env.QUEUE_URL);
+    expect(Array.isArray(firstInput.Entries)).toBe(true);
+    expect(firstInput.Entries.length).toBe(10);
+
+    expect(firstInput.Entries[0].Id).toBe("0-0");
+    expect(firstInput.Entries[9].Id).toBe("0-9");
+
+    expect(
+      firstInput.Entries[0].MessageAttributes.CorrelationId.StringValue,
+    ).toBe("correlationId1");
+
+    const parsed = JSON.parse(firstInput.Entries[0].MessageBody);
+    expect(parsed.id).toBe("letter0");
+
+    // check last batch had 5 entries
+    const thirdCallArg = sqsClientSendMock.mock.calls[2][0];
+    const thirdInput = thirdCallArg.input;
+    expect(thirdInput.Entries.length).toBe(5);
+    // ids in third batch should start "2-0"
+    expect(thirdInput.Entries[0].Id).toBe("2-0");
   });
 
-  it("should log error if enqueueing fails", async () => {
-    const mockError = new Error("error");
+  it("should log error when SendMessageBatch returns Failed entries", async () => {
     const sqsClient = {
       send: jest
         .fn()
-        .mockRejectedValueOnce(mockError)
-        .mockResolvedValueOnce({ MessageId: "m1" }),
+        .mockResolvedValueOnce({ Failed: [] }) // first batch succeeds
+        .mockResolvedValueOnce({
+          Failed: [
+            { Id: "1-1", SenderFault: false, Code: "Err", Message: "failed" },
+          ],
+        }),
     } as unknown as SQSClient;
     const logger = { error: jest.fn() } as unknown as pino.Logger;
     const env = {
@@ -286,44 +273,56 @@ describe("enqueueLetterUpdateRequests function", () => {
     };
     const deps: Deps = { sqsClient, logger, env } as Deps;
 
+    const updateLetterCommands = Array.from({ length: 12 }, (_, i) =>
+      makeUpdateLetterCommand(i),
+    );
+
     const result = await enqueueLetterUpdateRequests(
-      lettersToUpdate,
+      updateLetterCommands,
       "correlationId1",
       deps,
     );
 
     expect(result).toBeUndefined();
 
-    expect(deps.sqsClient.send).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({
-        input: {
-          QueueUrl: deps.env.QUEUE_URL,
-          MessageAttributes: {
-            CorrelationId: {
-              DataType: "String",
-              StringValue: "correlationId1",
-            },
-          },
-          MessageBody: JSON.stringify({
-            id: lettersToUpdate[1].id,
-            status: lettersToUpdate[1].status,
-            supplierId: lettersToUpdate[1].supplierId,
-          }),
-        },
-      }),
-    );
+    // 12 = 10 + 2
+    expect(deps.sqsClient.send).toHaveBeenCalledTimes(2);
 
     expect(deps.logger.error).toHaveBeenCalledTimes(1);
-    expect(deps.logger.error).toHaveBeenCalledWith(
-      {
-        err: mockError,
-        correlationId: "correlationId1",
-        letterId: lettersToUpdate[0].id,
-        letterStatus: lettersToUpdate[0].status,
-        supplierId: lettersToUpdate[0].supplierId,
-      },
-      "Error enqueuing letter status update",
+    const errorArgs = (deps.logger.error as jest.Mock).mock.calls[0][0];
+    expect(errorArgs.failed).toBeDefined();
+    expect(Array.isArray(errorArgs.failed)).toBe(true);
+    expect(errorArgs.failed[0].Id).toBe("1-1");
+  });
+
+  it("should log error if enqueueing fails", async () => {
+    const sqsClient = {
+      send: jest
+        .fn()
+        .mockResolvedValueOnce({ Failed: [] }) // batch 0
+        .mockImplementationOnce(() => {
+          throw new Error("some failure");
+        }) // batch 1
+        .mockResolvedValueOnce({ Failed: [] }), // batch 2
+    } as unknown as SQSClient;
+    const logger = { error: jest.fn() } as unknown as pino.Logger;
+    const env = {
+      QUEUE_URL: "sqsUrl",
+    };
+    const deps: Deps = { sqsClient, logger, env } as Deps;
+
+    const lettersToUpdate = Array.from({ length: 21 }, (_, i) =>
+      makeUpdateLetterCommand(i),
     );
+
+    await enqueueLetterUpdateRequests(lettersToUpdate, "correlationId1", deps);
+
+    // all 3 attempted
+    expect(deps.sqsClient.send).toHaveBeenCalledTimes(3);
+
+    expect(deps.logger.error).toHaveBeenCalledTimes(1);
+    const logged = (deps.logger.error as jest.Mock).mock.calls[0][0];
+    expect(logged.correlationId).toBe("correlationId1");
+    expect(logged.err).toBeInstanceOf(Error);
   });
 });

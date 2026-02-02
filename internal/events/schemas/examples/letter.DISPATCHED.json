@@ -1,0 +1,30 @@
+{
+  "data": {
+    "billingRef": "1y3q9v1zzzz",
+    "domainId": "e9dc9ee9-b2f8-4ef2-8351-73a9a29f8e96_38U220Ghb1WXF8hCK6hL0LGya3Y_38U23YjtnKSZypvaCSb07adMOlq",
+    "groupId": "client_template",
+    "origin": {
+      "domain": "letter-rendering",
+      "event": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+      "source": "/data-plane/letter-rendering/comms-mgr-prod/prod",
+      "subject": "client/e9dc9ee9-b2f8-4ef2-8351-73a9a29f8e96/letter-request/38U220Ghb1WXF8hCK6hL0LGya3Y_38U23YjtnKSZypvaCSb07adMOlq"
+    },
+    "specificationId": "1y3q9v1zzzz",
+    "status": "DISPATCHED",
+    "supplierId": "supplier-12345"
+  },
+  "datacontenttype": "application/json",
+  "dataschema": "https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.DISPATCHED.1.0.0.schema.json",
+  "dataschemaversion": "1.0.0",
+  "id": "23f1f09c-a555-4d9b-8405-0b33490bc920",
+  "plane": "data",
+  "recordedtime": "2025-08-28T08:45:00.000Z",
+  "severitynumber": 2,
+  "severitytext": "INFO",
+  "source": "/data-plane/supplier-api/nhs-supplier-api-prod/main/update-status",
+  "specversion": "1.0",
+  "subject": "letter-origin/letter-rendering/letter/e9dc9ee9-b2f8-4ef2-8351-73a9a29f8e96_38U220Ghb1WXF8hCK6hL0LGya3Y_38U23YjtnKSZypvaCSb07adMOlq",
+  "time": "2025-08-28T08:45:00.000Z",
+  "traceparent": "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01",
+  "type": "uk.nhs.notify.supplier-api.letter.DISPATCHED.v1"
+}

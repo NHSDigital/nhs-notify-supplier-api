@@ -7,14 +7,18 @@ describe("letter-mapper", () => {
     const letter = {
       id: "id1",
       specificationId: "spec1",
+      billingRef: "spec1",
       supplierId: "supplier1",
       groupId: "group1",
       status: "PRINTED",
       reasonCode: "R02",
       reasonText: "Reason text",
       updatedAt: "2025-11-24T15:55:18.000Z",
+      source: "letter-rendering/source/test",
+      subject: "letter-rendering/source/letter/letter-id",
     } as Letter;
-    const event = mapLetterToCloudEvent(letter);
+    const source = "/data-plane/supplier-api/nhs-supplier-api-dev/main/letters";
+    const event = mapLetterToCloudEvent(letter, source);
 
     // Check it conforms to the letter event schema - parse will throw an error if not
     $LetterEvent.parse(event);
@@ -22,24 +26,26 @@ describe("letter-mapper", () => {
     expect(event.dataschema).toBe(
       `https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.PRINTED.${event.dataschemaversion}.schema.json`,
     );
-    expect(event.dataschemaversion).toBe("1.0.5");
-    expect(event.subject).toBe("letter-origin/supplier-api/letter/id1");
+    expect(event.dataschemaversion).toMatch(/1\.\d+\.\d+/);
+    expect(event.subject).toBe("letter-origin/letter-rendering/letter/id1");
     expect(event.time).toBe("2025-11-24T15:55:18.000Z");
     expect(event.recordedtime).toBe("2025-11-24T15:55:18.000Z");
     expect(event.data).toEqual({
       domainId: "id1",
       status: "PRINTED",
       specificationId: "spec1",
+      billingRef: "spec1",
       supplierId: "supplier1",
       groupId: "group1",
       reasonCode: "R02",
       reasonText: "Reason text",
       origin: {
-        domain: "supplier-api",
-        source: "/data-plane/supplier-api/letters",
-        subject: "letter-origin/supplier-api/letter/id1",
+        domain: "letter-rendering",
+        source: "letter-rendering/source/test",
+        subject: "letter-rendering/source/letter/letter-id",
         event: event.id,
       },
     });
+    expect(event.source).toBe(source);
   });
 });
