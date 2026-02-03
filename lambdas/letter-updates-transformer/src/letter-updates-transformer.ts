@@ -14,7 +14,6 @@ import { MetricsLogger, Unit, metricScope } from "aws-embedded-metrics";
 import mapLetterToCloudEvent from "./mappers/letter-mapper";
 import { Deps } from "./deps";
 import { LetterForEventPub, LetterSchemaForEventPub } from "./types";
-import { string } from "zod";
 
 // SNS PublishBatchCommand supports up to 10 messages per batch
 const BATCH_SIZE = 10;
