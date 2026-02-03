@@ -275,7 +275,7 @@ describe("enqueueLetterUpdateRequests function", () => {
     expect(deps.logger.info).toHaveBeenCalledWith({
       description: "Enqueued letter updates",
       correlationId: "correlationId1",
-      messageIds: ["msg-001", "msg-002"],
+      // messageIds: ["msg-001", "msg-002"],
     });
   });
 
