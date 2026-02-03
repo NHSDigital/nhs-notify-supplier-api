@@ -69,7 +69,7 @@ function getOperationFromType(type: string): UpsertOperation {
         await deps.letterRepo.updateLetterStatus(letterToUpdate);
 
         deps.logger.info({
-          description: "Inserted letter",
+          description: "Updated letter",
           eventId: supplierEvent.id,
           letterId: letterToUpdate.id,
           supplierId: letterToUpdate.supplierId,
