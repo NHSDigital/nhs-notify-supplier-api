@@ -5,6 +5,7 @@ import { ApiErrorDetail } from "../contracts/errors";
 import {
   PostLettersRequest,
   PostLettersRequestSchema,
+  UpdateLetterCommand,
 } from "../contracts/letters";
 import ValidationError from "../errors/validation-error";
 import { processError } from "../mappers/error-mapper";
@@ -22,7 +23,7 @@ function duplicateIdsExist(postLettersRequest: PostLettersRequest) {
 /**
  * emits metrics of successful letter updates, including the supplier and grouped by status
  */
-async function emitMetics(
+function emitMetics(
   metrics: MetricsLogger,
   supplierId: string,
   statusesMapping: Map<string, number>,
@@ -34,6 +35,14 @@ async function emitMetics(
     });
     metrics.putMetric(MetricStatus.Success, count, Unit.Count);
   }
+}
+
+function populateStatusesMap(updateLetterCommands: UpdateLetterCommand[]) {
+  const statusMap = new Map<string, number>();
+  for (const command of updateLetterCommands) {
+    statusMap.set(command.status, (statusMap.get(command.status) || 0) + 1);
+  }
+  return statusMap;
 }
 
 export default function createPostLettersHandler(
@@ -95,14 +104,18 @@ export default function createPostLettersHandler(
           );
         }
 
-        const statusesMapping = new Map<string, number>();
+        const updateLetterCommands: UpdateLetterCommand[] = mapToUpdateCommands(
+          postLettersRequest,
+          supplierId,
+        );
+        const statusesMapping = populateStatusesMap(updateLetterCommands);
         await enqueueLetterUpdateRequests(
-          mapToUpdateCommands(postLettersRequest, supplierId, statusesMapping),
+          updateLetterCommands,
           commonIds.value.correlationId,
           deps,
         );
 
-        await emitMetics(metrics, supplierId, statusesMapping);
+        emitMetics(metrics, supplierId, statusesMapping);
         return {
           statusCode: 202,
           body: "",

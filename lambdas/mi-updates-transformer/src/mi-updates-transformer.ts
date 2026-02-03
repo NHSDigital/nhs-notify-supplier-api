@@ -50,7 +50,7 @@ function extractMIData(record: DynamoDBRecord): MI {
   return MISchema.parse(unmarshall(newImage as any));
 }
 
-async function emitMetrics(
+function emitMetrics(
   metrics: MetricsLogger,
   eventTypeCount: Map<string, number>,
 ) {
@@ -92,7 +92,7 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
           }),
         );
       }
-      await emitMetrics(metrics, eventTypeCount);
+      emitMetrics(metrics, eventTypeCount);
     };
   });
 }

@@ -14,6 +14,7 @@ import { MetricsLogger, Unit, metricScope } from "aws-embedded-metrics";
 import mapLetterToCloudEvent from "./mappers/letter-mapper";
 import { Deps } from "./deps";
 import { LetterForEventPub, LetterSchemaForEventPub } from "./types";
+import { string } from "zod";
 
 // SNS PublishBatchCommand supports up to 10 messages per batch
 const BATCH_SIZE = 10;
@@ -39,7 +40,9 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
           mapLetterToCloudEvent(element, deps.env.EVENT_SOURCE),
         );
 
-      const eventTypeCount = new Map<string, number>();
+      const eventTypeCount: Map<string, number> =
+        populateEventTypeMap(cloudEvents);
+      // const eventTypeCount = new Map<string, number>();
       for (const batch of generateBatches(cloudEvents)) {
         deps.logger.info({
           description: "Publishing batch",
@@ -49,22 +52,26 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
         await deps.snsClient.send(
           new PublishBatchCommand({
             TopicArn: deps.env.EVENTPUB_SNS_TOPIC_ARN,
-            PublishBatchRequestEntries: batch.map((element, index) => {
-              eventTypeCount.set(
-                element.type,
-                (eventTypeCount.get(element.type) || 0) + 1,
-              );
-              return buildMessage(element, index);
-            }),
+            PublishBatchRequestEntries: batch.map((element, index) =>
+              buildMessage(element, index),
+            ),
           }),
         );
       }
-      await emitMetrics(metrics, eventTypeCount);
+      emitMetrics(metrics, eventTypeCount);
     };
   });
 }
 
-async function emitMetrics(
+function populateEventTypeMap(cloudEvents: LetterEvent[]) {
+  const evtMap = new Map<string, number>();
+  for (const event of cloudEvents) {
+    evtMap.set(event.type, (evtMap.get(event.type) || 0) + 1);
+  }
+  return evtMap;
+}
+
+function emitMetrics(
   metrics: MetricsLogger,
   eventTypeCount: Map<string, number>,
 ) {
