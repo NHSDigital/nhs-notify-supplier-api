@@ -41,7 +41,6 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
 
       const eventTypeCount: Map<string, number> =
         populateEventTypeMap(cloudEvents);
-      // const eventTypeCount = new Map<string, number>();
       for (const batch of generateBatches(cloudEvents)) {
         deps.logger.info({
           description: "Publishing batch",
