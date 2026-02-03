@@ -80,7 +80,7 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ inputs.nodejs_version }}
+          node-version-file: '.tool-versions'
           registry-url: 'https://npm.pkg.github.com'
 
       - name: check if local version differs from latest published version
@@ -113,19 +113,14 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5.0.0
-      - name: Setup NodeJS
-        uses: actions/setup-node@v4
+      - name: "Repo setup"
+        uses: ./.github/actions/node-install
         with:
-          node-version: ${{ inputs.nodejs_version }}
-          registry-url: 'https://npm.pkg.github.com'
-      - name: "Install dependencies"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm ci
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Run provider contract tests"
         run: make test-contract
         env:
-          GITHUB_PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish-event-schemas:
     name: Publish event schemas package to GitHub package registry
@@ -145,7 +140,7 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ inputs.nodejs_version }}
+          node-version-file: '.tool-versions'
           registry-url: 'https://npm.pkg.github.com'
 
       - name: Install dependencies

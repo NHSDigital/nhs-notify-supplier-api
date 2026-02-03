@@ -51,6 +51,7 @@
   },
   "name": "nhs-notify-supplier-api",
   "overrides": {
+    "fast-xml-parser": "^5.3.4",
     "pretty-format": {
       "react-is": "19.0.0"
     },
@@ -89,6 +90,7 @@
     "lambdas/*",
     "pact-contracts",
     "scripts/utilities/*",
-    "tests"
+    "tests",
+    "tests/contracts/*"
   ]
 }
