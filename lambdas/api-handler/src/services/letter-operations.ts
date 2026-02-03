@@ -127,7 +127,7 @@ export async function enqueueLetterUpdateRequests(
             deps.logger.info({
               description: "Enqueued letter updates",
               correlationId,
-              messageIds: result.Successful.map((entry) => entry.MessageId),
+              // messageIds: result.Successful.map((entry) => entry.MessageId),
             });
           }
           if (result.Failed && result.Failed.length > 0) {
