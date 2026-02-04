@@ -38,7 +38,7 @@ data "aws_iam_policy_document" "letter_updates_queue_policy" {
     condition {
       test     = "ArnEquals"
       variable = "aws:SourceArn"
-      values   = [module.eventsub.sns_topic.arn]
+      values   = [module.eventsub.eventsub_topic.arn]
     }
   }
 
@@ -65,7 +65,7 @@ data "aws_iam_policy_document" "letter_updates_queue_policy" {
     condition {
       test     = "ArnEquals"
       variable = "aws:SourceArn"
-      values   = [module.eventsub.sns_topic.arn]
+      values   = [module.eventsub.eventsub_topic.arn]
     }
   }
 }

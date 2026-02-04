@@ -1,8 +1,8 @@
-output "sns_topic" {
+output "eventsub_topic" {
   description = "SNS Topic ARN and Name"
   value = {
-    arn  = aws_sns_topic.main.arn
-    name = aws_sns_topic.main.name
+    arn  = aws_sns_topic.eventsub_topic.arn
+    name = aws_sns_topic.eventsub_topic.name
   }
 }
 

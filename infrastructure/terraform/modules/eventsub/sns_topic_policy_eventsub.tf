@@ -1,5 +1,5 @@
-resource "aws_sns_topic_policy" "main" {
-  arn = aws_sns_topic.main.arn
+resource "aws_sns_topic_policy" "eventsub_topic" {
+  arn = aws_sns_topic.eventsub_topic.arn
 
   policy = data.aws_iam_policy_document.sns_topic_policy.json
 }
@@ -8,7 +8,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
   policy_id = "__default_policy_ID"
 
   statement {
-    sid = "AllowAllSNSActionsFromAccount"
+    sid    = "AllowAllSNSActionsFromAccount"
     effect = "Allow"
 
     principals {
@@ -29,7 +29,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
     ]
 
     resources = [
-      aws_sns_topic.main.arn,
+      aws_sns_topic.eventsub_topic.arn,
     ]
 
     condition {
@@ -43,7 +43,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
   }
 
   statement {
-    sid = "AllowAllSNSActionsFromSharedAccount"
+    sid    = "AllowAllSNSActionsFromSharedAccount"
     effect = "Allow"
     actions = [
       "SNS:Publish",
@@ -57,7 +57,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
     }
 
     resources = [
-      aws_sns_topic.main.arn,
+      aws_sns_topic.eventsub_topic.arn,
     ]
   }
 }
