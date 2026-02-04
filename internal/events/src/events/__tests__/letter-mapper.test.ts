@@ -1,6 +1,6 @@
 import { $LetterEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
 import { Letter } from "@internal/datastore";
-import { mapLetterToCloudEvent } from "../letter-mapper";
+import { mapLetterToCloudEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-mapper";
 
 describe("letter-mapper", () => {
   it("maps a letter to a letter event", async () => {
