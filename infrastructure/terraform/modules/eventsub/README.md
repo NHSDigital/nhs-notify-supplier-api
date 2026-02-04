@@ -40,6 +40,7 @@
 
 | Name | Description |
 |------|-------------|
+| <a name="output_amendments_topic"></a> [amendments\_topic](#output\_amendments\_topic) | Amendments SNS Topic ARN and Name |
 | <a name="output_eventsub_topic"></a> [eventsub\_topic](#output\_eventsub\_topic) | SNS Topic ARN and Name |
 | <a name="output_s3_bucket_event_cache"></a> [s3\_bucket\_event\_cache](#output\_s3\_bucket\_event\_cache) | S3 Bucket ARN and Name for event cache |
 <!-- vale on -->
