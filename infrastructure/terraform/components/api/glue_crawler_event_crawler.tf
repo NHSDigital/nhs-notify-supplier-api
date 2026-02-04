@@ -12,13 +12,15 @@ resource "aws_glue_crawler" "event_crawler" {
   s3_target {
     path = "s3://${local.eventsub_event_cache_bucket_name}/"
   }
+
+  schedule = "cron(0 * * * ? *)"
   recrawl_policy {
-    recrawl_behavior = "CRAWL_EVERYTHING"
+    recrawl_behavior = "CRAWL_NEW_FOLDERS_ONLY"
   }
 
   schema_change_policy {
     delete_behavior = "LOG"
-    update_behavior = "UPDATE_IN_DATABASE"
+    update_behavior = "LOG"
   }
 
 }
