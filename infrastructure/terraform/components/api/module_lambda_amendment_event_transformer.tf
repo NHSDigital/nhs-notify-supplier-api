@@ -105,7 +105,7 @@ data "aws_iam_policy_document" "amendment_event_transformer" {
     ]
 
     resources = [
-      module.eventsub.sns_topic.arn
+      module.eventsub.eventsub_topic.arn
     ]
   }
 }
