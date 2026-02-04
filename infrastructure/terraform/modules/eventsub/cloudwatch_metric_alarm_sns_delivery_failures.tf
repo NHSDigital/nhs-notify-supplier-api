@@ -14,3 +14,20 @@ resource "aws_cloudwatch_metric_alarm" "sns_delivery_failures" {
     TopicName = aws_sns_topic.eventsub_topic.name
   }
 }
+
+resource "aws_cloudwatch_metric_alarm" "amendments_delivery_failures" {
+  alarm_name          = "${local.csi}-amendments-sns-delivery-failures"
+  alarm_description   = "RELIABILITY: Alarm for amendments SNS topic delivery failures"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 1
+  metric_name         = "NumberOfNotificationsFailed"
+  namespace           = "AWS/SNS"
+  period              = 300
+  statistic           = "Sum"
+  threshold           = 0
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    TopicName = aws_sns_topic.amendments_topic.name
+  }
+}
