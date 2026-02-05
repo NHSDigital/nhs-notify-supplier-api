@@ -106,6 +106,9 @@ test-component:
 test-performance:
 	(cd tests && npm install && npm run test:performance)
 
+test-contract: # Run provider contract tests @Testing
+	npm run test:contracts --workspace tests/contracts/provider
+
 version:
 	rm -f .version
 	make version-create-effective-file dir=.
