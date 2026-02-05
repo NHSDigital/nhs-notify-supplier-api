@@ -91,7 +91,7 @@ data "aws_iam_policy_document" "letter_status_update" {
     ]
 
     resources = [
-      module.eventsub.eventsub_topic.arn
+      module.eventsub.amendments_topic.arn
     ]
   }
 }

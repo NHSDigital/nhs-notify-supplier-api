@@ -11,7 +11,7 @@ const EnvVarsSchema = z.object({
   MAX_LIMIT: z.coerce.number().int().optional(),
   QUEUE_URL: z.coerce.string().optional(),
   EVENT_SOURCE: z.string(),
-  SNS_TOPIC_ARN: z.string(),
+  AMENDMENTS_TOPIC_ARN: z.string(),
 });
 
 export type EnvVars = z.infer<typeof EnvVarsSchema>;

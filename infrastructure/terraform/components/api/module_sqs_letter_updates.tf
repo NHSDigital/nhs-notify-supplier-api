@@ -18,29 +18,6 @@ module "sqs_letter_updates" {
 
 data "aws_iam_policy_document" "letter_updates_queue_policy" {
   version = "2012-10-17"
-  statement {
-    sid    = "AllowSNSToSendMessage"
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["sns.amazonaws.com"]
-    }
-
-    actions = [
-      "sqs:SendMessage"
-    ]
-
-    resources = [
-      "arn:aws:sqs:${var.region}:${var.aws_account_id}:${var.project}-${var.environment}-${var.component}-letter-updates-queue"
-    ]
-
-    condition {
-      test     = "ArnEquals"
-      variable = "aws:SourceArn"
-      values   = [module.eventsub.eventsub_topic.arn]
-    }
-  }
 
   statement {
     sid    = "AllowSNSPermissions"
@@ -65,7 +42,7 @@ data "aws_iam_policy_document" "letter_updates_queue_policy" {
     condition {
       test     = "ArnEquals"
       variable = "aws:SourceArn"
-      values   = [module.eventsub.eventsub_topic.arn]
+      values   = [module.eventsub.eventsub_topic.arn, module.eventsub.amendments_topic.arn]
     }
   }
 }

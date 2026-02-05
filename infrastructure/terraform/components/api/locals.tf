@@ -27,7 +27,7 @@ locals {
     SUPPLIER_ID_HEADER       = "nhsd-supplier-id",
     APIM_CORRELATION_HEADER  = "nhsd-correlation-id",
     DOWNLOAD_URL_TTL_SECONDS = 60
-    SNS_TOPIC_ARN            = "${module.eventsub.eventsub_topic.arn}",
+    AMENDMENTS_TOPIC_ARN     = "${module.eventsub.amendments_topic.arn}",
     EVENT_SOURCE             = "/data-plane/supplier-api/${var.group}/${var.environment}/letters"
   }
 
