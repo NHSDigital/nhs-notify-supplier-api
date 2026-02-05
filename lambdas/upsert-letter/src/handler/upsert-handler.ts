@@ -24,10 +24,19 @@ import { Deps } from "../config/deps";
 
 type SupplierSpec = { supplierId: string; specId: string };
 type PreparedEvents = LetterRequestPreparedEventV2 | LetterRequestPreparedEvent;
+type AllocatedLetterQueueMessage = {
+  letterEvent: unknown;
+  operationType: string;
+  supplierSpec: SupplierSpec;
+};
 type UpsertOperation = {
   name: "Insert" | "Update";
   schemas: z.ZodSchema[];
-  handler: (request: unknown, deps: Deps) => Promise<void>;
+  handler: (
+    request: unknown,
+    supplierSpec: SupplierSpec,
+    deps: Deps,
+  ) => Promise<void>;
 };
 
 // small envelope that must exist in all inputs
@@ -38,12 +47,8 @@ function getOperationFromType(type: string): UpsertOperation {
     return {
       name: "Insert",
       schemas: [$LetterRequestPreparedEventV2, $LetterRequestPreparedEvent],
-      handler: async (request, deps) => {
+      handler: async (request, supplierSpec, deps) => {
         const preparedRequest = request as PreparedEvents;
-        const supplierSpec: SupplierSpec = resolveSupplierForVariant(
-          preparedRequest.data.letterVariantId,
-          deps,
-        );
         const letterToInsert: InsertLetter = mapToInsertLetter(
           preparedRequest,
           supplierSpec.supplierId,
@@ -64,7 +69,7 @@ function getOperationFromType(type: string): UpsertOperation {
     return {
       name: "Update",
       schemas: [$LetterEvent],
-      handler: async (request, deps) => {
+      handler: async (request, supplierSpec, deps) => {
         const supplierEvent = request as LetterEvent;
         const letterToUpdate: UpdateLetter = mapToUpdateLetter(supplierEvent);
         await deps.letterRepo.updateLetterStatus(letterToUpdate);
@@ -115,51 +120,16 @@ function mapToUpdateLetter(upsertRequest: LetterEvent): UpdateLetter {
   };
 }
 
-function resolveSupplierForVariant(
-  variantId: string,
-  deps: Deps,
-): SupplierSpec {
-  return deps.env.VARIANT_MAP[variantId];
-}
-
-function parseSNSNotification(record: SQSRecord) {
-  const notification = JSON.parse(record.body) as Partial<SNSMessage>;
-  if (
-    notification.Type !== "Notification" ||
-    typeof notification.Message !== "string"
-  ) {
-    throw new Error(
-      "SQS record does not contain SNS Notification with string Message",
-    );
-  }
-  return notification.Message;
-}
-
-function removeEventBridgeWrapper(event: any) {
-  const maybeEventBridge = event;
-  if (maybeEventBridge.source && maybeEventBridge.detail) {
-    return maybeEventBridge.detail;
-  }
-  return event;
-}
-
-function getType(event: unknown) {
-  const env = TypeEnvelope.safeParse(event);
-  if (!env.success) {
-    throw new Error("Missing or invalid envelope.type field");
-  }
-  return env.data.type;
-}
-
 async function runUpsert(
   operation: UpsertOperation,
   letterEvent: unknown,
+  supplierSpec: SupplierSpec,
   deps: Deps,
 ) {
   for (const schema of operation.schemas) {
     const r = schema.safeParse(letterEvent);
     if (r.success) {
-      await operation.handler(r.data, deps);
+      await operation.handler(r.data, supplierSpec, deps);
       return;
     }
   }
@@ -189,9 +159,9 @@ async function emitMetrics(
   }
 }
 
-function getSupplierId(snsEvent: any): string {
-  if (snsEvent && snsEvent.data && snsEvent.data.supplierId) {
-    return snsEvent.data.supplierId;
+function getSupplierEventId(letterEvent: any): string {
+  if (letterEvent && letterEvent.data && letterEvent.data.supplierId) {
+    return letterEvent.data.supplierId;
   }
   return "unknown";
 }
@@ -206,20 +176,24 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
       const tasks = event.Records.map(async (record) => {
         let supplier = "unknown";
         try {
-          const message: string = parseSNSNotification(record);
-          const snsEvent = JSON.parse(message);
-          supplier = getSupplierId(snsEvent);
-          const letterEvent: unknown = removeEventBridgeWrapper(snsEvent);
+          const queueMessage: AllocatedLetterQueueMessage = JSON.parse(
+            record.body,
+          );
+          const { letterEvent, operationType, supplierSpec } = queueMessage;
 
           deps.logger.info({
             description: "Extracted letter event",
             messageId: record.messageId,
           });
-          const type = getType(letterEvent);
 
-          const operation = getOperationFromType(type);
+          supplier =
+            !supplierSpec || !supplierSpec.supplierId
+              ? getSupplierEventId(letterEvent)
+              : supplierSpec.supplierId;
 
-          await runUpsert(operation, letterEvent, deps);
+          const operation = getOperationFromType(operationType);
+
+          await runUpsert(operation, letterEvent, supplierSpec, deps);
 
           perSupplierSuccess.set(
             supplier,
