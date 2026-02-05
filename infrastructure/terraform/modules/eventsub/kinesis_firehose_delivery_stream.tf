@@ -1,4 +1,4 @@
-resource "aws_kinesis_firehose_delivery_stream" "eventsub" {
+resource "aws_kinesis_firehose_delivery_stream" "main" {
   count = var.enable_event_cache ? 1 : 0
 
   name        = local.csi

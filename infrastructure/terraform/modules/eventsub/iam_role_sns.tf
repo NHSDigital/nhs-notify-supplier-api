@@ -45,7 +45,7 @@ data "aws_iam_policy_document" "firehose_delivery" {
     ]
 
     resources = [
-      "${aws_kinesis_firehose_delivery_stream.eventsub[0].arn}",
+      "${aws_kinesis_firehose_delivery_stream.main[0].arn}",
     ]
   }
 }
