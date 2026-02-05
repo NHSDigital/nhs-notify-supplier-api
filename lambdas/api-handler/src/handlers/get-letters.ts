@@ -3,6 +3,7 @@ import {
   APIGatewayProxyHandler,
 } from "aws-lambda";
 import { Logger } from "pino";
+import { MetricsLogger, metricScope } from "aws-embedded-metrics";
 import { getLettersForSupplier } from "../services/letter-operations";
 import { extractCommonIds } from "../utils/common-ids";
 import { requireEnvVar } from "../utils/validation";
@@ -11,7 +12,9 @@ import { processError } from "../mappers/error-mapper";
 import ValidationError from "../errors/validation-error";
 import { mapToGetLettersResponse } from "../mappers/letter-mapper";
 import type { Deps } from "../config/deps";
+import { MetricStatus, emitForSingleSupplier } from "../utils/metrics";
 
+// List letters Handlers
 // The endpoint should only return pending letters for now
 const status = "PENDING";
 
@@ -82,53 +85,70 @@ function getLimitOrDefault(
 export default function createGetLettersHandler(
   deps: Deps,
 ): APIGatewayProxyHandler {
-  return async (event) => {
-    const commonIds = extractCommonIds(
-      event.headers,
-      event.requestContext,
-      deps,
-    );
-
-    if (!commonIds.ok) {
-      return processError(
-        commonIds.error,
-        commonIds.correlationId,
-        deps.logger,
-      );
-    }
-
-    try {
-      const maxLimit = requireEnvVar(deps.env, "MAX_LIMIT");
-
-      const limitNumber = getLimitOrDefault(
-        event.queryStringParameters,
-        maxLimit,
-        deps.logger,
+  return metricScope((metrics: MetricsLogger) => {
+    return async (event) => {
+      const commonIds = extractCommonIds(
+        event.headers,
+        event.requestContext,
+        deps,
       );
 
-      const letters = await getLettersForSupplier(
-        commonIds.value.supplierId,
-        status,
-        limitNumber,
-        deps.letterRepo,
-      );
+      if (!commonIds.ok) {
+        return processError(
+          commonIds.error,
+          commonIds.correlationId,
+          deps.logger,
+        );
+      }
 
-      const response = mapToGetLettersResponse(letters);
+      const { supplierId } = commonIds.value;
+      try {
+        const maxLimit = requireEnvVar(deps.env, "MAX_LIMIT");
 
-      deps.logger.info({
-        description: "Pending letters successfully fetched",
-        supplierId: commonIds.value.supplierId,
-        limitNumber,
-        status,
-        lettersCount: letters.length,
-      });
+        const limitNumber = getLimitOrDefault(
+          event.queryStringParameters,
+          maxLimit,
+          deps.logger,
+        );
 
-      return {
-        statusCode: 200,
-        body: JSON.stringify(response, null, 2),
-      };
-    } catch (error) {
-      return processError(error, commonIds.value.correlationId, deps.logger);
-    }
-  };
+        const letters = await getLettersForSupplier(
+          supplierId,
+          status,
+          limitNumber,
+          deps.letterRepo,
+        );
+
+        const response = mapToGetLettersResponse(letters);
+
+        deps.logger.info({
+          description: "Pending letters successfully fetched",
+          supplierId,
+          limitNumber,
+          status,
+          lettersCount: letters.length,
+        });
+
+        emitForSingleSupplier(
+          metrics,
+          "getLetters",
+          supplierId,
+          letters.length,
+          MetricStatus.Success,
+        );
+        return {
+          statusCode: 200,
+          body: JSON.stringify(response, null, 2),
+        };
+      } catch (error) {
+        emitForSingleSupplier(
+          metrics,
+          "getLetters",
+          supplierId,
+          1,
+          MetricStatus.Failure,
+        );
+        return processError(error, commonIds.value.correlationId, deps.logger);
+      }
+    };
+  });
 }
