@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@aws-sdk/client-sns": "^3.954.0",
+    "@aws-sdk/client-sns": "^3.983.0",
     "@aws-sdk/util-dynamodb": "^3.943.0",
     "@internal/datastore": "^0.1.0",
     "@nhsdigital/nhs-notify-event-schemas-supplier-api": "*",
