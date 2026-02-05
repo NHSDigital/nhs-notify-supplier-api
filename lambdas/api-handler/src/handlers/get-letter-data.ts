@@ -1,4 +1,5 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
+import { MetricsLogger, metricScope } from "aws-embedded-metrics";
 import { assertNotEmpty } from "../utils/validation";
 import { extractCommonIds } from "../utils/common-ids";
 import { ApiErrorDetail } from "../contracts/errors";
@@ -6,46 +7,60 @@ import { processError } from "../mappers/error-mapper";
 import ValidationError from "../errors/validation-error";
 import { getLetterDataUrl } from "../services/letter-operations";
 import type { Deps } from "../config/deps";
+import { MetricStatus, emitForSingleSupplier } from "../utils/metrics";
 
 export default function createGetLetterDataHandler(
   deps: Deps,
 ): APIGatewayProxyHandler {
-  return async (event) => {
-    const commonIds = extractCommonIds(
-      event.headers,
-      event.requestContext,
-      deps,
-    );
-
-    if (!commonIds.ok) {
-      return processError(
-        commonIds.error,
-        commonIds.correlationId,
-        deps.logger,
-      );
-    }
-
-    try {
-      const letterId = assertNotEmpty(
-        event.pathParameters?.id,
-        new ValidationError(
-          ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter,
-        ),
+  return metricScope((metrics: MetricsLogger) => {
+    return async (event) => {
+      const commonIds = extractCommonIds(
+        event.headers,
+        event.requestContext,
+        deps,
       );
 
-      return {
-        statusCode: 303,
-        headers: {
-          Location: await getLetterDataUrl(
-            commonIds.value.supplierId,
-            letterId,
-            deps,
+      if (!commonIds.ok) {
+        return processError(
+          commonIds.error,
+          commonIds.correlationId,
+          deps.logger,
+        );
+      }
+
+      const { supplierId } = commonIds.value;
+      try {
+        const letterId = assertNotEmpty(
+          event.pathParameters?.id,
+          new ValidationError(
+            ApiErrorDetail.InvalidRequestMissingLetterIdPathParameter,
           ),
-        },
-        body: "",
-      };
-    } catch (error) {
-      return processError(error, commonIds.value.correlationId, deps.logger);
-    }
-  };
+        );
+
+        emitForSingleSupplier(
+          metrics,
+          "getLetterData",
+          supplierId,
+          1,
+          MetricStatus.Success,
+        );
+        return {
+          statusCode: 303,
+          headers: {
+            Location: await getLetterDataUrl(supplierId, letterId, deps),
+          },
+          body: "",
+        };
+      } catch (error) {
+        emitForSingleSupplier(
+          metrics,
+          "getLetterData",
+          supplierId,
+          1,
+          MetricStatus.Failure,
+        );
+        return processError(error, commonIds.value.correlationId, deps.logger);
+      }
+    };
+  });
 }
