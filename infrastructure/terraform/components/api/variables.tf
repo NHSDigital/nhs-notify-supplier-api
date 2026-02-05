@@ -187,3 +187,9 @@ variable "letter_event_source" {
   description = "Source value to use for the letter status event updates"
   default     = "/data-plane/supplier-api/nhs-supplier-api-prod/main/update-status"
 }
+
+variable "enable_api_data_trace" {
+  type        = bool
+  description = "Enable API Gateway data trace logging"
+  default     = false
+}
