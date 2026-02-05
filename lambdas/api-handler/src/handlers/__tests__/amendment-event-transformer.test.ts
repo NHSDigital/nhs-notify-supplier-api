@@ -117,7 +117,7 @@ describe("createLetterStatusUpdateHandler", () => {
         i + 1,
         expect.objectContaining({
           input: expect.objectContaining({
-            TopicArn: mockedDeps.env.SNS_TOPIC_ARN,
+            TopicArn: mockedDeps.env.AMENDMENTS_TOPIC_ARN,
             Message: JSON.stringify(
               mapLetterToCloudEvent(
                 updateLetterCommands[i] as Letter,

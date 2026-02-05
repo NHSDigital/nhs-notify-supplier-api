@@ -12,7 +12,7 @@ const EnvVarsSchema = z.object({
   QUEUE_URL: z.coerce.string().optional(),
   PINO_LOG_LEVEL: z.coerce.string().optional(),
   EVENT_SOURCE: z.string(),
-  SNS_TOPIC_ARN: z.string(),
+  AMENDMENTS_TOPIC_ARN: z.string(),
 });
 
 export type EnvVars = z.infer<typeof EnvVarsSchema>;
