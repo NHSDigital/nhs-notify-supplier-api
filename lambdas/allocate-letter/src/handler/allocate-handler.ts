@@ -9,8 +9,9 @@ import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
 
 import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
-import z from "zod";
+import z, { url } from "zod";
 import { Deps } from "../config/deps";
+import { de } from "zod/v4/locales";
 
 type SupplierSpec = { supplierId: string; specId: string };
 type PreparedEvents = LetterRequestPreparedEventV2 | LetterRequestPreparedEvent;
@@ -61,7 +62,7 @@ function getSupplier(letterEvent: PreparedEvents, deps: Deps): SupplierSpec {
 function isInsert(type: string): boolean {
   return (
     type === "uk.nhs.notify.letter-rendering.letter-request.prepared.v2" ||
-    type === "uk.nhs.notify.letter-rendering.letter-request.prepared" // legacy schema
+    type === "uk.nhs.notify.letter-rendering.letter-request.prepared.v1" // legacy schema
   );
 }
 
@@ -95,6 +96,11 @@ export default function createAllocatedLetterHandler(deps: Deps): SQSHandler {
           operationType,
           ...(supplierSpec && { supplierSpec }),
         };
+
+        deps.logger.info(
+          { msg: queueMessage, url: queueUrl },
+          "Sending message to allocated letters queue",
+        );
 
         await deps.sqsClient.send(
           new SendMessageCommand({
