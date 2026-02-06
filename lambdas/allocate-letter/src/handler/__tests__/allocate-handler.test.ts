@@ -1,13 +1,13 @@
 import { SNSMessage, SQSEvent, SQSRecord } from "aws-lambda";
 import pino from "pino";
-import { LetterRepository } from "internal/datastore/src";
+import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
 import {
   $LetterEvent,
   LetterEvent,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
-import createUpsertLetterHandler from "../allocate-handler";
+import createAllocatedLetterHandler from "../allocate-handler";
 import { Deps } from "../../config/deps";
 import { EnvVars } from "../../config/env";
 
@@ -40,58 +40,6 @@ type SupportedEvent =
   | LetterRequestPreparedEventV2
   | LetterRequestPreparedEvent
   | LetterEvent;
-
-function createEventBridgeNotification(
-  event: SupportedEvent,
-): Partial<SNSMessage> {
-  return {
-    SignatureVersion: "",
-    Timestamp: "",
-    Signature: "",
-    SigningCertUrl: "",
-    MessageId: "",
-    Message: createEventBridgeEvent(event),
-    MessageAttributes: {},
-    Type: "Notification",
-    UnsubscribeUrl: "",
-    TopicArn: "",
-    Subject: "",
-    Token: "",
-  };
-}
-
-function createNotification(event: SupportedEvent): Partial<SNSMessage> {
-  return {
-    SignatureVersion: "",
-    Timestamp: "",
-    Signature: "",
-    SigningCertUrl: "",
-    MessageId: "",
-    Message: JSON.stringify(event),
-    MessageAttributes: {},
-    Type: "Notification",
-    UnsubscribeUrl: "",
-    TopicArn: "",
-    Subject: "",
-    Token: "",
-  };
-}
-
-function createEventBridgeEvent(event: SupportedEvent): string {
-  const now = new Date().toISOString();
-  const eventBridgeEnvelope = {
-    version: "0",
-    id: "4f28e649-6832-18e8-7261-4b63e6dcd3b5",
-    "detail-type": event.type,
-    source: "custom.event",
-    account: "815490582396",
-    time: now,
-    region: "eu-west-2",
-    resources: [],
-    detail: event,
-  };
-  return JSON.stringify(eventBridgeEnvelope);
-}
 
 function createPreparedV1Event(
   overrides: Partial<any> = {},
@@ -186,304 +134,449 @@ function createSupplierStatusChangeEvent(
   });
 }
 
-describe("createUpsertLetterHandler", () => {
-  const mockedDeps: jest.Mocked<Deps> = {
-    letterRepo: {
-      putLetter: jest.fn(),
-      updateLetterStatus: jest.fn(),
-    } as unknown as LetterRepository,
-    logger: { error: jest.fn(), info: jest.fn() } as unknown as pino.Logger,
-    env: {
-      LETTERS_TABLE_NAME: "LETTERS_TABLE_NAME",
-      LETTER_TTL_HOURS: 12_960,
-      VARIANT_MAP: {
-        lv1: {
-          supplierId: "supplier1",
-          specId: "spec1",
-        },
-      },
-    } as EnvVars,
-  } as Deps;
+function createEventBridgeNotification(
+  event: LetterRequestPreparedEventV2 | LetterRequestPreparedEvent,
+): Partial<SNSMessage> {
+  return {
+    SignatureVersion: "",
+    Timestamp: "",
+    Signature: "",
+    SigningCertUrl: "",
+    MessageId: "",
+    Message: createEventBridgeEvent(event),
+    MessageAttributes: {},
+    Type: "Notification",
+    UnsubscribeUrl: "",
+    TopicArn: "",
+    Subject: "",
+    Token: "",
+  };
+}
+
+function createNotification(event: SupportedEvent): Partial<SNSMessage> {
+  return {
+    SignatureVersion: "",
+    Timestamp: "",
+    Signature: "",
+    SigningCertUrl: "",
+    MessageId: "",
+    Message: JSON.stringify(event),
+    MessageAttributes: {},
+    Type: "Notification",
+    UnsubscribeUrl: "",
+    TopicArn: "",
+    Subject: "",
+    Token: "",
+  };
+}
+
+function createEventBridgeEvent(event: SupportedEvent): string {
+  const now = new Date().toISOString();
+  const eventBridgeEnvelope = {
+    version: "0",
+    id: "4f28e649-6832-18e8-7261-4b63e6dcd3b5",
+    "detail-type": event.type,
+    source: "custom.event",
+    account: "815490582396",
+    time: now,
+    region: "eu-west-2",
+    resources: [],
+    detail: event,
+  };
+  return JSON.stringify(eventBridgeEnvelope);
+}
+
+describe("createAllocatedLetterHandler", () => {
+  let mockSqsClient: jest.Mocked<SQSClient>;
+  let mockedDeps: jest.Mocked<Deps>;
 
   beforeEach(() => {
+    mockSqsClient = {
+      send: jest.fn(),
+    } as unknown as jest.Mocked<SQSClient>;
+
+    mockedDeps = {
+      logger: { error: jest.fn(), info: jest.fn() } as unknown as pino.Logger,
+      env: {
+        LETTERS_TABLE_NAME: "LETTERS_TABLE_NAME",
+        LETTER_TTL_HOURS: 12_960,
+        VARIANT_MAP: {
+          lv1: {
+            supplierId: "supplier1",
+            specId: "spec1",
+          },
+        },
+      } as EnvVars,
+      sqsClient: mockSqsClient,
+    } as jest.Mocked<Deps>;
+
     jest.clearAllMocks();
   });
 
-  test("processes all records successfully and returns no batch failures", async () => {
+  test("parses SNS notification and sends message to SQS queue for v2 event", async () => {
+    const preparedEvent = createPreparedV2Event();
+    const snsNotification = createEventBridgeNotification(preparedEvent);
+
     const evt: SQSEvent = createSQSEvent([
-      createSqsRecord(
-        "msg1",
-        JSON.stringify(createEventBridgeNotification(createPreparedV2Event())),
-      ),
-      createSqsRecord(
-        "msg2",
-        JSON.stringify(createNotification(createSupplierStatusChangeEvent())),
-      ),
+      createSqsRecord("msg1", JSON.stringify(snsNotification)),
     ]);
 
-    const result = await createUpsertLetterHandler(mockedDeps)(
-      evt,
-      {} as any,
-      {} as any,
-    );
+    process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+
+    const handler = createAllocatedLetterHandler(mockedDeps);
+    const result = await handler(evt, {} as any, {} as any);
 
     expect(result).toBeDefined();
     if (!result) throw new Error("expected BatchResponse, got void");
+
     expect(result.batchItemFailures).toHaveLength(0);
 
-    expect(mockedDeps.letterRepo.putLetter).toHaveBeenCalledTimes(1);
-    expect(mockedDeps.letterRepo.updateLetterStatus).toHaveBeenCalledTimes(1);
+    expect(mockSqsClient.send).toHaveBeenCalledTimes(1);
+    const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
+    expect(sendCall).toBeInstanceOf(SendMessageCommand);
 
-    const firstArg = (mockedDeps.letterRepo.putLetter as jest.Mock).mock
-      .calls[0][0];
-    expect(firstArg.id).toBe("letter1");
-    expect(firstArg.supplierId).toBe("supplier1");
-    expect(firstArg.specificationId).toBe("spec1");
-    expect(firstArg.url).toBe("s3://letterDataBucket/letter1.pdf");
-    expect(firstArg.status).toBe("PENDING");
-    expect(firstArg.groupId).toBe("client1campaign1template1");
-    expect(firstArg.source).toBe("/data-plane/letter-rendering/test");
-
-    const secondArg = (mockedDeps.letterRepo.updateLetterStatus as jest.Mock)
-      .mock.calls[0][0];
-    expect(secondArg.id).toBe("f47ac10b-58cc-4372-a567-0e02b2c3d479");
-    expect(secondArg.supplierId).toBe("supplier1");
-    expect(secondArg.status).toBe("RETURNED");
-    expect(secondArg.reasonCode).toBe("R07");
-    expect(secondArg.reasonText).toBe("No such address");
+    const messageBody = JSON.parse(sendCall.input.MessageBody);
+    expect(messageBody.letterEvent).toEqual(preparedEvent);
+    expect(messageBody.operationType).toBe(
+      "uk.nhs.notify.letter-rendering.letter-request.prepared.v2",
+    );
+    expect(messageBody.supplierSpec).toEqual({
+      supplierId: "supplier1",
+      specId: "spec1",
+    });
   });
 
-  test("processes all v1 records successfully and returns no batch failures", async () => {
+  test("parses SNS notification and sends message to SQS queue for v1 event", async () => {
+    const preparedEvent = createPreparedV1Event();
+    const snsNotification = createEventBridgeNotification(preparedEvent);
+
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("msg1", JSON.stringify(snsNotification)),
+    ]);
+
+    process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+
+    const handler = createAllocatedLetterHandler(mockedDeps);
+    const result = await handler(evt, {} as any, {} as any);
+
+    expect(result).toBeDefined();
+    if (!result) throw new Error("expected BatchResponse, got void");
+
+    expect(result.batchItemFailures).toHaveLength(0);
+
+    expect(mockSqsClient.send).toHaveBeenCalledTimes(1);
+    const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
+    const messageBody = JSON.parse(sendCall.input.MessageBody);
+    expect(messageBody.operationType).toBe(
+      "uk.nhs.notify.letter-rendering.letter-request.prepared.v1",
+    );
+    expect(messageBody.supplierSpec).toEqual({
+      supplierId: "supplier1",
+      specId: "spec1",
+    });
+  });
+
+  test("parses SNS notification and sends message to SQS queue for update event", async () => {
+    const preparedEvent = createSupplierStatusChangeEvent();
+    const snsNotification = createNotification(preparedEvent);
+
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("msg1", JSON.stringify(snsNotification)),
+    ]);
+
+    process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+
+    const handler = createAllocatedLetterHandler(mockedDeps);
+    const result = await handler(evt, {} as any, {} as any);
+
+    expect(result).toBeDefined();
+    if (!result) throw new Error("expected BatchResponse, got void");
+
+    expect(result.batchItemFailures).toHaveLength(0);
+
+    expect(mockSqsClient.send).toHaveBeenCalledTimes(1);
+    const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
+    const messageBody = JSON.parse(sendCall.input.MessageBody);
+    expect(messageBody.operationType).toBe(
+      "uk.nhs.notify.supplier-api.letter.RETURNED.v1",
+    );
+    expect(messageBody.supplierSpec).toBeUndefined();
+  });
+
+  test("unwraps EventBridge envelope and extracts event details", async () => {
+    const preparedEvent = createPreparedV2Event({ domainId: "letter-test" });
+    const snsNotification = createEventBridgeNotification(preparedEvent);
+
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("msg1", JSON.stringify(snsNotification)),
+    ]);
+
+    process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+
+    const handler = createAllocatedLetterHandler(mockedDeps);
+    await handler(evt, {} as any, {} as any);
+
+    const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
+    const messageBody = JSON.parse(sendCall.input.MessageBody);
+    expect(messageBody.letterEvent.data.domainId).toBe("letter-test");
+  });
+
+  test("resolves correct supplier spec from variant map", async () => {
+    const preparedEvent = createPreparedV2Event();
+    const snsNotification = createEventBridgeNotification(preparedEvent);
+
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("msg1", JSON.stringify(snsNotification)),
+    ]);
+
+    process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+
+    const handler = createAllocatedLetterHandler(mockedDeps);
+    await handler(evt, {} as any, {} as any);
+
+    const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
+    const messageBody = JSON.parse(sendCall.input.MessageBody);
+    expect(messageBody.supplierSpec.supplierId).toBe("supplier1");
+    expect(messageBody.supplierSpec.specId).toBe("spec1");
+  });
+
+  test("processes multiple messages in batch", async () => {
     const evt: SQSEvent = createSQSEvent([
       createSqsRecord(
         "msg1",
-        JSON.stringify(createNotification(createPreparedV1Event())),
+        JSON.stringify(
+          createEventBridgeNotification(
+            createPreparedV2Event({ domainId: "letter1" }),
+          ),
+        ),
       ),
       createSqsRecord(
         "msg2",
         JSON.stringify(
-          createNotification(
-            createPreparedV1Event({
-              id: "7b9a03ca-342a-4150-b56b-989109c45614",
-              domainId: "letter2",
-              url: "s3://letterDataBucket/letter2.pdf",
-            }),
+          createEventBridgeNotification(
+            createPreparedV2Event({ domainId: "letter2" }),
           ),
         ),
       ),
     ]);
 
-    const result = await createUpsertLetterHandler(mockedDeps)(
-      evt,
-      {} as any,
-      {} as any,
-    );
+    process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+
+    const handler = createAllocatedLetterHandler(mockedDeps);
+    const result = await handler(evt, {} as any, {} as any);
 
     expect(result).toBeDefined();
     if (!result) throw new Error("expected BatchResponse, got void");
+
     expect(result.batchItemFailures).toHaveLength(0);
-
-    expect(mockedDeps.letterRepo.putLetter).toHaveBeenCalledTimes(2);
-
-    const firstArg = (mockedDeps.letterRepo.putLetter as jest.Mock).mock
-      .calls[0][0];
-    expect(firstArg.id).toBe("letter1");
-    expect(firstArg.supplierId).toBe("supplier1");
-    expect(firstArg.specificationId).toBe("spec1");
-    expect(firstArg.url).toBe("s3://letterDataBucket/letter1.pdf");
-    expect(firstArg.status).toBe("PENDING");
-    expect(firstArg.groupId).toBe("client1campaign1template1");
-    expect(firstArg.source).toBe("/data-plane/letter-rendering/test");
-
-    const secondArg = (mockedDeps.letterRepo.putLetter as jest.Mock).mock
-      .calls[1][0];
-    expect(secondArg.id).toBe("letter2");
-    expect(secondArg.supplierId).toBe("supplier1");
-    expect(secondArg.specificationId).toBe("spec1");
-    expect(secondArg.url).toBe("s3://letterDataBucket/letter2.pdf");
-    expect(secondArg.status).toBe("PENDING");
-    expect(secondArg.groupId).toBe("client1campaign1template1");
-    expect(firstArg.source).toBe("/data-plane/letter-rendering/test");
+    expect(mockSqsClient.send).toHaveBeenCalledTimes(2);
   });
 
-  test("invalid JSON body produces batch failure and logs error", async () => {
+  test("returns batch failure for invalid JSON", async () => {
     const evt: SQSEvent = createSQSEvent([
       createSqsRecord("bad-json", "this-is-not-json"),
     ]);
 
-    const result = await createUpsertLetterHandler(mockedDeps)(
-      evt,
-      {} as any,
-      {} as any,
-    );
+    process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+
+    const handler = createAllocatedLetterHandler(mockedDeps);
+    const result = await handler(evt, {} as any, {} as any);
 
     expect(result).toBeDefined();
     if (!result) throw new Error("expected BatchResponse, got void");
+
     expect(result.batchItemFailures).toHaveLength(1);
     expect(result.batchItemFailures[0].itemIdentifier).toBe("bad-json");
-
-    expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][1]).toBe(
-      "Error processing upsert of record bad-json",
-    );
-    expect(mockedDeps.letterRepo.putLetter).not.toHaveBeenCalled();
+    expect((mockedDeps.logger.error as jest.Mock).mock.calls).toHaveLength(1);
   });
 
-  test("invalid notification schema produces batch failure and logs error", async () => {
+  test("returns batch failure for invalid SNS notification schema", async () => {
     const evt: SQSEvent = createSQSEvent([
       createSqsRecord(
-        "bad-notification-schema",
-        JSON.stringify({ not: "unexpected notification shape" }),
+        "bad-notification",
+        JSON.stringify({ not: "a valid notification" }),
       ),
     ]);
 
-    const result = await createUpsertLetterHandler(mockedDeps)(
-      evt,
-      {} as any,
-      {} as any,
-    );
+    process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+
+    const handler = createAllocatedLetterHandler(mockedDeps);
+    const result = await handler(evt, {} as any, {} as any);
 
     expect(result).toBeDefined();
     if (!result) throw new Error("expected BatchResponse, got void");
-    expect(result.batchItemFailures).toHaveLength(1);
-    expect(result.batchItemFailures[0].itemIdentifier).toBe(
-      "bad-notification-schema",
-    );
 
-    expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][1]).toBe(
-      "Error processing upsert of record bad-notification-schema",
-    );
-    expect(mockedDeps.letterRepo.putLetter).not.toHaveBeenCalled();
+    expect(result.batchItemFailures).toHaveLength(1);
+    expect(result.batchItemFailures[0].itemIdentifier).toBe("bad-notification");
   });
 
-  test("no event type produces batch failure and logs error", async () => {
+  test("returns batch failure when SNS Message is missing", async () => {
+    const snsMessage: Partial<SNSMessage> = {
+      Type: "Notification",
+      MessageId: "test-id",
+    };
+
     const evt: SQSEvent = createSQSEvent([
-      createSqsRecord(
-        "bad-event-type",
-        JSON.stringify({
-          Type: "Notification",
-          Message: JSON.stringify({ no: "type" }),
-        }),
-      ),
+      createSqsRecord("no-message", JSON.stringify(snsMessage)),
     ]);
 
-    const result = await createUpsertLetterHandler(mockedDeps)(
-      evt,
-      {} as any,
-      {} as any,
-    );
+    process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
-    expect(result).toBeDefined();
+    const handler = createAllocatedLetterHandler(mockedDeps);
+    const result = await handler(evt, {} as any, {} as any);
     if (!result) throw new Error("expected BatchResponse, got void");
+
     expect(result.batchItemFailures).toHaveLength(1);
-    expect(result.batchItemFailures[0].itemIdentifier).toBe("bad-event-type");
-    expect(mockedDeps.letterRepo.putLetter).not.toHaveBeenCalled();
-    expect(mockedDeps.letterRepo.updateLetterStatus).not.toHaveBeenCalled();
-    expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][1]).toBe(
-      "Error processing upsert of record bad-event-type",
-    );
+    expect(result.batchItemFailures[0].itemIdentifier).toBe("no-message");
   });
 
-  test("invalid event type produces batch failure and logs error", async () => {
+  test("returns batch failure when event type is missing", async () => {
+    const event = { no: "type" };
+    const snsNotification: Partial<SNSMessage> = {
+      Type: "Notification",
+      Message: JSON.stringify(event),
+      MessageId: "test-id",
+    };
+
     const evt: SQSEvent = createSQSEvent([
-      createSqsRecord(
-        "bad-event-type",
-        JSON.stringify({
-          Type: "Notification",
-          Message: JSON.stringify({ type: "unexpected type" }),
-        }),
-      ),
+      createSqsRecord("no-type", JSON.stringify(snsNotification)),
     ]);
 
-    const result = await createUpsertLetterHandler(mockedDeps)(
-      evt,
-      {} as any,
-      {} as any,
-    );
+    process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
-    expect(result).toBeDefined();
+    const handler = createAllocatedLetterHandler(mockedDeps);
+    const result = await handler(evt, {} as any, {} as any);
     if (!result) throw new Error("expected BatchResponse, got void");
+
     expect(result.batchItemFailures).toHaveLength(1);
-    expect(result.batchItemFailures[0].itemIdentifier).toBe("bad-event-type");
-    expect(mockedDeps.letterRepo.putLetter).not.toHaveBeenCalled();
-    expect(mockedDeps.letterRepo.updateLetterStatus).not.toHaveBeenCalled();
-    expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][1]).toBe(
-      "Error processing upsert of record bad-event-type",
-    );
+    expect(result.batchItemFailures[0].itemIdentifier).toBe("no-type");
   });
 
-  test("valid event type and invalid schema produces batch failure and logs error", async () => {
+  test("returns batch failure when ALLOCATED_LETTERS_QUEUE_URL is not set", async () => {
+    const preparedEvent = createPreparedV2Event();
+    const snsNotification = createEventBridgeNotification(preparedEvent);
+
     const evt: SQSEvent = createSQSEvent([
-      createSqsRecord(
-        "bad-event-schema",
-        JSON.stringify({
-          Type: "Notification",
-          Message: JSON.stringify({
-            type: "uk.nhs.notify.letter-rendering.letter-request.prepared",
-            some: "unexpected shape",
-          }),
-        }),
-      ),
+      createSqsRecord("msg1", JSON.stringify(snsNotification)),
     ]);
 
-    const result = await createUpsertLetterHandler(mockedDeps)(
-      evt,
-      {} as any,
-      {} as any,
-    );
+    delete process.env.ALLOCATED_LETTERS_QUEUE_URL;
 
-    expect(result).toBeDefined();
+    const handler = createAllocatedLetterHandler(mockedDeps);
+    const result = await handler(evt, {} as any, {} as any);
     if (!result) throw new Error("expected BatchResponse, got void");
+
     expect(result.batchItemFailures).toHaveLength(1);
-    expect(result.batchItemFailures[0].itemIdentifier).toBe("bad-event-schema");
-    expect(mockedDeps.letterRepo.putLetter).not.toHaveBeenCalled();
-    expect(mockedDeps.letterRepo.updateLetterStatus).not.toHaveBeenCalled();
-    expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][1]).toBe(
-      "Error processing upsert of record bad-event-schema",
+    expect(result.batchItemFailures[0].itemIdentifier).toBe("msg1");
+    expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][0].err).toEqual(
+      expect.objectContaining({
+        message: "ALLOCATED_LETTERS_QUEUE_URL not configured",
+      }),
     );
   });
 
-  test("repository throwing for one record causes that message to be returned in batch failures while others succeed", async () => {
-    (mockedDeps.letterRepo.putLetter as jest.Mock)
-      .mockResolvedValueOnce({})
-      .mockRejectedValueOnce(new Error("ddb error"));
+  test("handles SQS send errors and returns batch failure", async () => {
+    const preparedEvent = createPreparedV2Event();
+    const snsNotification = createEventBridgeNotification(preparedEvent);
 
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("msg1", JSON.stringify(snsNotification)),
+    ]);
+
+    process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+
+    const sqsError = new Error("SQS send failed");
+    (mockSqsClient.send as jest.Mock).mockRejectedValueOnce(sqsError);
+
+    const handler = createAllocatedLetterHandler(mockedDeps);
+    const result = await handler(evt, {} as any, {} as any);
+    if (!result) throw new Error("expected BatchResponse, got void");
+
+    expect(result.batchItemFailures).toHaveLength(1);
+    expect(result.batchItemFailures[0].itemIdentifier).toBe("msg1");
+    expect((mockedDeps.logger.error as jest.Mock).mock.calls).toHaveLength(1);
+  });
+
+  test("processes mixed batch with successes and failures", async () => {
     const evt: SQSEvent = createSQSEvent([
       createSqsRecord(
         "ok-msg",
         JSON.stringify(
-          createNotification(
-            createPreparedV2Event({
-              id: "7b9a03ca-342a-4150-b56b-989109c45615",
-              domainId: "ok",
-            }),
+          createEventBridgeNotification(
+            createPreparedV2Event({ domainId: "letter1" }),
           ),
         ),
       ),
+      createSqsRecord("fail-msg", "invalid-json"),
       createSqsRecord(
-        "fail-msg",
+        "ok-msg-2",
         JSON.stringify(
-          createNotification(
-            createPreparedV2Event({
-              id: "7b9a03ca-342a-4150-b56b-989109c45616",
-              domainId: "fail",
-            }),
+          createEventBridgeNotification(
+            createPreparedV2Event({ domainId: "letter2" }),
           ),
         ),
       ),
     ]);
 
-    const result = await createUpsertLetterHandler(mockedDeps)(
-      evt,
-      {} as any,
-      {} as any,
-    );
+    process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
-    expect(mockedDeps.letterRepo.putLetter).toHaveBeenCalledTimes(2);
-
+    const handler = createAllocatedLetterHandler(mockedDeps);
+    const result = await handler(evt, {} as any, {} as any);
     if (!result) throw new Error("expected BatchResponse, got void");
+
     expect(result.batchItemFailures).toHaveLength(1);
     expect(result.batchItemFailures[0].itemIdentifier).toBe("fail-msg");
 
-    expect(mockedDeps.logger.error).toHaveBeenCalled();
+    expect(mockSqsClient.send).toHaveBeenCalledTimes(2);
+  });
+
+  test("does not include supplierSpec for non-insert event types", async () => {
+    const event = {
+      type: "uk.nhs.notify.supplier-api.letter.RETURNED.v1",
+      data: { status: "RETURNED" },
+    };
+    const snsNotification: Partial<SNSMessage> = {
+      Type: "Notification",
+      Message: JSON.stringify(event),
+      MessageId: "test-id",
+    };
+
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("supplier-event", JSON.stringify(snsNotification)),
+    ]);
+
+    process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+
+    const handler = createAllocatedLetterHandler(mockedDeps);
+    const result = await handler(evt, {} as any, {} as any);
+    if (!result) throw new Error("expected BatchResponse, got void");
+
+    expect(result.batchItemFailures).toHaveLength(0);
+
+    const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
+    const messageBody = JSON.parse(sendCall.input.MessageBody);
+    expect(messageBody.letterEvent).toEqual(event);
+    expect(messageBody.operationType).toBe(
+      "uk.nhs.notify.supplier-api.letter.RETURNED.v1",
+    );
+    expect(messageBody.supplierSpec).toBeUndefined();
+  });
+
+  test("sends correct queue URL in SQS message command", async () => {
+    const preparedEvent = createPreparedV2Event();
+    const snsNotification = createEventBridgeNotification(preparedEvent);
+
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("msg1", JSON.stringify(snsNotification)),
+    ]);
+
+    const queueUrl = "https://sqs.eu-west-2.amazonaws.com/123456789/test-queue";
+    process.env.ALLOCATED_LETTERS_QUEUE_URL = queueUrl;
+
+    const handler = createAllocatedLetterHandler(mockedDeps);
+    await handler(evt, {} as any, {} as any);
+
+    const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
+    expect(sendCall.input.QueueUrl).toBe(queueUrl);
   });
 });
