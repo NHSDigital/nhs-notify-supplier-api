@@ -1,10 +1,4 @@
-import {
-  SNSMessage,
-  SQSBatchItemFailure,
-  SQSEvent,
-  SQSHandler,
-  SQSRecord,
-} from "aws-lambda";
+import { SQSBatchItemFailure, SQSEvent, SQSHandler } from "aws-lambda";
 import { InsertLetter, UpdateLetter } from "@internal/datastore";
 import {
   $LetterRequestPreparedEvent,
@@ -38,9 +32,6 @@ type UpsertOperation = {
     deps: Deps,
   ) => Promise<void>;
 };
-
-// small envelope that must exist in all inputs
-const TypeEnvelope = z.object({ type: z.string().min(1) });
 
 function getOperationFromType(type: string): UpsertOperation {
   if (type.startsWith("uk.nhs.notify.letter-rendering.letter-request.prepared"))
