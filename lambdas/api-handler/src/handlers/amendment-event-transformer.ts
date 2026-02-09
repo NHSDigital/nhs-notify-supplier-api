@@ -8,7 +8,7 @@ import {
 } from "../contracts/letters";
 import { Deps } from "../config/deps";
 
-export default function createLetterStatusUpdateHandler(
+export default function createTransformAmendmentEventHandler(
   deps: Deps,
 ): SQSHandler {
   return async (event: SQSEvent) => {
