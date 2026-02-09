@@ -7,7 +7,7 @@ import { Letter, LetterRepository } from "@internal/datastore/src";
 import { UpdateLetterCommand } from "../../contracts/letters";
 import { EnvVars } from "../../config/env";
 import { Deps } from "../../config/deps";
-import createLetterStatusUpdateHandler from "../letter-status-update";
+import createTransformAmendmentEventHandler from "../amendment-event-transformer";
 
 // Make crypto return consistent values, since we"re calling it in both prod and test code and comparing the values
 const realCrypto = jest.requireActual("crypto");
@@ -104,9 +104,9 @@ describe("createLetterStatusUpdateHandler", () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const letterStatusUpdateHandler =
-      createLetterStatusUpdateHandler(mockedDeps);
-    await letterStatusUpdateHandler(
+    const transformAmendmentEventHandler =
+      createTransformAmendmentEventHandler(mockedDeps);
+    await transformAmendmentEventHandler(
       buildEvent(updateLetterCommands),
       context,
       callback,
@@ -140,9 +140,9 @@ describe("createLetterStatusUpdateHandler", () => {
     const context = mockDeep<Context>();
     const callback = jest.fn();
 
-    const letterStatusUpdateHandler =
-      createLetterStatusUpdateHandler(mockedDeps);
-    await letterStatusUpdateHandler(
+    const transformAmendmentEventHandler =
+      createTransformAmendmentEventHandler(mockedDeps);
+    await transformAmendmentEventHandler(
       buildEvent([updateLetterCommands[1]]),
       context,
       callback,
@@ -170,9 +170,9 @@ describe("createLetterStatusUpdateHandler", () => {
     );
     (mockedDeps.snsClient.send as jest.Mock).mockResolvedValueOnce({});
 
-    const letterStatusUpdateHandler =
-      createLetterStatusUpdateHandler(mockedDeps);
-    const sqsBatchResponse = await letterStatusUpdateHandler(
+    const transformAmendmentEventHandler =
+      createTransformAmendmentEventHandler(mockedDeps);
+    const sqsBatchResponse = await transformAmendmentEventHandler(
       buildEvent(updateLetterCommands),
       mockDeep<Context>(),
       jest.fn(),
