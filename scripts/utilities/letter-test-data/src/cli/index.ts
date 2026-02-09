@@ -72,8 +72,8 @@ async function main() {
           choices: [
             "test-letter-large",
             "test-letter-standard",
-            "none", //none exists to specify letter without pdf for error testing scenarios
-          ]
+            "none", // none exists to specify letter without pdf for error testing scenarios
+          ],
         },
       },
       async (argv) => {
@@ -87,7 +87,7 @@ async function main() {
         const { environment } = argv;
         const { ttlHours } = argv;
         const letterRepository = createLetterRepository(environment, ttlHours);
-        const testLetter = argv.testLetter;
+        const { testLetter } = argv;
 
         createLetter({
           letterId,
@@ -98,7 +98,7 @@ async function main() {
           specificationId,
           status: status as LetterStatusType,
           letterRepository,
-          testLetter
+          testLetter,
         });
       },
     )
@@ -119,7 +119,7 @@ async function main() {
           demandOption: true,
           choices: [
             "820178564574", // Supplier Dev
-            "885964308133" //Supplier Nonprod
+            "885964308133", // Supplier Nonprod
           ],
         },
         "group-id": {
@@ -162,8 +162,8 @@ async function main() {
           choices: [
             "test-letter-large",
             "test-letter-standard",
-            "none", //none exists to specify letter without pdf for error testing scenarios
-          ]
+            "none", // none exists to specify letter without pdf for error testing scenarios
+          ],
         },
       },
       async (argv) => {
@@ -188,7 +188,7 @@ async function main() {
         const url = `s3://${bucketName}/${folder}/${targetFilename}`;
 
         // Upload a test file for this batch if it is not an 'none' batch
-        if(testLetter !== 'none') {
+        if (testLetter !== "none") {
           await uploadFile(
             bucketName,
             folder,

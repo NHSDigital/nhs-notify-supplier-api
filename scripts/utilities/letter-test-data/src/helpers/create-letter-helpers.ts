@@ -28,7 +28,7 @@ export async function createLetter(params: {
     testLetter,
   } = params;
 
-  if(testLetter !== 'none') {
+  if (testLetter !== "none") {
     await uploadFile(
       bucketName,
       supplierId,
