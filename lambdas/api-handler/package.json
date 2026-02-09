@@ -9,10 +9,8 @@
     "@internal/datastore": "*",
     "@internal/helpers": "*",
     "@nhsdigital/nhs-notify-event-schemas-supplier-api": "*",
-    "aws-lambda": "^1.0.7",
-    "esbuild": "^0.25.11",
     "aws-embedded-metrics": "^4.2.1",
-    "aws-lambda": "^1.0.6",
+    "aws-lambda": "^1.0.7",
     "esbuild": "0.27.2",
     "pino": "^9.7.0",
     "zod": "^4.1.11"

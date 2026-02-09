@@ -13,7 +13,6 @@ import { LetterEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/s
 import { mapLetterToCloudEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-mapper";
 import { Letter, LetterSchema } from "@internal/datastore";
 import { MetricsLogger, Unit, metricScope } from "aws-embedded-metrics";
-import mapLetterToCloudEvent from "./mappers/letter-mapper";
 import { Deps } from "./deps";
 
 // SNS PublishBatchCommand supports up to 10 messages per batch
