@@ -80,7 +80,7 @@ function main() {
 function run-editorconfig-natively() {
 
   # shellcheck disable=SC2046,SC2086
-  editorconfig \
+  editorconfig-checker \
     --exclude '.git/' $dry_run_opt $($filter)
 }
 

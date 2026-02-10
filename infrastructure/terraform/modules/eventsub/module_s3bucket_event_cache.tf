@@ -48,7 +48,7 @@ module "s3bucket_event_cache" {
   }
 
   default_tags = {
-    Name = "Event Cache Storage"
+    Name                       = "Event Cache Storage"
     NHSE-Enable-S3-Backup-Acct = "True"
   }
 }
