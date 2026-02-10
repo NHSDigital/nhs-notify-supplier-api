@@ -9,9 +9,8 @@ import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
 
 import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
-import z, { url } from "zod";
+import z from "zod";
 import { Deps } from "../config/deps";
-import { de } from "zod/v4/locales";
 
 type SupplierSpec = { supplierId: string; specId: string };
 type PreparedEvents = LetterRequestPreparedEventV2 | LetterRequestPreparedEvent;
