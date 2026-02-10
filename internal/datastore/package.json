@@ -1,7 +1,7 @@
 {
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.981.0",
-    "@aws-sdk/lib-dynamodb": "^3.981.0",
+    "@aws-sdk/client-dynamodb": "^3.984.0",
+    "@aws-sdk/lib-dynamodb": "^3.984.0",
     "@internal/helpers": "*",
     "pino": "^9.7.0",
     "zod": "^4.1.11",
