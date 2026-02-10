@@ -75,13 +75,12 @@ resource "aws_cloudwatch_metric_alarm" "latency_anomaly" {
       period      = var.latency_period_seconds
       dimensions  = local.api_dimensions
     }
-    return_data = true
   }
 
   metric_query {
     id          = "ad1"
     expression  = "ANOMALY_DETECTION_BAND(m1, ${var.latency_anomaly_sensitivity})"
     label       = "Latency (expected)"
-    return_data = false
+    return_data = true
   }
 }

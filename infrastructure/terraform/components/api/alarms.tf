@@ -15,14 +15,20 @@ locals {
   }
 
   sqs_queue_names = {
-    letter_updates        = module.sqs_letter_updates.sqs_queue_name
-    letter_status_updates = module.letter_status_updates_queue.sqs_queue_name
+    letter_updates = {
+      name              = module.sqs_letter_updates.sqs_queue_name
+      age_period_seconds = 900
+    }
+    letter_status_updates = {
+      name              = module.letter_status_updates_queue.sqs_queue_name
+      age_period_seconds = 300
+    }
   }
 }
 
 module "lambda_alarms" {
   for_each   = local.lambda_alarm_targets
-  source     = "../../modules/alarms-lambda"
+  source     = "../../modules/alarms/alarms-lambda"
 
   alarm_prefix   = local.csi
   function_name  = each.value
@@ -31,21 +37,21 @@ module "lambda_alarms" {
 }
 
 module "ddb_alarms_letters" {
-  source       = "../../modules/alarms-ddb"
+  source       = "../../modules/alarms/alarms-ddb"
   alarm_prefix = local.csi
   table_name   = aws_dynamodb_table.letters.name
   tags         = local.default_tags
 }
 
 module "ddb_alarms_mi" {
-  source       = "../../modules/alarms-ddb"
+  source       = "../../modules/alarms/alarms-ddb"
   alarm_prefix = local.csi
   table_name   = aws_dynamodb_table.mi.name
   tags         = local.default_tags
 }
 
 module "ddb_alarms_suppliers" {
-  source       = "../../modules/alarms-ddb"
+  source       = "../../modules/alarms/alarms-ddb"
   alarm_prefix = local.csi
   table_name   = aws_dynamodb_table.suppliers.name
   tags         = local.default_tags
@@ -53,16 +59,17 @@ module "ddb_alarms_suppliers" {
 
 module "sqs_alarms" {
   for_each   = local.sqs_queue_names
-  source     = "../../modules/alarms-sqs"
+  source     = "../../modules/alarms/alarms-sqs"
 
   alarm_prefix   = local.csi
-  queue_name     = each.value
-  dlq_queue_name = replace(each.value, "-queue", "-dlq")
+  queue_name     = each.value.name
+  dlq_queue_name = replace(each.value.name, "-queue", "-dlq")
+  age_period_seconds = each.value.age_period_seconds
   tags           = local.default_tags
 }
 
 module "apigw_alarms" {
-  source       = "../../modules/alarms-apigw"
+  source       = "../../modules/alarms/alarms-apigw"
   alarm_prefix = local.csi
   api_name     = aws_api_gateway_rest_api.main.name
   stage_name   = aws_api_gateway_stage.main.stage_name

@@ -26,14 +26,13 @@ resource "aws_cloudwatch_metric_alarm" "age_anomaly" {
       period      = var.age_period_seconds
       dimensions  = local.queue_dimensions
     }
-    return_data = true
   }
 
   metric_query {
     id          = "ad1"
     expression  = "ANOMALY_DETECTION_BAND(m1, ${var.age_anomaly_sensitivity})"
     label       = "AgeOfOldestMessage (expected)"
-    return_data = false
+    return_data = true
   }
 }
 
