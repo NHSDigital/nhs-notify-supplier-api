@@ -15,6 +15,7 @@ export async function runCreateLetter(options: {
   specificationId: string;
   status: string;
   count: number;
+  testLetter: string;
 }) {
   const {
     awsAccountId,
@@ -25,6 +26,7 @@ export async function runCreateLetter(options: {
     specificationId,
     status,
     supplierId,
+    testLetter,
   } = options;
 
   const workspaceRoot = path.resolve(
@@ -57,6 +59,8 @@ export async function runCreateLetter(options: {
     status,
     "--count",
     String(count),
+    "--test-letter",
+    testLetter,
   ];
 
   await new Promise<void>((resolve, reject) => {
