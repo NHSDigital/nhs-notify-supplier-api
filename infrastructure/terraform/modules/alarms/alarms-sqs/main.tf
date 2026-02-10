@@ -26,6 +26,7 @@ resource "aws_cloudwatch_metric_alarm" "age_anomaly" {
       period      = var.age_period_seconds
       dimensions  = local.queue_dimensions
     }
+    return_data = true
   }
 
   metric_query {
