@@ -36,7 +36,7 @@ module "letter_updates_transformer" {
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
     EVENTPUB_SNS_TOPIC_ARN = "${module.eventpub.sns_topic.arn}",
-    EVENT_SOURCE = "/data-plane/supplier-api/${var.group}/${var.environment}/letters"
+    EVENT_SOURCE           = "/data-plane/supplier-api/${var.group}/${var.environment}/letters"
   })
 }
 
