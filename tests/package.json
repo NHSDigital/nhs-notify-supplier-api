@@ -5,7 +5,7 @@
     "@aws-sdk/client-dynamodb": "^3.981.0",
     "@aws-sdk/client-kinesis": "^3.964.0",
     "@aws-sdk/client-lambda": "^3.965.0",
-    "@aws-sdk/client-sns": "^3.955.0",
+    "@aws-sdk/client-sns": "^3.986.0",
     "@aws-sdk/lib-dynamodb": "^3.858.0",
     "@nhsdigital/nhs-notify-event-schemas-letter-rendering": "^2.0.1",
     "@pact-foundation/pact": "^16.0.4",
