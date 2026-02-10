@@ -1,4 +1,4 @@
-resource "aws_dynamodb_table" "letters" {
+resource "aws_dynamodb_table" "letter-queue" {
   name         = "${local.csi}-letter-queue"
   billing_mode = "PAY_PER_REQUEST"
 
