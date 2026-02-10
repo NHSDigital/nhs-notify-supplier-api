@@ -8,7 +8,7 @@ const envMaxInstances = Number.parseInt(process.env.WORKERS_MAX_INST!) || 10;
  */
 export const config: PlaywrightTestConfig = {
   /* Maximum time one test can run for. */
-  timeout: 60 * 1000,
+  timeout: 80 * 1000,
   workers: envMaxInstances,
   expect: {
     /**

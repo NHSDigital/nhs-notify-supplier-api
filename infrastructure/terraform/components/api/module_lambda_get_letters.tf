@@ -24,7 +24,7 @@ module "get_letters" {
   function_include_common = true
   handler_function_name   = "getLetters"
   runtime                 = "nodejs22.x"
-  memory                  = 128
+  memory                  = 1024
   timeout                 = 29
   log_level               = var.log_level
 
