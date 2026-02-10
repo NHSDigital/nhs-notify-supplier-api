@@ -6,7 +6,7 @@
     "@nhsdigital/nhs-notify-event-schemas-supplier-api": "*",
     "aws-embedded-metrics": "^4.2.1",
     "aws-lambda": "^1.0.6",
-    "esbuild": "^0.24.2",
+    "esbuild": "^0.27.3",
     "pino": "^10.1.0",
     "zod": "^4.1.13"
   },
