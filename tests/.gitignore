@@ -9,3 +9,10 @@ node_modules/
 /target
 /playwright/.auth/
 /allure-report
+
+*/__pycache__/
+**/__pycache__/
+__pycache__/
+*/__pycache__/
+**/__pycache__/
+*.pyc
