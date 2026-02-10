@@ -1,14 +1,14 @@
 {
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.981.0",
-    "@aws-sdk/lib-dynamodb": "^3.981.0",
+    "@aws-sdk/client-dynamodb": "^3.984.0",
+    "@aws-sdk/lib-dynamodb": "^3.984.0",
     "@internal/helpers": "*",
-    "pino": "^9.7.0",
+    "pino": "^10.3.0",
     "zod": "^4.1.11",
     "zod-mermaid": "^1.0.9"
   },
   "devDependencies": {
-    "@stylistic/eslint-plugin": "^3.1.0",
+    "@stylistic/eslint-plugin": "^5.8.0",
     "@tsconfig/node22": "^22.0.2",
     "@types/jest": "^30.0.0",
     "@typescript-eslint/eslint-plugin": "^8.46.2",
