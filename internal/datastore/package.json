@@ -3,7 +3,7 @@
     "@aws-sdk/client-dynamodb": "^3.981.0",
     "@aws-sdk/lib-dynamodb": "^3.981.0",
     "@internal/helpers": "*",
-    "pino": "^9.7.0",
+    "pino": "^10.3.1",
     "zod": "^4.1.11",
     "zod-mermaid": "^1.0.9"
   },
