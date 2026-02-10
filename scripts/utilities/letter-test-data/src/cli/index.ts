@@ -26,6 +26,11 @@ async function main() {
         awsAccountId: {
           type: "string",
           demandOption: true,
+          choices: [
+            "820178564574", // Supplier Dev
+            "885964308133", // Supplier Nonprod
+            "815459455390", // Supplier Prod
+          ],
         },
         "letter-id": {
           type: "string",
@@ -61,6 +66,15 @@ async function main() {
             "DELIVERED",
           ],
         },
+        "test-letter": {
+          type: "string",
+          demandOption: true,
+          choices: [
+            "test-letter-large",
+            "test-letter-standard",
+            "none", // none exists to specify letter without pdf for error testing scenarios
+          ],
+        },
       },
       async (argv) => {
         const { supplierId } = argv;
@@ -73,6 +87,7 @@ async function main() {
         const { environment } = argv;
         const { ttlHours } = argv;
         const letterRepository = createLetterRepository(environment, ttlHours);
+        const { testLetter } = argv;
 
         createLetter({
           letterId,
@@ -83,6 +98,7 @@ async function main() {
           specificationId,
           status: status as LetterStatusType,
           letterRepository,
+          testLetter,
         });
       },
     )
@@ -101,6 +117,10 @@ async function main() {
         awsAccountId: {
           type: "string",
           demandOption: true,
+          choices: [
+            "820178564574", // Supplier Dev
+            "885964308133", // Supplier Nonprod
+          ],
         },
         "group-id": {
           type: "string",
@@ -136,6 +156,15 @@ async function main() {
             "DELIVERED",
           ],
         },
+        "test-letter": {
+          type: "string",
+          demandOption: true,
+          choices: [
+            "test-letter-large",
+            "test-letter-standard",
+            "none", // none exists to specify letter without pdf for error testing scenarios
+          ],
+        },
       },
       async (argv) => {
         // set batch ID
@@ -150,17 +179,23 @@ async function main() {
         const { ttlHours } = argv;
         const letterRepository = createLetterRepository(environment, ttlHours);
         const { count } = argv;
+        const { testLetter } = argv;
 
-        // Upload a test file for this batch
+        // Setup file attributes
         const bucketName = `nhs-${argv.awsAccountId}-eu-west-2-${argv.environment}-supapi-test-letters`;
         const targetFilename = `${batchId}-${status}.pdf`;
-        const url = `s3://${bucketName}/${batchId}/${targetFilename}`;
-        await uploadFile(
-          bucketName,
-          batchId,
-          "../../test_letter.pdf",
-          targetFilename,
-        );
+        const folder = `${supplierId}/${batchId}`;
+        const url = `s3://${bucketName}/${folder}/${targetFilename}`;
+
+        // Upload a test file for this batch if it is not an 'none' batch
+        if (testLetter !== "none") {
+          await uploadFile(
+            bucketName,
+            folder,
+            `${testLetter}.pdf`,
+            targetFilename,
+          );
+        }
 
         // Create letter DTOs
         const letterDtos = [];
@@ -180,7 +215,7 @@ async function main() {
         // Upload Letters
         await letterRepository.unsafePutLetterBatch(letterDtos);
 
-        console.log(`Created batch ${batchId} of ${letterDtos.length}`);
+        console.log(`Created batch ${batchId} of ${letterDtos.length} letters`);
       },
     )
     .demandCommand(1)

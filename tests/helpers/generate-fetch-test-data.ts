@@ -45,6 +45,7 @@ export async function createTestData(
     specificationId: "TestSpecificationID",
     status: "PENDING",
     count: count || 1,
+    testLetter: "test-letter-standard",
   });
 }
 

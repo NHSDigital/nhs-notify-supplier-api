@@ -43,11 +43,12 @@ For creating multiple batches with different specification and group IDs, use th
   --status PENDING
 ```
 
-This script creates 3 batches with the following configurations:
+This script creates 4 batches with the following configurations:
 
 - Batch 1: `--specification-id integration-specification-english --group-id group-english`
 - Batch 2: `--specification-id integration-specification-braille --group-id group-accessible`
 - Batch 3: `--specification-id integration-specification-arabic --group-id group-international`
+- Batch 4: `--specification-id integration-specification-missing-pdf --group-id group-error`
 
 **Note:** The default configuration creates 2,505 letters total (835 letters × 3 batches) with an 18-month TTL.
 
@@ -57,5 +58,6 @@ This script creates 3 batches with the following configurations:
 - `--environment` (required): Environment (e.g., pr147, main)
 - `--awsAccountId` (required): AWS Account ID for S3 bucket resolution
 - `--count` (optional): Number of letters per batch (default: 835)
+- `--missing-count` (optional): Number of letters with missing PDFs (default: 5)
 - `--status` (optional): Letter status (default: PENDING)
 - `--ttl-hours` (optional): TTL in hours (default: 13140, ~18 months)
