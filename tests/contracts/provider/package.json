@@ -16,7 +16,7 @@
   "devDependencies": {
     "@tsconfig/node22": "^22.0.2",
     "@types/jest": "^30.0.0",
-    "@types/node": "^22.0.0",
+    "@types/node": "^25.2.2",
     "eslint": "^9.27.0",
     "glob": "^11.0.0",
     "jest": "^30.0.0",

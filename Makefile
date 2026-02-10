@@ -24,6 +24,7 @@ deploy: # Deploy the project artefact to the target environment @Pipeline
 
 clean:: # Clean-up project resources (main) @Operations
 	rm -f .version
+	find . -type d -name 'node_modules' -prune -exec rm -rf {} +
 	(cd sdk && make clean)
 # Take out for now - might add again in the future
 # (cd server && make clean)
