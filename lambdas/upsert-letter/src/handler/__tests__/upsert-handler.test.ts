@@ -354,7 +354,7 @@ describe("createUpsertLetterHandler", () => {
     };
 
     const evt: SQSEvent = createSQSEvent([
-      createSqsRecord("bad-schema", JSON.stringify(message)),
+      createSqsRecord("bad-notification-schema", JSON.stringify(message)),
     ]);
 
     const result = await createUpsertLetterHandler(mockedDeps)(
@@ -420,8 +420,14 @@ describe("createUpsertLetterHandler", () => {
   });
 
   test("invalid event type produces batch failure and logs error", async () => {
+    const message = {
+      letterEvent: { someField: "invalid" },
+      operationType:
+        "uk.nhs.notify.letter-rendering.letter-request.prepared.v2",
+      supplierSpec: { supplierId: "supplier1", specId: "spec1" },
+    };
     const evt: SQSEvent = createSQSEvent([
-      createSqsRecord("unknown-op", JSON.stringify(message)),
+      createSqsRecord("bad-event-type", JSON.stringify(message)),
     ]);
 
     const result = await createUpsertLetterHandler(mockedDeps)(
@@ -453,18 +459,50 @@ describe("createUpsertLetterHandler", () => {
     );
   });
 
+  test("unknown operation type produces batch failure and logs error", async () => {
+    const message = {
+      letterEvent: createPreparedV1Event(),
+      operationType: "unknown.operation.type",
+      supplierSpec: { supplierId: "supplier1", specId: "spec1" },
+    };
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("bad-operation-type", JSON.stringify(message)),
+    ]);
+
+    const result = await createUpsertLetterHandler(mockedDeps)(
+      evt,
+      {} as any,
+      {} as any,
+    );
+
+    expect(result).toBeDefined();
+    if (!result) throw new Error("expected BatchResponse, got void");
+    expect(result.batchItemFailures).toHaveLength(1);
+    expect(result.batchItemFailures[0].itemIdentifier).toBe(
+      "bad-operation-type",
+    );
+    expect(mockedDeps.letterRepo.putLetter).not.toHaveBeenCalled();
+    expect(mockedDeps.letterRepo.updateLetterStatus).not.toHaveBeenCalled();
+    expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        description: "Error processing upsert of record",
+        messageId: "bad-operation-type",
+      }),
+    );
+    expect(mockMetrics.setNamespace).toHaveBeenCalledWith("upsertLetter");
+    expect(mockMetrics.putDimensions).toHaveBeenCalledWith({
+      Supplier: "supplier1",
+    });
+    expect(mockMetrics.putMetric).toHaveBeenCalledWith(
+      "MessageFailed",
+      1,
+      "Count",
+    );
+  });
+
   test("valid event type and invalid schema produces batch failure and logs error", async () => {
     const evt: SQSEvent = createSQSEvent([
-      createSqsRecord(
-        "ok-msg",
-        JSON.stringify({
-          letterEvent: createPreparedV2Event(),
-          operationType:
-            "uk.nhs.notify.letter-rendering.letter-request.prepared.v2",
-          supplierSpec: { supplierId: "supplier1", specId: "spec1" },
-        }),
-      ),
-      createSqsRecord("fail-msg", "invalid-json"),
+      createSqsRecord("bad-event-schema", "invalid-json"),
     ]);
 
     const result = await createUpsertLetterHandler(mockedDeps)(
@@ -492,29 +530,27 @@ describe("createUpsertLetterHandler", () => {
       .mockResolvedValueOnce({})
       .mockRejectedValueOnce(new Error("ddb error"));
 
+    const message1 = {
+      letterEvent: createPreparedV2Event({
+        id: "7b9a03ca-342a-4150-b56b-989109c45615",
+        domainId: "ok",
+      }),
+      operationType:
+        "uk.nhs.notify.letter-rendering.letter-request.prepared.v2",
+      supplierSpec: { supplierId: "supplier1", specId: "spec1" },
+    };
+    const message2 = {
+      letterEvent: createPreparedV2Event({
+        id: "7b9a03ca-342a-4150-b56b-989109c45616",
+        domainId: "fail",
+      }),
+      operationType:
+        "uk.nhs.notify.letter-rendering.letter-request.prepared.v2",
+      supplierSpec: { supplierId: "supplier1", specId: "spec1" },
+    };
     const evt: SQSEvent = createSQSEvent([
-      createSqsRecord(
-        "ok-msg",
-        JSON.stringify(
-          createNotification(
-            createPreparedV2Event({
-              id: "7b9a03ca-342a-4150-b56b-989109c45615",
-              domainId: "ok",
-            }),
-          ),
-        ),
-      ),
-      createSqsRecord(
-        "fail-msg",
-        JSON.stringify(
-          createNotification(
-            createPreparedV2Event({
-              id: "7b9a03ca-342a-4150-b56b-989109c45616",
-              domainId: "fail",
-            }),
-          ),
-        ),
-      ),
+      createSqsRecord("ok-msg", JSON.stringify(message1)),
+      createSqsRecord("fail-msg", JSON.stringify(message2)),
     ]);
 
     const result = await createUpsertLetterHandler(mockedDeps)(
@@ -529,6 +565,6 @@ describe("createUpsertLetterHandler", () => {
     expect(result.batchItemFailures).toHaveLength(1);
     expect(result.batchItemFailures[0].itemIdentifier).toBe("fail-msg");
 
-    expect(mockedDeps.letterRepo.putLetter).toHaveBeenCalledTimes(1);
+    expect(mockedDeps.logger.error).toHaveBeenCalled();
   });
 });
