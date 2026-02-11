@@ -31,7 +31,7 @@ export default function createTransformAmendmentEventHandler(
           deps.env.EVENT_SOURCE,
         );
         await deps.snsClient.send(
-          buildSnsCommand(letterEvent, deps.env.AMENDMENTS_TOPIC_ARN),
+          buildSnsCommand(letterEvent, deps.env.SNS_TOPIC_ARN),
         );
         deps.logger.info({
           description: "Updated letter status",
