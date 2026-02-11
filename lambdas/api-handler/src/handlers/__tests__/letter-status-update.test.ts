@@ -143,14 +143,12 @@ describe("createLetterStatusUpdateHandler", () => {
     expect(mockedDeps.letterRepo.updateLetterStatus).toHaveBeenCalledWith(
       updateLetterCommands[0],
     );
-    expect(mockedDeps.logger.error).toHaveBeenCalledWith(
-      {
-        err: mockError,
-        messageId: "mid-id1",
-        correlationId: "correlationId-id1",
-        messageBody: '{"id":"id1","status":"ACCEPTED","supplierId":"s1"}',
-      },
-      "Error processing letter status update",
-    );
+    expect(mockedDeps.logger.error).toHaveBeenCalledWith({
+      description: "Error processing letter status update",
+      err: mockError,
+      messageId: "mid-id1",
+      correlationId: "correlationId-id1",
+      messageBody: '{"id":"id1","status":"ACCEPTED","supplierId":"s1"}',
+    });
   });
 });

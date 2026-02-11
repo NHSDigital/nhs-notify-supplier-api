@@ -1,12 +1,13 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
-import pino from "pino";
+import { Logger } from "pino";
 import { SupplierRepository } from "@internal/datastore";
+import { createLogger } from "@internal/helpers/src";
 import { EnvVars, envVars } from "./env";
 
 export type Deps = {
   supplierRepo: SupplierRepository;
-  logger: pino.Logger;
+  logger: Logger;
   env: EnvVars;
 };
 
@@ -17,7 +18,7 @@ function createDocumentClient(): DynamoDBDocumentClient {
 
 function createSupplierRepository(
   documentClient: DynamoDBDocumentClient,
-  log: pino.Logger,
+  log: Logger,
   suppliersTableName: string,
 ): SupplierRepository {
   const config = {
@@ -28,7 +29,7 @@ function createSupplierRepository(
 }
 
 export function createDependenciesContainer(): Deps {
-  const log = pino();
+  const log = createLogger({ logLevel: envVars.PINO_LOG_LEVEL });
 
   return {
     supplierRepo: createSupplierRepository(

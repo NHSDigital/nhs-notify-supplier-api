@@ -322,8 +322,11 @@ describe("createUpsertLetterHandler", () => {
     expect(result.batchItemFailures).toHaveLength(1);
     expect(result.batchItemFailures[0].itemIdentifier).toBe("bad-json");
 
-    expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][1]).toBe(
-      "Error processing upsert of record bad-json",
+    expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        description: "Error processing upsert of record",
+        messageId: "bad-json",
+      }),
     );
     expect(mockedDeps.letterRepo.putLetter).not.toHaveBeenCalled();
   });
@@ -349,8 +352,11 @@ describe("createUpsertLetterHandler", () => {
       "bad-notification-schema",
     );
 
-    expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][1]).toBe(
-      "Error processing upsert of record bad-notification-schema",
+    expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        description: "Error processing upsert of record",
+        messageId: "bad-notification-schema",
+      }),
     );
     expect(mockedDeps.letterRepo.putLetter).not.toHaveBeenCalled();
   });
@@ -378,8 +384,11 @@ describe("createUpsertLetterHandler", () => {
     expect(result.batchItemFailures[0].itemIdentifier).toBe("bad-event-type");
     expect(mockedDeps.letterRepo.putLetter).not.toHaveBeenCalled();
     expect(mockedDeps.letterRepo.updateLetterStatus).not.toHaveBeenCalled();
-    expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][1]).toBe(
-      "Error processing upsert of record bad-event-type",
+    expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        description: "Error processing upsert of record",
+        messageId: "bad-event-type",
+      }),
     );
   });
 
@@ -406,8 +415,11 @@ describe("createUpsertLetterHandler", () => {
     expect(result.batchItemFailures[0].itemIdentifier).toBe("bad-event-type");
     expect(mockedDeps.letterRepo.putLetter).not.toHaveBeenCalled();
     expect(mockedDeps.letterRepo.updateLetterStatus).not.toHaveBeenCalled();
-    expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][1]).toBe(
-      "Error processing upsert of record bad-event-type",
+    expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        description: "Error processing upsert of record",
+        messageId: "bad-event-type",
+      }),
     );
   });
 
@@ -437,8 +449,11 @@ describe("createUpsertLetterHandler", () => {
     expect(result.batchItemFailures[0].itemIdentifier).toBe("bad-event-schema");
     expect(mockedDeps.letterRepo.putLetter).not.toHaveBeenCalled();
     expect(mockedDeps.letterRepo.updateLetterStatus).not.toHaveBeenCalled();
-    expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][1]).toBe(
-      "Error processing upsert of record bad-event-schema",
+    expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        description: "Error processing upsert of record",
+        messageId: "bad-event-schema",
+      }),
     );
   });
 
