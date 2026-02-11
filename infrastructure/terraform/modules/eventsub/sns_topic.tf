@@ -1,4 +1,4 @@
-resource "aws_sns_topic" "eventsub_topic" {
+resource "aws_sns_topic" "main" {
   name              = local.csi
   kms_master_key_id = var.kms_key_arn
 
