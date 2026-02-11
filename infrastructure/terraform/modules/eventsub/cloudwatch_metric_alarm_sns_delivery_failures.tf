@@ -11,7 +11,7 @@ resource "aws_cloudwatch_metric_alarm" "sns_delivery_failures" {
   treat_missing_data  = "notBreaching"
 
   dimensions = {
-    TopicName = aws_sns_topic.eventsub_topic.name
+    TopicName = aws_sns_topic.main.name
   }
 }
 

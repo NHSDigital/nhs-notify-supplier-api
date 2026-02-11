@@ -1,5 +1,5 @@
-resource "aws_sns_topic_policy" "eventsub_topic" {
-  arn = aws_sns_topic.eventsub_topic.arn
+resource "aws_sns_topic_policy" "main" {
+  arn = aws_sns_topic.main.arn
 
   policy = data.aws_iam_policy_document.sns_topic_policy.json
 }
@@ -35,7 +35,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
     ]
 
     resources = [
-      aws_sns_topic.eventsub_topic.arn,
+      aws_sns_topic.main.arn,
     ]
 
     condition {
@@ -63,7 +63,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
     }
 
     resources = [
-      aws_sns_topic.eventsub_topic.arn,
+      aws_sns_topic.main.arn,
     ]
   }
 }
