@@ -73,6 +73,23 @@ export type UpdateLetter = {
   reasonText?: string;
 };
 
+export const PendingLetterSchema = z.object({
+  supplierId: idRef(SupplierSchema, "id"),
+  letterId: idRef(LetterSchema, "id"),
+  queueTimestamp: z.string().describe("Secondary index SK"),
+  specificationId: z.string(),
+  groupId: z.string(),
+  sha256hash: z.string(),
+  ttl: z.int(),
+});
+
+export type PendingLetter = z.infer<typeof PendingLetterSchema>;
+
+export type InsertPendingLetter = Omit<
+  PendingLetter,
+  "ttl" | "queueTimestamp" | "sha256hash"
+>;
+
 export const MISchemaBase = z.object({
   id: z.string(),
   lineItem: z.string(),
