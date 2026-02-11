@@ -7,7 +7,7 @@ import {
 } from "../contracts/letters";
 import { Deps } from "../config/deps";
 import { mapToUpdateLetter } from "../mappers/letter-mapper";
-import { buildEMFObject, MetricEntry } from "../utils/metrics";
+import { MetricEntry, buildEMFObject } from "../utils/metrics";
 
 export default function createLetterStatusUpdateHandler(
   deps: Deps,
