@@ -3,6 +3,7 @@
     "@aws-sdk/client-dynamodb": "^3.984.0",
     "@aws-sdk/lib-dynamodb": "^3.858.0",
     "@internal/datastore": "*",
+    "@internal/helpers": "*",
     "@nhsdigital/nhs-notify-event-schemas-letter-rendering": "^2.0.1",
     "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1": "npm:@nhsdigital/nhs-notify-event-schemas-letter-rendering@^1.1.5",
     "@nhsdigital/nhs-notify-event-schemas-supplier-api": "^1.0.8",

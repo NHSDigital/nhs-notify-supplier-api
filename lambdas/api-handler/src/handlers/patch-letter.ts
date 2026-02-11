@@ -65,6 +65,14 @@ export default function createPatchLetterHandler(
           throw typedError;
         }
 
+        deps.logger.info({
+          description: "Received patch letter request",
+          supplierId: commonIds.value.supplierId,
+          letterId,
+          newStatus: patchLetterRequest.data.attributes.status,
+          correlationId: commonIds.value.correlationId,
+        });
+
         const updateLetterCommand: UpdateLetterCommand = mapToUpdateCommand(
           patchLetterRequest,
           supplierId,
