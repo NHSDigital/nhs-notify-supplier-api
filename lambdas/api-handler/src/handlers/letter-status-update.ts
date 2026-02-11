@@ -7,7 +7,7 @@ import {
 } from "../contracts/letters";
 import { Deps } from "../config/deps";
 import { mapToUpdateLetter } from "../mappers/letter-mapper";
-import { buildEMFObject } from "../utils/metrics";
+import { buildEMFObject, MetricEntry } from "../utils/metrics";
 
 export default function createLetterStatusUpdateHandler(
   deps: Deps,
@@ -40,7 +40,7 @@ export default function createLetterStatusUpdateHandler(
 }
 
 function emitAndFlushMetricLog(message: SQSRecord, logger: pino.Logger) {
-  const metric = {
+  const metric: MetricEntry = {
     key: "statusUpdateFailed",
     value: 1,
     unit: Unit.Count,

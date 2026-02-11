@@ -1,5 +1,6 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
-import { MetricsLogger, Unit, metricScope } from "aws-embedded-metrics";
+import { Unit } from "aws-embedded-metrics";
+import pino from "pino";
 import type { Deps } from "../config/deps";
 import { ApiErrorDetail } from "../contracts/errors";
 import {
@@ -13,7 +14,7 @@ import { mapToUpdateCommands } from "../mappers/letter-mapper";
 import { enqueueLetterUpdateRequests } from "../services/letter-operations";
 import { extractCommonIds } from "../utils/common-ids";
 import { assertNotEmpty, requireEnvVar } from "../utils/validation";
-import { MetricStatus } from "../utils/metrics";
+import { MetricEntry, MetricStatus, buildEMFObject } from "../utils/metrics";
 
 function duplicateIdsExist(postLettersRequest: PostLettersRequest) {
   const ids = postLettersRequest.data.map((item) => item.id);
@@ -23,17 +24,23 @@ function duplicateIdsExist(postLettersRequest: PostLettersRequest) {
 /**
  * emits metrics of successful letter updates, including the supplier and grouped by status
  */
-function emitMetics(
-  metrics: MetricsLogger,
+function emitSuccessMetrics(
   supplierId: string,
   statusesMapping: Map<string, number>,
+  logger: pino.Logger,
 ) {
   for (const [status, count] of statusesMapping) {
-    metrics.putDimensions({
+    const dimensions: Record<string, string> = {
       supplier: supplierId,
       eventType: status,
-    });
-    metrics.putMetric(MetricStatus.Success, count, Unit.Count);
+    };
+    const metric: MetricEntry = {
+      key: "Letters posted",
+      value: count,
+      unit: Unit.Count,
+    };
+    const emf = buildEMFObject("postLetters", dimensions, metric);
+    logger.info(emf);
   }
 }
 
@@ -48,85 +55,90 @@ function populateStatusesMap(updateLetterCommands: UpdateLetterCommand[]) {
 export default function createPostLettersHandler(
   deps: Deps,
 ): APIGatewayProxyHandler {
-  return metricScope((metrics: MetricsLogger) => {
-    return async (event) => {
-      const commonIds = extractCommonIds(
-        event.headers,
-        event.requestContext,
+  return async (event) => {
+    const commonIds = extractCommonIds(
+      event.headers,
+      event.requestContext,
+      deps,
+    );
+
+    if (!commonIds.ok) {
+      return processError(
+        commonIds.error,
+        commonIds.correlationId,
+        deps.logger,
+      );
+    }
+
+    const maxUpdateItems = requireEnvVar(deps.env, "MAX_LIMIT");
+    requireEnvVar(deps.env, "QUEUE_URL");
+
+    const { supplierId } = commonIds.value;
+    try {
+      const body = assertNotEmpty(
+        event.body,
+        new ValidationError(ApiErrorDetail.InvalidRequestMissingBody),
+      );
+
+      let postLettersRequest: PostLettersRequest;
+
+      try {
+        postLettersRequest = PostLettersRequestSchema.parse(JSON.parse(body));
+      } catch (error) {
+        const typedError =
+          error instanceof Error
+            ? new ValidationError(ApiErrorDetail.InvalidRequestBody, {
+                cause: error,
+              })
+            : error;
+        throw typedError;
+      }
+
+      if (postLettersRequest.data.length > maxUpdateItems) {
+        throw new ValidationError(
+          ApiErrorDetail.InvalidRequestLettersToUpdate,
+          { args: [maxUpdateItems] },
+        );
+      }
+
+      if (duplicateIdsExist(postLettersRequest)) {
+        throw new ValidationError(
+          ApiErrorDetail.InvalidRequestDuplicateLetterId,
+        );
+      }
+
+      const updateLetterCommands: UpdateLetterCommand[] = mapToUpdateCommands(
+        postLettersRequest,
+        supplierId,
+      );
+      const statusesMapping = populateStatusesMap(updateLetterCommands);
+      await enqueueLetterUpdateRequests(
+        updateLetterCommands,
+        commonIds.value.correlationId,
         deps,
       );
 
-      if (!commonIds.ok) {
-        return processError(
-          commonIds.error,
-          commonIds.correlationId,
-          deps.logger,
-        );
-      }
+      emitSuccessMetrics(supplierId, statusesMapping, deps.logger);
+      return {
+        statusCode: 202,
+        body: "",
+      };
+    } catch (error) {
+      // error metrics
+      emitErrorMetrics(supplierId, deps.logger);
 
-      const maxUpdateItems = requireEnvVar(deps.env, "MAX_LIMIT");
-      requireEnvVar(deps.env, "QUEUE_URL");
+      return processError(error, commonIds.value.correlationId, deps.logger);
+    }
+  };
+}
 
-      const { supplierId } = commonIds.value;
-      metrics.setNamespace(
-        process.env.AWS_LAMBDA_FUNCTION_NAME || "postLetters",
-      );
-      try {
-        const body = assertNotEmpty(
-          event.body,
-          new ValidationError(ApiErrorDetail.InvalidRequestMissingBody),
-        );
-
-        let postLettersRequest: PostLettersRequest;
-
-        try {
-          postLettersRequest = PostLettersRequestSchema.parse(JSON.parse(body));
-        } catch (error) {
-          const typedError =
-            error instanceof Error
-              ? new ValidationError(ApiErrorDetail.InvalidRequestBody, {
-                  cause: error,
-                })
-              : error;
-          throw typedError;
-        }
-
-        if (postLettersRequest.data.length > maxUpdateItems) {
-          throw new ValidationError(
-            ApiErrorDetail.InvalidRequestLettersToUpdate,
-            { args: [maxUpdateItems] },
-          );
-        }
-
-        if (duplicateIdsExist(postLettersRequest)) {
-          throw new ValidationError(
-            ApiErrorDetail.InvalidRequestDuplicateLetterId,
-          );
-        }
-
-        const updateLetterCommands: UpdateLetterCommand[] = mapToUpdateCommands(
-          postLettersRequest,
-          supplierId,
-        );
-        const statusesMapping = populateStatusesMap(updateLetterCommands);
-        await enqueueLetterUpdateRequests(
-          updateLetterCommands,
-          commonIds.value.correlationId,
-          deps,
-        );
-
-        emitMetics(metrics, supplierId, statusesMapping);
-        return {
-          statusCode: 202,
-          body: "",
-        };
-      } catch (error) {
-        metrics.putDimensions({
-          supplier: supplierId,
-        });
-        metrics.putMetric(MetricStatus.Failure, 1, Unit.Count);
-        return processError(error, commonIds.value.correlationId, deps.logger);
-      }
-    };
-  });
+function emitErrorMetrics(supplierId: string, logger: pino.Logger) {
+  const dimensions: Record<string, string> = { supplier: supplierId };
+  const metric: MetricEntry = {
+    key: MetricStatus.Failure,
+    value: 1,
+    unit: Unit.Count,
+  };
+  const emf = buildEMFObject("postLetters", dimensions, metric);
+  logger.info(emf);
 }

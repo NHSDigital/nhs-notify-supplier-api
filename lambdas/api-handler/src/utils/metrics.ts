@@ -21,7 +21,7 @@ export enum MetricStatus {
   Failure = "failure",
 }
 
-interface MetricEntry {
+export interface MetricEntry {
   key: string;
   value: number;
   unit: Unit;
