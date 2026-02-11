@@ -123,20 +123,26 @@ export async function enqueueLetterUpdateRequests(
 
         try {
           const result = await deps.sqsClient.send(cmd);
+          if (result.Successful && result.Successful.length > 0) {
+            deps.logger.info({
+              description: "Enqueued letter updates",
+              correlationId,
+              messageIds: result.Successful.map((entry) => entry.MessageId),
+            });
+          }
           if (result.Failed && result.Failed.length > 0) {
-            deps.logger.error(
-              { failed: result.Failed },
-              "Some batch entries failed",
-            );
+            deps.logger.error({
+              failed: result.Failed,
+              description: "Some batch entries failed",
+              correlationId,
+            });
           }
         } catch (error) {
-          deps.logger.error(
-            {
-              err: error,
-              correlationId,
-            },
-            "Error enqueuing letter status updates",
-          );
+          deps.logger.error({
+            err: error,
+            description: "Error enqueuing letter status updates",
+            correlationId,
+          });
         }
       }),
     );

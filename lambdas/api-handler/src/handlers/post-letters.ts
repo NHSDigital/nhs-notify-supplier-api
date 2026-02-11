@@ -91,6 +91,13 @@ export default function createPostLettersHandler(
           throw typedError;
         }
 
+        deps.logger.info({
+          description: "Received post letters request",
+          supplierId: commonIds.value.supplierId,
+          letterIds: postLettersRequest.data.map((letter) => letter.id),
+          correlationId: commonIds.value.correlationId,
+        });
+
         if (postLettersRequest.data.length > maxUpdateItems) {
           throw new ValidationError(
             ApiErrorDetail.InvalidRequestLettersToUpdate,

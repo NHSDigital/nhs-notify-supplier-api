@@ -10,6 +10,7 @@ const EnvVarsSchema = z.object({
   DOWNLOAD_URL_TTL_SECONDS: z.coerce.number().int(),
   MAX_LIMIT: z.coerce.number().int().optional(),
   QUEUE_URL: z.coerce.string().optional(),
+  PINO_LOG_LEVEL: z.coerce.string().optional(),
 });
 
 export type EnvVars = z.infer<typeof EnvVarsSchema>;

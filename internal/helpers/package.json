@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "pino": "^10.3.0",
     "zod": "^4.1.11"
   },
   "description": "Common helper utilities for NHS Notify Supplier API",
