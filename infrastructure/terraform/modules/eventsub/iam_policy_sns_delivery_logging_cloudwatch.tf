@@ -39,10 +39,6 @@ data "aws_iam_policy_document" "sns_delivery_logging_cloudwatch" {
       "${aws_cloudwatch_log_group.sns_delivery_logging_success[0].arn}:log-stream:*",
       aws_cloudwatch_log_group.sns_delivery_logging_failure[0].arn,
       "${aws_cloudwatch_log_group.sns_delivery_logging_failure[0].arn}:log-stream:*",
-      aws_cloudwatch_log_group.amendments_sns_delivery_logging_success[0].arn,
-      "${aws_cloudwatch_log_group.amendments_sns_delivery_logging_success[0].arn}:log-stream:*",
-      aws_cloudwatch_log_group.amendments_sns_delivery_logging_failure[0].arn,
-      "${aws_cloudwatch_log_group.amendments_sns_delivery_logging_failure[0].arn}:log-stream:*",
     ]
   }
 }
