@@ -77,6 +77,11 @@ export default function createAllocatedLetterHandler(deps: Deps): SQSHandler {
 
         const letterEvent: unknown = removeEventBridgeWrapper(snsEvent);
 
+        deps.logger.info({
+          description: "Extracted letter event",
+          messageId: record.messageId,
+        });
+
         const operationType = getType(letterEvent);
 
         let supplierSpec: SupplierSpec | undefined;
