@@ -96,7 +96,7 @@ runs:
         echo "APIM_ENV=$APIM_ENV" >> $GITHUB_ENV
 
     - name: Upload OAS Spec
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: ${{ env.APIM_ENV }}-build-output
         path: ./build

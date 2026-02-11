@@ -148,15 +148,13 @@ describe("createLetterStatusUpdateHandler", () => {
       callback,
     );
 
-    expect(mockedDeps.logger.error).toHaveBeenCalledWith(
-      {
-        err: mockError,
-        messageId: "mid-id2",
-        correlationId: "correlationId-id2",
-        messageBody: '{"id":"id2","supplierId":"s2","status":"ACCEPTED"}',
-      },
-      "Error processing letter status update",
-    );
+    expect(mockedDeps.logger.error).toHaveBeenCalledWith({
+      description: "Error processing letter status update",
+      err: mockError,
+      messageId: "mid-id2",
+      correlationId: "correlationId-id2",
+      messageBody: '{"id":"id2","supplierId":"s2","status":"ACCEPTED"}',
+    });
   });
 
   it("returns batch update failures in the response", async () => {

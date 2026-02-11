@@ -78,7 +78,7 @@ data "aws_iam_policy_document" "amendment_event_transformer" {
     ]
 
     resources = [
-    module.amendments_queue.sqs_queue_arn
+      module.amendments_queue.sqs_queue_arn
     ]
   }
 

@@ -8,7 +8,7 @@
     "aws-embedded-metrics": "^4.2.1",
     "aws-lambda": "^1.0.6",
     "esbuild": "0.27.2",
-    "pino": "^10.1.0",
+    "pino": "^10.3.0",
     "zod": "^4.1.13"
   },
   "devDependencies": {

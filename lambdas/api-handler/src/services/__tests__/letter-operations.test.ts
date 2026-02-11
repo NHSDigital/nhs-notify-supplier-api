@@ -205,14 +205,17 @@ describe("enqueueLetterUpdateRequests function", () => {
     jest.clearAllMocks();
   });
 
-  it("should update the letter status successfully", async () => {
-    const sqsClient = { send: jest.fn() } as unknown as SQSClient;
-    const logger = { error: jest.fn() } as unknown as pino.Logger;
-    const env = {
-      QUEUE_URL: "sqsUrl",
-    };
-    const deps: Deps = { sqsClient, logger, env } as Deps;
+  const sqsClient = { send: jest.fn() } as unknown as SQSClient;
+  const logger = {
+    info: jest.fn(),
+    error: jest.fn(),
+  } as unknown as pino.Logger;
+  const env = {
+    QUEUE_URL: "sqsUrl",
+  };
+  const deps: Deps = { sqsClient, logger, env } as Deps;
 
+  it("should update the letter status successfully", async () => {
     const updateLetterCommands = Array.from({ length: 25 }, (_, i) =>
       makeUpdateLetterCommand(i),
     );
@@ -256,22 +259,34 @@ describe("enqueueLetterUpdateRequests function", () => {
     expect(thirdInput.Entries[0].Id).toBe("2-0");
   });
 
+  it("should log when SendMessageBatch returns Successful entries", async () => {
+    (sqsClient.send as jest.Mock).mockResolvedValue({
+      Successful: [{ MessageId: "msg-001" }, { MessageId: "msg-002" }],
+      Failed: [],
+    });
+    const updateLetterCommands = [makeUpdateLetterCommand(0)];
+
+    await enqueueLetterUpdateRequests(
+      updateLetterCommands,
+      "correlationId1",
+      deps,
+    );
+
+    expect(deps.logger.info).toHaveBeenCalledWith({
+      description: "Enqueued letter updates",
+      correlationId: "correlationId1",
+      messageIds: ["msg-001", "msg-002"],
+    });
+  });
+
   it("should log error when SendMessageBatch returns Failed entries", async () => {
-    const sqsClient = {
-      send: jest
-        .fn()
-        .mockResolvedValueOnce({ Failed: [] }) // first batch succeeds
-        .mockResolvedValueOnce({
-          Failed: [
-            { Id: "1-1", SenderFault: false, Code: "Err", Message: "failed" },
-          ],
-        }),
-    } as unknown as SQSClient;
-    const logger = { error: jest.fn() } as unknown as pino.Logger;
-    const env = {
-      QUEUE_URL: "sqsUrl",
-    };
-    const deps: Deps = { sqsClient, logger, env } as Deps;
+    (sqsClient.send as jest.Mock)
+      .mockResolvedValueOnce({ Failed: [] }) // first batch succeeds
+      .mockResolvedValueOnce({
+        Failed: [
+          { Id: "1-1", SenderFault: false, Code: "Err", Message: "failed" },
+        ],
+      });
 
     const updateLetterCommands = Array.from({ length: 12 }, (_, i) =>
       makeUpdateLetterCommand(i),
@@ -296,20 +311,12 @@ describe("enqueueLetterUpdateRequests function", () => {
   });
 
   it("should log error if enqueueing fails", async () => {
-    const sqsClient = {
-      send: jest
-        .fn()
-        .mockResolvedValueOnce({ Failed: [] }) // batch 0
-        .mockImplementationOnce(() => {
-          throw new Error("some failure");
-        }) // batch 1
-        .mockResolvedValueOnce({ Failed: [] }), // batch 2
-    } as unknown as SQSClient;
-    const logger = { error: jest.fn() } as unknown as pino.Logger;
-    const env = {
-      QUEUE_URL: "sqsUrl",
-    };
-    const deps: Deps = { sqsClient, logger, env } as Deps;
+    (sqsClient.send as jest.Mock)
+      .mockResolvedValueOnce({ Failed: [] }) // batch 0
+      .mockImplementationOnce(() => {
+        throw new Error("some failure");
+      }) // batch 1
+      .mockResolvedValueOnce({ Failed: [] });
 
     const lettersToUpdate = Array.from({ length: 21 }, (_, i) =>
       makeUpdateLetterCommand(i),

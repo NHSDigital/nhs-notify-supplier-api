@@ -6,7 +6,7 @@ resource "aws_lambda_event_source_mapping" "status_updates_sqs_to_status_update_
   scaling_config { maximum_concurrency = 10 }
 
   depends_on = [
-    module.amendments_queue, # ensures queue exists
-    module.amendment_event_transformer         # ensures update handler exists
+    module.amendments_queue,           # ensures queue exists
+    module.amendment_event_transformer # ensures update handler exists
   ]
 }

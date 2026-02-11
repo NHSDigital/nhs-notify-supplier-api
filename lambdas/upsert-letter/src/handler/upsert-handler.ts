@@ -51,6 +51,13 @@ function getOperationFromType(type: string): UpsertOperation {
           supplierSpec.specId, // use specId for now
         );
         await deps.letterRepo.putLetter(letterToInsert);
+
+        deps.logger.info({
+          description: "Inserted letter",
+          eventId: preparedRequest.id,
+          letterId: letterToInsert.id,
+          supplierId: letterToInsert.supplierId,
+        });
       },
     };
   if (type.startsWith("uk.nhs.notify.supplier-api.letter"))
@@ -61,6 +68,13 @@ function getOperationFromType(type: string): UpsertOperation {
         const supplierEvent = request as LetterEvent;
         const letterToUpdate: UpdateLetter = mapToUpdateLetter(supplierEvent);
         await deps.letterRepo.updateLetterStatus(letterToUpdate);
+
+        deps.logger.info({
+          description: "Updated letter",
+          eventId: supplierEvent.id,
+          letterId: letterToUpdate.id,
+          supplierId: letterToUpdate.supplierId,
+        });
       },
     };
   throw new Error(`Unknown operation from type=${type}`);
@@ -198,6 +212,11 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
           const snsEvent = JSON.parse(message);
           supplier = getSupplierId(snsEvent);
           const letterEvent: unknown = removeEventBridgeWrapper(snsEvent);
+
+          deps.logger.info({
+            description: "Extracted letter event",
+            messageId: record.messageId,
+          });
           const type = getType(letterEvent);
 
           const operation = getOperationFromType(type);
@@ -209,10 +228,12 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
             (perSupplierSuccess.get(supplier) || 0) + 1,
           );
         } catch (error) {
-          deps.logger.error(
-            { err: error, message: record.body },
-            `Error processing upsert of record ${record.messageId}`,
-          );
+          deps.logger.error({
+            description: "Error processing upsert of record",
+            err: error,
+            messageId: record.messageId,
+            message: record.body,
+          });
           perSupplierFailure.set(
             supplier,
             (perSupplierFailure.get(supplier) || 0) + 1,

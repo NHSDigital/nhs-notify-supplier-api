@@ -33,16 +33,20 @@ export default function createTransformAmendmentEventHandler(
         await deps.snsClient.send(
           buildSnsCommand(letterEvent, deps.env.AMENDMENTS_TOPIC_ARN),
         );
+        deps.logger.info({
+          description: "Updated letter status",
+          letterId: updateLetterCommand.id,
+          messageId: message.messageId,
+          correlationId: message.messageAttributes.CorrelationId.stringValue,
+        });
       } catch (error) {
-        deps.logger.error(
-          {
-            err: error,
-            messageId: message.messageId,
-            correlationId: message.messageAttributes.CorrelationId.stringValue,
-            messageBody: message.body,
-          },
-          "Error processing letter status update",
-        );
+        deps.logger.error({
+          description: "Error processing letter status update",
+          err: error,
+          messageId: message.messageId,
+          correlationId: message.messageAttributes.CorrelationId.stringValue,
+          messageBody: message.body,
+        });
         batchItemFailures.push({ itemIdentifier: message.messageId });
       }
     });
