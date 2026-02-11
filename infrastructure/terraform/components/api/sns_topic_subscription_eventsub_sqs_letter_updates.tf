@@ -3,8 +3,6 @@ resource "aws_sns_topic_subscription" "eventsub_sqs_letter_updates" {
   protocol  = "sqs"
   endpoint  = module.sqs_letter_updates.sqs_queue_arn
 
-  raw_message_delivery = true
-
   filter_policy_scope = "MessageBody"
   filter_policy = jsonencode({
     type = [{ prefix = "uk.nhs.notify.supplier-api.letter" }]
