@@ -13,7 +13,7 @@ const mockedDeps: jest.Mocked<Deps> = {
   logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
   env: {
     CLOUDWATCH_NAMESPACE: "cloudwatch-namespace",
-    CLIENT_CERTIFICATE_EXPIRATION_ALERT_DAYS: 14,
+    CLIENT_CERTIFICATE_EXPIRATION_ALERT_DAYS: 30,
     APIM_SUPPLIER_ID_HEADER: "NHSD-Supplier-ID",
   } as unknown as EnvVars,
   supplierRepo: {

@@ -53,7 +53,7 @@ variable "error_log_metric_name_prefix" {
 
 variable "error_log_metric_filter_pattern" {
   type    = string
-  default = "?ERROR ?Error ?Exception"
+  default = "{ ($.level = \"50\" || $.level = \"error\") && $.environment = * }"
 }
 
 variable "error_log_threshold" {

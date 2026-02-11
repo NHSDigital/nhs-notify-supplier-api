@@ -23,7 +23,7 @@ variable "age_period_seconds" {
 
 variable "age_anomaly_sensitivity" {
   type    = number
-  default = 2
+  default = 3
 }
 
 variable "age_anomaly_evaluation_periods" {
