@@ -3,7 +3,8 @@
     "@aws-sdk/client-dynamodb": "^3.984.0",
     "@aws-sdk/lib-dynamodb": "^3.858.0",
     "@internal/datastore": "*",
-    "aws-lambda": "^1.0.6",
+    "@internal/helpers": "*",
+    "aws-lambda": "^1.0.7",
     "esbuild": "0.27.2",
     "pino": "^10.3.0",
     "zod": "^4.1.11"

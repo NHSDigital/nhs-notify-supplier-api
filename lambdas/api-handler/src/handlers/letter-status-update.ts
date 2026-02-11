@@ -20,17 +20,20 @@ export default function createLetterStatusUpdateHandler(
         await deps.letterRepo.updateLetterStatus(
           mapToUpdateLetter(letterToUpdate),
         );
+        deps.logger.info({
+          description: "Updated letter status",
+          letterId: letterToUpdate.id,
+          messageId: message.messageId,
+          correlationId: message.messageAttributes.CorrelationId.stringValue,
+        });
       } catch (error) {
-        deps.logger.error(
-          {
-            err: error,
-            messageId: message.messageId,
-            correlationId: message.messageAttributes.CorrelationId.stringValue,
-            messageBody: message.body,
-          },
-          "Error processing letter status update",
-        );
-        // create metric object
+        deps.logger.error({
+          description: "Error processing letter status update",
+          err: error,
+          messageId: message.messageId,
+          correlationId: message.messageAttributes.CorrelationId.stringValue,
+          messageBody: message.body,
+        });
         emitAndFlushMetricLog(message, deps.logger);
       }
     });
