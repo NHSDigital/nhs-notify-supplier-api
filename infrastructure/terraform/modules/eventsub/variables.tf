@@ -70,7 +70,7 @@ variable "event_cache_buffer_interval" {
 variable "enable_sns_delivery_logging" {
   type        = bool
   description = "Enable SNS Delivery Failure Notifications"
-  default     = false
+  default     = true
 }
 
 variable "sns_success_logging_sample_percent" {
@@ -94,7 +94,7 @@ variable "event_cache_expiry_days" {
 variable "enable_event_cache" {
   type        = bool
   description = "Enable caching of events to an S3 bucket"
-  default     = false
+  default     = true
 }
 
 variable "enable_firehose_raw_message_delivery" {
@@ -113,4 +113,9 @@ variable "shared_infra_account_id" {
   type        = string
   description = "The AWS Account ID of the shared infrastructure account"
   default     = "000000000000"
+}
+
+variable "glue_role_arn" {
+  type        = string
+  description = "ARN of the Glue execution role from the parent"
 }
