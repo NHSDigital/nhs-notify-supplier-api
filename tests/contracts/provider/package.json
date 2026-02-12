@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@nhsdigital/nhs-notify-event-schemas-supplier-api": "*",
-    "@pact-foundation/pact": "^16.0.4"
+    "@pact-foundation/pact": "^16.2.0"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.2",
