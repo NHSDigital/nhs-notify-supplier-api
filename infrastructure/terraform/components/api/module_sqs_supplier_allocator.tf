@@ -1,4 +1,4 @@
-module "sqs_allocated_letters" {
+module "sqs_supplier_allocator" {
   source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-sqs.zip"
 
   aws_account_id = var.aws_account_id

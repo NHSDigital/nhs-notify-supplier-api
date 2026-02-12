@@ -1,10 +1,4 @@
-import {
-  SNSMessage,
-  SQSBatchItemFailure,
-  SQSEvent,
-  SQSHandler,
-  SQSRecord,
-} from "aws-lambda";
+import { SQSBatchItemFailure, SQSEvent, SQSHandler } from "aws-lambda";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
 
@@ -23,27 +17,6 @@ function resolveSupplierForVariant(
   deps: Deps,
 ): SupplierSpec {
   return deps.env.VARIANT_MAP[variantId];
-}
-
-function parseSNSNotification(record: SQSRecord) {
-  const notification = JSON.parse(record.body) as Partial<SNSMessage>;
-  if (
-    notification.Type !== "Notification" ||
-    typeof notification.Message !== "string"
-  ) {
-    throw new Error(
-      "SQS record does not contain SNS Notification with string Message",
-    );
-  }
-  return notification.Message;
-}
-
-function removeEventBridgeWrapper(event: any) {
-  const maybeEventBridge = event;
-  if (maybeEventBridge.source && maybeEventBridge.detail) {
-    return maybeEventBridge.detail;
-  }
-  return event;
 }
 
 function validateType(event: unknown) {
@@ -70,11 +43,7 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
 
     const tasks = event.Records.map(async (record) => {
       try {
-        const message: string = parseSNSNotification(record);
-
-        const snsEvent = JSON.parse(message);
-
-        const letterEvent: unknown = removeEventBridgeWrapper(snsEvent);
+        const letterEvent: unknown = JSON.parse(record.body);
 
         deps.logger.info({
           description: "Extracted letter event",
@@ -86,9 +55,9 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
         const supplierSpec = getSupplier(letterEvent as PreparedEvents, deps);
 
         // Send to allocated letters queue
-        const queueUrl = process.env.ALLOCATED_LETTERS_QUEUE_URL;
+        const queueUrl = process.env.UPSERT_LETTERS_QUEUE_URL;
         if (!queueUrl) {
-          throw new Error("ALLOCATED_LETTERS_QUEUE_URL not configured");
+          throw new Error("UPSERT_LETTERS_QUEUE_URL not configured");
         }
 
         const queueMessage = {
@@ -98,7 +67,7 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
 
         deps.logger.info(
           { msg: queueMessage, url: queueUrl },
-          "Sending message to allocated letters queue",
+          "Sending message to upsert letter queue",
         );
 
         await deps.sqsClient.send(

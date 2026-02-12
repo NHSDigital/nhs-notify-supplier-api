@@ -18,11 +18,7 @@ import { Deps } from "../config/deps";
 
 type SupplierSpec = { supplierId: string; specId: string };
 type PreparedEvents = LetterRequestPreparedEventV2 | LetterRequestPreparedEvent;
-type AllocatedLetterQueueMessage = {
-  letterEvent: unknown;
-  operationType: string;
-  supplierSpec: SupplierSpec;
-};
+
 type UpsertOperation = {
   name: "Insert" | "Update";
   schemas: z.ZodSchema[];
@@ -179,9 +175,8 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
       const tasks = event.Records.map(async (record) => {
         let supplier = "unknown";
         try {
-          const queueMessage: AllocatedLetterQueueMessage = JSON.parse(
-            record.body,
-          );
+          const queueMessage = JSON.parse(record.body);
+
           const { letterEvent, supplierSpec } = queueMessage;
 
           deps.logger.info({
@@ -195,6 +190,7 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
               : supplierSpec.supplierId;
 
           const type = getType(letterEvent);
+
           const operation = getOperationFromType(type);
 
           await runUpsert(operation, letterEvent, supplierSpec, deps);
