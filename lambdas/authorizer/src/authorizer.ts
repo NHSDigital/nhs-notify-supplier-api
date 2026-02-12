@@ -146,7 +146,10 @@ async function checkCertificateExpiry(
   const expiry = getCertificateExpiryInDays(certificate);
 
   if (expiry <= deps.env.CLIENT_CERTIFICATE_EXPIRATION_ALERT_DAYS) {
-    let metric = buildCloudWatchMetric(deps.env.CLOUDWATCH_NAMESPACE, certificate);
+    const metric = buildCloudWatchMetric(
+      deps.env.CLOUDWATCH_NAMESPACE,
+      certificate,
+    );
     deps.logger.warn(metric, `APIM Certificated expiry in ${expiry} days`);
     console.log(JSON.stringify(metric));
   }
