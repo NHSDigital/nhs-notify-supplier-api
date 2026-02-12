@@ -16,6 +16,7 @@ const EnvVarsSchema = z.object({
     const parsed = JSON.parse(str);
     return LetterVariantSchema.parse(parsed);
   }),
+  PINO_LOG_LEVEL: z.coerce.string().optional(),
 });
 
 export type EnvVars = z.infer<typeof EnvVarsSchema>;

@@ -57,6 +57,12 @@ export default function createPostMIHandler(
           deps.miRepo,
         );
 
+        deps.logger.info({
+          description: "Posted management information",
+          supplierId: commonIds.value.supplierId,
+          correlationId: commonIds.value.correlationId,
+        });
+
         // metric with count 1 specifying the supplier
         emitForSingleSupplier(
           metrics,

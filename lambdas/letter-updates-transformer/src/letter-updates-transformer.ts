@@ -127,7 +127,7 @@ function extractPayload(
   } catch (error) {
     deps.logger.error({
       description: "Error extracting payload",
-      error,
+      err: error,
       record,
     });
     throw error;

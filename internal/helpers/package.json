@@ -1,10 +1,11 @@
 {
   "dependencies": {
+    "pino": "^10.3.0",
     "zod": "^4.1.11"
   },
   "description": "Common helper utilities for NHS Notify Supplier API",
   "devDependencies": {
-    "@stylistic/eslint-plugin": "^3.1.0",
+    "@stylistic/eslint-plugin": "^5.8.0",
     "@tsconfig/node22": "^22.0.2",
     "@types/jest": "^30.0.0",
     "@typescript-eslint/eslint-plugin": "^8.27.0",

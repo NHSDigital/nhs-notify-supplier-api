@@ -24,6 +24,7 @@ deploy: # Deploy the project artefact to the target environment @Pipeline
 
 clean:: # Clean-up project resources (main) @Operations
 	rm -f .version
+	find . -type d -name 'node_modules' -prune -exec rm -rf {} +
 	(cd sdk && make clean)
 # Take out for now - might add again in the future
 # (cd server && make clean)
@@ -121,3 +122,54 @@ ${VERBOSE}.SILENT: \
 	config \
 	dependencies \
 	deploy \
+
+#####################
+# E2E Test commands #
+#####################
+
+TEST_CMD := APIGEE_ACCESS_TOKEN="$(APIGEE_ACCESS_TOKEN)" \
+	PYTHONPATH=. poetry run pytest --disable-warnings -vv \
+	--color=yes \
+	-n 4 \
+	--api-name=nhs-notify-supplier \
+	--proxy-name="$(PROXY_NAME)" \
+	-s \
+	--reruns 5 \
+	--reruns-delay 5 \
+	--only-rerun 'AssertionError: Unexpected 429' \
+	--only-rerun 'AssertionError: Unexpected 504' \
+	--only-rerun 'AssertionError: Unexpected 502' \
+	--junitxml=test-report.xml
+
+
+.internal-dev-test:
+	@cd tests/e2e-tests && \
+	$(TEST_CMD) \
+	api \
+	-m devtest
+
+.integration-test:
+	$(TEST_CMD) \
+	tests/api \
+	-m inttest
+
+
+PROD_CMD := APIGEE_ACCESS_TOKEN="$(APIGEE_ACCESS_TOKEN)" \
+	PYTHONPATH=. poetry run pytest --disable-warnings -vv \
+	--color=yes \
+	-n 4 \
+	--api-name=nhs-notify-supplier \
+	--proxy-name="$(PROXY_NAME)" \
+	-s \
+	--reruns 5 \
+	--reruns-delay 5 \
+	--only-rerun 'AssertionError: Unexpected 429' \
+	--only-rerun 'AssertionError: Unexpected 504' \
+	--only-rerun 'AssertionError: Unexpected 502' \
+	--junitxml=test-report.xml
+
+.prod-test:
+	@cd tests/e2e-tests && \
+	$(PROD_CMD) \
+	tests/api \
+	-m prodtest

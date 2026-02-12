@@ -31,28 +31,28 @@ runs:
         make build VERSION="${{ inputs.version }}"
 
     - name: Upload abstractions artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         path: "src/server/abstractions/bin/Release"
         name: libs-abstractions-${{ inputs.version }}
         include-hidden-files: true
 
     - name: Upload data artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         path: "src/server/data/bin/Release"
         name: libs-data-${{ inputs.version }}
         include-hidden-files: true
 
     - name: Upload letter artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         path: "src/server/letter/bin/Release"
         name: libs-letter-${{ inputs.version }}
         include-hidden-files: true
 
     - name: Upload host artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         path: "src/server/host/bin/Release"
         name: libs-host-${{ inputs.version }}
@@ -75,7 +75,7 @@ runs:
         outputs: type=docker,dest=${{ runner.temp }}/myimage/myimage.tar
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: libs-host-docker-${{ inputs.version }}
         path: ${{ runner.temp }}/myimage

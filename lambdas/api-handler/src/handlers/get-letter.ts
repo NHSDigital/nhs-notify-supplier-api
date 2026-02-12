@@ -51,6 +51,7 @@ export default function createGetLetterHandler(
           description: "Letter successfully fetched by id",
           supplierId,
           letterId,
+          correlationId: commonIds.value.correlationId,
         });
 
         emitForSingleSupplier(
@@ -62,7 +63,7 @@ export default function createGetLetterHandler(
         );
         return {
           statusCode: 200,
-          body: JSON.stringify(response, null, 2),
+          body: JSON.stringify(response),
         };
       } catch (error) {
         emitForSingleSupplier(

@@ -24,7 +24,7 @@ module "letter_status_update" {
   function_include_common = true
   handler_function_name   = "letterStatusUpdate"
   runtime                 = "nodejs22.x"
-  memory                  = 128
+  memory                  = 512
   timeout                 = 29
   log_level               = var.log_level
 
@@ -78,7 +78,7 @@ data "aws_iam_policy_document" "letter_status_update" {
     ]
 
     resources = [
-    module.letter_status_updates_queue.sqs_queue_arn
+      module.letter_status_updates_queue.sqs_queue_arn
     ]
   }
 

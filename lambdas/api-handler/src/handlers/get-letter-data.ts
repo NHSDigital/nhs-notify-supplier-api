@@ -37,6 +37,15 @@ export default function createGetLetterDataHandler(
           ),
         );
 
+        const presignedUrl = await getLetterDataUrl(supplierId, letterId, deps);
+
+        deps.logger.info({
+          description: "Generated presigned URL",
+          supplierId,
+          letterId,
+          correlationId: commonIds.value.correlationId,
+        });
+
         emitForSingleSupplier(
           metrics,
           "getLetterData",
@@ -47,7 +56,7 @@ export default function createGetLetterDataHandler(
         return {
           statusCode: 303,
           headers: {
-            Location: await getLetterDataUrl(supplierId, letterId, deps),
+            Location: presignedUrl,
           },
           body: "",
         };
