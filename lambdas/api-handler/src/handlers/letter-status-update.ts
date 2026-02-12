@@ -1,10 +1,13 @@
-import { SQSEvent, SQSHandler } from "aws-lambda";
+import { SQSEvent, SQSHandler, SQSRecord } from "aws-lambda";
+import { Unit } from "aws-embedded-metrics";
+import pino from "pino";
 import {
   UpdateLetterCommand,
   UpdateLetterCommandSchema,
 } from "../contracts/letters";
 import { Deps } from "../config/deps";
 import { mapToUpdateLetter } from "../mappers/letter-mapper";
+import { MetricEntry, buildEMFObject } from "../utils/metrics";
 
 export default function createLetterStatusUpdateHandler(
   deps: Deps,
@@ -31,9 +34,20 @@ export default function createLetterStatusUpdateHandler(
           correlationId: message.messageAttributes.CorrelationId.stringValue,
           messageBody: message.body,
         });
+        emitAndFlushMetricLog(message, deps.logger);
       }
     });
 
     await Promise.all(tasks);
   };
+}
+
+function emitAndFlushMetricLog(message: SQSRecord, logger: pino.Logger) {
+  const metric: MetricEntry = {
+    key: "statusUpdateFailed",
+    value: 1,
+    unit: Unit.Count,
+  };
+  const emf = buildEMFObject("letter-status-update", {}, metric);
+  logger.info(emf);
 }

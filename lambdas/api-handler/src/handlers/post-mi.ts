@@ -42,6 +42,7 @@ export default function createPostMIHandler(
         try {
           postMIRequest = PostMIRequestSchema.parse(JSON.parse(body));
         } catch (error) {
+          emitErrorMetric(metrics, supplierId);
           const typedError =
             error instanceof Error
               ? new ValidationError(ApiErrorDetail.InvalidRequestBody, {
@@ -86,15 +87,13 @@ export default function createPostMIHandler(
           body: JSON.stringify(result, null, 2),
         };
       } catch (error) {
-        emitForSingleSupplier(
-          metrics,
-          "postMi",
-          supplierId,
-          1,
-          MetricStatus.Failure,
-        );
+        emitErrorMetric(metrics, supplierId);
         return processError(error, commonIds.value.correlationId, deps.logger);
       }
     };
   });
+}
+
+function emitErrorMetric(metrics: MetricsLogger, supplierId: string) {
+  emitForSingleSupplier(metrics, "postMi", supplierId, 1, MetricStatus.Failure);
 }
