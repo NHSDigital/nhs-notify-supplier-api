@@ -182,6 +182,8 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
           deps.logger.info({
             description: "Extracted letter event",
             messageId: record.messageId,
+            event: letterEvent,
+            supplier: supplierSpec,
           });
 
           supplier =
