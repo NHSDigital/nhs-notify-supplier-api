@@ -56,10 +56,11 @@ describe("Authorizer Lambda Function", () => {
   });
 
   describe("Certificate expiry check", () => {
+    const currentDate = new Date("2025-11-01T14:19:00Z");
     beforeEach(() => {
       jest
         .useFakeTimers({ doNotFake: ["nextTick"] })
-        .setSystemTime(new Date("2025-11-03T14:19:00Z"));
+        .setSystemTime(currentDate);
     });
 
     afterEach(() => {
@@ -81,7 +82,7 @@ describe("Authorizer Lambda Function", () => {
 
     it("Should log CloudWatch metric when the certificate expiry threshold is reached", async () => {
       mockEvent.requestContext.identity.clientCert = buildCertWithExpiry(
-        "2025-11-17T14:19:00Z",
+        "2025-11-31T14:19:00Z",
       );
 
       const handler = createAuthorizerHandler(mockedDeps);
@@ -92,7 +93,7 @@ describe("Authorizer Lambda Function", () => {
       expect(mockedInfo.mock.calls.map((call) => call[0])).toContain(
         JSON.stringify({
           _aws: {
-            Timestamp: 1_762_179_540_000,
+            Timestamp: currentDate.getTime(),
             CloudWatchMetrics: [
               {
                 Namespace: "cloudwatch-namespace",
@@ -108,7 +109,7 @@ describe("Authorizer Lambda Function", () => {
             ],
           },
           SUBJECT_DN: "CN=test-subject",
-          NOT_AFTER: "2025-11-17T14:19:00Z",
+          NOT_AFTER: "2025-11-31T14:19:00Z",
           "apim-client-certificate-near-expiry": 1,
         }),
       );
@@ -116,7 +117,7 @@ describe("Authorizer Lambda Function", () => {
 
     it("Should not log CloudWatch metric when the certificate expiry threshold is not yet reached", async () => {
       mockEvent.requestContext.identity.clientCert = buildCertWithExpiry(
-        "2025-11-18T14:19:00Z",
+        "2026-01-01T14:19:00Z",
       );
 
       const handler = createAuthorizerHandler(mockedDeps);
