@@ -8,7 +8,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
   policy_id = "__default_policy_ID"
 
   statement {
-    sid = "AllowAllSNSActionsFromAccount"
+    sid    = "AllowAllSNSActionsFromAccount"
     effect = "Allow"
 
     principals {
@@ -43,7 +43,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
   }
 
   statement {
-    sid = "AllowAllSNSActionsFromSharedAccount"
+    sid    = "AllowAllSNSActionsFromSharedAccount"
     effect = "Allow"
     actions = [
       "SNS:Publish",

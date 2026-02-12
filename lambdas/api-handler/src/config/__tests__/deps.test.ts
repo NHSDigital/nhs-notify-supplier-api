@@ -15,14 +15,13 @@ describe("createDependenciesContainer", () => {
     jest.clearAllMocks();
     jest.resetModules();
 
-    // pino
-    jest.mock("pino", () => ({
-      __esModule: true,
-      default: jest.fn(() => ({
+    jest.mock("@internal/helpers", () => ({
+      createLogger: jest.fn(() => ({
         info: jest.fn(),
         error: jest.fn(),
         warn: jest.fn(),
         debug: jest.fn(),
+        level: "info",
       })),
     }));
 
@@ -49,7 +48,7 @@ describe("createDependenciesContainer", () => {
     // get current mock instances
     const { S3Client } = jest.requireMock("@aws-sdk/client-s3");
     const { SQSClient } = jest.requireMock("@aws-sdk/client-sqs");
-    const pinoMock = jest.requireMock("pino");
+    const { createLogger } = jest.requireMock("@internal/helpers");
     const { LetterRepository, MIRepository } = jest.requireMock(
       "@internal/datastore",
     );
@@ -63,7 +62,7 @@ describe("createDependenciesContainer", () => {
 
     expect(SQSClient).toHaveBeenCalledTimes(1);
 
-    expect(pinoMock.default).toHaveBeenCalledTimes(1);
+    expect(createLogger).toHaveBeenCalledTimes(1);
 
     expect(LetterRepository).toHaveBeenCalledTimes(1);
     const letterRepoCtorArgs = LetterRepository.mock.calls[0];
