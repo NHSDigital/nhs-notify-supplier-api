@@ -1,8 +1,8 @@
-module "upsert_letter" {
+module "allocate_letter" {
   source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip"
 
-  function_name = "upsert_letter"
-  description   = "Update or Insert the letter data in the letters table"
+  function_name = "allocate_letter"
+  description   = "Allocate a letter to a supplier"
 
   aws_account_id = var.aws_account_id
   component      = var.component
@@ -15,14 +15,14 @@ module "upsert_letter" {
   kms_key_arn           = module.kms.key_arn
 
   iam_policy_document = {
-    body = data.aws_iam_policy_document.upsert_letter_lambda.json
+    body = data.aws_iam_policy_document.allocate_letter_lambda.json
   }
 
   function_s3_bucket      = local.acct.s3_buckets["lambda_function_artefacts"]["id"]
   function_code_base_path = local.aws_lambda_functions_dir_path
-  function_code_dir       = "upsert-letter/dist"
+  function_code_dir       = "allocate-letter/dist"
   function_include_common = true
-  handler_function_name   = "upsertLetterHandler"
+  handler_function_name   = "allocateLetterHandler"
   runtime                 = "nodejs22.x"
   memory                  = 512
   timeout                 = 29
@@ -35,11 +35,12 @@ module "upsert_letter" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
-    VARIANT_MAP = jsonencode(var.letter_variant_map)
+    VARIANT_MAP                 = jsonencode(var.letter_variant_map)
+    ALLOCATED_LETTERS_QUEUE_URL = module.sqs_allocated_letters.sqs_queue_url
   })
 }
 
-data "aws_iam_policy_document" "upsert_letter_lambda" {
+data "aws_iam_policy_document" "allocate_letter_lambda" {
   statement {
     sid    = "KMSPermissions"
     effect = "Allow"
@@ -55,23 +56,6 @@ data "aws_iam_policy_document" "upsert_letter_lambda" {
   }
 
   statement {
-    sid    = "AllowDynamoDBWrite"
-    effect = "Allow"
-
-    actions = [
-      "dynamodb:PutItem",
-      "dynamodb:GetItem",
-      "dynamodb:Query",
-      "dynamodb:UpdateItem"
-    ]
-
-    resources = [
-      aws_dynamodb_table.letters.arn,
-      "${aws_dynamodb_table.letters.arn}/index/supplierStatus-index"
-    ]
-  }
-
-  statement {
     sid    = "AllowSQSRead"
     effect = "Allow"
 
@@ -79,6 +63,19 @@ data "aws_iam_policy_document" "upsert_letter_lambda" {
       "sqs:ReceiveMessage",
       "sqs:DeleteMessage",
       "sqs:GetQueueAttributes"
+    ]
+
+    resources = [
+      module.sqs_letter_updates.sqs_queue_arn
+    ]
+  }
+
+  statement {
+    sid    = "AllowSQSWrite"
+    effect = "Allow"
+
+    actions = [
+      "sqs:SendMessage"
     ]
 
     resources = [
