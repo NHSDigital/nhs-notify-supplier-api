@@ -1,7 +1,7 @@
-module "allocate_letter" {
+module "supplier_allocator" {
   source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip"
 
-  function_name = "allocate_letter"
+  function_name = "supplier-allocator"
   description   = "Allocate a letter to a supplier"
 
   aws_account_id = var.aws_account_id
@@ -15,7 +15,7 @@ module "allocate_letter" {
   kms_key_arn           = module.kms.key_arn
 
   iam_policy_document = {
-    body = data.aws_iam_policy_document.allocate_letter_lambda.json
+    body = data.aws_iam_policy_document.sqs_supplier_allocator_lambda.json
   }
 
   function_s3_bucket      = local.acct.s3_buckets["lambda_function_artefacts"]["id"]
@@ -35,12 +35,12 @@ module "allocate_letter" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
-    VARIANT_MAP                 = jsonencode(var.letter_variant_map)
-    ALLOCATED_LETTERS_QUEUE_URL = module.sqs_allocated_letters.sqs_queue_url
+    VARIANT_MAP              = jsonencode(var.letter_variant_map)
+    UPSERT_LETTERS_QUEUE_URL = module.sqs_letter_updates.sqs_queue_url
   })
 }
 
-data "aws_iam_policy_document" "allocate_letter_lambda" {
+data "aws_iam_policy_document" "sqs_supplier_allocator_lambda" {
   statement {
     sid    = "KMSPermissions"
     effect = "Allow"
@@ -79,7 +79,7 @@ data "aws_iam_policy_document" "allocate_letter_lambda" {
     ]
 
     resources = [
-      module.sqs_allocated_letters.sqs_queue_arn
+      module.sqs_supplier_allocator.sqs_queue_arn
     ]
   }
 }

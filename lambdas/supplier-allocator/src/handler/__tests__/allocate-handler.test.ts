@@ -1,4 +1,4 @@
-import { SNSMessage, SQSEvent, SQSRecord } from "aws-lambda";
+import { SQSEvent, SQSRecord } from "aws-lambda";
 import pino from "pino";
 import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
@@ -35,11 +35,6 @@ function createSqsRecord(msgId: string, body: string): SQSRecord {
     awsRegion: "",
   };
 }
-
-type SupportedEvent =
-  | LetterRequestPreparedEventV2
-  | LetterRequestPreparedEvent
-  | LetterEvent;
 
 function createPreparedV1Event(
   overrides: Partial<any> = {},
@@ -134,58 +129,6 @@ function createSupplierStatusChangeEvent(
   });
 }
 
-function createEventBridgeNotification(
-  event: LetterRequestPreparedEventV2 | LetterRequestPreparedEvent,
-): Partial<SNSMessage> {
-  return {
-    SignatureVersion: "",
-    Timestamp: "",
-    Signature: "",
-    SigningCertUrl: "",
-    MessageId: "",
-    Message: createEventBridgeEvent(event),
-    MessageAttributes: {},
-    Type: "Notification",
-    UnsubscribeUrl: "",
-    TopicArn: "",
-    Subject: "",
-    Token: "",
-  };
-}
-
-function createNotification(event: SupportedEvent): Partial<SNSMessage> {
-  return {
-    SignatureVersion: "",
-    Timestamp: "",
-    Signature: "",
-    SigningCertUrl: "",
-    MessageId: "",
-    Message: JSON.stringify(event),
-    MessageAttributes: {},
-    Type: "Notification",
-    UnsubscribeUrl: "",
-    TopicArn: "",
-    Subject: "",
-    Token: "",
-  };
-}
-
-function createEventBridgeEvent(event: SupportedEvent): string {
-  const now = new Date().toISOString();
-  const eventBridgeEnvelope = {
-    version: "0",
-    id: "4f28e649-6832-18e8-7261-4b63e6dcd3b5",
-    "detail-type": event.type,
-    source: "custom.event",
-    account: "815490582396",
-    time: now,
-    region: "eu-west-2",
-    resources: [],
-    detail: event,
-  };
-  return JSON.stringify(eventBridgeEnvelope);
-}
-
 describe("createSupplierAllocatorHandler", () => {
   let mockSqsClient: jest.Mocked<SQSClient>;
   let mockedDeps: jest.Mocked<Deps>;
@@ -215,13 +158,11 @@ describe("createSupplierAllocatorHandler", () => {
 
   test("parses SNS notification and sends message to SQS queue for v2 event", async () => {
     const preparedEvent = createPreparedV2Event();
-    const snsNotification = createEventBridgeNotification(preparedEvent);
-
     const evt: SQSEvent = createSQSEvent([
-      createSqsRecord("msg1", JSON.stringify(snsNotification)),
+      createSqsRecord("msg1", JSON.stringify(preparedEvent)),
     ]);
 
-    process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
     const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
@@ -245,13 +186,12 @@ describe("createSupplierAllocatorHandler", () => {
 
   test("parses SNS notification and sends message to SQS queue for v1 event", async () => {
     const preparedEvent = createPreparedV1Event();
-    const snsNotification = createEventBridgeNotification(preparedEvent);
 
     const evt: SQSEvent = createSQSEvent([
-      createSqsRecord("msg1", JSON.stringify(snsNotification)),
+      createSqsRecord("msg1", JSON.stringify(preparedEvent)),
     ]);
 
-    process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
     const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
@@ -272,13 +212,12 @@ describe("createSupplierAllocatorHandler", () => {
 
   test("returns batch failure for Update event", async () => {
     const preparedEvent = createSupplierStatusChangeEvent();
-    const snsNotification = createNotification(preparedEvent);
 
     const evt: SQSEvent = createSQSEvent([
-      createSqsRecord("invalid-event", JSON.stringify(snsNotification)),
+      createSqsRecord("invalid-event", JSON.stringify(preparedEvent)),
     ]);
 
-    process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
     const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
@@ -293,13 +232,12 @@ describe("createSupplierAllocatorHandler", () => {
 
   test("unwraps EventBridge envelope and extracts event details", async () => {
     const preparedEvent = createPreparedV2Event({ domainId: "letter-test" });
-    const snsNotification = createEventBridgeNotification(preparedEvent);
 
     const evt: SQSEvent = createSQSEvent([
-      createSqsRecord("msg1", JSON.stringify(snsNotification)),
+      createSqsRecord("msg1", JSON.stringify(preparedEvent)),
     ]);
 
-    process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
     const handler = createSupplierAllocatorHandler(mockedDeps);
     await handler(evt, {} as any, {} as any);
@@ -311,13 +249,12 @@ describe("createSupplierAllocatorHandler", () => {
 
   test("resolves correct supplier spec from variant map", async () => {
     const preparedEvent = createPreparedV2Event();
-    const snsNotification = createEventBridgeNotification(preparedEvent);
 
     const evt: SQSEvent = createSQSEvent([
-      createSqsRecord("msg1", JSON.stringify(snsNotification)),
+      createSqsRecord("msg1", JSON.stringify(preparedEvent)),
     ]);
 
-    process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
     const handler = createSupplierAllocatorHandler(mockedDeps);
     await handler(evt, {} as any, {} as any);
@@ -332,23 +269,15 @@ describe("createSupplierAllocatorHandler", () => {
     const evt: SQSEvent = createSQSEvent([
       createSqsRecord(
         "msg1",
-        JSON.stringify(
-          createEventBridgeNotification(
-            createPreparedV2Event({ domainId: "letter1" }),
-          ),
-        ),
+        JSON.stringify(createPreparedV2Event({ domainId: "letter1" })),
       ),
       createSqsRecord(
         "msg2",
-        JSON.stringify(
-          createEventBridgeNotification(
-            createPreparedV2Event({ domainId: "letter2" }),
-          ),
-        ),
+        JSON.stringify(createPreparedV2Event({ domainId: "letter2" })),
       ),
     ]);
 
-    process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
     const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
@@ -365,7 +294,7 @@ describe("createSupplierAllocatorHandler", () => {
       createSqsRecord("bad-json", "this-is-not-json"),
     ]);
 
-    process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
     const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
@@ -378,59 +307,14 @@ describe("createSupplierAllocatorHandler", () => {
     expect((mockedDeps.logger.error as jest.Mock).mock.calls).toHaveLength(1);
   });
 
-  test("returns batch failure for invalid SNS notification schema", async () => {
-    const evt: SQSEvent = createSQSEvent([
-      createSqsRecord(
-        "bad-notification",
-        JSON.stringify({ not: "a valid notification" }),
-      ),
-    ]);
-
-    process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
-
-    const handler = createSupplierAllocatorHandler(mockedDeps);
-    const result = await handler(evt, {} as any, {} as any);
-
-    expect(result).toBeDefined();
-    if (!result) throw new Error("expected BatchResponse, got void");
-
-    expect(result.batchItemFailures).toHaveLength(1);
-    expect(result.batchItemFailures[0].itemIdentifier).toBe("bad-notification");
-  });
-
-  test("returns batch failure when SNS Message is missing", async () => {
-    const snsMessage: Partial<SNSMessage> = {
-      Type: "Notification",
-      MessageId: "test-id",
-    };
-
-    const evt: SQSEvent = createSQSEvent([
-      createSqsRecord("no-message", JSON.stringify(snsMessage)),
-    ]);
-
-    process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
-
-    const handler = createSupplierAllocatorHandler(mockedDeps);
-    const result = await handler(evt, {} as any, {} as any);
-    if (!result) throw new Error("expected BatchResponse, got void");
-
-    expect(result.batchItemFailures).toHaveLength(1);
-    expect(result.batchItemFailures[0].itemIdentifier).toBe("no-message");
-  });
-
   test("returns batch failure when event type is missing", async () => {
     const event = { no: "type" };
-    const snsNotification: Partial<SNSMessage> = {
-      Type: "Notification",
-      Message: JSON.stringify(event),
-      MessageId: "test-id",
-    };
 
     const evt: SQSEvent = createSQSEvent([
-      createSqsRecord("no-type", JSON.stringify(snsNotification)),
+      createSqsRecord("no-type", JSON.stringify(event)),
     ]);
 
-    process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
     const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
@@ -440,15 +324,14 @@ describe("createSupplierAllocatorHandler", () => {
     expect(result.batchItemFailures[0].itemIdentifier).toBe("no-type");
   });
 
-  test("returns batch failure when ALLOCATED_LETTERS_QUEUE_URL is not set", async () => {
+  test("returns batch failure when UPSERT_LETTERS_QUEUE_URL is not set", async () => {
     const preparedEvent = createPreparedV2Event();
-    const snsNotification = createEventBridgeNotification(preparedEvent);
 
     const evt: SQSEvent = createSQSEvent([
-      createSqsRecord("msg1", JSON.stringify(snsNotification)),
+      createSqsRecord("msg1", JSON.stringify(preparedEvent)),
     ]);
 
-    delete process.env.ALLOCATED_LETTERS_QUEUE_URL;
+    delete process.env.UPSERT_LETTERS_QUEUE_URL;
 
     const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
@@ -458,20 +341,19 @@ describe("createSupplierAllocatorHandler", () => {
     expect(result.batchItemFailures[0].itemIdentifier).toBe("msg1");
     expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][0].err).toEqual(
       expect.objectContaining({
-        message: "ALLOCATED_LETTERS_QUEUE_URL not configured",
+        message: "UPSERT_LETTERS_QUEUE_URL not configured",
       }),
     );
   });
 
   test("handles SQS send errors and returns batch failure", async () => {
     const preparedEvent = createPreparedV2Event();
-    const snsNotification = createEventBridgeNotification(preparedEvent);
 
     const evt: SQSEvent = createSQSEvent([
-      createSqsRecord("msg1", JSON.stringify(snsNotification)),
+      createSqsRecord("msg1", JSON.stringify(preparedEvent)),
     ]);
 
-    process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
     const sqsError = new Error("SQS send failed");
     (mockSqsClient.send as jest.Mock).mockRejectedValueOnce(sqsError);
@@ -489,24 +371,16 @@ describe("createSupplierAllocatorHandler", () => {
     const evt: SQSEvent = createSQSEvent([
       createSqsRecord(
         "ok-msg",
-        JSON.stringify(
-          createEventBridgeNotification(
-            createPreparedV2Event({ domainId: "letter1" }),
-          ),
-        ),
+        JSON.stringify(createPreparedV2Event({ domainId: "letter1" })),
       ),
       createSqsRecord("fail-msg", "invalid-json"),
       createSqsRecord(
         "ok-msg-2",
-        JSON.stringify(
-          createEventBridgeNotification(
-            createPreparedV2Event({ domainId: "letter2" }),
-          ),
-        ),
+        JSON.stringify(createPreparedV2Event({ domainId: "letter2" })),
       ),
     ]);
 
-    process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
     const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
@@ -520,14 +394,13 @@ describe("createSupplierAllocatorHandler", () => {
 
   test("sends correct queue URL in SQS message command", async () => {
     const preparedEvent = createPreparedV2Event();
-    const snsNotification = createEventBridgeNotification(preparedEvent);
 
     const evt: SQSEvent = createSQSEvent([
-      createSqsRecord("msg1", JSON.stringify(snsNotification)),
+      createSqsRecord("msg1", JSON.stringify(preparedEvent)),
     ]);
 
     const queueUrl = "https://sqs.eu-west-2.amazonaws.com/123456789/test-queue";
-    process.env.ALLOCATED_LETTERS_QUEUE_URL = queueUrl;
+    process.env.UPSERT_LETTERS_QUEUE_URL = queueUrl;
 
     const handler = createSupplierAllocatorHandler(mockedDeps);
     await handler(evt, {} as any, {} as any);
