@@ -89,6 +89,7 @@ function mapToInsertLetter(
   const now = new Date().toISOString();
   return {
     id: upsertRequest.data.domainId,
+    eventId: upsertRequest.id,
     supplierId: supplier,
     status: "PENDING",
     specificationId: spec,
@@ -108,6 +109,7 @@ function mapToInsertLetter(
 function mapToUpdateLetter(upsertRequest: LetterEvent): UpdateLetter {
   return {
     id: upsertRequest.data.domainId,
+    eventId: upsertRequest.id,
     supplierId: upsertRequest.data.supplierId,
     status: upsertRequest.data.status,
     reasonCode: upsertRequest.data.reasonCode,
