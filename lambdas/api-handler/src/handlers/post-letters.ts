@@ -41,6 +41,7 @@ function emitSuccessMetrics(
     };
     const emf = buildEMFObject("postLetters", dimensions, metric);
     logger.info(emf);
+    logger.info(`process.env: ${process.env}`);
   }
 }
 
