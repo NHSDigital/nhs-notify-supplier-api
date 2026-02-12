@@ -32,7 +32,7 @@ function emitSuccessMetrics(
   for (const [status, count] of statusesMapping) {
     const dimensions: Record<string, string> = {
       supplier: supplierId,
-      eventType: status,
+      status,
     };
     const metric: MetricEntry = {
       key: "Letters posted",
@@ -41,7 +41,6 @@ function emitSuccessMetrics(
     };
     const emf = buildEMFObject("postLetters", dimensions, metric);
     logger.info(emf);
-    logger.info(`process.env: ${JSON.stringify(process.env)}`);
   }
 }
 

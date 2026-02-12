@@ -43,8 +43,10 @@ export function buildEMFObject(
       CloudWatchMetrics: [
         {
           Namespace: namespace,
-          Dimensions: [[...Object.keys(dimensions), "ServiceName", "LogGroup"]],
-          Metrics: [{ Name: metric.key, Unit: metric.value }],
+          Dimensions: [...Object.keys(dimensions), "ServiceName", "LogGroup"],
+          Metrics: [
+            { Name: metric.key, Value: metric.value, Unit: metric.unit },
+          ],
         },
       ],
     },

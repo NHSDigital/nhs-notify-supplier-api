@@ -11,7 +11,8 @@ import {
   PublishBatchRequestEntry,
 } from "@aws-sdk/client-sns";
 import { MISubmittedEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
-import { MetricsLogger, Unit, metricScope } from "aws-embedded-metrics";
+import { Unit } from "aws-embedded-metrics";
+import pino from "pino";
 import { mapMIToCloudEvent } from "./mappers/mi-mapper";
 import { Deps } from "./deps";
 
@@ -50,49 +51,57 @@ function extractMIData(record: DynamoDBRecord): MI {
   return MISchema.parse(unmarshall(newImage as any));
 }
 
-function emitMetrics(
-  metrics: MetricsLogger,
-  eventTypeCount: Map<string, number>,
-) {
-  metrics.setNamespace(
-    process.env.AWS_LAMBDA_FUNCTION_NAME || "letter-updates-transformer",
-  );
+function emitMetrics(logger: pino.Logger, eventTypeCount: Map<string, number>) {
+  const namespace =
+    process.env.AWS_LAMBDA_FUNCTION_NAME || "mi-updates-transformer";
   for (const [type, count] of eventTypeCount) {
-    metrics.putDimensions({
+    const emf = {
+      LogGroup: namespace,
+      ServiceName: namespace,
       eventType: type,
-    });
-    metrics.putMetric("events published", count, Unit.Count);
+      _aws: {
+        Timestamp: Date.now(),
+        CloudWatchMetrics: [
+          {
+            Namespace: namespace,
+            Dimensions: ["LogGroup", "ServiceName", "eventType"],
+            Metrics: [
+              { Name: "events published", Value: count, Unit: Unit.Count },
+            ],
+          },
+        ],
+      },
+    };
+    logger.info(emf);
   }
 }
 
 export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
-  return metricScope((metrics: MetricsLogger) => {
-    return async (streamEvent: KinesisStreamEvent) => {
-      deps.logger.info({ description: "Received event", streamEvent });
+  return async (streamEvent: KinesisStreamEvent) => {
+    deps.logger.info({ description: "Received event", streamEvent });
 
-      const cloudEvents: MISubmittedEvent[] = streamEvent.Records.map(
-        (record) => extractPayload(record, deps),
-      )
-        .filter((record) => record.eventName === "INSERT")
-        .map((element) => extractMIData(element))
-        .map((payload) => mapMIToCloudEvent(payload, deps));
+    const cloudEvents: MISubmittedEvent[] = streamEvent.Records.map((record) =>
+      extractPayload(record, deps),
+    )
+      .filter((record) => record.eventName === "INSERT")
+      .map((element) => extractMIData(element))
+      .map((payload) => mapMIToCloudEvent(payload, deps));
 
-      const eventTypeCount = new Map<string, number>();
-      for (const batch of generateBatches(cloudEvents)) {
-        await deps.snsClient.send(
-          new PublishBatchCommand({
-            TopicArn: deps.env.EVENTPUB_SNS_TOPIC_ARN,
-            PublishBatchRequestEntries: batch.map((element) => {
-              eventTypeCount.set(
-                element.type,
-                (eventTypeCount.get(element.type) || 0) + 1,
-              );
-              return buildMessage(element, deps);
-            }),
+    const eventTypeCount = new Map<string, number>();
+    for (const batch of generateBatches(cloudEvents)) {
+      await deps.snsClient.send(
+        new PublishBatchCommand({
+          TopicArn: deps.env.EVENTPUB_SNS_TOPIC_ARN,
+          PublishBatchRequestEntries: batch.map((element) => {
+            eventTypeCount.set(
+              element.type,
+              (eventTypeCount.get(element.type) || 0) + 1,
+            );
+            return buildMessage(element, deps);
           }),
-        );
-      }
-      emitMetrics(metrics, eventTypeCount);
-    };
-  });
+        }),
+      );
+    }
+    emitMetrics(deps.logger, eventTypeCount);
+  };
 }
