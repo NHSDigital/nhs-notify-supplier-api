@@ -56,14 +56,18 @@ describe("Authorizer Lambda Function", () => {
   });
 
   describe("Certificate expiry check", () => {
+    let consoleLogSpy: jest.SpyInstance;
+
     beforeEach(() => {
       jest
         .useFakeTimers({ doNotFake: ["nextTick"] })
         .setSystemTime(new Date("2025-11-03T14:19:00Z"));
+      consoleLogSpy = jest.spyOn(console, "log").mockImplementation();
     });
 
     afterEach(() => {
       jest.useRealTimers();
+      consoleLogSpy.mockRestore();
     });
 
     it("Should not log CloudWatch metric when certificate is null", async () => {
@@ -73,10 +77,7 @@ describe("Authorizer Lambda Function", () => {
       handler(mockEvent, mockContext, mockCallback);
       await new Promise(process.nextTick);
 
-      const mockedInfo = mockedDeps.logger.info as jest.Mock;
-      expect(mockedInfo.mock.calls).not.toContainEqual(
-        expect.stringContaining("CloudWatchMetrics"),
-      );
+      expect(consoleLogSpy).not.toHaveBeenCalled();
     });
 
     it("Should log CloudWatch metric when the certificate expiry threshold is reached", async () => {
@@ -88,8 +89,7 @@ describe("Authorizer Lambda Function", () => {
       handler(mockEvent, mockContext, mockCallback);
       await new Promise(process.nextTick);
 
-      const mockedInfo = mockedDeps.logger.info as jest.Mock;
-      expect(mockedInfo.mock.calls.map((call) => call[0])).toContain(
+      expect(consoleLogSpy).toHaveBeenCalledWith(
         JSON.stringify({
           _aws: {
             Timestamp: 1_762_179_540_000,
@@ -123,10 +123,7 @@ describe("Authorizer Lambda Function", () => {
       handler(mockEvent, mockContext, mockCallback);
       await new Promise(process.nextTick);
 
-      const mockedInfo = mockedDeps.logger.info as jest.Mock;
-      expect(mockedInfo.mock.calls).not.toContainEqual(
-        expect.stringContaining("CloudWatchMetrics"),
-      );
+      expect(consoleLogSpy).not.toHaveBeenCalled();
     });
   });
 
