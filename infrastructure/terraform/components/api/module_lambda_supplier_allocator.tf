@@ -20,9 +20,9 @@ module "allocate_letter" {
 
   function_s3_bucket      = local.acct.s3_buckets["lambda_function_artefacts"]["id"]
   function_code_base_path = local.aws_lambda_functions_dir_path
-  function_code_dir       = "allocate-letter/dist"
+  function_code_dir       = "supplier-allocator/dist"
   function_include_common = true
-  handler_function_name   = "allocateLetterHandler"
+  handler_function_name   = "supplierAllocatorHandler"
   runtime                 = "nodejs22.x"
   memory                  = 512
   timeout                 = 29

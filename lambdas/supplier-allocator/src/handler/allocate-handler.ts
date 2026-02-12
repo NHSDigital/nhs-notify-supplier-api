@@ -46,26 +46,25 @@ function removeEventBridgeWrapper(event: any) {
   return event;
 }
 
-function getType(event: unknown) {
+function validateType(event: unknown) {
   const env = TypeEnvelope.safeParse(event);
   if (!env.success) {
     throw new Error("Missing or invalid envelope.type field");
   }
-  return env.data.type;
+  if (
+    !env.data.type.startsWith(
+      "uk.nhs.notify.letter-rendering.letter-request.prepared",
+    )
+  ) {
+    throw new Error(`Unexpected event type: ${env.data.type}`);
+  }
 }
 
 function getSupplier(letterEvent: PreparedEvents, deps: Deps): SupplierSpec {
   return resolveSupplierForVariant(letterEvent.data.letterVariantId, deps);
 }
 
-function isInsert(type: string): boolean {
-  return (
-    type === "uk.nhs.notify.letter-rendering.letter-request.prepared.v2" ||
-    type === "uk.nhs.notify.letter-rendering.letter-request.prepared.v1" // legacy schema
-  );
-}
-
-export default function createAllocatedLetterHandler(deps: Deps): SQSHandler {
+export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
   return async (event: SQSEvent) => {
     const batchItemFailures: SQSBatchItemFailure[] = [];
 
@@ -82,12 +81,9 @@ export default function createAllocatedLetterHandler(deps: Deps): SQSHandler {
           messageId: record.messageId,
         });
 
-        const operationType = getType(letterEvent);
+        validateType(letterEvent);
 
-        let supplierSpec: SupplierSpec | undefined;
-        if (isInsert(operationType)) {
-          supplierSpec = getSupplier(letterEvent as PreparedEvents, deps);
-        }
+        const supplierSpec = getSupplier(letterEvent as PreparedEvents, deps);
 
         // Send to allocated letters queue
         const queueUrl = process.env.ALLOCATED_LETTERS_QUEUE_URL;
@@ -97,8 +93,7 @@ export default function createAllocatedLetterHandler(deps: Deps): SQSHandler {
 
         const queueMessage = {
           letterEvent,
-          operationType,
-          ...(supplierSpec && { supplierSpec }),
+          supplierSpec,
         };
 
         deps.logger.info(
