@@ -57,7 +57,9 @@
     "pretty-format": {
       "react-is": "19.0.0"
     },
-    "react": "^19.0.0"
+    "react": "^19.0.0",
+    "fast-xml-parser": "^5.3.4"
+
   },
   "scripts": {
     "build": "npm run bundle-oas && npm run generate --buildver=$npm_config_buildver",

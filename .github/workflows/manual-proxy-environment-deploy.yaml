@@ -36,11 +36,10 @@ jobs:
           node-version: 22
 
       - name: Npm install
-        working-directory: .
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm ci
-        shell: bash
+        uses: ./.github/actions/node-install
+        with:
+          node-version: 22
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Check if pull request exists for this branch and set ENVIRONMENT/APIM_ENV"
         id: pr_exists
