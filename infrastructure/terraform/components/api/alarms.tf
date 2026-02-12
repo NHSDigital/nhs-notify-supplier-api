@@ -16,19 +16,19 @@ locals {
 
   sqs_queue_names = {
     letter_updates = {
-      name              = module.sqs_letter_updates.sqs_queue_name
+      name               = module.sqs_letter_updates.sqs_queue_name
       age_period_seconds = 900
     }
     letter_status_updates = {
-      name              = module.letter_status_updates_queue.sqs_queue_name
-      age_period_seconds = 300
+      name               = module.letter_status_updates_queue.sqs_queue_name
+      age_period_seconds = 900
     }
   }
 }
 
 module "lambda_alarms" {
-  for_each   = local.lambda_alarm_targets
-  source     = "../../modules/alarms/alarms-lambda"
+  for_each = local.lambda_alarm_targets
+  source   = "../../modules/alarms/alarms-lambda"
 
   alarm_prefix   = local.csi
   function_name  = each.value
@@ -58,14 +58,14 @@ module "ddb_alarms_suppliers" {
 }
 
 module "sqs_alarms" {
-  for_each   = local.sqs_queue_names
-  source     = "../../modules/alarms/alarms-sqs"
+  for_each = local.sqs_queue_names
+  source   = "../../modules/alarms/alarms-sqs"
 
-  alarm_prefix   = local.csi
-  queue_name     = each.value.name
-  dlq_queue_name = replace(each.value.name, "-queue", "-dlq")
+  alarm_prefix       = local.csi
+  queue_name         = each.value.name
+  dlq_queue_name     = replace(each.value.name, "-queue", "-dlq")
   age_period_seconds = each.value.age_period_seconds
-  tags           = local.default_tags
+  tags               = local.default_tags
 }
 
 module "apigw_alarms" {

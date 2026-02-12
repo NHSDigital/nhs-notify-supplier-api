@@ -58,9 +58,9 @@ resource "aws_cloudwatch_log_metric_filter" "error_logs" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "error_logs" {
-  count               = var.enable_error_log_metric ? 1 : 0
-  alarm_name          = "${var.alarm_prefix}-lambda-${var.function_name}-error-logs"
-  alarm_description   = "ERROR: Lambda error logs detected"
+  count             = var.enable_error_log_metric ? 1 : 0
+  alarm_name        = "${var.alarm_prefix}-lambda-${var.function_name}-error-logs"
+  alarm_description = "ERROR: Lambda error logs detected"
 
   namespace   = var.error_log_metric_namespace
   metric_name = "${var.error_log_metric_name_prefix}${var.function_name}"

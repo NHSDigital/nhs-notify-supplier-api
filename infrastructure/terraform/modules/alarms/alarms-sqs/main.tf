@@ -38,9 +38,9 @@ resource "aws_cloudwatch_metric_alarm" "age_anomaly" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "dlq_depth" {
-  count               = var.dlq_queue_name == null ? 0 : 1
-  alarm_name          = "${var.alarm_prefix}-sqs-${var.dlq_queue_name}-dlq-depth"
-  alarm_description   = "RELIABILITY: SQS DLQ has messages"
+  count             = var.dlq_queue_name == null ? 0 : 1
+  alarm_name        = "${var.alarm_prefix}-sqs-${var.dlq_queue_name}-dlq-depth"
+  alarm_description = "RELIABILITY: SQS DLQ has messages"
 
   namespace   = "AWS/SQS"
   metric_name = "ApproximateNumberOfMessagesVisible"
