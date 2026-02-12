@@ -6,7 +6,7 @@ module "sqs_allocated_letters" {
   environment    = var.environment
   project        = var.project
   region         = var.region
-  name           = "allocated-letters"
+  name           = "supplier-allocator"
 
   sqs_kms_key_arn = module.kms.key_arn
 

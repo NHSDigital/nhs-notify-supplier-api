@@ -1,4 +1,4 @@
-import type { Deps } from "lambdas/allocate-letter/src/config/deps";
+import type { Deps } from "lambdas/supplier-allocator/src/config/deps";
 
 describe("createDependenciesContainer", () => {
   const env = {

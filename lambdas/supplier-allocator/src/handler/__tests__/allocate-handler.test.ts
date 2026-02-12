@@ -7,7 +7,7 @@ import {
   $LetterEvent,
   LetterEvent,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
-import createAllocatedLetterHandler from "../allocate-handler";
+import createSupplierAllocatorHandler from "../allocate-handler";
 import { Deps } from "../../config/deps";
 import { EnvVars } from "../../config/env";
 
@@ -186,7 +186,7 @@ function createEventBridgeEvent(event: SupportedEvent): string {
   return JSON.stringify(eventBridgeEnvelope);
 }
 
-describe("createAllocatedLetterHandler", () => {
+describe("createSupplierAllocatorHandler", () => {
   let mockSqsClient: jest.Mocked<SQSClient>;
   let mockedDeps: jest.Mocked<Deps>;
 
@@ -223,7 +223,7 @@ describe("createAllocatedLetterHandler", () => {
 
     process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
-    const handler = createAllocatedLetterHandler(mockedDeps);
+    const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
 
     expect(result).toBeDefined();
@@ -237,9 +237,6 @@ describe("createAllocatedLetterHandler", () => {
 
     const messageBody = JSON.parse(sendCall.input.MessageBody);
     expect(messageBody.letterEvent).toEqual(preparedEvent);
-    expect(messageBody.operationType).toBe(
-      "uk.nhs.notify.letter-rendering.letter-request.prepared.v2",
-    );
     expect(messageBody.supplierSpec).toEqual({
       supplierId: "supplier1",
       specId: "spec1",
@@ -256,7 +253,7 @@ describe("createAllocatedLetterHandler", () => {
 
     process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
-    const handler = createAllocatedLetterHandler(mockedDeps);
+    const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
 
     expect(result).toBeDefined();
@@ -267,40 +264,31 @@ describe("createAllocatedLetterHandler", () => {
     expect(mockSqsClient.send).toHaveBeenCalledTimes(1);
     const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
     const messageBody = JSON.parse(sendCall.input.MessageBody);
-    expect(messageBody.operationType).toBe(
-      "uk.nhs.notify.letter-rendering.letter-request.prepared.v1",
-    );
     expect(messageBody.supplierSpec).toEqual({
       supplierId: "supplier1",
       specId: "spec1",
     });
   });
 
-  test("parses SNS notification and sends message to SQS queue for update event", async () => {
+  test("returns batch failure for Update event", async () => {
     const preparedEvent = createSupplierStatusChangeEvent();
     const snsNotification = createNotification(preparedEvent);
 
     const evt: SQSEvent = createSQSEvent([
-      createSqsRecord("msg1", JSON.stringify(snsNotification)),
+      createSqsRecord("invalid-event", JSON.stringify(snsNotification)),
     ]);
 
     process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
-    const handler = createAllocatedLetterHandler(mockedDeps);
+    const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
 
     expect(result).toBeDefined();
     if (!result) throw new Error("expected BatchResponse, got void");
 
-    expect(result.batchItemFailures).toHaveLength(0);
-
-    expect(mockSqsClient.send).toHaveBeenCalledTimes(1);
-    const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
-    const messageBody = JSON.parse(sendCall.input.MessageBody);
-    expect(messageBody.operationType).toBe(
-      "uk.nhs.notify.supplier-api.letter.RETURNED.v1",
-    );
-    expect(messageBody.supplierSpec).toBeUndefined();
+    expect(result.batchItemFailures).toHaveLength(1);
+    expect(result.batchItemFailures[0].itemIdentifier).toBe("invalid-event");
+    expect((mockedDeps.logger.error as jest.Mock).mock.calls).toHaveLength(1);
   });
 
   test("unwraps EventBridge envelope and extracts event details", async () => {
@@ -313,7 +301,7 @@ describe("createAllocatedLetterHandler", () => {
 
     process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
-    const handler = createAllocatedLetterHandler(mockedDeps);
+    const handler = createSupplierAllocatorHandler(mockedDeps);
     await handler(evt, {} as any, {} as any);
 
     const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
@@ -331,7 +319,7 @@ describe("createAllocatedLetterHandler", () => {
 
     process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
-    const handler = createAllocatedLetterHandler(mockedDeps);
+    const handler = createSupplierAllocatorHandler(mockedDeps);
     await handler(evt, {} as any, {} as any);
 
     const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
@@ -362,7 +350,7 @@ describe("createAllocatedLetterHandler", () => {
 
     process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
-    const handler = createAllocatedLetterHandler(mockedDeps);
+    const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
 
     expect(result).toBeDefined();
@@ -379,7 +367,7 @@ describe("createAllocatedLetterHandler", () => {
 
     process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
-    const handler = createAllocatedLetterHandler(mockedDeps);
+    const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
 
     expect(result).toBeDefined();
@@ -400,7 +388,7 @@ describe("createAllocatedLetterHandler", () => {
 
     process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
-    const handler = createAllocatedLetterHandler(mockedDeps);
+    const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
 
     expect(result).toBeDefined();
@@ -422,7 +410,7 @@ describe("createAllocatedLetterHandler", () => {
 
     process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
-    const handler = createAllocatedLetterHandler(mockedDeps);
+    const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
     if (!result) throw new Error("expected BatchResponse, got void");
 
@@ -444,7 +432,7 @@ describe("createAllocatedLetterHandler", () => {
 
     process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
-    const handler = createAllocatedLetterHandler(mockedDeps);
+    const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
     if (!result) throw new Error("expected BatchResponse, got void");
 
@@ -462,7 +450,7 @@ describe("createAllocatedLetterHandler", () => {
 
     delete process.env.ALLOCATED_LETTERS_QUEUE_URL;
 
-    const handler = createAllocatedLetterHandler(mockedDeps);
+    const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
     if (!result) throw new Error("expected BatchResponse, got void");
 
@@ -488,7 +476,7 @@ describe("createAllocatedLetterHandler", () => {
     const sqsError = new Error("SQS send failed");
     (mockSqsClient.send as jest.Mock).mockRejectedValueOnce(sqsError);
 
-    const handler = createAllocatedLetterHandler(mockedDeps);
+    const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
     if (!result) throw new Error("expected BatchResponse, got void");
 
@@ -520,7 +508,7 @@ describe("createAllocatedLetterHandler", () => {
 
     process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
-    const handler = createAllocatedLetterHandler(mockedDeps);
+    const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
     if (!result) throw new Error("expected BatchResponse, got void");
 
@@ -528,38 +516,6 @@ describe("createAllocatedLetterHandler", () => {
     expect(result.batchItemFailures[0].itemIdentifier).toBe("fail-msg");
 
     expect(mockSqsClient.send).toHaveBeenCalledTimes(2);
-  });
-
-  test("does not include supplierSpec for non-insert event types", async () => {
-    const event = {
-      type: "uk.nhs.notify.supplier-api.letter.RETURNED.v1",
-      data: { status: "RETURNED" },
-    };
-    const snsNotification: Partial<SNSMessage> = {
-      Type: "Notification",
-      Message: JSON.stringify(event),
-      MessageId: "test-id",
-    };
-
-    const evt: SQSEvent = createSQSEvent([
-      createSqsRecord("supplier-event", JSON.stringify(snsNotification)),
-    ]);
-
-    process.env.ALLOCATED_LETTERS_QUEUE_URL = "https://sqs.test.queue";
-
-    const handler = createAllocatedLetterHandler(mockedDeps);
-    const result = await handler(evt, {} as any, {} as any);
-    if (!result) throw new Error("expected BatchResponse, got void");
-
-    expect(result.batchItemFailures).toHaveLength(0);
-
-    const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
-    const messageBody = JSON.parse(sendCall.input.MessageBody);
-    expect(messageBody.letterEvent).toEqual(event);
-    expect(messageBody.operationType).toBe(
-      "uk.nhs.notify.supplier-api.letter.RETURNED.v1",
-    );
-    expect(messageBody.supplierSpec).toBeUndefined();
   });
 
   test("sends correct queue URL in SQS message command", async () => {
@@ -573,7 +529,7 @@ describe("createAllocatedLetterHandler", () => {
     const queueUrl = "https://sqs.eu-west-2.amazonaws.com/123456789/test-queue";
     process.env.ALLOCATED_LETTERS_QUEUE_URL = queueUrl;
 
-    const handler = createAllocatedLetterHandler(mockedDeps);
+    const handler = createSupplierAllocatorHandler(mockedDeps);
     await handler(evt, {} as any, {} as any);
 
     const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];

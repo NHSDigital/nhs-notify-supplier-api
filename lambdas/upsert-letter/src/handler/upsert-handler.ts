@@ -33,6 +33,9 @@ type UpsertOperation = {
   ) => Promise<void>;
 };
 
+// small envelope that must exist in all inputs
+const TypeEnvelope = z.object({ type: z.string().min(1) });
+
 function getOperationFromType(type: string): UpsertOperation {
   if (type.startsWith("uk.nhs.notify.letter-rendering.letter-request.prepared"))
     return {
@@ -112,6 +115,13 @@ function mapToUpdateLetter(upsertRequest: LetterEvent): UpdateLetter {
     reasonText: upsertRequest.data.reasonText,
   };
 }
+function getType(event: unknown) {
+  const env = TypeEnvelope.safeParse(event);
+  if (!env.success) {
+    throw new Error("Missing or invalid envelope.type field");
+  }
+  return env.data.type;
+}
 
 async function runUpsert(
   operation: UpsertOperation,
@@ -152,7 +162,7 @@ async function emitMetrics(
   }
 }
 
-function getSupplierEventId(letterEvent: any): string {
+function getSupplierIdFromEvent(letterEvent: any): string {
   if (letterEvent && letterEvent.data && letterEvent.data.supplierId) {
     return letterEvent.data.supplierId;
   }
@@ -172,7 +182,7 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
           const queueMessage: AllocatedLetterQueueMessage = JSON.parse(
             record.body,
           );
-          const { letterEvent, operationType, supplierSpec } = queueMessage;
+          const { letterEvent, supplierSpec } = queueMessage;
 
           deps.logger.info({
             description: "Extracted letter event",
@@ -181,10 +191,11 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
 
           supplier =
             !supplierSpec || !supplierSpec.supplierId
-              ? getSupplierEventId(letterEvent)
+              ? getSupplierIdFromEvent(letterEvent)
               : supplierSpec.supplierId;
 
-          const operation = getOperationFromType(operationType);
+          const type = getType(letterEvent);
+          const operation = getOperationFromType(type);
 
           await runUpsert(operation, letterEvent, supplierSpec, deps);
 
