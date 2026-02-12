@@ -66,7 +66,7 @@ data "aws_iam_policy_document" "sqs_supplier_allocator_lambda" {
     ]
 
     resources = [
-      module.sqs_letter_updates.sqs_queue_arn
+      module.sqs_supplier_allocator.sqs_queue_arn
     ]
   }
 
@@ -79,7 +79,7 @@ data "aws_iam_policy_document" "sqs_supplier_allocator_lambda" {
     ]
 
     resources = [
-      module.sqs_supplier_allocator.sqs_queue_arn
+      module.sqs_letter_updates.sqs_queue_arn
     ]
   }
 }
