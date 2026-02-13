@@ -114,7 +114,13 @@ function mapToUpdateLetter(upsertRequest: LetterEvent): UpdateLetter {
 function getType(event: unknown) {
   const env = TypeEnvelope.safeParse(event);
   if (!env.success) {
-    throw new Error("Missing or invalid envelope.type field");
+    // Helpful debugging info:
+    const pretty = (() => {
+      return JSON.stringify(event, null, 2);
+    })();
+    throw new Error(
+      `Missing or invalid envelope.type field. Payload seen:\n${pretty}`,
+    );
   }
   return env.data.type;
 }
@@ -175,7 +181,17 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
       const tasks = event.Records.map(async (record) => {
         let supplier = "unknown";
         try {
+          deps.logger.info({
+            description: "Processing record",
+            messageId: record.messageId,
+            message: record.body,
+          });
           const queueMessage = JSON.parse(record.body);
+          deps.logger.info({
+            description: "Parsed message body",
+            messageId: record.messageId,
+            queueMessage,
+          });
 
           const { letterEvent, supplierSpec } = queueMessage;
 
