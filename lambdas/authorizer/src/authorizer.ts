@@ -6,7 +6,8 @@ import {
   APIGatewayRequestAuthorizerHandler,
   Callback,
   Context,
-} from "aws-lambda";
+} from "aws-lambda"
+import { MetricsLogger, metricScope } from "aws-embedded-metrics";
 import { Supplier } from "@internal/datastore";
 import { Deps } from "./deps";
 
@@ -100,33 +101,6 @@ function getCertificateExpiryInDays(
   return (expiry - now) / (1000 * 60 * 60 * 24);
 }
 
-function buildCloudWatchMetric(
-  namespace: string,
-  certificate: APIGatewayEventClientCertificate,
-) {
-  return {
-    _aws: {
-      Timestamp: Date.now(),
-      CloudWatchMetrics: [
-        {
-          Namespace: namespace,
-          Dimensions: ["SUBJECT_DN", "NOT_AFTER"],
-          Metrics: [
-            {
-              Name: "apim-client-certificate-near-expiry",
-              Unit: "Count",
-              Value: 1,
-            },
-          ],
-        },
-      ],
-    },
-    SUBJECT_DN: certificate.subjectDN,
-    NOT_AFTER: certificate.validity.notAfter,
-    "apim-client-certificate-near-expiry": 1,
-  };
-}
-
 async function checkCertificateExpiry(
   certificate: APIGatewayEventClientCertificate | null,
   deps: Deps,
@@ -146,11 +120,11 @@ async function checkCertificateExpiry(
   const expiry = getCertificateExpiryInDays(certificate);
 
   if (expiry <= deps.env.CLIENT_CERTIFICATE_EXPIRATION_ALERT_DAYS) {
-    const metric = buildCloudWatchMetric(
-      deps.env.CLOUDWATCH_NAMESPACE,
-      certificate,
-    );
-    deps.logger.warn(metric, `APIM Certificated expiry in ${expiry} days`);
-    console.log(JSON.stringify(metric));
-  }
+    metricScope(
+      (metrics: MetricsLogger) => async () => {
+      deps.logger.warn(`APIM Certificated expiry in ${expiry} days`);
+      metrics.setNamespace(process.env.AWS_LAMBDA_FUNCTION_NAME || 'authorizer');
+      metrics.putMetric("apim-client-certificate-near-expiry", expiry, "Count");
+    });
+  };
 }
