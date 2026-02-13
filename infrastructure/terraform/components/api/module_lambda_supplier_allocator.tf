@@ -15,7 +15,7 @@ module "supplier_allocator" {
   kms_key_arn           = module.kms.key_arn
 
   iam_policy_document = {
-    body = data.aws_iam_policy_document.sqs_supplier_allocator_lambda.json
+    body = data.aws_iam_policy_document.supplier_allocator_lambda.json
   }
 
   function_s3_bucket      = local.acct.s3_buckets["lambda_function_artefacts"]["id"]
@@ -40,7 +40,7 @@ module "supplier_allocator" {
   })
 }
 
-data "aws_iam_policy_document" "sqs_supplier_allocator_lambda" {
+data "aws_iam_policy_document" "supplier_allocator_lambda" {
   statement {
     sid    = "KMSPermissions"
     effect = "Allow"
