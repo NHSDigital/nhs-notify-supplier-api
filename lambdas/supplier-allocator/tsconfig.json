@@ -1,6 +1,9 @@
 {
   "compilerOptions": {
-    "esModuleInterop": true
+    "types": [
+      "jest",
+      "node"
+    ]
   },
   "extends": "../../tsconfig.base.json",
   "include": [

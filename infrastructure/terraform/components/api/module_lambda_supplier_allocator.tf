@@ -1,8 +1,8 @@
-module "letter_status_update" {
+module "supplier_allocator" {
   source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip"
 
-  function_name = "letter_status_update"
-  description   = "Processes letter status updates"
+  function_name = "supplier-allocator"
+  description   = "Allocate a letter to a supplier"
 
   aws_account_id = var.aws_account_id
   component      = var.component
@@ -15,14 +15,14 @@ module "letter_status_update" {
   kms_key_arn           = module.kms.key_arn
 
   iam_policy_document = {
-    body = data.aws_iam_policy_document.letter_status_update.json
+    body = data.aws_iam_policy_document.supplier_allocator_lambda.json
   }
 
   function_s3_bucket      = local.acct.s3_buckets["lambda_function_artefacts"]["id"]
   function_code_base_path = local.aws_lambda_functions_dir_path
-  function_code_dir       = "api-handler/dist"
+  function_code_dir       = "supplier-allocator/dist"
   function_include_common = true
-  handler_function_name   = "letterStatusUpdate"
+  handler_function_name   = "supplierAllocatorHandler"
   runtime                 = "nodejs22.x"
   memory                  = 512
   timeout                 = 29
@@ -34,10 +34,13 @@ module "letter_status_update" {
   log_destination_arn       = local.destination_arn
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
-  lambda_env_vars = merge(local.common_lambda_env_vars, {})
+  lambda_env_vars = merge(local.common_lambda_env_vars, {
+    VARIANT_MAP              = jsonencode(var.letter_variant_map)
+    UPSERT_LETTERS_QUEUE_URL = module.sqs_letter_updates.sqs_queue_url
+  })
 }
 
-data "aws_iam_policy_document" "letter_status_update" {
+data "aws_iam_policy_document" "supplier_allocator_lambda" {
   statement {
     sid    = "KMSPermissions"
     effect = "Allow"
@@ -48,38 +51,35 @@ data "aws_iam_policy_document" "letter_status_update" {
     ]
 
     resources = [
-      module.kms.key_arn, ## Requires shared kms module
+      module.kms.key_arn,
     ]
   }
 
   statement {
-    sid    = "AllowDynamoDBAccess"
-    effect = "Allow"
-
-    actions = [
-      "dynamodb:GetItem",
-      "dynamodb:Query",
-      "dynamodb:UpdateItem",
-    ]
-
-    resources = [
-      aws_dynamodb_table.letters.arn,
-    ]
-  }
-
-  statement {
-    sid    = "AllowQueueAccess"
+    sid    = "AllowSQSRead"
     effect = "Allow"
 
     actions = [
       "sqs:ReceiveMessage",
       "sqs:DeleteMessage",
-      "sqs:GetQueueAttributes",
-      "sqs:ChangeMessageVisibility"
+      "sqs:GetQueueAttributes"
     ]
 
     resources = [
-      module.letter_status_updates_queue.sqs_queue_arn
+      module.sqs_supplier_allocator.sqs_queue_arn
+    ]
+  }
+
+  statement {
+    sid    = "AllowSQSWrite"
+    effect = "Allow"
+
+    actions = [
+      "sqs:SendMessage"
+    ]
+
+    resources = [
+      module.sqs_letter_updates.sqs_queue_arn
     ]
   }
 }

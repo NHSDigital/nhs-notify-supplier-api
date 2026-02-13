@@ -1,7 +1,14 @@
-import type { Config } from "jest";
-
-export const baseJestConfig: Config = {
+export const baseJestConfig = {
   preset: "ts-jest",
+  extensionsToTreatAsEsm: [".ts"],
+  transform: {
+    "^.+\\.ts$": [
+      "ts-jest",
+      {
+        useESM: true,
+      },
+    ],
+  },
 
   // Automatically clear mock calls, instances, contexts and results before every test
   clearMocks: true,
@@ -24,8 +31,7 @@ export const baseJestConfig: Config = {
     },
   },
 
-  coveragePathIgnorePatterns: ["/src/index.ts$", "/__tests__/"],
-  transform: { "^.+\\.ts$": "ts-jest" },
+  coveragePathIgnorePatterns: ["/__tests__/"],
   testPathIgnorePatterns: [".build"],
   testMatch: ["**/?(*.)+(spec|test).[jt]s?(x)"],
 
@@ -46,4 +52,15 @@ export const baseJestConfig: Config = {
   testEnvironment: "jsdom",
 };
 
-export default baseJestConfig;
+const utilsJestConfig = {
+  ...baseJestConfig,
+
+  testEnvironment: "node",
+
+  coveragePathIgnorePatterns: [
+    ...(baseJestConfig.coveragePathIgnorePatterns ?? []),
+    "zod-validators.ts",
+  ],
+};
+
+export default utilsJestConfig;
