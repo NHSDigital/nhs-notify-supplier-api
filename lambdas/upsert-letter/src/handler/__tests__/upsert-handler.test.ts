@@ -217,14 +217,14 @@ describe("createUpsertLetterHandler", () => {
       letterEvent: createPreparedV1Event(),
       supplierSpec: { supplierId: "supplier1", specId: "spec1" },
     };
-    const updateMessage = {
-      letterEvent: createSupplierStatusChangeEvent(),
-    };
 
     const evt: SQSEvent = createSQSEvent([
       createSqsRecord("msg1", JSON.stringify(v2message)),
       createSqsRecord("msg2", JSON.stringify(v1message)),
-      createSqsRecord("msg3", JSON.stringify(updateMessage)),
+      createSqsRecord(
+        "msg3",
+        JSON.stringify(createSupplierStatusChangeEvent()),
+      ),
     ]);
 
     const result = await createUpsertLetterHandler(mockedDeps)(
@@ -425,7 +425,7 @@ describe("createUpsertLetterHandler", () => {
     );
     expect(mockMetrics.setNamespace).toHaveBeenCalledWith("upsertLetter");
     expect(mockMetrics.putDimensions).toHaveBeenCalledWith({
-      Supplier: "supplier1",
+      Supplier: "unknown",
     });
     expect(mockMetrics.putMetric).toHaveBeenCalledWith(
       "MessageFailed",

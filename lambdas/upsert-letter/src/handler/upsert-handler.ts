@@ -19,8 +19,27 @@ import { Deps } from "../config/deps";
 type SupplierSpec = { supplierId: string; specId: string };
 type PreparedEvents = LetterRequestPreparedEventV2 | LetterRequestPreparedEvent;
 
+const SupplierSpecSchema = z.object({
+  supplierId: z.string().min(1),
+  specId: z.string().min(1),
+});
+
+const LetterEventUnionSchema = z.discriminatedUnion("type", [
+  $LetterRequestPreparedEventV2,
+  $LetterRequestPreparedEvent,
+  $LetterEvent,
+]);
+
+const QueueMessageSchema = z.union([
+  $LetterEvent,
+  z.object({
+    letterEvent: LetterEventUnionSchema,
+    supplierSpec: SupplierSpecSchema.optional(),
+  }),
+]);
+
 type UpsertOperation = {
-  name: "Insert" | "Update";
+  name: "Insert" | "Update" | "Unknown";
   schemas: z.ZodSchema[];
   handler: (
     request: unknown,
@@ -29,11 +48,10 @@ type UpsertOperation = {
   ) => Promise<void>;
 };
 
-// small envelope that must exist in all inputs
-const TypeEnvelope = z.object({ type: z.string().min(1) });
-
 function getOperationFromType(type: string): UpsertOperation {
-  if (type.startsWith("uk.nhs.notify.letter-rendering.letter-request.prepared"))
+  if (
+    type.startsWith("uk.nhs.notify.letter-rendering.letter-request.prepared")
+  ) {
     return {
       name: "Insert",
       schemas: [$LetterRequestPreparedEventV2, $LetterRequestPreparedEvent],
@@ -55,24 +73,24 @@ function getOperationFromType(type: string): UpsertOperation {
         });
       },
     };
-  if (type.startsWith("uk.nhs.notify.supplier-api.letter"))
-    return {
-      name: "Update",
-      schemas: [$LetterEvent],
-      handler: async (request, supplierSpec, deps) => {
-        const supplierEvent = request as LetterEvent;
-        const letterToUpdate: UpdateLetter = mapToUpdateLetter(supplierEvent);
-        await deps.letterRepo.updateLetterStatus(letterToUpdate);
+  }
+  // if it's not an insert type, it must be an update as we've already parsed the message, but we want to have a separate operation for better logging and metrics
+  return {
+    name: "Update",
+    schemas: [$LetterEvent],
+    handler: async (request, supplierSpec, deps) => {
+      const supplierEvent = request as LetterEvent;
+      const letterToUpdate: UpdateLetter = mapToUpdateLetter(supplierEvent);
+      await deps.letterRepo.updateLetterStatus(letterToUpdate);
 
-        deps.logger.info({
-          description: "Updated letter",
-          eventId: supplierEvent.id,
-          letterId: letterToUpdate.id,
-          supplierId: letterToUpdate.supplierId,
-        });
-      },
-    };
-  throw new Error(`Unknown operation from type=${type}`);
+      deps.logger.info({
+        description: "Updated letter",
+        eventId: supplierEvent.id,
+        letterId: letterToUpdate.id,
+        supplierId: letterToUpdate.supplierId,
+      });
+    },
+  };
 }
 
 function mapToInsertLetter(
@@ -111,19 +129,6 @@ function mapToUpdateLetter(upsertRequest: LetterEvent): UpdateLetter {
     reasonText: upsertRequest.data.reasonText,
   };
 }
-function getType(event: unknown) {
-  const env = TypeEnvelope.safeParse(event);
-  if (!env.success) {
-    // Helpful debugging info:
-    const pretty = (() => {
-      return JSON.stringify(event, null, 2);
-    })();
-    throw new Error(
-      `Missing or invalid envelope.type field. Payload seen:\n${pretty}`,
-    );
-  }
-  return env.data.type;
-}
 
 async function runUpsert(
   operation: UpsertOperation,
@@ -138,8 +143,6 @@ async function runUpsert(
       return;
     }
   }
-  // none matched
-  throw new Error("No matching schema for received message");
 }
 
 async function emitMetrics(
@@ -193,7 +196,24 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
             queueMessage,
           });
 
-          const { letterEvent, supplierSpec } = queueMessage;
+          const result = QueueMessageSchema.safeParse(queueMessage);
+          if (!result.success) {
+            throw new Error(
+              `Message did not match expected schema: ${JSON.stringify(
+                result.error.issues,
+              )}`,
+            );
+          }
+          let letterEvent: any;
+          let supplierSpec: SupplierSpec | undefined;
+
+          if ("letterEvent" in result.data) {
+            letterEvent = result.data.letterEvent;
+            supplierSpec = result.data.supplierSpec;
+          } else {
+            letterEvent = result.data;
+            supplierSpec = undefined;
+          }
 
           deps.logger.info({
             description: "Extracted letter event",
@@ -207,11 +227,14 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
               ? getSupplierIdFromEvent(letterEvent)
               : supplierSpec.supplierId;
 
-          const type = getType(letterEvent);
+          const operation = getOperationFromType(letterEvent.type);
 
-          const operation = getOperationFromType(type);
-
-          await runUpsert(operation, letterEvent, supplierSpec, deps);
+          await runUpsert(
+            operation,
+            letterEvent,
+            supplierSpec ?? { supplierId: "unknown", specId: "unknown" },
+            deps,
+          );
 
           perSupplierSuccess.set(
             supplier,
