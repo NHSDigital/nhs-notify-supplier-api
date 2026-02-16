@@ -6,7 +6,7 @@ import {
   APIGatewayRequestAuthorizerHandler,
   Callback,
   Context,
-} from "aws-lambda"
+} from "aws-lambda";
 import { MetricsLogger, metricScope } from "aws-embedded-metrics";
 import { Supplier } from "@internal/datastore";
 import { Deps } from "./deps";
@@ -120,11 +120,12 @@ async function checkCertificateExpiry(
   const expiry = getCertificateExpiryInDays(certificate);
 
   if (expiry <= deps.env.CLIENT_CERTIFICATE_EXPIRATION_ALERT_DAYS) {
-    metricScope(
-      (metrics: MetricsLogger) => async () => {
+    metricScope((metrics: MetricsLogger) => async () => {
       deps.logger.warn(`APIM Certificated expiry in ${expiry} days`);
-      metrics.setNamespace(process.env.AWS_LAMBDA_FUNCTION_NAME || 'authorizer');
+      metrics.setNamespace(
+        process.env.AWS_LAMBDA_FUNCTION_NAME || "authorizer",
+      );
       metrics.putMetric("apim-client-certificate-near-expiry", expiry, "Count");
     });
-  };
+  }
 }

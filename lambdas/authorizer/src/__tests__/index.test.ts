@@ -17,13 +17,14 @@ jest.mock("aws-embedded-metrics", () => {
   };
 
   return {
-    metricScope: jest.fn((handler: (metrics: typeof metricsMock) => unknown) => {
-      const wrapped = handler(metricsMock);
-      if (typeof wrapped === "function") {
-        return wrapped();
-      }
-      return undefined;
-    }),
+    metricScope: jest.fn(
+      (handler: (metrics: typeof metricsMock) => unknown) => {
+        const wrapped = handler(metricsMock);
+        if (typeof wrapped === "function") {
+          return wrapped();
+        }
+      },
+    ),
     __metricsMock: metricsMock,
   };
 });
@@ -80,14 +81,9 @@ describe("Authorizer Lambda Function", () => {
         .useFakeTimers({ doNotFake: ["nextTick"] })
         .setSystemTime(new Date("2025-11-03T14:19:00Z"));
       (metricScope as jest.Mock).mockClear();
-      const metricsMock = (jest.requireMock(
+      const metricsMock = jest.requireMock(
         "aws-embedded-metrics",
-      ) as {
-        __metricsMock: {
-          setNamespace: jest.Mock;
-          putMetric: jest.Mock;
-        };
-      }).__metricsMock;
+      ).__metricsMock;
       metricsMock.setNamespace.mockClear();
       metricsMock.putMetric.mockClear();
     });
@@ -115,12 +111,9 @@ describe("Authorizer Lambda Function", () => {
       handler(mockEvent, mockContext, mockCallback);
       await new Promise(process.nextTick);
 
-      const metricsMock = (jest.requireMock("aws-embedded-metrics") as {
-        __metricsMock: {
-          setNamespace: jest.Mock;
-          putMetric: jest.Mock;
-        };
-      }).__metricsMock;
+      const metricsMock = jest.requireMock(
+        "aws-embedded-metrics",
+      ).__metricsMock;
 
       expect(metricScope).toHaveBeenCalledTimes(1);
       expect(metricsMock.setNamespace).toHaveBeenCalledWith("authorizer");
