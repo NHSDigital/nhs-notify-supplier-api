@@ -23,6 +23,7 @@ jest.mock("aws-embedded-metrics", () => {
         if (typeof wrapped === "function") {
           return wrapped();
         }
+        return undefined;
       },
     ),
     __metricsMock: metricsMock,
