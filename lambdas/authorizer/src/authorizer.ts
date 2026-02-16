@@ -120,12 +120,12 @@ async function checkCertificateExpiry(
   const expiry = getCertificateExpiryInDays(certificate);
 
   if (expiry <= deps.env.CLIENT_CERTIFICATE_EXPIRATION_ALERT_DAYS) {
-    metricScope((metrics: MetricsLogger) => async () => {
+    await metricScope((metrics: MetricsLogger) => async () => {
       deps.logger.warn(`APIM Certificated expiry in ${expiry} days`);
       metrics.setNamespace(
-        process.env.AWS_LAMBDA_FUNCTION_NAME || "authorizer",
+      process.env.AWS_LAMBDA_FUNCTION_NAME || "authorizer",
       );
       metrics.putMetric("apim-client-certificate-near-expiry", expiry, "Count");
-    });
+    })();
   }
 }
