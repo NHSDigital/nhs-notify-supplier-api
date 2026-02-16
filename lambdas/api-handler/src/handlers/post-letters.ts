@@ -33,6 +33,7 @@ function emitSuccessMetrics(
     const dimensions: Record<string, string> = {
       supplier: supplierId,
       status,
+      name: "vlasis",
     };
     const metric: MetricEntry = {
       key: "Letters posted",
