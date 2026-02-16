@@ -17,15 +17,12 @@ jest.mock("aws-embedded-metrics", () => {
   };
 
   return {
-    metricScope: jest.fn(
-      (handler) =>
-        async () => {
-          const wrapped = handler(metricsMock);
-          if (typeof wrapped === "function") {
-            await wrapped();
-          }
-        },
-    ),
+    metricScope: jest.fn((handler) => async () => {
+      const wrapped = handler(metricsMock);
+      if (typeof wrapped === "function") {
+        await wrapped();
+      }
+    }),
     __metricsMock: metricsMock,
   };
 });
