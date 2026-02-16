@@ -283,12 +283,8 @@ describe("createUpsertLetterHandler", () => {
   test("unknown supplier has metric emitted with 'unknown' supplier dimension", async () => {
     const letterEvent = createSupplierStatusChangeEventWithoutSupplier();
 
-    const message = {
-      letterEvent,
-      supplierSpec: undefined,
-    };
     const evt: SQSEvent = createSQSEvent([
-      createSqsRecord("unknown-supplier", JSON.stringify(message)),
+      createSqsRecord("unknown-supplier", JSON.stringify(letterEvent)),
     ]);
 
     await createUpsertLetterHandler(mockedDeps)(evt, {} as any, {} as any);

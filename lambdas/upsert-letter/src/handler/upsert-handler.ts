@@ -24,17 +24,16 @@ const SupplierSpecSchema = z.object({
   specId: z.string().min(1),
 });
 
-const LetterEventUnionSchema = z.discriminatedUnion("type", [
+const PreparedEventUnionSchema = z.discriminatedUnion("type", [
   $LetterRequestPreparedEventV2,
   $LetterRequestPreparedEvent,
-  $LetterEvent,
 ]);
 
 const QueueMessageSchema = z.union([
   $LetterEvent,
   z.object({
-    letterEvent: LetterEventUnionSchema,
-    supplierSpec: SupplierSpecSchema.optional(),
+    letterEvent: PreparedEventUnionSchema,
+    supplierSpec: SupplierSpecSchema,
   }),
 ]);
 
@@ -190,13 +189,9 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
             message: record.body,
           });
           const queueMessage = JSON.parse(record.body);
-          deps.logger.info({
-            description: "Parsed message body",
-            messageId: record.messageId,
-            queueMessage,
-          });
 
           const result = QueueMessageSchema.safeParse(queueMessage);
+
           if (!result.success) {
             throw new Error(
               `Message did not match expected schema: ${JSON.stringify(
@@ -218,7 +213,7 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
           deps.logger.info({
             description: "Extracted letter event",
             messageId: record.messageId,
-            event: letterEvent,
+            type: letterEvent,
             supplier: supplierSpec,
           });
 
@@ -228,11 +223,6 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
               : supplierSpec.supplierId;
 
           const operation = getOperationFromType(letterEvent.type);
-          deps.logger.info({
-            description: "Determined operation from event type",
-            messageId: record.messageId,
-            operation: operation.name,
-          });
 
           await runUpsert(
             operation,

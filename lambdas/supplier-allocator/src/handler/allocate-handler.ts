@@ -17,10 +17,6 @@ function resolveSupplierForVariant(
   deps: Deps,
 ): SupplierSpec {
   deps.logger.info({ variantId }, "Resolving supplier for letter variant");
-  deps.logger.info(
-    { variantMap: deps.env.VARIANT_MAP },
-    "Current variant to supplier mapping",
-  );
   return deps.env.VARIANT_MAP[variantId];
 }
 
@@ -53,12 +49,16 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
         deps.logger.info({
           description: "Extracted letter event",
           messageId: record.messageId,
-          event: letterEvent,
         });
 
         validateType(letterEvent);
 
         const supplierSpec = getSupplier(letterEvent as PreparedEvents, deps);
+
+        deps.logger.info({
+          description: "Resolved supplier spec",
+          supplierSpec,
+        });
 
         // Send to allocated letters queue
         const queueUrl = process.env.UPSERT_LETTERS_QUEUE_URL;
@@ -70,10 +70,6 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
           letterEvent,
           supplierSpec,
         };
-        deps.logger.info(
-          { msg: queueMessage, url: queueUrl },
-          "Prepared message for upsert letter queue",
-        );
 
         deps.logger.info(
           { msg: queueMessage, url: queueUrl },
