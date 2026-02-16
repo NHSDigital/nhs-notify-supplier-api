@@ -228,6 +228,11 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
               : supplierSpec.supplierId;
 
           const operation = getOperationFromType(letterEvent.type);
+          deps.logger.info({
+            description: "Determined operation from event type",
+            messageId: record.messageId,
+            operation: operation.name,
+          });
 
           await runUpsert(
             operation,
