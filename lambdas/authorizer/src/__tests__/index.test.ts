@@ -18,12 +18,11 @@ jest.mock("aws-embedded-metrics", () => {
 
   return {
     metricScope: jest.fn(
-      (handler: (metrics: typeof metricsMock) => unknown) => {
+      (handler: (metrics: typeof metricsMock) => unknown): void => {
         const wrapped = handler(metricsMock);
         if (typeof wrapped === "function") {
-          return wrapped();
+          wrapped();
         }
-        return undefined;
       },
     ),
     __metricsMock: metricsMock,
