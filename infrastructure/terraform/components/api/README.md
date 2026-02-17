@@ -43,6 +43,8 @@ No requirements.
 
 | Name | Source | Version |
 |------|--------|---------|
+| <a name="module_amendment_event_transformer"></a> [amendment\_event\_transformer](#module\_amendment\_event\_transformer) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip | n/a |
+| <a name="module_amendments_queue"></a> [amendments\_queue](#module\_amendments\_queue) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.24/terraform-sqs.zip | n/a |
 | <a name="module_apigw_alarms"></a> [apigw\_alarms](#module\_apigw\_alarms) | ../../modules/alarms/alarms-apigw | n/a |
 | <a name="module_authorizer_lambda"></a> [authorizer\_lambda](#module\_authorizer\_lambda) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip | n/a |
 | <a name="module_ddb_alarms_letters"></a> [ddb\_alarms\_letters](#module\_ddb\_alarms\_letters) | ../../modules/alarms/alarms-ddb | n/a |
@@ -57,7 +59,6 @@ No requirements.
 | <a name="module_get_status"></a> [get\_status](#module\_get\_status) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip | n/a |
 | <a name="module_kms"></a> [kms](#module\_kms) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-kms.zip | n/a |
 | <a name="module_lambda_alarms"></a> [lambda\_alarms](#module\_lambda\_alarms) | ../../modules/alarms/alarms-lambda | n/a |
-| <a name="module_letter_status_update"></a> [letter\_status\_update](#module\_letter\_status\_update) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip | n/a |
 | <a name="module_letter_status_updates_queue"></a> [letter\_status\_updates\_queue](#module\_letter\_status\_updates\_queue) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.24/terraform-sqs.zip | n/a |
 | <a name="module_letter_updates_transformer"></a> [letter\_updates\_transformer](#module\_letter\_updates\_transformer) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip | n/a |
 | <a name="module_logging_bucket"></a> [logging\_bucket](#module\_logging\_bucket) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-s3bucket.zip | n/a |
