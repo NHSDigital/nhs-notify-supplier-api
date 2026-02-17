@@ -77,6 +77,7 @@ export default function createPostMIHandler(
       // metric displaying the type/number of lineItems posted per supplier
       dimensions.lineItem = postMIRequest.data.attributes.lineItem;
       metric.key = "LineItem per supplier";
+      metric.value = postMIRequest.data.attributes.quantity;
       emf = buildEMFObject("postMi", dimensions, metric);
       deps.logger.info(emf);
 
