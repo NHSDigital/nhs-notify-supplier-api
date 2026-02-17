@@ -80,7 +80,7 @@ function emitMetrics(logger: pino.Logger, eventTypeCount: Map<string, number>) {
         CloudWatchMetrics: [
           {
             Namespace: namespace,
-            Dimensions: ["eventType", "ServiceName", "LogGroup"],
+            Dimensions: [["eventType", "ServiceName", "LogGroup"]],
             Metrics: [
               { Name: "events published", Value: count, Unit: Unit.Count },
             ],
