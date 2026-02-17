@@ -71,6 +71,7 @@ function emitMetrics(logger: pino.Logger, eventTypeCount: Map<string, number>) {
           },
         ],
       },
+      "events published": count,
     };
     logger.info(emf);
   }
