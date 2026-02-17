@@ -79,6 +79,7 @@ describe("Authorizer Lambda Function", () => {
         .useFakeTimers({ doNotFake: ["nextTick"] })
         .setSystemTime(new Date("2025-11-03T14:19:00Z"));
       (metricScope as jest.Mock).mockClear();
+      (mockedDeps.logger.warn as jest.Mock).mockClear();
       const metricsMock = jest.requireMock(
         "aws-embedded-metrics",
       ).__metricsMock;
@@ -114,6 +115,10 @@ describe("Authorizer Lambda Function", () => {
       ).__metricsMock;
 
       expect(metricScope).toHaveBeenCalledTimes(1);
+      expect(mockedDeps.logger.warn).toHaveBeenCalledWith({
+        description: "APIM Certificate expiry",
+        days: 14,
+      });
       expect(metricsMock.setNamespace).toHaveBeenCalledWith("authorizer");
       expect(metricsMock.putMetric).toHaveBeenCalledWith(
         "apim-client-certificate-near-expiry",
