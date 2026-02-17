@@ -1,15 +1,16 @@
 import { SQSClient } from "@aws-sdk/client-sqs";
-import pino from "pino";
+import { Logger } from "pino";
+import { createLogger } from "@internal/helpers";
 import { EnvVars, envVars } from "./env";
 
 export type Deps = {
-  logger: pino.Logger;
+  logger: Logger;
   env: EnvVars;
   sqsClient: SQSClient;
 };
 
 export function createDependenciesContainer(): Deps {
-  const log = pino();
+  const log = createLogger({ logLevel: envVars.PINO_LOG_LEVEL });
 
   return {
     logger: log,

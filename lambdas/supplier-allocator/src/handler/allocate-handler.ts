@@ -16,7 +16,10 @@ function resolveSupplierForVariant(
   variantId: string,
   deps: Deps,
 ): SupplierSpec {
-  deps.logger.info({ variantId }, "Resolving supplier for letter variant");
+  deps.logger.info({
+    description: "Resolving supplier for letter variant",
+    variantId,
+  });
   return deps.env.VARIANT_MAP[variantId];
 }
 
@@ -71,10 +74,11 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
           supplierSpec,
         };
 
-        deps.logger.info(
-          { msg: queueMessage, url: queueUrl },
-          "Sending message to upsert letter queue",
-        );
+        deps.logger.info({
+          description: "Sending message to upsert letter queue",
+          msg: queueMessage,
+          url: queueUrl,
+        });
 
         await deps.sqsClient.send(
           new SendMessageCommand({
@@ -83,10 +87,12 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
           }),
         );
       } catch (error) {
-        deps.logger.error(
-          { err: error, message: record.body },
-          `Error processing allocation of record ${record.messageId}`,
-        );
+        deps.logger.error({
+          description: "Error processing allocation of record",
+          err: error,
+          messageId: record.messageId,
+          message: record.body,
+        });
         batchItemFailures.push({ itemIdentifier: record.messageId });
       }
     });

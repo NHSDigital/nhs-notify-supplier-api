@@ -37,6 +37,8 @@ const QueueMessageSchema = z.union([
   }),
 ]);
 
+type QueueMessage = z.infer<typeof QueueMessageSchema>;
+
 type UpsertOperation = {
   name: "Insert" | "Update";
   schemas: z.ZodSchema[];
@@ -173,7 +175,7 @@ function getSupplierIdFromEvent(letterEvent: any): string {
   return "unknown";
 }
 
-function parseQueueMessage(queueMessage: string): any {
+function parseQueueMessage(queueMessage: string): QueueMessage {
   const result = QueueMessageSchema.safeParse(queueMessage);
 
   if (!result.success) {
@@ -201,18 +203,18 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
             messageId: record.messageId,
             message: record.body,
           });
-          const queueMessage = JSON.parse(record.body);
+          const sqsMessage = JSON.parse(record.body);
 
-          const sqsEvent = parseQueueMessage(queueMessage);
+          const queueMessage: QueueMessage = parseQueueMessage(sqsMessage);
 
-          let letterEvent: any;
+          let letterEvent: LetterEvent | PreparedEvents;
           let supplierSpec: SupplierSpec | undefined;
 
-          if ("letterEvent" in sqsEvent) {
-            letterEvent = sqsEvent.letterEvent;
-            supplierSpec = sqsEvent.supplierSpec;
+          if ("letterEvent" in queueMessage) {
+            letterEvent = queueMessage.letterEvent;
+            supplierSpec = queueMessage.supplierSpec;
           } else {
-            letterEvent = sqsEvent;
+            letterEvent = queueMessage;
             supplierSpec = undefined;
           }
 

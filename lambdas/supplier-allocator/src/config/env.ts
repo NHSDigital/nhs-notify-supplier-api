@@ -10,6 +10,7 @@ const LetterVariantSchema = z.record(
 export type LetterVariant = z.infer<typeof LetterVariantSchema>;
 
 const EnvVarsSchema = z.object({
+  PINO_LOG_LEVEL: z.coerce.string().optional(),
   VARIANT_MAP: z.string().transform((str, _) => {
     const parsed = JSON.parse(str);
     return LetterVariantSchema.parse(parsed);
