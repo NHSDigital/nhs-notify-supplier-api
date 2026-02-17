@@ -35,7 +35,7 @@ function emitSuccessMetrics(
       status,
     };
     const metric: MetricEntry = {
-      key: "Letters posted",
+      key: MetricStatus.Success,
       value: count,
       unit: Unit.Count,
     };
