@@ -10,11 +10,11 @@ import {
   PublishBatchRequestEntry,
 } from "@aws-sdk/client-sns";
 import { LetterEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
+import { mapLetterToCloudEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-mapper";
+import { Letter, LetterSchema } from "@internal/datastore";
 import { Unit } from "aws-embedded-metrics";
 import pino from "pino";
-import mapLetterToCloudEvent from "./mappers/letter-mapper";
 import { Deps } from "./deps";
-import { LetterForEventPub, LetterSchemaForEventPub } from "./types";
 
 // SNS PublishBatchCommand supports up to 10 messages per batch
 const BATCH_SIZE = 10;
@@ -149,9 +149,9 @@ function isChanged(record: DynamoDBRecord, property: string): boolean {
   return oldValue?.S !== newValue?.S;
 }
 
-function extractNewLetter(record: DynamoDBRecord): LetterForEventPub {
+function extractNewLetter(record: DynamoDBRecord): Letter {
   const newImage = record.dynamodb?.NewImage!;
-  return LetterSchemaForEventPub.parse(unmarshall(newImage as any));
+  return LetterSchema.parse(unmarshall(newImage as any));
 }
 
 function* generateBatches(events: LetterEvent[]) {
