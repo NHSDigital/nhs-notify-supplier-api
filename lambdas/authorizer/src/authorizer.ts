@@ -121,7 +121,7 @@ async function checkCertificateExpiry(
 
   if (expiry <= deps.env.CLIENT_CERTIFICATE_EXPIRATION_ALERT_DAYS) {
     await metricScope((metrics: MetricsLogger) => async () => {
-      deps.logger.warn(`APIM Certificated expiry in ${expiry} days`);
+      deps.logger.warn({description="APIM Certificate expiry", days: expiry});
       metrics.setNamespace(
         process.env.AWS_LAMBDA_FUNCTION_NAME || "authorizer",
       );
