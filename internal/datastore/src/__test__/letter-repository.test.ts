@@ -14,10 +14,12 @@ function createLetter(
   supplierId: string,
   letterId: string,
   status: Letter["status"] = "PENDING",
+  eventId?: string,
 ): InsertLetter {
   const now = new Date().toISOString();
   return {
     id: letterId,
+    eventId,
     supplierId,
     specificationId: "specification1",
     groupId: "group1",
@@ -168,6 +170,7 @@ describe("LetterRepository", () => {
 
     const updateLetter: UpdateLetter = {
       id: "letter1",
+      eventId: "event1",
       supplierId: "supplier1",
       status: "REJECTED",
       reasonCode: "R01",
@@ -180,6 +183,7 @@ describe("LetterRepository", () => {
       "letter1",
     );
     expect(updatedLetter.status).toBe("REJECTED");
+    expect(updatedLetter.previousStatus).toBe("PENDING");
     expect(updatedLetter.reasonCode).toBe("R01");
     expect(updatedLetter.reasonText).toBe("Reason text");
   });
@@ -199,6 +203,7 @@ describe("LetterRepository", () => {
     jest.setSystemTime(new Date(2020, 1, 2));
     const letterDto: UpdateLetter = {
       id: "letter1",
+      eventId: "event1",
       supplierId: "supplier1",
       status: "DELIVERED",
     };
@@ -215,6 +220,7 @@ describe("LetterRepository", () => {
   test("can't update a letter that does not exist", async () => {
     const updateLetter: UpdateLetter = {
       id: "letter1",
+      eventId: "event1",
       supplierId: "supplier1",
       status: "DELIVERED",
     };
@@ -233,12 +239,59 @@ describe("LetterRepository", () => {
 
     const updateLetter: UpdateLetter = {
       id: "letter1",
+      eventId: "event1",
       supplierId: "supplier1",
       status: "DELIVERED",
     };
     await expect(
       misconfiguredRepository.updateLetterStatus(updateLetter),
     ).rejects.toThrow("Cannot do operations on a non-existent table");
+  });
+
+  test("does not update a letter if the same eventId is used", async () => {
+    const letter = createLetter("supplier1", "letter1", "DELIVERED", "event1");
+    await letterRepository.putLetter(letter);
+
+    const duplicateUpdate: UpdateLetter = {
+      id: "letter1",
+      eventId: "event1",
+      supplierId: "supplier1",
+      status: "REJECTED",
+      reasonCode: "R01",
+    };
+    const result = await letterRepository.updateLetterStatus(duplicateUpdate);
+
+    expect(result).toBeUndefined();
+    const unchangedLetter = await letterRepository.getLetterById(
+      "supplier1",
+      "letter1",
+    );
+    expect(unchangedLetter.status).toBe("DELIVERED");
+    expect(unchangedLetter.eventId).toBe("event1");
+    expect(unchangedLetter.reasonCode).toBeUndefined();
+  });
+
+  test("updates a letter if a different eventId is used", async () => {
+    const letter = createLetter("supplier1", "letter1", "DELIVERED", "event1");
+    await letterRepository.putLetter(letter);
+
+    const duplicateUpdate: UpdateLetter = {
+      id: "letter1",
+      eventId: "event2",
+      supplierId: "supplier1",
+      status: "REJECTED",
+      reasonCode: "R01",
+    };
+    const result = await letterRepository.updateLetterStatus(duplicateUpdate);
+
+    expect(result).toBeDefined();
+    const changedLetter = await letterRepository.getLetterById(
+      "supplier1",
+      "letter1",
+    );
+    expect(changedLetter.status).toBe("REJECTED");
+    expect(changedLetter.eventId).toBe("event2");
+    expect(changedLetter.reasonCode).toBe("R01");
   });
 
   test("should return a list of letters matching status", async () => {
@@ -278,6 +331,7 @@ describe("LetterRepository", () => {
 
     const updateLetter: UpdateLetter = {
       id: "letter1",
+      eventId: "event1",
       supplierId: "supplier1",
       status: "DELIVERED",
     };

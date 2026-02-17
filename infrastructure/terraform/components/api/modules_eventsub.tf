@@ -12,6 +12,8 @@ module "eventsub" {
 
   default_tags = local.default_tags
 
+  glue_role_arn = aws_iam_role.glue_role.arn
+
   kms_key_arn           = module.kms.key_arn
   log_retention_in_days = var.log_retention_in_days
   log_level             = "INFO"

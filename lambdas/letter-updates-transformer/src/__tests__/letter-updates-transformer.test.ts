@@ -7,13 +7,12 @@ import {
   KinesisStreamRecordPayload,
 } from "aws-lambda";
 import { mockDeep } from "jest-mock-extended";
-import { LetterBase } from "@internal/datastore";
+import { Letter } from "@internal/datastore";
+import { mapLetterToCloudEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-mapper";
 import createHandler from "../letter-updates-transformer";
 import { Deps } from "../deps";
 import { EnvVars } from "../env";
-import mapLetterToCloudEvent from "../mappers/letter-mapper";
 import { LetterStatus } from "../../../api-handler/src/contracts/letters";
-import { LetterForEventPub } from "../types";
 
 // Make crypto return consistent values, since we"re calling it in both prod and test code and comparing the values
 const realCrypto = jest.requireActual("crypto");
@@ -171,7 +170,7 @@ describe("letter-updates-transformer Lambda", () => {
     it("does not publish invalid letter data", async () => {
       const handler = createHandler(mockedDeps);
       const oldLetter = generateLetter("ACCEPTED");
-      const newLetter = { id: oldLetter.id } as LetterForEventPub;
+      const newLetter = { id: oldLetter.id } as Letter;
 
       const testData = generateKinesisEvent([
         generateModifyRecord(oldLetter, newLetter),
@@ -324,7 +323,7 @@ describe("letter-updates-transformer Lambda", () => {
   });
 });
 
-function generateLetter(status: LetterStatus, id?: string): LetterForEventPub {
+function generateLetter(status: LetterStatus, id?: string): Letter {
   return {
     id: id || "1",
     status,
@@ -337,14 +336,14 @@ function generateLetter(status: LetterStatus, id?: string): LetterForEventPub {
     url: "https://example.com/letter.pdf",
     source: "test-source",
     subject: "test-source/subject-id",
+    supplierStatus: `supplier1#${status}`,
+    supplierStatusSk: "2025-12-10T11:12:54Z#1",
+    ttl: 1_234_567_890,
   };
 }
 
-function generateLetters(
-  numLetters: number,
-  status: LetterStatus,
-): LetterForEventPub[] {
-  const letters: LetterForEventPub[] = Array.from({ length: numLetters });
+function generateLetters(numLetters: number, status: LetterStatus): Letter[] {
+  const letters: Letter[] = Array.from({ length: numLetters });
   for (let i = 0; i < numLetters; i++) {
     letters[i] = generateLetter(status, String(i + 1));
   }
@@ -352,29 +351,32 @@ function generateLetters(
 }
 
 function generateModifyRecord(
-  oldLetter: LetterForEventPub,
-  newLetter: LetterForEventPub,
+  oldLetter: Letter,
+  newLetter: Letter,
 ): DynamoDBRecord {
-  const oldImage = Object.fromEntries(
-    Object.entries(oldLetter).map(([key, value]) => [key, { S: value }]),
-  );
-  const newImage = Object.fromEntries(
-    Object.entries(newLetter).map(([key, value]) => [key, { S: value }]),
-  );
+  const oldImage = buildStreamImage(oldLetter);
+  const newImage = buildStreamImage(newLetter);
   return {
     eventName: "MODIFY",
     dynamodb: { OldImage: oldImage, NewImage: newImage },
   };
 }
 
-function generateInsertRecord(newLetter: LetterBase): DynamoDBRecord {
-  const newImage = Object.fromEntries(
-    Object.entries(newLetter).map(([key, value]) => [key, { S: value }]),
-  );
+function generateInsertRecord(newLetter: Letter): DynamoDBRecord {
+  const newImage = buildStreamImage(newLetter);
   return {
     eventName: "INSERT",
     dynamodb: { NewImage: newImage },
   };
+}
+
+function buildStreamImage(letter: Letter) {
+  return Object.fromEntries(
+    Object.entries(letter).map(([key, value]) => [
+      key,
+      typeof value === "number" ? { N: String(value) } : { S: value },
+    ]),
+  );
 }
 
 function generateKinesisEvent(letterEvents: object[]): KinesisStreamEvent {

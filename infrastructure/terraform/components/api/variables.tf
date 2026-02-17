@@ -163,17 +163,23 @@ variable "core_environment" {
 
 }
 
+variable "enable_backups" {
+  type        = bool
+  description = "Enable backups"
+  default     = false
+}
+
 # Event Pub/Sub cache settings
 variable "enable_event_cache" {
   type        = bool
   description = "Enable caching of events to an S3 bucket"
-  default     = false
+  default     = true
 }
 
 variable "enable_sns_delivery_logging" {
   type        = bool
   description = "Enable SNS Delivery Failure Notifications"
-  default     = false
+  default     = true
 }
 
 variable "sns_success_logging_sample_percent" {
