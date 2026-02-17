@@ -10,8 +10,6 @@ const LetterVariantSchema = z.record(
 export type LetterVariant = z.infer<typeof LetterVariantSchema>;
 
 const EnvVarsSchema = z.object({
-  LETTERS_TABLE_NAME: z.string(),
-  LETTER_TTL_HOURS: z.coerce.number().int(),
   VARIANT_MAP: z.string().transform((str, _) => {
     const parsed = JSON.parse(str);
     return LetterVariantSchema.parse(parsed);

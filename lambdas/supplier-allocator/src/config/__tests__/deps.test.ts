@@ -2,8 +2,12 @@ import type { Deps } from "lambdas/supplier-allocator/src/config/deps";
 
 describe("createDependenciesContainer", () => {
   const env = {
-    LETTERS_TABLE_NAME: "LettersTable",
-    LETTER_TTL_HOURS: 12_960,
+    VARIANT_MAP: {
+      lv1: {
+        supplierId: "supplier1",
+        specId: "spec1",
+      },
+    },
   };
 
   beforeEach(() => {

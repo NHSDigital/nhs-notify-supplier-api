@@ -141,8 +141,6 @@ describe("createSupplierAllocatorHandler", () => {
     mockedDeps = {
       logger: { error: jest.fn(), info: jest.fn() } as unknown as pino.Logger,
       env: {
-        LETTERS_TABLE_NAME: "LETTERS_TABLE_NAME",
-        LETTER_TTL_HOURS: 12_960,
         VARIANT_MAP: {
           lv1: {
             supplierId: "supplier1",

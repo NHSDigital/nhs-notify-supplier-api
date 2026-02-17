@@ -38,7 +38,7 @@ const QueueMessageSchema = z.union([
 ]);
 
 type UpsertOperation = {
-  name: "Insert" | "Update" | "Unknown";
+  name: "Insert" | "Update";
   schemas: z.ZodSchema[];
   handler: (
     request: unknown,
@@ -173,6 +173,19 @@ function getSupplierIdFromEvent(letterEvent: any): string {
   return "unknown";
 }
 
+function parseQueueMessage(queueMessage: string): any {
+  const result = QueueMessageSchema.safeParse(queueMessage);
+
+  if (!result.success) {
+    throw new Error(
+      `Message did not match an expected schema: ${JSON.stringify(
+        result.error.issues,
+      )}`,
+    );
+  }
+  return result.data;
+}
+
 export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
   return metricScope((metrics: MetricsLogger) => {
     return async (event: SQSEvent) => {
@@ -190,30 +203,23 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
           });
           const queueMessage = JSON.parse(record.body);
 
-          const result = QueueMessageSchema.safeParse(queueMessage);
+          const sqsEvent = parseQueueMessage(queueMessage);
 
-          if (!result.success) {
-            throw new Error(
-              `Message did not match expected schema: ${JSON.stringify(
-                result.error.issues,
-              )}`,
-            );
-          }
           let letterEvent: any;
           let supplierSpec: SupplierSpec | undefined;
 
-          if ("letterEvent" in result.data) {
-            letterEvent = result.data.letterEvent;
-            supplierSpec = result.data.supplierSpec;
+          if ("letterEvent" in sqsEvent) {
+            letterEvent = sqsEvent.letterEvent;
+            supplierSpec = sqsEvent.supplierSpec;
           } else {
-            letterEvent = result.data;
+            letterEvent = sqsEvent;
             supplierSpec = undefined;
           }
 
           deps.logger.info({
             description: "Extracted letter event",
             messageId: record.messageId,
-            type: letterEvent,
+            type: letterEvent.type,
             supplier: supplierSpec,
           });
 
