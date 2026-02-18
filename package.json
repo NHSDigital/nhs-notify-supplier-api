@@ -53,14 +53,12 @@
   "name": "nhs-notify-supplier-api",
   "overrides": {
     "axios": "^1.13.5",
-    "fast-xml-parser": "^5.3.4",
+    "fast-xml-parser": "^5.3.6",
     "@isaacs/brace-expansion": "^5.0.1",
     "pretty-format": {
       "react-is": "19.0.0"
     },
-    "react": "^19.0.0",
-    "fast-xml-parser": "^5.3.4"
-
+    "react": "^19.0.0"
   },
   "scripts": {
     "build": "npm run bundle-oas && npm run generate --buildver=$npm_config_buildver",
