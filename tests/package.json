@@ -8,7 +8,7 @@
     "@aws-sdk/client-sns": "^3.984.0",
     "@aws-sdk/lib-dynamodb": "^3.984.0",
     "@nhsdigital/nhs-notify-event-schemas-letter-rendering": "^2.0.1",
-    "@pact-foundation/pact": "^16.0.4",
+    "@pact-foundation/pact": "^16.2.0",
     "@pact-foundation/pact-core": "^17.0.2",
     "@playwright/test": "^1.57.0",
     "allure-js-commons": "^3.3.3",
