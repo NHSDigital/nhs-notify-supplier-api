@@ -1,7 +1,7 @@
 {
   "author": "",
   "dependencies": {
-    "@aws-sdk/client-api-gateway": "^3.906.0",
+    "@aws-sdk/client-api-gateway": "^3.992.0",
     "@aws-sdk/client-dynamodb": "^3.984.0",
     "@aws-sdk/client-kinesis": "^3.964.0",
     "@aws-sdk/client-lambda": "^3.986.0",
