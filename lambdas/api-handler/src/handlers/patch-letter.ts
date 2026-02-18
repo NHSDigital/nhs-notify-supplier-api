@@ -56,6 +56,7 @@ export default function createPatchLetterHandler(
         try {
           patchLetterRequest = PatchLetterRequestSchema.parse(JSON.parse(body));
         } catch (error) {
+          emitErrorMetric(metrics, supplierId);
           const typedError =
             error instanceof Error
               ? new ValidationError(ApiErrorDetail.InvalidRequestBody, {
@@ -79,6 +80,7 @@ export default function createPatchLetterHandler(
         );
 
         if (updateLetterCommand.id !== letterId) {
+          emitErrorMetric(metrics, supplierId);
           throw new ValidationError(
             ApiErrorDetail.InvalidRequestLetterIdsMismatch,
           );
@@ -100,12 +102,16 @@ export default function createPatchLetterHandler(
           body: "",
         };
       } catch (error) {
-        metrics.putDimensions({
-          supplier: supplierId,
-        });
-        metrics.putMetric(MetricStatus.Success, 1, Unit.Count);
+        emitErrorMetric(metrics, supplierId);
         return processError(error, commonIds.value.correlationId, deps.logger);
       }
     };
   });
+}
+
+function emitErrorMetric(metrics: MetricsLogger, supplierId: string) {
+  metrics.putDimensions({
+    supplier: supplierId,
+  });
+  metrics.putMetric(MetricStatus.Failure, 1, Unit.Count);
 }

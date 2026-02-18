@@ -2,11 +2,14 @@ import { SQSBatchItemFailure, SQSEvent, SQSHandler } from "aws-lambda";
 import { PublishCommand } from "@aws-sdk/client-sns";
 import { LetterEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
 import { mapLetterToCloudEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-mapper";
+import { Unit } from "aws-embedded-metrics";
+import pino from "pino";
 import {
   UpdateLetterCommand,
   UpdateLetterCommandSchema,
 } from "../contracts/letters";
 import { Deps } from "../config/deps";
+import { MetricEntry, MetricStatus, buildEMFObject } from "../utils/metrics";
 
 export default function createTransformAmendmentEventHandler(
   deps: Deps,
@@ -39,6 +42,11 @@ export default function createTransformAmendmentEventHandler(
           messageId: message.messageId,
           correlationId: message.messageAttributes.CorrelationId.stringValue,
         });
+        emitSuccessMetrics(
+          updateLetterCommand.supplierId,
+          updateLetterCommand.status,
+          deps.logger,
+        );
       } catch (error) {
         deps.logger.error({
           description: "Error processing letter status update",
@@ -52,7 +60,7 @@ export default function createTransformAmendmentEventHandler(
     });
 
     await Promise.all(tasks);
-
+    emitFailedItems(batchItemFailures, deps.logger);
     return { batchItemFailures };
   };
 }
@@ -65,4 +73,44 @@ function buildSnsCommand(
     TopicArn: topicArn,
     Message: JSON.stringify(letterEvent),
   });
+}
+
+function emitSuccessMetrics(
+  supplierId: string,
+  status: string,
+  logger: pino.Logger,
+) {
+  const dimensions: Record<string, string> = {
+    supplier: supplierId,
+    status,
+  };
+  const metric: MetricEntry = {
+    key: MetricStatus.Success,
+    value: 1,
+    unit: Unit.Count,
+  };
+  const emf = buildEMFObject("amendment-event-transformer", dimensions, metric);
+  logger.info(emf);
+}
+
+function emitFailedItems(
+  batchFailures: SQSBatchItemFailure[],
+  logger: pino.Logger,
+) {
+  for (const item of batchFailures) {
+    const dimensions: Record<string, string> = {
+      identifier: item.itemIdentifier,
+    };
+    const metric: MetricEntry = {
+      key: MetricStatus.Failure,
+      value: 1,
+      unit: Unit.Count,
+    };
+    const emf = buildEMFObject(
+      "amendment-event-transformer",
+      dimensions,
+      metric,
+    );
+    logger.info(emf);
+  }
 }

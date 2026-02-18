@@ -14,7 +14,6 @@ import { mapToGetLettersResponse } from "../mappers/letter-mapper";
 import type { Deps } from "../config/deps";
 import { MetricStatus, emitForSingleSupplier } from "../utils/metrics";
 
-// List letters Handlers
 // The endpoint should only return pending letters for now
 const status = "PENDING";
 

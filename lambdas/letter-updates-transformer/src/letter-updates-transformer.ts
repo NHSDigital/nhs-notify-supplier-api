@@ -12,53 +12,50 @@ import {
 import { LetterEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
 import { mapLetterToCloudEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-mapper";
 import { Letter, LetterSchema } from "@internal/datastore";
-import { MetricsLogger, Unit, metricScope } from "aws-embedded-metrics";
+import { Unit } from "aws-embedded-metrics";
+import pino from "pino";
 import { Deps } from "./deps";
 
 // SNS PublishBatchCommand supports up to 10 messages per batch
 const BATCH_SIZE = 10;
 
 export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
-  return metricScope((metrics: MetricsLogger) => {
-    return async (streamEvent: KinesisStreamEvent) => {
-      deps.logger.info({ description: "Received event", streamEvent });
+  return async (streamEvent: KinesisStreamEvent) => {
+    deps.logger.info({ description: "Received event", streamEvent });
+    deps.logger.info({
+      description: "Number of records",
+      count: streamEvent.Records?.length || 0,
+    });
+
+    // Ensure logging by extracting all records first
+    const ddbRecords: DynamoDBRecord[] = streamEvent.Records.map((record) =>
+      extractPayload(record, deps),
+    );
+
+    const cloudEvents: LetterEvent[] = ddbRecords
+      .filter((record) => filterRecord(record, deps))
+      .map((element) => extractNewLetter(element))
+      .map((element) => mapLetterToCloudEvent(element, deps.env.EVENT_SOURCE));
+
+    const eventTypeCount: Map<string, number> =
+      populateEventTypeMap(cloudEvents);
+    for (const batch of generateBatches(cloudEvents)) {
       deps.logger.info({
-        description: "Number of records",
-        count: streamEvent.Records?.length || 0,
+        description: "Publishing batch",
+        size: batch.length,
+        letterEvents: batch,
       });
-
-      // Ensure logging by extracting all records first
-      const ddbRecords: DynamoDBRecord[] = streamEvent.Records.map((record) =>
-        extractPayload(record, deps),
+      await deps.snsClient.send(
+        new PublishBatchCommand({
+          TopicArn: deps.env.EVENTPUB_SNS_TOPIC_ARN,
+          PublishBatchRequestEntries: batch.map((element, index) =>
+            buildMessage(element, index),
+          ),
+        }),
       );
-
-      const cloudEvents: LetterEvent[] = ddbRecords
-        .filter((record) => filterRecord(record, deps))
-        .map((element) => extractNewLetter(element))
-        .map((element) =>
-          mapLetterToCloudEvent(element, deps.env.EVENT_SOURCE),
-        );
-
-      const eventTypeCount: Map<string, number> =
-        populateEventTypeMap(cloudEvents);
-      for (const batch of generateBatches(cloudEvents)) {
-        deps.logger.info({
-          description: "Publishing batch",
-          size: batch.length,
-          letterEvents: batch,
-        });
-        await deps.snsClient.send(
-          new PublishBatchCommand({
-            TopicArn: deps.env.EVENTPUB_SNS_TOPIC_ARN,
-            PublishBatchRequestEntries: batch.map((element, index) =>
-              buildMessage(element, index),
-            ),
-          }),
-        );
-      }
-      emitMetrics(metrics, eventTypeCount);
-    };
-  });
+    }
+    emitMetrics(deps.logger, eventTypeCount);
+  };
 }
 
 function populateEventTypeMap(cloudEvents: LetterEvent[]) {
@@ -69,18 +66,30 @@ function populateEventTypeMap(cloudEvents: LetterEvent[]) {
   return evtMap;
 }
 
-function emitMetrics(
-  metrics: MetricsLogger,
-  eventTypeCount: Map<string, number>,
-) {
-  metrics.setNamespace(
-    process.env.AWS_LAMBDA_FUNCTION_NAME || "letter-updates-transformer",
-  );
+function emitMetrics(logger: pino.Logger, eventTypeCount: Map<string, number>) {
+  const namespace =
+    process.env.AWS_LAMBDA_FUNCTION_NAME || "letter-updates-transformer";
+
   for (const [type, count] of eventTypeCount) {
-    metrics.putDimensions({
+    const emf = {
+      LogGroup: namespace,
+      ServiceName: namespace,
       eventType: type,
-    });
-    metrics.putMetric("events published", count, Unit.Count);
+      _aws: {
+        Timestamp: Date.now(),
+        CloudWatchMetrics: [
+          {
+            Namespace: namespace,
+            Dimensions: [["eventType", "ServiceName", "LogGroup"]],
+            Metrics: [
+              { Name: "events published", Value: count, Unit: Unit.Count },
+            ],
+          },
+        ],
+      },
+      "events published": count,
+    };
+    logger.info(emf);
   }
 }
 
