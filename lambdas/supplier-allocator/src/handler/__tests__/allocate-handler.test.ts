@@ -344,6 +344,35 @@ describe("createSupplierAllocatorHandler", () => {
     );
   });
 
+  test("returns batch failure when variant mapping is missing", async () => {
+    const preparedEvent = createPreparedV2Event();
+    preparedEvent.data.letterVariantId = "missing-variant";
+
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("msg1", JSON.stringify(preparedEvent)),
+    ]);
+
+    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+
+    // Override variant map to be empty for this test
+    mockedDeps.env.VARIANT_MAP = {} as any;
+
+    const handler = createSupplierAllocatorHandler(mockedDeps);
+    const result = await handler(evt, {} as any, {} as any);
+    if (!result) throw new Error("expected BatchResponse, got void");
+
+    expect(result.batchItemFailures).toHaveLength(1);
+    expect(result.batchItemFailures[0].itemIdentifier).toBe("msg1");
+    expect(
+      (mockedDeps.logger.error as jest.Mock).mock.calls.length,
+    ).toBeGreaterThan(0);
+    expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        description: "No supplier mapping found for variant",
+      }),
+    );
+  });
+
   test("handles SQS send errors and returns batch failure", async () => {
     const preparedEvent = createPreparedV2Event();
 

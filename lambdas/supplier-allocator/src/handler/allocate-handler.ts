@@ -20,7 +20,16 @@ function resolveSupplierForVariant(
     description: "Resolving supplier for letter variant",
     variantId,
   });
-  return deps.env.VARIANT_MAP[variantId];
+  const supplier = deps.env.VARIANT_MAP[variantId];
+  if (!supplier) {
+    deps.logger.error({
+      description: "No supplier mapping found for variant",
+      variantId,
+    });
+    throw new Error(`No supplier mapping for variantId: ${variantId}`);
+  }
+
+  return supplier;
 }
 
 function validateType(event: unknown) {
