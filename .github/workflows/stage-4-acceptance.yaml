@@ -77,3 +77,18 @@ jobs:
             --targetEnvironment "$ENVIRONMENT" \
             --targetAccountGroup "nhs-notify-supplier-api-dev" \
             --targetComponent "api"
+
+  run-e2e-tests:
+    name: Run End-to-End Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5.0.0
+
+      - name: "Run e2e tests"
+        uses: ./.github/actions/e2e-tests
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NON_PROD_API_KEY: ${{ secrets.NON_PROD_API_KEY }}
+          INTERNAL_DEV_TEST_PEM: ${{ secrets.INTERNAL_DEV_TEST_PEM }}
+        with:
+          pr_number: ${{ inputs.pr_number }}
