@@ -35,6 +35,10 @@ on:
         description: "PR Number if it exists"
         required: false
         type: string
+      deploy_proxy:
+        description: "True if the APIM proxy should be deployed"
+        required: true
+        type: string
 
 permissions:
   id-token: write # This is required for requesting the JWT
@@ -133,7 +137,6 @@ jobs:
   pr-create-dynamic-environment:
     name: Create Dynamic Environment
     runs-on: ubuntu-latest
-    if: inputs.pr_number != ''
     outputs:
       environment_name: ${{ steps.set-environment.outputs.environment_name }}
     steps:
@@ -162,7 +165,7 @@ jobs:
   artefact-proxies:
     name: "Build proxies"
     runs-on: ubuntu-latest
-    if: inputs.pr_number != ''
+    if: inputs.deploy_proxy == 'true'
     needs: [artefact-oas-spec-sandbox, pr-create-dynamic-environment]
     timeout-minutes: 10
     env:

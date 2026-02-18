@@ -29,6 +29,7 @@ jobs:
       does_pull_request_exist: ${{ steps.pr_exists.outputs.does_pull_request_exist }}
       pr_number: ${{ steps.pr_exists.outputs.pr_number }}
       skip_trivy_package: ${{ steps.skip_trivy.outputs.skip_trivy_package }}
+      deploy_proxy: ${{ steps.deploy_proxy.outputs.deploy_proxy }}
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v5
@@ -87,6 +88,26 @@ jobs:
           else
             echo "skip_trivy_package=false" >> $GITHUB_OUTPUT
           fi
+      - name: "Determine if proxy should be deployed"
+        id: deploy_proxy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.pr_exists.outputs.pr_number }}
+        run: |
+          if [[ -z "$PR_NUMBER" ]]; then
+            echo "No pull request detected; proxy deployment will run."
+            echo "deploy_proxy=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          labels=$(gh pr view "$PR_NUMBER" --json labels --jq '.labels[].name')
+          echo "Labels on PR #$PR_NUMBER: $labels"
+
+          if echo "$labels" | grep -Fxq 'deploy-proxy'; then
+            echo "deploy_proxy=true" >> $GITHUB_OUTPUT
+          else
+            echo "deploy_proxy=false" >> $GITHUB_OUTPUT
+          fi
       - name: "List variables"
         run: |
           export BUILD_DATETIME_LONDON="${{ steps.variables.outputs.build_datetime_london }}"
@@ -141,6 +162,7 @@ jobs:
       terraform_version: "${{ needs.metadata.outputs.terraform_version }}"
       version: "${{ needs.metadata.outputs.version }}"
       pr_number: "${{ needs.metadata.outputs.pr_number }}"
+      deploy_proxy: "${{ needs.metadata.outputs.deploy_proxy }}"
     secrets: inherit
   acceptance-stage: # Recommended maximum execution time is 10 minutes
     name: "Acceptance stage"
