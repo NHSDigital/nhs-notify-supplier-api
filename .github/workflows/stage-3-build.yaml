@@ -134,8 +134,13 @@ jobs:
     name: Create Dynamic Environment
     runs-on: ubuntu-latest
     if: inputs.pr_number != ''
+    outputs:
+      environment_name: ${{ steps.set-environment.outputs.environment_name }}
     steps:
       - uses: actions/checkout@v5
+      - name: Set environment name
+        id: set-environment
+        run: echo "environment_name=${{ inputs.pr_number != '' && format('pr{0}', inputs.pr_number) || 'main' }}" >> $GITHUB_OUTPUT
       - name: Trigger dynamic environment creation
         env:
           APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
@@ -148,7 +153,7 @@ jobs:
             --infraRepoName "$(echo ${{ github.repository }} | cut -d'/' -f2)" \
             --releaseVersion ${{ github.head_ref || github.ref_name }} \
             --targetWorkflow "dispatch-deploy-dynamic-env.yaml" \
-            --targetEnvironment "pr${PR_NUMBER}" \
+            --targetEnvironment "${{ steps.set-environment.outputs.environment_name }}" \
             --targetComponent "api" \
             --targetAccountGroup "nhs-notify-supplier-api-dev" \
             --terraformAction "apply" \
@@ -162,7 +167,6 @@ jobs:
     timeout-minutes: 10
     env:
       PROXYGEN_API_NAME: nhs-notify-supplier
-      PR_NUMBER: ${{ inputs.pr_number }}
       APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
       APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
     steps:
@@ -172,7 +176,7 @@ jobs:
         uses: ./.github/actions/build-proxies
         with:
           version: "${{ inputs.version }}"
-          environment: ${{ inputs.pr_number != '' && format('pr{0}', inputs.pr_number) || 'main' }}
+          environment: ${{ needs.pr-create-dynamic-environment.outputs.environment_name }}
           apimEnv: "internal-dev-sandbox"
           runId: "${{ github.run_id }}"
           buildSandbox: true
