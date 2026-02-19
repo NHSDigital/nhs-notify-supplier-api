@@ -74,12 +74,12 @@ runs:
           echo "run_e2e=true" >> $GITHUB_OUTPUT
         fi
 
-    - name: Install poetry and pytest
+    - name: Install poetry and e2e test dependencies
       if: inputs.testType == 'e2e' && steps.check_e2e.outputs.run_e2e == 'true'
       shell: bash
       run: |
         pipx install poetry
-        pip install pytest
+        cd tests/e2e-tests && poetry install
 
     - name: Run e2e tests
       if: inputs.testType == 'e2e' && steps.check_e2e.outputs.run_e2e == 'true'
