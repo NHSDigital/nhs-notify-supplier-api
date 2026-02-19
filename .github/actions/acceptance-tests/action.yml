@@ -45,11 +45,13 @@ runs:
           echo "PR_NUMBER=${{ inputs.targetEnvironment }}" >> $GITHUB_ENV
 
     - name: Run component tests
+      if: inputs.testType == "component"
       shell: bash
       run: |
         make test-component
 
     - name: Check if e2e tests should run
+      if: inputs.testType == "e2e"
       id: check_e2e
       shell: bash
       env:
@@ -72,13 +74,15 @@ runs:
           echo "run_e2e=true" >> $GITHUB_OUTPUT
         fi
 
-    - name: Install poetry
-      if: steps.check_e2e.outputs.run_e2e == 'true'
+    - name: Install poetry and pytest
+      if: inputs.testType == "e2e" && steps.check_e2e.outputs.run_e2e == 'true'
       shell: bash
-      run: pipx install poetry
+      run: |
+        pipx install poetry
+        pip install pytest
 
     - name: Run e2e tests
-      if: steps.check_e2e.outputs.run_e2e == 'true'
+      if: inputs.testType == "e2e" && steps.check_e2e.outputs.run_e2e == 'true'
       shell: bash
       run: |
         make .internal-dev-test
