@@ -72,6 +72,11 @@ runs:
           echo "run_e2e=true" >> $GITHUB_OUTPUT
         fi
 
+    - name: Install poetry
+      if: steps.check_e2e.outputs.run_e2e == 'true'
+      shell: bash
+      run: pipx install poetry
+
     - name: Run e2e tests
       if: steps.check_e2e.outputs.run_e2e == 'true'
       shell: bash
