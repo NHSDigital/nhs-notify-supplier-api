@@ -4,10 +4,28 @@ import {
   Callback,
   Context,
 } from "aws-lambda";
+import { metricScope } from "aws-embedded-metrics";
 import pino from "pino";
 import { Deps } from "../deps";
 import { EnvVars } from "../env";
 import createAuthorizerHandler from "../authorizer";
+
+jest.mock("aws-embedded-metrics", () => {
+  const metricsMock = {
+    setNamespace: jest.fn(),
+    putMetric: jest.fn(),
+  };
+
+  return {
+    metricScope: jest.fn((handler) => async () => {
+      const wrapped = handler(metricsMock);
+      if (typeof wrapped === "function") {
+        await wrapped();
+      }
+    }),
+    __metricsMock: metricsMock,
+  };
+});
 
 const mockedDeps: jest.Mocked<Deps> = {
   logger: {
@@ -61,6 +79,13 @@ describe("Authorizer Lambda Function", () => {
       jest
         .useFakeTimers({ doNotFake: ["nextTick"] })
         .setSystemTime(currentDate);
+      (metricScope as jest.Mock).mockClear();
+      (mockedDeps.logger.warn as jest.Mock).mockClear();
+      const metricsMock = jest.requireMock(
+        "aws-embedded-metrics",
+      ).__metricsMock;
+      metricsMock.setNamespace.mockClear();
+      metricsMock.putMetric.mockClear();
     });
 
     afterEach(() => {
@@ -74,10 +99,7 @@ describe("Authorizer Lambda Function", () => {
       handler(mockEvent, mockContext, mockCallback);
       await new Promise(process.nextTick);
 
-      const mockedInfo = mockedDeps.logger.info as jest.Mock;
-      expect(mockedInfo.mock.calls).not.toContainEqual(
-        expect.stringContaining("CloudWatchMetrics"),
-      );
+      expect(metricScope).not.toHaveBeenCalled();
     });
 
     it("Should log CloudWatch metric when the certificate expiry threshold is reached", async () => {
@@ -89,29 +111,20 @@ describe("Authorizer Lambda Function", () => {
       handler(mockEvent, mockContext, mockCallback);
       await new Promise(process.nextTick);
 
-      const mockedInfo = mockedDeps.logger.info as jest.Mock;
-      expect(mockedInfo.mock.calls.map((call) => call[0])).toContain(
-        JSON.stringify({
-          _aws: {
-            Timestamp: currentDate.getTime(),
-            CloudWatchMetrics: [
-              {
-                Namespace: "cloudwatch-namespace",
-                Dimensions: ["SUBJECT_DN", "NOT_AFTER"],
-                Metrics: [
-                  {
-                    Name: "apim-client-certificate-near-expiry",
-                    Unit: "Count",
-                    Value: 1,
-                  },
-                ],
-              },
-            ],
-          },
-          SUBJECT_DN: "CN=test-subject",
-          NOT_AFTER: "2025-11-31T14:19:00Z",
-          "apim-client-certificate-near-expiry": 1,
-        }),
+      const metricsMock = jest.requireMock(
+        "aws-embedded-metrics",
+      ).__metricsMock;
+
+      expect(metricScope).toHaveBeenCalledTimes(1);
+      expect(mockedDeps.logger.warn).toHaveBeenCalledWith({
+        description: "APIM Certificate expiry",
+        days: 30,
+      });
+      expect(metricsMock.setNamespace).toHaveBeenCalledWith("authorizer");
+      expect(metricsMock.putMetric).toHaveBeenCalledWith(
+        "apim-client-certificate-near-expiry",
+        30,
+        "Count",
       );
     });
 
@@ -124,10 +137,7 @@ describe("Authorizer Lambda Function", () => {
       handler(mockEvent, mockContext, mockCallback);
       await new Promise(process.nextTick);
 
-      const mockedInfo = mockedDeps.logger.info as jest.Mock;
-      expect(mockedInfo.mock.calls).not.toContainEqual(
-        expect.stringContaining("CloudWatchMetrics"),
-      );
+      expect(metricScope).not.toHaveBeenCalled();
     });
   });
 
