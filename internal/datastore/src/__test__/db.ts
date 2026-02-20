@@ -30,9 +30,11 @@ export async function setupDynamoDBContainer() {
     region: "us-west-2",
     endpoint,
     lettersTableName: "letters",
+    letterQueueTableName: "letter-queue",
     miTableName: "management-info",
     suppliersTableName: "suppliers",
     lettersTtlHours: 1,
+    letterQueueTtlHours: 1,
     miTtlHours: 1,
   };
 
@@ -118,6 +120,32 @@ const createSupplierTableCommand = new CreateTableCommand({
   ],
 });
 
+const createLetterQueueTableCommand = new CreateTableCommand({
+  TableName: "letter-queue",
+  BillingMode: "PAY_PER_REQUEST",
+  KeySchema: [
+    { AttributeName: "supplierId", KeyType: "HASH" }, // Partition key
+    { AttributeName: "letterId", KeyType: "RANGE" }, // Sort key
+  ],
+  LocalSecondaryIndexes: [
+    {
+      IndexName: "timestamp-index",
+      KeySchema: [
+        { AttributeName: "supplierId", KeyType: "HASH" }, // Partition key for LSI
+        { AttributeName: "queueTimestamp", KeyType: "RANGE" }, // Sort key for LSI
+      ],
+      Projection: {
+        ProjectionType: "ALL",
+      },
+    },
+  ],
+  AttributeDefinitions: [
+    { AttributeName: "supplierId", AttributeType: "S" },
+    { AttributeName: "letterId", AttributeType: "S" },
+    { AttributeName: "queueTimestamp", AttributeType: "S" },
+  ],
+});
+
 export async function createTables(context: DBContext) {
   const { ddbClient } = context;
 
@@ -126,26 +154,22 @@ export async function createTables(context: DBContext) {
 
   await ddbClient.send(createMITableCommand);
   await ddbClient.send(createSupplierTableCommand);
+  await ddbClient.send(createLetterQueueTableCommand);
 }
 
 export async function deleteTables(context: DBContext) {
   const { ddbClient } = context;
 
-  await ddbClient.send(
-    new DeleteTableCommand({
-      TableName: "letters",
-    }),
-  );
-
-  await ddbClient.send(
-    new DeleteTableCommand({
-      TableName: "management-info",
-    }),
-  );
-
-  await ddbClient.send(
-    new DeleteTableCommand({
-      TableName: "suppliers",
-    }),
-  );
+  for (const tableName of [
+    "letters",
+    "management-info",
+    "suppliers",
+    "letter-queue",
+  ]) {
+    await ddbClient.send(
+      new DeleteTableCommand({
+        TableName: tableName,
+      }),
+    );
+  }
 }
