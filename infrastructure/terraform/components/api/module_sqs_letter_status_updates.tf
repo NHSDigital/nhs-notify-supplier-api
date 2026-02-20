@@ -1,4 +1,5 @@
-# Queue to transport update letter status messages
+# Queue to transport update letter status messages. Now replaced by module.amendments_queue.
+# This queue will not be removed just yet, to allow it to be drained following the release in which module.amendments_queue replaces it.
 module "letter_status_updates_queue" {
   source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.24/terraform-sqs.zip"
 
