@@ -1,7 +1,7 @@
 import { SQSBatchItemFailure, SQSEvent, SQSHandler } from "aws-lambda";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
-
+import { LetterVariant } from "internal/datastore/src/SupplierConfigDomain";
 import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import z from "zod";
 import { Deps } from "../config/deps";
@@ -46,7 +46,23 @@ function validateType(event: unknown) {
   }
 }
 
+async function getVariantDetails(variantId: string, deps: Deps) {
+  deps.logger.info({
+    description: "Fetching letter variant details from database",
+    variantId,
+  });
+
+  const variantDetails: LetterVariant =
+    await deps.supplierConfigRepo.getLetterVariant(variantId);
+  deps.logger.info({
+    description: "Fetched letter variant details",
+    variantId,
+    variantDetails,
+  });
+}
+
 function getSupplier(letterEvent: PreparedEvents, deps: Deps): SupplierSpec {
+  getVariantDetails(letterEvent.data.letterVariantId, deps);
   return resolveSupplierForVariant(letterEvent.data.letterVariantId, deps);
 }
 
