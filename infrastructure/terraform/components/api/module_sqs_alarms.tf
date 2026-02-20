@@ -3,7 +3,7 @@ module "sqs_alarms" {
   source   = "../../modules/alarms-sqs"
 
   alarm_prefix   = local.csi
-  queue_name     = each.value.name
-  dlq_queue_name = replace(each.value.name, "-queue", "-dlq")
+  queue_name     = each.value
+  dlq_queue_name = replace(each.value, "-queue", "-dlq")
   tags           = local.default_tags
 }
