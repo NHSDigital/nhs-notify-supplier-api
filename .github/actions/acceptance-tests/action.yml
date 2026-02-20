@@ -88,7 +88,8 @@ runs:
         NON_PROD_API_KEY: ${{ secrets.NON_PROD_API_KEY }}
         APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
       run: |
-        echo $APP_PEM_FILE > internal-dev-test-1.pem
+        echo "$APP_PEM_FILE" > internal-dev-test-1.pem
+        chmod 600 internal-dev-test-1.pem
         export PROXY_NAME=nhs-notify-supplier--internal-dev--nhs-notify-supplier
         export API_ENVIRONMENT=internal-dev
         export NON_PROD_PRIVATE_KEY=internal-dev-test-1.pem
