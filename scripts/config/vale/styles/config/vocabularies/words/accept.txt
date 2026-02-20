@@ -3,6 +3,8 @@ API|api
 [A-Z]+s
 Bitwarden
 bot
+campaignId
+clientId
 Cognito
 Cyber
 [Dd]ev
