@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.984.0",
-    "@aws-sdk/lib-dynamodb": "^3.858.0",
+    "@aws-sdk/lib-dynamodb": "^3.994.0",
     "@internal/datastore": "*",
     "@internal/helpers": "*",
     "aws-embedded-metrics": "^4.2.1",
