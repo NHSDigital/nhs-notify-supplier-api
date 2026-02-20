@@ -7,6 +7,7 @@ import {
   $LetterEvent,
   LetterEvent,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
+import { SupplierConfigRepository } from "@internal/datastore";
 import createSupplierAllocatorHandler from "../allocate-handler";
 import { Deps } from "../../config/deps";
 import { EnvVars } from "../../config/env";
@@ -139,8 +140,16 @@ describe("createSupplierAllocatorHandler", () => {
     } as unknown as jest.Mocked<SQSClient>;
 
     mockedDeps = {
+      supplierConfigRepo: {
+        getLetterVariant: jest.fn().mockResolvedValue({
+          id: "variant1",
+          supplierId: "supplier1",
+          specId: "spec1",
+        }),
+      } as unknown as SupplierConfigRepository,
       logger: { error: jest.fn(), info: jest.fn() } as unknown as pino.Logger,
       env: {
+        SUPPLIER_CONFIG_TABLE_NAME: "SupplierConfigTable",
         VARIANT_MAP: {
           lv1: {
             supplierId: "supplier1",
