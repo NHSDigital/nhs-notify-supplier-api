@@ -1,0 +1,64 @@
+name: Acceptance tests
+description: "Run acceptance tests for this repo"
+
+inputs:
+
+  targetEnvironment:
+    description: Name of the environment under test
+    required: true
+
+runs:
+  using: "composite"
+
+  steps:
+
+    - name: "Repo setup"
+      uses: ./.github/actions/node-install
+      with:
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+
+    - name: "Set PR NUMBER"
+      shell: bash
+      run: |
+          echo "PR_NUMBER=${{ inputs.targetEnvironment }}" >> $GITHUB_ENV
+
+    - name: Check if e2e tests should run
+      id: check_e2e
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+      run: |
+        # Extract PR number from environment name (e.g., pr123 -> 123)
+        if [[ "${{ inputs.targetEnvironment }}" =~ ^pr([0-9]+)$ ]]; then
+          pr_number="${BASH_REMATCH[1]}"
+          labels=$(gh pr view "$pr_number" --json labels --jq '.labels[].name' 2>/dev/null || echo "")
+
+          if echo "$labels" | grep -Fxq 'deploy-proxy'; then
+            echo "deploy-proxy label found; e2e tests will run."
+            echo "run_e2e=true" >> $GITHUB_OUTPUT
+          else
+            echo "deploy-proxy label not found; e2e tests will be skipped."
+            echo "run_e2e=false" >> $GITHUB_OUTPUT
+          fi
+        else
+          echo "Not a PR environment; e2e tests will run."
+          echo "run_e2e=true" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Install poetry and e2e test dependencies
+      if: steps.check_e2e.outputs.run_e2e == 'true'
+      shell: bash
+      run: |
+        pipx install poetry
+        cd tests/e2e-tests && poetry install
+
+    - name: Run e2e tests
+      if: steps.check_e2e.outputs.run_e2e == 'true'
+      shell: bash
+      run: |
+        echo "$APP_PEM_FILE" > internal-dev-test-1.pem
+        chmod 600 internal-dev-test-1.pem
+        export PROXY_NAME=nhs-notify-supplier--internal-dev--nhs-notify-supplier
+        export API_ENVIRONMENT=internal-dev
+        export NON_PROD_PRIVATE_KEY=internal-dev-test-1.pem
+        make .internal-dev-test

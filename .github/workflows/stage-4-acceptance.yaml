@@ -77,3 +77,27 @@ jobs:
             --targetEnvironment "$ENVIRONMENT" \
             --targetAccountGroup "nhs-notify-supplier-api-dev" \
             --targetComponent "api"
+
+  run-e2e-tests:
+    name: Run End-to-End Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5.0.0
+
+      - name: "Set environment"
+        shell: bash
+        run: |
+          if [ "${{ inputs.pr_number }}" != "" ]; then
+            echo "ENVIRONMENT=pr${{ inputs.pr_number }}" >> $GITHUB_ENV
+          else
+            echo "ENVIRONMENT=main" >> $GITHUB_ENV
+          fi
+
+      - name: "Run e2e tests"
+        uses: ./.github/actions/e2e-tests
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NON_PROD_API_KEY: ${{ secrets.NON_PROD_API_KEY }}
+          APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
+        with:
+          targetEnvironment: ${{ env.ENVIRONMENT }}
