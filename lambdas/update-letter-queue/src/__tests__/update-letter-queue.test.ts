@@ -16,19 +16,6 @@ import createHandler from "../update-letter-queue";
 import { EnvVars } from "../env";
 import { LetterStatus } from "../../../api-handler/src/contracts/letters";
 
-const mockPutMetric = jest.fn();
-const mockSetNamespace = jest.fn();
-
-jest.mock("aws-embedded-metrics", () => ({
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-  metricScope: (fn: Function) =>
-    fn({
-      putMetric: mockPutMetric,
-      setNamespace: mockSetNamespace,
-    }),
-  Unit: { Count: "Count" },
-}));
-
 const mockedDeps: jest.Mocked<Deps> = {
   letterQueueRepository: {
     putLetter: jest.fn(),
@@ -198,105 +185,69 @@ describe("update-letter-queue Lambda", () => {
       );
     });
   });
-});
 
-describe("Metrics", () => {
-  it("emits success metrics when all letters are processed successfully", async () => {
-    const handler = createHandler(mockedDeps);
-    const newLetter1 = generateLetter("PENDING", "1");
-    const newLetter2 = generateLetter("PENDING", "2");
+  describe("Metrics", () => {
+    it("emits success metrics when all letters are processed successfully", async () => {
+      const handler = createHandler(mockedDeps);
+      const newLetter1 = generateLetter("PENDING", "1");
+      const newLetter2 = generateLetter("PENDING", "2");
 
-    const testData = generateKinesisEvent([
-      generateInsertRecord(newLetter1),
-      generateInsertRecord(newLetter2),
-    ]);
-    await handler(testData, mockDeep<Context>(), jest.fn());
+      const testData = generateKinesisEvent([
+        generateInsertRecord(newLetter1),
+        generateInsertRecord(newLetter2),
+      ]);
+      await handler(testData, mockDeep<Context>(), jest.fn());
 
-    expect(mockSetNamespace).toHaveBeenCalledWith("update-letter-queue");
-    expect(mockPutMetric).toHaveBeenCalledWith(
-      "letters queued successfully",
-      2,
-      "Count",
-    );
-    expect(mockPutMetric).toHaveBeenCalledWith(
-      "letters queued failed",
-      0,
-      "Count",
-    );
-  });
+      assertSuccessMetricLogged(2);
+      assertFailureMetricLogged(0);
+    });
 
-  it("emits failure metrics when a letter fails to process", async () => {
-    const handler = createHandler(mockedDeps);
-    const newLetter1 = generateLetter("PENDING", "1");
-    const newLetter2 = generateLetter("PENDING", "2");
-    (mockedDeps.letterQueueRepository.putLetter as jest.Mock)
-      .mockResolvedValueOnce({})
-      .mockRejectedValueOnce(new Error("DynamoDB error"));
+    it("emits failure metrics when a letter fails to process", async () => {
+      const handler = createHandler(mockedDeps);
+      const newLetter1 = generateLetter("PENDING", "1");
+      const newLetter2 = generateLetter("PENDING", "2");
+      (mockedDeps.letterQueueRepository.putLetter as jest.Mock)
+        .mockResolvedValueOnce({})
+        .mockRejectedValueOnce(new Error("DynamoDB error"));
 
-    const testData = generateKinesisEvent([
-      generateInsertRecord(newLetter1),
-      generateInsertRecord(newLetter2),
-    ]);
-    await handler(testData, mockDeep<Context>(), jest.fn());
+      const testData = generateKinesisEvent([
+        generateInsertRecord(newLetter1),
+        generateInsertRecord(newLetter2),
+      ]);
+      await handler(testData, mockDeep<Context>(), jest.fn());
 
-    expect(mockSetNamespace).toHaveBeenCalledWith("update-letter-queue");
-    expect(mockPutMetric).toHaveBeenCalledWith(
-      "letters queued successfully",
-      1,
-      "Count",
-    );
-    expect(mockPutMetric).toHaveBeenCalledWith(
-      "letters queued failed",
-      1,
-      "Count",
-    );
-  });
+      assertSuccessMetricLogged(1);
+      assertFailureMetricLogged(1);
+    });
 
-  it("does not count a reprocessed event as a success or failure", async () => {
-    const handler = createHandler(mockedDeps);
-    const newLetter1 = generateLetter("PENDING", "1");
-    const newLetter2 = generateLetter("PENDING", "2");
-    (mockedDeps.letterQueueRepository.putLetter as jest.Mock)
-      .mockRejectedValueOnce(new LetterAlreadyExistsError("supplier1", "1"))
-      .mockResolvedValueOnce({});
+    it("does not count a reprocessed event as a success or failure", async () => {
+      const handler = createHandler(mockedDeps);
+      const newLetter1 = generateLetter("PENDING", "1");
+      const newLetter2 = generateLetter("PENDING", "2");
+      (mockedDeps.letterQueueRepository.putLetter as jest.Mock)
+        .mockRejectedValueOnce(new LetterAlreadyExistsError("supplier1", "1"))
+        .mockResolvedValueOnce({});
 
-    const testData = generateKinesisEvent([
-      generateInsertRecord(newLetter1),
-      generateInsertRecord(newLetter2),
-    ]);
-    await handler(testData, mockDeep<Context>(), jest.fn());
+      const testData = generateKinesisEvent([
+        generateInsertRecord(newLetter1),
+        generateInsertRecord(newLetter2),
+      ]);
+      await handler(testData, mockDeep<Context>(), jest.fn());
 
-    expect(mockSetNamespace).toHaveBeenCalledWith("update-letter-queue");
-    expect(mockPutMetric).toHaveBeenCalledWith(
-      "letters queued successfully",
-      1,
-      "Count",
-    );
-    expect(mockPutMetric).toHaveBeenCalledWith(
-      "letters queued failed",
-      0,
-      "Count",
-    );
-  });
+      assertSuccessMetricLogged(1);
+      assertFailureMetricLogged(0);
+    });
 
-  it("emits zero success metrics when no pending letters are in the batch", async () => {
-    const handler = createHandler(mockedDeps);
-    const newLetter = generateLetter("PRINTED");
+    it("emits zero success metrics when no pending letters are in the batch", async () => {
+      const handler = createHandler(mockedDeps);
+      const newLetter = generateLetter("PRINTED");
 
-    const testData = generateKinesisEvent([generateInsertRecord(newLetter)]);
-    await handler(testData, mockDeep<Context>(), jest.fn());
+      const testData = generateKinesisEvent([generateInsertRecord(newLetter)]);
+      await handler(testData, mockDeep<Context>(), jest.fn());
 
-    expect(mockSetNamespace).toHaveBeenCalledWith("update-letter-queue");
-    expect(mockPutMetric).toHaveBeenCalledWith(
-      "letters queued successfully",
-      0,
-      "Count",
-    );
-    expect(mockPutMetric).toHaveBeenCalledWith(
-      "letters queued failed",
-      0,
-      "Count",
-    );
+      assertSuccessMetricLogged(0);
+      assertFailureMetricLogged(0);
+    });
   });
 });
 
@@ -337,5 +288,43 @@ function mapToImage(oldLetter: Letter) {
       key,
       typeof value === "string" ? { S: value } : { N: String(value) },
     ]),
+  );
+}
+
+function assertSuccessMetricLogged(count: number) {
+  expect(mockedDeps.logger.info).toHaveBeenCalledWith(
+    expect.objectContaining({
+      _aws: expect.objectContaining({
+        CloudWatchMetrics: expect.arrayContaining([
+          expect.objectContaining({
+            Metrics: [
+              expect.objectContaining({
+                Name: "letters queued successfully",
+                Value: count,
+              }),
+            ],
+          }),
+        ]),
+      }),
+    }),
+  );
+}
+
+function assertFailureMetricLogged(count: number) {
+  expect(mockedDeps.logger.info).toHaveBeenCalledWith(
+    expect.objectContaining({
+      _aws: expect.objectContaining({
+        CloudWatchMetrics: expect.arrayContaining([
+          expect.objectContaining({
+            Metrics: [
+              expect.objectContaining({
+                Name: "letters queued failed",
+                Value: count,
+              }),
+            ],
+          }),
+        ]),
+      }),
+    }),
   );
 }
