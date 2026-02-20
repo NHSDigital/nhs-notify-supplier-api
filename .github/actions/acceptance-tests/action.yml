@@ -84,5 +84,12 @@ runs:
     - name: Run e2e tests
       if: inputs.testType == 'e2e' && steps.check_e2e.outputs.run_e2e == 'true'
       shell: bash
+      env:
+        NON_PROD_API_KEY: ${{ secrets.NON_PROD_API_KEY }}
+        APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
       run: |
+        echo $APP_PEM_FILE > internal-dev-test-1.pem
+        export PROXY_NAME=nhs-notify-supplier--internal-dev--nhs-notify-supplier
+        export API_ENVIRONMENT=internal-dev
+        export NON_PROD_PRIVATE_KEY=internal-dev-test-1.pem
         make .internal-dev-test
