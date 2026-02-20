@@ -1,6 +1,6 @@
 module "lambda_alarms" {
   for_each = local.lambda_alarm_targets
-  source   = "../../modules/alarms/alarms-lambda"
+  source   = "../../modules/alarms-lambda"
 
   alarm_prefix   = local.csi
   function_name  = each.value

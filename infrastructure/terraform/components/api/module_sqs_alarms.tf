@@ -1,6 +1,6 @@
 module "sqs_alarms" {
   for_each = local.sqs_queue_names
-  source   = "../../modules/alarms/alarms-sqs"
+  source   = "../../modules/alarms-sqs"
 
   alarm_prefix       = local.csi
   queue_name         = each.value.name
