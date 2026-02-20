@@ -18,7 +18,7 @@ variable "tags" {
 
 variable "age_period_seconds" {
   type    = number
-  default = 60
+  default = 900
 }
 
 variable "age_anomaly_sensitivity" {
