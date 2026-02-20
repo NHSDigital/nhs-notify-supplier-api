@@ -82,4 +82,18 @@ data "aws_iam_policy_document" "supplier_allocator_lambda" {
       module.sqs_letter_updates.sqs_queue_arn
     ]
   }
+
+  statement {
+    sid    = "AllowDynamoDBAccess"
+    effect = "Allow"
+
+    actions = [
+      "dynamodb:GetItem",
+      "dynamodb:Query"
+    ]
+
+    resources = [
+      aws_dynamodb_table.supplier-configuration.arn
+    ]
+  }
 }

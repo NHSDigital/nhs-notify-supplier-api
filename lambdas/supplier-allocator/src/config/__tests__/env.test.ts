@@ -15,6 +15,7 @@ describe("lambdaEnv", () => {
   });
 
   it("should load all environment variables successfully", () => {
+    process.env.SUPPLIER_CONFIG_TABLE_NAME = "SupplierConfigTable";
     process.env.VARIANT_MAP = `{
       "lv1": {
         "supplierId": "supplier1",
@@ -25,6 +26,7 @@ describe("lambdaEnv", () => {
     const { envVars } = require("../env");
 
     expect(envVars).toEqual({
+      SUPPLIER_CONFIG_TABLE_NAME: "SupplierConfigTable",
       VARIANT_MAP: {
         lv1: {
           supplierId: "supplier1",
