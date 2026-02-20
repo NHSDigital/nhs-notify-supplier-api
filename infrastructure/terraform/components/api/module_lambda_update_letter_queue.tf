@@ -1,7 +1,7 @@
 module "update_letter_queue" {
   source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip"
 
-  function_name = "update-letter-queue"
+  function_name = "update_letter_queue"
   description   = "Populates the letter queue table with new pending letters from the letter change stream"
 
   aws_account_id = var.aws_account_id
