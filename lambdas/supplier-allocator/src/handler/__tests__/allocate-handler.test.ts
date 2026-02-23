@@ -130,6 +130,7 @@ function createSupplierStatusChangeEvent(
   });
 }
 
+// Skipping tests for now as we're still in early development and these are likely to change significantly. Will add back before merge.
 describe.skip("createSupplierAllocatorHandler", () => {
   let mockSqsClient: jest.Mocked<SQSClient>;
   let mockedDeps: jest.Mocked<Deps>;
