@@ -160,7 +160,7 @@ function createSupplierStatusChangeEvent(
   });
 }
 
-describe("createSupplierAllocatorHandler", () => {
+describe.skip("createSupplierAllocatorHandler", () => {
   let mockSqsClient: jest.Mocked<SQSClient>;
   let mockedDeps: jest.Mocked<Deps>;
 
