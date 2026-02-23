@@ -1,7 +1,11 @@
 import { SQSBatchItemFailure, SQSEvent, SQSHandler } from "aws-lambda";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
-import { LetterVariant } from "internal/datastore/src/SupplierConfigDomain";
+import {
+  LetterVariant,
+  SupplierAllocation,
+  VolumeGroup,
+} from "internal/datastore/src/SupplierConfigDomain";
 import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import z from "zod";
 import { Deps } from "../config/deps";
@@ -46,7 +50,10 @@ function validateType(event: unknown) {
   }
 }
 
-async function getVariantDetails(variantId: string, deps: Deps) {
+async function getVariantDetails(
+  variantId: string,
+  deps: Deps,
+): Promise<LetterVariant> {
   deps.logger.info({
     description: "Fetching letter variant details from database",
     variantId,
@@ -54,15 +61,77 @@ async function getVariantDetails(variantId: string, deps: Deps) {
 
   const variantDetails: LetterVariant =
     await deps.supplierConfigRepo.getLetterVariant(variantId);
+
+  if (variantDetails) {
+    deps.logger.info({
+      description: "Fetched letter variant details",
+      variantId,
+      variantDetails,
+    });
+  } else {
+    deps.logger.error({
+      description: "No letter variant found for id",
+      variantId,
+    });
+  }
+  return variantDetails;
+}
+
+async function getVolumeGroupDetails(
+  groupId: string,
+  deps: Deps,
+): Promise<VolumeGroup> {
   deps.logger.info({
-    description: "Fetched letter variant details",
-    variantId,
+    description: "Fetching volume group details from database",
+    groupId,
+  });
+
+  const groupDetails = await deps.supplierConfigRepo.getVolumeGroup(groupId);
+  if (groupDetails) {
+    deps.logger.info({
+      description: "Fetched volume group details",
+      groupId,
+      groupDetails,
+    });
+  } else {
+    deps.logger.error({
+      description: "No volume group found for id",
+      groupId,
+    });
+  }
+  return groupDetails;
+}
+
+async function getSupplierFromConfig(letterEvent: PreparedEvents, deps: Deps) {
+  const variantDetails: LetterVariant = await getVariantDetails(
+    letterEvent.data.letterVariantId,
+    deps,
+  );
+  deps.logger.info({
+    description: "Fetched variant details for letter variant",
     variantDetails,
+  });
+
+  const volumeGroupDetails: VolumeGroup = await getVolumeGroupDetails(
+    variantDetails.volumeGroupId,
+    deps,
+  );
+  deps.logger.info({
+    description: "Fetched volume group details for letter variant",
+    volumeGroupDetails,
+  });
+
+  const supplierAllocations: SupplierAllocation[] =
+    await deps.supplierConfigRepo.getSupplierAllocationsForVolumeGroup(
+      variantDetails.volumeGroupId,
+    );
+  deps.logger.info({
+    description: "Fetched supplier allocations for volume group",
+    supplierAllocations,
   });
 }
 
 function getSupplier(letterEvent: PreparedEvents, deps: Deps): SupplierSpec {
-  getVariantDetails(letterEvent.data.letterVariantId, deps);
   return resolveSupplierForVariant(letterEvent.data.letterVariantId, deps);
 }
 
@@ -80,6 +149,8 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
         });
 
         validateType(letterEvent);
+
+        await getSupplierFromConfig(letterEvent as PreparedEvents, deps);
 
         const supplierSpec = getSupplier(letterEvent as PreparedEvents, deps);
 
