@@ -1,6 +1,7 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { Unit } from "aws-embedded-metrics";
 import pino from "pino";
+import { MetricEntry, MetricStatus, buildEMFObject } from "@internal/helpers";
 import type { Deps } from "../config/deps";
 import { ApiErrorDetail } from "../contracts/errors";
 import {
@@ -14,7 +15,6 @@ import { mapToUpdateCommands } from "../mappers/letter-mapper";
 import { enqueueLetterUpdateRequests } from "../services/letter-operations";
 import { extractCommonIds } from "../utils/common-ids";
 import { assertNotEmpty, requireEnvVar } from "../utils/validation";
-import { MetricEntry, MetricStatus, buildEMFObject } from "../utils/metrics";
 
 function duplicateIdsExist(postLettersRequest: PostLettersRequest) {
   const ids = postLettersRequest.data.map((item) => item.id);
