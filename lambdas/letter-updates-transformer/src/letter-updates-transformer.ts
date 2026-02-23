@@ -14,6 +14,7 @@ import { mapLetterToCloudEvent } from "@nhsdigital/nhs-notify-event-schemas-supp
 import { Letter, LetterSchema } from "@internal/datastore";
 import { Unit } from "aws-embedded-metrics";
 import pino from "pino";
+import { MetricEntry, buildEMFObject } from "internal/helpers/src";
 import { Deps } from "./deps";
 
 // SNS PublishBatchCommand supports up to 10 messages per batch
@@ -67,28 +68,15 @@ function populateEventTypeMap(cloudEvents: LetterEvent[]) {
 }
 
 function emitMetrics(logger: pino.Logger, eventTypeCount: Map<string, number>) {
-  const namespace =
-    process.env.AWS_LAMBDA_FUNCTION_NAME || "letter-updates-transformer";
-
+  const namespace = "letter-updates-transformer";
   for (const [type, count] of eventTypeCount) {
-    const emf = {
-      LogGroup: namespace,
-      ServiceName: namespace,
-      eventType: type,
-      _aws: {
-        Timestamp: Date.now(),
-        CloudWatchMetrics: [
-          {
-            Namespace: namespace,
-            Dimensions: [["eventType", "ServiceName", "LogGroup"]],
-            Metrics: [
-              { Name: "events published", Value: count, Unit: Unit.Count },
-            ],
-          },
-        ],
-      },
-      "events published": count,
+    const dimensions: Record<string, string> = { eventType: type };
+    const metric: MetricEntry = {
+      key: "Events published",
+      value: count,
+      unit: Unit.Count,
     };
+    const emf = buildEMFObject(namespace, dimensions, metric);
     logger.info(emf);
   }
 }

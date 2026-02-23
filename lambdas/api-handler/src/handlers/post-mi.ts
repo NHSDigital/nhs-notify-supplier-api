@@ -1,6 +1,7 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { Unit } from "aws-embedded-metrics";
 import pino from "pino";
+import { MetricEntry, MetricStatus, buildEMFObject } from "@internal/helpers";
 import postMIOperation from "../services/mi-operations";
 import { ApiErrorDetail } from "../contracts/errors";
 import ValidationError from "../errors/validation-error";
@@ -10,7 +11,6 @@ import { extractCommonIds } from "../utils/common-ids";
 import { PostMIRequest, PostMIRequestSchema } from "../contracts/mi";
 import { mapToMI } from "../mappers/mi-mapper";
 import { Deps } from "../config/deps";
-import { MetricEntry, MetricStatus, buildEMFObject } from "../utils/metrics";
 
 export default function createPostMIHandler(
   deps: Deps,

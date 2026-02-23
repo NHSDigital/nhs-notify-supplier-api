@@ -13,6 +13,7 @@ import {
 import { MISubmittedEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
 import { Unit } from "aws-embedded-metrics";
 import pino from "pino";
+import { MetricEntry, buildEMFObject } from "internal/helpers/src";
 import { mapMIToCloudEvent } from "./mappers/mi-mapper";
 import { Deps } from "./deps";
 
@@ -52,27 +53,15 @@ function extractMIData(record: DynamoDBRecord): MI {
 }
 
 function emitMetrics(logger: pino.Logger, eventTypeCount: Map<string, number>) {
-  const namespace =
-    process.env.AWS_LAMBDA_FUNCTION_NAME || "mi-updates-transformer";
+  const namespace = "mi-updates-transformer";
   for (const [type, count] of eventTypeCount) {
-    const emf = {
-      LogGroup: namespace,
-      ServiceName: namespace,
-      eventType: type,
-      _aws: {
-        Timestamp: Date.now(),
-        CloudWatchMetrics: [
-          {
-            Namespace: namespace,
-            Dimensions: [["LogGroup", "ServiceName", "eventType"]],
-            Metrics: [
-              { Name: "events published", Value: count, Unit: Unit.Count },
-            ],
-          },
-        ],
-      },
-      "events published": count,
+    const dimensions: Record<string, string> = { eventType: type };
+    const metric: MetricEntry = {
+      key: "Events published",
+      value: count,
+      unit: Unit.Count,
     };
+    const emf = buildEMFObject(namespace, dimensions, metric);
     logger.info(emf);
   }
 }

@@ -1,5 +1,6 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { MetricsLogger, Unit, metricScope } from "aws-embedded-metrics";
+import { MetricStatus } from "@internal/helpers";
 import { enqueueLetterUpdateRequests } from "../services/letter-operations";
 import {
   PatchLetterRequest,
@@ -13,7 +14,6 @@ import { assertNotEmpty } from "../utils/validation";
 import { extractCommonIds } from "../utils/common-ids";
 import { mapToUpdateCommand } from "../mappers/letter-mapper";
 import type { Deps } from "../config/deps";
-import { MetricStatus } from "../utils/metrics";
 
 export default function createPatchLetterHandler(
   deps: Deps,
