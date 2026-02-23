@@ -6,11 +6,11 @@ import {
 import { Logger } from "pino";
 import {
   $LetterVariant,
-  LetterVariant,
-  $VolumeGroup,
-  VolumeGroup,
   $SupplierAllocation,
+  $VolumeGroup,
+  LetterVariant,
   SupplierAllocation,
+  VolumeGroup,
 } from "./SupplierConfigDomain";
 
 export type SupplierConfigRepositoryConfig = {
@@ -64,11 +64,11 @@ export class SupplierConfigRepository {
         },
       }),
     );
-    if (!result.Item) {
+    if (!result.Items) {
       throw new Error(
-        `Supplier allocations for volume group with id ${groupId} not found`,
+        `No supplier allocations found for volume group id ${groupId}`,
       );
     }
-    return $SupplierAllocation.array().parse(result.Item.items);
+    return $SupplierAllocation.array().parse(result.Items);
   }
 }
