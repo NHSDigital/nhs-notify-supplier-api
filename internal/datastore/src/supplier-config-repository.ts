@@ -47,6 +47,7 @@ export class SupplierConfigRepository {
     if (!result.Item) {
       throw new Error(`Volume group with id ${groupId} not found`);
     }
+
     return $VolumeGroup.parse(result.Item);
   }
 
@@ -63,13 +64,16 @@ export class SupplierConfigRepository {
         TableName: this.config.supplierConfigTableName,
         IndexName: "volumeGroup-index",
         KeyConditionExpression: "#pk = :pk AND #group = :groupId",
+        FilterExpression: "#status = :status ",
         ExpressionAttributeNames: {
-          "#pk": "PK", // make sure this is the GSI's PK attribute name
-          "#group": "volumeGroup", // <-- use the **actual** GSI key name
+          "#pk": "PK",
+          "#group": "volumeGroup",
+          "#status": "status",
         },
         ExpressionAttributeValues: {
           ":pk": "SUPPLIER_ALLOCATION",
           ":groupId": groupId,
+          ":status": "PROD",
         },
       }),
     );
@@ -84,6 +88,7 @@ export class SupplierConfigRepository {
         `No supplier allocations found for volume group id ${groupId}`,
       );
     }
+
     return $SupplierAllocation.array().parse(result.Items);
   }
 }
