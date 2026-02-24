@@ -9,7 +9,7 @@ import {
   UpdateLetterCommandSchema,
 } from "../contracts/letters";
 import { Deps } from "../config/deps";
-import { MetricEntry, MetricStatus, buildEMFObject } from "../utils/metrics";
+import { MetricEntry, MetricStatus, buildEMFObject } from "@internal/helpers";
 
 export default function createTransformAmendmentEventHandler(
   deps: Deps,
