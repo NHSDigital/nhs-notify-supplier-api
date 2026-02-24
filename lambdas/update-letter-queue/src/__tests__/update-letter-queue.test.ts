@@ -138,7 +138,7 @@ describe("update-letter-queue Lambda", () => {
       expect(mockedDeps.letterQueueRepository.putLetter).toHaveBeenCalledTimes(
         1,
       );
-      expect(result.batchItemFailures).toEqual([{ itemIdentifier: "1" }]);
+      expect(result.batchItemFailures).toEqual([{ itemIdentifier: "seq-0" }]);
     });
 
     it("does not treat a replayed event as a failure", async () => {
@@ -255,8 +255,10 @@ function generateKinesisEvent(letterEvents: object[]): KinesisStreamEvent {
   const records = letterEvents
     .map((letter) => Buffer.from(JSON.stringify(letter)).toString("base64"))
     .map(
-      (data) =>
-        ({ kinesis: { data } }) as unknown as KinesisStreamRecordPayload,
+      (data, index) =>
+        ({
+          kinesis: { data, sequenceNumber: `seq-${index}` },
+        }) as unknown as KinesisStreamRecordPayload,
     );
 
   return { Records: records } as unknown as KinesisStreamEvent;

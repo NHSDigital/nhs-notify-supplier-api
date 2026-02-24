@@ -24,43 +24,43 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
       count: streamEvent.Records?.length || 0,
     });
 
-    const ddbRecords: DynamoDBRecord[] = streamEvent.Records.map((record) =>
-      extractPayload(record, deps),
-    );
+    for (const record of streamEvent.Records) {
+      const ddbRecord = extractPayload(record, deps);
 
-    const newPendingLetters = ddbRecords
-      .filter((record) => filterRecord(record, deps))
-      .map((element) => extractNewLetter(element))
-      .map((element) => mapLetterToPendingLetter(element));
+      if (isNewPendingLetter(ddbRecord)) {
+        const letter = extractNewLetter(ddbRecord);
+        const pendingLetter = mapLetterToPendingLetter(letter);
 
-    for (const pendingLetter of newPendingLetters) {
-      try {
-        deps.logger.info({
-          description: "Persisting pending letter",
-          pendingLetter,
-        });
-        await deps.letterQueueRepository.putLetter(pendingLetter);
-        successCount += 1;
-      } catch (error) {
-        if (error instanceof LetterAlreadyExistsError) {
-          deps.logger.warn({
-            description: "Letter already exists",
-            supplierId: pendingLetter.supplierId,
-            letterId: pendingLetter.letterId,
-          });
-        } else {
-          deps.logger.error({
-            description: "Error persisting pending letter",
-            error,
+        try {
+          deps.logger.info({
+            description: "Persisting pending letter",
             pendingLetter,
           });
-          recordProcessing(deps, successCount, 1);
-          // If we get a failure, return immediately without processing the remaining records. Since we are
-          // working with a Kinesis stream, AWS will retry from the point of failure and no records will be lost.
-          // See https://docs.aws.amazon.com/lambda/latest/dg/example_serverless_Kinesis_Lambda_batch_item_failures_section.html
-          return {
-            batchItemFailures: [{ itemIdentifier: pendingLetter.letterId }],
-          };
+          await deps.letterQueueRepository.putLetter(pendingLetter);
+          successCount += 1;
+        } catch (error) {
+          if (error instanceof LetterAlreadyExistsError) {
+            deps.logger.warn({
+              description: "Letter already exists",
+              supplierId: pendingLetter.supplierId,
+              letterId: pendingLetter.letterId,
+            });
+          } else {
+            deps.logger.error({
+              description: "Error persisting pending letter",
+              error,
+              pendingLetter,
+            });
+            recordProcessing(deps, successCount, 1);
+            // If we get a failure, return immediately without processing the remaining records. Since we are
+            // working with a Kinesis stream, AWS will retry from the point of failure and no records will be lost.
+            // See https://docs.aws.amazon.com/lambda/latest/dg/example_serverless_Kinesis_Lambda_batch_item_failures_section.html
+            return {
+              batchItemFailures: [
+                { itemIdentifier: record.kinesis.sequenceNumber },
+              ],
+            };
+          }
         }
       }
     }
@@ -86,22 +86,12 @@ function recordProcessing(
   deps.logger.info(buildMetric("letters queued failed", failureCount));
 }
 
-function filterRecord(record: DynamoDBRecord, deps: Deps): boolean {
+function isNewPendingLetter(record: DynamoDBRecord): boolean {
   const isInsert = record.eventName === "INSERT";
   const newImage = record.dynamodb?.NewImage;
   const isPending = newImage?.status?.S === "PENDING";
 
-  const allowEvent = isInsert && isPending;
-
-  deps.logger.info({
-    description: "Filtering record",
-    eventName: record.eventName,
-    eventId: record.eventID,
-    status: newImage?.status?.S,
-    allowEvent,
-  });
-
-  return allowEvent;
+  return isInsert && isPending;
 }
 
 function extractPayload(
