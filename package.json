@@ -58,8 +58,7 @@
     "pretty-format": {
       "react-is": "19.0.0"
     },
-    "react": "^19.0.0",
-    "minimatch": "10.2.1"
+    "react": "^19.0.0"
   },
   "scripts": {
     "build": "npm run bundle-oas && npm run generate --buildver=$npm_config_buildver",
