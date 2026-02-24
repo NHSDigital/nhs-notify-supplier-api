@@ -10,6 +10,7 @@ import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schem
 import z from "zod";
 import {
   getSupplierAllocationsForVolumeGroup,
+  getSupplierDetails,
   getVariantDetails,
   getVolumeGroupDetails,
 } from "../services/supplier-config";
@@ -84,6 +85,14 @@ async function getSupplierFromConfig(letterEvent: PreparedEvents, deps: Deps) {
     description: "Fetched supplier allocations for volume group",
     supplierAllocations,
   });
+
+  const supplierDetails = await getSupplierDetails(supplierAllocations, deps);
+  deps.logger.info({
+    description: "Fetched supplier details for supplier allocations",
+    supplierDetails,
+  });
+
+  return supplierDetails;
 }
 
 function getSupplier(letterEvent: PreparedEvents, deps: Deps): SupplierSpec {
