@@ -6,9 +6,11 @@ import {
 import { Logger } from "pino";
 import {
   $LetterVariant,
+  $Supplier,
   $SupplierAllocation,
   $VolumeGroup,
   LetterVariant,
+  Supplier,
   SupplierAllocation,
   VolumeGroup,
 } from "./SupplierConfigDomain";
@@ -90,5 +92,22 @@ export class SupplierConfigRepository {
     }
 
     return $SupplierAllocation.array().parse(result.Items);
+  }
+
+  async getSuppliersDetails(supplierIds: string[]): Promise<Supplier[]> {
+    const suppliers: Supplier[] = [];
+    for (const supplierId of supplierIds) {
+      const result = await this.ddbClient.send(
+        new GetCommand({
+          TableName: this.config.supplierConfigTableName,
+          Key: { PK: "SUPPLIER", SK: supplierId },
+        }),
+      );
+      if (!result.Item) {
+        throw new Error(`Supplier with id ${supplierId} not found`);
+      }
+      suppliers.push($Supplier.parse(result.Item));
+    }
+    return suppliers;
   }
 }
