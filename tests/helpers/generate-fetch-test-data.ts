@@ -74,11 +74,14 @@ export const getLettersBySupplier = async (
   return Items as SupplierApiLetters[];
 };
 
-export const deleteLettersBySupplier = async (id: string) => {
+export const deleteLettersBySupplier = async (
+  supplierId: string,
+  id: string,
+) => {
   const resp = await docClient.send(
     new DeleteCommand({
       TableName: LETTERSTABLENAME,
-      Key: { supplierId: SUPPLIERID, id },
+      Key: { id, supplierId },
       ReturnValues: "ALL_OLD",
     }),
   );
