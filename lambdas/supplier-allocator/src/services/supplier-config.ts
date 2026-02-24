@@ -1,5 +1,6 @@
 import {
   LetterVariant,
+  Supplier,
   SupplierAllocation,
   VolumeGroup,
 } from "internal/datastore/src/SupplierConfigDomain";
@@ -117,4 +118,31 @@ export async function getSupplierAllocationsForVolumeGroup(
   }
 
   return allocations;
+}
+
+export async function getSupplierDetails(
+  supplierAllocations: SupplierAllocation[],
+  deps: Deps,
+): Promise<Supplier[]> {
+  const supplierIds = supplierAllocations.map((alloc) => alloc.supplier);
+
+  const supplierDetails: Supplier[] =
+    await deps.supplierConfigRepo.getSuppliersDetails(supplierIds);
+
+  deps.logger.info({
+    description: "Fetched supplier details for supplier allocations",
+    supplierIds,
+    supplierDetails,
+  });
+
+  if (Object.keys(supplierDetails).length === 0) {
+    deps.logger.error({
+      description: "No supplier details found for supplier allocations",
+      supplierIds,
+    });
+    throw new Error(
+      `No supplier details found for supplier ids ${supplierIds.join(", ")}`,
+    );
+  }
+  return supplierDetails;
 }
