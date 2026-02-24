@@ -62,9 +62,13 @@ export class SupplierConfigRepository {
       new QueryCommand({
         TableName: this.config.supplierConfigTableName,
         IndexName: "volumeGroup-index",
-        KeyConditionExpression: "PK = :pk AND volumeGroup = :groupId",
+        KeyConditionExpression: "#pk = :pk AND #group = :groupId",
+        ExpressionAttributeNames: {
+          "#pk": "PK", // make sure this is the GSI's PK attribute name
+          "#group": "volumeGroup", // <-- use the **actual** GSI key name
+        },
         ExpressionAttributeValues: {
-          ":pk": "SUPPLIER_ALLOCATIONS",
+          ":pk": "SUPPLIER_ALLOCATION",
           ":groupId": groupId,
         },
       }),
