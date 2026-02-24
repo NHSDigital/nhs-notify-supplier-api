@@ -1,5 +1,6 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { MetricsLogger, metricScope } from "aws-embedded-metrics";
+import { MetricStatus, emitForSingleSupplier } from "@internal/helpers";
 import { assertNotEmpty } from "../utils/validation";
 import { extractCommonIds } from "../utils/common-ids";
 import ValidationError from "../errors/validation-error";
@@ -8,7 +9,6 @@ import { getLetterById } from "../services/letter-operations";
 import { processError } from "../mappers/error-mapper";
 import { mapToGetLetterResponse } from "../mappers/letter-mapper";
 import { Deps } from "../config/deps";
-import { MetricStatus, emitForSingleSupplier } from "../utils/metrics";
 
 // Get letter data
 export default function createGetLetterHandler(
