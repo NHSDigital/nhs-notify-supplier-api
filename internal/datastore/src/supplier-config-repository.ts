@@ -53,6 +53,11 @@ export class SupplierConfigRepository {
   async getSupplierAllocationsForVolumeGroup(
     groupId: string,
   ): Promise<SupplierAllocation[]> {
+    this.log.info({
+      description:
+        "Fetching supplier allocations for volume group from database",
+      groupId,
+    });
     const result = await this.ddbClient.send(
       new QueryCommand({
         TableName: this.config.supplierConfigTableName,
@@ -64,6 +69,12 @@ export class SupplierConfigRepository {
         },
       }),
     );
+    this.log.info({
+      description:
+        "Fetched supplier allocations for volume group from database",
+      groupId,
+      count: result.Items?.length ?? 0,
+    });
     if (!result.Items) {
       throw new Error(
         `No supplier allocations found for volume group id ${groupId}`,
