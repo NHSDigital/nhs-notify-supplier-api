@@ -56,7 +56,7 @@ export class SupplierConfigRepository {
     const result = await this.ddbClient.send(
       new QueryCommand({
         TableName: this.config.supplierConfigTableName,
-        IndexName: "VolumeGroupIndex",
+        IndexName: "volumeGroup-index",
         KeyConditionExpression: "PK = :pk AND volumeGroup = :groupId",
         ExpressionAttributeValues: {
           ":pk": "SUPPLIER_ALLOCATIONS",

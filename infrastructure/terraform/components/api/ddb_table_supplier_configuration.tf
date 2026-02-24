@@ -38,7 +38,7 @@ resource "aws_dynamodb_table" "supplier-configuration" {
   }
 
   global_secondary_index {
-    name            = "volumeGroupIndex"
+    name            = "volumeGroup-index"
     hash_key        = "PK"
     range_key       = "volumeGroup"
     projection_type = "ALL"
