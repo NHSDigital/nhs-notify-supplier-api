@@ -4,12 +4,12 @@ import { LetterEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/s
 import { mapLetterToCloudEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-mapper";
 import { Unit } from "aws-embedded-metrics";
 import pino from "pino";
+import { MetricEntry, MetricStatus, buildEMFObject } from "@internal/helpers";
 import {
   UpdateLetterCommand,
   UpdateLetterCommandSchema,
 } from "../contracts/letters";
 import { Deps } from "../config/deps";
-import { MetricEntry, MetricStatus, buildEMFObject } from "@internal/helpers";
 
 export default function createTransformAmendmentEventHandler(
   deps: Deps,

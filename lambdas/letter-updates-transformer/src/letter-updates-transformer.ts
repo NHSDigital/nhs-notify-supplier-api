@@ -14,7 +14,7 @@ import { mapLetterToCloudEvent } from "@nhsdigital/nhs-notify-event-schemas-supp
 import { Letter, LetterSchema } from "@internal/datastore";
 import { Unit } from "aws-embedded-metrics";
 import pino from "pino";
-import { MetricEntry, buildEMFObject } from "internal/helpers/src";
+import { MetricEntry, buildEMFObject } from "@internal/helpers";
 import { Deps } from "./deps";
 
 // SNS PublishBatchCommand supports up to 10 messages per batch

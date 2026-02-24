@@ -13,7 +13,7 @@ import {
 import { MISubmittedEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
 import { Unit } from "aws-embedded-metrics";
 import pino from "pino";
-import { MetricEntry, buildEMFObject } from "internal/helpers/src";
+import { MetricEntry, buildEMFObject } from "@internal/helpers";
 import { mapMIToCloudEvent } from "./mappers/mi-mapper";
 import { Deps } from "./deps";
 
