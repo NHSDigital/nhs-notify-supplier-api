@@ -99,7 +99,69 @@ async function getVolumeGroupDetails(
       groupId,
     });
   }
+
+  if (
+    groupDetails.status !== "PROD" &&
+    (new Date(groupDetails.startDate) > new Date() ||
+      (groupDetails.endDate && new Date(groupDetails.endDate) < new Date()))
+  ) {
+    deps.logger.error({
+      description: "Volume group is not active based on status and dates",
+      groupId,
+      status: groupDetails.status,
+      startDate: groupDetails.startDate,
+      endDate: groupDetails.endDate,
+    });
+    throw new Error(`Volume group with id ${groupId} is not active`);
+  }
   return groupDetails;
+}
+
+async function getSupplierAllocationsForVolumeGroup(
+  groupId: string,
+  supplierId: string,
+  deps: Deps,
+): Promise<SupplierAllocation[]> {
+  deps.logger.info({
+    description: "Fetching supplier allocations for volume group from database",
+    groupId,
+  });
+  const allocations =
+    await deps.supplierConfigRepo.getSupplierAllocationsForVolumeGroup(groupId);
+
+  if (allocations.length > 0) {
+    deps.logger.info({
+      description:
+        "Fetched supplier allocations for volume group from database",
+      groupId,
+      count: allocations.length,
+    });
+  } else {
+    deps.logger.error({
+      description: "No supplier allocations found for volume group id",
+      groupId,
+    });
+  }
+
+  if (supplierId) {
+    const filteredAllocations = allocations.filter(
+      (alloc) => alloc.supplier === supplierId,
+    );
+    if (filteredAllocations.length === 0) {
+      deps.logger.error({
+        description:
+          "No supplier allocations found for variantsupplier id in volume group",
+        groupId,
+        supplierId,
+      });
+      throw new Error(
+        `No supplier allocations found for variant supplier id ${supplierId} in volume group ${groupId}`,
+      );
+    }
+    return filteredAllocations;
+  }
+
+  return allocations;
 }
 
 async function getSupplierFromConfig(letterEvent: PreparedEvents, deps: Deps) {
@@ -122,8 +184,10 @@ async function getSupplierFromConfig(letterEvent: PreparedEvents, deps: Deps) {
   });
 
   const supplierAllocations: SupplierAllocation[] =
-    await deps.supplierConfigRepo.getSupplierAllocationsForVolumeGroup(
+    await getSupplierAllocationsForVolumeGroup(
       variantDetails.volumeGroupId,
+      variantDetails.supplierId ?? "",
+      deps,
     );
   deps.logger.info({
     description: "Fetched supplier allocations for volume group",
