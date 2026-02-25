@@ -14,7 +14,7 @@
 | <a name="input_alarm_prefix"></a> [alarm\_prefix](#input\_alarm\_prefix) | n/a | `string` | n/a | yes |
 | <a name="input_enable_error_log_metric"></a> [enable\_error\_log\_metric](#input\_enable\_error\_log\_metric) | n/a | `bool` | `true` | no |
 | <a name="input_error_log_evaluation_periods"></a> [error\_log\_evaluation\_periods](#input\_error\_log\_evaluation\_periods) | n/a | `number` | `1` | no |
-| <a name="input_error_log_metric_filter_pattern"></a> [error\_log\_metric\_filter\_pattern](#input\_error\_log\_metric\_filter\_pattern) | n/a | `string` | `"{ ($.level = \"50\" || $.level = \"error\") && $.environment = * }"` | no |
+| <a name="input_error_log_metric_filter_pattern"></a> [error\_log\_metric\_filter\_pattern](#input\_error\_log\_metric\_filter\_pattern) | n/a | `string` | `"{ $.level = \"ERROR\" || $.level = \"FATAL\" }"` | no |
 | <a name="input_error_log_metric_name_prefix"></a> [error\_log\_metric\_name\_prefix](#input\_error\_log\_metric\_name\_prefix) | n/a | `string` | `"LambdaErrorLogs-"` | no |
 | <a name="input_error_log_metric_namespace"></a> [error\_log\_metric\_namespace](#input\_error\_log\_metric\_namespace) | n/a | `string` | `"Custom/LambdaErrorLogs"` | no |
 | <a name="input_error_log_threshold"></a> [error\_log\_threshold](#input\_error\_log\_threshold) | n/a | `number` | `0` | no |

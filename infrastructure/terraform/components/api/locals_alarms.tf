@@ -8,6 +8,7 @@ locals {
     patch_letter                = module.patch_letter.function_name
     post_letters                = module.post_letters.function_name
     post_mi                     = module.post_mi.function_name
+    update_letter_queue         = module.update_letter_queue.function_name
     upsert_letter               = module.upsert_letter.function_name
     amendment_event_transformer = module.amendment_event_transformer.function_name
     letter_updates_transformer  = module.letter_updates_transformer.function_name
