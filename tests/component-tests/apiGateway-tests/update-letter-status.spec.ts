@@ -11,6 +11,7 @@ import {
 import {
   createTestData,
   getLettersBySupplier,
+  waitForLetterStatus,
 } from "../../helpers/generate-fetch-test-data";
 import { createInvalidRequestHeaders } from "../../constants/request-headers";
 import {
@@ -53,6 +54,13 @@ test.describe("API Gateway Tests to Verify Patch Status Endpoint", () => {
     );
 
     expect(response.status()).toBe(202);
+
+    const updated = await waitForLetterStatus(
+      SUPPLIERID,
+      letter.id,
+      "ACCEPTED",
+    );
+    expect(updated.status).toBe("ACCEPTED");
   });
 
   test(`Patch /letters returns 202 and status is updated to REJECTED`, async ({
@@ -71,6 +79,13 @@ test.describe("API Gateway Tests to Verify Patch Status Endpoint", () => {
     );
 
     expect(response.status()).toBe(202);
+
+    const updated = await waitForLetterStatus(
+      SUPPLIERID,
+      letter.id,
+      "REJECTED",
+    );
+    expect(updated.status).toBe("REJECTED");
   });
 
   test(`Patch /letters returns 400 if request Body is invalid`, async ({
