@@ -5,7 +5,7 @@ import {
   LetterVariant,
   SupplierAllocation,
   VolumeGroup,
-} from "internal/datastore/src/SupplierConfigDomain";
+} from "@nhsdigital/nhs-notify-event-schemas-supplier-config";
 import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import z from "zod";
 import {

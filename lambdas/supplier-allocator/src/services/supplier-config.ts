@@ -3,7 +3,7 @@ import {
   Supplier,
   SupplierAllocation,
   VolumeGroup,
-} from "internal/datastore/src/SupplierConfigDomain";
+} from "@nhsdigital/nhs-notify-event-schemas-supplier-config";
 import { Deps } from "../config/deps";
 
 export async function getVariantDetails(
