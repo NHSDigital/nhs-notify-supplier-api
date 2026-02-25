@@ -13,7 +13,7 @@ import {
   Supplier,
   SupplierAllocation,
   VolumeGroup,
-} from "./SupplierConfigDomain";
+} from "@nhsdigital/nhs-notify-event-schemas-supplier-config";
 
 export type SupplierConfigRepositoryConfig = {
   supplierConfigTableName: string;
