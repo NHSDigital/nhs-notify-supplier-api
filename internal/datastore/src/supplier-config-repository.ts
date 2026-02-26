@@ -34,8 +34,13 @@ export class SupplierConfigRepository {
       }),
     );
     if (!result.Item) {
-      throw new Error(`Letter variant with id ${variantId} not found`);
+      this.log.error({
+        description: "No letter variant found for id",
+        variantId,
+      });
+      throw new Error(`No letter variant details found for id ${variantId}`);
     }
+
     return $LetterVariant.parse(result.Item);
   }
 
@@ -47,20 +52,18 @@ export class SupplierConfigRepository {
       }),
     );
     if (!result.Item) {
-      throw new Error(`Volume group with id ${groupId} not found`);
+      this.log.error({
+        description: "No volume group found for id",
+        groupId,
+      });
+      throw new Error(`No volume group details found for id ${groupId}`);
     }
-
     return $VolumeGroup.parse(result.Item);
   }
 
   async getSupplierAllocationsForVolumeGroup(
     groupId: string,
   ): Promise<SupplierAllocation[]> {
-    this.log.info({
-      description:
-        "Fetching supplier allocations for volume group from database",
-      groupId,
-    });
     const result = await this.ddbClient.send(
       new QueryCommand({
         TableName: this.config.supplierConfigTableName,
@@ -79,15 +82,13 @@ export class SupplierConfigRepository {
         },
       }),
     );
-    this.log.info({
-      description:
-        "Fetched supplier allocations for volume group from database",
-      groupId,
-      count: result.Items?.length ?? 0,
-    });
-    if (!result.Items) {
+    if (!result.Items || result.Items.length === 0) {
+      this.log.error({
+        description: "No supplier allocations found for volume group id",
+        groupId,
+      });
       throw new Error(
-        `No supplier allocations found for volume group id ${groupId}`,
+        `No active supplier allocations found for volume group id ${groupId}`,
       );
     }
 
@@ -104,6 +105,10 @@ export class SupplierConfigRepository {
         }),
       );
       if (!result.Item) {
+        this.log.error({
+          description: "No supplier found for id",
+          supplierId,
+        });
         throw new Error(`Supplier with id ${supplierId} not found`);
       }
       suppliers.push($Supplier.parse(result.Item));
