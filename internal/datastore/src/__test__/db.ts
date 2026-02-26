@@ -36,6 +36,7 @@ export async function setupDynamoDBContainer() {
     lettersTtlHours: 1,
     letterQueueTtlHours: 1,
     miTtlHours: 1,
+    supplierConfigTableName: "supplier-config",
   };
 
   return {
@@ -145,6 +146,31 @@ const createLetterQueueTableCommand = new CreateTableCommand({
     { AttributeName: "queueTimestamp", AttributeType: "S" },
   ],
 });
+const createSupplierConfigTableCommand = new CreateTableCommand({
+  TableName: "supplier-config",
+  BillingMode: "PAY_PER_REQUEST",
+  KeySchema: [
+    { AttributeName: "PK", KeyType: "HASH" }, // Partition key
+    { AttributeName: "SK", KeyType: "RANGE" }, // Sort key
+  ],
+  GlobalSecondaryIndexes: [
+    {
+      IndexName: "volumeGroup-index",
+      KeySchema: [
+        { AttributeName: "PK", KeyType: "HASH" }, // Partition key for GSI
+        { AttributeName: "volumeGroup", KeyType: "RANGE" }, // Sort key for GSI
+      ],
+      Projection: {
+        ProjectionType: "ALL",
+      },
+    },
+  ],
+  AttributeDefinitions: [
+    { AttributeName: "PK", AttributeType: "S" },
+    { AttributeName: "SK", AttributeType: "S" },
+    { AttributeName: "volumeGroup", AttributeType: "S" },
+  ],
+});
 
 export async function createTables(context: DBContext) {
   const { ddbClient } = context;
@@ -155,6 +181,7 @@ export async function createTables(context: DBContext) {
   await ddbClient.send(createMITableCommand);
   await ddbClient.send(createSupplierTableCommand);
   await ddbClient.send(createLetterQueueTableCommand);
+  await ddbClient.send(createSupplierConfigTableCommand);
 }
 
 export async function deleteTables(context: DBContext) {
@@ -165,6 +192,7 @@ export async function deleteTables(context: DBContext) {
     "management-info",
     "suppliers",
     "letter-queue",
+    "supplier-config",
   ]) {
     await ddbClient.send(
       new DeleteTableCommand({
