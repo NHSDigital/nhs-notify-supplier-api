@@ -1,4 +1,9 @@
 locals {
+  apigw_alarm_dimensions = {
+    ApiName = aws_api_gateway_rest_api.main.name
+    Stage   = aws_api_gateway_stage.main.stage_name
+  }
+
   lambda_alarm_targets = {
     authorizer_lambda           = module.authorizer_lambda.function_name
     get_letter                  = module.get_letter.function_name

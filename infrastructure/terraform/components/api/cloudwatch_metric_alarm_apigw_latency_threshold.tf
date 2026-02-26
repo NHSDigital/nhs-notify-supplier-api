@@ -1,22 +1,22 @@
-resource "aws_cloudwatch_metric_alarm" "latency_threshold" {
-  alarm_name        = "${var.alarm_prefix}-apigw-latency-threshold"
+resource "aws_cloudwatch_metric_alarm" "apigw_latency_threshold" {
+  alarm_name        = "${local.csi}-apigw-latency-threshold"
   alarm_description = "RELIABILITY: API Gateway latency above threshold"
 
   namespace   = "AWS/ApiGateway"
   metric_name = "Latency"
   statistic   = "Average"
-  period      = var.latency_period_seconds
+  period      = 60
 
-  evaluation_periods  = var.latency_evaluation_periods
-  threshold           = var.latency_threshold_ms
+  evaluation_periods  = 5
+  threshold           = 29000
   comparison_operator = "GreaterThanThreshold"
   treat_missing_data  = "notBreaching"
 
-  dimensions = local.api_dimensions
+  dimensions = local.apigw_alarm_dimensions
 
   actions_enabled           = false
   alarm_actions             = []
   ok_actions                = []
   insufficient_data_actions = []
-  tags                      = var.tags
+  tags                      = local.default_tags
 }
