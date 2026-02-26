@@ -159,9 +159,8 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
 
         validateType(letterEvent);
 
-        await getSupplierFromConfig(letterEvent as PreparedEvents, deps);
-
         const supplierSpec = getSupplier(letterEvent as PreparedEvents, deps);
+        await getSupplierFromConfig(letterEvent as PreparedEvents, deps);
 
         supplier = supplierSpec.supplierId;
         priority = String(supplierSpec.priority);

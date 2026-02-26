@@ -54,12 +54,13 @@ export async function getVolumeGroupDetails(
       description: "No volume group found for id",
       groupId,
     });
+    return undefined as any;
   }
 
   if (
-    groupDetails.status !== "PROD" &&
-    (new Date(groupDetails.startDate) > new Date() ||
-      (groupDetails.endDate && new Date(groupDetails.endDate) < new Date()))
+    groupDetails.status !== "PROD" ||
+    new Date(groupDetails.startDate) > new Date() ||
+    (groupDetails.endDate && new Date(groupDetails.endDate) < new Date())
   ) {
     deps.logger.error({
       description: "Volume group is not active based on status and dates",
@@ -97,6 +98,9 @@ export async function getSupplierAllocationsForVolumeGroup(
       description: "No supplier allocations found for volume group id",
       groupId,
     });
+    throw new Error(
+      `No supplier allocations found for volume group id ${groupId}`,
+    );
   }
 
   if (supplierId) {
