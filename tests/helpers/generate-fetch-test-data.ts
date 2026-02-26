@@ -104,7 +104,7 @@ export async function waitForLetterStatus(
       }),
     );
 
-    const letter = Item as SupplierApiLetters | undefined;
+    const letter = Item as SupplierApiLetters;
 
     if (letter && letter.status === status) {
       return letter;

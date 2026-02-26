@@ -31,9 +31,9 @@ test.describe("API Gateway Tests to Verify Patch Status Endpoint", () => {
     await createTestData(SUPPLIERID, 2);
     letters = await getLettersBySupplier(SUPPLIERID, "PENDING", 2);
 
-    if (!letters || letters.length < 2) {
+    if (letters.length < 2) {
       throw new Error(
-        `Expected 2 PENDING letters for supplier ${SUPPLIERID}, got ${letters?.length ?? 0}.`,
+        `Expected 2 PENDING letters for supplier ${SUPPLIERID}, got ${letters.length}.`,
       );
     }
   });
