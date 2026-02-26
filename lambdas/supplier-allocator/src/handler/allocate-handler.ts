@@ -3,6 +3,7 @@ import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
 import {
   LetterVariant,
+  Supplier,
   SupplierAllocation,
   VolumeGroup,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-config";
@@ -68,19 +69,11 @@ async function getSupplierFromConfig(letterEvent: PreparedEvents, deps: Deps) {
     letterEvent.data.letterVariantId,
     deps,
   );
-  deps.logger.info({
-    description: "Fetched variant details for letter variant",
-    variantDetails,
-  });
 
   const volumeGroupDetails: VolumeGroup = await getVolumeGroupDetails(
     variantDetails.volumeGroupId,
     deps,
   );
-  deps.logger.info({
-    description: "Fetched volume group details for letter variant",
-    volumeGroupDetails,
-  });
 
   const supplierAllocations: SupplierAllocation[] =
     await getSupplierAllocationsForVolumeGroup(
@@ -88,14 +81,16 @@ async function getSupplierFromConfig(letterEvent: PreparedEvents, deps: Deps) {
       variantDetails.supplierId ?? "",
       deps,
     );
-  deps.logger.info({
-    description: "Fetched supplier allocations for volume group",
-    supplierAllocations,
-  });
 
-  const supplierDetails = await getSupplierDetails(supplierAllocations, deps);
+  const supplierDetails: Supplier[] = await getSupplierDetails(
+    supplierAllocations,
+    deps,
+  );
   deps.logger.info({
     description: "Fetched supplier details for supplier allocations",
+    variantId: letterEvent.data.letterVariantId,
+    volumeGroupId: volumeGroupDetails.id,
+    supplierAllocationIds: supplierAllocations.map((a) => a.id),
     supplierDetails,
   });
 
