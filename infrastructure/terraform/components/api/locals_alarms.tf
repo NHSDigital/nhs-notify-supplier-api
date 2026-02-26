@@ -1,4 +1,6 @@
 locals {
+  alarms_enabled = var.environment == "main" || var.enable_alarms_in_non_main
+
   apigw_alarm_dimensions = {
     ApiName = aws_api_gateway_rest_api.main.name
     Stage   = aws_api_gateway_stage.main.stage_name

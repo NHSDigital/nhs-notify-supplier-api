@@ -1,4 +1,6 @@
 resource "aws_cloudwatch_metric_alarm" "apigw_latency_anomaly" {
+  count = local.alarms_enabled ? 1 : 0
+
   alarm_name          = "${local.csi}-apigw-latency-anomaly"
   alarm_description   = "RELIABILITY: API Gateway latency anomaly"
   comparison_operator = "GreaterThanUpperThreshold"

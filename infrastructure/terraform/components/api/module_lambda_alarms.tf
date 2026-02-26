@@ -1,5 +1,5 @@
 module "lambda_alarms" {
-  for_each = local.lambda_alarm_targets
+  for_each = local.alarms_enabled ? local.lambda_alarm_targets : {}
   source   = "../../modules/alarms-lambda"
 
   alarm_prefix   = local.csi

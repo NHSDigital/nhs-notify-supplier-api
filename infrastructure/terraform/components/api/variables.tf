@@ -193,3 +193,9 @@ variable "enable_api_data_trace" {
   description = "Enable API Gateway data trace logging"
   default     = false
 }
+
+variable "enable_alarms_in_non_main" {
+  type        = bool
+  description = "Enable CloudWatch alarms in non-main environments (for example PR environments)"
+  default     = false
+}

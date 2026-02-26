@@ -1,4 +1,6 @@
 resource "aws_cloudwatch_metric_alarm" "apigw_five_xx" {
+  count = local.alarms_enabled ? 1 : 0
+
   alarm_name        = "${local.csi}-apigw-5xx"
   alarm_description = "RELIABILITY: API Gateway 5xx responses"
 

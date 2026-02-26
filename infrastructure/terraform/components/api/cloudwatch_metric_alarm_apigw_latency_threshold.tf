@@ -1,4 +1,6 @@
 resource "aws_cloudwatch_metric_alarm" "apigw_latency_threshold" {
+  count = local.alarms_enabled ? 1 : 0
+
   alarm_name        = "${local.csi}-apigw-latency-threshold"
   alarm_description = "RELIABILITY: API Gateway latency above threshold"
 
