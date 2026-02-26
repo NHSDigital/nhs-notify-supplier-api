@@ -47,6 +47,7 @@ No requirements.
 | <a name="module_amendments_queue"></a> [amendments\_queue](#module\_amendments\_queue) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.24/terraform-sqs.zip | n/a |
 | <a name="module_apigw_alarms"></a> [apigw\_alarms](#module\_apigw\_alarms) | ../../modules/alarms-apigw | n/a |
 | <a name="module_authorizer_lambda"></a> [authorizer\_lambda](#module\_authorizer\_lambda) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip | n/a |
+| <a name="module_ddb_alarms_letter_queue"></a> [ddb\_alarms\_letter\_queue](#module\_ddb\_alarms\_letter\_queue) | ../../modules/alarms-ddb | n/a |
 | <a name="module_ddb_alarms_letters"></a> [ddb\_alarms\_letters](#module\_ddb\_alarms\_letters) | ../../modules/alarms-ddb | n/a |
 | <a name="module_ddb_alarms_mi"></a> [ddb\_alarms\_mi](#module\_ddb\_alarms\_mi) | ../../modules/alarms-ddb | n/a |
 | <a name="module_ddb_alarms_suppliers"></a> [ddb\_alarms\_suppliers](#module\_ddb\_alarms\_suppliers) | ../../modules/alarms-ddb | n/a |
