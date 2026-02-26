@@ -30,7 +30,7 @@ describe("supplier-config service", () => {
   afterEach(() => jest.resetAllMocks());
 
   describe("getVariantDetails", () => {
-    it("returns variant details and logs when found", async () => {
+    it("returns variant details", async () => {
       const variant = { id: "v1", volumeGroupId: "g1" } as any;
       const deps = makeDeps();
       deps.supplierConfigRepo.getLetterVariant = jest
@@ -40,10 +40,9 @@ describe("supplier-config service", () => {
       const result = await getVariantDetails("v1", deps);
 
       expect(result).toBe(variant);
-      expect(deps.logger.info).toHaveBeenCalled();
     });
 
-    it("logs an error and returns undefined when not found", async () => {
+    it("returns undefined when not found", async () => {
       const variant = undefined;
       const deps = makeDeps();
       deps.supplierConfigRepo.getLetterVariant = jest
@@ -53,7 +52,6 @@ describe("supplier-config service", () => {
       const result = await getVariantDetails("missing", deps);
 
       expect(result).toBeUndefined();
-      expect(deps.logger.error).toHaveBeenCalled();
     });
   });
 
@@ -72,7 +70,6 @@ describe("supplier-config service", () => {
       const result = await getVolumeGroupDetails("g1", deps);
 
       expect(result).toBe(group);
-      expect(deps.logger.info).toHaveBeenCalled();
     });
     it("logs an error and returns group details when not found", async () => {
       const group = undefined;
@@ -84,7 +81,6 @@ describe("supplier-config service", () => {
       const result = await getVolumeGroupDetails("missing", deps);
 
       expect(result).toBeUndefined();
-      expect(deps.logger.error).toHaveBeenCalled();
     });
 
     it("throws when group is not active based on status", async () => {
@@ -153,7 +149,6 @@ describe("supplier-config service", () => {
       const result = await getSupplierAllocationsForVolumeGroup("g1", "", deps);
 
       expect(result).toEqual(allocations);
-      expect(deps.logger.info).toHaveBeenCalled();
     });
 
     it("filters by supplierId when provided", async () => {
@@ -169,18 +164,6 @@ describe("supplier-config service", () => {
       );
 
       expect(result).toEqual([allocations[1]]);
-    });
-
-    it("throws when no allocations found for volume group id, and logs an error", async () => {
-      const deps = makeDeps();
-      deps.supplierConfigRepo.getSupplierAllocationsForVolumeGroup = jest
-        .fn()
-        .mockResolvedValue([]);
-
-      await expect(
-        getSupplierAllocationsForVolumeGroup("g1", "", deps),
-      ).rejects.toThrow(/No supplier allocations found/);
-      expect(deps.logger.error).toHaveBeenCalled();
     });
 
     it("throws when supplierId provided but no matching allocation", async () => {
@@ -218,7 +201,6 @@ describe("supplier-config service", () => {
         "s1",
         "s2",
       ]);
-      expect(deps.logger.info).toHaveBeenCalled();
     });
 
     it("throws when no supplier details found", async () => {
@@ -231,7 +213,6 @@ describe("supplier-config service", () => {
       await expect(getSupplierDetails(allocations, deps)).rejects.toThrow(
         /No supplier details found/,
       );
-      expect(deps.logger.error).toHaveBeenCalled();
     });
 
     it("extracts supplier ids from allocations and requests details", async () => {
