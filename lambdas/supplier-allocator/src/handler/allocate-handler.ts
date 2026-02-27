@@ -1,9 +1,20 @@
 import { SQSBatchItemFailure, SQSEvent, SQSHandler } from "aws-lambda";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
-
+import {
+  LetterVariant,
+  Supplier,
+  SupplierAllocation,
+  VolumeGroup,
+} from "@nhsdigital/nhs-notify-event-schemas-supplier-config";
 import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import z from "zod";
+import {
+  getSupplierAllocationsForVolumeGroup,
+  getSupplierDetails,
+  getVariantDetails,
+  getVolumeGroupDetails,
+} from "../services/supplier-config";
 import { Deps } from "../config/deps";
 
 type SupplierSpec = { supplierId: string; specId: string };
@@ -46,6 +57,39 @@ function validateType(event: unknown) {
   }
 }
 
+async function getSupplierFromConfig(letterEvent: PreparedEvents, deps: Deps) {
+  const variantDetails: LetterVariant = await getVariantDetails(
+    letterEvent.data.letterVariantId,
+    deps,
+  );
+
+  const volumeGroupDetails: VolumeGroup = await getVolumeGroupDetails(
+    variantDetails.volumeGroupId,
+    deps,
+  );
+
+  const supplierAllocations: SupplierAllocation[] =
+    await getSupplierAllocationsForVolumeGroup(
+      variantDetails.volumeGroupId,
+      variantDetails.supplierId ?? "",
+      deps,
+    );
+
+  const supplierDetails: Supplier[] = await getSupplierDetails(
+    supplierAllocations,
+    deps,
+  );
+  deps.logger.info({
+    description: "Fetched supplier details for supplier allocations",
+    variantId: letterEvent.data.letterVariantId,
+    volumeGroupId: volumeGroupDetails.id,
+    supplierAllocationIds: supplierAllocations.map((a) => a.id),
+    supplierDetails,
+  });
+
+  return supplierDetails;
+}
+
 function getSupplier(letterEvent: PreparedEvents, deps: Deps): SupplierSpec {
   return resolveSupplierForVariant(letterEvent.data.letterVariantId, deps);
 }
@@ -66,6 +110,7 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
         validateType(letterEvent);
 
         const supplierSpec = getSupplier(letterEvent as PreparedEvents, deps);
+        await getSupplierFromConfig(letterEvent as PreparedEvents, deps);
 
         deps.logger.info({
           description: "Resolved supplier spec",
