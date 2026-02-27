@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "aws-embedded-metrics": "^4.2.1",
     "pino": "^10.3.0",
     "zod": "^4.1.11"
   },
