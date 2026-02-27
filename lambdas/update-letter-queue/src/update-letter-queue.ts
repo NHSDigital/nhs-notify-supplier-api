@@ -6,6 +6,7 @@ import {
 } from "aws-lambda";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import { Unit } from "aws-embedded-metrics";
+import { MetricEntry, MetricStatus, buildEMFObject } from "@internal/helpers";
 import {
   InsertPendingLetter,
   Letter,
@@ -82,8 +83,8 @@ function recordProcessing(
     totalProcessed: successCount + failureCount,
   });
 
-  deps.logger.info(buildMetric("letters queued successfully", successCount));
-  deps.logger.info(buildMetric("letters queued failed", failureCount));
+  deps.logger.info(buildMetric(MetricStatus.Success, successCount));
+  deps.logger.info(buildMetric(MetricStatus.Failure, failureCount));
 }
 
 function isNewPendingLetter(record: DynamoDBRecord): boolean {
@@ -135,22 +136,14 @@ function mapLetterToPendingLetter(letter: Letter): InsertPendingLetter {
   };
 }
 
-function buildMetric(name: string, count: number) {
-  const namespace =
-    process.env.AWS_LAMBDA_FUNCTION_NAME || "update-letter-queue";
-  return {
-    LogGroup: namespace,
-    ServiceName: namespace,
-    _aws: {
-      Timestamp: Date.now(),
-      CloudWatchMetrics: [
-        {
-          Namespace: namespace,
-          Dimensions: [["ServiceName", "LogGroup"]],
-          Metrics: [{ Name: name, Value: count, Unit: Unit.Count }],
-        },
-      ],
+function buildMetric(status: MetricStatus, count: number) {
+  return buildEMFObject(
+    "update-letter-queue",
+    {},
+    {
+      key: status,
+      value: count,
+      unit: Unit.Count,
     },
-    "events published": count,
-  };
+  );
 }
