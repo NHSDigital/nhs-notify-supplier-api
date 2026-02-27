@@ -6,7 +6,7 @@ import {
 } from "aws-lambda";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import { Unit } from "aws-embedded-metrics";
-import { MetricEntry, MetricStatus, buildEMFObject } from "@internal/helpers";
+import { MetricStatus, buildEMFObject } from "@internal/helpers";
 import {
   InsertPendingLetter,
   Letter,

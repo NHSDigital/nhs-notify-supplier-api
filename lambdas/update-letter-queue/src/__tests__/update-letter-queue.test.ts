@@ -5,6 +5,7 @@ import {
 } from "@internal/datastore";
 import { mockDeep } from "jest-mock-extended";
 import pino from "pino";
+import { MetricStatus } from "@internal/helpers";
 import {
   Context,
   DynamoDBRecord,
@@ -15,6 +16,7 @@ import { Deps } from "../deps";
 import createHandler from "../update-letter-queue";
 import { EnvVars } from "../env";
 import { LetterStatus } from "../../../api-handler/src/contracts/letters";
+import { Unit } from "aws-embedded-metrics";
 
 const mockedDeps: jest.Mocked<Deps> = {
   letterQueueRepository: {
@@ -301,13 +303,14 @@ function assertSuccessMetricLogged(count: number) {
           expect.objectContaining({
             Metrics: [
               expect.objectContaining({
-                Name: "letters queued successfully",
+                Name: MetricStatus.Success,
                 Value: count,
               }),
             ],
           }),
         ]),
       }),
+      success: count,
     }),
   );
 }
@@ -320,13 +323,15 @@ function assertFailureMetricLogged(count: number) {
           expect.objectContaining({
             Metrics: [
               expect.objectContaining({
-                Name: "letters queued failed",
+                Name: MetricStatus.Failure,
                 Value: count,
+                Unit: Unit.Count,
               }),
             ],
           }),
         ]),
       }),
+      failure: count,
     }),
   );
 }
