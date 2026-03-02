@@ -34,6 +34,10 @@ on:
       pr_number:
         required: true
         type: string
+      proxy_deployed:
+        description: "True if the APIM proxy was deployed"
+        required: true
+        type: string
 
 permissions:
   id-token: write
@@ -77,3 +81,18 @@ jobs:
             --targetEnvironment "$ENVIRONMENT" \
             --targetAccountGroup "nhs-notify-supplier-api-dev" \
             --targetComponent "api"
+
+  run-e2e-tests:
+    name: Run End-to-End Tests
+    runs-on: ubuntu-latest
+    if: inputs.proxy_deployed == 'true'
+    steps:
+      - uses: actions/checkout@v5.0.0
+
+      - name: "Run e2e tests"
+        uses: ./.github/actions/e2e-tests
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NON_PROD_API_KEY: ${{ secrets.NON_PROD_API_KEY }}
+          INTERNAL_DEV_TEST_PEM: ${{ secrets.INTERNAL_DEV_TEST_PEM }}
+          APIGEE_PASSWORD: $ {{ secrets. APIGEE_PASSWORD }}
