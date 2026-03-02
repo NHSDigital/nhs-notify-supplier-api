@@ -71,6 +71,9 @@
     },
     "react": "^19.0.0",
     "@stoplight/spectral-cli": {
+      "@stoplight/spectral-ruleset-bundler": {
+        "rollup": "^2.80.0"
+      },
       "@stoplight/spectral-core": {
         "minimatch": "^3.1.5"
       }
@@ -87,6 +90,9 @@
       "serve-handler": {
         "minimatch": "^3.1.5"
       }
+    },
+    "mocha": {
+      "serialize-javascript": "^7.0.3"
     }
   },
   "scripts": {
