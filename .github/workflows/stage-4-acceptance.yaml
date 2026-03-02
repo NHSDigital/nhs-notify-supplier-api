@@ -95,3 +95,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NON_PROD_API_KEY: ${{ secrets.NON_PROD_API_KEY }}
           INTERNAL_DEV_TEST_PEM: ${{ secrets.INTERNAL_DEV_TEST_PEM }}
+          APIGEE_PASSWORD: $ {{ secrets. APIGEE_PASSWORD }}

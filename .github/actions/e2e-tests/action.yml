@@ -11,6 +11,16 @@ runs:
         pipx install poetry
         cd tests/e2e-tests && poetry install
 
+    - name: Install get_token and get Apigee token
+      shell: bash
+      run: |
+        curl https://login.apigee.com/resources/scripts/sso-cli/ssocli-bundle.zip -O
+        unzip ssocli-bundle.zip
+        mkdir -p  "$HOME/.local/bin"
+        ./install -b "$HOME/.local/bin"
+        echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+        echo "APIGEE_ACCESS_TOKEN=$(SSO_LOGIN_URL=https://login.apigee.com get_token -u steve.buxton@nhs.net:$APIGEE_PASSWORD)" >> "$GITHUB_ENV"
+
     - name: Run e2e tests
       shell: bash
       run: |
