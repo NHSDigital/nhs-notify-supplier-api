@@ -13,6 +13,9 @@
     "winston": "^3.2.1"
   },
   "description": "API for communication suppliers to integrate with NHS Notify.  This specification represents the in-development 'next' version of the API schema and should be treated as unstable. ",
+  "devDependencies": {
+    "eslint-config-airbnb-base": "^15.0.0"
+  },
   "eslintConfig": {
     "env": {
       "node": true

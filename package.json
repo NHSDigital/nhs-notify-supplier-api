@@ -7,7 +7,7 @@
     "@openapitools/openapi-generator-cli": "^2.21.4",
     "@redocly/cli": "1.31.0",
     "@stoplight/spectral-cli": "^6.15.0",
-    "@stylistic/eslint-plugin": "^5.8.0",
+    "@stylistic/eslint-plugin": "^5.9.0",
     "@tsconfig/node22": "^22.0.2",
     "@types/aws-lambda": "^8.10.148",
     "@types/jest": "^30.0.0",
@@ -23,8 +23,7 @@
     "chai-as-promised": "^7.1.1",
     "esbuild": "0.27.2",
     "eslint": "^9.27.0",
-    "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-config-airbnb-extended": "^1.0.11",
+    "eslint-config-airbnb-extended": "^3.0.1",
     "eslint-config-next": "^15.3.2",
     "eslint-config-prettier": "^10.1.5",
     "eslint-import-resolver-typescript": "^4.4.2",
@@ -70,7 +69,25 @@
     "pretty-format": {
       "react-is": "19.0.0"
     },
-    "react": "^19.0.0"
+    "react": "^19.0.0",
+    "@stoplight/spectral-cli": {
+      "@stoplight/spectral-core": {
+        "minimatch": "^3.1.5"
+      }
+    },
+    "eslint-plugin-sonarjs": {
+      "minimatch": "^10.2.4"
+    },
+    "openapi-typescript": {
+      "@redocly/openapi-core": {
+        "minimatch": "^5.1.9"
+      }
+    },
+    "serve": {
+      "serve-handler": {
+        "minimatch": "^3.1.5"
+      }
+    }
   },
   "scripts": {
     "build": "npm run bundle-oas && npm run generate --buildver=$npm_config_buildver",
