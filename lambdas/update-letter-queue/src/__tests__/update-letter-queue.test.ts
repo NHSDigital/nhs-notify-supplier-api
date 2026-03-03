@@ -1,6 +1,7 @@
 import {
   Letter,
   LetterAlreadyExistsError,
+  LetterDoesNotExistError,
   LetterQueueRepository,
 } from "@internal/datastore";
 import { mockDeep } from "jest-mock-extended";
@@ -21,6 +22,7 @@ import { LetterStatus } from "../../../api-handler/src/contracts/letters";
 const mockedDeps: jest.Mocked<Deps> = {
   letterQueueRepository: {
     putLetter: jest.fn(),
+    deleteLetter: jest.fn(),
   } as unknown as LetterQueueRepository,
   logger: {
     info: jest.fn(),
@@ -50,7 +52,7 @@ function generateLetter(status: LetterStatus, id?: string): Letter {
 }
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  jest.resetAllMocks();
 });
 
 describe("update-letter-queue Lambda", () => {
@@ -74,7 +76,34 @@ describe("update-letter-queue Lambda", () => {
       expect(result.batchItemFailures).toEqual([]);
     });
 
-    it("does not publish updates", async () => {
+    it("deletes letters that are no longer pending", async () => {
+      const handler = createHandler(mockedDeps);
+      const oldLetter = generateLetter("PENDING");
+      const newLetter = generateLetter("ACCEPTED");
+
+      const testData = generateKinesisEvent([
+        generateModifyRecord(oldLetter, newLetter),
+      ]);
+      const result = await handler(testData, mockDeep<Context>(), jest.fn());
+
+      expect(
+        mockedDeps.letterQueueRepository.deleteLetter,
+      ).toHaveBeenCalledWith("supplier1", "1");
+      expect(result.batchItemFailures).toEqual([]);
+    });
+
+    it("does not publish non-PENDING letters", async () => {
+      const handler = createHandler(mockedDeps);
+      const newLetter = generateLetter("ACCEPTED");
+
+      const testData = generateKinesisEvent([generateInsertRecord(newLetter)]);
+      const result = await handler(testData, mockDeep<Context>(), jest.fn());
+
+      expect(mockedDeps.letterQueueRepository.putLetter).not.toHaveBeenCalled();
+      expect(result.batchItemFailures).toEqual([]);
+    });
+
+    it("does not delete letters that are still PENDING", async () => {
       const handler = createHandler(mockedDeps);
       const oldLetter = generateLetter("PENDING");
       const newLetter = generateLetter("PENDING");
@@ -84,18 +113,9 @@ describe("update-letter-queue Lambda", () => {
       ]);
       const result = await handler(testData, mockDeep<Context>(), jest.fn());
 
-      expect(mockedDeps.letterQueueRepository.putLetter).not.toHaveBeenCalled();
-      expect(result.batchItemFailures).toEqual([]);
-    });
-
-    it("does not publish non-PENDING letters", async () => {
-      const handler = createHandler(mockedDeps);
-      const newLetter = generateLetter("PRINTED");
-
-      const testData = generateKinesisEvent([generateInsertRecord(newLetter)]);
-      const result = await handler(testData, mockDeep<Context>(), jest.fn());
-
-      expect(mockedDeps.letterQueueRepository.putLetter).not.toHaveBeenCalled();
+      expect(
+        mockedDeps.letterQueueRepository.deleteLetter,
+      ).not.toHaveBeenCalled();
       expect(result.batchItemFailures).toEqual([]);
     });
 
@@ -116,11 +136,10 @@ describe("update-letter-queue Lambda", () => {
       const newLetter = { id: "1", status: "PENDING" } as Letter;
 
       const testData = generateKinesisEvent([generateInsertRecord(newLetter)]);
-      await expect(
-        handler(testData, mockDeep<Context>(), jest.fn()),
-      ).rejects.toThrow();
+      const result = await handler(testData, mockDeep<Context>(), jest.fn());
 
       expect(mockedDeps.letterQueueRepository.putLetter).not.toHaveBeenCalled();
+      expect(result.batchItemFailures).toEqual([{ itemIdentifier: "seq-0" }]);
     });
 
     it("returns on the first failure", async () => {
@@ -143,7 +162,7 @@ describe("update-letter-queue Lambda", () => {
       expect(result.batchItemFailures).toEqual([{ itemIdentifier: "seq-0" }]);
     });
 
-    it("does not treat a replayed event as a failure", async () => {
+    it("does not treat a replayed insert as a failure", async () => {
       const handler = createHandler(mockedDeps);
       const newLetter1 = generateLetter("PENDING", "1");
       const newLetter2 = generateLetter("PENDING", "2");
@@ -154,6 +173,25 @@ describe("update-letter-queue Lambda", () => {
       const testData = generateKinesisEvent([
         generateInsertRecord(newLetter1),
         generateInsertRecord(newLetter2),
+      ]);
+      const result = await handler(testData, mockDeep<Context>(), jest.fn());
+
+      expect(result.batchItemFailures).toEqual([]);
+    });
+
+    it("does not treat a replayed delete as a failure", async () => {
+      const handler = createHandler(mockedDeps);
+      const oldLetter1 = generateLetter("PENDING", "1");
+      const oldLetter2 = generateLetter("PENDING", "2");
+      const newLetter1 = generateLetter("ACCEPTED", "1");
+      const newLetter2 = generateLetter("ACCEPTED", "2");
+      (mockedDeps.letterQueueRepository.putLetter as jest.Mock)
+        .mockRejectedValueOnce(new LetterDoesNotExistError("supplier1", "1"))
+        .mockResolvedValueOnce({});
+
+      const testData = generateKinesisEvent([
+        generateModifyRecord(oldLetter1, newLetter1),
+        generateModifyRecord(oldLetter2, newLetter2),
       ]);
       const result = await handler(testData, mockDeep<Context>(), jest.fn());
 
@@ -191,11 +229,12 @@ describe("update-letter-queue Lambda", () => {
   describe("Metrics", () => {
     it("emits success metrics when all letters are processed successfully", async () => {
       const handler = createHandler(mockedDeps);
-      const newLetter1 = generateLetter("PENDING", "1");
+      const oldLetter1 = generateLetter("PENDING", "1");
+      const newLetter1 = generateLetter("ACCEPTED", "1");
       const newLetter2 = generateLetter("PENDING", "2");
 
       const testData = generateKinesisEvent([
-        generateInsertRecord(newLetter1),
+        generateModifyRecord(oldLetter1, newLetter1),
         generateInsertRecord(newLetter2),
       ]);
       await handler(testData, mockDeep<Context>(), jest.fn());
@@ -204,7 +243,7 @@ describe("update-letter-queue Lambda", () => {
       assertFailureMetricLogged(0);
     });
 
-    it("emits failure metrics when a letter fails to process", async () => {
+    it("emits failure metrics when a letter fails to be inserted", async () => {
       const handler = createHandler(mockedDeps);
       const newLetter1 = generateLetter("PENDING", "1");
       const newLetter2 = generateLetter("PENDING", "2");
@@ -222,10 +261,31 @@ describe("update-letter-queue Lambda", () => {
       assertFailureMetricLogged(1);
     });
 
-    it("does not count a reprocessed event as a success or failure", async () => {
+    it("emits failure metrics when a letter fails to be deleted", async () => {
+      const handler = createHandler(mockedDeps);
+      const oldLetter1 = generateLetter("PENDING", "1");
+      const oldLetter2 = generateLetter("PENDING", "2");
+      const newLetter1 = generateLetter("ACCEPTED", "1");
+      const newLetter2 = generateLetter("ACCEPTED", "2");
+      (mockedDeps.letterQueueRepository.deleteLetter as jest.Mock)
+        .mockResolvedValueOnce({})
+        .mockRejectedValueOnce(new Error("DynamoDB error"));
+
+      const testData = generateKinesisEvent([
+        generateModifyRecord(oldLetter1, newLetter1),
+        generateModifyRecord(oldLetter2, newLetter2),
+      ]);
+      await handler(testData, mockDeep<Context>(), jest.fn());
+
+      assertSuccessMetricLogged(1);
+      assertFailureMetricLogged(1);
+    });
+
+    it("does not count a replayed insert as a success or failure", async () => {
       const handler = createHandler(mockedDeps);
       const newLetter1 = generateLetter("PENDING", "1");
       const newLetter2 = generateLetter("PENDING", "2");
+
       (mockedDeps.letterQueueRepository.putLetter as jest.Mock)
         .mockRejectedValueOnce(new LetterAlreadyExistsError("supplier1", "1"))
         .mockResolvedValueOnce({});
@@ -233,6 +293,26 @@ describe("update-letter-queue Lambda", () => {
       const testData = generateKinesisEvent([
         generateInsertRecord(newLetter1),
         generateInsertRecord(newLetter2),
+      ]);
+      await handler(testData, mockDeep<Context>(), jest.fn());
+
+      assertSuccessMetricLogged(1);
+      assertFailureMetricLogged(0);
+    });
+
+    it("does not count a replayed delete as a success or failure", async () => {
+      const handler = createHandler(mockedDeps);
+      const oldLetter1 = generateLetter("PENDING", "1");
+      const oldLetter2 = generateLetter("PENDING", "2");
+      const newLetter1 = generateLetter("ACCEPTED", "1");
+      const newLetter2 = generateLetter("ACCEPTED", "2");
+      (mockedDeps.letterQueueRepository.deleteLetter as jest.Mock)
+        .mockRejectedValueOnce(new LetterDoesNotExistError("supplier1", "1"))
+        .mockResolvedValueOnce({});
+
+      const testData = generateKinesisEvent([
+        generateModifyRecord(oldLetter1, newLetter1),
+        generateModifyRecord(oldLetter2, newLetter2),
       ]);
       await handler(testData, mockDeep<Context>(), jest.fn());
 
