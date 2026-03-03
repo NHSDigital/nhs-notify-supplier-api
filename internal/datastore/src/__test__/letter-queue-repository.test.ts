@@ -1,3 +1,4 @@
+import { GetCommand } from "@aws-sdk/lib-dynamodb";
 import { Logger } from "pino";
 import {
   DBContext,
@@ -7,8 +8,9 @@ import {
 } from "./db";
 import LetterQueueRepository from "../letter-queue-repository";
 import { InsertPendingLetter } from "../types";
-import { LetterAlreadyExistsError } from "../errors";
+import { LetterAlreadyExistsError } from "../letter-already-exists-error";
 import { createTestLogger } from "./logs";
+import { LetterDoesNotExistError } from "../letter-does-not-exist-error";
 
 function createLetter(letterId = "letter1"): InsertPendingLetter {
   return {
@@ -77,6 +79,7 @@ describe("LetterQueueRepository", () => {
       expect(timestampInMillis).toBeGreaterThanOrEqual(before);
       expect(timestampInMillis).toBeLessThanOrEqual(after);
       assertTtl(pendingLetter.ttl, before, after);
+      expect(await letterExists(db, "supplier1", "letter1")).toBe(true);
     });
 
     it("throws LetterAlreadyExistsError when creating a letter which already exists", async () => {
@@ -101,4 +104,48 @@ describe("LetterQueueRepository", () => {
       ).rejects.toThrow("Cannot do operations on a non-existent table");
     });
   });
+
+  describe("deleteLetter", () => {
+    it("deletes a letter from the database", async () => {
+      await letterQueueRepository.putLetter(createLetter());
+
+      await letterQueueRepository.deleteLetter("supplier1", "letter1");
+
+      expect(await letterExists(db, "supplier1", "letter1")).toBe(false);
+    });
+
+    it("throws an error when the letter does not exist", async () => {
+      await expect(
+        letterQueueRepository.deleteLetter("supplier1", "letter1"),
+      ).rejects.toThrow(LetterDoesNotExistError);
+    });
+
+    it("rethrows errors from DynamoDB when deleting a letter", async () => {
+      const misconfiguredRepository = new LetterQueueRepository(
+        db.docClient,
+        logger,
+        {
+          ...db.config,
+          letterQueueTableName: "nonexistent-table",
+        },
+      );
+      await expect(
+        misconfiguredRepository.deleteLetter("supplier1", "letter1"),
+      ).rejects.toThrow("Cannot do operations on a non-existent table");
+    });
+  });
 });
+
+async function letterExists(
+  db: DBContext,
+  supplierId: string,
+  letterId: string,
+): Promise<boolean> {
+  const result = await db.docClient.send(
+    new GetCommand({
+      TableName: db.config.letterQueueTableName,
+      Key: { supplierId, letterId },
+    }),
+  );
+  return result.Item !== undefined;
+}

@@ -1,11 +1,16 @@
-import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
+import {
+  DeleteCommand,
+  DynamoDBDocumentClient,
+  PutCommand,
+} from "@aws-sdk/lib-dynamodb";
 import { Logger } from "pino";
 import {
   InsertPendingLetter,
   PendingLetter,
   PendingLetterSchema,
 } from "./types";
-import { LetterAlreadyExistsError } from "./errors";
+import { LetterAlreadyExistsError } from "./letter-already-exists-error";
+import { LetterDoesNotExistError } from "./letter-does-not-exist-error";
 
 type LetterQueueRepositoryConfig = {
   letterQueueTableName: string;
@@ -51,5 +56,25 @@ export default class LetterQueueRepository {
       throw error;
     }
     return PendingLetterSchema.parse(pendingLetter);
+  }
+
+  async deleteLetter(supplierId: string, letterId: string): Promise<void> {
+    try {
+      await this.ddbClient.send(
+        new DeleteCommand({
+          TableName: this.config.letterQueueTableName,
+          Key: { supplierId, letterId },
+          ConditionExpression: "attribute_exists(letterId)",
+        }),
+      );
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.name === "ConditionalCheckFailedException"
+      ) {
+        throw new LetterDoesNotExistError(supplierId, letterId);
+      }
+      throw error;
+    }
   }
 }
