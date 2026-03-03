@@ -3,7 +3,7 @@ resource "aws_dynamodb_table" "letter_queue" {
   billing_mode = "PAY_PER_REQUEST"
 
   hash_key  = "supplierId"
-  range_key = "queueTimestamp"
+  range_key = "letterId"
 
   ttl {
     attribute_name = "ttl"
@@ -11,8 +11,8 @@ resource "aws_dynamodb_table" "letter_queue" {
   }
 
   local_secondary_index {
-    name            = "letterId-index"
-    range_key       = "letterId"
+    name            = "queueTimestamp-index"
+    range_key       = "queueTimestamp"
     projection_type = "ALL"
   }
 
