@@ -13,3 +13,12 @@ output "s3_bucket_event_cache" {
     bucket = module.s3bucket_event_cache[0].bucket
   } : {}
 }
+
+# CloudWatch Anomaly Detection Alarm
+output "subscriber_anomaly_alarm" {
+  description = "Subscriber anomaly detection alarm details"
+  value = var.enable_event_anomaly_detection ? {
+    arn  = aws_cloudwatch_metric_alarm.subscriber_anomaly[0].arn
+    name = aws_cloudwatch_metric_alarm.subscriber_anomaly[0].alarm_name
+  } : null
+}
