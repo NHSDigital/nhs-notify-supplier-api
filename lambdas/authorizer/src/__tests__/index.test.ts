@@ -35,7 +35,7 @@ const mockedDeps: jest.Mocked<Deps> = {
   } as unknown as pino.Logger,
   env: {
     CLOUDWATCH_NAMESPACE: "cloudwatch-namespace",
-    CLIENT_CERTIFICATE_EXPIRATION_ALERT_DAYS: 14,
+    CLIENT_CERTIFICATE_EXPIRATION_ALERT_DAYS: 30,
     APIM_SUPPLIER_ID_HEADER: "NHSD-Supplier-ID",
   } as unknown as EnvVars,
   supplierRepo: {
@@ -74,10 +74,11 @@ describe("Authorizer Lambda Function", () => {
   });
 
   describe("Certificate expiry check", () => {
+    const currentDate = new Date("2025-11-01T14:19:00Z");
     beforeEach(() => {
       jest
         .useFakeTimers({ doNotFake: ["nextTick"] })
-        .setSystemTime(new Date("2025-11-03T14:19:00Z"));
+        .setSystemTime(currentDate);
       (metricScope as jest.Mock).mockClear();
       (mockedDeps.logger.warn as jest.Mock).mockClear();
       const metricsMock = jest.requireMock(
@@ -103,7 +104,7 @@ describe("Authorizer Lambda Function", () => {
 
     it("Should log CloudWatch metric when the certificate expiry threshold is reached", async () => {
       mockEvent.requestContext.identity.clientCert = buildCertWithExpiry(
-        "2025-11-17T14:19:00Z",
+        "2025-11-31T14:19:00Z",
       );
 
       const handler = createAuthorizerHandler(mockedDeps);
@@ -117,19 +118,19 @@ describe("Authorizer Lambda Function", () => {
       expect(metricScope).toHaveBeenCalledTimes(1);
       expect(mockedDeps.logger.warn).toHaveBeenCalledWith({
         description: "APIM Certificate expiry",
-        days: 14,
+        days: 30,
       });
       expect(metricsMock.setNamespace).toHaveBeenCalledWith("authorizer");
       expect(metricsMock.putMetric).toHaveBeenCalledWith(
         "apim-client-certificate-near-expiry",
-        14,
+        30,
         "Count",
       );
     });
 
     it("Should not log CloudWatch metric when the certificate expiry threshold is not yet reached", async () => {
       mockEvent.requestContext.identity.clientCert = buildCertWithExpiry(
-        "2025-11-18T14:19:00Z",
+        "2026-01-01T14:19:00Z",
       );
 
       const handler = createAuthorizerHandler(mockedDeps);
