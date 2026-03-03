@@ -12,11 +12,11 @@ import {
   KinesisStreamEvent,
   KinesisStreamRecordPayload,
 } from "aws-lambda";
+import { Unit } from "aws-embedded-metrics";
 import { Deps } from "../deps";
 import createHandler from "../update-letter-queue";
 import { EnvVars } from "../env";
 import { LetterStatus } from "../../../api-handler/src/contracts/letters";
-import { Unit } from "aws-embedded-metrics";
 
 const mockedDeps: jest.Mocked<Deps> = {
   letterQueueRepository: {
