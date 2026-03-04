@@ -1,0 +1,2062 @@
+{
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "exec": [
+          "var uuid = require('uuid');",
+          "",
+          "//assign the message batch reference",
+          "pm.variables.set(\"x_request_id\", uuid.v4());",
+          "",
+          "//assign the correlation id",
+          "pm.variables.set(\"correlation_id\", uuid.v4());"
+        ],
+        "packages": {},
+        "requests": {},
+        "type": "text/javascript"
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "exec": [
+          ""
+        ],
+        "packages": {},
+        "requests": {},
+        "type": "text/javascript"
+      }
+    }
+  ],
+  "info": {
+    "_collection_link": "https://go.postman.co/collection/47311855-76fbd310-c09c-4723-8cc5-b84e760183f3?source=collection_link",
+    "_exporter_id": "47311855",
+    "_postman_id": "76fbd310-c09c-4723-8cc5-b84e760183f3",
+    "description": "Collection lets you execute a set of pre-generated requests to simulate responses from our sandbox environment. This environment is ready to use without any authentication or prior setup.\n\nFor further information please refer to [the documentation](https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier).",
+    "name": "NHS Notify Supplier API - Sandbox",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "item": [
+        {
+          "item": [
+            {
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 200\", () => {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "const jsonData = pm.response.json();",
+                      "pm.test(\"Response Body contains data field and status\", () => {",
+                      "    pm.expect(jsonData).to.have.property(\"data\");",
+                      "    pm.expect(jsonData.data.attributes).to.have.property(\"status\");",
+                      "});",
+                      ""
+                    ],
+                    "packages": {},
+                    "requests": {},
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "packages": {},
+                    "requests": {},
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "name": "200 Get Letter Status",
+              "request": {
+                "description": "Get details the status of a letter.",
+                "header": [
+                  {
+                    "disabled": true,
+                    "key": "Accept",
+                    "value": "application/vnd.api+json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/vnd.api+json"
+                  },
+                  {
+                    "key": "X-Correlation-Id",
+                    "value": "{{correlation_id}}"
+                  },
+                  {
+                    "key": "X-Request-ID",
+                    "value": "{{x_request_id}}"
+                  }
+                ],
+                "method": "GET",
+                "url": {
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "letters",
+                    ":id"
+                  ],
+                  "raw": "{{baseUrl}}/letters/:id",
+                  "variable": [
+                    {
+                      "description": "(Required) Unique identifier of this resource",
+                      "key": "id",
+                      "value": "2AL5eYSWGzCHlGmzNxuqVusPxDg"
+                    }
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "_postman_previewlanguage": "json",
+                  "body": "",
+                  "code": 200,
+                  "cookie": [],
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/vnd.api+json"
+                    }
+                  ],
+                  "name": "200 Get Letter Status - PENDING",
+                  "originalRequest": {
+                    "header": [
+                      {
+                        "description": "(Required) Unique request identifier, in the format of a GUID",
+                        "key": "X-Request-ID",
+                        "value": "dcb9c8dc-c2f4-4d5f-8674-a2e913e040b2"
+                      },
+                      {
+                        "description": "An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place.\nThe ID will be returned in a response header.",
+                        "key": "X-Correlation-ID",
+                        "value": "11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/vnd.api+json"
+                      }
+                    ],
+                    "method": "GET",
+                    "url": {
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "letters",
+                        ":id"
+                      ],
+                      "raw": "{{baseUrl}}/letters/:id",
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "24L5eYSWGzCHlGmzNxuqVusPxDg"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK"
+                },
+                {
+                  "_postman_previewlanguage": "json",
+                  "body": "",
+                  "code": 200,
+                  "cookie": [],
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/vnd.api+json"
+                    }
+                  ],
+                  "name": "200 Get Letter Status - ACCEPTED",
+                  "originalRequest": {
+                    "header": [
+                      {
+                        "description": "(Required) Unique request identifier, in the format of a GUID",
+                        "key": "X-Request-ID",
+                        "value": "dcb9c8dc-c2f4-4d5f-8674-a2e913e040b2"
+                      },
+                      {
+                        "description": "An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place.\nThe ID will be returned in a response header.",
+                        "key": "X-Correlation-ID",
+                        "value": "11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/vnd.api+json"
+                      }
+                    ],
+                    "method": "GET",
+                    "url": {
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "letters",
+                        ":id"
+                      ],
+                      "raw": "{{baseUrl}}/letters/:id",
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "2AL5eYSWGzCHlGmzNxuqVusPxDg"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK"
+                },
+                {
+                  "_postman_previewlanguage": "json",
+                  "body": "",
+                  "code": 200,
+                  "cookie": [],
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/vnd.api+json"
+                    }
+                  ],
+                  "name": "200 Get Letter Status - PRINTED",
+                  "originalRequest": {
+                    "header": [
+                      {
+                        "description": "(Required) Unique request identifier, in the format of a GUID",
+                        "key": "X-Request-ID",
+                        "value": "dcb9c8dc-c2f4-4d5f-8674-a2e913e040b2"
+                      },
+                      {
+                        "description": "An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place.\nThe ID will be returned in a response header.",
+                        "key": "X-Correlation-ID",
+                        "value": "11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/vnd.api+json"
+                      }
+                    ],
+                    "method": "GET",
+                    "url": {
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "letters",
+                        ":id"
+                      ],
+                      "raw": "{{baseUrl}}/letters/:id",
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "2BL5eYSWGzCHlGmzNxuqVusPxDg"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK"
+                },
+                {
+                  "_postman_previewlanguage": "json",
+                  "body": "",
+                  "code": 200,
+                  "cookie": [],
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/vnd.api+json"
+                    }
+                  ],
+                  "name": "200 Get Letter Status - ENCLOSED",
+                  "originalRequest": {
+                    "header": [
+                      {
+                        "description": "(Required) Unique request identifier, in the format of a GUID",
+                        "key": "X-Request-ID",
+                        "value": "dcb9c8dc-c2f4-4d5f-8674-a2e913e040b2"
+                      },
+                      {
+                        "description": "An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place.\nThe ID will be returned in a response header.",
+                        "key": "X-Correlation-ID",
+                        "value": "11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/vnd.api+json"
+                      }
+                    ],
+                    "method": "GET",
+                    "url": {
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "letters",
+                        ":id"
+                      ],
+                      "raw": "{{baseUrl}}/letters/:id",
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "2CL5eYSWGzCHlGmzNxuqVusPxDg"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK"
+                },
+                {
+                  "_postman_previewlanguage": "json",
+                  "body": "",
+                  "code": 200,
+                  "cookie": [],
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/vnd.api+json"
+                    }
+                  ],
+                  "name": "200 Get Letter Status - DISPATCHED",
+                  "originalRequest": {
+                    "header": [
+                      {
+                        "description": "(Required) Unique request identifier, in the format of a GUID",
+                        "key": "X-Request-ID",
+                        "value": "dcb9c8dc-c2f4-4d5f-8674-a2e913e040b2"
+                      },
+                      {
+                        "description": "An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place.\nThe ID will be returned in a response header.",
+                        "key": "X-Correlation-ID",
+                        "value": "11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/vnd.api+json"
+                      }
+                    ],
+                    "method": "GET",
+                    "url": {
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "letters",
+                        ":id"
+                      ],
+                      "raw": "{{baseUrl}}/letters/:id",
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "2DL5eYSWGzCHlGmzNxuqVusPxDg"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK"
+                },
+                {
+                  "_postman_previewlanguage": "json",
+                  "body": "",
+                  "code": 200,
+                  "cookie": [],
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/vnd.api+json"
+                    }
+                  ],
+                  "name": "200 Get Letter Status - DELIVERED",
+                  "originalRequest": {
+                    "header": [
+                      {
+                        "description": "(Required) Unique request identifier, in the format of a GUID",
+                        "key": "X-Request-ID",
+                        "value": "dcb9c8dc-c2f4-4d5f-8674-a2e913e040b2"
+                      },
+                      {
+                        "description": "An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place.\nThe ID will be returned in a response header.",
+                        "key": "X-Correlation-ID",
+                        "value": "11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/vnd.api+json"
+                      }
+                    ],
+                    "method": "GET",
+                    "url": {
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "letters",
+                        ":id"
+                      ],
+                      "raw": "{{baseUrl}}/letters/:id",
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "2EL5eYSWGzCHlGmzNxuqVusPxDg"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK"
+                },
+                {
+                  "_postman_previewlanguage": "json",
+                  "body": "",
+                  "code": 200,
+                  "cookie": [],
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/vnd.api+json"
+                    }
+                  ],
+                  "name": "200 Get Letter Status - REJECTED",
+                  "originalRequest": {
+                    "header": [
+                      {
+                        "description": "(Required) Unique request identifier, in the format of a GUID",
+                        "key": "X-Request-ID",
+                        "value": "dcb9c8dc-c2f4-4d5f-8674-a2e913e040b2"
+                      },
+                      {
+                        "description": "An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place.\nThe ID will be returned in a response header.",
+                        "key": "X-Correlation-ID",
+                        "value": "11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/vnd.api+json"
+                      }
+                    ],
+                    "method": "GET",
+                    "url": {
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "letters",
+                        ":id"
+                      ],
+                      "raw": "{{baseUrl}}/letters/:id",
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "2WL5eYSWGzCHlGmzNxuqVusPxDg"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK"
+                },
+                {
+                  "_postman_previewlanguage": "json",
+                  "body": "",
+                  "code": 200,
+                  "cookie": [],
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/vnd.api+json"
+                    }
+                  ],
+                  "name": "200 Get Letter Status - CANCELLED",
+                  "originalRequest": {
+                    "header": [
+                      {
+                        "description": "(Required) Unique request identifier, in the format of a GUID",
+                        "key": "X-Request-ID",
+                        "value": "dcb9c8dc-c2f4-4d5f-8674-a2e913e040b2"
+                      },
+                      {
+                        "description": "An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place.\nThe ID will be returned in a response header.",
+                        "key": "X-Correlation-ID",
+                        "value": "11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/vnd.api+json"
+                      }
+                    ],
+                    "method": "GET",
+                    "url": {
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "letters",
+                        ":id"
+                      ],
+                      "raw": "{{baseUrl}}/letters/:id",
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "2XL5eYSWGzCHlGmzNxuqVusPxDg"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK"
+                },
+                {
+                  "_postman_previewlanguage": "json",
+                  "body": "",
+                  "code": 200,
+                  "cookie": [],
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/vnd.api+json"
+                    }
+                  ],
+                  "name": "200 Get Letter Status - FAILED",
+                  "originalRequest": {
+                    "header": [
+                      {
+                        "description": "(Required) Unique request identifier, in the format of a GUID",
+                        "key": "X-Request-ID",
+                        "value": "dcb9c8dc-c2f4-4d5f-8674-a2e913e040b2"
+                      },
+                      {
+                        "description": "An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place.\nThe ID will be returned in a response header.",
+                        "key": "X-Correlation-ID",
+                        "value": "11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/vnd.api+json"
+                      }
+                    ],
+                    "method": "GET",
+                    "url": {
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "letters",
+                        ":id"
+                      ],
+                      "raw": "{{baseUrl}}/letters/:id",
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "2YL5eYSWGzCHlGmzNxuqVusPxDg"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK"
+                },
+                {
+                  "_postman_previewlanguage": "json",
+                  "body": "",
+                  "code": 200,
+                  "cookie": [],
+                  "header": [
+                    {
+                      "key": "Content-Type",
+                      "value": "application/vnd.api+json"
+                    }
+                  ],
+                  "name": "200 Get Letter Status - RETURNED",
+                  "originalRequest": {
+                    "header": [
+                      {
+                        "description": "(Required) Unique request identifier, in the format of a GUID",
+                        "key": "X-Request-ID",
+                        "value": "dcb9c8dc-c2f4-4d5f-8674-a2e913e040b2"
+                      },
+                      {
+                        "description": "An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place.\nThe ID will be returned in a response header.",
+                        "key": "X-Correlation-ID",
+                        "value": "11C46F5F-CDEF-4865-94B2-0EE0EDCC26DA"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "application/vnd.api+json"
+                      }
+                    ],
+                    "method": "GET",
+                    "url": {
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "letters",
+                        ":id"
+                      ],
+                      "raw": "{{baseUrl}}/letters/:id",
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "2ZL5eYSWGzCHlGmzNxuqVusPxDg"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK"
+                }
+              ]
+            },
+            {
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 404\", () => {",
+                      "    pm.response.to.have.status(404);",
+                      "});",
+                      "",
+                      "const jsonData = pm.response.json();",
+                      "pm.test(\"Response Body contains errors with correct code\", () => {",
+                      "    pm.expect(jsonData).to.have.property(\"errors\");",
+                      "    pm.expect(jsonData.errors[0].code).to.equal(\"NOTIFY_RESOURCE_NOT_FOUND\");",
+                      "});"
+                    ],
+                    "packages": {},
+                    "requests": {},
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "packages": {},
+                    "requests": {},
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "name": "404 Not Found",
+              "request": {
+                "description": "Get details the status of a letter.",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/vnd.api+json"
+                  },
+                  {
+                    "description": "An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place.\nThe ID will be returned in a response header.",
+                    "key": "X-Correlation-Id",
+                    "value": "{{correlation_id}}"
+                  },
+                  {
+                    "key": "X-Request-ID",
+                    "value": "{{x_request_id}}"
+                  }
+                ],
+                "method": "GET",
+                "url": {
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "letters",
+                    ":id"
+                  ],
+                  "raw": "{{baseUrl}}/letters/:id",
+                  "variable": [
+                    {
+                      "description": "(Required) Unique identifier of this resource",
+                      "key": "id",
+                      "value": "24L5eYSWGzCHlGmzNxuqVusP"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ],
+          "name": "Get Letter Status"
+        },
+        {
+          "item": [
+            {
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 202\", () => {",
+                      "    pm.expect(pm.response.code).to.equal(202);",
+                      "});"
+                    ],
+                    "packages": {},
+                    "requests": {},
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "packages": {},
+                    "requests": {},
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "name": "200 - PatchLetter",
+              "request": {
+                "body": {
+                  "mode": "raw",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  },
+                  "raw": "{\n  \"data\": {\n    \"id\": \"2WL5eYSWGzCHlGmzNxuqVusPxDg\",\n    \"type\": \"Letter\",\n    \"attributes\": {\n      \"status\": \"ACCEPTED\"\n    }\n  }\n}"
+                },
+                "header": [
+                  {
+                    "key": "X-Request-ID",
+                    "type": "text",
+                    "value": "{{x_request_id}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "type": "text",
+                    "value": "application/vnd.api+json"
+                  },
+                  {
+                    "key": "X-Correlation-ID",
+                    "type": "text",
+                    "value": "{{correlation_id}}"
+                  }
+                ],
+                "method": "PATCH",
+                "url": {
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "letters",
+                    ":id"
+                  ],
+                  "raw": "{{baseUrl}}/letters/:id",
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "24L5eYSWGzCHlGmzNxuqVusPxDg"
+                    }
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "_postman_previewlanguage": "Text",
+                  "body": "",
+                  "cookie": [],
+                  "header": [],
+                  "name": "200 - PatchLetter-PENDING",
+                  "originalRequest": {
+                    "body": {
+                      "mode": "raw",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      },
+                      "raw": "{\n  \"data\": {\n    \"attributes\": {\n      \"status\": \"PENDING\"\n    },\n    \"id\": \"2WL5eYSWGzCHlGmzNxuqVusPxDg\",\n    \"type\": \"Letter\"\n  }\n}"
+                    },
+                    "header": [
+                      {
+                        "key": "X-Request-ID",
+                        "type": "text",
+                        "value": "{{x_request_id}}"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "type": "text",
+                        "value": "application/vnd.api+json"
+                      },
+                      {
+                        "key": "X-Correlation-ID",
+                        "type": "text",
+                        "value": "{{correlation_id}}"
+                      }
+                    ],
+                    "method": "PATCH",
+                    "url": {
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "letters",
+                        ":id"
+                      ],
+                      "raw": "{{baseUrl}}/letters/:id",
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "24L5eYSWGzCHlGmzNxuqVusPxDg"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "_postman_previewlanguage": "Text",
+                  "body": "",
+                  "cookie": [],
+                  "header": [],
+                  "name": "200 - PatchLetter-CANCELLED",
+                  "originalRequest": {
+                    "body": {
+                      "mode": "raw",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      },
+                      "raw": "\n{\n  \"data\": {\n    \"attributes\": {\n      \"reasonCode\": 'R01',\n      \"reasonText\": \"failed validation\",\n      \"status\": \"CANCELLED\"\n    },\n    \"id\": \"2WL5eYSWGzCHlGmzNxuqVusPxDg\",\n    \"type\": \"Letter\"\n  }\n}"
+                    },
+                    "header": [
+                      {
+                        "key": "X-Request-ID",
+                        "type": "text",
+                        "value": "{{x_request_id}}"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "type": "text",
+                        "value": "application/vnd.api+json"
+                      },
+                      {
+                        "key": "X-Correlation-ID",
+                        "type": "text",
+                        "value": "{{correlation_id}}"
+                      }
+                    ],
+                    "method": "PATCH",
+                    "url": {
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "letters",
+                        ":id"
+                      ],
+                      "raw": "{{baseUrl}}/letters/:id",
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "24L5eYSWGzCHlGmzNxuqVusPxDg"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "_postman_previewlanguage": "Text",
+                  "body": "",
+                  "cookie": [],
+                  "header": [],
+                  "name": "200 - PatchLetter-ACCEPTED",
+                  "originalRequest": {
+                    "body": {
+                      "mode": "raw",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      },
+                      "raw": "{\n  \"data\": {\n    \"attributes\": {\n      \"status\": \"ACCEPTED\"\n    },\n    \"id\": \"2WL5eYSWGzCHlGmzNxuqVusPxDg\",\n    \"type\": \"Letter\"\n  }\n}"
+                    },
+                    "header": [
+                      {
+                        "key": "X-Request-ID",
+                        "type": "text",
+                        "value": "{{x_request_id}}"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "type": "text",
+                        "value": "application/vnd.api+json"
+                      },
+                      {
+                        "key": "X-Correlation-ID",
+                        "type": "text",
+                        "value": "{{correlation_id}}"
+                      }
+                    ],
+                    "method": "PATCH",
+                    "url": {
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "letters",
+                        ":id"
+                      ],
+                      "raw": "{{baseUrl}}/letters/:id",
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "24L5eYSWGzCHlGmzNxuqVusPxDg"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "_postman_previewlanguage": "Text",
+                  "body": "",
+                  "cookie": [],
+                  "header": [],
+                  "name": "200 - PatchLetter-DELIVERED",
+                  "originalRequest": {
+                    "body": {
+                      "mode": "raw",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      },
+                      "raw": "{\n  \"data\": {\n    \"attributes\": {\n      \"status\": \"DELIVERED\"\n    },\n    \"id\": \"2WL5eYSWGzCHlGmzNxuqVusPxDg\",\n    \"type\": \"Letter\"\n  }\n}\n"
+                    },
+                    "header": [
+                      {
+                        "key": "X-Request-ID",
+                        "type": "text",
+                        "value": "{{x_request_id}}"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "type": "text",
+                        "value": "application/vnd.api+json"
+                      },
+                      {
+                        "key": "X-Correlation-ID",
+                        "type": "text",
+                        "value": "{{correlation_id}}"
+                      }
+                    ],
+                    "method": "PATCH",
+                    "url": {
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "letters",
+                        ":id"
+                      ],
+                      "raw": "{{baseUrl}}/letters/:id",
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "24L5eYSWGzCHlGmzNxuqVusPxDg"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "_postman_previewlanguage": "Text",
+                  "body": "",
+                  "cookie": [],
+                  "header": [],
+                  "name": "200 - PatchLetter-DISPATCHED",
+                  "originalRequest": {
+                    "body": {
+                      "mode": "raw",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      },
+                      "raw": "{\n  \"data\": {\n    \"attributes\": {\n      \"status\": \"DISPATCHED\"\n    },\n    \"id\": \"2WL5eYSWGzCHlGmzNxuqVusPxDg\",\n    \"type\": \"Letter\"\n  }\n}"
+                    },
+                    "header": [
+                      {
+                        "key": "X-Request-ID",
+                        "type": "text",
+                        "value": "{{x_request_id}}"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "type": "text",
+                        "value": "application/vnd.api+json"
+                      },
+                      {
+                        "key": "X-Correlation-ID",
+                        "type": "text",
+                        "value": "{{correlation_id}}"
+                      }
+                    ],
+                    "method": "PATCH",
+                    "url": {
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "letters",
+                        ":id"
+                      ],
+                      "raw": "{{baseUrl}}/letters/:id",
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "24L5eYSWGzCHlGmzNxuqVusPxDg"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "_postman_previewlanguage": "Text",
+                  "body": "",
+                  "cookie": [],
+                  "header": [],
+                  "name": "200 - PatchLetter-ENCLOSED",
+                  "originalRequest": {
+                    "body": {
+                      "mode": "raw",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      },
+                      "raw": "{\n  \"data\": {\n    \"attributes\": {\n      \"status\": \"ENCLOSED\"\n    },\n    \"id\": \"2WL5eYSWGzCHlGmzNxuqVusPxDg\",\n    \"type\": \"Letter\"\n  }\n}"
+                    },
+                    "header": [
+                      {
+                        "key": "X-Request-ID",
+                        "type": "text",
+                        "value": "{{x_request_id}}"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "type": "text",
+                        "value": "application/vnd.api+json"
+                      },
+                      {
+                        "key": "X-Correlation-ID",
+                        "type": "text",
+                        "value": "{{correlation_id}}"
+                      }
+                    ],
+                    "method": "PATCH",
+                    "url": {
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "letters",
+                        ":id"
+                      ],
+                      "raw": "{{baseUrl}}/letters/:id",
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "24L5eYSWGzCHlGmzNxuqVusPxDg"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "_postman_previewlanguage": "Text",
+                  "body": "",
+                  "cookie": [],
+                  "header": [],
+                  "name": "200 - PatchLetter-FAILED",
+                  "originalRequest": {
+                    "body": {
+                      "mode": "raw",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      },
+                      "raw": "{\n  \"data\": {\n    \"attributes\": {\n      \"reasonCode\": 'R01',\n      \"reasonText\": \"failed validation\",\n      \"status\": \"FAILED\"\n    },\n    \"id\": \"2WL5eYSWGzCHlGmzNxuqVusPxDg\",\n    \"type\": \"Letter\"\n  }\n}"
+                    },
+                    "header": [
+                      {
+                        "key": "X-Request-ID",
+                        "type": "text",
+                        "value": "{{x_request_id}}"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "type": "text",
+                        "value": "application/vnd.api+json"
+                      },
+                      {
+                        "key": "X-Correlation-ID",
+                        "type": "text",
+                        "value": "{{correlation_id}}"
+                      }
+                    ],
+                    "method": "PATCH",
+                    "url": {
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "letters",
+                        ":id"
+                      ],
+                      "raw": "{{baseUrl}}/letters/:id",
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "24L5eYSWGzCHlGmzNxuqVusPxDg"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "_postman_previewlanguage": "Text",
+                  "body": "",
+                  "cookie": [],
+                  "header": [],
+                  "name": "200 - PatchLetter-PRINTED",
+                  "originalRequest": {
+                    "body": {
+                      "mode": "raw",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      },
+                      "raw": "{\n  \"data\": {\n    \"attributes\": {\n      \"status\": \"PRINTED\"\n    },\n    \"id\": \"2WL5eYSWGzCHlGmzNxuqVusPxDg\",\n    \"type\": \"Letter\"\n  }\n}"
+                    },
+                    "header": [
+                      {
+                        "key": "X-Request-ID",
+                        "type": "text",
+                        "value": "{{x_request_id}}"
+                      },
+                      {
+                        "key": "Content-Type",
+                        "type": "text",
+                        "value": "application/vnd.api+json"
+                      },
+                      {
+                        "key": "X-Correlation-ID",
+                        "type": "text",
+                        "value": "{{correlation_id}}"
+                      }
+                    ],
+                    "method": "PATCH",
+                    "url": {
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "letters",
+                        ":id"
+                      ],
+                      "raw": "{{baseUrl}}/letters/:id",
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "24L5eYSWGzCHlGmzNxuqVusPxDg"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 400\", () => {",
+                      "    pm.response.to.have.status(400);",
+                      "});"
+                    ],
+                    "packages": {},
+                    "requests": {},
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "name": "400 - Invalid Request",
+              "request": {
+                "body": {
+                  "mode": "raw",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  },
+                  "raw": "{\n  \"data\": {\n    \"attributes\": {\n      \"status\": \"INVALID_STATUS\"\n    },\n    \"id\": \"2WL5eYSWGzCHlGmzNxuqVusPxDg\",\n    \"type\": \"Letter\"\n  }\n}"
+                },
+                "header": [
+                  {
+                    "key": "X-Request-ID",
+                    "type": "text",
+                    "value": "{{x_request_id}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "type": "text",
+                    "value": "application/vnd.api+json"
+                  },
+                  {
+                    "key": "X-Correlation-ID",
+                    "type": "text",
+                    "value": "{{correlation_id}}"
+                  }
+                ],
+                "method": "PATCH",
+                "url": {
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "letters",
+                    ":id"
+                  ],
+                  "raw": "{{baseUrl}}/letters/:id",
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "{{id}}"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 404\", () => {",
+                      "    pm.response.to.have.status(404);",
+                      "});"
+                    ],
+                    "packages": {},
+                    "requests": {},
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "name": "404 - Not Found",
+              "request": {
+                "body": {
+                  "mode": "raw",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  },
+                  "raw": "{\n  \"data\": {\n    \"attributes\": {\n      \"status\": \"ACCEPTED\"\n    },\n    \"id\": \"123654789\",\n    \"type\": \"Letter\"\n  }\n}"
+                },
+                "header": [
+                  {
+                    "key": "X-Request-ID",
+                    "type": "text",
+                    "value": "{{x_request_id}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "type": "text",
+                    "value": "application/vnd.api+json"
+                  },
+                  {
+                    "key": "X-Correlation-ID",
+                    "type": "text",
+                    "value": "{{correlation_id}}"
+                  }
+                ],
+                "method": "PATCH",
+                "url": {
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "letters",
+                    ":id"
+                  ],
+                  "raw": "{{baseUrl}}/letters/:id",
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": ""
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ],
+          "name": "Update Letter Status"
+        },
+        {
+          "item": [
+            {
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 200\", () => {",
+                      "    pm.expect(pm.response.code).to.equal(200);",
+                      "});",
+                      "",
+                      "pm.test(\"Response Body contains data field and its size is correct\", () => {",
+                      "    const jsonData = pm.response.json();",
+                      "    pm.expect(jsonData).to.have.property(\"data\");",
+                      "    pm.expect(jsonData.data).to.be.an('array').and.have.length.greaterThanOrEqual(10);",
+                      "});",
+                      ""
+                    ],
+                    "packages": {},
+                    "requests": {},
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "packages": {},
+                    "requests": {},
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "name": "200 - Get List Of PENDING Letters",
+              "request": {
+                "header": [
+                  {
+                    "key": "X-Request-ID",
+                    "type": "text",
+                    "value": "{{x_request_id}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "type": "text",
+                    "value": "application/vnd.api+json"
+                  },
+                  {
+                    "key": "X-Correlation-ID",
+                    "type": "text",
+                    "value": "{{correlation_id}}"
+                  }
+                ],
+                "method": "GET",
+                "url": {
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "letters"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    }
+                  ],
+                  "raw": "{{baseUrl}}/letters?limit=10"
+                }
+              },
+              "response": []
+            },
+            {
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 400\", () => {",
+                      "    pm.response.to.have.status(400);",
+                      "});",
+                      "",
+                      "const jsonData = pm.response.json();",
+                      "pm.test(\"Response Body contains error message\", () => {",
+                      "    pm.expect(jsonData).to.have.property(\"message\");",
+                      "});",
+                      ""
+                    ],
+                    "packages": {},
+                    "requests": {},
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "name": "400 - GetLetters InCorrectQueryParam",
+              "request": {
+                "header": [
+                  {
+                    "key": "X-Request-ID",
+                    "type": "text",
+                    "value": "{{x_request_id}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "type": "text",
+                    "value": "application/vnd.api+json"
+                  },
+                  {
+                    "key": "X-Correlation-ID",
+                    "type": "text",
+                    "value": "{{correlation_id}}"
+                  }
+                ],
+                "method": "GET",
+                "url": {
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "letters"
+                  ],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "XX"
+                    }
+                  ],
+                  "raw": "{{baseUrl}}/letters?limit=XX"
+                }
+              },
+              "response": []
+            }
+          ],
+          "name": "Get List Of PENDING Letters"
+        },
+        {
+          "item": [
+            {
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 202\", () => {",
+                      "    pm.expect(pm.response.code).to.equal(202);",
+                      "});"
+                    ],
+                    "packages": {},
+                    "requests": {},
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "name": "202 - UpdateStatusMultiLetters",
+              "request": {
+                "body": {
+                  "mode": "raw",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  },
+                  "raw": "{\n  \"data\": [\n    {\n      \"attributes\": {\n        \"status\": \"PENDING\"\n      },\n      \"id\": \"2WL5eYSWGzCHlGmzNxuqVusPxDg\",\n      \"type\": \"Letter\"\n    },\n    {\n      \"attributes\": {\n        \"status\": \"ACCEPTED\"\n      },\n      \"id\": \"2WL5eYSWGzCHlGmzNxuqVusPxDg\",\n      \"type\": \"Letter\"\n    },\n    {\n      \"attributes\": {\n        \"status\": \"PRINTED\"\n      },\n      \"id\": \"2WL5eYSWGzCHlGmzNxuqVusPxDg\",\n      \"type\": \"Letter\"\n    },\n    {\n      \"attributes\": {\n        \"status\": \"ENCLOSED\"\n      },\n      \"id\": \"2WL5eYSWGzCHlGmzNxuqVusPxDg\",\n      \"type\": \"Letter\"\n    },\n    {\n      \"attributes\": {\n        \"status\": \"DISPATCHED\"\n      },\n      \"id\": \"2WL5eYSWGzCHlGmzNxuqVusPxDg\",\n      \"type\": \"Letter\"\n    },\n    {\n      \"attributes\": {\n        \"status\": \"DELIVERED\"\n      },\n      \"id\": \"2WL5eYSWGzCHlGmzNxuqVusPxDg\",\n      \"type\": \"Letter\"\n    },\n    {\n      \"attributes\": {\n        \"reasonCode\": \"R01\",\n        \"reasonText\": \"failed validation\",\n        \"status\": \"RETURNED\"\n      },\n      \"id\": \"2WL5eYSWGzCHlGmzNxuqVusPxDg\",\n      \"type\": \"Letter\"\n    },\n    {\n      \"attributes\": {\n        \"reasonCode\": \"R01\",\n        \"reasonText\": \"failed validation\",\n        \"status\": \"CANCELLED\"\n      },\n      \"id\": \"2WL5eYSWGzCHlGmzNxuqVusPxDg\",\n      \"type\": \"Letter\"\n    },\n    {\n      \"attributes\": {\n        \"reasonCode\": \"R01\",\n        \"reasonText\": \"failed validation\",\n        \"status\": \"FAILED\"\n      },\n      \"id\": \"2WL5eYSWGzCHlGmzNxuqVusPxDg\",\n      \"type\": \"Letter\"\n    },\n    {\n      \"attributes\": {\n        \"reasonCode\": \"R01\",\n        \"reasonText\": \"failed validation\",\n        \"status\": \"RETURNED\"\n      },\n      \"id\": \"2WL5eYSWGzCHlGmzNxuqVusPxDg\",\n      \"type\": \"Letter\"\n    }\n  ]\n}"
+                },
+                "header": [
+                  {
+                    "key": "X-Request-ID",
+                    "type": "text",
+                    "value": "{{x_request_id}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "type": "text",
+                    "value": "application/vnd.api+json"
+                  },
+                  {
+                    "key": "X-Correlation-ID",
+                    "type": "text",
+                    "value": "{{correlation_id}}"
+                  }
+                ],
+                "method": "POST",
+                "url": {
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "letters"
+                  ],
+                  "raw": "{{baseUrl}}/letters"
+                }
+              },
+              "response": []
+            },
+            {
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 404\", () => {",
+                      "    pm.expect(pm.response.code).to.equal(404);",
+                      "});"
+                    ],
+                    "packages": {},
+                    "requests": {},
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "name": "404 - Id Not Found",
+              "request": {
+                "body": {
+                  "mode": "raw",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  },
+                  "raw": "{\n  \"data\": [\n    {\n      \"attributes\": {\n        \"status\": \"PENDING\"\n      },\n      \"id\": \"123654789\",\n      \"type\": \"Letter\"\n    }\n  ]\n}"
+                },
+                "header": [
+                  {
+                    "key": "X-Request-ID",
+                    "type": "text",
+                    "value": "{{x_request_id}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "type": "text",
+                    "value": "application/vnd.api+json"
+                  },
+                  {
+                    "key": "X-Correlation-ID",
+                    "type": "text",
+                    "value": "{{correlation_id}}"
+                  }
+                ],
+                "method": "POST",
+                "url": {
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "letters"
+                  ],
+                  "raw": "{{baseUrl}}/letters"
+                }
+              },
+              "response": []
+            },
+            {
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 400\", () => {",
+                      "    pm.expect(pm.response.code).to.equal(400);",
+                      "});",
+                      "",
+                      "pm.test(\"Response contains error message\", () => {",
+                      "    const responseJson = pm.response.json();",
+                      "    pm.expect(responseJson.message).to.include(\"should be equal to one of the allowed values\");",
+                      "});"
+                    ],
+                    "packages": {},
+                    "requests": {},
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "name": "400 - Bad Request",
+              "request": {
+                "body": {
+                  "mode": "raw",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  },
+                  "raw": "{\n  \"data\": [\n    {\n      \"attributes\": {\n        \"status\": \"PENDING\"\n      },\n      \"id\": \"2WL5eYSWGzCHlGmzNxuqVusPxDg\",\n      \"type\": \"Letter\"\n    },\n    {\n      \"attributes\": {\n        \"status\": \"XX\"\n      },\n      \"id\": \"2WL5eYSWGzCHlGmzNxuqVusPxDg\",\n      \"type\": \"Letter\"\n    }\n  ]\n}"
+                },
+                "header": [
+                  {
+                    "key": "X-Request-ID",
+                    "type": "text",
+                    "value": "{{x_request_id}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "type": "text",
+                    "value": "application/vnd.api+json"
+                  },
+                  {
+                    "key": "X-Correlation-ID",
+                    "type": "text",
+                    "value": "{{correlation_id}}"
+                  }
+                ],
+                "method": "POST",
+                "url": {
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "letters"
+                  ],
+                  "raw": "{{baseUrl}}/letters"
+                }
+              },
+              "response": []
+            }
+          ],
+          "name": "Update Multiple Letter Status"
+        }
+      ],
+      "name": "Letters"
+    },
+    {
+      "item": [
+        {
+          "item": [
+            {
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 200\", () => {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test(\"Content type is pdf\", () => {",
+                      "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/pdf');",
+                      "});"
+                    ],
+                    "packages": {},
+                    "requests": {},
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "name": "200 Fetch Data File",
+              "request": {
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "type": "default",
+                    "value": "application/vnd.api+json"
+                  },
+                  {
+                    "key": "X-Correlation-Id",
+                    "type": "default",
+                    "value": "{{correlation_id}}"
+                  },
+                  {
+                    "key": "X-Request-ID",
+                    "type": "text",
+                    "value": "{{x_request_id}}"
+                  }
+                ],
+                "method": "GET",
+                "url": {
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "letters",
+                    ":id",
+                    "data"
+                  ],
+                  "query": [
+                    {
+                      "disabled": true,
+                      "key": "",
+                      "value": null
+                    }
+                  ],
+                  "raw": "{{baseUrl}}/letters/:id/data",
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "2AL5eYSWGzCHlGmzNxuqVusPxDg"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 404\", () => {",
+                      "    pm.response.to.have.status(404);",
+                      "});",
+                      ""
+                    ],
+                    "packages": {},
+                    "requests": {},
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "name": "404 Not Found",
+              "protocolProfileBehavior": {
+                "disabledSystemHeaders": {
+                  "accept": true
+                }
+              },
+              "request": {
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "type": "text",
+                    "value": "application/vnd.api+json"
+                  },
+                  {
+                    "key": "X-Correlation-Id",
+                    "type": "text",
+                    "value": "{{correlation_id}}"
+                  },
+                  {
+                    "key": "X-Request-ID",
+                    "type": "text",
+                    "value": "{{x_request_id}}"
+                  }
+                ],
+                "method": "GET",
+                "url": {
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "letters",
+                    ":id",
+                    "data"
+                  ],
+                  "raw": "{{baseUrl}}/letters/:id/data",
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "2AL5eYSWGzCHlGmzNxuqVusP"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            }
+          ],
+          "name": "Fetch Data File"
+        }
+      ],
+      "name": "Data"
+    },
+    {
+      "item": [
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Response Body contains data field and status\", () => {",
+                  "    pm.expect(jsonData).to.have.property(\"data\");",
+                  "    pm.expect(jsonData.data).to.have.property(\"id\");",
+                  "});",
+                  ""
+                ],
+                "packages": {},
+                "requests": {},
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "packages": {},
+                "requests": {},
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "201 - Create New record",
+          "protocolProfileBehavior": {
+            "disabledSystemHeaders": {
+              "content-type": true
+            }
+          },
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "headerFamily": "json",
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"data\": {\n    \"attributes\": {\n      \"groupId\": \"abc123\",\n      \"lineItem\": \"envelope-business-standard\",\n      \"quantity\": 22,\n      \"specificationId\": \"2WL5eYSWGzCHlGmzNxuqVusPxDg\",\n      \"stockRemaining\": 2000,\n      \"timestamp\": \"2023-11-17T14:27:51.413Z\"\n    },\n    \"type\": \"ManagementInformation\"\n  }\n}\n"
+            },
+            "header": [
+              {
+                "key": "X-Request-ID",
+                "type": "text",
+                "value": "{{x_request_id}}"
+              },
+              {
+                "key": "X-Correlation-ID",
+                "type": "text",
+                "value": "{{correlation_id}}"
+              },
+              {
+                "key": "Content-Type",
+                "type": "text",
+                "value": " application/vnd.api+json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "mi"
+              ],
+              "raw": "{{baseUrl}}/mi"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", () => {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Response Body contains data field and status\", () => {",
+                  "    pm.expect(jsonData.message).to.include(\"timestamp should match format\");",
+                  "});",
+                  ""
+                ],
+                "packages": {},
+                "requests": {},
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "400 - Invalid Request",
+          "protocolProfileBehavior": {
+            "disabledSystemHeaders": {
+              "content-type": true
+            }
+          },
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "headerFamily": "json",
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"data\": {\n    \"attributes\": {\n      \"groupId\": \"abc123\",\n      \"lineItem\": \"envelope-business-standard\",\n      \"quantity\": 22,\n      \"specificationId\": \"2WL5eYSWGzCHlGmzNxuqVusPxDg\",\n      \"stockRemaining\": 2000,\n      \"timestamp\": \"yesterday\"\n    },\n    \"type\": \"ManagementInformation\"\n  }\n}"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/vnd.api+json"
+              },
+              {
+                "key": "X-Request-ID",
+                "value": "{{x_request_id}}"
+              },
+              {
+                "key": "X-Correlation-ID",
+                "value": "{{correlation_id}}"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "mi"
+              ],
+              "raw": "{{baseUrl}}/mi"
+            }
+          },
+          "response": []
+        },
+        {
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", () => {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Response Body contains data field and status\", () => {",
+                  "    pm.expect(jsonData).to.have.property(\"errors\");",
+                  "    pm.expect(parseInt(jsonData.errors[0].status)).to.equal(404);",
+                  "});"
+                ],
+                "packages": {},
+                "requests": {},
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "name": "404 - Not Found",
+          "protocolProfileBehavior": {
+            "disabledSystemHeaders": {
+              "content-type": true
+            }
+          },
+          "request": {
+            "body": {
+              "mode": "raw",
+              "options": {
+                "raw": {
+                  "headerFamily": "json",
+                  "language": "json"
+                }
+              },
+              "raw": "{\n  \"data\": {\n    \"attributes\": {\n      \"groupId\": \"abc123\",\n      \"lineItem\": \"envelope-business-standard\",\n      \"quantity\": 22,\n      \"specificationId\": \"\",\n      \"stockRemaining\": 2000,\n      \"timestamp\": \"2023-11-17T14:27:51.413Z\"\n    },\n    \"type\": \"ManagementInformation\"\n  }\n}\n"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/vnd.api+json"
+              },
+              {
+                "description": "(Required) Unique request identifier, in the format of a GUID",
+                "key": "X-Request-ID",
+                "value": "{{x_request_id}}"
+              },
+              {
+                "description": "An optional ID which you can use to track transactions across multiple systems. It can take any value, but we recommend avoiding `.` characters. If not provided in the request, NHS Notify will default to a system generated ID in its place.\nThe ID will be returned in a response header.",
+                "key": "X-Correlation-ID",
+                "value": "{{correlation_id}}"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "mi"
+              ],
+              "raw": "{{baseUrl}}/mi"
+            }
+          },
+          "response": []
+        }
+      ],
+      "name": "MI"
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://internal-dev-sandbox.api.service.nhs.uk/nhs-notify-supplier-PR-164"
+    },
+    {
+      "key": "id",
+      "value": "24L5eYSWGzCHlGmzNxuqVusPxDg"
+    }
+  ]
+}

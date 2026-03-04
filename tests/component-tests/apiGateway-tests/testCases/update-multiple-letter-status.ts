@@ -6,6 +6,14 @@ import {
 } from "../../../helpers/common-types";
 import { SupplierApiLetters } from "../../../helpers/generate-fetch-test-data";
 
+export interface LetterUpdateAttributes {
+  status: string;
+  reasonCode?: string;
+  reasonText?: string;
+}
+
+export type LetterUpdatesById = Record<string, LetterUpdateAttributes>;
+
 export function postLettersRequestHeaders(): RequestHeaders {
   return {
     "NHSD-Supplier-ID": SUPPLIERID,
@@ -23,41 +31,14 @@ export function postLettersInvalidRequestHeaders(): RequestHeaders {
 }
 
 export function postValidRequestBody(
-  letters: SupplierApiLetters[],
+  updatesById: LetterUpdatesById,
 ): PostMessageRequestBody {
   return {
-    data: [
-      {
-        type: "Letter",
-        id: letters[0].id,
-        attributes: {
-          status: "ACCEPTED",
-        },
-      },
-      {
-        type: "Letter",
-        id: letters[1].id,
-        attributes: {
-          status: "REJECTED",
-          reasonCode: "R01",
-          reasonText: "Test Reason",
-        },
-      },
-      {
-        type: "Letter",
-        id: letters[2].id,
-        attributes: {
-          status: "PRINTED",
-        },
-      },
-      {
-        type: "Letter",
-        id: letters[3].id,
-        attributes: {
-          status: "CANCELLED",
-        },
-      },
-    ],
+    data: Object.entries(updatesById).map(([id, attributes]) => ({
+      type: "Letter",
+      id,
+      attributes,
+    })),
   };
 }
 
