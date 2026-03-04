@@ -27,4 +27,6 @@ module "eventsub" {
   enable_event_cache      = var.enable_event_cache
 
   shared_infra_account_id = var.shared_infra_account_id
+
+  access_logging_bucket = local.acct.s3_buckets["access_logs"]["id"]
 }
