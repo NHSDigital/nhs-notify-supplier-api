@@ -1,6 +1,6 @@
 # Queue to transport letter status amendment messages
 module "amendments_queue" {
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.24/terraform-sqs.zip"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.0.5/terraform-sqs.zip"
 
   name = "amendments_queue"
 
