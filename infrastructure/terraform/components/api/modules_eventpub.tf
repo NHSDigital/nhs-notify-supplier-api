@@ -1,5 +1,5 @@
 module "eventpub" {
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.0.4/terraform-eventpub.zip"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.0.6/terraform-eventpub.zip"
 
   name = "eventpub"
 
@@ -32,11 +32,10 @@ module "eventpub" {
     data.aws_iam_policy_document.eventcache[0].json
   ]
 
-  # CloudWatch Anomaly Detection for publishing
-  enable_event_publishing_anomaly_detection   = var.enable_event_publishing_anomaly_detection
-  event_publishing_anomaly_band_width         = var.event_publishing_anomaly_band_width
-  event_publishing_anomaly_evaluation_periods = var.event_publishing_anomaly_evaluation_periods
-  event_publishing_anomaly_period             = var.event_publishing_anomaly_period
+  enable_event_anomaly_detection   = var.enable_event_anomaly_detection
+  event_anomaly_band_width         = var.event_anomaly_band_width
+  event_anomaly_evaluation_periods = var.event_anomaly_evaluation_periods
+  event_anomaly_period             = var.event_anomaly_period
 }
 
 data "aws_iam_policy_document" "eventcache" {
