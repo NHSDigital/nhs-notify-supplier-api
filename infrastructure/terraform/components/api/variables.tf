@@ -221,5 +221,5 @@ variable "event_anomaly_period" {
 variable "event_anomaly_band_width" {
   type        = number
   description = "The width of the anomaly detection band. Higher values (e.g. 4-6) reduce sensitivity and noise, lower values (e.g. 2-3) increase sensitivity. Recommended: 2-4."
-  default     = 5
+  default     = 4
 }
