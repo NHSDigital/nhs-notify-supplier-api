@@ -21,12 +21,12 @@ module "eventpub" {
   event_cache_buffer_interval        = 500
   enable_sns_delivery_logging        = var.enable_sns_delivery_logging
   sns_success_logging_sample_percent = var.sns_success_logging_sample_percent
+  access_logging_bucket              = local.acct.s3_buckets["access_logs"]["id"]
 
   event_cache_expiry_days = 30
   enable_event_cache      = var.enable_event_cache
-
-  data_plane_bus_arn    = var.eventpub_data_plane_bus_arn
-  control_plane_bus_arn = var.eventpub_control_plane_bus_arn
+  data_plane_bus_arn      = var.eventpub_data_plane_bus_arn
+  control_plane_bus_arn   = var.eventpub_control_plane_bus_arn
 
   additional_policies_for_event_cache_bucket = [
     data.aws_iam_policy_document.eventcache[0].json
