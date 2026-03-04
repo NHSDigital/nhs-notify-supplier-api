@@ -1,5 +1,5 @@
 module "eventpub" {
-  source = "git::https://github.com/NHSDigital/nhs-notify-shared-modules.git//infrastructure/terraform/modules/eventpub?ref=3.0.4"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.0.4/terraform-eventpub.zip"
 
   name = "eventpub"
 

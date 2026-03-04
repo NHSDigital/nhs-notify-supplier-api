@@ -56,7 +56,7 @@ No requirements.
 | <a name="module_ddb_alarms_mi"></a> [ddb\_alarms\_mi](#module\_ddb\_alarms\_mi) | ../../modules/alarms-ddb | n/a |
 | <a name="module_ddb_alarms_suppliers"></a> [ddb\_alarms\_suppliers](#module\_ddb\_alarms\_suppliers) | ../../modules/alarms-ddb | n/a |
 | <a name="module_domain_truststore"></a> [domain\_truststore](#module\_domain\_truststore) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-s3bucket.zip | n/a |
-| <a name="module_eventpub"></a> [eventpub](#module\_eventpub) | git::https://github.com/NHSDigital/nhs-notify-shared-modules.git//infrastructure/terraform/modules/eventpub | 3.0.4 |
+| <a name="module_eventpub"></a> [eventpub](#module\_eventpub) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.0.4/terraform-eventpub.zip | n/a |
 | <a name="module_eventsub"></a> [eventsub](#module\_eventsub) | ../../modules/eventsub | n/a |
 | <a name="module_get_letter"></a> [get\_letter](#module\_get\_letter) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip | n/a |
 | <a name="module_get_letter_data"></a> [get\_letter\_data](#module\_get\_letter\_data) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip | n/a |
