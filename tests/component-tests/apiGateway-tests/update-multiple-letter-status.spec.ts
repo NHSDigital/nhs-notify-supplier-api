@@ -14,6 +14,7 @@ import {
 import {
   createTestData,
   getLettersBySupplier,
+  waitForLetterStatus,
 } from "../../helpers/generate-fetch-test-data";
 
 let baseUrl: string;
@@ -35,7 +36,18 @@ test.describe("API Gateway Tests to Verify post Status Endpoint", () => {
     }
 
     const headers = postLettersRequestHeaders();
-    const body = postValidRequestBody(letters);
+    const updatesById = {
+      [letters[0].id]: { status: "ACCEPTED" },
+      [letters[1].id]: {
+        status: "REJECTED",
+        reasonCode: "R01",
+        reasonText: "Test Reason",
+      },
+      [letters[2].id]: { status: "PRINTED" },
+      [letters[3].id]: { status: "CANCELLED" },
+    };
+
+    const body = postValidRequestBody(updatesById);
 
     const response = await request.post(`${baseUrl}/${SUPPLIER_LETTERS}`, {
       headers,
@@ -43,6 +55,17 @@ test.describe("API Gateway Tests to Verify post Status Endpoint", () => {
     });
 
     expect(response.status()).toBe(202);
+
+    await Promise.all(
+      Object.entries(updatesById).map(async ([id, attributes]) => {
+        const letter = await waitForLetterStatus(
+          SUPPLIERID,
+          id,
+          attributes.status,
+        );
+        expect(letter.status).toBe(attributes.status);
+      }),
+    );
   });
 
   test(`Post /letters returns 400 if request has invalid status`, async ({
@@ -107,7 +130,16 @@ test.describe("API Gateway Tests to Verify post Status Endpoint", () => {
     }
 
     const headers = postLettersInvalidRequestHeaders();
-    const body = postValidRequestBody(letters);
+    const body = postValidRequestBody({
+      [letters[0].id]: { status: "ACCEPTED" },
+      [letters[1].id]: {
+        status: "REJECTED",
+        reasonCode: "R01",
+        reasonText: "Test Reason",
+      },
+      [letters[2].id]: { status: "PRINTED" },
+      [letters[3].id]: { status: "CANCELLED" },
+    });
 
     const response = await request.post(`${baseUrl}/${SUPPLIER_LETTERS}`, {
       headers,
