@@ -1,5 +1,5 @@
 module "eventpub" {
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.0.4/terraform-eventpub.zip"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.0.6/terraform-eventpub.zip"
 
   name = "eventpub"
 
@@ -21,19 +21,23 @@ module "eventpub" {
   event_cache_buffer_interval        = 500
   enable_sns_delivery_logging        = var.enable_sns_delivery_logging
   sns_success_logging_sample_percent = var.sns_success_logging_sample_percent
+  access_logging_bucket              = local.acct.s3_buckets["access_logs"]["id"]
 
   event_cache_expiry_days = 30
   enable_event_cache      = var.enable_event_cache
-
-  data_plane_bus_arn    = var.eventpub_data_plane_bus_arn
-  control_plane_bus_arn = var.eventpub_control_plane_bus_arn
-
-  access_logging_bucket = local.acct.s3_buckets["access_logs"]["id"]
+  data_plane_bus_arn      = var.eventpub_data_plane_bus_arn
+  control_plane_bus_arn   = var.eventpub_control_plane_bus_arn
 
   additional_policies_for_event_cache_bucket = [
     data.aws_iam_policy_document.eventcache[0].json
   ]
+
+  enable_event_anomaly_detection   = var.enable_event_anomaly_detection
+  event_anomaly_band_width         = var.event_anomaly_band_width
+  event_anomaly_evaluation_periods = var.event_anomaly_evaluation_periods
+  event_anomaly_period             = var.event_anomaly_period
 }
+
 data "aws_iam_policy_document" "eventcache" {
   count = local.event_cache_bucket_name != null ? 1 : 0
   statement {
