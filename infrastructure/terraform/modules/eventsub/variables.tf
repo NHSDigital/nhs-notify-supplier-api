@@ -152,3 +152,9 @@ variable "glue_role_arn" {
   type        = string
   description = "ARN of the Glue execution role from the parent"
 }
+
+variable "access_logging_bucket" {
+  type        = string
+  description = "Name of S3 bucket to use for access logging"
+  default     = ""
+}

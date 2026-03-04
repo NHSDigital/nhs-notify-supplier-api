@@ -28,6 +28,8 @@ module "eventpub" {
   data_plane_bus_arn      = var.eventpub_data_plane_bus_arn
   control_plane_bus_arn   = var.eventpub_control_plane_bus_arn
 
+  access_logging_bucket = local.acct.s3_buckets["access_logs"]["id"]
+
   additional_policies_for_event_cache_bucket = [
     data.aws_iam_policy_document.eventcache[0].json
   ]

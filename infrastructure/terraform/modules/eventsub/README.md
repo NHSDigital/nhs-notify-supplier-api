@@ -11,6 +11,7 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_access_logging_bucket"></a> [access\_logging\_bucket](#input\_access\_logging\_bucket) | Name of S3 bucket to use for access logging | `string` | `""` | no |
 | <a name="input_aws_account_id"></a> [aws\_account\_id](#input\_aws\_account\_id) | The AWS Account ID (numeric) | `string` | n/a | yes |
 | <a name="input_component"></a> [component](#input\_component) | The name of the terraformscaffold component calling this module | `string` | n/a | yes |
 | <a name="input_default_tags"></a> [default\_tags](#input\_default\_tags) | Default tag map for application to all taggable resources in the module | `map(string)` | `{}` | no |
@@ -39,7 +40,7 @@
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_s3bucket_event_cache"></a> [s3bucket\_event\_cache](#module\_s3bucket\_event\_cache) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-s3bucket.zip | n/a |
+| <a name="module_s3bucket_event_cache"></a> [s3bucket\_event\_cache](#module\_s3bucket\_event\_cache) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.0.4/terraform-s3bucket.zip | n/a |
 ## Outputs
 
 | Name | Description |
