@@ -13,7 +13,7 @@ resource "aws_cloudwatch_metric_alarm" "subscriber_anomaly" {
     return_data = true
 
     metric {
-      metric_name = "NumberOfMessagesPublished"
+      metric_name = "NumberOfNotificationsDelivered"
       namespace   = "AWS/SNS"
       period      = var.event_anomaly_period
       stat        = "Sum"
@@ -27,7 +27,7 @@ resource "aws_cloudwatch_metric_alarm" "subscriber_anomaly" {
   metric_query {
     id          = "ad1"
     expression  = "ANOMALY_DETECTION_BAND(m1, ${var.event_anomaly_band_width})"
-    label       = "NumberOfMessagesPublished (expected)"
+    label       = "NumberOfNotificationsDelivered (expected)"
     return_data = true
   }
 
