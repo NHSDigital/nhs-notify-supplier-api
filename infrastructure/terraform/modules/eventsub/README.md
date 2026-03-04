@@ -40,7 +40,7 @@
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_s3bucket_event_cache"></a> [s3bucket\_event\_cache](#module\_s3bucket\_event\_cache) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.0.4/terraform-s3bucket.zip | n/a |
+| <a name="module_s3bucket_event_cache"></a> [s3bucket\_event\_cache](#module\_s3bucket\_event\_cache) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.0.6/terraform-s3bucket.zip | n/a |
 ## Outputs
 
 | Name | Description |
