@@ -1,0 +1,22 @@
+name: E2E tests
+description: "Run end-to-end tests for this repo"
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Install poetry and e2e test dependencies
+      shell: bash
+      run: |
+        pipx install poetry
+        cd tests/e2e-tests && poetry install
+
+    - name: Run e2e tests
+      shell: bash
+      run: |
+        echo "$INTERNAL_DEV_TEST_PEM" > "${GITHUB_WORKSPACE}/internal-dev-test-1.pem"
+        chmod 600 "${GITHUB_WORKSPACE}/internal-dev-test-1.pem"
+        export PROXY_NAME=nhs-notify-supplier--internal-dev--nhs-notify-supplier
+        export API_ENVIRONMENT=internal-dev
+        export NON_PROD_PRIVATE_KEY="${GITHUB_WORKSPACE}/internal-dev-test-1.pem"
+        make .internal-dev-test
