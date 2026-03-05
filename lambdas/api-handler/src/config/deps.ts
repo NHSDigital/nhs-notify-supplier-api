@@ -6,6 +6,7 @@ import { SNSClient } from "@aws-sdk/client-sns";
 import { Logger } from "pino";
 import {
   DBHealthcheck,
+  LetterQueueRepository,
   LetterRepository,
   MIRepository,
 } from "@internal/datastore";
@@ -17,6 +18,7 @@ export type Deps = {
   sqsClient: SQSClient;
   snsClient: SNSClient;
   letterRepo: LetterRepository;
+  letterQueueRepo: LetterQueueRepository;
   miRepo: MIRepository;
   dbHealthcheck: DBHealthcheck;
   logger: Logger;
@@ -38,6 +40,18 @@ function createLetterRepository(
   };
 
   return new LetterRepository(createDocumentClient(), log, config);
+}
+
+function createLetterQueueRepository(
+  log: Logger,
+  environment: EnvVars,
+): LetterQueueRepository {
+  const config = {
+    letterQueueTableName: environment.LETTER_QUEUE_TABLE_NAME,
+    letterQueueTtlHours: environment.LETTER_QUEUE_TTL_HOURS,
+  };
+
+  return new LetterQueueRepository(createDocumentClient(), log, config);
 }
 
 function createDBHealthcheck(environment: EnvVars): DBHealthcheck {
@@ -66,6 +80,7 @@ export function createDependenciesContainer(): Deps {
     sqsClient: new SQSClient(),
     snsClient: new SNSClient(),
     letterRepo: createLetterRepository(log, envVars),
+    letterQueueRepo: createLetterQueueRepository(log, envVars),
     miRepo: createMIRepository(log, envVars),
     dbHealthcheck: createDBHealthcheck(envVars),
     logger: log,
