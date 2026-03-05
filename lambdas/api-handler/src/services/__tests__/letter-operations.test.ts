@@ -49,7 +49,7 @@ describe("getPendingLetters", () => {
     jest.clearAllMocks();
   });
 
-  it("returns letters from the letter queue repository mapped to LetterBase", async () => {
+  it("returns letters from the letter queue repository", async () => {
     const mockRepo = {
       getLetters: jest.fn().mockResolvedValue([
         {
@@ -65,11 +65,24 @@ describe("getPendingLetters", () => {
           groupId: "g1",
         },
       ]),
+      updateLetterTimestamp: jest.fn(),
     };
 
     const result = await getPendingLetters("supplier1", 10, mockRepo as any);
 
     expect(mockRepo.getLetters).toHaveBeenCalledWith("supplier1", 10);
+    expect(mockRepo.updateLetterTimestamp).toHaveBeenNthCalledWith(
+      1,
+      "supplier1",
+      "id1",
+      600,
+    );
+    expect(mockRepo.updateLetterTimestamp).toHaveBeenNthCalledWith(
+      2,
+      "supplier1",
+      "id2",
+      600,
+    );
     expect(result).toEqual([
       { id: "id1", status: "PENDING", specificationId: "s1", groupId: "g1" },
       { id: "id2", status: "PENDING", specificationId: "s1", groupId: "g1" },

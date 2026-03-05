@@ -8,12 +8,7 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 import { Logger } from "pino";
 import z from "zod";
-import {
-  PendingLetter,
-  PendingLetterBase,
-  PendingLetterSchema,
-  PendingLetterSchemaBase,
-} from "./types";
+import { PendingLetter, PendingLetterBase, PendingLetterSchema } from "./types";
 import { LetterAlreadyExistsError } from "./letter-already-exists-error";
 import { LetterDoesNotExistError } from "./letter-does-not-exist-error";
 
@@ -86,7 +81,7 @@ export default class LetterQueueRepository {
   async getLetters(
     supplierId: string,
     limit: number,
-  ): Promise<PendingLetterBase[]> {
+  ): Promise<PendingLetter[]> {
     const result = await this.ddbClient.send(
       new QueryCommand({
         TableName: this.config.letterQueueTableName,
@@ -95,12 +90,11 @@ export default class LetterQueueRepository {
         ExpressionAttributeValues: {
           ":supplierId": supplierId,
         },
-        ProjectionExpression: "supplierId, letterId, specificationId, groupId",
         Limit: limit,
       }),
     );
 
-    return z.array(PendingLetterSchemaBase).parse(result.Items);
+    return z.array(PendingLetterSchema).parse(result.Items);
   }
 
   async updateLetterTimestamp(
