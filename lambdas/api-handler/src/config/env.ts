@@ -4,6 +4,8 @@ const EnvVarsSchema = z.object({
   SUPPLIER_ID_HEADER: z.string(),
   APIM_CORRELATION_HEADER: z.string(),
   LETTERS_TABLE_NAME: z.string(),
+  LETTER_QUEUE_TABLE_NAME: z.string(),
+  LETTER_QUEUE_TTL_HOURS: z.coerce.number().int(),
   MI_TABLE_NAME: z.string(),
   LETTER_TTL_HOURS: z.coerce.number().int(),
   MI_TTL_HOURS: z.coerce.number().int(),

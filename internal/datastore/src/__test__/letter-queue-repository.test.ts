@@ -7,12 +7,12 @@ import {
   setupDynamoDBContainer,
 } from "./db";
 import LetterQueueRepository from "../letter-queue-repository";
-import { InsertPendingLetter } from "../types";
+import { PendingLetterBase } from "../types";
 import { LetterAlreadyExistsError } from "../letter-already-exists-error";
 import { createTestLogger } from "./logs";
 import { LetterDoesNotExistError } from "../letter-does-not-exist-error";
 
-function createLetter(letterId = "letter1"): InsertPendingLetter {
+function createLetter(letterId = "letter1"): PendingLetterBase {
   return {
     letterId,
     supplierId: "supplier1",
@@ -47,38 +47,22 @@ describe("LetterQueueRepository", () => {
   afterEach(async () => {
     await deleteTables(db);
     jest.useRealTimers();
+    jest.restoreAllMocks();
   });
 
   afterAll(async () => {
     await db.container.stop();
   });
 
-  function assertTtl(ttl: number, before: number, after: number) {
-    const expectedLower = Math.floor(
-      before / 1000 + 60 * 60 * db.config.letterQueueTtlHours,
-    );
-    const expectedUpper = Math.floor(
-      after / 1000 + 60 * 60 * db.config.lettersTtlHours,
-    );
-    expect(ttl).toBeGreaterThanOrEqual(expectedLower);
-    expect(ttl).toBeLessThanOrEqual(expectedUpper);
-  }
-
   describe("putLetter", () => {
     it("adds a letter to the database", async () => {
-      const before = Date.now();
+      jest.useFakeTimers().setSystemTime(new Date("2026-03-04T13:15:45.000Z"));
 
       const pendingLetter =
         await letterQueueRepository.putLetter(createLetter());
 
-      const after = Date.now();
-
-      const timestampInMillis = new Date(
-        pendingLetter.queueTimestamp,
-      ).valueOf();
-      expect(timestampInMillis).toBeGreaterThanOrEqual(before);
-      expect(timestampInMillis).toBeLessThanOrEqual(after);
-      assertTtl(pendingLetter.ttl, before, after);
+      expect(pendingLetter.queueTimestamp).toBe("2026-03-04T13:15:45.000Z");
+      expect(pendingLetter.ttl).toBe(1_772_633_745);
       expect(await letterExists(db, "supplier1", "letter1")).toBe(true);
     });
 
@@ -134,18 +118,130 @@ describe("LetterQueueRepository", () => {
       ).rejects.toThrow("Cannot do operations on a non-existent table");
     });
   });
+
+  describe("getLetters", () => {
+    it("filters by supplierId", async () => {
+      await letterQueueRepository.putLetter(createLetter());
+
+      const letters = await letterQueueRepository.getLetters("supplier2", 1);
+
+      expect(letters).toHaveLength(0);
+    });
+
+    it("returns letters in timestamp order", async () => {
+      await letterQueueRepository.putLetter(createLetter("first-letter"));
+      await letterQueueRepository.putLetter(createLetter("second-letter"));
+      await letterQueueRepository.putLetter(createLetter("third-letter"));
+      await letterQueueRepository.putLetter(createLetter("fourth-letter"));
+      await letterQueueRepository.putLetter(createLetter("fifth-letter"));
+
+      const letters = await letterQueueRepository.getLetters("supplier1", 5);
+
+      expect(letters[0].letterId).toBe("first-letter");
+      expect(letters[1].letterId).toBe("second-letter");
+      expect(letters[2].letterId).toBe("third-letter");
+      expect(letters[3].letterId).toBe("fourth-letter");
+      expect(letters[4].letterId).toBe("fifth-letter");
+    });
+
+    it("limits results to the supplied number", async () => {
+      await letterQueueRepository.putLetter(createLetter("first-letter"));
+      await letterQueueRepository.putLetter(createLetter("second-letter"));
+      await letterQueueRepository.putLetter(createLetter("third-letter"));
+      await letterQueueRepository.putLetter(createLetter("fourth-letter"));
+
+      const letters = await letterQueueRepository.getLetters("supplier1", 3);
+
+      expect(letters).toHaveLength(3);
+      expect(letters[2].letterId).toBe("third-letter");
+    });
+  });
+
+  describe("updateLetterTimestamp", () => {
+    it("updates the queueTimestamp on an existing letter", async () => {
+      jest.useFakeTimers().setSystemTime(new Date("2026-03-04T13:15:45.000Z"));
+      await letterQueueRepository.putLetter(createLetter());
+
+      await letterQueueRepository.updateLetterTimestamp(
+        "supplier1",
+        "letter1",
+        600,
+      );
+
+      const letter = await getLetter(db, "supplier1", "letter1");
+      expect(letter?.queueTimestamp).toBe("2026-03-04T13:25:45.000Z");
+    });
+
+    it("throws LetterDoesNotExistError when the letter does not exist", async () => {
+      await expect(
+        letterQueueRepository.updateLetterTimestamp("supplier1", "letter1", 60),
+      ).rejects.toThrow(LetterDoesNotExistError);
+    });
+
+    it("throws an error when the letter is deleted part way through", async () => {
+      jest.spyOn(db.docClient, "send").mockImplementationOnce((_) => ({
+        // Fake the existence of the letter for the GetCommand
+        Item: {
+          ...createLetter(),
+          queueTimestamp: "2026-03-04T13:15:45.000Z",
+        },
+      }));
+
+      await expect(
+        letterQueueRepository.updateLetterTimestamp("supplier1", "letter1", 60),
+      ).rejects.toThrow(LetterDoesNotExistError);
+    });
+
+    it("rethrows errors from DynamoDB when getting the letter", async () => {
+      const misconfiguredRepository = new LetterQueueRepository(
+        db.docClient,
+        logger,
+        {
+          ...db.config,
+          letterQueueTableName: "nonexistent-table",
+        },
+      );
+      await expect(
+        misconfiguredRepository.updateLetterTimestamp(
+          "supplier1",
+          "letter1",
+          60,
+        ),
+      ).rejects.toThrow("Cannot do operations on a non-existent table");
+    });
+
+    it("rethrows errors from DynamoDB when updating the error", async () => {
+      await letterQueueRepository.putLetter(createLetter());
+      const originalSend = db.docClient.send.bind(db.docClient);
+      jest
+        .spyOn(db.docClient, "send")
+        .mockImplementationOnce(originalSend)
+        .mockImplementationOnce((_) => {
+          throw new Error("error");
+        });
+
+      await expect(
+        letterQueueRepository.updateLetterTimestamp("supplier1", "letter1", 60),
+      ).rejects.toThrow("error");
+    });
+  });
 });
 
-async function letterExists(
-  db: DBContext,
-  supplierId: string,
-  letterId: string,
-): Promise<boolean> {
+async function getLetter(db: DBContext, supplierId: string, letterId: string) {
   const result = await db.docClient.send(
     new GetCommand({
       TableName: db.config.letterQueueTableName,
       Key: { supplierId, letterId },
     }),
   );
-  return result.Item !== undefined;
+  return result.Item;
+}
+
+async function letterExists(
+  db: DBContext,
+  supplierId: string,
+  letterId: string,
+): Promise<boolean> {
+  const letter = await getLetter(db, supplierId, letterId);
+  return letter !== undefined;
 }

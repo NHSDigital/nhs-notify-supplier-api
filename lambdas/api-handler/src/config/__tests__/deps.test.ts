@@ -4,6 +4,8 @@ describe("createDependenciesContainer", () => {
   const env = {
     LETTERS_TABLE_NAME: "LettersTable",
     LETTER_TTL_HOURS: 12_960,
+    LETTER_QUEUE_TABLE_NAME: "LetterQueueTable",
+    LETTER_QUEUE_TTL_HOURS: 168,
     MI_TABLE_NAME: "MITable",
     MI_TTL_HOURS: 2160,
     SUPPLIER_ID_HEADER: "nhsd-supplier-id",
@@ -36,6 +38,7 @@ describe("createDependenciesContainer", () => {
     // Repo client
     jest.mock("@internal/datastore", () => ({
       LetterRepository: jest.fn(),
+      LetterQueueRepository: jest.fn(),
       MIRepository: jest.fn(),
       DBHealthcheck: jest.fn(),
     }));
@@ -49,9 +52,8 @@ describe("createDependenciesContainer", () => {
     const { S3Client } = jest.requireMock("@aws-sdk/client-s3");
     const { SQSClient } = jest.requireMock("@aws-sdk/client-sqs");
     const { createLogger } = jest.requireMock("@internal/helpers");
-    const { LetterRepository, MIRepository } = jest.requireMock(
-      "@internal/datastore",
-    );
+    const { LetterQueueRepository, LetterRepository, MIRepository } =
+      jest.requireMock("@internal/datastore");
 
     // allow re-import of deps to leverage mocks
     // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -69,6 +71,13 @@ describe("createDependenciesContainer", () => {
     expect(letterRepoCtorArgs[2]).toEqual({
       lettersTableName: "LettersTable",
       lettersTtlHours: 12_960,
+    });
+
+    expect(LetterQueueRepository).toHaveBeenCalledTimes(1);
+    const letterQueueRepoCtorArgs = LetterQueueRepository.mock.calls[0];
+    expect(letterQueueRepoCtorArgs[2]).toEqual({
+      letterQueueTableName: "LetterQueueTable",
+      letterQueueTtlHours: 168,
     });
 
     expect(MIRepository).toHaveBeenCalledTimes(1);

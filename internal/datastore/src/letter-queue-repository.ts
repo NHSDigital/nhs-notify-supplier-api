@@ -1,13 +1,18 @@
 import {
   DeleteCommand,
   DynamoDBDocumentClient,
+  GetCommand,
   PutCommand,
+  QueryCommand,
+  UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { Logger } from "pino";
+import z from "zod";
 import {
-  InsertPendingLetter,
   PendingLetter,
+  PendingLetterBase,
   PendingLetterSchema,
+  PendingLetterSchemaBase,
 } from "./types";
 import { LetterAlreadyExistsError } from "./letter-already-exists-error";
 import { LetterDoesNotExistError } from "./letter-does-not-exist-error";
@@ -25,7 +30,7 @@ export default class LetterQueueRepository {
   ) {}
 
   async putLetter(
-    insertPendingLetter: InsertPendingLetter,
+    insertPendingLetter: PendingLetterBase,
   ): Promise<PendingLetter> {
     const pendingLetter: PendingLetter = {
       ...insertPendingLetter,
@@ -65,6 +70,70 @@ export default class LetterQueueRepository {
           TableName: this.config.letterQueueTableName,
           Key: { supplierId, letterId },
           ConditionExpression: "attribute_exists(letterId)",
+        }),
+      );
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.name === "ConditionalCheckFailedException"
+      ) {
+        throw new LetterDoesNotExistError(supplierId, letterId);
+      }
+      throw error;
+    }
+  }
+
+  async getLetters(
+    supplierId: string,
+    limit: number,
+  ): Promise<PendingLetterBase[]> {
+    const result = await this.ddbClient.send(
+      new QueryCommand({
+        TableName: this.config.letterQueueTableName,
+        IndexName: "queueTimestamp-index",
+        KeyConditionExpression: "supplierId = :supplierId",
+        ExpressionAttributeValues: {
+          ":supplierId": supplierId,
+        },
+        ProjectionExpression: "supplierId, letterId, specificationId, groupId",
+        Limit: limit,
+      }),
+    );
+
+    return z.array(PendingLetterSchemaBase).parse(result.Items);
+  }
+
+  async updateLetterTimestamp(
+    supplierId: string,
+    letterId: string,
+    seconds: number,
+  ): Promise<void> {
+    const item = await this.ddbClient.send(
+      new GetCommand({
+        TableName: this.config.letterQueueTableName,
+        Key: { supplierId, letterId },
+      }),
+    );
+
+    if (!item.Item) {
+      throw new LetterDoesNotExistError(supplierId, letterId);
+    }
+
+    const currentTimestamp = new Date(item.Item.queueTimestamp).getTime();
+    const updatedTimestamp = new Date(
+      currentTimestamp + seconds * 1000,
+    ).toISOString();
+
+    try {
+      await this.ddbClient.send(
+        new UpdateCommand({
+          TableName: this.config.letterQueueTableName,
+          Key: { supplierId, letterId },
+          UpdateExpression: "SET queueTimestamp = :ts",
+          ConditionExpression: "attribute_exists(letterId)",
+          ExpressionAttributeValues: {
+            ":ts": updatedTimestamp,
+          },
         }),
       );
     } catch (error) {

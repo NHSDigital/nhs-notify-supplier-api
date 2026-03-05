@@ -19,8 +19,12 @@ describe("lambdaEnv", () => {
     process.env.SUPPLIER_ID_HEADER = "nhsd-supplier-id";
     process.env.APIM_CORRELATION_HEADER = "nhsd-correlation-id";
     process.env.LETTERS_TABLE_NAME = "letters-table";
+    process.env.LETTER_QUEUE_TABLE_NAME = "letter-queue-table";
+    process.env.MI_TABLE_NAME = "mi-table";
+    process.env.LETTER_QUEUE_TABLE_NAME = "letter-queue-table";
     process.env.MI_TABLE_NAME = "mi-table";
     process.env.LETTER_TTL_HOURS = "12960";
+    process.env.LETTER_QUEUE_TTL_HOURS = "240";
     process.env.MI_TTL_HOURS = "2160";
     process.env.DOWNLOAD_URL_TTL_SECONDS = "60";
     process.env.MAX_LIMIT = "2500";
@@ -34,8 +38,10 @@ describe("lambdaEnv", () => {
       SUPPLIER_ID_HEADER: "nhsd-supplier-id",
       APIM_CORRELATION_HEADER: "nhsd-correlation-id",
       LETTERS_TABLE_NAME: "letters-table",
+      LETTER_QUEUE_TABLE_NAME: "letter-queue-table",
       MI_TABLE_NAME: "mi-table",
       LETTER_TTL_HOURS: 12_960,
+      LETTER_QUEUE_TTL_HOURS: 240,
       MI_TTL_HOURS: 2160,
       DOWNLOAD_URL_TTL_SECONDS: 60,
       MAX_LIMIT: 2500,
@@ -61,8 +67,10 @@ describe("lambdaEnv", () => {
     process.env.SUPPLIER_ID_HEADER = "nhsd-supplier-id";
     process.env.APIM_CORRELATION_HEADER = "nhsd-correlation-id";
     process.env.LETTERS_TABLE_NAME = "letters-table";
+    process.env.LETTER_QUEUE_TABLE_NAME = "letter-queue-table";
     process.env.MI_TABLE_NAME = "mi-table";
     process.env.LETTER_TTL_HOURS = "12960";
+    process.env.LETTER_QUEUE_TTL_HOURS = "240";
     process.env.MI_TTL_HOURS = "2160";
     process.env.DOWNLOAD_URL_TTL_SECONDS = "60";
     process.env.EVENT_SOURCE = "supplier-api";
@@ -74,8 +82,10 @@ describe("lambdaEnv", () => {
       SUPPLIER_ID_HEADER: "nhsd-supplier-id",
       APIM_CORRELATION_HEADER: "nhsd-correlation-id",
       LETTERS_TABLE_NAME: "letters-table",
+      LETTER_QUEUE_TABLE_NAME: "letter-queue-table",
       MI_TABLE_NAME: "mi-table",
       LETTER_TTL_HOURS: 12_960,
+      LETTER_QUEUE_TTL_HOURS: 240,
       MI_TTL_HOURS: 2160,
       DOWNLOAD_URL_TTL_SECONDS: 60,
       MAX_LIMIT: undefined,

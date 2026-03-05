@@ -1,4 +1,9 @@
-import { LetterBase, LetterRepository } from "@internal/datastore";
+import {
+  LetterBase,
+  LetterQueueRepository,
+  LetterRepository,
+  PendingLetterBase,
+} from "@internal/datastore";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { SendMessageBatchCommand } from "@aws-sdk/client-sqs";
@@ -31,13 +36,22 @@ async function getDownloadUrl(
   return getSignedUrl(s3Client, command, { expiresIn: expiry });
 }
 
-export const getLettersForSupplier = async (
+function mapPendingLetterToLetterBase(pending: PendingLetterBase): LetterBase {
+  return {
+    id: pending.letterId,
+    status: "PENDING",
+    specificationId: pending.specificationId,
+    groupId: pending.groupId,
+  };
+}
+
+export const getPendingLetters = async (
   supplierId: string,
-  status: string,
   limit: number,
-  letterRepo: LetterRepository,
+  letterQueueRepo: LetterQueueRepository,
 ): Promise<LetterBase[]> => {
-  return letterRepo.getLettersBySupplier(supplierId, status, limit);
+  const pendingLetters = await letterQueueRepo.getLetters(supplierId, limit);
+  return pendingLetters.map((letter) => mapPendingLetterToLetterBase(letter));
 };
 
 export const getLetterById = async (
