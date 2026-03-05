@@ -66,7 +66,7 @@ data "aws_iam_policy_document" "get_letters_lambda" {
     ]
 
     resources = [
-      aws_dynamodb_table.letter_queue,
+      aws_dynamodb_table.letter_queue.arn,
       "${aws_dynamodb_table.letter_queue.arn}/index/queueTimestamp-index"
     ]
   }

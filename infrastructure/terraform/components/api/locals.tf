@@ -21,8 +21,10 @@ locals {
 
   common_lambda_env_vars = {
     LETTERS_TABLE_NAME       = aws_dynamodb_table.letters.name,
+    LETTER_QUEUE_TABLE_NAME  = aws_dynamodb_table.letter_queue.name,
     MI_TABLE_NAME            = aws_dynamodb_table.mi.name,
     LETTER_TTL_HOURS         = 12960, # 18 months * 30 days * 24 hours
+    LETTER_QUEUE_TTL_HOURS   = 168    # 7 days * 24 days
     MI_TTL_HOURS             = 2160   # 90 days * 24 hours
     SUPPLIER_ID_HEADER       = "nhsd-supplier-id",
     APIM_CORRELATION_HEADER  = "nhsd-correlation-id",
