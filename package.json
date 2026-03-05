@@ -93,6 +93,9 @@
     },
     "mocha": {
       "serialize-javascript": "^7.0.3"
+    },
+    "@pact-foundation/pact-core": {
+      "underscore": "^1.13.8"
     }
   },
   "scripts": {
