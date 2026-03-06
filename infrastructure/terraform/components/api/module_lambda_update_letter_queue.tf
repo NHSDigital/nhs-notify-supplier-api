@@ -47,6 +47,7 @@ data "aws_iam_policy_document" "update_letter_queue_lambda" {
 
     actions = [
       "dynamodb:PutItem",
+      "dynamodb:DeleteItem",
     ]
 
     resources = [

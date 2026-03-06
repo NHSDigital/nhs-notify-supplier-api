@@ -1,11 +1,16 @@
-import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
-import { Logger } from "pino";
 import {
-  InsertPendingLetter,
-  PendingLetter,
-  PendingLetterSchema,
-} from "./types";
-import { LetterAlreadyExistsError } from "./errors";
+  DeleteCommand,
+  DynamoDBDocumentClient,
+  GetCommand,
+  PutCommand,
+  QueryCommand,
+  UpdateCommand,
+} from "@aws-sdk/lib-dynamodb";
+import { Logger } from "pino";
+import z from "zod";
+import { PendingLetter, PendingLetterBase, PendingLetterSchema } from "./types";
+import { LetterAlreadyExistsError } from "./letter-already-exists-error";
+import { LetterDoesNotExistError } from "./letter-does-not-exist-error";
 
 type LetterQueueRepositoryConfig = {
   letterQueueTableName: string;
@@ -20,7 +25,7 @@ export default class LetterQueueRepository {
   ) {}
 
   async putLetter(
-    insertPendingLetter: InsertPendingLetter,
+    insertPendingLetter: PendingLetterBase,
   ): Promise<PendingLetter> {
     const pendingLetter: PendingLetter = {
       ...insertPendingLetter,
@@ -51,5 +56,89 @@ export default class LetterQueueRepository {
       throw error;
     }
     return PendingLetterSchema.parse(pendingLetter);
+  }
+
+  async deleteLetter(supplierId: string, letterId: string): Promise<void> {
+    try {
+      await this.ddbClient.send(
+        new DeleteCommand({
+          TableName: this.config.letterQueueTableName,
+          Key: { supplierId, letterId },
+          ConditionExpression: "attribute_exists(letterId)",
+        }),
+      );
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.name === "ConditionalCheckFailedException"
+      ) {
+        throw new LetterDoesNotExistError(supplierId, letterId);
+      }
+      throw error;
+    }
+  }
+
+  async getLetters(
+    supplierId: string,
+    limit: number,
+  ): Promise<PendingLetter[]> {
+    const result = await this.ddbClient.send(
+      new QueryCommand({
+        TableName: this.config.letterQueueTableName,
+        IndexName: "queueTimestamp-index",
+        KeyConditionExpression: "supplierId = :supplierId",
+        ExpressionAttributeValues: {
+          ":supplierId": supplierId,
+        },
+        Limit: limit,
+      }),
+    );
+
+    return z.array(PendingLetterSchema).parse(result.Items);
+  }
+
+  async updateLetterTimestamp(
+    supplierId: string,
+    letterId: string,
+    seconds: number,
+  ): Promise<void> {
+    const item = await this.ddbClient.send(
+      new GetCommand({
+        TableName: this.config.letterQueueTableName,
+        Key: { supplierId, letterId },
+      }),
+    );
+
+    if (!item.Item) {
+      throw new LetterDoesNotExistError(supplierId, letterId);
+    }
+
+    const currentTimestamp = new Date(item.Item.queueTimestamp).getTime();
+    const updatedTimestamp = new Date(
+      currentTimestamp + seconds * 1000,
+    ).toISOString();
+
+    try {
+      await this.ddbClient.send(
+        new UpdateCommand({
+          TableName: this.config.letterQueueTableName,
+          Key: { supplierId, letterId },
+          UpdateExpression: "SET queueTimestamp = :ts",
+          ConditionExpression: "attribute_exists(letterId)",
+          ExpressionAttributeValues: {
+            ":ts": updatedTimestamp,
+          },
+        }),
+      );
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.name === "ConditionalCheckFailedException"
+      ) {
+        // Letter has been deleted from queue as no longer pending - just ignore it
+        return;
+      }
+      throw error;
+    }
   }
 }

@@ -7,7 +7,7 @@ import {
   enqueueLetterUpdateRequests,
   getLetterById,
   getLetterDataUrl,
-  getLettersForSupplier,
+  getPendingLetters,
 } from "../letter-operations";
 import { UpdateLetterCommand } from "../../contracts/letters";
 import { Deps } from "../../config/deps";
@@ -44,34 +44,53 @@ function makeLetter(id: string, status: Letter["status"]): Letter {
   };
 }
 
-describe("getLetterIdsForSupplier", () => {
+describe("getPendingLetters", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("returns letter IDs from the repository", async () => {
+  it("returns letters from the letter queue repository", async () => {
     const mockRepo = {
-      getLettersBySupplier: jest.fn().mockResolvedValue([
-        { id: "id1", status: "PENDING", specificationId: "s1" },
-        { id: "id2", status: "PENDING", specificationId: "s1" },
+      getLetters: jest.fn().mockResolvedValue([
+        {
+          supplierId: "supplier1",
+          letterId: "id1",
+          specificationId: "s1",
+          groupId: "g1",
+        },
+        {
+          supplierId: "supplier1",
+          letterId: "id2",
+          specificationId: "s1",
+          groupId: "g1",
+        },
       ]),
+      updateLetterTimestamp: jest.fn(),
     };
 
-    const result = await getLettersForSupplier(
+    const result = await getPendingLetters(
       "supplier1",
-      "PENDING",
       10,
       mockRepo as any,
+      600,
     );
 
-    expect(mockRepo.getLettersBySupplier).toHaveBeenCalledWith(
+    expect(mockRepo.getLetters).toHaveBeenCalledWith("supplier1", 10);
+    expect(mockRepo.updateLetterTimestamp).toHaveBeenNthCalledWith(
+      1,
       "supplier1",
-      "PENDING",
-      10,
+      "id1",
+      600,
+    );
+    expect(mockRepo.updateLetterTimestamp).toHaveBeenNthCalledWith(
+      2,
+      "supplier1",
+      "id2",
+      600,
     );
     expect(result).toEqual([
-      { id: "id1", status: "PENDING", specificationId: "s1" },
-      { id: "id2", status: "PENDING", specificationId: "s1" },
+      { id: "id1", status: "PENDING", specificationId: "s1", groupId: "g1" },
+      { id: "id2", status: "PENDING", specificationId: "s1", groupId: "g1" },
     ]);
   });
 });

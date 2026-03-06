@@ -129,7 +129,7 @@ const createLetterQueueTableCommand = new CreateTableCommand({
   ],
   LocalSecondaryIndexes: [
     {
-      IndexName: "timestamp-index",
+      IndexName: "queueTimestamp-index",
       KeySchema: [
         { AttributeName: "supplierId", KeyType: "HASH" }, // Partition key for LSI
         { AttributeName: "queueTimestamp", KeyType: "RANGE" }, // Sort key for LSI
