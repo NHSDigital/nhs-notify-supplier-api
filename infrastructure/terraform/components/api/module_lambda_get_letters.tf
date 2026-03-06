@@ -63,6 +63,7 @@ data "aws_iam_policy_document" "get_letters_lambda" {
       "dynamodb:GetItem",
       "dynamodb:Query",
       "dynamodb:Scan",
+      "dynamodb:UpdateItem",
     ]
 
     resources = [
