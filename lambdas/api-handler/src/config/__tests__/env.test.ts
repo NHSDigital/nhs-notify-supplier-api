@@ -21,8 +21,7 @@ describe("lambdaEnv", () => {
     process.env.LETTERS_TABLE_NAME = "letters-table";
     process.env.LETTER_QUEUE_TABLE_NAME = "letter-queue-table";
     process.env.MI_TABLE_NAME = "mi-table";
-    process.env.LETTER_QUEUE_TABLE_NAME = "letter-queue-table";
-    process.env.MI_TABLE_NAME = "mi-table";
+
     process.env.LETTER_TTL_HOURS = "12960";
     process.env.LETTER_QUEUE_TTL_HOURS = "240";
     process.env.MI_TTL_HOURS = "2160";
