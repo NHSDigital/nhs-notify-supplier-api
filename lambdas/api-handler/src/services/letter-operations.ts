@@ -49,13 +49,14 @@ export const getPendingLetters = async (
   supplierId: string,
   limit: number,
   letterQueueRepo: LetterQueueRepository,
+  visibilityTimeout: number,
 ): Promise<LetterBase[]> => {
   const pendingLetters = await letterQueueRepo.getLetters(supplierId, limit);
   for (const letter of pendingLetters) {
     await letterQueueRepo.updateLetterTimestamp(
       letter.supplierId,
       letter.letterId,
-      600,
+      visibilityTimeout,
     );
   }
   return pendingLetters.map((letter) => mapPendingLetterToLetterBase(letter));

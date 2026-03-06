@@ -42,6 +42,7 @@ describe("API Lambda handler", () => {
       LETTER_QUEUE_TTL_HOURS: 168,
       LETTER_TTL_HOURS: 12_960,
       DOWNLOAD_URL_TTL_SECONDS: 60,
+      LETTER_QUEUE_VISIBILITY_TIMEOUT: 600,
       MAX_LIMIT: 2500,
     } as unknown as EnvVars,
   } as Deps;
@@ -93,6 +94,7 @@ describe("API Lambda handler", () => {
       "supplier1",
       mockedDeps.env.MAX_LIMIT,
       mockedDeps.letterQueueRepo,
+      mockedDeps.env.LETTER_QUEUE_VISIBILITY_TIMEOUT,
     );
 
     const expected = {
@@ -163,6 +165,7 @@ describe("API Lambda handler", () => {
       "supplier1",
       50,
       mockedDeps.letterQueueRepo,
+      mockedDeps.env.LETTER_QUEUE_VISIBILITY_TIMEOUT,
     );
 
     const expected = {

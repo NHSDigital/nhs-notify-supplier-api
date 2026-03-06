@@ -135,7 +135,8 @@ export default class LetterQueueRepository {
         error instanceof Error &&
         error.name === "ConditionalCheckFailedException"
       ) {
-        throw new LetterDoesNotExistError(supplierId, letterId);
+        // Letter has been deleted from queue as no longer pending - just ignore it
+        return;
       }
       throw error;
     }

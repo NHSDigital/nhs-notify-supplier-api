@@ -68,7 +68,12 @@ describe("getPendingLetters", () => {
       updateLetterTimestamp: jest.fn(),
     };
 
-    const result = await getPendingLetters("supplier1", 10, mockRepo as any);
+    const result = await getPendingLetters(
+      "supplier1",
+      10,
+      mockRepo as any,
+      600,
+    );
 
     expect(mockRepo.getLetters).toHaveBeenCalledWith("supplier1", 10);
     expect(mockRepo.updateLetterTimestamp).toHaveBeenNthCalledWith(

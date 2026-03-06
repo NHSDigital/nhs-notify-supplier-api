@@ -10,6 +10,7 @@ const EnvVarsSchema = z.object({
   LETTER_TTL_HOURS: z.coerce.number().int(),
   MI_TTL_HOURS: z.coerce.number().int(),
   DOWNLOAD_URL_TTL_SECONDS: z.coerce.number().int(),
+  LETTER_QUEUE_VISIBILITY_TIMEOUT: z.coerce.number().int(),
   MAX_LIMIT: z.coerce.number().int().optional(),
   QUEUE_URL: z.coerce.string().optional(),
   PINO_LOG_LEVEL: z.coerce.string().optional(),

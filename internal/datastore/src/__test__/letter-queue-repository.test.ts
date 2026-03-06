@@ -178,7 +178,7 @@ describe("LetterQueueRepository", () => {
       ).rejects.toThrow(LetterDoesNotExistError);
     });
 
-    it("throws an error when the letter is deleted part way through", async () => {
+    it("does nothing when the letter is deleted before it can be updated", async () => {
       jest.spyOn(db.docClient, "send").mockImplementationOnce((_) => ({
         // Fake the existence of the letter for the GetCommand
         Item: {
@@ -187,9 +187,13 @@ describe("LetterQueueRepository", () => {
         },
       }));
 
-      await expect(
-        letterQueueRepository.updateLetterTimestamp("supplier1", "letter1", 60),
-      ).rejects.toThrow(LetterDoesNotExistError);
+      await letterQueueRepository.updateLetterTimestamp(
+        "supplier1",
+        "letter1",
+        60,
+      );
+
+      expect(await letterExists(db, "supplier1", "letter1")).toBe(false);
     });
 
     it("rethrows errors from DynamoDB when getting the letter", async () => {

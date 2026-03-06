@@ -111,6 +111,7 @@ export default function createGetLettersHandler(
           supplierId,
           limitNumber,
           deps.letterQueueRepo,
+          deps.env.LETTER_QUEUE_VISIBILITY_TIMEOUT,
         );
 
         const response = mapToGetLettersResponse(letters);

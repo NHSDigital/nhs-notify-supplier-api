@@ -27,6 +27,7 @@ describe("lambdaEnv", () => {
     process.env.LETTER_QUEUE_TTL_HOURS = "240";
     process.env.MI_TTL_HOURS = "2160";
     process.env.DOWNLOAD_URL_TTL_SECONDS = "60";
+    process.env.LETTER_QUEUE_VISIBILITY_TIMEOUT = "600";
     process.env.MAX_LIMIT = "2500";
     process.env.QUEUE_URL = "url";
     process.env.EVENT_SOURCE = "supplier-api";
@@ -44,6 +45,7 @@ describe("lambdaEnv", () => {
       LETTER_QUEUE_TTL_HOURS: 240,
       MI_TTL_HOURS: 2160,
       DOWNLOAD_URL_TTL_SECONDS: 60,
+      LETTER_QUEUE_VISIBILITY_TIMEOUT: 600,
       MAX_LIMIT: 2500,
       QUEUE_URL: "url",
       EVENT_SOURCE: "supplier-api",
@@ -59,6 +61,7 @@ describe("lambdaEnv", () => {
     process.env.LETTER_TTL_HOURS = "12960";
     process.env.MI_TTL_HOURS = "2160";
     process.env.DOWNLOAD_URL_TTL_SECONDS = "60";
+    process.env.LETTER_QUEUE_VISIBILITY_TIMEOUT = "600";
 
     expect(() => require("../env")).toThrow(ZodError);
   });
@@ -73,6 +76,7 @@ describe("lambdaEnv", () => {
     process.env.LETTER_QUEUE_TTL_HOURS = "240";
     process.env.MI_TTL_HOURS = "2160";
     process.env.DOWNLOAD_URL_TTL_SECONDS = "60";
+    process.env.LETTER_QUEUE_VISIBILITY_TIMEOUT = "600";
     process.env.EVENT_SOURCE = "supplier-api";
     process.env.SNS_TOPIC_ARN = "sns-topic.arn";
 
@@ -88,6 +92,7 @@ describe("lambdaEnv", () => {
       LETTER_QUEUE_TTL_HOURS: 240,
       MI_TTL_HOURS: 2160,
       DOWNLOAD_URL_TTL_SECONDS: 60,
+      LETTER_QUEUE_VISIBILITY_TIMEOUT: 600,
       MAX_LIMIT: undefined,
       EVENT_SOURCE: "supplier-api",
       SNS_TOPIC_ARN: "sns-topic.arn",

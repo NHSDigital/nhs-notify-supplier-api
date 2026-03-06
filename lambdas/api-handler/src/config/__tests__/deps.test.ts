@@ -11,6 +11,7 @@ describe("createDependenciesContainer", () => {
     SUPPLIER_ID_HEADER: "nhsd-supplier-id",
     APIM_CORRELATION_HEADER: "nhsd-correlation-id",
     DOWNLOAD_URL_TTL_SECONDS: 60,
+    LETTER_QUEUE_VISIBILITY_TIMEOUT: 600,
   };
 
   beforeEach(() => {
