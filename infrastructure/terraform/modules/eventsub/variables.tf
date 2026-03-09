@@ -79,6 +79,39 @@ variable "sns_success_logging_sample_percent" {
   default     = 0
 }
 
+##
+# CloudWatch Anomaly Detection Variables
+##
+
+variable "enable_event_anomaly_detection" {
+  type        = bool
+  description = "Enable CloudWatch anomaly detection alarm for SNS topic message publishing"
+  default     = true
+}
+
+variable "event_anomaly_evaluation_periods" {
+  type        = number
+  description = "Number of evaluation periods for the anomaly alarm. Each period is defined by event_anomaly_period."
+  default     = 2
+}
+
+variable "event_anomaly_period" {
+  type        = number
+  description = "The period in seconds over which the specified statistic is applied for anomaly detection. Minimum 300 seconds (5 minutes). Recommended: 300-600."
+  default     = 300
+}
+
+variable "event_anomaly_band_width" {
+  type        = number
+  description = "The width of the anomaly detection band. Higher values (e.g. 4-6) reduce sensitivity and noise, lower values (e.g. 2-3) increase sensitivity. Recommended: 2-4."
+  default     = 3
+
+  validation {
+    condition     = var.event_anomaly_band_width >= 2 && var.event_anomaly_band_width <= 10
+    error_message = "Band width must be between 2 and 10"
+  }
+}
+
 variable "log_level" {
   type        = string
   description = "The log level to be used in lambda functions within the component. Any log with a lower severity than the configured value will not be logged: https://docs.python.org/3/library/logging.html#levels"
@@ -118,4 +151,10 @@ variable "shared_infra_account_id" {
 variable "glue_role_arn" {
   type        = string
   description = "ARN of the Glue execution role from the parent"
+}
+
+variable "access_logging_bucket" {
+  type        = string
+  description = "Name of S3 bucket to use for access logging"
+  default     = ""
 }

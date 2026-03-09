@@ -1,5 +1,5 @@
 module "domain_truststore" {
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-s3bucket.zip"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.0.6/terraform-s3bucket.zip"
 
   name           = "truststore"
   aws_account_id = var.aws_account_id
@@ -12,11 +12,9 @@ module "domain_truststore" {
   kms_key_arn  = module.kms.key_id
 
   bucket_logging_target = {
-    bucket = module.logging_bucket.bucket
-    prefix = "truststore/"
+    bucket = local.acct.s3_buckets["access_logs"]["id"]
   }
 
   policy_documents = [
   ]
-
 }
