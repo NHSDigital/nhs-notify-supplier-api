@@ -27,7 +27,7 @@ function createSupplierConfigRepository(
     supplierConfigTableName: envVars.SUPPLIER_CONFIG_TABLE_NAME,
   };
 
-  return new SupplierConfigRepository(createDocumentClient(), log, config);
+  return new SupplierConfigRepository(createDocumentClient(), config);
 }
 
 export function createDependenciesContainer(): Deps {

@@ -71,8 +71,8 @@ async function getSupplierFromConfig(letterEvent: PreparedEvents, deps: Deps) {
   const supplierAllocations: SupplierAllocation[] =
     await getSupplierAllocationsForVolumeGroup(
       variantDetails.volumeGroupId,
-      variantDetails.supplierId ?? "",
       deps,
+      variantDetails.supplierId,
     );
 
   const supplierDetails: Supplier[] = await getSupplierDetails(

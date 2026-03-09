@@ -5,11 +5,13 @@ import {
   getVolumeGroupDetails,
 } from "../supplier-config";
 import { Deps } from "../../config/deps";
+import { warn } from "node:console";
 
 function makeDeps(overrides: Partial<Deps> = {}): Deps {
   const logger = {
     info: jest.fn(),
     error: jest.fn(),
+    warn: jest.fn(),
   } as unknown as Deps["logger"];
 
   const supplierConfigRepo = {
@@ -146,7 +148,7 @@ describe("supplier-config service", () => {
         .fn()
         .mockResolvedValue(allocations);
 
-      const result = await getSupplierAllocationsForVolumeGroup("g1", "", deps);
+      const result = await getSupplierAllocationsForVolumeGroup("g1", deps);
 
       expect(result).toEqual(allocations);
     });
@@ -159,8 +161,8 @@ describe("supplier-config service", () => {
 
       const result = await getSupplierAllocationsForVolumeGroup(
         "g1",
-        "s2",
         deps,
+        "s2",
       );
 
       expect(result).toEqual([allocations[1]]);
@@ -173,7 +175,7 @@ describe("supplier-config service", () => {
         .mockResolvedValue(allocations);
 
       await expect(
-        getSupplierAllocationsForVolumeGroup("g1", "missing", deps),
+        getSupplierAllocationsForVolumeGroup("g1", deps, "missing"),
       ).rejects.toThrow(/No supplier allocations found/);
       expect(deps.logger.error).toHaveBeenCalled();
     });
@@ -239,5 +241,48 @@ describe("supplier-config service", () => {
         "s5",
       ]);
     });
+  });
+  it("logs a warning when supplier allocations count differs from supplier details count", async () => {
+    const allocations = [
+      { supplier: "s1", variantId: "v1" },
+      { supplier: "s2", variantId: "v2" },
+      { supplier: "s3", variantId: "v3" },
+    ] as any[];
+    const suppliers = [
+      { id: "s1", name: "Supplier 1" },
+      { id: "s2", name: "Supplier 2" },
+    ] as any[];
+    const deps = makeDeps();
+    deps.supplierConfigRepo.getSuppliersDetails = jest
+      .fn()
+      .mockResolvedValue(suppliers);
+
+    await getSupplierDetails(allocations, deps);
+
+    expect(deps.logger.warn).toHaveBeenCalledWith({
+      description: "Mismatch between supplier allocations and supplier details",
+      allocationsCount: 3,
+      detailsCount: 2,
+      missingSuppliers: ["s3"],
+    });
+  });
+
+  it("does not log a warning when counts match", async () => {
+    const allocations = [
+      { supplier: "s1", variantId: "v1" },
+      { supplier: "s2", variantId: "v2" },
+    ] as any[];
+    const suppliers = [
+      { id: "s1", name: "Supplier 1" },
+      { id: "s2", name: "Supplier 2" },
+    ] as any[];
+    const deps = makeDeps();
+    deps.supplierConfigRepo.getSuppliersDetails = jest
+      .fn()
+      .mockResolvedValue(suppliers);
+
+    await getSupplierDetails(allocations, deps);
+
+    expect(deps.logger.warn).not.toHaveBeenCalled();
   });
 });

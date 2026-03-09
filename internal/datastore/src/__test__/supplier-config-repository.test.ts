@@ -1,4 +1,3 @@
-import { Logger } from "pino";
 import { PutCommand } from "@aws-sdk/lib-dynamodb";
 import {
   DBContext,
@@ -6,7 +5,6 @@ import {
   deleteTables,
   setupDynamoDBContainer,
 } from "./db";
-import { LogStream, createTestLogger } from "./logs";
 import { SupplierConfigRepository } from "../supplier-config-repository";
 
 function createLetterVariantItem(variantId: string) {
@@ -26,10 +24,10 @@ function createLetterVariantItem(variantId: string) {
 function createVolumeGroupItem(groupId: string, status = "PROD") {
   const startDate = new Date(Date.now() - 24 * 1000 * 60 * 60)
     .toISOString()
-    .split("T")[0]; // Started an hour ago to ensure it's active based on start date. Tests can override this if needed.
+    .split("T")[0]; // Started a day ago to ensure it's active based on start date. Tests can override this if needed.
   const endDate = new Date(Date.now() + 24 * 1000 * 60 * 60)
     .toISOString()
-    .split("T")[0]; // Ends in an hour to ensure it's active based on end date. Tests can override this if needed.
+    .split("T")[0]; // Ends in a day to ensure it's active based on end date. Tests can override this if needed.
   return {
     PK: "VOLUME_GROUP",
     SK: groupId,
@@ -75,8 +73,6 @@ jest.setTimeout(30_000);
 describe("SupplierConfigRepository", () => {
   let dbContext: DBContext;
   let repository: SupplierConfigRepository;
-  let logStream: LogStream;
-  let logger: Logger;
 
   // Database tests can take longer, especially with setup and teardown
   beforeAll(async () => {
@@ -85,10 +81,8 @@ describe("SupplierConfigRepository", () => {
 
   beforeEach(async () => {
     await createTables(dbContext);
-    ({ logStream, logger } = createTestLogger());
     repository = new SupplierConfigRepository(
       dbContext.docClient,
-      logger,
       dbContext.config,
     );
   });
@@ -120,8 +114,6 @@ describe("SupplierConfigRepository", () => {
     expect(result.status).toBe("PROD");
     expect(result.volumeGroupId).toBe(`group-${variantId}`);
     expect(result.packSpecificationIds).toEqual([`pack-spec-${variantId}`]);
-
-    expect(logStream.logs).toEqual([]);
   });
 
   test("getLetterVariant throws error for non-existent variant", async () => {
@@ -130,12 +122,6 @@ describe("SupplierConfigRepository", () => {
     await expect(repository.getLetterVariant(variantId)).rejects.toThrow(
       `No letter variant details found for id ${variantId}`,
     );
-
-    expect(
-      logStream.logs.some((log) =>
-        log.includes("No letter variant found for id"),
-      ),
-    ).toBe(true);
   });
 
   test("getVolumeGroup returns correct details for existing group", async () => {
@@ -155,8 +141,6 @@ describe("SupplierConfigRepository", () => {
     expect(result.status).toBe("PROD");
     expect(new Date(result.startDate).getTime()).toBeLessThan(Date.now());
     expect(new Date(result.endDate!).getTime()).toBeGreaterThan(Date.now());
-
-    expect(logStream.logs).toEqual([]);
   });
 
   test("getVolumeGroup throws error for non-existent group", async () => {
@@ -165,12 +149,6 @@ describe("SupplierConfigRepository", () => {
     await expect(repository.getVolumeGroup(groupId)).rejects.toThrow(
       `No volume group details found for id ${groupId}`,
     );
-
-    expect(
-      logStream.logs.some((log) =>
-        log.includes("No volume group found for id"),
-      ),
-    ).toBe(true);
   });
 
   test("getSupplierAllocationsForVolumeGroup returns correct allocations", async () => {
@@ -197,8 +175,6 @@ describe("SupplierConfigRepository", () => {
         allocationPercentage: 50,
       },
     ]);
-
-    expect(logStream.logs).toEqual([]);
   });
 
   test("getSupplierAllocationsForVolumeGroup returns multiple allocations", async () => {
@@ -245,7 +221,6 @@ describe("SupplierConfigRepository", () => {
         },
       ]),
     );
-    expect(logStream.logs).toEqual([]);
   });
 
   test("getSupplierAllocationsForVolumeGroup throws error for non-existent group", async () => {
@@ -256,12 +231,6 @@ describe("SupplierConfigRepository", () => {
     ).rejects.toThrow(
       `No active supplier allocations found for volume group id ${groupId}`,
     );
-
-    expect(
-      logStream.logs.some((log) =>
-        log.includes("No supplier allocations found for volume group id"),
-      ),
-    ).toBe(true);
   });
 
   test("getSuppliersDetails returns correct supplier details", async () => {
@@ -285,7 +254,6 @@ describe("SupplierConfigRepository", () => {
         status: "PROD",
       },
     ]);
-    expect(logStream.logs).toEqual([]);
   });
 
   test("getSuppliersDetails throws error for non-existent supplier", async () => {
@@ -294,9 +262,5 @@ describe("SupplierConfigRepository", () => {
     await expect(repository.getSuppliersDetails([supplierId])).rejects.toThrow(
       `Supplier with id ${supplierId} not found`,
     );
-
-    expect(
-      logStream.logs.some((log) => log.includes("No supplier found for id")),
-    ).toBe(true);
   });
 });
