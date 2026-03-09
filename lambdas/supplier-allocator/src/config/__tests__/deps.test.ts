@@ -47,7 +47,7 @@ describe("createDependenciesContainer", () => {
     expect(createLogger).toHaveBeenCalledTimes(1);
     expect(SupplierConfigRepository).toHaveBeenCalledTimes(1);
     const supplierConfigRepoCtorArgs = SupplierConfigRepository.mock.calls[0];
-    expect(supplierConfigRepoCtorArgs[2]).toEqual({
+    expect(supplierConfigRepoCtorArgs[1]).toEqual({
       supplierConfigTableName: "SupplierConfigTable",
     });
     expect(deps.env).toEqual(env);
