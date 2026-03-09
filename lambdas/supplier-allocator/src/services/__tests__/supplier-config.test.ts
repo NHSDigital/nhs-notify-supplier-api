@@ -5,7 +5,6 @@ import {
   getVolumeGroupDetails,
 } from "../supplier-config";
 import { Deps } from "../../config/deps";
-import { warn } from "node:console";
 
 function makeDeps(overrides: Partial<Deps> = {}): Deps {
   const logger = {
