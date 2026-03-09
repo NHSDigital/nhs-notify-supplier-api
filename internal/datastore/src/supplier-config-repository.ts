@@ -3,7 +3,6 @@ import {
   GetCommand,
   QueryCommand,
 } from "@aws-sdk/lib-dynamodb";
-import { Logger } from "pino";
 import {
   $LetterVariant,
   $Supplier,
@@ -22,7 +21,6 @@ export type SupplierConfigRepositoryConfig = {
 export class SupplierConfigRepository {
   constructor(
     readonly ddbClient: DynamoDBDocumentClient,
-    readonly log: Logger,
     readonly config: SupplierConfigRepositoryConfig,
   ) {}
 
@@ -34,10 +32,6 @@ export class SupplierConfigRepository {
       }),
     );
     if (!result.Item) {
-      this.log.error({
-        description: "No letter variant found for id",
-        variantId,
-      });
       throw new Error(`No letter variant details found for id ${variantId}`);
     }
 
@@ -52,10 +46,6 @@ export class SupplierConfigRepository {
       }),
     );
     if (!result.Item) {
-      this.log.error({
-        description: "No volume group found for id",
-        groupId,
-      });
       throw new Error(`No volume group details found for id ${groupId}`);
     }
     return $VolumeGroup.parse(result.Item);
@@ -83,10 +73,6 @@ export class SupplierConfigRepository {
       }),
     );
     if (!result.Items || result.Items.length === 0) {
-      this.log.error({
-        description: "No supplier allocations found for volume group id",
-        groupId,
-      });
       throw new Error(
         `No active supplier allocations found for volume group id ${groupId}`,
       );
@@ -105,10 +91,6 @@ export class SupplierConfigRepository {
         }),
       );
       if (!result.Item) {
-        this.log.error({
-          description: "No supplier found for id",
-          supplierId,
-        });
         throw new Error(`Supplier with id ${supplierId} not found`);
       }
       suppliers.push($Supplier.parse(result.Item));

@@ -41,8 +41,8 @@ export async function getVolumeGroupDetails(
 
 export async function getSupplierAllocationsForVolumeGroup(
   groupId: string,
-  supplierId: string,
   deps: Deps,
+  supplierId?: string,
 ): Promise<SupplierAllocation[]> {
   const allocations =
     await deps.supplierConfigRepo.getSupplierAllocationsForVolumeGroup(groupId);
@@ -85,6 +85,19 @@ export async function getSupplierDetails(
     throw new Error(
       `No supplier details found for supplier ids ${supplierIds.join(", ")}`,
     );
+  }
+  // Log a warning if some supplier details are missing compared to allocations
+  if (supplierAllocations.length !== supplierDetails.length) {
+    const foundSupplierIds = new Set(supplierDetails.map((s) => s.id));
+    const missingSupplierIds = supplierIds.filter(
+      (id) => !foundSupplierIds.has(id),
+    );
+    deps.logger.warn({
+      description: "Mismatch between supplier allocations and supplier details",
+      allocationsCount: supplierAllocations.length,
+      detailsCount: supplierDetails.length,
+      missingSuppliers: missingSupplierIds,
+    });
   }
   return supplierDetails;
 }
