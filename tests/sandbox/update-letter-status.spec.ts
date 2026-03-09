@@ -24,6 +24,10 @@ test.describe("Sandbox Tests To Update Letter Status", () => {
       );
 
       expect(response.status()).toBe(expectedStatus);
+      if (response.status() !== 202) {
+        const responseBody = await response.json();
+        expect(responseBody).toEqual(expectedResponse);
+      }
     });
   }
 });
