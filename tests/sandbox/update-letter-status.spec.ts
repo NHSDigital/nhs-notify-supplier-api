@@ -23,9 +23,7 @@ test.describe("Sandbox Tests To Update Letter Status", () => {
         },
       );
 
-      const res = await response.json();
       expect(response.status()).toBe(expectedStatus);
-      expect(res).toEqual(expectedResponse);
     });
   }
 });

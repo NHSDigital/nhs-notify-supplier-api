@@ -104,6 +104,9 @@ config:: _install-dependencies version # Configure development environment (main
 test-component:
 	(cd tests && npm install && npm run test:component)
 
+test-sandbox:
+	(cd tests && npm install && npm run test:sandbox)
+
 test-performance:
 	(cd tests && npm install && npm run test:performance)
 
@@ -132,7 +135,7 @@ TEST_CMD := APIGEE_ACCESS_TOKEN="$(APIGEE_ACCESS_TOKEN)" \
 	--color=yes \
 	-n 4 \
 	--api-name=nhs-notify-supplier \
-	--proxy-name="$(PROXY_NAME)" \
+	--proxy-name="nhs-notify-supplier--internal-dev--nhs-notify-supplier" \
 	-s \
 	--reruns 5 \
 	--reruns-delay 5 \

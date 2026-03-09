@@ -28,6 +28,9 @@
     "zod": "^4.1.11"
   },
   "description": "",
+  "devDependencies": {
+    "@aws-sdk/client-cloudwatch-logs": "^3.1003.0"
+  },
   "keywords": [],
   "license": "ISC",
   "main": "index.js",
