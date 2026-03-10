@@ -23,10 +23,9 @@ repos:
                 sdk/.* |
                 someotherdir/.* |
                 src/server/host/Properties/launchSettings.json |
+                tests/contracts/provider/tsconfig.json |
                 internal/events/.*/.*\.schema\.json
             )$
-
-    # -   id: ...
   - repo: local
     hooks:
       - id: sort-dictionary
