@@ -12,7 +12,7 @@ resource "aws_dynamodb_table" "letter_queue" {
 
   local_secondary_index {
     name            = "queueSortOrder-index"
-    range_key       = "queueTimestamp"
+    range_key       = "queueSortOrderSk"
     projection_type = "ALL"
   }
 
@@ -27,7 +27,7 @@ resource "aws_dynamodb_table" "letter_queue" {
   }
 
   attribute {
-    name = "queueTimestamp"
+    name = "queueSortOrderSk"
     type = "S"
   }
 

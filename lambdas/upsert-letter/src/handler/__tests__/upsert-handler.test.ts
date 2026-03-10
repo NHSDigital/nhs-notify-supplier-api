@@ -211,11 +211,11 @@ describe("createUpsertLetterHandler", () => {
   test("processes all records successfully and returns no batch failures", async () => {
     const v2message = {
       letterEvent: createPreparedV2Event(),
-      supplierSpec: { supplierId: "supplier1", specId: "spec1" },
+      supplierSpec: { supplierId: "supplier1", specId: "spec1", priority: 10 },
     };
     const v1message = {
       letterEvent: createPreparedV1Event(),
-      supplierSpec: { supplierId: "supplier1", specId: "spec1" },
+      supplierSpec: { supplierId: "supplier1", specId: "spec1", priority: 10 },
     };
 
     const evt: SQSEvent = createSQSEvent([
@@ -249,6 +249,7 @@ describe("createUpsertLetterHandler", () => {
     expect(insertedV2Letter.status).toBe("PENDING");
     expect(insertedV2Letter.groupId).toBe("client1campaign1template1");
     expect(insertedV2Letter.source).toBe("/data-plane/letter-rendering/test");
+    expect(insertedV2Letter.priority).toBe(10);
 
     const insertedV1Letter = (mockedDeps.letterRepo.putLetter as jest.Mock).mock
       .calls[1][0];
@@ -260,6 +261,7 @@ describe("createUpsertLetterHandler", () => {
     expect(insertedV1Letter.status).toBe("PENDING");
     expect(insertedV1Letter.groupId).toBe("client1campaign1template1");
     expect(insertedV1Letter.source).toBe("/data-plane/letter-rendering/test");
+    expect(insertedV1Letter.priority).toBe(10);
 
     const updatedLetter = (
       mockedDeps.letterRepo.updateLetterStatus as jest.Mock
@@ -472,14 +474,14 @@ describe("createUpsertLetterHandler", () => {
         id: "7b9a03ca-342a-4150-b56b-989109c45615",
         domainId: "ok",
       }),
-      supplierSpec: { supplierId: "supplier1", specId: "spec1" },
+      supplierSpec: { supplierId: "supplier1", specId: "spec1", priority: 10 },
     };
     const message2 = {
       letterEvent: createPreparedV2Event({
         id: "7b9a03ca-342a-4150-b56b-989109c45616",
         domainId: "fail",
       }),
-      supplierSpec: { supplierId: "supplier1", specId: "spec1" },
+      supplierSpec: { supplierId: "supplier1", specId: "spec1", priority: 10 },
     };
     const evt: SQSEvent = createSQSEvent([
       createSqsRecord("ok-msg", JSON.stringify(message1)),

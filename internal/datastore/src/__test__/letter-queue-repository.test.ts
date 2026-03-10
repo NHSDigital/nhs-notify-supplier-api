@@ -12,12 +12,16 @@ import { LetterAlreadyExistsError } from "../letter-already-exists-error";
 import { createTestLogger } from "./logs";
 import { LetterDoesNotExistError } from "../letter-does-not-exist-error";
 
-function createLetter(letterId = "letter1"): InsertPendingLetter {
+function createLetter(
+  overrides: Partial<InsertPendingLetter> = {},
+): InsertPendingLetter {
   return {
-    letterId,
+    letterId: "letter1",
     supplierId: "supplier1",
     specificationId: "specification1",
     groupId: "group1",
+    priority: 10,
+    ...overrides,
   };
 }
 
@@ -54,9 +58,11 @@ describe("LetterQueueRepository", () => {
   });
 
   describe("putLetter", () => {
-    it("adds a letter to the database", async () => {
+    beforeEach(() => {
       jest.useFakeTimers().setSystemTime(new Date("2026-03-04T13:15:45.000Z"));
+    });
 
+    it("adds a letter to the database", async () => {
       const pendingLetter =
         await letterQueueRepository.putLetter(createLetter());
 
@@ -65,7 +71,30 @@ describe("LetterQueueRepository", () => {
         "2026-03-04T13:15:45.000Z",
       );
       expect(pendingLetter.ttl).toBe(1_772_633_745);
+      expect(pendingLetter.queueSortOrderSk).toBe(
+        "10-2026-03-04T13:15:45.000Z",
+      );
       expect(await letterExists(db, "supplier1", "letter1")).toBe(true);
+    });
+
+    it("left-pads the priority with zeros in the sort key", async () => {
+      const pendingLetter = await letterQueueRepository.putLetter(
+        createLetter({ priority: 5 }),
+      );
+
+      expect(pendingLetter.queueSortOrderSk).toBe(
+        "05-2026-03-04T13:15:45.000Z",
+      );
+    });
+
+    it("defaults a missing priority to 10 in the sort key", async () => {
+      const pendingLetter = await letterQueueRepository.putLetter(
+        createLetter({ priority: undefined }),
+      );
+
+      expect(pendingLetter.queueSortOrderSk).toBe(
+        "10-2026-03-04T13:15:45.000Z",
+      );
     });
 
     it("throws LetterAlreadyExistsError when creating a letter which already exists", async () => {
@@ -122,16 +151,21 @@ describe("LetterQueueRepository", () => {
   });
 });
 
-async function letterExists(
-  db: DBContext,
-  supplierId: string,
-  letterId: string,
-): Promise<boolean> {
+async function getLetter(db: DBContext, supplierId: string, letterId: string) {
   const result = await db.docClient.send(
     new GetCommand({
       TableName: db.config.letterQueueTableName,
       Key: { supplierId, letterId },
     }),
   );
-  return result.Item !== undefined;
+  return result.Item;
+}
+
+async function letterExists(
+  db: DBContext,
+  supplierId: string,
+  letterId: string,
+): Promise<boolean> {
+  const letter = await getLetter(db, supplierId, letterId);
+  return letter !== undefined;
 }
