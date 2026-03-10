@@ -185,7 +185,7 @@ describe("update-letter-queue Lambda", () => {
       const oldLetter2 = generateLetter("PENDING", "2");
       const newLetter1 = generateLetter("ACCEPTED", "1");
       const newLetter2 = generateLetter("ACCEPTED", "2");
-      (mockedDeps.letterQueueRepository.putLetter as jest.Mock)
+      (mockedDeps.letterQueueRepository.deleteLetter as jest.Mock)
         .mockRejectedValueOnce(new LetterDoesNotExistError("supplier1", "1"))
         .mockResolvedValueOnce({});
 
