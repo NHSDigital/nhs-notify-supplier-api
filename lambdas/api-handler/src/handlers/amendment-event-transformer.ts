@@ -29,8 +29,6 @@ export default function createTransformAmendmentEventHandler(
         letter.reasonCode = updateLetterCommand.reasonCode;
         letter.reasonText = updateLetterCommand.reasonText;
 
-        // validate given the letter status change event schema allows "uuid" style only?
-
         const letterEvent = mapLetterToCloudEvent(
           letter,
           deps.env.EVENT_SOURCE,
