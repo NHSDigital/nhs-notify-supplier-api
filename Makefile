@@ -135,7 +135,7 @@ TEST_CMD := APIGEE_ACCESS_TOKEN="$(APIGEE_ACCESS_TOKEN)" \
 	--color=yes \
 	-n 4 \
 	--api-name=nhs-notify-supplier \
-	--proxy-name="nhs-notify-supplier--internal-dev--nhs-notify-supplier" \
+	--proxy-name="$(PROXY_NAME)" \
 	-s \
 	--reruns 5 \
 	--reruns-delay 5 \

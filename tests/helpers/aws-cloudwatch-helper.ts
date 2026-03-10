@@ -2,7 +2,7 @@ import {
   CloudWatchLogsClient,
   FilterLogEventsCommand,
 } from "@aws-sdk/client-cloudwatch-logs";
-import { envName } from "tests/constants/api-constants";
+import { AWS_REGION, envName } from "tests/constants/api-constants";
 
 const sleep = (ms: number) =>
   new Promise((resolve) => {
@@ -16,7 +16,7 @@ export async function pollSupplierAllocatorLogForResolvedSpec(
   const startTimeMs = Date.now() - 5 * 60_000;
   const timeoutMs = 120_000;
 
-  const client = new CloudWatchLogsClient({});
+  const client = new CloudWatchLogsClient({ region: AWS_REGION });
   const logGroupName = `/aws/lambda/nhs-${envName}-supapi-supplier-allocator`;
   const deadline = Date.now() + timeoutMs;
 
@@ -42,7 +42,6 @@ export async function pollSupplierAllocatorLogForResolvedSpec(
         (!domainId || message.includes(domainId))
       );
     });
-
     if (foundEvent?.message) {
       return foundEvent.message;
     }
@@ -57,12 +56,13 @@ export async function pollSupplierAllocatorLogForResolvedSpec(
 
 export async function pollUpsertLetterLogForError(
   msgToCheck: string,
+  domainId?: string,
 ): Promise<string> {
   const intervalMs = 5000;
   const startTimeMs = Date.now() - 5 * 60_000;
   const timeoutMs = 120_000;
 
-  const client = new CloudWatchLogsClient({});
+  const client = new CloudWatchLogsClient({ region: AWS_REGION });
   const logGroupName = `/aws/lambda/nhs-${envName}-supapi-upsertletter`;
   const deadline = Date.now() + timeoutMs;
 
@@ -73,7 +73,9 @@ export async function pollUpsertLetterLogForError(
         startTime: startTimeMs,
         interleaved: true,
         limit: 100,
-        filterPattern: `"Error processing upsert of record"`,
+        filterPattern: domainId
+          ? `"Error processing upsert of record" "${domainId}"`
+          : `"Error processing upsert of record"`,
       }),
     );
 
@@ -94,6 +96,6 @@ export async function pollUpsertLetterLogForError(
   }
 
   throw new Error(
-    `Timed out waiting for resolved supplier spec log in ${logGroupName}`,
+    `Timed out waiting for upsert letter error log in ${logGroupName}`,
   );
 }
