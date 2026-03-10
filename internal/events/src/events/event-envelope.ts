@@ -90,8 +90,9 @@ export function EventEnvelope<TData extends z.ZodTypeAny>(
 
       subject: z
         .string()
-
-        .regex(new RegExp(`^${subjectPrefixRegex}${resourceName}/[a-z0-9-]+$`))
+        .regex(
+          new RegExp(`^${subjectPrefixRegex}${resourceName}/[^/]+(?:/.*)?$`),
+        )
         .meta({
           title: "Event Subject",
           description:

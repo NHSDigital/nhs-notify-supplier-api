@@ -364,5 +364,27 @@ describe("EventEnvelope schema validation", () => {
       const result = $EnvelopeNoPrefix.safeParse(envelope);
       expect(result.success).toBe(false);
     });
+
+    it("should accept subject with non uuid resource id", () => {
+      const envelope = {
+        ...baseLetterEnvelope,
+        subject: "letter-origin/letter-rendering/letter/Some_Letter_12345",
+      };
+
+      const result = $EnvelopeWithPrefix.safeParse(envelope);
+      expect(result.error).toBeUndefined();
+      expect(result.success).toBe(true);
+    });
+
+    it("should accept subject with multi sub path resource id", () => {
+      const envelope = {
+        ...baseLetterEnvelope,
+        subject: "letter-origin/letter-rendering/letter/a/B/c/123",
+      };
+
+      const result = $EnvelopeWithPrefix.safeParse(envelope);
+      expect(result.error).toBeUndefined();
+      expect(result.success).toBe(true);
+    });
   });
 });
