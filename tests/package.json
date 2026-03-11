@@ -43,7 +43,7 @@
     "clean": "rimraf $(pwd)/target",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test:component": "playwright test --config=config/main.config.ts --max-failures=10 --project=component-tests",
+    "test:component": "playwright test --config=config/main.config.ts --max-failures=10",
     "test:pact": "./pact-tests/run-pact-tests.sh",
     "test:performance": "playwright test --config=config/performance/performance.config.ts --max-failures=10 --project=performance",
     "test:sandbox": "playwright test --config=config/sandbox.config.ts --max-failures=10 --project=sandbox",

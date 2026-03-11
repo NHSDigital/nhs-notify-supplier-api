@@ -5,11 +5,12 @@ import { randomUUID } from "node:crypto";
 import { logger } from "tests/helpers/pino-logger";
 import { createValidRequestHeaders } from "tests/constants/request-headers";
 import getRestApiGatewayBaseUrl from "tests/helpers/aws-gateway-helper";
-import { SUPPLIER_LETTERS } from "tests/constants/api-constants";
+import { SUPPLIER_LETTERS, envName } from "tests/constants/api-constants";
 import {
   pollSupplierAllocatorLogForResolvedSpec,
   pollUpsertLetterLogForError,
 } from "tests/helpers/aws-cloudwatch-helper";
+import { supplierDataSetup } from "tests/helpers/suppliers-setup-helper";
 
 let baseUrl: string;
 
@@ -18,7 +19,7 @@ test.beforeAll(async () => {
 });
 
 test.describe("Event Subscription SNS Tests", () => {
-  test("Verify that the publish event to nhs-main-supapi-eventsub topic inserts data into db", async ({
+  test(`Verify that the publish event to nhs-${envName}-supapi-eventsub topic inserts data into db`, async ({
     request,
   }) => {
     const domainId = randomUUID();
@@ -42,6 +43,9 @@ test.describe("Event Subscription SNS Tests", () => {
     if (!supplierId) {
       throw new Error("supplierId was not found in supplier allocator log");
     }
+
+    // check if supplier exists in suppliers table
+    await supplierDataSetup(supplierId);
 
     const headers = createValidRequestHeaders(supplierId);
     let statusCode = 0;
