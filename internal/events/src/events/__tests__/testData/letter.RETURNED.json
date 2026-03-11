@@ -11,6 +11,7 @@
     },
     "reasonCode": "R07",
     "reasonText": "No such address",
+    "specificationBillingId": "billing123",
     "specificationId": "1y3q9v1zzzz",
     "status": "RETURNED",
     "supplierId": "supplier1"
