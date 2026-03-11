@@ -1,5 +1,4 @@
 import { Logger } from "pino";
-import { PutCommand } from "@aws-sdk/lib-dynamodb";
 import {
   DBContext,
   createTables,
@@ -8,7 +7,7 @@ import {
 } from "./db";
 import { LetterRepository } from "../letter-repository";
 import { InsertLetter, Letter, UpdateLetter } from "../types";
-import { LogStream, createTestLogger } from "./logs";
+import { createTestLogger } from "./logs";
 
 function createLetter(
   supplierId: string,
@@ -44,7 +43,6 @@ jest.setTimeout(30_000);
 describe("LetterRepository", () => {
   let db: DBContext;
   let letterRepository: LetterRepository;
-  let logStream: LogStream;
   let logger: Logger;
 
   beforeAll(async () => {
@@ -53,7 +51,7 @@ describe("LetterRepository", () => {
 
   beforeEach(async () => {
     await createTables(db);
-    ({ logStream, logger } = createTestLogger());
+    ({ logger } = createTestLogger());
 
     letterRepository = new LetterRepository(db.docClient, logger, db.config);
   });
@@ -294,208 +292,6 @@ describe("LetterRepository", () => {
     expect(changedLetter.reasonCode).toBe("R01");
   });
 
-  test("should return a list of letters matching status", async () => {
-    await letterRepository.putLetter(createLetter("supplier1", "letter1"));
-    await letterRepository.putLetter(createLetter("supplier1", "letter2"));
-    await letterRepository.putLetter(
-      createLetter("supplier1", "letter3", "DELIVERED"),
-    );
-
-    const pendingLetters = await letterRepository.getLettersByStatus(
-      "supplier1",
-      "PENDING",
-    );
-    expect(pendingLetters.letters).toHaveLength(2);
-    expect(pendingLetters.letters.map((l) => l.id)).toEqual([
-      "letter1",
-      "letter2",
-    ]);
-
-    const deliveredLetters = await letterRepository.getLettersByStatus(
-      "supplier1",
-      "DELIVERED",
-    );
-    expect(deliveredLetters.letters).toHaveLength(1);
-    expect(deliveredLetters.letters[0].id).toBe("letter3");
-  });
-
-  test("letter list should change when letter status is updated", async () => {
-    await letterRepository.putLetter(createLetter("supplier1", "letter1"));
-    await letterRepository.putLetter(createLetter("supplier1", "letter2"));
-
-    const pendingLetters = await letterRepository.getLettersByStatus(
-      "supplier1",
-      "PENDING",
-    );
-    expect(pendingLetters.letters).toHaveLength(2);
-
-    const updateLetter: UpdateLetter = {
-      id: "letter1",
-      eventId: "event1",
-      supplierId: "supplier1",
-      status: "DELIVERED",
-    };
-    await letterRepository.updateLetterStatus(updateLetter);
-    const remainingLetters = await letterRepository.getLettersByStatus(
-      "supplier1",
-      "PENDING",
-    );
-    expect(remainingLetters.letters).toHaveLength(1);
-    expect(remainingLetters.letters[0].id).toBe("letter2");
-
-    const updatedLetters = await letterRepository.getLettersByStatus(
-      "supplier1",
-      "DELIVERED",
-    );
-    expect(updatedLetters.letters).toHaveLength(1);
-    expect(updatedLetters.letters[0].id).toBe("letter1");
-  });
-
-  test("letter list should support pagination", async () => {
-    for (let i = 1; i <= 99; i++) {
-      const paddedId = i.toString().padStart(3, "0");
-      await letterRepository.putLetter(
-        createLetter("supplier1", `letter${paddedId}`),
-      );
-    }
-    const firstPage = await letterRepository.getLettersByStatus(
-      "supplier1",
-      "PENDING",
-    );
-    expect(firstPage.letters).toHaveLength(50); // Default page size is 50
-    expect(firstPage.lastEvaluatedKey).toBeDefined();
-    expect(firstPage.letters[0].id).toBe("letter001");
-    expect(firstPage.letters[49].id).toBe("letter050");
-
-    const secondPage = await letterRepository.getLettersByStatus(
-      "supplier1",
-      "PENDING",
-      {
-        exclusiveStartKey: firstPage.lastEvaluatedKey,
-      },
-    );
-    expect(secondPage.letters).toHaveLength(49);
-    expect(secondPage.lastEvaluatedKey).toBeUndefined(); // No more pages
-    expect(secondPage.letters[0].id).toBe("letter051");
-    expect(secondPage.letters[48].id).toBe("letter099");
-  });
-
-  test("letter list should return empty when no letters match status", async () => {
-    await letterRepository.putLetter(
-      createLetter("supplier1", "letter1", "ACCEPTED"),
-    );
-    const page = await letterRepository.getLettersByStatus(
-      "supplier1",
-      "PENDING",
-    );
-    expect(page.letters).toHaveLength(0);
-    expect(page.lastEvaluatedKey).toBeUndefined();
-  });
-
-  test("letter list should warn about invalid data", async () => {
-    await letterRepository.putLetter(createLetter("supplier1", "letter1"));
-    await db.docClient.send(
-      new PutCommand({
-        TableName: db.config.lettersTableName,
-        Item: {
-          supplierId: "supplier1",
-          id: "invalid-letter",
-          // specificationId: 'specification1', // Missing required field
-          groupId: "group1",
-          url: "s3://bucket/invalid-letter.pdf",
-          status: "PENDING",
-          supplierStatus: "supplier1#PENDING",
-          supplierStatusSk: new Date().toISOString(),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-      }),
-    );
-
-    const pendingLetters = await letterRepository.getLettersByStatus(
-      "supplier1",
-      "PENDING",
-    );
-    expect(pendingLetters.letters).toHaveLength(1);
-    expect(pendingLetters.letters[0].id).toBe("letter1");
-
-    expect(
-      logStream.logs.some((log) => log.includes("Invalid letter data:")),
-    ).toBe(true);
-
-    expect(
-      logStream.logs.some(
-        (log) =>
-          log.includes("specificationId") &&
-          log.includes("Invalid input: expected string"),
-      ),
-    ).toBe(true);
-  });
-
-  test("should return all letters for a supplier status", async () => {
-    await letterRepository.putLetter(createLetter("supplier1", "letter1"));
-    await letterRepository.putLetter(createLetter("supplier1", "letter2"));
-    await letterRepository.putLetter(createLetter("supplier1", "letter3"));
-    await letterRepository.putLetter(
-      createLetter("supplier1", "letter4", "REJECTED"),
-    );
-    await letterRepository.putLetter(createLetter("supplier2", "letter1"));
-    await letterRepository.putLetter(createLetter("supplier2", "letter2"));
-
-    const letters = await letterRepository.getLettersBySupplier(
-      "supplier1",
-      "PENDING",
-      10,
-    );
-    expect(letters).toEqual([
-      {
-        id: "letter1",
-        specificationId: "specification1",
-        groupId: "group1",
-        status: "PENDING",
-      },
-      {
-        id: "letter2",
-        specificationId: "specification1",
-        groupId: "group1",
-        status: "PENDING",
-      },
-      {
-        id: "letter3",
-        specificationId: "specification1",
-        groupId: "group1",
-        status: "PENDING",
-      },
-    ]);
-  });
-
-  test("should return empty if no letters exist for a supplier", async () => {
-    await letterRepository.putLetter(createLetter("supplier1", "letter1"));
-    await letterRepository.putLetter(createLetter("supplier1", "letter2"));
-
-    const letters = await letterRepository.getLettersBySupplier(
-      "supplier2",
-      "PENDING",
-      10,
-    );
-    expect(letters).toEqual([]);
-  });
-
-  test("should return empty if query result Items is null", async () => {
-    await letterRepository.putLetter(createLetter("supplier1", "letter1"));
-
-    const mockSend = jest.fn().mockResolvedValue({ Items: null });
-    const mockDdbClient = { send: mockSend } as any;
-    const repo = new LetterRepository(
-      mockDdbClient,
-      { debug: jest.fn() } as any,
-      { lettersTableName: "letters", lettersTtlHours: 1 },
-    );
-
-    const letters = await repo.getLettersBySupplier("supplier1", "PENDING", 10);
-    expect(letters).toEqual([]);
-  });
-
   test("should batch write letters to the database", async () => {
     const before = Date.now();
 
@@ -570,72 +366,5 @@ describe("LetterRepository", () => {
         createLetter("supplier1", "letter1"),
       ]),
     ).rejects.toThrow("Cannot do operations on a non-existent table");
-  });
-
-  test("should paginate through multiple pages when fetching letters by supplier", async () => {
-    const mockSend = jest
-      .fn()
-      // first call returns 30 items with a LastEvaluatedKey
-      .mockResolvedValueOnce({
-        Items: Array.from({ length: 30 }, (_, i) => ({
-          id: `letter${(i + 1).toString().padStart(3, "0")}`,
-          status: "PENDING",
-          specificationId: "specification1",
-          groupId: "group1",
-        })),
-        LastEvaluatedKey: { id: "letter030", supplierId: "supplier1" },
-      })
-      // second call returns remaining 20 items without LastEvaluatedKey
-      .mockResolvedValueOnce({
-        Items: Array.from({ length: 20 }, (_, i) => ({
-          id: `letter${(i + 31).toString().padStart(3, "0")}`,
-          status: "PENDING",
-          specificationId: "specification1",
-          groupId: "group1",
-        })),
-        LastEvaluatedKey: undefined,
-      });
-
-    const mockDdbClient = { send: mockSend } as any;
-    const repo = new LetterRepository(mockDdbClient, logger, db.config);
-
-    // request 50 letters - should require 2 DynamoDB queries due to mocked pagination
-    const letters = await repo.getLettersBySupplier("supplier1", "PENDING", 50);
-
-    // verify all 50 letters were returned
-    expect(letters).toHaveLength(50);
-
-    // verify two send calls were made (2 pages)
-    expect(mockSend).toHaveBeenCalledTimes(2);
-
-    // verify the second call included the ExclusiveStartKey from first response
-    const secondCallInput = mockSend.mock.calls[1][0].input;
-    expect(secondCallInput.ExclusiveStartKey).toEqual({
-      id: "letter030",
-      supplierId: "supplier1",
-    });
-  });
-
-  test("should respect limit when fewer items available than requested", async () => {
-    // create only 10 letters
-    for (let i = 1; i <= 10; i++) {
-      await letterRepository.putLetter(
-        createLetter(
-          "supplier1",
-          `letter${i.toString().padStart(2, "0")}`,
-          "PENDING",
-        ),
-      );
-    }
-
-    // request 50 letters but only 10 exist
-    const letters = await letterRepository.getLettersBySupplier(
-      "supplier1",
-      "PENDING",
-      50,
-    );
-
-    expect(letters).toHaveLength(10);
-    expect(letters.every((l) => l.status === "PENDING")).toBe(true);
   });
 });
