@@ -83,6 +83,13 @@ The identifier will be included as the origin domain in the subject of any corre
       examples: ["1y3q9v1zzzz"],
     }),
 
+    specificationBillingId: z.string().meta({
+      title: "Specification Billing ID",
+      description:
+        "The billing ID from the letter specification which was used to produce a letter pack for this request.",
+      examples: ["1y3q9v1zzzz"],
+    }),
+
     supplierId: z.string().meta({
       title: "Supplier ID",
       description: "Supplier ID allocated to the letter during creation.",
