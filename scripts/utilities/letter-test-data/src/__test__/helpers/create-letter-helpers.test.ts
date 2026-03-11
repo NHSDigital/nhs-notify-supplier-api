@@ -62,6 +62,7 @@ describe("Create letter helpers", () => {
       source: "/data-plane/letter-rendering/letter-test-data",
       subject: "supplier-api/letter-test-data/letterId",
       billingRef: "specificationId",
+      specificationBillingId: "specificationId",
     });
   });
 
@@ -110,6 +111,7 @@ describe("Create letter helpers", () => {
       billingRef: "specificationId",
       source: "/data-plane/letter-rendering/letter-test-data",
       subject: "supplier-api/letter-test-data/letterId",
+      specificationBillingId: "specificationId",
     });
   });
 
@@ -140,6 +142,7 @@ describe("Create letter helpers", () => {
       source: "/data-plane/letter-rendering/letter-test-data",
       subject: "supplier-api/letter-test-data/testLetterId",
       billingRef: "testSpecId",
+      specificationBillingId: "testSpecId",
     });
   });
 });

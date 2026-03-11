@@ -49,6 +49,7 @@ export async function createLetter(params: {
     source: "/data-plane/letter-rendering/letter-test-data",
     subject: `supplier-api/letter-test-data/${letterId}`,
     billingRef: specificationId,
+    specificationBillingId: specificationId,
   };
 
   const letterRecord = await letterRepository.putLetter(letter);
@@ -78,6 +79,7 @@ export function createLetterDto(params: {
     source: "/data-plane/letter-rendering/letter-test-data",
     subject: `supplier-api/letter-test-data/${letterId}`,
     billingRef: specificationId,
+    specificationBillingId: specificationId,
   };
 
   return letter;

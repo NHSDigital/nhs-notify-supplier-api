@@ -26,8 +26,14 @@ function makeDeps(overrides: Partial<Deps> = {}): Deps {
 
   const env = {
     VARIANT_MAP: {
-      "variant-1": { supplierId: "supplier-1", specId: "spec-1" },
-      "variant-2": { supplierId: "supplier-2", specId: "spec-2" },
+      "variant-1": {
+        supplierId: "supplier-1",
+        specId: "spec-1",
+      },
+      "variant-2": {
+        supplierId: "supplier-2",
+        specId: "spec-2",
+      },
     },
   };
 

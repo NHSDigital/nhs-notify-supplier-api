@@ -53,6 +53,7 @@ export const LetterSchema = LetterSchemaBase.extend({
   source: z.string(),
   subject: z.string(),
   billingRef: z.string(),
+  specificationBillingId: z.string(),
 }).describe("Letter");
 
 /**
