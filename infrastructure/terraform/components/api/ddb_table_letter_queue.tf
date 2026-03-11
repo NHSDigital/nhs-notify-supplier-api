@@ -11,7 +11,7 @@ resource "aws_dynamodb_table" "letter_queue" {
   }
 
   local_secondary_index {
-    name            = "queueTimestamp-index"
+    name            = "queueSortOrder-index"
     range_key       = "queueTimestamp"
     projection_type = "ALL"
   }

@@ -27,10 +27,13 @@ export default class LetterQueueRepository {
   async putLetter(
     insertPendingLetter: InsertPendingLetter,
   ): Promise<PendingLetter> {
+    // needs to be an ISO timestamp as Db sorts alphabetically
+    const now = new Date().toISOString();
+
     const pendingLetter: PendingLetter = {
       ...insertPendingLetter,
-      // needs to be an ISO timestamp as Db sorts alphabetically
-      queueTimestamp: new Date().toISOString(),
+      queueTimestamp: now,
+      visibilityTimeout: now,
       ttl: Math.floor(
         Date.now() / 1000 + 60 * 60 * this.config.letterQueueTtlHours,
       ),

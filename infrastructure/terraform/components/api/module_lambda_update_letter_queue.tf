@@ -35,7 +35,7 @@ module "update_letter_queue" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
-    LETTER_QUEUE_TABLE_NAME = aws_dynamodb_table.letter_queue.name,
+    LETTER_QUEUE_TABLE_NAME = "${local.csi}-letter-queue",
     LETTER_QUEUE_TTL_HOURS  = 168 # 7 days
   })
 }
@@ -51,8 +51,8 @@ data "aws_iam_policy_document" "update_letter_queue_lambda" {
     ]
 
     resources = [
-      aws_dynamodb_table.letter_queue.arn,
-      "${aws_dynamodb_table.letter_queue.arn}/index/*"
+      "arn:aws:dynamodb:${var.region}:${var.aws_account_id}:table/${local.csi}-letter-queue",
+      "arn:aws:dynamodb:${var.region}:${var.aws_account_id}:table/${local.csi}-letter-queue/index/*"
     ]
   }
 
