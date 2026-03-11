@@ -35,6 +35,10 @@ on:
         description: "PR Number if it exists"
         required: false
         type: string
+      deploy_proxy:
+        description: "True if the APIM proxy should be deployed"
+        required: true
+        type: string
 
 permissions:
   id-token: write # This is required for requesting the JWT
@@ -133,9 +137,13 @@ jobs:
   pr-create-dynamic-environment:
     name: Create Dynamic Environment
     runs-on: ubuntu-latest
-    if: inputs.pr_number != ''
+    outputs:
+      environment_name: ${{ steps.set-environment.outputs.environment_name }}
     steps:
       - uses: actions/checkout@v5
+      - name: Set environment name
+        id: set-environment
+        run: echo "environment_name=${{ inputs.pr_number != '' && format('pr{0}', inputs.pr_number) || 'main' }}" >> $GITHUB_OUTPUT
       - name: Trigger dynamic environment creation
         env:
           APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
@@ -148,7 +156,7 @@ jobs:
             --infraRepoName "$(echo ${{ github.repository }} | cut -d'/' -f2)" \
             --releaseVersion ${{ github.head_ref || github.ref_name }} \
             --targetWorkflow "dispatch-deploy-dynamic-env.yaml" \
-            --targetEnvironment "pr${PR_NUMBER}" \
+            --targetEnvironment "${{ steps.set-environment.outputs.environment_name }}" \
             --targetComponent "api" \
             --targetAccountGroup "nhs-notify-supplier-api-dev" \
             --terraformAction "apply" \
@@ -157,12 +165,11 @@ jobs:
   artefact-proxies:
     name: "Build proxies"
     runs-on: ubuntu-latest
-    if: inputs.pr_number != ''
+    if: inputs.deploy_proxy == 'true'
     needs: [artefact-oas-spec-sandbox, pr-create-dynamic-environment]
     timeout-minutes: 10
     env:
       PROXYGEN_API_NAME: nhs-notify-supplier
-      PR_NUMBER: ${{ inputs.pr_number }}
       APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
       APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
     steps:
@@ -172,7 +179,7 @@ jobs:
         uses: ./.github/actions/build-proxies
         with:
           version: "${{ inputs.version }}"
-          environment: ${{ inputs.pr_number != '' && format('pr{0}', inputs.pr_number) || 'main' }}
+          environment: ${{ needs.pr-create-dynamic-environment.outputs.environment_name }}
           apimEnv: "internal-dev-sandbox"
           runId: "${{ github.run_id }}"
           buildSandbox: true
