@@ -81,6 +81,7 @@ export function EventEnvelope<TData extends z.ZodTypeAny>(
 
       source: z
         .string()
+        // eslint-disable-next-line security/detect-unsafe-regex
         .regex(/^\/data-plane\/supplier-api(?:\/.*)?$/)
         .meta({
           title: "Event Source",
@@ -91,6 +92,7 @@ export function EventEnvelope<TData extends z.ZodTypeAny>(
       subject: z
         .string()
         .regex(
+          // eslint-disable-next-line security/detect-non-literal-regexp
           new RegExp(`^${subjectPrefixRegex}${resourceName}/[^/]+(?:/.*)?$`),
         )
         .meta({
