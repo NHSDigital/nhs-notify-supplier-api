@@ -53,32 +53,16 @@ describe("LetterQueueRepository", () => {
     await db.container.stop();
   });
 
-  function assertTtl(ttl: number, before: number, after: number) {
-    const expectedLower = Math.floor(
-      before / 1000 + 60 * 60 * db.config.letterQueueTtlHours,
-    );
-    const expectedUpper = Math.floor(
-      after / 1000 + 60 * 60 * db.config.lettersTtlHours,
-    );
-    expect(ttl).toBeGreaterThanOrEqual(expectedLower);
-    expect(ttl).toBeLessThanOrEqual(expectedUpper);
-  }
-
   describe("putLetter", () => {
     it("adds a letter to the database", async () => {
-      const before = Date.now();
+      jest.useFakeTimers().setSystemTime(new Date("2026-03-04T13:15:45.000Z"));
 
       const pendingLetter =
         await letterQueueRepository.putLetter(createLetter());
 
-      const after = Date.now();
-
-      const timestampInMillis = new Date(
-        pendingLetter.queueTimestamp,
-      ).valueOf();
-      expect(timestampInMillis).toBeGreaterThanOrEqual(before);
-      expect(timestampInMillis).toBeLessThanOrEqual(after);
-      assertTtl(pendingLetter.ttl, before, after);
+      expect(pendingLetter.queueTimestamp).toBe("2026-03-04T13:15:45.000Z");
+      expect(pendingLetter.visibilityTimeout).toBe("2026-03-04T13:15:45.000Z");
+      expect(pendingLetter.ttl).toBe(1_772_633_745);
       expect(await letterExists(db, "supplier1", "letter1")).toBe(true);
     });
 
