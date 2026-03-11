@@ -117,6 +117,7 @@ function mapToInsertLetter(
     createdAt: now,
     updatedAt: now,
     billingRef,
+    specificationBillingId: spec,
   };
 }
 
@@ -235,7 +236,10 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
           await runUpsert(
             operation,
             letterEvent,
-            supplierSpec ?? { supplierId: "unknown", specId: "unknown" },
+            supplierSpec ?? {
+              supplierId: "unknown",
+              specId: "unknown",
+            },
             deps,
           );
 
