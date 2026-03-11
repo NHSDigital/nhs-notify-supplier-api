@@ -80,7 +80,7 @@ export const PendingLetterSchema = z.object({
   supplierId: idRef(SupplierSchema, "id"),
   letterId: idRef(LetterSchema, "id"),
   queueTimestamp: z.string().describe("Secondary index SK"),
-  visibilityTimeout: z.string(),
+  visibilityTimestamp: z.string(),
   specificationId: z.string(),
   groupId: z.string(),
   ttl: z.int(),
@@ -90,7 +90,7 @@ export type PendingLetter = z.infer<typeof PendingLetterSchema>;
 
 export type InsertPendingLetter = Omit<
   PendingLetter,
-  "ttl" | "queueTimestamp" | "visibilityTimeout"
+  "ttl" | "queueTimestamp" | "visibilityTimestamp"
 >;
 
 export const MISchemaBase = z.object({

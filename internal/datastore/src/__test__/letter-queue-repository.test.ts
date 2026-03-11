@@ -61,7 +61,7 @@ describe("LetterQueueRepository", () => {
         await letterQueueRepository.putLetter(createLetter());
 
       expect(pendingLetter.queueTimestamp).toBe("2026-03-04T13:15:45.000Z");
-      expect(pendingLetter.visibilityTimeout).toBe("2026-03-04T13:15:45.000Z");
+      expect(pendingLetter.visibilityTimestamp).toBe("2026-03-04T13:15:45.000Z");
       expect(pendingLetter.ttl).toBe(1_772_633_745);
       expect(await letterExists(db, "supplier1", "letter1")).toBe(true);
     });
