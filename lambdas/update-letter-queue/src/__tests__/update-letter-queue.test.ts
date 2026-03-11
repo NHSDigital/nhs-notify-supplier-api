@@ -46,6 +46,7 @@ function generateLetter(status: LetterStatus, id?: string): Letter {
     source: "test-source",
     subject: "test-subject",
     billingRef: "billing-ref-1",
+    specificationBillingId: "billing1",
   };
 }
 

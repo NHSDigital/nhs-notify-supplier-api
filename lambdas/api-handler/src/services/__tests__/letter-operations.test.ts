@@ -41,6 +41,7 @@ function makeLetter(id: string, status: Letter["status"]): Letter {
     reasonText: "Reason text",
     source: "/data-plane/letter-rendering/pdf",
     subject: "letter-rendering/source/letter/letter-id",
+    specificationBillingId: "billing123",
   };
 }
 
