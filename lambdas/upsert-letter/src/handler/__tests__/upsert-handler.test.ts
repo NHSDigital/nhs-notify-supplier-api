@@ -97,6 +97,7 @@ function createSupplierStatusChangeEventWithoutSupplier(
       billingRef: "1y3q9v1zzzz",
       status: "RETURNED",
       supplierId: "",
+      specificationBillingId: "billing1",
     },
     datacontenttype: "application/json",
     dataschema:
@@ -151,6 +152,7 @@ function createSupplierStatusChangeEvent(
       billingRef: "1y3q9v1zzzz",
       status: "RETURNED",
       supplierId: "supplier1",
+      specificationBillingId: "billing1",
     },
     datacontenttype: "application/json",
     dataschema:
@@ -249,6 +251,7 @@ describe("createUpsertLetterHandler", () => {
     expect(insertedV2Letter.status).toBe("PENDING");
     expect(insertedV2Letter.groupId).toBe("client1campaign1template1");
     expect(insertedV2Letter.source).toBe("/data-plane/letter-rendering/test");
+    expect(insertedV2Letter.specificationBillingId).toBe("spec1");
     expect(insertedV2Letter.priority).toBe(10);
 
     const insertedV1Letter = (mockedDeps.letterRepo.putLetter as jest.Mock).mock
@@ -261,6 +264,7 @@ describe("createUpsertLetterHandler", () => {
     expect(insertedV1Letter.status).toBe("PENDING");
     expect(insertedV1Letter.groupId).toBe("client1campaign1template1");
     expect(insertedV1Letter.source).toBe("/data-plane/letter-rendering/test");
+    expect(insertedV1Letter.specificationBillingId).toBe("spec1");
     expect(insertedV1Letter.priority).toBe(10);
 
     const updatedLetter = (

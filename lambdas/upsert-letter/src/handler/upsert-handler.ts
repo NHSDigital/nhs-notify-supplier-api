@@ -122,6 +122,7 @@ function mapToInsertLetter(
     createdAt: now,
     updatedAt: now,
     billingRef,
+    specificationBillingId: spec,
   };
 }
 
