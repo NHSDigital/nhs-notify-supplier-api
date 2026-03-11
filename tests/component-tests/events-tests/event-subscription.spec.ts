@@ -19,6 +19,7 @@ test.beforeAll(async () => {
 });
 
 test.describe("Event Subscription SNS Tests", () => {
+  test.setTimeout(180_000); // 3 minutes for long running polling
   test(`Verify that the publish event to nhs-${envName}-supapi-eventsub topic inserts data into db`, async ({
     request,
   }) => {
