@@ -216,13 +216,15 @@ describe("createUpsertLetterHandler", () => {
       supplierSpec: {
         supplierId: "supplier1",
         specId: "spec1",
+        billingId: "billing1",
       },
     };
     const v1message = {
       letterEvent: createPreparedV1Event(),
       supplierSpec: {
-        supplierId: "supplier1",
-        specId: "spec1",
+        supplierId: "supplier2",
+        specId: "spec2",
+        billingId: "billing2",
       },
     };
 
@@ -257,19 +259,19 @@ describe("createUpsertLetterHandler", () => {
     expect(insertedV2Letter.status).toBe("PENDING");
     expect(insertedV2Letter.groupId).toBe("client1campaign1template1");
     expect(insertedV2Letter.source).toBe("/data-plane/letter-rendering/test");
-    expect(insertedV2Letter.specificationBillingId).toBe("spec1");
+    expect(insertedV2Letter.specificationBillingId).toBe("billing1");
 
     const insertedV1Letter = (mockedDeps.letterRepo.putLetter as jest.Mock).mock
       .calls[1][0];
     expect(insertedV1Letter.id).toBe("letter1");
-    expect(insertedV1Letter.supplierId).toBe("supplier1");
-    expect(insertedV1Letter.specificationId).toBe("spec1");
-    expect(insertedV1Letter.billingRef).toBe("spec1");
+    expect(insertedV1Letter.supplierId).toBe("supplier2");
+    expect(insertedV1Letter.specificationId).toBe("spec2");
+    expect(insertedV1Letter.billingRef).toBe("spec2");
     expect(insertedV1Letter.url).toBe("s3://letterDataBucket/letter1.pdf");
     expect(insertedV1Letter.status).toBe("PENDING");
     expect(insertedV1Letter.groupId).toBe("client1campaign1template1");
     expect(insertedV1Letter.source).toBe("/data-plane/letter-rendering/test");
-    expect(insertedV1Letter.specificationBillingId).toBe("spec1");
+    expect(insertedV1Letter.specificationBillingId).toBe("billing2");
 
     const updatedLetter = (
       mockedDeps.letterRepo.updateLetterStatus as jest.Mock
@@ -285,7 +287,12 @@ describe("createUpsertLetterHandler", () => {
     });
     expect(mockMetrics.putMetric).toHaveBeenCalledWith(
       "MessagesProcessed",
-      3,
+      2,
+      "Count",
+    );
+    expect(mockMetrics.putMetric).toHaveBeenCalledWith(
+      "MessagesProcessed",
+      1,
       "Count",
     );
   });
@@ -485,6 +492,7 @@ describe("createUpsertLetterHandler", () => {
       supplierSpec: {
         supplierId: "supplier1",
         specId: "spec1",
+        billingId: "billing1",
       },
     };
     const message2 = {
@@ -495,6 +503,7 @@ describe("createUpsertLetterHandler", () => {
       supplierSpec: {
         supplierId: "supplier1",
         specId: "spec1",
+        billingId: "billing1",
       },
     };
     const evt: SQSEvent = createSQSEvent([

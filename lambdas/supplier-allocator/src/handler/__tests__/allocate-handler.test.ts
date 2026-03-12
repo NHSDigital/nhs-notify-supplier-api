@@ -29,10 +29,12 @@ function makeDeps(overrides: Partial<Deps> = {}): Deps {
       "variant-1": {
         supplierId: "supplier-1",
         specId: "spec-1",
+        billingId: "billing-1",
       },
       "variant-2": {
         supplierId: "supplier-2",
         specId: "spec-2",
+        billingId: "billing-2",
       },
     },
   };

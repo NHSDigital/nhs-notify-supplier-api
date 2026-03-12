@@ -5,6 +5,7 @@ const LetterVariantSchema = z.record(
   z.object({
     supplierId: z.string(),
     specId: z.string(),
+    billingId: z.string(),
   }),
 );
 export type LetterVariant = z.infer<typeof LetterVariantSchema>;

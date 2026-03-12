@@ -7,6 +7,7 @@ describe("createDependenciesContainer", () => {
       lv1: {
         supplierId: "supplier1",
         specId: "spec1",
+        billingId: "billing1",
       },
     },
   };

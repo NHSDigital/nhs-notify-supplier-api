@@ -16,12 +16,13 @@ import z from "zod";
 import { MetricsLogger, Unit, metricScope } from "aws-embedded-metrics";
 import { Deps } from "../config/deps";
 
-type SupplierSpec = { supplierId: string; specId: string };
+type SupplierSpec = { supplierId: string; specId: string; billingId: string };
 type PreparedEvents = LetterRequestPreparedEventV2 | LetterRequestPreparedEvent;
 
 const SupplierSpecSchema = z.object({
   supplierId: z.string().min(1),
   specId: z.string().min(1),
+  billingId: z.string().min(1),
 });
 
 const PreparedEventUnionSchema = z.discriminatedUnion("type", [
@@ -63,6 +64,7 @@ function getOperationFromType(type: string): UpsertOperation {
           supplierSpec.supplierId,
           supplierSpec.specId,
           supplierSpec.specId, // use specId for now
+          supplierSpec.billingId, // use billingId for now
         );
         await deps.letterRepo.putLetter(letterToInsert);
 
@@ -99,6 +101,7 @@ function mapToInsertLetter(
   supplier: string,
   spec: string,
   billingRef: string,
+  billingId: string,
 ): InsertLetter {
   const now = new Date().toISOString();
   return {
@@ -117,7 +120,7 @@ function mapToInsertLetter(
     createdAt: now,
     updatedAt: now,
     billingRef,
-    specificationBillingId: spec,
+    specificationBillingId: billingId,
   };
 }
 
@@ -239,6 +242,7 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
             supplierSpec ?? {
               supplierId: "unknown",
               specId: "unknown",
+              billingId: "unknown",
             },
             deps,
           );
