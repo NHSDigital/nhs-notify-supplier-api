@@ -161,7 +161,8 @@ jobs:
             --targetAccountGroup "nhs-notify-supplier-api-dev" \
             --terraformAction "apply" \
             --overrideProjectName "nhs" \
-            --overrideRoleName "nhs-main-acct-supplier-api-github-deploy"
+            --overrideRoleName "nhs-main-acct-supplier-api-github-deploy" \
+            --internalRef "feature/CCM-15148"
   artefact-proxies:
     name: "Build proxies"
     runs-on: ubuntu-latest
