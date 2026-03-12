@@ -2,21 +2,24 @@ import { S3Client } from "@aws-sdk/client-s3";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { SQSClient } from "@aws-sdk/client-sqs";
-import pino from "pino";
+import { SNSClient } from "@aws-sdk/client-sns";
+import { Logger } from "pino";
 import {
   DBHealthcheck,
   LetterRepository,
   MIRepository,
 } from "@internal/datastore";
+import { createLogger } from "@internal/helpers";
 import { EnvVars, envVars } from "./env";
 
 export type Deps = {
   s3Client: S3Client;
   sqsClient: SQSClient;
+  snsClient: SNSClient;
   letterRepo: LetterRepository;
   miRepo: MIRepository;
   dbHealthcheck: DBHealthcheck;
-  logger: pino.Logger;
+  logger: Logger;
   env: EnvVars;
 };
 
@@ -26,7 +29,7 @@ function createDocumentClient(): DynamoDBDocumentClient {
 }
 
 function createLetterRepository(
-  log: pino.Logger,
+  log: Logger,
   environment: EnvVars,
 ): LetterRepository {
   const config = {
@@ -46,10 +49,7 @@ function createDBHealthcheck(environment: EnvVars): DBHealthcheck {
   return new DBHealthcheck(createDocumentClient(), config);
 }
 
-function createMIRepository(
-  log: pino.Logger,
-  environment: EnvVars,
-): MIRepository {
+function createMIRepository(log: Logger, environment: EnvVars): MIRepository {
   const config = {
     miTableName: environment.MI_TABLE_NAME,
     miTtlHours: environment.MI_TTL_HOURS,
@@ -59,11 +59,12 @@ function createMIRepository(
 }
 
 export function createDependenciesContainer(): Deps {
-  const log = pino();
+  const log = createLogger({ logLevel: envVars.PINO_LOG_LEVEL });
 
   return {
     s3Client: new S3Client(),
     sqsClient: new SQSClient(),
+    snsClient: new SNSClient(),
     letterRepo: createLetterRepository(log, envVars),
     miRepo: createMIRepository(log, envVars),
     dbHealthcheck: createDBHealthcheck(envVars),

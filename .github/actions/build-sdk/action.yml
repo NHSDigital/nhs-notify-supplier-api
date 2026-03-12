@@ -56,31 +56,31 @@ runs:
         make build VERSION="${{ inputs.version }}"
 
     - name: Upload html artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         path: "sdk/html"
         name: sdk-html-${{ inputs.version }}
 
     - name: Upload swagger artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         path: "sdk/swagger"
         name: sdk-swagger-${{ inputs.version }}
 
     - name: Upload ts artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         path: "sdk/typescript"
         name: sdk-ts-${{ inputs.version }}
 
     - name: Upload python artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         path: "sdk/python"
         name: sdk-python-${{ inputs.version }}
 
     - name: Upload csharp artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         path: "sdk/csharp"
         name: sdk-csharp-${{ inputs.version }}

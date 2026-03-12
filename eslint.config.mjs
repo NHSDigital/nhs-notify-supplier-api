@@ -20,12 +20,30 @@ import {
 } from 'eslint-config-airbnb-extended';
 import { rules as prettierConfigRules } from 'eslint-config-prettier';
 
-import { dirname } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { FlatCompat } from '@eslint/eslintrc';
+import { globSync } from 'glob';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+const rootPackageJson = JSON.parse(
+  readFileSync(new URL('./package.json', import.meta.url), 'utf8'),
+);
+const workspacePatterns = rootPackageJson.workspaces ?? [];
+const workspacePackageDirs = workspacePatterns.flatMap((pattern) =>
+  globSync(`${pattern}/package.json`, {
+    cwd: __dirname,
+    ignore: ['**/node_modules/**'],
+  }).map((packageJsonPath) =>
+    resolve(__dirname, packageJsonPath.replace(/\/package\.json$/, '')),
+  ),
+);
+const monorepoPackageDirs = Array.from(
+  new Set([__dirname, ...workspacePackageDirs]),
+);
 
 const compat = new FlatCompat({
   baseDirectory: __dirname,
@@ -171,7 +189,7 @@ export default defineConfig([
     rules: {
       'import-x/no-extraneous-dependencies': [
         2,
-        { devDependencies: true },
+        { devDependencies: true, packageDir: monorepoPackageDirs },
       ],
     },
   },
@@ -188,7 +206,7 @@ export default defineConfig([
     rules: {
       'import-x/no-extraneous-dependencies': [
         'error',
-        { devDependencies: true },
+        { devDependencies: true, packageDir: monorepoPackageDirs },
       ],
     },
   },

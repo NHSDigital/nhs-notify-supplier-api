@@ -11,16 +11,22 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_access_logging_bucket"></a> [access\_logging\_bucket](#input\_access\_logging\_bucket) | Name of S3 bucket to use for access logging | `string` | `""` | no |
 | <a name="input_aws_account_id"></a> [aws\_account\_id](#input\_aws\_account\_id) | The AWS Account ID (numeric) | `string` | n/a | yes |
 | <a name="input_component"></a> [component](#input\_component) | The name of the terraformscaffold component calling this module | `string` | n/a | yes |
 | <a name="input_default_tags"></a> [default\_tags](#input\_default\_tags) | Default tag map for application to all taggable resources in the module | `map(string)` | `{}` | no |
-| <a name="input_enable_event_cache"></a> [enable\_event\_cache](#input\_enable\_event\_cache) | Enable caching of events to an S3 bucket | `bool` | `false` | no |
+| <a name="input_enable_event_anomaly_detection"></a> [enable\_event\_anomaly\_detection](#input\_enable\_event\_anomaly\_detection) | Enable CloudWatch anomaly detection alarm for SNS topic message publishing | `bool` | `true` | no |
+| <a name="input_enable_event_cache"></a> [enable\_event\_cache](#input\_enable\_event\_cache) | Enable caching of events to an S3 bucket | `bool` | `true` | no |
 | <a name="input_enable_firehose_raw_message_delivery"></a> [enable\_firehose\_raw\_message\_delivery](#input\_enable\_firehose\_raw\_message\_delivery) | Enables raw message delivery on firehose subscription | `bool` | `false` | no |
-| <a name="input_enable_sns_delivery_logging"></a> [enable\_sns\_delivery\_logging](#input\_enable\_sns\_delivery\_logging) | Enable SNS Delivery Failure Notifications | `bool` | `false` | no |
+| <a name="input_enable_sns_delivery_logging"></a> [enable\_sns\_delivery\_logging](#input\_enable\_sns\_delivery\_logging) | Enable SNS Delivery Failure Notifications | `bool` | `true` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | The name of the terraformscaffold environment the module is called for | `string` | n/a | yes |
+| <a name="input_event_anomaly_band_width"></a> [event\_anomaly\_band\_width](#input\_event\_anomaly\_band\_width) | The width of the anomaly detection band. Higher values (e.g. 4-6) reduce sensitivity and noise, lower values (e.g. 2-3) increase sensitivity. Recommended: 2-4. | `number` | `3` | no |
+| <a name="input_event_anomaly_evaluation_periods"></a> [event\_anomaly\_evaluation\_periods](#input\_event\_anomaly\_evaluation\_periods) | Number of evaluation periods for the anomaly alarm. Each period is defined by event\_anomaly\_period. | `number` | `2` | no |
+| <a name="input_event_anomaly_period"></a> [event\_anomaly\_period](#input\_event\_anomaly\_period) | The period in seconds over which the specified statistic is applied for anomaly detection. Minimum 300 seconds (5 minutes). Recommended: 300-600. | `number` | `300` | no |
 | <a name="input_event_cache_buffer_interval"></a> [event\_cache\_buffer\_interval](#input\_event\_cache\_buffer\_interval) | The buffer interval for data firehose | `number` | `500` | no |
 | <a name="input_event_cache_expiry_days"></a> [event\_cache\_expiry\_days](#input\_event\_cache\_expiry\_days) | s3 archiving expiry in days | `number` | `30` | no |
 | <a name="input_force_destroy"></a> [force\_destroy](#input\_force\_destroy) | When enabled will force destroy event-cache S3 bucket | `bool` | `false` | no |
+| <a name="input_glue_role_arn"></a> [glue\_role\_arn](#input\_glue\_role\_arn) | ARN of the Glue execution role from the parent | `string` | n/a | yes |
 | <a name="input_group"></a> [group](#input\_group) | The name of the tfscaffold group | `string` | `null` | no |
 | <a name="input_kms_key_arn"></a> [kms\_key\_arn](#input\_kms\_key\_arn) | KMS key arn to use for this function | `string` | n/a | yes |
 | <a name="input_log_level"></a> [log\_level](#input\_log\_level) | The log level to be used in lambda functions within the component. Any log with a lower severity than the configured value will not be logged: https://docs.python.org/3/library/logging.html#levels | `string` | `"WARN"` | no |
@@ -34,7 +40,7 @@
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_s3bucket_event_cache"></a> [s3bucket\_event\_cache](#module\_s3bucket\_event\_cache) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-s3bucket.zip | n/a |
+| <a name="module_s3bucket_event_cache"></a> [s3bucket\_event\_cache](#module\_s3bucket\_event\_cache) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.0.6/terraform-s3bucket.zip | n/a |
 ## Outputs
 
 | Name | Description |

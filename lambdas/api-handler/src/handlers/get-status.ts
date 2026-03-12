@@ -26,10 +26,10 @@ export default function createGetStatusHandler(
         body: JSON.stringify({ code: 200 }, null, 2),
       };
     } catch (error) {
-      deps.logger.error(
-        { err: error },
-        "Status endpoint error, services not available",
-      );
+      deps.logger.error({
+        err: error,
+        description: "Status endpoint error, services not available",
+      });
       return {
         statusCode: 500,
         body: JSON.stringify({ code: 500 }, null, 2),

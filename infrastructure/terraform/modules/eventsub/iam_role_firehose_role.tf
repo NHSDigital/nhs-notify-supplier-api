@@ -1,8 +1,8 @@
 resource "aws_iam_role" "firehose_role" {
   count = var.enable_event_cache ? 1 : 0
 
-  name                 = "${local.csi}-firehose-role"
-  assume_role_policy   = data.aws_iam_policy_document.firehose_assume_role[0].json
+  name               = "${local.csi}-firehose-role"
+  assume_role_policy = data.aws_iam_policy_document.firehose_assume_role[0].json
 }
 
 data "aws_iam_policy_document" "firehose_assume_role" {

@@ -42,9 +42,11 @@ export const LetterSchemaBase = z.object({
 
 export const LetterSchema = LetterSchemaBase.extend({
   supplierId: idRef(SupplierSchema, "id"),
+  eventId: z.string().optional(),
   url: z.url(),
   createdAt: z.string(),
   updatedAt: z.string(),
+  previousStatus: LetterStatus.optional(),
   supplierStatus: z.string().describe("Secondary index PK"),
   supplierStatusSk: z.string().describe("Secondary index SK"),
   ttl: z.int(),
@@ -67,11 +69,25 @@ export type InsertLetter = Omit<
 >;
 export type UpdateLetter = {
   id: string;
+  eventId: string;
   supplierId: string;
   status: Letter["status"];
   reasonCode?: string;
   reasonText?: string;
 };
+
+export const PendingLetterSchema = z.object({
+  supplierId: idRef(SupplierSchema, "id"),
+  letterId: idRef(LetterSchema, "id"),
+  queueTimestamp: z.string().describe("Secondary index SK"),
+  specificationId: z.string(),
+  groupId: z.string(),
+  ttl: z.int(),
+});
+
+export type PendingLetter = z.infer<typeof PendingLetterSchema>;
+
+export type InsertPendingLetter = Omit<PendingLetter, "ttl" | "queueTimestamp">;
 
 export const MISchemaBase = z.object({
   id: z.string(),

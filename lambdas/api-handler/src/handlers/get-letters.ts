@@ -4,6 +4,7 @@ import {
 } from "aws-lambda";
 import { Logger } from "pino";
 import { MetricsLogger, metricScope } from "aws-embedded-metrics";
+import { MetricStatus, emitForSingleSupplier } from "@internal/helpers";
 import { getLettersForSupplier } from "../services/letter-operations";
 import { extractCommonIds } from "../utils/common-ids";
 import { requireEnvVar } from "../utils/validation";
@@ -12,9 +13,7 @@ import { processError } from "../mappers/error-mapper";
 import ValidationError from "../errors/validation-error";
 import { mapToGetLettersResponse } from "../mappers/letter-mapper";
 import type { Deps } from "../config/deps";
-import { MetricStatus, emitForSingleSupplier } from "../utils/metrics";
 
-// List letters Handlers
 // The endpoint should only return pending letters for now
 const status = "PENDING";
 
@@ -126,6 +125,7 @@ export default function createGetLettersHandler(
           limitNumber,
           status,
           lettersCount: letters.length,
+          correlationId: commonIds.value.correlationId,
         });
 
         emitForSingleSupplier(
@@ -137,7 +137,7 @@ export default function createGetLettersHandler(
         );
         return {
           statusCode: 200,
-          body: JSON.stringify(response, null, 2),
+          body: JSON.stringify(response),
         };
       } catch (error) {
         emitForSingleSupplier(

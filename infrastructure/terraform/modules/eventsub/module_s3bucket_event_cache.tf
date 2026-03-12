@@ -1,5 +1,5 @@
 module "s3bucket_event_cache" {
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-s3bucket.zip"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.0.6/terraform-s3bucket.zip"
 
   count = var.enable_event_cache ? 1 : 0
 
@@ -40,6 +40,10 @@ module "s3bucket_event_cache" {
     data.aws_iam_policy_document.s3bucket_event_cache[0].json
   ]
 
+  bucket_logging_target = {
+    bucket = "${var.access_logging_bucket}"
+  }
+
   public_access = {
     block_public_acls       = true
     block_public_policy     = true
@@ -48,7 +52,7 @@ module "s3bucket_event_cache" {
   }
 
   default_tags = {
-    Name = "Event Cache Storage"
+    Name                       = "Event Cache Storage"
     NHSE-Enable-S3-Backup-Acct = "True"
   }
 }
@@ -125,5 +129,45 @@ data "aws_iam_policy_document" "s3bucket_event_cache" {
         "arn:aws:iam::${var.aws_account_id}:root"
       ]
     }
+  }
+  statement {
+    sid    = "AllowGlueListBucketAndGetLocation"
+    effect = "Allow"
+
+    principals {
+      type        = "AWS"
+      identifiers = [var.glue_role_arn]
+    }
+
+    actions = [
+      "s3:ListBucket",
+      "s3:GetBucketLocation"
+    ]
+
+    resources = [
+      "arn:aws:s3:::${module.s3bucket_event_cache[0].bucket}"
+    ]
+  }
+
+  # Object-level permissions: Get/Put/Delete objects
+  statement {
+    sid    = "AllowGlueObjectAccess"
+    effect = "Allow"
+
+    principals {
+      type        = "AWS"
+      identifiers = [var.glue_role_arn]
+    }
+
+    actions = [
+      "s3:GetObject",
+      "s3:GetObjectVersion",
+      "s3:PutObject",
+      "s3:DeleteObject"
+    ]
+
+    resources = [
+      "arn:aws:s3:::${module.s3bucket_event_cache[0].bucket}/*"
+    ]
   }
 }

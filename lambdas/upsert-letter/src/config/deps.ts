@@ -1,12 +1,13 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
-import pino from "pino";
+import { Logger } from "pino";
 import { LetterRepository } from "@internal/datastore";
+import { createLogger } from "@internal/helpers";
 import { EnvVars, envVars } from "./env";
 
 export type Deps = {
   letterRepo: LetterRepository;
-  logger: pino.Logger;
+  logger: Logger;
   env: EnvVars;
 };
 
@@ -16,7 +17,7 @@ function createDocumentClient(): DynamoDBDocumentClient {
 }
 
 function createLetterRepository(
-  log: pino.Logger,
+  log: Logger,
   // eslint-disable-next-line @typescript-eslint/no-shadow
   envVars: EnvVars,
 ): LetterRepository {
@@ -29,7 +30,7 @@ function createLetterRepository(
 }
 
 export function createDependenciesContainer(): Deps {
-  const log = pino();
+  const log = createLogger({ logLevel: envVars.PINO_LOG_LEVEL });
 
   return {
     letterRepo: createLetterRepository(log, envVars),

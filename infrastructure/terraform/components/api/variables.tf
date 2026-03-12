@@ -163,17 +163,23 @@ variable "core_environment" {
 
 }
 
+variable "enable_backups" {
+  type        = bool
+  description = "Enable backups"
+  default     = false
+}
+
 # Event Pub/Sub cache settings
 variable "enable_event_cache" {
   type        = bool
   description = "Enable caching of events to an S3 bucket"
-  default     = false
+  default     = true
 }
 
 variable "enable_sns_delivery_logging" {
   type        = bool
   description = "Enable SNS Delivery Failure Notifications"
-  default     = false
+  default     = true
 }
 
 variable "sns_success_logging_sample_percent" {
@@ -192,4 +198,34 @@ variable "enable_api_data_trace" {
   type        = bool
   description = "Enable API Gateway data trace logging"
   default     = false
+}
+
+variable "enable_alarms" {
+  type        = bool
+  description = "Enable CloudWatch alarms for this deployed environment"
+  default     = true
+}
+
+variable "enable_event_anomaly_detection" {
+  type        = bool
+  description = "Enable CloudWatch anomaly detection alarm for SNS message  Detects abnormal drops or spikes in event publishing volume."
+  default     = true
+}
+
+variable "event_anomaly_evaluation_periods" {
+  type        = number
+  description = "Number of evaluation periods for the anomaly alarm. Each period is defined by event_anomaly_period."
+  default     = 3
+}
+
+variable "event_anomaly_period" {
+  type        = number
+  description = "The period in seconds over which the specified statistic is applied for anomaly detection. Minimum 300 seconds (5 minutes). Recommended: 300-600."
+  default     = 300
+}
+
+variable "event_anomaly_band_width" {
+  type        = number
+  description = "The width of the anomaly detection band. Higher values (e.g. 4-6) reduce sensitivity and noise, lower values (e.g. 2-3) increase sensitivity. Recommended: 2-4."
+  default     = 4
 }

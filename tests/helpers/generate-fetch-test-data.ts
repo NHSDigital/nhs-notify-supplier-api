@@ -2,11 +2,11 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
   DeleteCommand,
   DynamoDBDocumentClient,
+  GetCommand,
   QueryCommand,
 } from "@aws-sdk/lib-dynamodb";
 import {
   LETTERSTABLENAME,
-  SUPPLIERID,
   SUPPLIERTABLENAME,
   envName,
 } from "../constants/api-constants";
@@ -45,6 +45,7 @@ export async function createTestData(
     specificationId: "TestSpecificationID",
     status: "PENDING",
     count: count || 1,
+    testLetter: "test-letter-standard",
   });
 }
 
@@ -73,11 +74,58 @@ export const getLettersBySupplier = async (
   return Items as SupplierApiLetters[];
 };
 
-export const deleteLettersBySupplier = async (id: string) => {
+const delay = (ms: number) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
+export async function waitForLetterStatus(
+  supplierId: string,
+  id: string,
+  status: string,
+  options?: {
+    timeoutMs?: number;
+    intervalMs?: number;
+  },
+): Promise<SupplierApiLetters> {
+  const timeoutMs = options?.timeoutMs ?? 60_000;
+  const intervalMs = options?.intervalMs ?? 5000;
+  const startedAt = Date.now();
+
+  while (Date.now() - startedAt < timeoutMs) {
+    const { Item } = await docClient.send(
+      new GetCommand({
+        TableName: LETTERSTABLENAME,
+        Key: { id, supplierId },
+        ProjectionExpression: "id, #status, supplierId",
+        ExpressionAttributeNames: {
+          "#status": "status",
+        },
+      }),
+    );
+
+    const letter = Item as SupplierApiLetters;
+
+    if (letter && letter.status === status) {
+      return letter;
+    }
+
+    await delay(intervalMs);
+  }
+
+  throw new Error(
+    `Timed out waiting for letter ${id} to reach status ${status} for supplier ${supplierId}.`,
+  );
+}
+
+export const deleteLettersBySupplier = async (
+  supplierId: string,
+  id: string,
+) => {
   const resp = await docClient.send(
     new DeleteCommand({
       TableName: LETTERSTABLENAME,
-      Key: { supplierId: SUPPLIERID, id },
+      Key: { id, supplierId },
       ReturnValues: "ALL_OLD",
     }),
   );

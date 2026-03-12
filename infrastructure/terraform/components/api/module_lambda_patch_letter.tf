@@ -24,7 +24,7 @@ module "patch_letter" {
   function_include_common = true
   handler_function_name   = "patchLetter"
   runtime                 = "nodejs22.x"
-  memory                  = 128
+  memory                  = 512
   timeout                 = 29
   log_level               = var.log_level
 
@@ -35,7 +35,7 @@ module "patch_letter" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
-    QUEUE_URL = module.letter_status_updates_queue.sqs_queue_url
+    QUEUE_URL = module.amendments_queue.sqs_queue_url
   })
 }
 
@@ -64,7 +64,7 @@ data "aws_iam_policy_document" "patch_letter_lambda" {
     ]
 
     resources = [
-      module.letter_status_updates_queue.sqs_queue_arn
+      module.amendments_queue.sqs_queue_arn
     ]
   }
 }

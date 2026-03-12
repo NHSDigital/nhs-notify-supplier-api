@@ -70,13 +70,46 @@ variable "event_cache_buffer_interval" {
 variable "enable_sns_delivery_logging" {
   type        = bool
   description = "Enable SNS Delivery Failure Notifications"
-  default     = false
+  default     = true
 }
 
 variable "sns_success_logging_sample_percent" {
   type        = number
   description = "Enable SNS Delivery Successful Sample Percentage"
   default     = 0
+}
+
+##
+# CloudWatch Anomaly Detection Variables
+##
+
+variable "enable_event_anomaly_detection" {
+  type        = bool
+  description = "Enable CloudWatch anomaly detection alarm for SNS topic message publishing"
+  default     = true
+}
+
+variable "event_anomaly_evaluation_periods" {
+  type        = number
+  description = "Number of evaluation periods for the anomaly alarm. Each period is defined by event_anomaly_period."
+  default     = 2
+}
+
+variable "event_anomaly_period" {
+  type        = number
+  description = "The period in seconds over which the specified statistic is applied for anomaly detection. Minimum 300 seconds (5 minutes). Recommended: 300-600."
+  default     = 300
+}
+
+variable "event_anomaly_band_width" {
+  type        = number
+  description = "The width of the anomaly detection band. Higher values (e.g. 4-6) reduce sensitivity and noise, lower values (e.g. 2-3) increase sensitivity. Recommended: 2-4."
+  default     = 3
+
+  validation {
+    condition     = var.event_anomaly_band_width >= 2 && var.event_anomaly_band_width <= 10
+    error_message = "Band width must be between 2 and 10"
+  }
 }
 
 variable "log_level" {
@@ -94,7 +127,7 @@ variable "event_cache_expiry_days" {
 variable "enable_event_cache" {
   type        = bool
   description = "Enable caching of events to an S3 bucket"
-  default     = false
+  default     = true
 }
 
 variable "enable_firehose_raw_message_delivery" {
@@ -113,4 +146,15 @@ variable "shared_infra_account_id" {
   type        = string
   description = "The AWS Account ID of the shared infrastructure account"
   default     = "000000000000"
+}
+
+variable "glue_role_arn" {
+  type        = string
+  description = "ARN of the Glue execution role from the parent"
+}
+
+variable "access_logging_bucket" {
+  type        = string
+  description = "Name of S3 bucket to use for access logging"
+  default     = ""
 }

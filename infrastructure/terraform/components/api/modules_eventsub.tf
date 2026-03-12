@@ -12,6 +12,8 @@ module "eventsub" {
 
   default_tags = local.default_tags
 
+  glue_role_arn = aws_iam_role.glue_role.arn
+
   kms_key_arn           = module.kms.key_arn
   log_retention_in_days = var.log_retention_in_days
   log_level             = "INFO"
@@ -22,7 +24,9 @@ module "eventsub" {
   sns_success_logging_sample_percent = var.sns_success_logging_sample_percent
 
   event_cache_expiry_days = 30
-  enable_event_cache                 = var.enable_event_cache
+  enable_event_cache      = var.enable_event_cache
 
   shared_infra_account_id = var.shared_infra_account_id
+
+  access_logging_bucket = local.acct.s3_buckets["access_logs"]["id"]
 }

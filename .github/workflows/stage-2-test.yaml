@@ -105,14 +105,14 @@ jobs:
         run: |
           make test-unit
       - name: "Save the result of fast test suite"
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: unit-tests
           path: "**/.reports/unit"
           include-hidden-files: true
         if: always()
       - name: "Save the result of code coverage"
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: code-coverage-report
           path: ".reports/lcov.info"
