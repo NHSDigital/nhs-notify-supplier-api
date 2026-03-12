@@ -8,7 +8,7 @@ import { Unit } from "aws-embedded-metrics";
 import { MetricEntry, MetricStatus, buildEMFObject } from "@internal/helpers";
 import { Deps } from "../config/deps";
 
-type SupplierSpec = { supplierId: string; specId: string; priority: number };
+type SupplierSpec = { supplierId: string; specId: string; priority: number; billingId: string };
 type PreparedEvents = LetterRequestPreparedEventV2 | LetterRequestPreparedEvent;
 
 // small envelope that must exist in all inputs
