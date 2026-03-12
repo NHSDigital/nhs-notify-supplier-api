@@ -11,12 +11,14 @@ export async function createLetter(params: {
   supplierId: string;
   targetFilename: string;
   specificationId: string;
+  billingId: string;
   groupId: string;
   status: LetterStatusType;
   letterRepository: LetterRepository;
   testLetter: string;
 }) {
   const {
+    billingId,
     bucketName,
     groupId,
     letterId,
@@ -49,7 +51,7 @@ export async function createLetter(params: {
     source: "/data-plane/letter-rendering/letter-test-data",
     subject: `supplier-api/letter-test-data/${letterId}`,
     billingRef: specificationId,
-    specificationBillingId: specificationId,
+    specificationBillingId: billingId,
   };
 
   const letterRecord = await letterRepository.putLetter(letter);
@@ -60,12 +62,20 @@ export function createLetterDto(params: {
   letterId: string;
   supplierId: string;
   specificationId: string;
+  billingId: string;
   groupId: string;
   status: LetterStatusType;
   url: string;
 }) {
-  const { groupId, letterId, specificationId, status, supplierId, url } =
-    params;
+  const {
+    billingId,
+    groupId,
+    letterId,
+    specificationId,
+    status,
+    supplierId,
+    url,
+  } = params;
 
   const letter: Omit<Letter, "ttl" | "supplierStatus" | "supplierStatusSk"> = {
     id: letterId,
@@ -79,7 +89,7 @@ export function createLetterDto(params: {
     source: "/data-plane/letter-rendering/letter-test-data",
     subject: `supplier-api/letter-test-data/${letterId}`,
     billingRef: specificationId,
-    specificationBillingId: specificationId,
+    specificationBillingId: billingId,
   };
 
   return letter;
