@@ -10,7 +10,7 @@ const sleep = (ms: number) =>
   });
 
 export async function pollSupplierAllocatorLogForResolvedSpec(
-  domainId?: string,
+  domainId: string,
 ): Promise<string> {
   const intervalMs = 5000;
   const startTimeMs = Date.now() - 5 * 60_000;
@@ -27,9 +27,7 @@ export async function pollSupplierAllocatorLogForResolvedSpec(
         startTime: startTimeMs,
         interleaved: true,
         limit: 100,
-        filterPattern: domainId
-          ? `"Sending message to upsert letter queue" "${domainId}"`
-          : `"Sending message to upsert letter queue"`,
+        filterPattern: `"Sending message to upsert letter queue" "${domainId}"`,
       }),
     );
 

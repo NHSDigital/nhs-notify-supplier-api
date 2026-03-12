@@ -11,6 +11,7 @@ import {
   pollUpsertLetterLogForError,
 } from "tests/helpers/aws-cloudwatch-helper";
 import { supplierDataSetup } from "tests/helpers/suppliers-setup-helper";
+import { pollForLettersInDb } from "tests/helpers/poll-for-letters-helper";
 
 let baseUrl: string;
 
@@ -27,7 +28,6 @@ test.describe("Event Subscription SNS Tests", () => {
     logger.info(`Testing event subscription with domainId: ${domainId}`);
     const preparedEvent = createPreparedV1Event({ domainId });
     const response = await sendSnsEvent(preparedEvent);
-    const RETRY_DELAY_MS = 30_000;
 
     expect(response.MessageId).toBeTruthy();
 
@@ -48,40 +48,14 @@ test.describe("Event Subscription SNS Tests", () => {
     // check if supplier exists in suppliers table
     await supplierDataSetup(supplierId);
 
-    const headers = createValidRequestHeaders(supplierId);
-    let statusCode = 0;
-    let letterStatus: string | undefined;
+    // poll for letter to be inserted in db with status PENDING
+    const { letterStatus, statusCode } = await pollForLettersInDb(
+      request,
+      supplierId,
+      domainId,
+      baseUrl,
+    );
 
-    for (let attempt = 1; attempt <= 3; attempt++) {
-      const getLetterResponse = await request.get(
-        `${baseUrl}/${SUPPLIER_LETTERS}/${domainId}`,
-        {
-          headers,
-        },
-      );
-
-      statusCode = getLetterResponse.status();
-      const responseBody = (await getLetterResponse.json()) as {
-        data?: { attributes?: { status?: string } };
-      };
-      letterStatus = responseBody.data?.attributes?.status;
-
-      if (statusCode === 200 && letterStatus === "PENDING") {
-        logger.info(
-          `Attempt ${attempt}: Received status code ${statusCode} for domainId: ${domainId}`,
-        );
-        break;
-      }
-
-      if (attempt < 3) {
-        logger.info(
-          `Attempt ${attempt}: Received status code ${statusCode} for domainId: ${domainId}. Retrying after ${RETRY_DELAY_MS / 1000} seconds...`,
-        );
-        await new Promise((resolve) => {
-          setTimeout(resolve, RETRY_DELAY_MS); // Wait for 30 seconds before the next attempt
-        });
-      }
-    }
     expect(statusCode).toBe(200);
     expect(letterStatus).toBe("PENDING");
   });
