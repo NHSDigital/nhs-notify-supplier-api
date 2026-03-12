@@ -153,6 +153,7 @@ jobs:
         shell: bash
         run: |
           .github/scripts/dispatch_internal_repo_workflow.sh \
+            --internalRef "feature/CCM-13906"\
             --infraRepoName "$(echo ${{ github.repository }} | cut -d'/' -f2)" \
             --releaseVersion ${{ github.head_ref || github.ref_name }} \
             --targetWorkflow "dispatch-deploy-dynamic-env.yaml" \
