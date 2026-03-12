@@ -386,7 +386,7 @@ describe.skip("createSupplierAllocatorHandler", () => {
         () => {},
       )) as SQSBatchResponse;
 
-      expect(result.batchItemFailures).toHaveLength(1);
+      expect(result.batchItemFailures).toHaveLength(0);
       expect(deps.logger.error).toHaveBeenCalled();
     });
 

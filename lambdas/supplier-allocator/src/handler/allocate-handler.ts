@@ -65,36 +65,45 @@ function validateType(event: unknown) {
 }
 
 async function getSupplierFromConfig(letterEvent: PreparedEvents, deps: Deps) {
-  const variantDetails: LetterVariant = await getVariantDetails(
-    letterEvent.data.letterVariantId,
-    deps,
-  );
-
-  const volumeGroupDetails: VolumeGroup = await getVolumeGroupDetails(
-    variantDetails.volumeGroupId,
-    deps,
-  );
-
-  const supplierAllocations: SupplierAllocation[] =
-    await getSupplierAllocationsForVolumeGroup(
-      variantDetails.volumeGroupId,
+  try {
+    const variantDetails: LetterVariant = await getVariantDetails(
+      letterEvent.data.letterVariantId,
       deps,
-      variantDetails.supplierId,
     );
 
-  const supplierDetails: Supplier[] = await getSupplierDetails(
-    supplierAllocations,
-    deps,
-  );
-  deps.logger.info({
-    description: "Fetched supplier details for supplier allocations",
-    variantId: letterEvent.data.letterVariantId,
-    volumeGroupId: volumeGroupDetails.id,
-    supplierAllocationIds: supplierAllocations.map((a) => a.id),
-    supplierDetails,
-  });
+    const volumeGroupDetails: VolumeGroup = await getVolumeGroupDetails(
+      variantDetails.volumeGroupId,
+      deps,
+    );
 
-  return supplierDetails;
+    const supplierAllocations: SupplierAllocation[] =
+      await getSupplierAllocationsForVolumeGroup(
+        variantDetails.volumeGroupId,
+        deps,
+        variantDetails.supplierId,
+      );
+
+    const supplierDetails: Supplier[] = await getSupplierDetails(
+      supplierAllocations,
+      deps,
+    );
+    deps.logger.info({
+      description: "Fetched supplier details for supplier allocations",
+      variantId: letterEvent.data.letterVariantId,
+      volumeGroupId: volumeGroupDetails.id,
+      supplierAllocationIds: supplierAllocations.map((a) => a.id),
+      supplierDetails,
+    });
+
+    return supplierDetails;
+  } catch (error) {
+    deps.logger.error({
+      description: "Error fetching supplier from config",
+      err: error,
+      variantId: letterEvent.data.letterVariantId,
+    });
+    return [];
+  }
 }
 
 function getSupplier(letterEvent: PreparedEvents, deps: Deps): SupplierSpec {
