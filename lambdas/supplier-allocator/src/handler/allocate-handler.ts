@@ -6,7 +6,7 @@ import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schem
 import z from "zod";
 import { Deps } from "../config/deps";
 
-type SupplierSpec = { supplierId: string; specId: string };
+type SupplierSpec = { supplierId: string; specId: string; billingId: string };
 type PreparedEvents = LetterRequestPreparedEventV2 | LetterRequestPreparedEvent;
 
 // small envelope that must exist in all inputs

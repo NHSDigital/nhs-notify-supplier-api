@@ -18,7 +18,8 @@ describe("lambdaEnv", () => {
     process.env.VARIANT_MAP = `{
       "lv1": {
         "supplierId": "supplier1",
-        "specId": "spec1"
+        "specId": "spec1",
+        "billingId": "billing1"
       }
     }`;
 
@@ -29,6 +30,7 @@ describe("lambdaEnv", () => {
         lv1: {
           supplierId: "supplier1",
           specId: "spec1",
+          billingId: "billing1",
         },
       },
     });
