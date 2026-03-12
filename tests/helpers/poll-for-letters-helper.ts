@@ -41,7 +41,7 @@ export async function pollForLettersInDb(
         `Attempt ${attempt}: Received status code ${statusCode} for domainId: ${domainId}. Retrying after ${RETRY_DELAY_MS / 1000} seconds...`,
       );
       await new Promise((resolve) => {
-        setTimeout(resolve, RETRY_DELAY_MS); // Wait for 30 seconds before the next attempt
+        setTimeout(resolve, RETRY_DELAY_MS); // Wait for 10 seconds before the next attempt
       });
     }
   }
