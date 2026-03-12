@@ -17,7 +17,7 @@ import {
 } from "../services/supplier-config";
 import { Deps } from "../config/deps";
 
-type SupplierSpec = { supplierId: string; specId: string };
+type SupplierSpec = { supplierId: string; specId: string; billingId: string };
 type PreparedEvents = LetterRequestPreparedEventV2 | LetterRequestPreparedEvent;
 
 // small envelope that must exist in all inputs

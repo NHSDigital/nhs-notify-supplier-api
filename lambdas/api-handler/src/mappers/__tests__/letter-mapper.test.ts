@@ -28,6 +28,7 @@ describe("letter-mapper", () => {
       ttl: 123,
       source: "/data-plane/letter-rendering/pdf",
       subject: "letter-rendering/source/letter/letter-id",
+      specificationBillingId: "billing123",
     };
 
     const result: PatchLetterResponse = mapToPatchLetterResponse(letter);
@@ -64,6 +65,7 @@ describe("letter-mapper", () => {
       reasonText: "Reason text",
       source: "/data-plane/letter-rendering/pdf",
       subject: "letter-rendering/source/letter/letter-id",
+      specificationBillingId: "billing123",
     };
 
     const result: PatchLetterResponse = mapToPatchLetterResponse(letter);
@@ -100,6 +102,7 @@ describe("letter-mapper", () => {
       ttl: 123,
       source: "/data-plane/letter-rendering/pdf",
       subject: "letter-rendering/source/letter/letter-id",
+      specificationBillingId: "billing123",
     };
 
     const result: GetLetterResponse = mapToGetLetterResponse(letter);
@@ -136,6 +139,7 @@ describe("letter-mapper", () => {
       reasonText: "Reason text",
       source: "/data-plane/letter-rendering/pdf",
       subject: "letter-rendering/source/letter/letter-id",
+      specificationBillingId: "billing123",
     };
 
     const result: GetLetterResponse = mapToGetLetterResponse(letter);
@@ -174,6 +178,7 @@ describe("letter-mapper", () => {
       reasonText: "Reason text",
       source: "/data-plane/letter-rendering/pdf",
       subject: "letter-rendering/source/letter/letter-id",
+      specificationBillingId: "billing123",
     };
 
     const result: GetLettersResponse = mapToGetLettersResponse([
