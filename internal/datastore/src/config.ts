@@ -8,4 +8,5 @@ export type DatastoreConfig = {
   lettersTtlHours: number;
   letterQueueTtlHours: number;
   miTtlHours: number;
+  supplierConfigTableName: string;
 };
