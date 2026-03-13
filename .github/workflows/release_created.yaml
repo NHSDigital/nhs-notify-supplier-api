@@ -41,6 +41,7 @@ jobs:
             --targetComponent "api" \
             --terraformAction "apply"
   deploy-proxy:
+    needs: deploy-main #wait for backend deploy to complete
     name: "Deploy proxy"
     runs-on: ubuntu-latest
     timeout-minutes: 10
