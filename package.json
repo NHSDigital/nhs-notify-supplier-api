@@ -63,6 +63,7 @@
   },
   "name": "nhs-notify-supplier-api",
   "overrides": {
+    "flatted": "^3.4.0",
     "axios": "^1.13.5",
     "fast-xml-parser": "^5.3.6",
     "@isaacs/brace-expansion": "^5.0.1",
