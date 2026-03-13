@@ -24,16 +24,22 @@ export default class LetterQueueRepository {
     readonly config: LetterQueueRepositoryConfig,
   ) {}
 
+  private readonly defaultPriority = 10;
+
   async putLetter(
     insertPendingLetter: InsertPendingLetter,
   ): Promise<PendingLetter> {
     // needs to be an ISO timestamp as Db sorts alphabetically
     const now = new Date().toISOString();
-
+    const priority = String(
+      insertPendingLetter.priority ?? this.defaultPriority,
+    );
+    const queueSortOrderSk = `${priority.padStart(2, "0")}-${now}`;
     const pendingLetter: PendingLetter = {
       ...insertPendingLetter,
       queueTimestamp: now,
       visibilityTimestamp: now,
+      queueSortOrderSk,
       ttl: Math.floor(
         Date.now() / 1000 + 60 * 60 * this.config.letterQueueTtlHours,
       ),

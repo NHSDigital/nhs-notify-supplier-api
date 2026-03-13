@@ -7,9 +7,38 @@ import {
   $LetterEvent,
   LetterEvent,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
+import { MetricStatus } from "@internal/helpers";
 import createSupplierAllocatorHandler from "../allocate-handler";
 import { Deps } from "../../config/deps";
 import { EnvVars } from "../../config/env";
+
+function assertMetricLogged(
+  logger: pino.Logger,
+  supplier: string,
+  priority: string,
+  status: MetricStatus,
+  count: number,
+) {
+  expect(logger.info).toHaveBeenCalledWith(
+    expect.objectContaining({
+      Supplier: supplier,
+      Priority: priority,
+      _aws: expect.objectContaining({
+        CloudWatchMetrics: expect.arrayContaining([
+          expect.objectContaining({
+            Metrics: [
+              expect.objectContaining({
+                Name: status,
+                Value: count,
+              }),
+            ],
+          }),
+        ]),
+      }),
+      [status]: count,
+    }),
+  );
+}
 
 function createSQSEvent(records: SQSRecord[]): SQSEvent {
   return {
@@ -145,6 +174,7 @@ describe("createSupplierAllocatorHandler", () => {
           lv1: {
             supplierId: "supplier1",
             specId: "spec1",
+            priority: 10,
           },
         },
       } as EnvVars,
@@ -179,7 +209,16 @@ describe("createSupplierAllocatorHandler", () => {
     expect(messageBody.supplierSpec).toEqual({
       supplierId: "supplier1",
       specId: "spec1",
+      priority: 10,
     });
+
+    assertMetricLogged(
+      mockedDeps.logger,
+      "supplier1",
+      "10",
+      MetricStatus.Success,
+      1,
+    );
   });
 
   test("parses SNS notification and sends message to SQS queue for v1 event", async () => {
@@ -205,6 +244,7 @@ describe("createSupplierAllocatorHandler", () => {
     expect(messageBody.supplierSpec).toEqual({
       supplierId: "supplier1",
       specId: "spec1",
+      priority: 10,
     });
   });
 
@@ -226,6 +266,14 @@ describe("createSupplierAllocatorHandler", () => {
     expect(result.batchItemFailures).toHaveLength(1);
     expect(result.batchItemFailures[0].itemIdentifier).toBe("invalid-event");
     expect((mockedDeps.logger.error as jest.Mock).mock.calls).toHaveLength(1);
+
+    assertMetricLogged(
+      mockedDeps.logger,
+      "unknown",
+      "unknown",
+      MetricStatus.Failure,
+      1,
+    );
   });
 
   test("unwraps EventBridge envelope and extracts event details", async () => {
@@ -259,8 +307,11 @@ describe("createSupplierAllocatorHandler", () => {
 
     const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
     const messageBody = JSON.parse(sendCall.input.MessageBody);
-    expect(messageBody.supplierSpec.supplierId).toBe("supplier1");
-    expect(messageBody.supplierSpec.specId).toBe("spec1");
+    expect(messageBody.supplierSpec).toEqual({
+      supplierId: "supplier1",
+      specId: "spec1",
+      priority: 10,
+    });
   });
 
   test("processes multiple messages in batch", async () => {
@@ -392,6 +443,14 @@ describe("createSupplierAllocatorHandler", () => {
     expect(result.batchItemFailures).toHaveLength(1);
     expect(result.batchItemFailures[0].itemIdentifier).toBe("msg1");
     expect((mockedDeps.logger.error as jest.Mock).mock.calls).toHaveLength(1);
+
+    assertMetricLogged(
+      mockedDeps.logger,
+      "supplier1",
+      "10",
+      MetricStatus.Failure,
+      1,
+    );
   });
 
   test("processes mixed batch with successes and failures", async () => {
@@ -417,6 +476,21 @@ describe("createSupplierAllocatorHandler", () => {
     expect(result.batchItemFailures[0].itemIdentifier).toBe("fail-msg");
 
     expect(mockSqsClient.send).toHaveBeenCalledTimes(2);
+
+    assertMetricLogged(
+      mockedDeps.logger,
+      "supplier1",
+      "10",
+      MetricStatus.Success,
+      2,
+    );
+    assertMetricLogged(
+      mockedDeps.logger,
+      "unknown",
+      "unknown",
+      MetricStatus.Failure,
+      1,
+    );
   });
 
   test("sends correct queue URL in SQS message command", async () => {
@@ -434,5 +508,49 @@ describe("createSupplierAllocatorHandler", () => {
 
     const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
     expect(sendCall.input.QueueUrl).toBe(queueUrl);
+  });
+
+  test("emits separate metrics per supplier and priority combination", async () => {
+    mockedDeps.env.VARIANT_MAP = {
+      lv1: { supplierId: "supplier1", specId: "spec1", priority: 10 },
+      lv2: { supplierId: "supplier2", specId: "spec2", priority: 5 },
+    } as any;
+
+    const eventForSupplier1 = createPreparedV2Event({ domainId: "letter1" });
+    const eventForSupplier2 = {
+      ...createPreparedV2Event({ domainId: "letter2" }),
+      data: {
+        ...createPreparedV2Event({ domainId: "letter2" }).data,
+        letterVariantId: "lv2",
+      },
+    };
+
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("msg1", JSON.stringify(eventForSupplier1)),
+      createSqsRecord("msg2", JSON.stringify(eventForSupplier2)),
+    ]);
+
+    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+
+    const handler = createSupplierAllocatorHandler(mockedDeps);
+    const result = await handler(evt, {} as any, {} as any);
+    if (!result) throw new Error("expected BatchResponse, got void");
+
+    expect(result.batchItemFailures).toHaveLength(0);
+
+    assertMetricLogged(
+      mockedDeps.logger,
+      "supplier1",
+      "10",
+      MetricStatus.Success,
+      1,
+    );
+    assertMetricLogged(
+      mockedDeps.logger,
+      "supplier2",
+      "5",
+      MetricStatus.Success,
+      1,
+    );
   });
 });
