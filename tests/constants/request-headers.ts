@@ -42,10 +42,10 @@ export function createHeaderWithNoCorrelationId(): RequestHeaders {
   return requestHeaders;
 }
 
-export function createValidRequestHeaders(): RequestHeaders {
+export function createValidRequestHeaders(supplierId?: string): RequestHeaders {
   let requestHeaders: RequestHeaders;
   requestHeaders = {
-    "NHSD-Supplier-ID": SUPPLIERID,
+    "NHSD-Supplier-ID": supplierId || SUPPLIERID,
     "NHSD-Correlation-ID": "12345",
     "X-Request-ID": "requestId1",
   };

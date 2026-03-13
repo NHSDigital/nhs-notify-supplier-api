@@ -120,7 +120,7 @@ export const apiSandboxGetLetterStatusTestData: ApiSandboxGetLetterStatusTestCas
       testCase: "404 response when no record is found for the given id",
       id: "24L5eYSWGzCHlGmzNxuqVusP",
       header: sandBoxHeader,
-      expectedStatus: 200,
+      expectedStatus: 404,
       expectedResponse: {
         errors: [
           {
