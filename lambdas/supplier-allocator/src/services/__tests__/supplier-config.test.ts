@@ -72,17 +72,6 @@ describe("supplier-config service", () => {
 
       expect(result).toBe(group);
     });
-    it("logs an error and returns group details when not found", async () => {
-      const group = undefined;
-      const deps = makeDeps();
-      deps.supplierConfigRepo.getVolumeGroup = jest
-        .fn()
-        .mockResolvedValue(group);
-
-      const result = await getVolumeGroupDetails("missing", deps);
-
-      expect(result).toBeUndefined();
-    });
 
     it("throws when group is not active based on status", async () => {
       const group = {
@@ -132,6 +121,23 @@ describe("supplier-config service", () => {
         /not active/,
       );
       expect(deps.logger.error).toHaveBeenCalled();
+    });
+    it("returns group details when start date and end date are both today", async () => {
+      const today = new Date().toISOString();
+      const group = {
+        id: "g4",
+        status: "PROD",
+        startDate: today,
+        endDate: today,
+      } as any;
+      const deps = makeDeps();
+      deps.supplierConfigRepo.getVolumeGroup = jest
+        .fn()
+        .mockResolvedValue(group);
+
+      const result = await getVolumeGroupDetails("g4", deps);
+
+      expect(result).toBe(group);
     });
   });
 
@@ -187,8 +193,8 @@ describe("supplier-config service", () => {
         { supplier: "s2", variantId: "v2" },
       ] as any[];
       const suppliers = [
-        { id: "s1", name: "Supplier 1" },
-        { id: "s2", name: "Supplier 2" },
+        { id: "s1", name: "Supplier 1", status: "PROD" },
+        { id: "s2", name: "Supplier 2", status: "PROD" },
       ] as any[];
       const deps = makeDeps();
       deps.supplierConfigRepo.getSuppliersDetails = jest
@@ -223,9 +229,9 @@ describe("supplier-config service", () => {
         { supplier: "s5", variantId: "v3" },
       ] as any[];
       const suppliers = [
-        { id: "s1", name: "Supplier 1" },
-        { id: "s3", name: "Supplier 3" },
-        { id: "s5", name: "Supplier 5" },
+        { id: "s1", name: "Supplier 1", status: "PROD" },
+        { id: "s3", name: "Supplier 3", status: "PROD" },
+        { id: "s5", name: "Supplier 5", status: "PROD" },
       ] as any[];
       const deps = makeDeps();
       deps.supplierConfigRepo.getSuppliersDetails = jest
@@ -248,8 +254,8 @@ describe("supplier-config service", () => {
       { supplier: "s3", variantId: "v3" },
     ] as any[];
     const suppliers = [
-      { id: "s1", name: "Supplier 1" },
-      { id: "s2", name: "Supplier 2" },
+      { id: "s1", name: "Supplier 1", status: "PROD" },
+      { id: "s2", name: "Supplier 2", status: "PROD" },
     ] as any[];
     const deps = makeDeps();
     deps.supplierConfigRepo.getSuppliersDetails = jest
@@ -272,8 +278,8 @@ describe("supplier-config service", () => {
       { supplier: "s2", variantId: "v2" },
     ] as any[];
     const suppliers = [
-      { id: "s1", name: "Supplier 1" },
-      { id: "s2", name: "Supplier 2" },
+      { id: "s1", name: "Supplier 1", status: "PROD" },
+      { id: "s2", name: "Supplier 2", status: "PROD" },
     ] as any[];
     const deps = makeDeps();
     deps.supplierConfigRepo.getSuppliersDetails = jest
@@ -283,5 +289,51 @@ describe("supplier-config service", () => {
     await getSupplierDetails(allocations, deps);
 
     expect(deps.logger.warn).not.toHaveBeenCalled();
+  });
+
+  it("throws when no active suppliers found", async () => {
+    const allocations = [
+      { supplier: "s1", variantId: "v1" },
+      { supplier: "s2", variantId: "v2" },
+    ] as any[];
+    const suppliers = [
+      { id: "s1", name: "Supplier 1", status: "DRAFT" },
+      { id: "s2", name: "Supplier 2", status: "DRAFT" },
+    ] as any[];
+    const deps = makeDeps();
+    deps.supplierConfigRepo.getSuppliersDetails = jest
+      .fn()
+      .mockResolvedValue(suppliers);
+
+    await expect(getSupplierDetails(allocations, deps)).rejects.toThrow(
+      /No active suppliers found/,
+    );
+    expect(deps.logger.error).toHaveBeenCalledWith(
+      expect.objectContaining({
+        description: "No active suppliers found for supplier allocations",
+      }),
+    );
+  });
+
+  it("filters to return only active suppliers with PROD status", async () => {
+    const allocations = [
+      { supplier: "s1", variantId: "v1" },
+      { supplier: "s2", variantId: "v2" },
+      { supplier: "s3", variantId: "v3" },
+    ] as any[];
+    const suppliers = [
+      { id: "s1", name: "Supplier 1", status: "PROD" },
+      { id: "s2", name: "Supplier 2", status: "DRAFT" },
+      { id: "s3", name: "Supplier 3", status: "PROD" },
+    ] as any[];
+    const deps = makeDeps();
+    deps.supplierConfigRepo.getSuppliersDetails = jest
+      .fn()
+      .mockResolvedValue(suppliers);
+
+    const result = await getSupplierDetails(allocations, deps);
+
+    expect(result).toEqual([suppliers[0], suppliers[2]]);
+    expect(result.every((s) => s.status === "PROD")).toBe(true);
   });
 });
