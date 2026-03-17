@@ -104,6 +104,9 @@ config:: _install-dependencies version # Configure development environment (main
 test-component:
 	(cd tests && npm install && npm run test:component)
 
+test-sandbox:
+	(cd tests && npm install && npm run test:sandbox)
+
 test-performance:
 	(cd tests && npm install && npm run test:performance)
 
