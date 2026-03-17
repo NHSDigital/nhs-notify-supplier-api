@@ -10,9 +10,15 @@ const localConfig: PlaywrightTestConfig = {
   reporter: getReporters("api-test"),
   projects: [
     {
-      name: "component-tests",
-      testDir: path.resolve(__dirname, "../component-tests"),
+      name: "apiGateway-tests",
+      testDir: path.resolve(__dirname, "../component-tests/apiGateway-tests"),
       testMatch: "**/*.spec.ts",
+    },
+    {
+      name: "events-tests",
+      testDir: path.resolve(__dirname, "../component-tests/events-tests"),
+      testMatch: "**/*.spec.ts",
+      dependencies: ["apiGateway-tests"],
     },
   ],
 };
