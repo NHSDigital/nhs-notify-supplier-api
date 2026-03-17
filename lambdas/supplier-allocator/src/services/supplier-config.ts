@@ -19,24 +19,30 @@ export async function getVolumeGroupDetails(
   groupId: string,
   deps: Deps,
 ): Promise<VolumeGroup> {
-  const groupDetails = await deps.supplierConfigRepo.getVolumeGroup(groupId);
+  const groupDetails: VolumeGroup =
+    await deps.supplierConfigRepo.getVolumeGroup(groupId);
+
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date();
+  endOfDay.setHours(23, 59, 59, 999);
 
   if (
-    groupDetails &&
-    (groupDetails.status !== "PROD" ||
-      new Date(groupDetails.startDate) > new Date() ||
-      (groupDetails.endDate && new Date(groupDetails.endDate) < new Date()))
+    groupDetails.status === "PROD" &&
+    new Date(groupDetails.startDate) < endOfDay &&
+    (!groupDetails.endDate || new Date(groupDetails.endDate) >= startOfDay)
   ) {
-    deps.logger.error({
-      description: "Volume group is not active based on status and dates",
-      groupId,
-      status: groupDetails.status,
-      startDate: groupDetails.startDate,
-      endDate: groupDetails.endDate,
-    });
-    throw new Error(`Volume group with id ${groupId} is not active`);
+    return groupDetails;
   }
-  return groupDetails;
+
+  deps.logger.error({
+    description: "Volume group is not active based on status and dates",
+    groupId,
+    status: groupDetails.status,
+    startDate: groupDetails.startDate,
+    endDate: groupDetails.endDate,
+  });
+  throw new Error(`Volume group with id ${groupId} is not active`);
 }
 
 export async function getSupplierAllocationsForVolumeGroup(
@@ -99,5 +105,15 @@ export async function getSupplierDetails(
       missingSuppliers: missingSupplierIds,
     });
   }
-  return supplierDetails;
+  const activeSuppliers = supplierDetails.filter((s) => s.status === "PROD");
+  if (activeSuppliers.length === 0) {
+    deps.logger.error({
+      description: "No active suppliers found for supplier allocations",
+      supplierIds,
+    });
+    throw new Error(
+      `No active suppliers found for supplier ids ${supplierIds.join(", ")}`,
+    );
+  }
+  return activeSuppliers;
 }
