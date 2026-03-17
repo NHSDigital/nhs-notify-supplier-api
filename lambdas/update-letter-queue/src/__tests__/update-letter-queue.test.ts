@@ -6,7 +6,6 @@ import {
 } from "@internal/datastore";
 import { mockDeep } from "jest-mock-extended";
 import pino from "pino";
-import { MetricStatus } from "@internal/helpers";
 import {
   Context,
   DynamoDBRecord,
@@ -32,9 +31,12 @@ const mockedDeps: jest.Mocked<Deps> = {
   env: {} as unknown as EnvVars,
 } as Deps;
 
-function generateLetter(status: LetterStatus, id?: string): Letter {
+function generateLetter(
+  status: LetterStatus,
+  overrides?: Partial<Letter>,
+): Letter {
   return {
-    id: id || "1",
+    id: "1",
     status,
     specificationId: "spec1",
     supplierId: "supplier1",
@@ -50,6 +52,7 @@ function generateLetter(status: LetterStatus, id?: string): Letter {
     billingRef: "billing-ref-1",
     specificationBillingId: "billing1",
     priority: 2,
+    ...overrides,
   };
 }
 
@@ -147,8 +150,8 @@ describe("update-letter-queue Lambda", () => {
 
     it("returns on the first failure", async () => {
       const handler = createHandler(mockedDeps);
-      const newLetter1 = generateLetter("PENDING", "1");
-      const newLetter2 = generateLetter("PENDING", "2");
+      const newLetter1 = generateLetter("PENDING", { id: "1" });
+      const newLetter2 = generateLetter("PENDING", { id: "2" });
       (mockedDeps.letterQueueRepository.putLetter as jest.Mock)
         .mockRejectedValueOnce({})
         .mockResolvedValueOnce({});
@@ -167,8 +170,8 @@ describe("update-letter-queue Lambda", () => {
 
     it("does not treat a replayed insert as a failure", async () => {
       const handler = createHandler(mockedDeps);
-      const newLetter1 = generateLetter("PENDING", "1");
-      const newLetter2 = generateLetter("PENDING", "2");
+      const newLetter1 = generateLetter("PENDING", { id: "1" });
+      const newLetter2 = generateLetter("PENDING", { id: "2" });
       (mockedDeps.letterQueueRepository.putLetter as jest.Mock)
         .mockRejectedValueOnce(new LetterAlreadyExistsError("supplier1", "1"))
         .mockResolvedValueOnce({});
@@ -184,10 +187,10 @@ describe("update-letter-queue Lambda", () => {
 
     it("does not treat a replayed delete as a failure", async () => {
       const handler = createHandler(mockedDeps);
-      const oldLetter1 = generateLetter("PENDING", "1");
-      const oldLetter2 = generateLetter("PENDING", "2");
-      const newLetter1 = generateLetter("ACCEPTED", "1");
-      const newLetter2 = generateLetter("ACCEPTED", "2");
+      const oldLetter1 = generateLetter("PENDING", { id: "1" });
+      const oldLetter2 = generateLetter("PENDING", { id: "2" });
+      const newLetter1 = generateLetter("ACCEPTED", { id: "1" });
+      const newLetter2 = generateLetter("ACCEPTED", { id: "2" });
       (mockedDeps.letterQueueRepository.deleteLetter as jest.Mock)
         .mockRejectedValueOnce(new LetterDoesNotExistError("supplier1", "1"))
         .mockResolvedValueOnce({});
@@ -230,26 +233,51 @@ describe("update-letter-queue Lambda", () => {
   });
 
   describe("Metrics", () => {
-    it("emits success metrics when all letters are processed successfully", async () => {
+    // eslint-disable-next-line jest/expect-expect
+    it("logs a metric containing the delta of pending letters added/deleted", async () => {
       const handler = createHandler(mockedDeps);
-      const oldLetter1 = generateLetter("PENDING", "1");
-      const newLetter1 = generateLetter("ACCEPTED", "1");
-      const newLetter2 = generateLetter("PENDING", "2");
+      const oldLetter1 = generateLetter("PENDING", { id: "1" });
+      const newLetter1 = generateLetter("ACCEPTED", { id: "1" });
+      const newLetter2 = generateLetter("PENDING", { id: "2" });
+      const newLetter3 = generateLetter("PENDING", { id: "3" });
 
       const testData = generateKinesisEvent([
         generateModifyRecord(oldLetter1, newLetter1),
         generateInsertRecord(newLetter2),
+        generateInsertRecord(newLetter3),
       ]);
       await handler(testData, mockDeep<Context>(), jest.fn());
 
-      assertSuccessMetricLogged(2);
-      assertFailureMetricLogged(0);
+      assertQueueDeltaMetricLogged("supplier1", 1);
     });
 
-    it("emits failure metrics when a letter fails to be inserted", async () => {
+    // eslint-disable-next-line jest/expect-expect
+    it("breaks the metric down by supplier", async () => {
       const handler = createHandler(mockedDeps);
-      const newLetter1 = generateLetter("PENDING", "1");
-      const newLetter2 = generateLetter("PENDING", "2");
+      const oldLetter1 = generateLetter("PENDING", { id: "1" });
+      const newLetter1 = generateLetter("ACCEPTED", { id: "1" });
+      const newLetter2 = generateLetter("PENDING", {
+        supplierId: "supplier2",
+        id: "2",
+      });
+      const newLetter3 = generateLetter("PENDING", { id: "3" });
+
+      const testData = generateKinesisEvent([
+        generateModifyRecord(oldLetter1, newLetter1),
+        generateInsertRecord(newLetter2),
+        generateInsertRecord(newLetter3),
+      ]);
+      await handler(testData, mockDeep<Context>(), jest.fn());
+
+      assertQueueDeltaMetricLogged("supplier1", 0);
+      assertQueueDeltaMetricLogged("supplier2", 1);
+    });
+
+    // eslint-disable-next-line jest/expect-expect
+    it("counts a failed insert as zero", async () => {
+      const handler = createHandler(mockedDeps);
+      const newLetter1 = generateLetter("PENDING", { id: "1" });
+      const newLetter2 = generateLetter("PENDING", { id: "2" });
       (mockedDeps.letterQueueRepository.putLetter as jest.Mock)
         .mockResolvedValueOnce({})
         .mockRejectedValueOnce(new Error("DynamoDB error"));
@@ -260,16 +288,16 @@ describe("update-letter-queue Lambda", () => {
       ]);
       await handler(testData, mockDeep<Context>(), jest.fn());
 
-      assertSuccessMetricLogged(1);
-      assertFailureMetricLogged(1);
+      assertQueueDeltaMetricLogged("supplier1", 1);
     });
 
-    it("emits failure metrics when a letter fails to be deleted", async () => {
+    // eslint-disable-next-line jest/expect-expect
+    it("counts a failed delete as zero", async () => {
       const handler = createHandler(mockedDeps);
-      const oldLetter1 = generateLetter("PENDING", "1");
-      const oldLetter2 = generateLetter("PENDING", "2");
-      const newLetter1 = generateLetter("ACCEPTED", "1");
-      const newLetter2 = generateLetter("ACCEPTED", "2");
+      const oldLetter1 = generateLetter("PENDING", { id: "1" });
+      const oldLetter2 = generateLetter("PENDING", { id: "2" });
+      const newLetter1 = generateLetter("ACCEPTED", { id: "1" });
+      const newLetter2 = generateLetter("ACCEPTED", { id: "2" });
       (mockedDeps.letterQueueRepository.deleteLetter as jest.Mock)
         .mockResolvedValueOnce({})
         .mockRejectedValueOnce(new Error("DynamoDB error"));
@@ -280,14 +308,14 @@ describe("update-letter-queue Lambda", () => {
       ]);
       await handler(testData, mockDeep<Context>(), jest.fn());
 
-      assertSuccessMetricLogged(1);
-      assertFailureMetricLogged(1);
+      assertQueueDeltaMetricLogged("supplier1", -1);
     });
 
-    it("does not count a replayed insert as a success or failure", async () => {
+    // eslint-disable-next-line jest/expect-expect
+    it("counts a replayed insert as zero", async () => {
       const handler = createHandler(mockedDeps);
-      const newLetter1 = generateLetter("PENDING", "1");
-      const newLetter2 = generateLetter("PENDING", "2");
+      const newLetter1 = generateLetter("PENDING", { id: "1" });
+      const newLetter2 = generateLetter("PENDING", { id: "2" });
 
       (mockedDeps.letterQueueRepository.putLetter as jest.Mock)
         .mockRejectedValueOnce(new LetterAlreadyExistsError("supplier1", "1"))
@@ -299,16 +327,16 @@ describe("update-letter-queue Lambda", () => {
       ]);
       await handler(testData, mockDeep<Context>(), jest.fn());
 
-      assertSuccessMetricLogged(1);
-      assertFailureMetricLogged(0);
+      assertQueueDeltaMetricLogged("supplier1", 1);
     });
 
-    it("does not count a replayed delete as a success or failure", async () => {
+    // eslint-disable-next-line jest/expect-expect
+    it("counts a replayed delete as zero", async () => {
       const handler = createHandler(mockedDeps);
-      const oldLetter1 = generateLetter("PENDING", "1");
-      const oldLetter2 = generateLetter("PENDING", "2");
-      const newLetter1 = generateLetter("ACCEPTED", "1");
-      const newLetter2 = generateLetter("ACCEPTED", "2");
+      const oldLetter1 = generateLetter("PENDING", { id: "1" });
+      const oldLetter2 = generateLetter("PENDING", { id: "2" });
+      const newLetter1 = generateLetter("ACCEPTED", { id: "1" });
+      const newLetter2 = generateLetter("ACCEPTED", { id: "2" });
       (mockedDeps.letterQueueRepository.deleteLetter as jest.Mock)
         .mockRejectedValueOnce(new LetterDoesNotExistError("supplier1", "1"))
         .mockResolvedValueOnce({});
@@ -319,19 +347,36 @@ describe("update-letter-queue Lambda", () => {
       ]);
       await handler(testData, mockDeep<Context>(), jest.fn());
 
-      assertSuccessMetricLogged(1);
-      assertFailureMetricLogged(0);
+      assertQueueDeltaMetricLogged("supplier1", -1);
     });
 
-    it("emits zero success metrics when no pending letters are in the batch", async () => {
+    // eslint-disable-next-line jest/expect-expect
+    it("logs zero counts when no pending letters are in the batch", async () => {
       const handler = createHandler(mockedDeps);
       const newLetter = generateLetter("PRINTED");
 
       const testData = generateKinesisEvent([generateInsertRecord(newLetter)]);
       await handler(testData, mockDeep<Context>(), jest.fn());
 
-      assertSuccessMetricLogged(0);
-      assertFailureMetricLogged(0);
+      assertQueueDeltaMetricNotLogged();
+    });
+
+    it("skips records with no NewImage (e.g. DELETE events) without error", async () => {
+      const handler = createHandler(mockedDeps);
+      const deleteRecord: DynamoDBRecord = {
+        eventName: "REMOVE",
+        dynamodb: { OldImage: mapToImage(generateLetter("PENDING")) },
+      };
+
+      const testData = generateKinesisEvent([deleteRecord]);
+      const result = await handler(testData, mockDeep<Context>(), jest.fn());
+
+      expect(mockedDeps.letterQueueRepository.putLetter).not.toHaveBeenCalled();
+      expect(
+        mockedDeps.letterQueueRepository.deleteLetter,
+      ).not.toHaveBeenCalled();
+      expect(result.batchItemFailures).toEqual([]);
+      assertQueueDeltaMetricNotLogged();
     });
   });
 });
@@ -378,43 +423,42 @@ function mapToImage(oldLetter: Letter) {
   );
 }
 
-function assertSuccessMetricLogged(count: number) {
+function assertQueueDeltaMetricLogged(supplierId: string, delta: number) {
   expect(mockedDeps.logger.info).toHaveBeenCalledWith(
     expect.objectContaining({
+      supplier: supplierId,
       _aws: expect.objectContaining({
         CloudWatchMetrics: expect.arrayContaining([
           expect.objectContaining({
             Metrics: [
               expect.objectContaining({
-                Name: MetricStatus.Success,
-                Value: count,
-              }),
-            ],
-          }),
-        ]),
-      }),
-      success: count,
-    }),
-  );
-}
-
-function assertFailureMetricLogged(count: number) {
-  expect(mockedDeps.logger.info).toHaveBeenCalledWith(
-    expect.objectContaining({
-      _aws: expect.objectContaining({
-        CloudWatchMetrics: expect.arrayContaining([
-          expect.objectContaining({
-            Metrics: [
-              expect.objectContaining({
-                Name: MetricStatus.Failure,
-                Value: count,
+                Name: "QueueDelta",
+                Value: delta,
                 Unit: Unit.Count,
               }),
             ],
           }),
         ]),
       }),
-      failure: count,
+      QueueDelta: delta,
+    }),
+  );
+}
+
+function assertQueueDeltaMetricNotLogged() {
+  expect(mockedDeps.logger.info).not.toHaveBeenCalledWith(
+    expect.objectContaining({
+      _aws: expect.objectContaining({
+        CloudWatchMetrics: expect.arrayContaining([
+          expect.objectContaining({
+            Metrics: [
+              expect.objectContaining({
+                Name: "QueueDelta",
+              }),
+            ],
+          }),
+        ]),
+      }),
     }),
   );
 }
