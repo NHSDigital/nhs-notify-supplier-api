@@ -44,6 +44,44 @@ permissions:
   contents: read
 
 jobs:
+  run-acceptance-tests:
+    name: Run Acceptance Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5.0.0
+
+      - name: "Use Node.js"
+        uses: actions/setup-node@v6
+        with:
+          node-version: "${{ inputs.nodejs_version }}"
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@nhsdigital"
+
+      - name: "Set environment"
+        shell: bash
+        run: |
+          if [ "${{ inputs.pr_number }}" != "" ]; then
+            echo "ENVIRONMENT=pr${{ inputs.pr_number }}" >> $GITHUB_ENV
+          else
+            echo "ENVIRONMENT=main" >> $GITHUB_ENV
+          fi
+
+      - name: Trigger Acceptance Tests
+        shell: bash
+        env:
+          APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
+          APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          .github/scripts/dispatch_internal_repo_workflow.sh \
+            --targetWorkflow "dispatch-contextual-tests-dynamic-env.yaml" \
+            --infraRepoName "nhs-notify-supplier-api" \
+            --releaseVersion "${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" \
+            --overrideProjectName "nhs" \
+            --targetEnvironment "$ENVIRONMENT" \
+            --targetAccountGroup "nhs-notify-supplier-api-dev" \
+            --targetComponent "api"
+
   run-e2e-tests:
     name: Run End-to-End Tests
     runs-on: ubuntu-latest
