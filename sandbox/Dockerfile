@@ -6,7 +6,6 @@ COPY . /sandbox
 
 WORKDIR /sandbox
 
-
 RUN npm install
 
 EXPOSE 9000
