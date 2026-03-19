@@ -1,7 +1,9 @@
 import {
   LetterVariant,
+  PackSpecification,
   Supplier,
   SupplierAllocation,
+  SupplierPack,
   VolumeGroup,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-config";
 import { Deps } from "../config/deps";
@@ -75,11 +77,9 @@ export async function getSupplierAllocationsForVolumeGroup(
 }
 
 export async function getSupplierDetails(
-  supplierAllocations: SupplierAllocation[],
+  supplierIds: string[],
   deps: Deps,
 ): Promise<Supplier[]> {
-  const supplierIds = supplierAllocations.map((alloc) => alloc.supplier);
-
   const supplierDetails: Supplier[] =
     await deps.supplierConfigRepo.getSuppliersDetails(supplierIds);
 
@@ -93,14 +93,14 @@ export async function getSupplierDetails(
     );
   }
   // Log a warning if some supplier details are missing compared to allocations
-  if (supplierAllocations.length !== supplierDetails.length) {
+  if (supplierIds.length !== supplierDetails.length) {
     const foundSupplierIds = new Set(supplierDetails.map((s) => s.id));
     const missingSupplierIds = supplierIds.filter(
       (id) => !foundSupplierIds.has(id),
     );
     deps.logger.warn({
       description: "Mismatch between supplier allocations and supplier details",
-      allocationsCount: supplierAllocations.length,
+      allocationsCount: supplierIds.length,
       detailsCount: supplierDetails.length,
       missingSuppliers: missingSupplierIds,
     });
@@ -116,4 +116,67 @@ export async function getSupplierDetails(
     );
   }
   return activeSuppliers;
+}
+
+export async function getPreferredSupplierPacks(
+  packSpecificationIds: string[],
+  suppliers: Supplier[],
+  deps: Deps,
+): Promise<SupplierPack[]> {
+  for (const packSpecId of packSpecificationIds) {
+    const supplierPacks =
+      await deps.supplierConfigRepo.getSupplierPacksForPackSpecification(
+        packSpecId,
+      );
+    if (supplierPacks.length > 0) {
+      const preferredPacks = supplierPacks.filter((pack) =>
+        suppliers.some((supplier) => supplier.id === pack.supplierId),
+      );
+      if (preferredPacks.length > 0) {
+        return preferredPacks;
+      }
+    }
+  }
+  deps.logger.error({
+    description:
+      "No preferred supplier packs found for pack specification ids and suppliers",
+    packSpecificationIds,
+    supplierIds: suppliers.map((s) => s.id),
+  });
+  throw new Error(
+    `No preferred supplier packs found for pack specification ids ${packSpecificationIds.join(", ")} and suppliers ${suppliers.map((s) => s.id).join(", ")}`,
+  );
+}
+
+export async function getPackSpecification(
+  packSpecId: string,
+  deps: Deps,
+): Promise<PackSpecification> {
+  const packSpec =
+    await deps.supplierConfigRepo.getPackSpecification(packSpecId);
+  return packSpec;
+}
+
+// This function is used to filter the allocated suppliers based on those that support the supplied pack specification
+export async function getSuppliersWithValidPack(
+  suppliers: Supplier[],
+  packSpecificationId: string,
+  deps: Deps,
+): Promise<Supplier[]> {
+  const suppliersWithValidPack: Supplier[] = [];
+  const supplierPacks =
+    await deps.supplierConfigRepo.getSupplierPacksForPackSpecification(
+      packSpecificationId,
+    );
+
+  for (const supplier of suppliers) {
+    const hasValidPack = supplierPacks.some(
+      (pack) => pack.supplierId === supplier.id,
+    );
+    if (hasValidPack) {
+      suppliersWithValidPack.push(supplier);
+    }
+  }
+
+  return suppliersWithValidPack;
 }

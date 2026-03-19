@@ -3,8 +3,10 @@ import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
 import {
   LetterVariant,
+  PackSpecification,
   Supplier,
   SupplierAllocation,
+  SupplierPack,
   VolumeGroup,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-config";
 import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
@@ -12,8 +14,11 @@ import z from "zod";
 import { Unit } from "aws-embedded-metrics";
 import { MetricEntry, MetricStatus, buildEMFObject } from "@internal/helpers";
 import {
+  getPackSpecification,
+  getPreferredSupplierPacks,
   getSupplierAllocationsForVolumeGroup,
   getSupplierDetails,
+  getSuppliersWithValidPack,
   getVariantDetails,
   getVolumeGroupDetails,
 } from "../services/supplier-config";
@@ -83,19 +88,44 @@ async function getSupplierFromConfig(letterEvent: PreparedEvents, deps: Deps) {
         variantDetails.supplierId,
       );
 
-    const supplierDetails: Supplier[] = await getSupplierDetails(
-      supplierAllocations,
+    const supplierIds = supplierAllocations.map((alloc) => alloc.supplier);
+
+    const allocatedSuppliers: Supplier[] = await getSupplierDetails(
+      supplierIds,
       deps,
     );
+
+    const preferredSupplierPacks: SupplierPack[] =
+      await getPreferredSupplierPacks(
+        variantDetails.packSpecificationIds,
+        allocatedSuppliers,
+        deps,
+      );
+
+    const preferredPack: PackSpecification = await getPackSpecification(
+      preferredSupplierPacks[0].packSpecificationId,
+      deps,
+    );
+
+    const suppliersForPack: Supplier[] = await getSuppliersWithValidPack(
+      allocatedSuppliers,
+      preferredPack.id,
+      deps,
+    );
+
     deps.logger.info({
       description: "Fetched supplier details for supplier allocations",
       variantId: letterEvent.data.letterVariantId,
       volumeGroupId: volumeGroupDetails.id,
       supplierAllocationIds: supplierAllocations.map((a) => a.id),
-      supplierDetails,
+      allocatedSuppliers,
+      eligiblePacks: variantDetails.packSpecificationIds,
+      preferredSupplierPacks,
+      preferredPack,
+      suppliersForPack,
     });
 
-    return supplierDetails;
+    return allocatedSuppliers;
   } catch (error) {
     deps.logger.error({
       description: "Error fetching supplier from config",
