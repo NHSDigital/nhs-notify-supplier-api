@@ -1,6 +1,6 @@
+import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import { SQSEvent, SQSRecord } from "aws-lambda";
 import pino from "pino";
-import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
 import {
@@ -157,6 +157,17 @@ function setupDefaultMocks() {
     specId: "spec-1",
     priority: 1,
     billingId: "billing-1",
+  });
+  (supplierConfig.getPreferredSupplierPacks as jest.Mock).mockResolvedValue([
+    {
+      packSpecificationId: "pack-spec-1",
+    },
+  ]);
+  (supplierConfig.getPackSpecification as jest.Mock).mockResolvedValue({
+    id: "pack-spec-1",
+    type: "A4",
+    colour: false,
+    duplex: false,
   });
 }
 
