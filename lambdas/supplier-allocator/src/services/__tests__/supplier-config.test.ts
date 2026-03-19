@@ -1,6 +1,9 @@
 import {
+  getPackSpecification,
+  getPreferredSupplierPacks,
   getSupplierAllocationsForVolumeGroup,
   getSupplierDetails,
+  getSuppliersWithValidPack,
   getVariantDetails,
   getVolumeGroupDetails,
 } from "../supplier-config";
@@ -31,7 +34,7 @@ describe("supplier-config service", () => {
   afterEach(() => jest.resetAllMocks());
 
   describe("getVariantDetails", () => {
-    it("returns variant details", async () => {
+    it("returns variant details for valid id", async () => {
       const variant = { id: "v1", volumeGroupId: "g1" } as any;
       const deps = makeDeps();
       deps.supplierConfigRepo.getLetterVariant = jest
@@ -188,10 +191,7 @@ describe("supplier-config service", () => {
 
   describe("getSupplierDetails", () => {
     it("returns supplier details when found", async () => {
-      const allocations = [
-        { supplier: "s1", variantId: "v1" },
-        { supplier: "s2", variantId: "v2" },
-      ] as any[];
+      const supplierIds = ["s1", "s2"];
       const suppliers = [
         { id: "s1", name: "Supplier 1", status: "PROD" },
         { id: "s2", name: "Supplier 2", status: "PROD" },
@@ -201,7 +201,7 @@ describe("supplier-config service", () => {
         .fn()
         .mockResolvedValue(suppliers);
 
-      const result = await getSupplierDetails(allocations, deps);
+      const result = await getSupplierDetails(supplierIds, deps);
 
       expect(result).toEqual(suppliers);
       expect(deps.supplierConfigRepo.getSuppliersDetails).toHaveBeenCalledWith([
@@ -211,23 +211,19 @@ describe("supplier-config service", () => {
     });
 
     it("throws when no supplier details found", async () => {
-      const allocations = [{ supplier: "s1", variantId: "v1" }] as any[];
+      const supplierIds = ["s1"];
       const deps = makeDeps();
       deps.supplierConfigRepo.getSuppliersDetails = jest
         .fn()
         .mockResolvedValue([]);
 
-      await expect(getSupplierDetails(allocations, deps)).rejects.toThrow(
+      await expect(getSupplierDetails(supplierIds, deps)).rejects.toThrow(
         /No supplier details found/,
       );
     });
 
     it("extracts supplier ids from allocations and requests details", async () => {
-      const allocations = [
-        { supplier: "s1", variantId: "v1" },
-        { supplier: "s3", variantId: "v2" },
-        { supplier: "s5", variantId: "v3" },
-      ] as any[];
+      const supplierIds = ["s1", "s3", "s5"];
       const suppliers = [
         { id: "s1", name: "Supplier 1", status: "PROD" },
         { id: "s3", name: "Supplier 3", status: "PROD" },
@@ -238,7 +234,7 @@ describe("supplier-config service", () => {
         .fn()
         .mockResolvedValue(suppliers);
 
-      await getSupplierDetails(allocations, deps);
+      await getSupplierDetails(supplierIds, deps);
 
       expect(deps.supplierConfigRepo.getSuppliersDetails).toHaveBeenCalledWith([
         "s1",
@@ -248,11 +244,7 @@ describe("supplier-config service", () => {
     });
   });
   it("logs a warning when supplier allocations count differs from supplier details count", async () => {
-    const allocations = [
-      { supplier: "s1", variantId: "v1" },
-      { supplier: "s2", variantId: "v2" },
-      { supplier: "s3", variantId: "v3" },
-    ] as any[];
+    const supplierIds = ["s1", "s2", "s3"];
     const suppliers = [
       { id: "s1", name: "Supplier 1", status: "PROD" },
       { id: "s2", name: "Supplier 2", status: "PROD" },
@@ -262,7 +254,7 @@ describe("supplier-config service", () => {
       .fn()
       .mockResolvedValue(suppliers);
 
-    await getSupplierDetails(allocations, deps);
+    await getSupplierDetails(supplierIds, deps);
 
     expect(deps.logger.warn).toHaveBeenCalledWith({
       description: "Mismatch between supplier allocations and supplier details",
@@ -273,10 +265,7 @@ describe("supplier-config service", () => {
   });
 
   it("does not log a warning when counts match", async () => {
-    const allocations = [
-      { supplier: "s1", variantId: "v1" },
-      { supplier: "s2", variantId: "v2" },
-    ] as any[];
+    const supplierIds = ["s1", "s2"];
     const suppliers = [
       { id: "s1", name: "Supplier 1", status: "PROD" },
       { id: "s2", name: "Supplier 2", status: "PROD" },
@@ -286,16 +275,13 @@ describe("supplier-config service", () => {
       .fn()
       .mockResolvedValue(suppliers);
 
-    await getSupplierDetails(allocations, deps);
+    await getSupplierDetails(supplierIds, deps);
 
     expect(deps.logger.warn).not.toHaveBeenCalled();
   });
 
   it("throws when no active suppliers found", async () => {
-    const allocations = [
-      { supplier: "s1", variantId: "v1" },
-      { supplier: "s2", variantId: "v2" },
-    ] as any[];
+    const supplierIds = ["s1", "s2"];
     const suppliers = [
       { id: "s1", name: "Supplier 1", status: "DRAFT" },
       { id: "s2", name: "Supplier 2", status: "DRAFT" },
@@ -305,7 +291,7 @@ describe("supplier-config service", () => {
       .fn()
       .mockResolvedValue(suppliers);
 
-    await expect(getSupplierDetails(allocations, deps)).rejects.toThrow(
+    await expect(getSupplierDetails(supplierIds, deps)).rejects.toThrow(
       /No active suppliers found/,
     );
     expect(deps.logger.error).toHaveBeenCalledWith(
@@ -316,11 +302,7 @@ describe("supplier-config service", () => {
   });
 
   it("filters to return only active suppliers with PROD status", async () => {
-    const allocations = [
-      { supplier: "s1", variantId: "v1" },
-      { supplier: "s2", variantId: "v2" },
-      { supplier: "s3", variantId: "v3" },
-    ] as any[];
+    const supplierIds = ["s1", "s2", "s3"];
     const suppliers = [
       { id: "s1", name: "Supplier 1", status: "PROD" },
       { id: "s2", name: "Supplier 2", status: "DRAFT" },
@@ -331,9 +313,170 @@ describe("supplier-config service", () => {
       .fn()
       .mockResolvedValue(suppliers);
 
-    const result = await getSupplierDetails(allocations, deps);
+    const result = await getSupplierDetails(supplierIds, deps);
 
     expect(result).toEqual([suppliers[0], suppliers[2]]);
     expect(result.every((s) => s.status === "PROD")).toBe(true);
+  });
+  describe("getPreferredSupplierPacks", () => {
+    it("returns preferred supplier packs when found", async () => {
+      const suppliers = [
+        { id: "s1", name: "Supplier 1", status: "PROD" },
+        { id: "s2", name: "Supplier 2", status: "PROD" },
+      ] as any[];
+      const supplierPacks = [
+        { id: "p1", supplierId: "s1", packSpecificationId: "spec1" },
+        { id: "p2", supplierId: "s2", packSpecificationId: "spec1" },
+        { id: "p3", supplierId: "s3", packSpecificationId: "spec1" },
+      ] as any[];
+      const deps = makeDeps();
+      deps.supplierConfigRepo.getSupplierPacksForPackSpecification = jest
+        .fn()
+        .mockResolvedValue(supplierPacks);
+
+      const result = await getPreferredSupplierPacks(
+        ["spec1"],
+        suppliers,
+        deps,
+      );
+
+      expect(result).toEqual([
+        { id: "p1", supplierId: "s1", packSpecificationId: "spec1" },
+        { id: "p2", supplierId: "s2", packSpecificationId: "spec1" },
+      ]);
+    });
+
+    it("throws when no preferred supplier packs found", async () => {
+      const suppliers = [
+        { id: "s1", name: "Supplier 1", status: "PROD" },
+        { id: "s2", name: "Supplier 2", status: "PROD" },
+      ] as any[];
+      const deps = makeDeps();
+      deps.supplierConfigRepo.getSupplierPacksForPackSpecification = jest
+        .fn()
+        .mockResolvedValue([]);
+
+      await expect(
+        getPreferredSupplierPacks(["spec1"], suppliers, deps),
+      ).rejects.toThrow(/No preferred supplier packs found/);
+      expect(deps.logger.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          description:
+            "No preferred supplier packs found for pack specification ids and suppliers",
+        }),
+      );
+    });
+    it("does not error when at least 1 pack specification has a preferred supplier pack", async () => {
+      const suppliers = [
+        { id: "s1", name: "Supplier 1", status: "PROD" },
+        { id: "s2", name: "Supplier 2", status: "PROD" },
+      ] as any[];
+      const deps = makeDeps();
+      deps.supplierConfigRepo.getSupplierPacksForPackSpecification = jest
+        .fn()
+        .mockResolvedValueOnce([]) // no packs for spec1
+        .mockResolvedValueOnce([
+          { id: "p2", supplierId: "s2", packSpecificationId: "spec2" },
+        ]); // preferred pack for spec2
+
+      const result = await getPreferredSupplierPacks(
+        ["spec1", "spec2"],
+        suppliers,
+        deps,
+      );
+
+      expect(result).toEqual([
+        { id: "p2", supplierId: "s2", packSpecificationId: "spec2" },
+      ]);
+    });
+
+    it("throws an error when no suppliers match the pack specification", async () => {
+      const suppliers = [
+        { id: "s4", name: "Supplier 1", status: "PROD" },
+        { id: "s5", name: "Supplier 2", status: "PROD" },
+      ] as any[];
+      const supplierPacks = [
+        { id: "p1", supplierId: "s1", packSpecificationId: "spec1" },
+        { id: "p2", supplierId: "s2", packSpecificationId: "spec1" },
+        { id: "p3", supplierId: "s3", packSpecificationId: "spec1" },
+      ] as any[];
+      const deps = makeDeps();
+      deps.supplierConfigRepo.getSupplierPacksForPackSpecification = jest
+        .fn()
+        .mockResolvedValue(supplierPacks);
+
+      await expect(
+        getPreferredSupplierPacks(["spec1"], suppliers, deps),
+      ).rejects.toThrow(/No preferred supplier packs found/);
+      expect(deps.logger.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          description:
+            "No preferred supplier packs found for pack specification ids and suppliers",
+        }),
+      );
+    });
+  });
+
+  describe("getPackSpecification", () => {
+    it("returns pack specification when found", async () => {
+      const packSpec = {
+        id: "spec1",
+        name: "Pack Spec 1",
+        status: "PROD",
+      } as any;
+      const deps = makeDeps();
+      deps.supplierConfigRepo.getPackSpecification = jest
+        .fn()
+        .mockResolvedValue(packSpec);
+
+      const result = await getPackSpecification("spec1", deps);
+
+      expect(result).toBe(packSpec);
+    });
+
+    it("throws when pack specification is not active based on status", async () => {
+      const packSpec = {
+        id: "spec2",
+        name: "Pack Spec 2",
+        status: "DRAFT",
+      } as any;
+      const deps = makeDeps();
+      deps.supplierConfigRepo.getPackSpecification = jest
+        .fn()
+        .mockResolvedValue(packSpec);
+
+      await expect(getPackSpecification("spec2", deps)).rejects.toThrow(
+        /not active/,
+      );
+      expect(deps.logger.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          description: "Pack specification is not active based on status",
+          packSpecId: "spec2",
+          status: "DRAFT",
+        }),
+      );
+    });
+  });
+
+  describe("getSuppliersWithValidPack", () => {
+    it("returns suppliers that have the valid pack specification", async () => {
+      const suppliers = [
+        { id: "s1", name: "Supplier 1", status: "PROD" },
+        { id: "s2", name: "Supplier 2", status: "PROD" },
+      ] as any[];
+      const supplierPacks = [
+        { id: "p1", supplierId: "s1", packSpecificationId: "spec1" },
+      ] as any[];
+      const deps = makeDeps();
+      deps.supplierConfigRepo.getSupplierPacksForPackSpecification = jest
+        .fn()
+        .mockResolvedValue(supplierPacks);
+
+      const result = await getSuppliersWithValidPack(suppliers, "spec1", deps);
+
+      expect(result).toEqual([
+        { id: "s1", name: "Supplier 1", status: "PROD" },
+      ]);
+    });
   });
 });
