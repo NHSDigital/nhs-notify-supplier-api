@@ -263,4 +263,86 @@ describe("SupplierConfigRepository", () => {
       `Supplier with id ${supplierId} not found`,
     );
   });
+
+  test("getSupplierPacksForPackSpecification returns correct supplier packs", async () => {
+    const packSpecId = "pack-spec-123";
+    const supplierId = "supplier-123";
+    const supplierPackId = "supplier-pack-123";
+
+    await dbContext.docClient.send(
+      new PutCommand({
+        TableName: dbContext.config.supplierConfigTableName,
+        Item: {
+          PK: "SUPPLIER_PACK",
+          SK: supplierPackId,
+          id: supplierPackId,
+          packSpecificationId: packSpecId,
+          supplierId,
+          status: "PROD",
+          approval: "APPROVED",
+        },
+      }),
+    );
+
+    const result =
+      await repository.getSupplierPacksForPackSpecification(packSpecId);
+    expect(result).toEqual([
+      {
+        approval: "APPROVED",
+        id: supplierPackId,
+        packSpecificationId: packSpecId,
+        supplierId,
+        status: "PROD",
+      },
+    ]);
+  });
+
+  test("getSupplierPacksForPackSpecification returns empty array for non-existent pack specification", async () => {
+    const packSpecId = "non-existent-pack-spec";
+    const result =
+      await repository.getSupplierPacksForPackSpecification(packSpecId);
+    expect(result).toEqual([]);
+  });
+
+  test("getPackSpecification returns correct pack specification details", async () => {
+    const packSpecId = "pack-spec-123";
+
+    await dbContext.docClient.send(
+      new PutCommand({
+        TableName: dbContext.config.supplierConfigTableName,
+        Item: {
+          PK: "PACK_SPECIFICATION",
+          SK: packSpecId,
+          id: packSpecId,
+          name: `Pack Specification ${packSpecId}`,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          version: 1,
+          billingId: `billing-${packSpecId}`,
+          postage: { id: "postageId", size: "STANDARD" },
+          status: "PROD",
+        },
+      }),
+    );
+
+    const result = await repository.getPackSpecification(packSpecId);
+    expect(result).toEqual({
+      billingId: `billing-${packSpecId}`,
+      createdAt: expect.any(String),
+      id: packSpecId,
+      name: `Pack Specification ${packSpecId}`,
+      postage: { id: "postageId", size: "STANDARD" },
+      updatedAt: expect.any(String),
+      version: 1,
+      status: "PROD",
+    });
+  });
+
+  test("getPackSpecification throws error for non-existent pack specification", async () => {
+    const packSpecId = "non-existent-pack-spec";
+
+    await expect(repository.getPackSpecification(packSpecId)).rejects.toThrow(
+      `No pack specification found for id ${packSpecId}`,
+    );
+  });
 });
