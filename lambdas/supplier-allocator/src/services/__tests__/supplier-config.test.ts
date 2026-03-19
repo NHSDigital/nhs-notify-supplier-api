@@ -1,4 +1,6 @@
 import {
+  getPackSpecification,
+  getPreferredSupplierPacks,
   getSupplierAllocationsForVolumeGroup,
   getSupplierDetails,
   getVariantDetails,
@@ -335,5 +337,68 @@ describe("supplier-config service", () => {
 
     expect(result).toEqual([suppliers[0], suppliers[2]]);
     expect(result.every((s) => s.status === "PROD")).toBe(true);
+  });
+  describe("getPreferredSupplierPacks", () => {
+    it("returns preferred supplier packs when found", async () => {
+      const suppliers = [
+        { id: "s1", name: "Supplier 1", status: "PROD" },
+        { id: "s2", name: "Supplier 2", status: "PROD" },
+      ] as any[];
+      const supplierPacks = [
+        { id: "p1", supplierId: "s1", packSpecificationId: "spec1" },
+        { id: "p2", supplierId: "s2", packSpecificationId: "spec1" },
+        { id: "p3", supplierId: "s3", packSpecificationId: "spec1" },
+      ] as any[];
+      const deps = makeDeps();
+      deps.supplierConfigRepo.getSupplierPacksForPackSpecification = jest
+        .fn()
+        .mockResolvedValue(supplierPacks);
+
+      const result = await getPreferredSupplierPacks(
+        ["spec1"],
+        suppliers,
+        deps,
+      );
+
+      expect(result).toEqual([
+        { id: "p1", supplierId: "s1", packSpecificationId: "spec1" },
+        { id: "p2", supplierId: "s2", packSpecificationId: "spec1" },
+      ]);
+    });
+
+    it("throws when no preferred supplier packs found", async () => {
+      const suppliers = [
+        { id: "s1", name: "Supplier 1", status: "PROD" },
+        { id: "s2", name: "Supplier 2", status: "PROD" },
+      ] as any[];
+      const deps = makeDeps();
+      deps.supplierConfigRepo.getSupplierPacksForPackSpecification = jest
+        .fn()
+        .mockResolvedValue([]);
+
+      await expect(
+        getPreferredSupplierPacks(["spec1"], suppliers, deps),
+      ).rejects.toThrow(/No preferred supplier packs found/);
+      expect(deps.logger.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          description:
+            "No preferred supplier packs found for pack specification ids and suppliers",
+        }),
+      );
+    });
+  });
+
+  describe("getPackSpecification", () => {
+    it("returns pack specification when found", async () => {
+      const packSpec = { id: "spec1", name: "Pack Spec 1" } as any;
+      const deps = makeDeps();
+      deps.supplierConfigRepo.getPackSpecification = jest
+        .fn()
+        .mockResolvedValue(packSpec);
+
+      const result = await getPackSpecification("spec1", deps);
+
+      expect(result).toBe(packSpec);
+    });
   });
 });

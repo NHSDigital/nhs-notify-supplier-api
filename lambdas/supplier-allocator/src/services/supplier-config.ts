@@ -1,7 +1,9 @@
 import {
   LetterVariant,
+  PackSpecification,
   Supplier,
   SupplierAllocation,
+  SupplierPack,
   VolumeGroup,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-config";
 import { Deps } from "../config/deps";
@@ -116,4 +118,41 @@ export async function getSupplierDetails(
     );
   }
   return activeSuppliers;
+}
+
+export async function getPreferredSupplierPacks(
+  packSpecificationIds: string[],
+  suppliers: Supplier[],
+  deps: Deps,
+): Promise<SupplierPack[]> {
+  for (const packSpecId of packSpecificationIds) {
+    const supplierPacks =
+      await deps.supplierConfigRepo.getSupplierPacksForPackSpecification(
+        packSpecId,
+      );
+    const preferredPacks = supplierPacks.filter((pack) =>
+      suppliers.some((supplier) => supplier.id === pack.supplierId),
+    );
+    if (preferredPacks.length > 0) {
+      return preferredPacks;
+    }
+  }
+  deps.logger.error({
+    description:
+      "No preferred supplier packs found for pack specification ids and suppliers",
+    packSpecificationIds,
+    supplierIds: suppliers.map((s) => s.id),
+  });
+  throw new Error(
+    `No preferred supplier packs found for pack specification ids ${packSpecificationIds.join(", ")} and suppliers ${suppliers.map((s) => s.id).join(", ")}`,
+  );
+}
+
+export async function getPackSpecification(
+  packSpecId: string,
+  deps: Deps,
+): Promise<PackSpecification> {
+  const packSpec =
+    await deps.supplierConfigRepo.getPackSpecification(packSpecId);
+  return packSpec;
 }

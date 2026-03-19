@@ -3,13 +3,17 @@ import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
 import {
   LetterVariant,
+  PackSpecification,
   Supplier,
   SupplierAllocation,
+  SupplierPack,
   VolumeGroup,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-config";
 import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import z from "zod";
 import {
+  getPackSpecification,
+  getPreferredSupplierPacks,
   getSupplierAllocationsForVolumeGroup,
   getSupplierDetails,
   getVariantDetails,
@@ -76,19 +80,34 @@ async function getSupplierFromConfig(letterEvent: PreparedEvents, deps: Deps) {
         variantDetails.supplierId,
       );
 
-    const supplierDetails: Supplier[] = await getSupplierDetails(
+    const allocatedSuppliers: Supplier[] = await getSupplierDetails(
       supplierAllocations,
       deps,
     );
+
+    const preferredSupplierPacks: SupplierPack[] =
+      await getPreferredSupplierPacks(
+        variantDetails.packSpecificationIds,
+        allocatedSuppliers,
+        deps,
+      );
+
+    const preferredPack: PackSpecification = await getPackSpecification(
+      preferredSupplierPacks[0].packSpecificationId,
+      deps,
+    );
+
     deps.logger.info({
       description: "Fetched supplier details for supplier allocations",
       variantId: letterEvent.data.letterVariantId,
       volumeGroupId: volumeGroupDetails.id,
       supplierAllocationIds: supplierAllocations.map((a) => a.id),
-      supplierDetails,
+      allocatedSuppliers,
+      preferredSupplierPacks,
+      preferredPack,
     });
 
-    return supplierDetails;
+    return allocatedSuppliers;
   } catch (error) {
     deps.logger.error({
       description: "Error fetching supplier from config",

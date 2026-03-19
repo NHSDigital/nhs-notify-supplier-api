@@ -164,11 +164,22 @@ const createSupplierConfigTableCommand = new CreateTableCommand({
         ProjectionType: "ALL",
       },
     },
+    {
+      IndexName: "packSpecificationId-index",
+      KeySchema: [
+        { AttributeName: "PK", KeyType: "HASH" }, // Partition key for GSI
+        { AttributeName: "packSpecificationId", KeyType: "RANGE" }, // Sort key for GSI
+      ],
+      Projection: {
+        ProjectionType: "ALL",
+      },
+    },
   ],
   AttributeDefinitions: [
     { AttributeName: "PK", AttributeType: "S" },
     { AttributeName: "SK", AttributeType: "S" },
     { AttributeName: "volumeGroup", AttributeType: "S" },
+    { AttributeName: "packSpecificationId", AttributeType: "S" },
   ],
 });
 

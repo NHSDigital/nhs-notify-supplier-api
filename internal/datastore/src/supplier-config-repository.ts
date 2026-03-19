@@ -5,12 +5,16 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 import {
   $LetterVariant,
+  $PackSpecification,
   $Supplier,
   $SupplierAllocation,
+  $SupplierPack,
   $VolumeGroup,
   LetterVariant,
+  PackSpecification,
   Supplier,
   SupplierAllocation,
+  SupplierPack,
   VolumeGroup,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-config";
 
@@ -96,5 +100,45 @@ export class SupplierConfigRepository {
       suppliers.push($Supplier.parse(result.Item));
     }
     return suppliers;
+  }
+
+  async getSupplierPacksForPackSpecification(
+    packSpecId: string,
+  ): Promise<SupplierPack[]> {
+    const result = await this.ddbClient.send(
+      new QueryCommand({
+        TableName: this.config.supplierConfigTableName,
+        IndexName: "packSpecificationId-index",
+        KeyConditionExpression: "#pk = :pk AND #packSpecId = :packSpecId",
+        ExpressionAttributeNames: {
+          "#pk": "PK",
+          "#packSpecId": "packSpecificationId",
+        },
+        ExpressionAttributeValues: {
+          ":pk": "SUPPLIER_PACK",
+          ":packSpecId": packSpecId,
+        },
+      }),
+    );
+    if (!result.Items || result.Items.length === 0) {
+      throw new Error(
+        `No supplier packs found for pack specification id ${packSpecId}`,
+      );
+    }
+
+    return $SupplierPack.array().parse(result.Items);
+  }
+
+  async getPackSpecification(packSpecId: string): Promise<PackSpecification> {
+    const result = await this.ddbClient.send(
+      new GetCommand({
+        TableName: this.config.supplierConfigTableName,
+        Key: { PK: "PACK_SPECIFICATION", SK: packSpecId },
+      }),
+    );
+    if (!result.Item) {
+      throw new Error(`No pack specification found for id ${packSpecId}`);
+    }
+    return $PackSpecification.parse(result.Item);
   }
 }
