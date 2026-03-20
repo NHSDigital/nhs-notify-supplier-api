@@ -162,7 +162,7 @@ jobs:
             --terraformAction "apply" \
             --overrideProjectName "nhs" \
             --overrideRoleName "nhs-main-acct-supplier-api-github-deploy" \
-            --internalRef "feature/CCM-15148-Test"
+            --internalRef "feature/CCM-13752-Test"
   artefact-proxies:
     name: "Build proxies"
     runs-on: ubuntu-latest
