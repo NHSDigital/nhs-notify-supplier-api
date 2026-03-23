@@ -5,7 +5,7 @@ import { getReporters } from "./reporters";
 
 const localConfig: PlaywrightTestConfig = {
   ...baseConfig,
-  //globalSetup: path.resolve(__dirname, "./global-setup.ts"),
+  globalSetup: path.resolve(__dirname, "./global-setup.ts"),
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: getReporters("api-test"),
   projects: [
