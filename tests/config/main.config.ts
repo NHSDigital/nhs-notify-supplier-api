@@ -5,7 +5,7 @@ import { getReporters } from "./reporters";
 
 const localConfig: PlaywrightTestConfig = {
   ...baseConfig,
-  globalSetup: path.resolve(__dirname, "./global-setup.ts"),
+  //globalSetup: path.resolve(__dirname, "./global-setup.ts"),
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: getReporters("api-test"),
   projects: [
@@ -19,6 +19,11 @@ const localConfig: PlaywrightTestConfig = {
       testDir: path.resolve(__dirname, "../component-tests/events-tests"),
       testMatch: "**/*.spec.ts",
       dependencies: ["apiGateway-tests"],
+    },
+    {
+      name: "letterQueue-tests",
+      testDir: path.resolve(__dirname, "../component-tests/letterQueue-tests"),
+      testMatch: "**/*.spec.ts",
     },
   ],
 };
