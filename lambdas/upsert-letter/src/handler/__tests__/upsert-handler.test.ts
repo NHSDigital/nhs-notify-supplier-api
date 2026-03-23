@@ -223,10 +223,10 @@ describe("createUpsertLetterHandler", () => {
     const v1message = {
       letterEvent: createPreparedV1Event(),
       supplierSpec: {
-        supplierId: "supplier1",
-        specId: "spec1",
+        supplierId: "supplier2",
+        specId: "spec2",
         priority: 10,
-        billingId: "billing1",
+        billingId: "billing2",
       },
     };
 

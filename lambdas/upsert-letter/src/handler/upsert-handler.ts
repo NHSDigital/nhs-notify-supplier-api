@@ -16,7 +16,6 @@ import z from "zod";
 import { MetricsLogger, Unit, metricScope } from "aws-embedded-metrics";
 import { Deps } from "../config/deps";
 
-type SupplierSpec = { supplierId: string; specId: string; priority: number; billingId: string };
 type PreparedEvents = LetterRequestPreparedEventV2 | LetterRequestPreparedEvent;
 
 const SupplierSpecSchema = z.object({
