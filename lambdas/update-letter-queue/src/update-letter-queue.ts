@@ -183,6 +183,7 @@ function mapLetterToPendingLetter(letter: Letter): InsertPendingLetter {
     letterId: letter.id,
     specificationId: letter.specificationId,
     groupId: letter.groupId,
+    priority: letter.priority,
   };
 }
 

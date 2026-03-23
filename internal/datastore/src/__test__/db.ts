@@ -22,6 +22,7 @@ export async function setupDynamoDBContainer() {
       accessKeyId: "fakeMyKeyId",
       secretAccessKey: "fakeSecretAccessKey",
     },
+    maxAttempts: 1,
   });
 
   const docClient = DynamoDBDocumentClient.from(ddbClient);
@@ -132,7 +133,7 @@ const createLetterQueueTableCommand = new CreateTableCommand({
       IndexName: "queueSortOrder-index",
       KeySchema: [
         { AttributeName: "supplierId", KeyType: "HASH" }, // Partition key for LSI
-        { AttributeName: "queueTimestamp", KeyType: "RANGE" }, // Sort key for LSI
+        { AttributeName: "queueSortOrderSk", KeyType: "RANGE" }, // Sort key for LSI
       ],
       Projection: {
         ProjectionType: "ALL",
@@ -142,7 +143,7 @@ const createLetterQueueTableCommand = new CreateTableCommand({
   AttributeDefinitions: [
     { AttributeName: "supplierId", AttributeType: "S" },
     { AttributeName: "letterId", AttributeType: "S" },
-    { AttributeName: "queueTimestamp", AttributeType: "S" },
+    { AttributeName: "queueSortOrderSk", AttributeType: "S" },
   ],
 });
 
