@@ -6,7 +6,11 @@ import {
 } from "tests/helpers/event-fixtures";
 import { logger } from "tests/helpers/pino-logger";
 import { sendSnsBatchEvent, sendSnsEvent } from "tests/helpers/send-sns-event";
-import { supplierIdFromSupplierAllocatorLog } from "tests/helpers/aws-cloudwatch-helper";
+import {
+  pollUpdateLetterQueueDuplicateLog,
+  pollUpsertLetterLogForError,
+  supplierIdFromSupplierAllocatorLog,
+} from "tests/helpers/aws-cloudwatch-helper";
 import getRestApiGatewayBaseUrl from "tests/helpers/aws-gateway-helper";
 import { SUPPLIER_LETTERS } from "tests/constants/api-constants";
 import { supplierDataSetup } from "tests/helpers/suppliers-setup-helper";
@@ -85,12 +89,12 @@ test.describe("Letter Queue Tests", () => {
         message: event,
       })),
     );
-    expect(response.Successful).toBeTruthy();
+    expect(response.Successful).toHaveLength(eventBatch.length);
 
     const supplierId = await supplierIdFromSupplierAllocatorLog(letterId);
 
     logger.info(
-      `Verifying if only one entry is inserted in the letter queue table for the batch of events with same letterId ${letterId}`,
+      `Verifying duplicate queue inserts are ignored for the batch of events with same letterId ${letterId}`,
     );
     const [letterExists, itemCount] = await checkLetterQueueTable(
       supplierId,
@@ -98,5 +102,10 @@ test.describe("Letter Queue Tests", () => {
     );
     expect(letterExists).toBe(true);
     expect(itemCount).toBe(1);
+
+    await pollUpsertLetterLogForError(
+      `Letter with id ${letterId} already exists for supplier ${supplierId}"`,
+      letterId,
+    );
   });
 });

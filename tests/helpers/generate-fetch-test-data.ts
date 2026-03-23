@@ -148,7 +148,8 @@ export async function checkSupplierExists(
 
     const { Items } = await docClient.send(new QueryCommand(params));
     return Items !== undefined && Items.length > 0;
-  } catch {
+  } catch (error) {
+    logger.error({ supplierId, error }, "Supplier existence check failed");
     return false;
   }
 }
@@ -190,7 +191,7 @@ export async function checkLetterQueueTable(
         );
         return [true, Items.length];
       }
-      if (deleteAfterCheck && Items?.length === 0) {
+      if (deleteAfterCheck && Items !== undefined && Items.length === 0) {
         logger.info(
           `Queried letter queue table to verify deletion for letterId ${letterId} and found no items, confirming deletion`,
         );

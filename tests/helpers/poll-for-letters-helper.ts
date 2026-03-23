@@ -58,7 +58,7 @@ export async function pollForLettersInDb(
   return pollForLetterStatus(request, supplierId, domainId, baseUrl);
 }
 
-export async function pollForLettersInLetterQueue(
+export async function getLetterStatusFromApi(
   request: APIRequestContext,
   supplierId: string,
   domainId: string,

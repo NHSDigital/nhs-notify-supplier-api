@@ -32,6 +32,11 @@ export async function sendSnsEvent(
 export async function sendSnsBatchEvent(
   messages: SnsBatchEventEntry[],
 ): Promise<PublishBatchCommandOutput> {
+  if (messages.length > 10) {
+    throw new Error(
+      "SNS batch publish supports a maximum of 10 messages per batch",
+    );
+  }
   const publishBatchRequestEntries: PublishBatchRequestEntry[] = messages.map(
     ({ id, message, messageAttributes }, index) => ({
       Id: id ?? `message-${index + 1}`,
