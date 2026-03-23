@@ -26,10 +26,11 @@ on:
         description: "Python version, set by the CI/CD pipeline workflow"
         required: true
         type: string
-      skip_trivy_package:
-        description: "Skip Trivy package scan when true"
-        type: boolean
-        default: false
+      # TODO - Re-visit Trivy usage https://nhsd-jira.digital.nhs.uk/browse/CCM-15549
+      # skip_trivy_package:
+      #   description: "Skip Trivy package scan when true"
+      #   type: boolean
+      #   default: false
       terraform_version:
         description: "Terraform version, set by the CI/CD pipeline workflow"
         required: true
