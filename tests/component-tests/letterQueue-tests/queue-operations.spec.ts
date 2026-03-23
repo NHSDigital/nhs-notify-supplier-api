@@ -7,7 +7,6 @@ import {
 import { logger } from "tests/helpers/pino-logger";
 import { sendSnsBatchEvent, sendSnsEvent } from "tests/helpers/send-sns-event";
 import {
-  pollUpdateLetterQueueDuplicateLog,
   pollUpsertLetterLogForError,
   supplierIdFromSupplierAllocatorLog,
 } from "tests/helpers/aws-cloudwatch-helper";
