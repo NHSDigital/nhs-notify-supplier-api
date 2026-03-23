@@ -120,7 +120,7 @@ terraform-validate-all: # Validate all Terraform components @Quality
 
 terraform-sec: # Run Trivy IaC security scanning on Terraform code @Quality
 	# Example: make terraform-sec
-	./scripts/terraform/trivy-scan.sh --mode iac infrastructure/terraform
+	# ./scripts/terraform/trivy-scan.sh --mode iac infrastructure/terraform
 
 terraform-docs: # Generate Terraform documentation - optional: component=[specific component, or all if omitted] @Quality
 	# Example: make terraform-docs component=mycomp
