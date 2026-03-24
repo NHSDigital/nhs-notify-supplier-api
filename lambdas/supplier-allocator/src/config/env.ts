@@ -6,6 +6,7 @@ const LetterVariantSchema = z.record(
     supplierId: z.string(),
     specId: z.string(),
     priority: z.int().min(0).max(99), // Lower number represents a higher priority
+    billingId: z.string(),
   }),
 );
 export type LetterVariant = z.infer<typeof LetterVariantSchema>;
