@@ -11,7 +11,7 @@ import {
   pollUpsertLetterLogForError,
 } from "tests/helpers/aws-cloudwatch-helper";
 import { supplierDataSetup } from "tests/helpers/suppliers-setup-helper";
-import { pollForLettersInDb } from "tests/helpers/poll-for-letters-helper";
+import { pollForLetterInDb } from "tests/helpers/poll-for-letters-helper";
 
 let baseUrl: string;
 
@@ -49,7 +49,7 @@ test.describe("Event Subscription SNS Tests", () => {
     await supplierDataSetup(supplierId);
 
     // poll for letter to be inserted in db with status PENDING
-    const { letterStatus, statusCode } = await pollForLettersInDb(
+    const { letterStatus, statusCode } = await pollForLetterInDb(
       request,
       supplierId,
       domainId,
