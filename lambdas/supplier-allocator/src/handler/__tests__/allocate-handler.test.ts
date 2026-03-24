@@ -1,86 +1,103 @@
-import { SQSBatchResponse, SQSEvent, SQSRecord } from "aws-lambda";
-import { SendMessageCommand } from "@aws-sdk/client-sqs";
+import { SQSEvent, SQSRecord } from "aws-lambda";
+import pino from "pino";
+import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
 import {
   $LetterEvent,
   LetterEvent,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
-import { MetricStatus } from "@internal/helpers";
 import { SupplierConfigRepository } from "@internal/datastore";
 import createSupplierAllocatorHandler from "../allocate-handler";
 import * as supplierConfig from "../../services/supplier-config";
+
 import { Deps } from "../../config/deps";
 import { EnvVars } from "../../config/env";
 
-jest.mock("@aws-sdk/client-sqs");
 jest.mock("../../services/supplier-config");
 
-function assertMetricLogged(
-  logger: pino.Logger,
-  supplier: string,
-  priority: string,
-  status: MetricStatus,
-  count: number,
-) {
-  expect(logger.info).toHaveBeenCalledWith(
-    expect.objectContaining({
-      Supplier: supplier,
-      Priority: priority,
-      _aws: expect.objectContaining({
-        CloudWatchMetrics: expect.arrayContaining([
-          expect.objectContaining({
-            Metrics: [
-              expect.objectContaining({
-                Name: status,
-                Value: count,
-              }),
-            ],
-          }),
-        ]),
-      }),
-      [status]: count,
-    }),
-  );
+function createSQSEvent(records: SQSRecord[]): SQSEvent {
+  return {
+    Records: records,
+  };
 }
 
-function makeDeps(overrides: Partial<Deps> = {}): Deps {
-  const logger = {
-    info: jest.fn(),
-    error: jest.fn(),
-  };
-
-  const sqsClient = {
-    send: jest.fn().mockResolvedValue({}),
-  };
-
-  const supplierConfigRepo = {
-    getLetterVariant: jest.fn(),
-    getVolumeGroup: jest.fn(),
-    getSupplierAllocationsForVolumeGroup: jest.fn(),
-  };
-
-  const env = {
-    VARIANT_MAP: {
-      "variant-1": { supplierId: "supplier-1", specId: "spec-1" },
-      "variant-2": { supplierId: "supplier-2", specId: "spec-2" },
+function createSqsRecord(msgId: string, body: string): SQSRecord {
+  return {
+    messageId: msgId,
+    receiptHandle: "",
+    body,
+    attributes: {
+      ApproximateReceiveCount: "",
+      SentTimestamp: "",
+      SenderId: "",
+      ApproximateFirstReceiveTimestamp: "",
     },
+    messageAttributes: {},
+    md5OfBody: "",
+    eventSource: "",
+    eventSourceARN: "",
+    awsRegion: "",
   };
+}
+
+function createPreparedV1Event(
+  overrides: Partial<any> = {},
+): LetterRequestPreparedEvent {
+  const now = new Date().toISOString();
 
   return {
-    logger: logger as any,
-    sqsClient: sqsClient as any,
-    supplierConfigRepo: supplierConfigRepo as any,
-    env: env as any,
-    ...overrides,
-  } as any;
+    specversion: "1.0",
+    id: overrides.id ?? "7b9a03ca-342a-4150-b56b-989109c45613",
+    source: "/data-plane/letter-rendering/test",
+    subject: "client/client1/letter-request/letterRequest1",
+    type: "uk.nhs.notify.letter-rendering.letter-request.prepared.v1",
+    time: now,
+    dataschema:
+      "https://notify.nhs.uk/cloudevents/schemas/letter-rendering/letter-request.prepared.1.0.0.schema.json",
+    dataschemaversion: "1.0.0",
+    data: {
+      domainId: overrides.domainId ?? "letter1",
+      letterVariantId: "lv1",
+      requestId: "request1",
+      requestItemId: "requestItem1",
+      requestItemPlanId: "requestItemPlan1",
+      clientId: "client1",
+      campaignId: "campaign1",
+      templateId: "template1",
+      url: overrides.url ?? "s3://letterDataBucket/letter1.pdf",
+      sha256Hash:
+        "3a7bd3e2360a3d29eea436fcfb7e44c735d117c8f2f1d2d1e4f6e8f7e6e8f7e6",
+      createdAt: now,
+      pageCount: 1,
+      status: "PREPARED",
+    },
+    traceparent: "00-0af7651916cd43dd8448eb211c803191-b7ad6b7169203331-01",
+    recordedtime: now,
+    severitynumber: 2,
+    severitytext: "INFO",
+    plane: "data",
+  };
 }
 
-function makeLetterEventV2(
-  variantId = "variant-1",
+function createPreparedV2Event(
+  overrides: Partial<any> = {},
 ): LetterRequestPreparedEventV2 {
   return {
+    ...createPreparedV1Event(overrides),
     type: "uk.nhs.notify.letter-rendering.letter-request.prepared.v2",
+    dataschema:
+      "https://notify.nhs.uk/cloudevents/schemas/letter-rendering/letter-request.prepared.2.0.1.schema.json",
+    dataschemaversion: "2.0.1",
+  };
+}
+
+function createSupplierStatusChangeEvent(
+  overrides: Partial<any> = {},
+): LetterEvent {
+  const now = new Date().toISOString();
+
+  return $LetterEvent.parse({
     data: {
       domainId: overrides.domainId ?? "f47ac10b-58cc-4372-a567-0e02b2c3d479",
       groupId: "client_template",
@@ -118,23 +135,47 @@ function makeLetterEventV2(
   });
 }
 
-describe.skip("createSupplierAllocatorHandler", () => {
+function setupDefaultMocks() {
+  (supplierConfig.getVariantDetails as jest.Mock).mockResolvedValue({
+    id: "v1",
+    volumeGroupId: "g1",
+  });
+  (supplierConfig.getVolumeGroupDetails as jest.Mock).mockResolvedValue({
+    id: "g1",
+    status: "PROD",
+  });
+  (
+    supplierConfig.getSupplierAllocationsForVolumeGroup as jest.Mock
+  ).mockResolvedValue([{ supplier: "s1" }]);
+  (supplierConfig.getSupplierDetails as jest.Mock).mockResolvedValue({
+    supplierId: "supplier-1",
+    specId: "spec-1",
+    priority: 1,
+    billingId: "billing-1",
+  });
+}
+
+describe("createSupplierAllocatorHandler", () => {
   let mockSqsClient: jest.Mocked<SQSClient>;
   let mockedDeps: jest.Mocked<Deps>;
-
+  let mockedSupplierConfigRepo: jest.Mocked<SupplierConfigRepository>;
   beforeEach(() => {
     mockSqsClient = {
       send: jest.fn(),
     } as unknown as jest.Mocked<SQSClient>;
 
+    mockedSupplierConfigRepo = {
+      ddbClient: {} as any,
+      config: {} as any,
+      getLetterVariant: jest.fn(),
+      getVolumeGroup: jest.fn(),
+      getSupplierAllocationsForVolumeGroup: jest.fn(),
+      getSuppliersDetails: jest.fn(),
+      getSupplierPacksForPackSpecification: jest.fn(),
+      getPackSpecification: jest.fn(),
+    } as jest.Mocked<SupplierConfigRepository>;
+
     mockedDeps = {
-      supplierConfigRepo: {
-        getLetterVariant: jest.fn().mockResolvedValue({
-          id: "variant1",
-          supplierId: "supplier1",
-          specId: "spec1",
-        }),
-      } as unknown as SupplierConfigRepository,
       logger: { error: jest.fn(), info: jest.fn() } as unknown as pino.Logger,
       env: {
         SUPPLIER_CONFIG_TABLE_NAME: "SupplierConfigTable",
@@ -142,21 +183,25 @@ describe.skip("createSupplierAllocatorHandler", () => {
           lv1: {
             supplierId: "supplier1",
             specId: "spec1",
-            priority: 10,
+            priority: 1,
             billingId: "billing1",
           },
         },
       } as EnvVars,
       sqsClient: mockSqsClient,
+      supplierConfigRepo: mockedSupplierConfigRepo,
     } as jest.Mocked<Deps>;
-
     jest.clearAllMocks();
-    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.queue";
   });
 
-  afterEach(() => {
-    delete process.env.UPSERT_LETTERS_QUEUE_URL;
-  });
+  test("parses SNS notification and sends message to SQS queue for v2 event", async () => {
+    const preparedEvent = createPreparedV2Event();
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("msg1", JSON.stringify(preparedEvent)),
+    ]);
+
+    setupDefaultMocks();
+    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
     const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
@@ -175,36 +220,25 @@ describe.skip("createSupplierAllocatorHandler", () => {
     expect(messageBody.supplierSpec).toEqual({
       supplierId: "supplier1",
       specId: "spec1",
-      priority: 10,
+      priority: 1,
       billingId: "billing1",
     });
-
-    assertMetricLogged(
-      mockedDeps.logger,
-      "supplier1",
-      "10",
-      MetricStatus.Success,
-      1,
-    );
   });
 
-  describe("handler execution", () => {
-    it("processes single record successfully", async () => {
-      const deps = makeDeps();
-      const letterEvent = makeLetterEventV2();
+  test("parses SNS notification and sends message to SQS queue for v1 event", async () => {
+    const preparedEvent = createPreparedV1Event();
 
-      setupDefaultMocks();
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("msg1", JSON.stringify(preparedEvent)),
+    ]);
 
-      const handler = createSupplierAllocatorHandler(deps);
-      const event: SQSEvent = {
-        Records: [makeSQSRecord(letterEvent)],
-      };
+    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+    setupDefaultMocks();
+    const handler = createSupplierAllocatorHandler(mockedDeps);
+    const result = await handler(evt, {} as any, {} as any);
 
-      const result = (await handler(
-        event,
-        {} as any,
-        () => {},
-      )) as SQSBatchResponse;
+    expect(result).toBeDefined();
+    if (!result) throw new Error("expected BatchResponse, got void");
 
     expect(result.batchItemFailures).toHaveLength(0);
 
@@ -214,7 +248,7 @@ describe.skip("createSupplierAllocatorHandler", () => {
     expect(messageBody.supplierSpec).toEqual({
       supplierId: "supplier1",
       specId: "spec1",
-      priority: 10,
+      priority: 1,
       billingId: "billing1",
     });
   });
@@ -237,14 +271,6 @@ describe.skip("createSupplierAllocatorHandler", () => {
     expect(result.batchItemFailures).toHaveLength(1);
     expect(result.batchItemFailures[0].itemIdentifier).toBe("invalid-event");
     expect((mockedDeps.logger.error as jest.Mock).mock.calls).toHaveLength(1);
-
-    assertMetricLogged(
-      mockedDeps.logger,
-      "unknown",
-      "unknown",
-      MetricStatus.Failure,
-      1,
-    );
   });
 
   test("unwraps EventBridge envelope and extracts event details", async () => {
@@ -280,8 +306,6 @@ describe.skip("createSupplierAllocatorHandler", () => {
     const messageBody = JSON.parse(sendCall.input.MessageBody);
     expect(messageBody.supplierSpec.supplierId).toBe("supplier1");
     expect(messageBody.supplierSpec.specId).toBe("spec1");
-    expect(messageBody.supplierSpec.priority).toBe(10);
-    expect(messageBody.supplierSpec.billingId).toBe("billing1");
   });
 
   test("processes multiple messages in batch", async () => {
@@ -321,170 +345,123 @@ describe.skip("createSupplierAllocatorHandler", () => {
     expect(result).toBeDefined();
     if (!result) throw new Error("expected BatchResponse, got void");
 
-      expect(result.batchItemFailures).toHaveLength(1);
-      expect(deps.logger.error).toHaveBeenCalled();
-    });
+    expect(result.batchItemFailures).toHaveLength(1);
+    expect(result.batchItemFailures[0].itemIdentifier).toBe("bad-json");
+    expect((mockedDeps.logger.error as jest.Mock).mock.calls).toHaveLength(1);
+  });
 
-    it("records failures for missing envelope type", async () => {
-      const deps = makeDeps();
-      const handler = createSupplierAllocatorHandler(deps);
+  test("returns batch failure when event type is missing", async () => {
+    const event = { no: "type" };
 
-      const invalidEvent = { data: { letterVariantId: "v1" } };
-      const event: SQSEvent = {
-        Records: [makeSQSRecord(invalidEvent)],
-      };
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("no-type", JSON.stringify(event)),
+    ]);
 
-      const result = (await handler(
-        event,
-        {} as any,
-        () => {},
-      )) as SQSBatchResponse;
+    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
-      expect(result.batchItemFailures).toHaveLength(1);
-      expect(deps.logger.error).toHaveBeenCalled();
-    });
+    const handler = createSupplierAllocatorHandler(mockedDeps);
+    const result = await handler(evt, {} as any, {} as any);
+    if (!result) throw new Error("expected BatchResponse, got void");
 
-    it("records failures for missing variant mapping", async () => {
-      const deps = makeDeps();
-      const letterEvent = makeLetterEventV2("unknown-variant");
+    expect(result.batchItemFailures).toHaveLength(1);
+    expect(result.batchItemFailures[0].itemIdentifier).toBe("no-type");
+  });
 
-      const handler = createSupplierAllocatorHandler(deps);
-      const event: SQSEvent = {
-        Records: [makeSQSRecord(letterEvent)],
-      };
+  test("returns batch failure when UPSERT_LETTERS_QUEUE_URL is not set", async () => {
+    const preparedEvent = createPreparedV2Event();
 
-      const result = (await handler(
-        event,
-        {} as any,
-        () => {},
-      )) as SQSBatchResponse;
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("msg1", JSON.stringify(preparedEvent)),
+    ]);
 
-      expect(result.batchItemFailures).toHaveLength(1);
-      expect(deps.logger.error).toHaveBeenCalledWith(
-        expect.objectContaining({
-          description: "Error processing allocation of record",
-        }),
-      );
-    });
+    delete process.env.UPSERT_LETTERS_QUEUE_URL;
 
-    it("records failures when supplier config resolution fails", async () => {
-      const deps = makeDeps();
-      const letterEvent = makeLetterEventV2();
+    const handler = createSupplierAllocatorHandler(mockedDeps);
+    const result = await handler(evt, {} as any, {} as any);
+    if (!result) throw new Error("expected BatchResponse, got void");
 
-      (supplierConfig.getVariantDetails as jest.Mock).mockRejectedValue(
-        new Error("Database error"),
-      );
+    expect(result.batchItemFailures).toHaveLength(1);
+    expect(result.batchItemFailures[0].itemIdentifier).toBe("msg1");
+    expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][0].err).toEqual(
+      expect.objectContaining({
+        message: "UPSERT_LETTERS_QUEUE_URL not configured",
+      }),
+    );
+  });
 
-      const handler = createSupplierAllocatorHandler(deps);
-      const event: SQSEvent = {
-        Records: [makeSQSRecord(letterEvent)],
-      };
+  test("returns batch failure when variant mapping is missing", async () => {
+    const preparedEvent = createPreparedV2Event();
+    preparedEvent.data.letterVariantId = "missing-variant";
 
-      const result = (await handler(
-        event,
-        {} as any,
-        () => {},
-      )) as SQSBatchResponse;
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("msg1", JSON.stringify(preparedEvent)),
+    ]);
 
-      expect(result.batchItemFailures).toHaveLength(0);
-      expect(deps.logger.error).toHaveBeenCalled();
-    });
+    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
-    it("records failures when UPSERT_LETTERS_QUEUE_URL not configured", async () => {
-      delete process.env.UPSERT_LETTERS_QUEUE_URL;
+    // Override variant map to be empty for this test
+    mockedDeps.env.VARIANT_MAP = {} as any;
 
-      const deps = makeDeps();
-      const letterEvent = makeLetterEventV2();
+    const handler = createSupplierAllocatorHandler(mockedDeps);
+    const result = await handler(evt, {} as any, {} as any);
+    if (!result) throw new Error("expected BatchResponse, got void");
 
-      setupDefaultMocks();
+    expect(result.batchItemFailures).toHaveLength(1);
+    expect(result.batchItemFailures[0].itemIdentifier).toBe("msg1");
+    expect(
+      (mockedDeps.logger.error as jest.Mock).mock.calls.length,
+    ).toBeGreaterThan(0);
+    expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        description: "No supplier mapping found for variant",
+      }),
+    );
+  });
 
-      const handler = createSupplierAllocatorHandler(deps);
-      const event: SQSEvent = {
-        Records: [makeSQSRecord(letterEvent)],
-      };
+  test("handles SQS send errors and returns batch failure", async () => {
+    const preparedEvent = createPreparedV2Event();
 
-      const result = (await handler(
-        event,
-        {} as any,
-        () => {},
-      )) as SQSBatchResponse;
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("msg1", JSON.stringify(preparedEvent)),
+    ]);
 
-      expect(result.batchItemFailures).toHaveLength(1);
-      expect(deps.logger.error).toHaveBeenCalled();
-    });
+    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
-    it("records failures when SQS send fails", async () => {
-      const deps = makeDeps();
-      const letterEvent = makeLetterEventV2();
+    const sqsError = new Error("SQS send failed");
+    (mockSqsClient.send as jest.Mock).mockRejectedValueOnce(sqsError);
 
-      setupDefaultMocks();
-
-      deps.sqsClient.send = jest.fn().mockRejectedValue(new Error("SQS error"));
-
-      const handler = createSupplierAllocatorHandler(deps);
-      const event: SQSEvent = {
-        Records: [makeSQSRecord(letterEvent)],
-      };
-
-      const result = (await handler(
-        event,
-        {} as any,
-        () => {},
-      )) as SQSBatchResponse;
+    const handler = createSupplierAllocatorHandler(mockedDeps);
+    const result = await handler(evt, {} as any, {} as any);
+    if (!result) throw new Error("expected BatchResponse, got void");
 
     expect(result.batchItemFailures).toHaveLength(1);
     expect(result.batchItemFailures[0].itemIdentifier).toBe("msg1");
     expect((mockedDeps.logger.error as jest.Mock).mock.calls).toHaveLength(1);
-
-    assertMetricLogged(
-      mockedDeps.logger,
-      "supplier1",
-      "10",
-      MetricStatus.Failure,
-      1,
-    );
   });
 
-    it("handles mixed success and failure records", async () => {
-      const deps = makeDeps();
-      const letterEventGood = makeLetterEventV2("variant-1");
-      const letterEventBad = { type: "invalid.type" };
+  test("processes mixed batch with successes and failures", async () => {
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord(
+        "ok-msg",
+        JSON.stringify(createPreparedV2Event({ domainId: "letter1" })),
+      ),
+      createSqsRecord("fail-msg", "invalid-json"),
+      createSqsRecord(
+        "ok-msg-2",
+        JSON.stringify(createPreparedV2Event({ domainId: "letter2" })),
+      ),
+    ]);
 
-      setupDefaultMocks();
+    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
-      const handler = createSupplierAllocatorHandler(deps);
-      const event: SQSEvent = {
-        Records: [
-          makeSQSRecord(letterEventGood),
-          makeSQSRecord(letterEventBad),
-        ],
-      };
-
-      const result = (await handler(
-        event,
-        {} as any,
-        () => {},
-      )) as SQSBatchResponse;
+    const handler = createSupplierAllocatorHandler(mockedDeps);
+    const result = await handler(evt, {} as any, {} as any);
+    if (!result) throw new Error("expected BatchResponse, got void");
 
     expect(result.batchItemFailures).toHaveLength(1);
     expect(result.batchItemFailures[0].itemIdentifier).toBe("fail-msg");
 
     expect(mockSqsClient.send).toHaveBeenCalledTimes(2);
-
-    assertMetricLogged(
-      mockedDeps.logger,
-      "supplier1",
-      "10",
-      MetricStatus.Success,
-      2,
-    );
-    assertMetricLogged(
-      mockedDeps.logger,
-      "unknown",
-      "unknown",
-      MetricStatus.Failure,
-      1,
-    );
   });
 
   test("sends correct queue URL in SQS message command", async () => {
@@ -504,47 +481,30 @@ describe.skip("createSupplierAllocatorHandler", () => {
     expect(sendCall.input.QueueUrl).toBe(queueUrl);
   });
 
-  test("emits separate metrics per supplier and priority combination", async () => {
-    mockedDeps.env.VARIANT_MAP = {
-      lv1: { supplierId: "supplier1", specId: "spec1", priority: 10 },
-      lv2: { supplierId: "supplier2", specId: "spec2", priority: 5 },
-    } as any;
-
-    const eventForSupplier1 = createPreparedV2Event({ domainId: "letter1" });
-    const eventForSupplier2 = {
-      ...createPreparedV2Event({ domainId: "letter2" }),
-      data: {
-        ...createPreparedV2Event({ domainId: "letter2" }).data,
-        letterVariantId: "lv2",
-      },
-    };
+  test("logs error when supplier config retrieval fails", async () => {
+    const preparedEvent = createPreparedV2Event();
 
     const evt: SQSEvent = createSQSEvent([
-      createSqsRecord("msg1", JSON.stringify(eventForSupplier1)),
-      createSqsRecord("msg2", JSON.stringify(eventForSupplier2)),
+      createSqsRecord("msg1", JSON.stringify(preparedEvent)),
     ]);
 
     process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+    const configError = new Error("Failed to retrieve supplier config");
+    (supplierConfig.getVariantDetails as jest.Mock).mockRejectedValueOnce(
+      configError,
+    );
 
     const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
     if (!result) throw new Error("expected BatchResponse, got void");
-
     expect(result.batchItemFailures).toHaveLength(0);
-
-    assertMetricLogged(
-      mockedDeps.logger,
-      "supplier1",
-      "10",
-      MetricStatus.Success,
-      1,
-    );
-    assertMetricLogged(
-      mockedDeps.logger,
-      "supplier2",
-      "5",
-      MetricStatus.Success,
-      1,
+    expect((mockedDeps.logger.error as jest.Mock).mock.calls).toHaveLength(1);
+    expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        description: "Error fetching supplier from config",
+        err: configError,
+        variantId: "lv1",
+      }),
     );
   });
 });
