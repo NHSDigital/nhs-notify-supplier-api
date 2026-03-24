@@ -48,6 +48,7 @@ function generateLetter(status: LetterStatus, id?: string): Letter {
     source: "test-source",
     subject: "test-subject",
     billingRef: "billing-ref-1",
+    priority: 2,
   };
 }
 
@@ -72,6 +73,7 @@ describe("update-letter-queue Lambda", () => {
         letterId: "1",
         specificationId: "spec1",
         groupId: "group1",
+        priority: 2,
       });
       expect(result.batchItemFailures).toEqual([]);
     });
