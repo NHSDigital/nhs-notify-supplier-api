@@ -57,3 +57,5 @@ def test_500_letter_does_not_exist(url, bearer_token):
 
     ErrorHandler.handle_retry(get_message_response)
     assert get_message_response.status_code == 500
+
+#TODO CCM-14318 probably

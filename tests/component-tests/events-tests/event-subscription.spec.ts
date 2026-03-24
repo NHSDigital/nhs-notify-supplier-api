@@ -95,8 +95,8 @@ test.describe("Event Subscription SNS Tests", () => {
         headers,
       },
     );
+    expect(getLetterResponse.status()).toBe(404);
 
-    expect(getLetterResponse.status()).toBe(500);
     await pollUpsertLetterLogForError(
       "Message did not match an expected schema",
       domainId,
