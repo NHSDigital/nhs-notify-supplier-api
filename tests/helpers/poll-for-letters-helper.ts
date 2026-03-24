@@ -49,16 +49,7 @@ async function pollForLetterStatus(
   return { letterStatus, statusCode };
 }
 
-export async function pollForLettersInDb(
-  request: APIRequestContext,
-  supplierId: string,
-  domainId: string,
-  baseUrl: string,
-): Promise<{ letterStatus: string | undefined; statusCode: number }> {
-  return pollForLetterStatus(request, supplierId, domainId, baseUrl);
-}
-
-export async function getLetterStatusFromApi(
+export async function pollForLetterInDb(
   request: APIRequestContext,
   supplierId: string,
   domainId: string,

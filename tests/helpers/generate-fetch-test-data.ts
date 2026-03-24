@@ -168,7 +168,7 @@ export async function createSupplierEntry(supplierId: string): Promise<void> {
 export async function checkLetterQueueTable(
   supplierId: string,
   letterId: string,
-  deleteAfterCheck?: boolean,
+  checkForDeletedLetters?: boolean,
 ): Promise<[boolean, number?]> {
   const MAX_ATTEMPTS = 5;
   const RETRY_DELAY_MS = 10_000;
@@ -185,13 +185,13 @@ export async function checkLetterQueueTable(
 
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
       const { Items } = await docClient.send(new QueryCommand(params));
-      if (!deleteAfterCheck && Items !== undefined && Items.length > 0) {
+      if (!checkForDeletedLetters && Items !== undefined && Items.length > 0) {
         logger.info(
           `Queried letter queue table to verify existence for letterId ${letterId} and found items, confirming existence`,
         );
         return [true, Items.length];
       }
-      if (deleteAfterCheck && Items !== undefined && Items.length === 0) {
+      if (checkForDeletedLetters && Items !== undefined && Items.length === 0) {
         logger.info(
           `Queried letter queue table to verify deletion for letterId ${letterId} and found no items, confirming deletion`,
         );
