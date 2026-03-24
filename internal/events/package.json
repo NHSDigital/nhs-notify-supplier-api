@@ -1,7 +1,6 @@
 {
   "dependencies": {
     "@asyncapi/bundler": "^0.6.4",
-    "@internal/datastore": "*",
     "zod": "^4.1.11"
   },
   "description": "Schemas for NHS Notify Supplier API events",
@@ -37,5 +36,5 @@
     "typecheck": "tsc --noEmit"
   },
   "types": "dist/index.d.ts",
-  "version": "1.0.14"
+  "version": "1.0.16"
 }
