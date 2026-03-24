@@ -43,6 +43,7 @@ export const LetterSchemaBase = z.object({
 export const LetterSchema = LetterSchemaBase.extend({
   supplierId: idRef(SupplierSchema, "id"),
   eventId: z.string().optional(),
+  priority: z.int().min(0).max(99).optional(), // A lower number represents a higher priority
   url: z.url(),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -79,15 +80,21 @@ export type UpdateLetter = {
 export const PendingLetterSchema = z.object({
   supplierId: idRef(SupplierSchema, "id"),
   letterId: idRef(LetterSchema, "id"),
-  queueTimestamp: z.string().describe("Secondary index SK"),
+  queueTimestamp: z.string(),
+  visibilityTimestamp: z.string(),
+  queueSortOrderSk: z.string().describe("Secondary index SK"),
   specificationId: z.string(),
   groupId: z.string(),
+  priority: z.int().min(0).max(99).optional(),
   ttl: z.int(),
 });
 
 export type PendingLetter = z.infer<typeof PendingLetterSchema>;
 
-export type InsertPendingLetter = Omit<PendingLetter, "ttl" | "queueTimestamp">;
+export type InsertPendingLetter = Omit<
+  PendingLetter,
+  "ttl" | "queueTimestamp" | "visibilityTimestamp" | "queueSortOrderSk"
+>;
 
 export const MISchemaBase = z.object({
   id: z.string(),

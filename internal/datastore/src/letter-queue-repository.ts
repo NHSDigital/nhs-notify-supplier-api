@@ -1,11 +1,16 @@
-import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
+import {
+  DeleteCommand,
+  DynamoDBDocumentClient,
+  PutCommand,
+} from "@aws-sdk/lib-dynamodb";
 import { Logger } from "pino";
 import {
   InsertPendingLetter,
   PendingLetter,
   PendingLetterSchema,
 } from "./types";
-import { LetterAlreadyExistsError } from "./errors/letter-already-exists-error";
+import LetterAlreadyExistsError from "./errors/letter-already-exists-error";
+import LetterNotFoundError from "./errors/letter-not-found-error";
 
 type LetterQueueRepositoryConfig = {
   letterQueueTableName: string;
@@ -19,13 +24,22 @@ export default class LetterQueueRepository {
     readonly config: LetterQueueRepositoryConfig,
   ) {}
 
+  private readonly defaultPriority = 10;
+
   async putLetter(
     insertPendingLetter: InsertPendingLetter,
   ): Promise<PendingLetter> {
+    // needs to be an ISO timestamp as Db sorts alphabetically
+    const now = new Date().toISOString();
+    const priority = String(
+      insertPendingLetter.priority ?? this.defaultPriority,
+    );
+    const queueSortOrderSk = `${priority.padStart(2, "0")}-${now}`;
     const pendingLetter: PendingLetter = {
       ...insertPendingLetter,
-      // needs to be an ISO timestamp as Db sorts alphabetically
-      queueTimestamp: new Date().toISOString(),
+      queueTimestamp: now,
+      visibilityTimestamp: now,
+      queueSortOrderSk,
       ttl: Math.floor(
         Date.now() / 1000 + 60 * 60 * this.config.letterQueueTtlHours,
       ),
@@ -51,5 +65,25 @@ export default class LetterQueueRepository {
       throw error;
     }
     return PendingLetterSchema.parse(pendingLetter);
+  }
+
+  async deleteLetter(supplierId: string, letterId: string): Promise<void> {
+    try {
+      await this.ddbClient.send(
+        new DeleteCommand({
+          TableName: this.config.letterQueueTableName,
+          Key: { supplierId, letterId },
+          ConditionExpression: "attribute_exists(letterId)",
+        }),
+      );
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.name === "ConditionalCheckFailedException"
+      ) {
+        throw new LetterNotFoundError(supplierId, letterId);
+      }
+      throw error;
+    }
   }
 }
