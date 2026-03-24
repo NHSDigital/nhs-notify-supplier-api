@@ -22,6 +22,7 @@ const SupplierSpecSchema = z.object({
   supplierId: z.string().min(1),
   specId: z.string().min(1),
   priority: z.int().min(0).max(99).default(10),
+  billingId: z.string().min(1),
 });
 
 type SupplierSpec = z.infer<typeof SupplierSpecSchema>;
@@ -66,6 +67,7 @@ function getOperationFromType(type: string): UpsertOperation {
           supplierSpec.specId,
           supplierSpec.specId, // use specId for now
           supplierSpec.priority,
+          supplierSpec.billingId, // use billingId for now
         );
         await deps.letterRepo.putLetter(letterToInsert);
 
@@ -103,6 +105,7 @@ function mapToInsertLetter(
   spec: string,
   billingRef: string,
   priority: number,
+  billingId: string,
 ): InsertLetter {
   const now = new Date().toISOString();
   return {
@@ -122,6 +125,7 @@ function mapToInsertLetter(
     createdAt: now,
     updatedAt: now,
     billingRef,
+    specificationBillingId: billingId,
   };
 }
 
@@ -244,6 +248,7 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
               supplierId: "unknown",
               specId: "unknown",
               priority: 10,
+              billingId: "unknown",
             },
             deps,
           );

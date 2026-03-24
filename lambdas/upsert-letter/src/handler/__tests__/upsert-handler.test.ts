@@ -97,6 +97,7 @@ function createSupplierStatusChangeEventWithoutSupplier(
       billingRef: "1y3q9v1zzzz",
       status: "RETURNED",
       supplierId: "",
+      specificationBillingId: "billing1",
     },
     datacontenttype: "application/json",
     dataschema:
@@ -151,6 +152,7 @@ function createSupplierStatusChangeEvent(
       billingRef: "1y3q9v1zzzz",
       status: "RETURNED",
       supplierId: "supplier1",
+      specificationBillingId: "billing1",
     },
     datacontenttype: "application/json",
     dataschema:
@@ -211,11 +213,21 @@ describe("createUpsertLetterHandler", () => {
   test("processes all records successfully and returns no batch failures", async () => {
     const v2message = {
       letterEvent: createPreparedV2Event(),
-      supplierSpec: { supplierId: "supplier1", specId: "spec1", priority: 10 },
+      supplierSpec: {
+        supplierId: "supplier1",
+        specId: "spec1",
+        priority: 10,
+        billingId: "billing1",
+      },
     };
     const v1message = {
       letterEvent: createPreparedV1Event(),
-      supplierSpec: { supplierId: "supplier1", specId: "spec1", priority: 10 },
+      supplierSpec: {
+        supplierId: "supplier2",
+        specId: "spec2",
+        priority: 10,
+        billingId: "billing2",
+      },
     };
 
     const evt: SQSEvent = createSQSEvent([
@@ -249,18 +261,20 @@ describe("createUpsertLetterHandler", () => {
     expect(insertedV2Letter.status).toBe("PENDING");
     expect(insertedV2Letter.groupId).toBe("client1campaign1template1");
     expect(insertedV2Letter.source).toBe("/data-plane/letter-rendering/test");
+    expect(insertedV2Letter.specificationBillingId).toBe("billing1");
     expect(insertedV2Letter.priority).toBe(10);
 
     const insertedV1Letter = (mockedDeps.letterRepo.putLetter as jest.Mock).mock
       .calls[1][0];
     expect(insertedV1Letter.id).toBe("letter1");
-    expect(insertedV1Letter.supplierId).toBe("supplier1");
-    expect(insertedV1Letter.specificationId).toBe("spec1");
-    expect(insertedV1Letter.billingRef).toBe("spec1");
+    expect(insertedV1Letter.supplierId).toBe("supplier2");
+    expect(insertedV1Letter.specificationId).toBe("spec2");
+    expect(insertedV1Letter.billingRef).toBe("spec2");
     expect(insertedV1Letter.url).toBe("s3://letterDataBucket/letter1.pdf");
     expect(insertedV1Letter.status).toBe("PENDING");
     expect(insertedV1Letter.groupId).toBe("client1campaign1template1");
     expect(insertedV1Letter.source).toBe("/data-plane/letter-rendering/test");
+    expect(insertedV1Letter.specificationBillingId).toBe("billing2");
     expect(insertedV1Letter.priority).toBe(10);
 
     const updatedLetter = (
@@ -277,7 +291,12 @@ describe("createUpsertLetterHandler", () => {
     });
     expect(mockMetrics.putMetric).toHaveBeenCalledWith(
       "MessagesProcessed",
-      3,
+      2,
+      "Count",
+    );
+    expect(mockMetrics.putMetric).toHaveBeenCalledWith(
+      "MessagesProcessed",
+      1,
       "Count",
     );
   });
@@ -474,14 +493,24 @@ describe("createUpsertLetterHandler", () => {
         id: "7b9a03ca-342a-4150-b56b-989109c45615",
         domainId: "ok",
       }),
-      supplierSpec: { supplierId: "supplier1", specId: "spec1", priority: 10 },
+      supplierSpec: {
+        supplierId: "supplier1",
+        specId: "spec1",
+        priority: 10,
+        billingId: "billing1",
+      },
     };
     const message2 = {
       letterEvent: createPreparedV2Event({
         id: "7b9a03ca-342a-4150-b56b-989109c45616",
         domainId: "fail",
       }),
-      supplierSpec: { supplierId: "supplier1", specId: "spec1", priority: 10 },
+      supplierSpec: {
+        supplierId: "supplier1",
+        specId: "spec1",
+        priority: 10,
+        billingId: "billing1",
+      },
     };
     const evt: SQSEvent = createSQSEvent([
       createSqsRecord("ok-msg", JSON.stringify(message1)),

@@ -19,7 +19,8 @@ describe("lambdaEnv", () => {
       "lv1": {
         "supplierId": "supplier1",
         "specId": "spec1",
-        "priority": 10
+        "priority": 10,
+        "billingId": "billing1"
       }
     }`;
 
@@ -31,6 +32,7 @@ describe("lambdaEnv", () => {
           supplierId: "supplier1",
           specId: "spec1",
           priority: 10,
+          billingId: "billing1",
         },
       },
     });
