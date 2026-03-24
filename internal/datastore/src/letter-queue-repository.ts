@@ -5,7 +5,7 @@ import {
   PendingLetter,
   PendingLetterSchema,
 } from "./types";
-import { LetterAlreadyExistsError } from "./errors";
+import { LetterAlreadyExistsError } from "./errors/letter-already-exists-error";
 
 type LetterQueueRepositoryConfig = {
   letterQueueTableName: string;

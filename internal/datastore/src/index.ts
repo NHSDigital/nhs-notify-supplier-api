@@ -1,5 +1,5 @@
 export * from "./types";
-export * from "./errors";
+export * from "./errors/letter-already-exists-error";
 export * from "./mi-repository";
 export * from "./letter-repository";
 export * from "./supplier-repository";

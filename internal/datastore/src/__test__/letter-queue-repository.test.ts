@@ -7,7 +7,7 @@ import {
 } from "./db";
 import LetterQueueRepository from "../letter-queue-repository";
 import { InsertPendingLetter } from "../types";
-import { LetterAlreadyExistsError } from "../errors";
+import { LetterAlreadyExistsError } from "../errors/letter-already-exists-error";
 import { createTestLogger } from "./logs";
 
 function createLetter(letterId = "letter1"): InsertPendingLetter {

@@ -140,7 +140,7 @@ describe("LetterRepository", () => {
     await expect(
       letterRepository.getLetterById("supplier1", "letter1"),
     ).rejects.toThrow(
-      "Letter with id letter1 not found for supplier supplier1",
+      "Letter not found: supplierId=supplier1, letterId=letter1",
     );
   });
 

@@ -27,6 +27,12 @@
 - [ ] This PR is a result of pair or mob programming
 - [ ] If I have used the 'skip-trivy-package' label I have done so responsibly and in the knowledge that this is being fixed as part of a separate ticket/PR.
 
+## DT3-Specific Checklist
+
+<!-- Go over all the following points, and put an `x` in all the boxes that apply. -->
+
+- [ ] If I have added a new resource (SQS, Lambda, Gateway, DDB table, etc), I have created the appropriate alarms
+
 ---
 
 ## Sensitive Information Declaration

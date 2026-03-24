@@ -18,6 +18,7 @@ import {
   LetterSchemaBase,
   UpdateLetter,
 } from "./types";
+import LetterNotFoundError from "./errors/letter-not-found-error";
 
 export type PagingOptions = Partial<{
   exclusiveStartKey: Record<string, any>;
@@ -117,9 +118,7 @@ export class LetterRepository {
     );
 
     if (!result.Item) {
-      throw new Error(
-        `Letter with id ${letterId} not found for supplier ${supplierId}`,
-      );
+      throw new LetterNotFoundError(supplierId, letterId);
     }
     return LetterSchema.parse(result.Item);
   }
