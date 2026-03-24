@@ -40,6 +40,7 @@ describe("LetterStatus event validations", () => {
             billingRef: "1y3q9v1zzzz",
             groupId: "client_template",
             status,
+            specificationBillingId: "billing123",
           }),
         }),
       );

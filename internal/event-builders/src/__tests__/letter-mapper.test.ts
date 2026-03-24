@@ -16,6 +16,7 @@ describe("letter-mapper", () => {
       updatedAt: "2025-11-24T15:55:18.000Z",
       source: "letter-rendering/source/test",
       subject: "letter-rendering/source/letter/letter-id",
+      specificationBillingId: "billing123",
     } as Letter;
     const source = "/data-plane/supplier-api/nhs-supplier-api-dev/main/letters";
     const event = mapLetterToCloudEvent(letter, source);
@@ -35,6 +36,7 @@ describe("letter-mapper", () => {
       status: "PRINTED",
       specificationId: "spec1",
       billingRef: "spec1",
+      specificationBillingId: "billing123",
       supplierId: "supplier1",
       groupId: "group1",
       reasonCode: "R02",

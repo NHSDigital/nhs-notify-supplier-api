@@ -339,6 +339,7 @@ function generateLetter(status: LetterStatus, id?: string): Letter {
     supplierStatus: `supplier1#${status}`,
     supplierStatusSk: "2025-12-10T11:12:54Z#1",
     ttl: 1_234_567_890,
+    specificationBillingId: "billing1",
   };
 }
 

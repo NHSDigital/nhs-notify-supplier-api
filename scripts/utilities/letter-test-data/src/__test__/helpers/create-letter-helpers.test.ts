@@ -29,6 +29,7 @@ describe("Create letter helpers", () => {
     const targetFilename = "targetFilename";
     const groupId = "groupId";
     const specificationId = "specificationId";
+    const billingId = "billingId";
     const status = "PENDING" as LetterStatusType;
     const testLetter = "test-letter-standard";
 
@@ -39,6 +40,7 @@ describe("Create letter helpers", () => {
       targetFilename,
       groupId,
       specificationId,
+      billingId,
       status,
       letterRepository: mockedLetterRepository,
       testLetter,
@@ -62,6 +64,7 @@ describe("Create letter helpers", () => {
       source: "/data-plane/letter-rendering/letter-test-data",
       subject: "supplier-api/letter-test-data/letterId",
       billingRef: "specificationId",
+      specificationBillingId: "billingId",
     });
   });
 
@@ -81,6 +84,7 @@ describe("Create letter helpers", () => {
     const targetFilename = "targetFilename";
     const groupId = "groupId";
     const specificationId = "specificationId";
+    const billingId = "billingId";
     const status = "PENDING" as LetterStatusType;
     const testLetter = "none";
 
@@ -91,6 +95,7 @@ describe("Create letter helpers", () => {
       targetFilename,
       groupId,
       specificationId,
+      billingId,
       status,
       letterRepository: mockedLetterRepository,
       testLetter,
@@ -110,6 +115,7 @@ describe("Create letter helpers", () => {
       billingRef: "specificationId",
       source: "/data-plane/letter-rendering/letter-test-data",
       subject: "supplier-api/letter-test-data/letterId",
+      specificationBillingId: "billingId",
     });
   });
 
@@ -121,6 +127,7 @@ describe("Create letter helpers", () => {
       letterId: "testLetterId",
       supplierId: "testSupplierId",
       specificationId: "testSpecId",
+      billingId: "testBillingId",
       groupId: "testGroupId",
       status: "PENDING" as LetterStatusType,
       url: "s3://bucket/testSupplierId/testLetter.pdf",
@@ -140,6 +147,7 @@ describe("Create letter helpers", () => {
       source: "/data-plane/letter-rendering/letter-test-data",
       subject: "supplier-api/letter-test-data/testLetterId",
       billingRef: "testSpecId",
+      specificationBillingId: "testBillingId",
     });
   });
 });

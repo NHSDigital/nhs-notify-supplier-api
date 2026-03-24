@@ -138,6 +138,7 @@ function createSupplierStatusChangeEvent(
       billingRef: "1y3q9v1zzzz",
       status: "RETURNED",
       supplierId: "supplier1",
+      specificationBillingId: "billing1",
     },
     datacontenttype: "application/json",
     dataschema:
@@ -175,6 +176,7 @@ describe("createSupplierAllocatorHandler", () => {
             supplierId: "supplier1",
             specId: "spec1",
             priority: 10,
+            billingId: "billing1",
           },
         },
       } as EnvVars,
@@ -210,6 +212,7 @@ describe("createSupplierAllocatorHandler", () => {
       supplierId: "supplier1",
       specId: "spec1",
       priority: 10,
+      billingId: "billing1",
     });
 
     assertMetricLogged(
@@ -245,6 +248,7 @@ describe("createSupplierAllocatorHandler", () => {
       supplierId: "supplier1",
       specId: "spec1",
       priority: 10,
+      billingId: "billing1",
     });
   });
 
@@ -307,11 +311,10 @@ describe("createSupplierAllocatorHandler", () => {
 
     const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
     const messageBody = JSON.parse(sendCall.input.MessageBody);
-    expect(messageBody.supplierSpec).toEqual({
-      supplierId: "supplier1",
-      specId: "spec1",
-      priority: 10,
-    });
+    expect(messageBody.supplierSpec.supplierId).toBe("supplier1");
+    expect(messageBody.supplierSpec.specId).toBe("spec1");
+    expect(messageBody.supplierSpec.priority).toBe(10);
+    expect(messageBody.supplierSpec.billingId).toBe("billing1");
   });
 
   test("processes multiple messages in batch", async () => {
