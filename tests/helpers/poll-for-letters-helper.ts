@@ -3,7 +3,7 @@ import { createValidRequestHeaders } from "tests/constants/request-headers";
 import { SUPPLIER_LETTERS } from "tests/constants/api-constants";
 import { logger } from "./pino-logger";
 
-async function pollForLetterStatus(
+export async function pollForLetterStatus(
   request: APIRequestContext,
   supplierId: string,
   domainId: string,
@@ -47,13 +47,4 @@ async function pollForLetterStatus(
   }
 
   return { letterStatus, statusCode };
-}
-
-export async function pollForLetterInDb(
-  request: APIRequestContext,
-  supplierId: string,
-  domainId: string,
-  baseUrl: string,
-): Promise<{ letterStatus: string | undefined; statusCode: number }> {
-  return pollForLetterStatus(request, supplierId, domainId, baseUrl);
 }
