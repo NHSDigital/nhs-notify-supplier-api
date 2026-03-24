@@ -30,6 +30,7 @@ function createLetter(
     source: "/data-plane/letter-rendering/pdf",
     subject: `client/1/letter-request/${letterId}`,
     billingRef: "specification1",
+    specificationBillingId: "billing1",
   };
 }
 

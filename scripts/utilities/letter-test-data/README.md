@@ -16,6 +16,7 @@ npm run cli -- create-letter \
   --letter-id letter-id \
   --group-id group-id \
   --specification-id specification-id \
+  --billing-id billing-id \
   --status PENDING
 ```
 
@@ -26,6 +27,7 @@ npm run cli -- create-letter-batch \
   --awsAccountId 820178564574 \
   --group-id group-id \
   --specification-id specification-id \
+  --billing-id billing-id \
   --status PENDING \
   --count 10
 ```
