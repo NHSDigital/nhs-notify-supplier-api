@@ -20,7 +20,7 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
   return async (streamEvent: KinesisStreamEvent) => {
     let successCount = 0;
 
-    // The change in the size of the pending letters queue, keyed by supplier
+    // change in the size of the pending letters queue, keyed by supplier
     const deltasBySupplierId = new Map<string, number>();
 
     deps.logger.info({ description: "Received event", streamEvent });
