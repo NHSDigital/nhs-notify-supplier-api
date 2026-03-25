@@ -28,10 +28,10 @@ export type PatchMessageResponseBody = {
   };
 };
 
-export function patchRequestHeaders(): RequestHeaders {
+export function patchRequestHeaders(supplierId?: string): RequestHeaders {
   return {
     headerauth1: process.env.HEADERAUTH || "",
-    "NHSD-Supplier-ID": SUPPLIERID,
+    "NHSD-Supplier-ID": supplierId ?? SUPPLIERID,
     "NHSD-Correlation-ID": "12344",
     "X-Request-ID": "requestId1",
   };

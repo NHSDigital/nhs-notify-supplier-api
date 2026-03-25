@@ -1,11 +1,22 @@
 import { SQSBatchItemFailure, SQSEvent, SQSHandler } from "aws-lambda";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
-
+import {
+  LetterVariant,
+  Supplier,
+  SupplierAllocation,
+  VolumeGroup,
+} from "@nhsdigital/nhs-notify-event-schemas-supplier-config";
 import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import z from "zod";
 import { Unit } from "aws-embedded-metrics";
 import { MetricEntry, MetricStatus, buildEMFObject } from "@internal/helpers";
+import {
+  getSupplierAllocationsForVolumeGroup,
+  getSupplierDetails,
+  getVariantDetails,
+  getVolumeGroupDetails,
+} from "../services/supplier-config";
 import { Deps } from "../config/deps";
 
 type SupplierSpec = {
@@ -50,6 +61,48 @@ function validateType(event: unknown) {
     )
   ) {
     throw new Error(`Unexpected event type: ${env.data.type}`);
+  }
+}
+
+async function getSupplierFromConfig(letterEvent: PreparedEvents, deps: Deps) {
+  try {
+    const variantDetails: LetterVariant = await getVariantDetails(
+      letterEvent.data.letterVariantId,
+      deps,
+    );
+
+    const volumeGroupDetails: VolumeGroup = await getVolumeGroupDetails(
+      variantDetails.volumeGroupId,
+      deps,
+    );
+
+    const supplierAllocations: SupplierAllocation[] =
+      await getSupplierAllocationsForVolumeGroup(
+        variantDetails.volumeGroupId,
+        deps,
+        variantDetails.supplierId,
+      );
+
+    const supplierDetails: Supplier[] = await getSupplierDetails(
+      supplierAllocations,
+      deps,
+    );
+    deps.logger.info({
+      description: "Fetched supplier details for supplier allocations",
+      variantId: letterEvent.data.letterVariantId,
+      volumeGroupId: volumeGroupDetails.id,
+      supplierAllocationIds: supplierAllocations.map((a) => a.id),
+      supplierDetails,
+    });
+
+    return supplierDetails;
+  } catch (error) {
+    deps.logger.error({
+      description: "Error fetching supplier from config",
+      err: error,
+      variantId: letterEvent.data.letterVariantId,
+    });
+    return [];
   }
 }
 
@@ -111,6 +164,7 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
         validateType(letterEvent);
 
         const supplierSpec = getSupplier(letterEvent as PreparedEvents, deps);
+        await getSupplierFromConfig(letterEvent as PreparedEvents, deps);
 
         supplier = supplierSpec.supplierId;
         priority = String(supplierSpec.priority);
