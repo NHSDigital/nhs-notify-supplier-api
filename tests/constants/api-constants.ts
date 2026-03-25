@@ -15,3 +15,4 @@ export const AWS_ACCOUNT_ID = process.env.AWS_ACCOUNT_ID ?? "820178564574";
 export const EVENT_SUBSCRIPTION_TOPIC_ARN =
   process.env.EVENT_SUBSCRIPTION_TOPIC_ARN ??
   `arn:aws:sns:${AWS_REGION}:${AWS_ACCOUNT_ID}:${EVENT_SUBSCRIPTION_TOPIC_NAME}`;
+export const LETTERQUEUE_TABLENAME = `nhs-${envName}-supapi-letter-queue`;

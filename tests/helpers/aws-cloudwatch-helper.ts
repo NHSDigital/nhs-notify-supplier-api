@@ -3,6 +3,7 @@ import {
   FilterLogEventsCommand,
 } from "@aws-sdk/client-cloudwatch-logs";
 import { AWS_REGION, envName } from "tests/constants/api-constants";
+import { logger } from "./pino-logger";
 
 const sleep = (ms: number) =>
   new Promise((resolve) => {
@@ -96,4 +97,23 @@ export async function pollUpsertLetterLogForError(
   throw new Error(
     `Timed out waiting for upsert letter error log in ${logGroupName}`,
   );
+}
+
+export async function supplierIdFromSupplierAllocatorLog(
+  domainId: string,
+): Promise<string> {
+  const message = await pollSupplierAllocatorLogForResolvedSpec(domainId);
+  const supplierAllocatorLog = JSON.parse(message) as {
+    msg?: { supplierSpec?: { supplierId?: string } };
+  };
+  const supplierId = supplierAllocatorLog.msg?.supplierSpec?.supplierId;
+
+  logger.info(
+    `Supplier ${supplierId} allocated for domainId ${domainId} in supplier allocator lambda`,
+  );
+
+  if (!supplierId) {
+    throw new Error("supplierId was not found in supplier allocator log");
+  }
+  return supplierId;
 }
