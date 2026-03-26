@@ -102,6 +102,6 @@ test.describe("Letter Queue Tests", () => {
     expect(letterExists).toBe(true);
     expect(itemCount).toBe(1);
 
-    await pollUpsertLetterLogForWarning(letterId, "Letter already exists");
+    await pollUpsertLetterLogForWarning("Letter already exists", letterId);
   });
 });

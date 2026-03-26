@@ -134,6 +134,6 @@ test.describe("Event Subscription SNS Tests", () => {
     expect(duplicateResponse.MessageId).toBeTruthy();
 
     // poll supplier upsert to check if duplicate event was processed
-    await pollUpsertLetterLogForWarning(domainId, "Letter already exists");
+    await pollUpsertLetterLogForWarning("Letter already exists", domainId);
   });
 });
