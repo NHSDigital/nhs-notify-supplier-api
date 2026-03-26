@@ -18,6 +18,7 @@ import {
   LetterSchemaBase,
   UpdateLetter,
 } from "./types";
+import { LetterAlreadyExistsError } from "./letter-already-exists-error";
 
 export type PagingOptions = Partial<{
   exclusiveStartKey: Record<string, any>;
@@ -62,9 +63,7 @@ export class LetterRepository {
         error instanceof Error &&
         error.name === "ConditionalCheckFailedException"
       ) {
-        throw new Error(
-          `Letter with id ${letter.id} already exists for supplier ${letter.supplierId}`,
-        );
+        throw new LetterAlreadyExistsError(letter.supplierId, letter.id);
       }
       throw error;
     }
