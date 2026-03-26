@@ -9,6 +9,7 @@ import { SUPPLIER_LETTERS, envName } from "tests/constants/api-constants";
 import {
   pollSupplierAllocatorLogForResolvedSpec,
   pollUpsertLetterLogForError,
+  pollUpsertLetterLogForWarning,
 } from "tests/helpers/aws-cloudwatch-helper";
 import { supplierDataSetup } from "tests/helpers/suppliers-setup-helper";
 import { pollForLetterStatus } from "tests/helpers/poll-for-letters-helper";
@@ -133,8 +134,6 @@ test.describe("Event Subscription SNS Tests", () => {
     expect(duplicateResponse.MessageId).toBeTruthy();
 
     // poll supplier upsert to check if duplicate event was processed
-    await pollUpsertLetterLogForError(
-      `Letter with id ${domainId} already exists for supplier ${supplierId}"`,
-    );
+    await pollUpsertLetterLogForWarning(domainId, "Letter already exists");
   });
 });
