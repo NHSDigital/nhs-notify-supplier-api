@@ -76,6 +76,7 @@ async function main() {
           choices: [
             "test-letter-large",
             "test-letter-standard",
+            "test-letter-smoke",
             "none", // none exists to specify letter without pdf for error testing scenarios
           ],
         },
