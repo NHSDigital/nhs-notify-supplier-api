@@ -134,6 +134,7 @@
     "pact-contracts",
     "scripts/utilities/*",
     "tests",
-    "tests/contracts/*"
+    "tests/contracts/*",
+    "scripts/replay-events"
   ]
 }
