@@ -93,7 +93,9 @@ function mapToInsertLetter(
   };
 }
 
-function mapToUpdateLetter(upsertRequest: LetterStatusChangeEvent): UpdateLetter {
+function mapToUpdateLetter(
+  upsertRequest: LetterStatusChangeEvent,
+): UpdateLetter {
   return {
     id: upsertRequest.data.domainId,
     eventId: upsertRequest.id,
