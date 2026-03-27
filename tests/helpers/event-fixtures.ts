@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 export function createPreparedV1Event(overrides: Record<string, unknown> = {}) {
   const now = new Date().toISOString();
 
@@ -36,4 +38,14 @@ export function createPreparedV1Event(overrides: Record<string, unknown> = {}) {
     severitytext: "INFO",
     plane: "data",
   };
+}
+
+export function createPreparedEventBatchWithSameDomainId(
+  overrides: Record<string, unknown> = {},
+) {
+  return [
+    createPreparedV1Event({ id: randomUUID(), ...overrides }),
+    createPreparedV1Event({ id: randomUUID(), ...overrides }),
+    createPreparedV1Event({ id: randomUUID(), ...overrides }),
+  ];
 }

@@ -3,7 +3,7 @@ import { createValidRequestHeaders } from "tests/constants/request-headers";
 import { SUPPLIER_LETTERS } from "tests/constants/api-constants";
 import { logger } from "./pino-logger";
 
-export async function pollForLettersInDb(
+export async function pollForLetterStatus(
   request: APIRequestContext,
   supplierId: string,
   domainId: string,
@@ -41,9 +41,10 @@ export async function pollForLettersInDb(
         `Attempt ${attempt}: Received status code ${statusCode} for domainId: ${domainId}. Retrying after ${RETRY_DELAY_MS / 1000} seconds...`,
       );
       await new Promise((resolve) => {
-        setTimeout(resolve, RETRY_DELAY_MS); // Wait for 10 seconds before the next attempt
+        setTimeout(resolve, RETRY_DELAY_MS);
       });
     }
   }
+
   return { letterStatus, statusCode };
 }

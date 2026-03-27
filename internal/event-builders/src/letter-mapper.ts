@@ -1,7 +1,7 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import eventSchemaPackage from "@nhsdigital/nhs-notify-event-schemas-supplier-api/package.json";
 import { Letter } from "@internal/datastore";
-import { LetterStatusChangeEvent } from "./letter-events";
+import { LetterStatusChangeEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
 
 // eslint-disable-next-line import-x/prefer-default-export
 export function mapLetterToCloudEvent(

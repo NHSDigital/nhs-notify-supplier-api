@@ -3,6 +3,7 @@
     "@aws-sdk/client-sns": "^3.943.0",
     "@aws-sdk/util-dynamodb": "^3.943.0",
     "@internal/datastore": "^0.1.0",
+    "@internal/event-builders": "*",
     "@internal/helpers": "^0.1.0",
     "@nhsdigital/nhs-notify-event-schemas-supplier-api": "*",
     "aws-embedded-metrics": "^4.2.1",

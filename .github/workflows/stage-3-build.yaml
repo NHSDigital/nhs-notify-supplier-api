@@ -182,6 +182,5 @@ jobs:
           environment: ${{ needs.pr-create-dynamic-environment.outputs.environment_name }}
           apimEnv: "internal-dev-sandbox"
           runId: "${{ github.run_id }}"
-          # TODO: CCM-15527: Do not deploy sandbox - new certs do not appear to auth for docker correctly
-          buildSandbox: false
+          buildSandbox: true
           releaseVersion: ${{ github.head_ref || github.ref_name }}

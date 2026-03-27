@@ -1,10 +1,10 @@
 import { SQSBatchItemFailure, SQSEvent, SQSHandler } from "aws-lambda";
 import { PublishCommand } from "@aws-sdk/client-sns";
 import { LetterStatusChangeEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
-import { mapLetterToCloudEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-mapper";
+import { MetricEntry, MetricStatus, buildEMFObject } from "@internal/helpers";
+import { mapLetterToCloudEvent } from "@internal/event-builders/src";
 import { Unit } from "aws-embedded-metrics";
 import pino from "pino";
-import { MetricEntry, MetricStatus, buildEMFObject } from "@internal/helpers";
 import {
   UpdateLetterCommand,
   UpdateLetterCommandSchema,
