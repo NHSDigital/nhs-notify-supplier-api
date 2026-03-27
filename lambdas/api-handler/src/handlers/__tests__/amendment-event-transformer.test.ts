@@ -2,7 +2,7 @@ import { Context, SQSEvent, SQSRecord } from "aws-lambda";
 import { mockDeep } from "jest-mock-extended";
 import pino from "pino";
 import { SNSClient } from "@aws-sdk/client-sns";
-import { mapLetterToCloudEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-mapper";
+import { mapLetterToCloudEvent } from "@internal/event-builders/src";
 import { Letter, LetterRepository } from "@internal/datastore/src";
 import { UpdateLetterCommand } from "../../contracts/letters";
 import { EnvVars } from "../../config/env";
