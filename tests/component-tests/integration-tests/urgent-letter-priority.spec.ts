@@ -6,7 +6,7 @@ import { logger } from "tests/helpers/pino-logger";
 import { createValidRequestHeaders } from "tests/constants/request-headers";
 import getRestApiGatewayBaseUrl from "tests/helpers/aws-gateway-helper";
 import { SUPPLIER_LETTERS } from "tests/constants/api-constants";
-import { pollForLettersInDb } from "tests/helpers/poll-for-letters-helper";
+import { pollForLetterStatus } from "tests/helpers/poll-for-letters-helper";
 import { pollSupplierAllocatorLogForResolvedSpec } from "tests/helpers/aws-cloudwatch-helper";
 import {
   GetLettersResponse,
@@ -61,7 +61,7 @@ test.describe("Urgent Letter Priority Tests", () => {
 
     await Promise.all(
       [...urgencyNineLetterIds, ...urgencyTenLetterIds].map(async (domainId) =>
-        pollForLettersInDb(request, supplier, domainId, baseUrl),
+        pollForLetterStatus(request, supplier, domainId, baseUrl),
       ),
     );
 
