@@ -1,6 +1,6 @@
 import { SQSBatchItemFailure, SQSEvent, SQSHandler } from "aws-lambda";
 import { PublishCommand } from "@aws-sdk/client-sns";
-import { LetterEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
+import { LetterStatusChangeEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
 import { mapLetterToCloudEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-mapper";
 import { Unit } from "aws-embedded-metrics";
 import pino from "pino";
@@ -66,7 +66,7 @@ export default function createTransformAmendmentEventHandler(
 }
 
 function buildSnsCommand(
-  letterEvent: LetterEvent,
+  letterEvent: LetterStatusChangeEvent,
   topicArn: string,
 ): PublishCommand {
   return new PublishCommand({

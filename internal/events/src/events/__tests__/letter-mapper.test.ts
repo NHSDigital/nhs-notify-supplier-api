@@ -1,4 +1,4 @@
-import { $LetterEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
+import { $LetterStatusChangeEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
 import { Letter } from "@internal/datastore";
 import { mapLetterToCloudEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-mapper";
 
@@ -22,7 +22,7 @@ describe("letter-mapper", () => {
     const event = mapLetterToCloudEvent(letter, source);
 
     // Check it conforms to the letter event schema - parse will throw an error if not
-    $LetterEvent.parse(event);
+    $LetterStatusChangeEvent.parse(event);
     expect(event.type).toBe("uk.nhs.notify.supplier-api.letter.PRINTED.v1");
     expect(event.dataschema).toBe(
       `https://notify.nhs.uk/cloudevents/schemas/supplier-api/letter.PRINTED.${event.dataschemaversion}.schema.json`,

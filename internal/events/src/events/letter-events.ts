@@ -9,7 +9,7 @@ import { EventEnvelope } from "@nhsdigital/nhs-notify-event-schemas-supplier-api
 /**
  * A generic schema for parsing any letter status change event
  */
-export const $LetterEvent = EventEnvelope(
+export const $LetterStatusChangeEvent = EventEnvelope(
   "letter",
   "letter",
   $Letter,
@@ -19,7 +19,7 @@ export const $LetterEvent = EventEnvelope(
   title: `letter.* Event`,
   description: `Event schema for generic letter status change`,
 });
-export type LetterEvent = z.infer<typeof $LetterEvent>;
+export type LetterStatusChangeEvent = z.infer<typeof $LetterStatusChangeEvent>;
 
 /**
  * Specialise the generic event schema for a single status
