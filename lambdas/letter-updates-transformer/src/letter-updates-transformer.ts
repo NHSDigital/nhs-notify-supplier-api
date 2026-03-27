@@ -10,11 +10,11 @@ import {
   PublishBatchRequestEntry,
 } from "@aws-sdk/client-sns";
 import { LetterEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
-import { mapLetterToCloudEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-mapper";
+import { MetricEntry, buildEMFObject } from "@internal/helpers";
 import { Letter, LetterSchema } from "@internal/datastore";
+import { mapLetterToCloudEvent } from "@internal/event-builders/src";
 import { Unit } from "aws-embedded-metrics";
 import pino from "pino";
-import { MetricEntry, buildEMFObject } from "@internal/helpers";
 import { Deps } from "./deps";
 
 // SNS PublishBatchCommand supports up to 10 messages per batch
