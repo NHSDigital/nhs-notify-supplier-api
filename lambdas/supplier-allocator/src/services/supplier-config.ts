@@ -154,6 +154,14 @@ export async function getPackSpecification(
 ): Promise<PackSpecification> {
   const packSpec =
     await deps.supplierConfigRepo.getPackSpecification(packSpecId);
+  if (packSpec.status !== "PROD") {
+    deps.logger.error({
+      description: "Pack specification is not active based on status",
+      packSpecId,
+      status: packSpec.status,
+    });
+    throw new Error(`Pack specification with id ${packSpecId} is not active`);
+  }
   return packSpec;
 }
 

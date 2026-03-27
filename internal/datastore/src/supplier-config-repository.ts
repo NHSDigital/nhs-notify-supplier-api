@@ -110,13 +110,18 @@ export class SupplierConfigRepository {
         TableName: this.config.supplierConfigTableName,
         IndexName: "packSpecificationId-index",
         KeyConditionExpression: "#pk = :pk AND #packSpecId = :packSpecId",
+        FilterExpression: "#status = :status AND #approval = :approval",
         ExpressionAttributeNames: {
           "#pk": "PK",
           "#packSpecId": "packSpecificationId",
+          "#status": "status",
+          "#approval": "approval",
         },
         ExpressionAttributeValues: {
           ":pk": "SUPPLIER_PACK",
           ":packSpecId": packSpecId,
+          ":status": "PROD",
+          ":approval": "APPROVED",
         },
       }),
     );

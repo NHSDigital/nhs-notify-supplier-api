@@ -419,7 +419,11 @@ describe("supplier-config service", () => {
 
   describe("getPackSpecification", () => {
     it("returns pack specification when found", async () => {
-      const packSpec = { id: "spec1", name: "Pack Spec 1" } as any;
+      const packSpec = {
+        id: "spec1",
+        name: "Pack Spec 1",
+        status: "PROD",
+      } as any;
       const deps = makeDeps();
       deps.supplierConfigRepo.getPackSpecification = jest
         .fn()
@@ -428,6 +432,29 @@ describe("supplier-config service", () => {
       const result = await getPackSpecification("spec1", deps);
 
       expect(result).toBe(packSpec);
+    });
+
+    it("throws when pack specification is not active based on status", async () => {
+      const packSpec = {
+        id: "spec2",
+        name: "Pack Spec 2",
+        status: "DRAFT",
+      } as any;
+      const deps = makeDeps();
+      deps.supplierConfigRepo.getPackSpecification = jest
+        .fn()
+        .mockResolvedValue(packSpec);
+
+      await expect(getPackSpecification("spec2", deps)).rejects.toThrow(
+        /not active/,
+      );
+      expect(deps.logger.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          description: "Pack specification is not active based on status",
+          packSpecId: "spec2",
+          status: "DRAFT",
+        }),
+      );
     });
   });
 
