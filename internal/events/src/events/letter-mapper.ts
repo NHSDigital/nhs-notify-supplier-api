@@ -25,6 +25,7 @@ export function mapLetterToCloudEvent(
       status: letter.status,
       specificationId: letter.specificationId,
       billingRef: letter.billingRef,
+      specificationBillingId: letter.specificationBillingId,
       supplierId: letter.supplierId,
       groupId: letter.groupId,
       reasonCode: letter.reasonCode,

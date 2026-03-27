@@ -44,6 +44,10 @@ async function main() {
           type: "string",
           demandOption: false,
         },
+        "billing-id": {
+          type: "string",
+          demandOption: false,
+        },
         "ttl-hours": {
           type: "number",
           demandOption: false,
@@ -84,6 +88,7 @@ async function main() {
         const targetFilename = `${letterId}.pdf`;
         const groupId = argv.groupId ?? randomUUID();
         const specificationId = argv.specificationId ?? randomUUID();
+        const billingId = argv.billingId ?? randomUUID();
         const { status } = argv;
         const { environment } = argv;
         const { ttlHours } = argv;
@@ -97,6 +102,7 @@ async function main() {
           targetFilename,
           groupId,
           specificationId,
+          billingId,
           status: status as LetterStatusType,
           letterRepository,
           testLetter,
@@ -128,6 +134,10 @@ async function main() {
           demandOption: false,
         },
         "specification-id": {
+          type: "string",
+          demandOption: false,
+        },
+        "billing-id": {
           type: "string",
           demandOption: false,
         },
@@ -175,6 +185,7 @@ async function main() {
         const { supplierId } = argv;
         const groupId = argv.groupId ?? randomUUID();
         const specificationId = argv.specificationId ?? randomUUID();
+        const billingId = argv.billingId ?? randomUUID();
         const { status } = argv;
         const { environment } = argv;
         const { ttlHours } = argv;
@@ -207,6 +218,7 @@ async function main() {
               supplierId,
               groupId,
               specificationId,
+              billingId,
               status: status as LetterStatusType,
               url,
             }),
