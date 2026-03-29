@@ -68,6 +68,7 @@ test.describe("Urgent Letter Priority Tests", () => {
     await verifyAllocationLogsContainPriority(urgencyNineLetterIds, 9);
     await verifyAllocationLogsContainPriority(urgencyTenLetterIds, 10);
 
+    // TODO CCM-15589 below is failing as still not fetching from letters queue using the queueSortOrder index
     const header = createValidRequestHeaders(supplier);
     const response = await request.get(`${baseUrl}/${SUPPLIER_LETTERS}`, {
       headers: header,
