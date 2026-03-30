@@ -4,6 +4,9 @@
     "nhsuk-frontend": "^10.1.0"
   },
   "description": "",
+  "devDependencies": {
+    "tsx": "^4.20.6"
+  },
   "engines": {},
   "keywords": [],
   "license": "ISC",
