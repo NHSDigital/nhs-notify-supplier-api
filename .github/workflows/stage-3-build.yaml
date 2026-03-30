@@ -54,7 +54,7 @@ jobs:
       - name: "Checkout code"
         uses: actions/checkout@v5
       - name: "Build docs"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/build-docs@3.0.8
+        uses: ./.github/actions/build-docs
         with:
           version: "${{ inputs.version }}"
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
