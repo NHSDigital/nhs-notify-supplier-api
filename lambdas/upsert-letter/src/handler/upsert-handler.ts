@@ -1,5 +1,9 @@
 import { SQSBatchItemFailure, SQSEvent, SQSHandler } from "aws-lambda";
-import { InsertLetter, UpdateLetter } from "@internal/datastore";
+import {
+  InsertLetter,
+  LetterAlreadyExistsError,
+  UpdateLetter,
+} from "@internal/datastore";
 import {
   $LetterRequestPreparedEvent,
   LetterRequestPreparedEvent,
@@ -69,14 +73,26 @@ function getOperationFromType(type: string): UpsertOperation {
           supplierSpec.priority,
           supplierSpec.billingId, // use billingId for now
         );
-        await deps.letterRepo.putLetter(letterToInsert);
+        try {
+          await deps.letterRepo.putLetter(letterToInsert);
 
-        deps.logger.info({
-          description: "Inserted letter",
-          eventId: preparedRequest.id,
-          letterId: letterToInsert.id,
-          supplierId: letterToInsert.supplierId,
-        });
+          deps.logger.info({
+            description: "Inserted letter",
+            eventId: preparedRequest.id,
+            letterId: letterToInsert.id,
+            supplierId: letterToInsert.supplierId,
+          });
+        } catch (error) {
+          if (error instanceof LetterAlreadyExistsError) {
+            deps.logger.warn({
+              description: "Letter already exists",
+              supplierId: letterToInsert.supplierId,
+              letterId: letterToInsert.id,
+            });
+          } else {
+            throw error;
+          }
+        }
       },
     };
   }

@@ -1,6 +1,9 @@
 import { SQSEvent, SQSRecord } from "aws-lambda";
 import pino from "pino";
-import { LetterRepository } from "internal/datastore/src";
+import {
+  LetterAlreadyExistsError,
+  LetterRepository,
+} from "@internal/datastore";
 import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
 import {
@@ -199,7 +202,11 @@ describe("createUpsertLetterHandler", () => {
       putLetter: jest.fn(),
       updateLetterStatus: jest.fn(),
     } as unknown as LetterRepository,
-    logger: { error: jest.fn(), info: jest.fn() } as unknown as pino.Logger,
+    logger: {
+      error: jest.fn(),
+      warn: jest.fn(),
+      info: jest.fn(),
+    } as unknown as pino.Logger,
     env: {
       LETTERS_TABLE_NAME: "LETTERS_TABLE_NAME",
       LETTER_TTL_HOURS: 12_960,
@@ -299,6 +306,31 @@ describe("createUpsertLetterHandler", () => {
       1,
       "Count",
     );
+  });
+
+  it("does not treat a replayed insert as a failure", async () => {
+    const v1message = {
+      letterEvent: createPreparedV1Event(),
+      supplierSpec: {
+        supplierId: "supplier1",
+        specId: "spec1",
+        priority: 10,
+        billingId: "billing1",
+      },
+    };
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("msg2", JSON.stringify(v1message)),
+    ]);
+    (mockedDeps.letterRepo.putLetter as jest.Mock).mockRejectedValue(
+      new LetterAlreadyExistsError("supplier1", "letter1"),
+    );
+
+    const result = await createUpsertLetterHandler(mockedDeps)(
+      evt,
+      {} as any,
+      {} as any,
+    );
+    expect(result!.batchItemFailures).toEqual([]);
   });
 
   test("unknown supplier has metric emitted with 'unknown' supplier dimension", async () => {
