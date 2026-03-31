@@ -14,7 +14,6 @@ import ValidationError from "../errors/validation-error";
 import { mapToGetLettersResponse } from "../mappers/letter-mapper";
 import type { Deps } from "../config/deps";
 
-
 function validateLimitParamOnly(
   queryStringParameters: APIGatewayProxyEventQueryStringParameters | null,
   logger: Logger,

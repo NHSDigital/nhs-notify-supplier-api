@@ -3,31 +3,18 @@ import {
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
-  QueryCommand,
   UpdateCommand,
   UpdateCommandOutput,
 } from "@aws-sdk/lib-dynamodb";
 import { ConditionalCheckFailedException } from "@aws-sdk/client-dynamodb";
 import { Logger } from "pino";
-import { z } from "zod";
-import {
-  InsertLetter,
-  Letter,
-  LetterBase,
-  LetterSchema,
-  LetterSchemaBase,
-  UpdateLetter,
-} from "./types";
+import { InsertLetter, Letter, LetterSchema, UpdateLetter } from "./types";
 import { LetterAlreadyExistsError } from "./letter-already-exists-error";
 
 export type PagingOptions = Partial<{
   exclusiveStartKey: Record<string, any>;
   pageSize: number;
 }>;
-
-const defaultPagingOptions = {
-  pageSize: 50,
-};
 
 export type LetterRepositoryConfig = {
   lettersTableName: string;

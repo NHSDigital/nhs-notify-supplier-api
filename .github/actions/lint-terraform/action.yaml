@@ -11,8 +11,7 @@ runs:
       shell: bash
       run: |
         asdf plugin add terraform || true
-        asdf install terraform
-        asdf current terraform
+        asdf install terraform || true
     - name: "Check Terraform format"
       shell: bash
       run: |

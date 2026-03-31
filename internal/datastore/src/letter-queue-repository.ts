@@ -7,12 +7,7 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 import { Logger } from "pino";
 import z from "zod";
-import {
-  InsertPendingLetter,
-  PendingLetter,
-  PendingLetterBase,
-  PendingLetterSchema,
-} from "./types";
+import { PendingLetter, PendingLetterBase, PendingLetterSchema } from "./types";
 import { LetterAlreadyExistsError } from "./letter-already-exists-error";
 import { LetterDoesNotExistError } from "./letter-does-not-exist-error";
 

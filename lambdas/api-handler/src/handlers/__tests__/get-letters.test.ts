@@ -3,7 +3,6 @@ import type { APIGatewayProxyResult, Context } from "aws-lambda";
 import { mockDeep } from "jest-mock-extended";
 import { S3Client } from "@aws-sdk/client-s3";
 import pino from "pino";
-import { LetterRepository } from "@internal/datastore/src";
 import { processError } from "../../mappers/error-mapper";
 import * as letterService from "../../services/letter-operations";
 
