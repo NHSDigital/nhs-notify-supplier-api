@@ -28,13 +28,10 @@ jest.mock("../../services/letter-operations");
 describe("API Lambda handler", () => {
   const mockedDeps: jest.Mocked<Deps> = {
     s3Client: {} as unknown as S3Client,
-    letterRepo: {} as unknown as LetterRepository,
     logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
     env: {
       SUPPLIER_ID_HEADER: "nhsd-supplier-id",
       APIM_CORRELATION_HEADER: "nhsd-correlation-id",
-      LETTERS_TABLE_NAME: "LETTERS_TABLE_NAME",
-      LETTER_TTL_HOURS: 12_960,
       DOWNLOAD_URL_TTL_SECONDS: 60,
       MAX_LIMIT: 2500,
     } as unknown as EnvVars,
@@ -45,8 +42,8 @@ describe("API Lambda handler", () => {
   });
 
   it("returns 200 OK with basic paginated resources", async () => {
-    const mockedGetLetters = letterService.getLettersForSupplier as jest.Mock;
-    mockedGetLetters.mockResolvedValue([
+    const mockGetPendingLetters = letterService.getPendingLetters as jest.Mock;
+    mockGetPendingLetters.mockResolvedValue([
       {
         id: "l1",
         specificationId: "s1",
@@ -83,11 +80,11 @@ describe("API Lambda handler", () => {
     const getLettersHandler = createGetLettersHandler(mockedDeps);
     const result = await getLettersHandler(event, context, callback);
 
-    expect(mockedGetLetters).toHaveBeenCalledWith(
+    expect(mockGetPendingLetters).toHaveBeenCalledWith(
       "supplier1",
-      "PENDING",
       mockedDeps.env.MAX_LIMIT,
-      mockedDeps.letterRepo,
+      mockedDeps.letterQueueRepo,
+      mockedDeps.env.LETTER_QUEUE_VISIBILITY_TIMEOUT,
     );
 
     const expected = {
@@ -129,8 +126,8 @@ describe("API Lambda handler", () => {
   });
 
   it("returns 200 OK with a valid limit", async () => {
-    const mockedGetLetters = letterService.getLettersForSupplier as jest.Mock;
-    mockedGetLetters.mockResolvedValue([
+    const mockGetPendingLetters = letterService.getPendingLetters as jest.Mock;
+    mockGetPendingLetters.mockResolvedValue([
       {
         id: "l1",
         specificationId: "s1",
@@ -154,11 +151,11 @@ describe("API Lambda handler", () => {
     const getLettersHandler = createGetLettersHandler(mockedDeps);
     const result = await getLettersHandler(event, context, callback);
 
-    expect(mockedGetLetters).toHaveBeenCalledWith(
+    expect(mockGetPendingLetters).toHaveBeenCalledWith(
       "supplier1",
-      "PENDING",
       50,
-      mockedDeps.letterRepo,
+      mockedDeps.letterQueueRepo,
+      mockedDeps.env.LETTER_QUEUE_VISIBILITY_TIMEOUT,
     );
 
     const expected = {

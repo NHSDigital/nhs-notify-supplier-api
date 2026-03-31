@@ -8,11 +8,11 @@ import { unmarshall } from "@aws-sdk/util-dynamodb";
 import { Unit } from "aws-embedded-metrics";
 import { buildEMFObject } from "@internal/helpers";
 import {
-  InsertPendingLetter,
   Letter,
   LetterAlreadyExistsError,
   LetterDoesNotExistError,
   LetterSchema,
+  PendingLetterBase,
 } from "@internal/datastore";
 import { Deps } from "./deps";
 
@@ -184,7 +184,7 @@ function extractNewOrUpdatedLetter(record: DynamoDBRecord): Letter {
   return LetterSchema.parse(unmarshall(newImage as any));
 }
 
-function mapLetterToPendingLetter(letter: Letter): InsertPendingLetter {
+function mapLetterToPendingLetter(letter: Letter): PendingLetterBase {
   return {
     supplierId: letter.supplierId,
     letterId: letter.id,

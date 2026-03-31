@@ -90,12 +90,15 @@ export const PendingLetterSchema = z.object({
   ttl: z.int(),
 });
 
-export type PendingLetter = z.infer<typeof PendingLetterSchema>;
+export const PendingLetterSchemaBase = z.object({
+  supplierId: idRef(SupplierSchema, "id"),
+  letterId: idRef(LetterSchema, "id"),
+  specificationId: z.string(),
+  groupId: z.string(),
+});
 
-export type InsertPendingLetter = Omit<
-  PendingLetter,
-  "ttl" | "queueTimestamp" | "visibilityTimestamp" | "queueSortOrderSk"
->;
+export type PendingLetter = z.infer<typeof PendingLetterSchema>;
+export type PendingLetterBase = z.infer<typeof PendingLetterSchemaBase>;
 
 export const MISchemaBase = z.object({
   id: z.string(),

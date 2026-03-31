@@ -5,7 +5,7 @@ import {
 import { Logger } from "pino";
 import { MetricsLogger, metricScope } from "aws-embedded-metrics";
 import { MetricStatus, emitForSingleSupplier } from "@internal/helpers";
-import { getLettersForSupplier } from "../services/letter-operations";
+import { getPendingLetters } from "../services/letter-operations";
 import { extractCommonIds } from "../utils/common-ids";
 import { requireEnvVar } from "../utils/validation";
 import { ApiErrorDetail } from "../contracts/errors";
@@ -14,8 +14,6 @@ import ValidationError from "../errors/validation-error";
 import { mapToGetLettersResponse } from "../mappers/letter-mapper";
 import type { Deps } from "../config/deps";
 
-// The endpoint should only return pending letters for now
-const status = "PENDING";
 
 function validateLimitParamOnly(
   queryStringParameters: APIGatewayProxyEventQueryStringParameters | null,
@@ -110,11 +108,11 @@ export default function createGetLettersHandler(
           deps.logger,
         );
 
-        const letters = await getLettersForSupplier(
+        const letters = await getPendingLetters(
           supplierId,
-          status,
           limitNumber,
-          deps.letterRepo,
+          deps.letterQueueRepo,
+          deps.env.LETTER_QUEUE_VISIBILITY_TIMEOUT,
         );
 
         const response = mapToGetLettersResponse(letters);
@@ -123,7 +121,6 @@ export default function createGetLettersHandler(
           description: "Pending letters successfully fetched",
           supplierId,
           limitNumber,
-          status,
           lettersCount: letters.length,
           correlationId: commonIds.value.correlationId,
         });
