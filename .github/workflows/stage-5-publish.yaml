@@ -98,7 +98,8 @@ jobs:
 
       - name: "Create release"
         id: create_release
-        uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1        env:
+        uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ inputs.version }}
@@ -109,7 +110,8 @@ jobs:
           prerelease: ${{ inputs.is_version_prerelease == 'true'}}
 
       - name: "Upload jekyll docs release asset"
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1        env:
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: "${{ steps.create_release.outputs.upload_url }}"
@@ -118,7 +120,8 @@ jobs:
           asset_content_type: "application/gzip"
 
       - name: "Upload sdk html docs release asset"
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1        env:
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: "${{ steps.create_release.outputs.upload_url }}"
@@ -127,7 +130,8 @@ jobs:
           asset_content_type: "application/gzip"
 
       - name: "Upload sdk swagger docs release asset"
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1        env:
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: "${{ steps.create_release.outputs.upload_url }}"
@@ -142,7 +146,8 @@ jobs:
         shell: bash
 
       - name: "Upload sdk html release asset"
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1        env:
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: "${{ steps.create_release.outputs.upload_url }}"
@@ -157,7 +162,8 @@ jobs:
         shell: bash
 
       - name: "Upload sdk ts release asset"
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1        env:
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: "${{ steps.create_release.outputs.upload_url }}"
@@ -172,7 +178,8 @@ jobs:
         shell: bash
 
       - name: "Upload sdk python release asset"
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1        env:
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: "${{ steps.create_release.outputs.upload_url }}"
@@ -187,7 +194,8 @@ jobs:
         shell: bash
 
       - name: "Upload sdk csharp release asset"
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1        env:
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: "${{ steps.create_release.outputs.upload_url }}"
@@ -237,7 +245,8 @@ jobs:
         shell: bash
 
       - name: "Upload OAS specification release asset"
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1        env:
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.publish.outputs.upload_url }}
