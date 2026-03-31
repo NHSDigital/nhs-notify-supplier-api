@@ -46,47 +46,39 @@ jobs:
 
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@v5
-
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
       - name: "Get the artefacts 1"
-        uses: actions/download-artifact@v8
-        with:
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8        with:
           path: ./artifacts/jekyll-docs-${{ inputs.version }}
           name: jekyll-docs-${{ inputs.version }}
 
       - name: "Get the artefacts 2"
-        uses: actions/download-artifact@v8
-        with:
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8        with:
           path: ./artifacts/sdk-html-docs-${{ inputs.version }}
           name: sdk-html-docs-${{ inputs.version }}
 
       - name: "Get the artefacts 3"
-        uses: actions/download-artifact@v8
-        with:
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8        with:
           path: ./artifacts/sdk-swagger-docs-${{ inputs.version }}
           name: sdk-swagger-docs-${{ inputs.version }}
 
       - name: "Get the artefacts 4"
-        uses: actions/download-artifact@v8
-        with:
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8        with:
           path: ./artifacts/sdk-html-${{ inputs.version }}
           name: sdk-html-${{ inputs.version }}
 
       - name: "Get the artefacts 5"
-        uses: actions/download-artifact@v8
-        with:
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8        with:
           path: ./artifacts/sdk-ts-${{ inputs.version }}
           name: sdk-ts-${{ inputs.version }}
 
       - name: "Get the artefacts 6"
-        uses: actions/download-artifact@v8
-        with:
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8        with:
           path: ./artifacts/sdk-python-${{ inputs.version }}
           name: sdk-python-${{ inputs.version }}
 
       - name: "Get the artefacts 7"
-        uses: actions/download-artifact@v8
-        with:
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8        with:
           path: ./artifacts/sdk-csharp-${{ inputs.version }}
           name: sdk-csharp-${{ inputs.version }}
 
@@ -99,8 +91,7 @@ jobs:
 
       - name: "Create release"
         id: create_release
-        uses: actions/create-release@v1
-        env:
+        uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ inputs.version }}
@@ -111,8 +102,7 @@ jobs:
           prerelease: ${{ inputs.is_version_prerelease == 'true'}}
 
       - name: "Upload jekyll docs release asset"
-        uses: actions/upload-release-asset@v1
-        env:
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: "${{ steps.create_release.outputs.upload_url }}"
@@ -121,8 +111,7 @@ jobs:
           asset_content_type: "application/gzip"
 
       - name: "Upload sdk html docs release asset"
-        uses: actions/upload-release-asset@v1
-        env:
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: "${{ steps.create_release.outputs.upload_url }}"
@@ -131,8 +120,7 @@ jobs:
           asset_content_type: "application/gzip"
 
       - name: "Upload sdk swagger docs release asset"
-        uses: actions/upload-release-asset@v1
-        env:
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: "${{ steps.create_release.outputs.upload_url }}"
@@ -147,8 +135,7 @@ jobs:
         shell: bash
 
       - name: "Upload sdk html release asset"
-        uses: actions/upload-release-asset@v1
-        env:
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: "${{ steps.create_release.outputs.upload_url }}"
@@ -163,8 +150,7 @@ jobs:
         shell: bash
 
       - name: "Upload sdk ts release asset"
-        uses: actions/upload-release-asset@v1
-        env:
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: "${{ steps.create_release.outputs.upload_url }}"
@@ -179,8 +165,7 @@ jobs:
         shell: bash
 
       - name: "Upload sdk python release asset"
-        uses: actions/upload-release-asset@v1
-        env:
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: "${{ steps.create_release.outputs.upload_url }}"
@@ -195,8 +180,7 @@ jobs:
         shell: bash
 
       - name: "Upload sdk csharp release asset"
-        uses: actions/upload-release-asset@v1
-        env:
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: "${{ steps.create_release.outputs.upload_url }}"
@@ -235,8 +219,7 @@ jobs:
         apimEnv: [internal-dev, int, ref, prod]
     steps:
       - name: "Download OAS spec artifact"
-        uses: actions/download-artifact@v8
-        with:
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8        with:
           path: ./artifacts/api-oas-specification-${{ matrix.apimEnv }}-${{ inputs.version }}
           name: api-oas-specification-${{ matrix.apimEnv }}-${{ inputs.version }}
 
@@ -246,8 +229,7 @@ jobs:
         shell: bash
 
       - name: "Upload OAS specification release asset"
-        uses: actions/upload-release-asset@v1
-        env:
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.publish.outputs.upload_url }}
@@ -293,8 +275,7 @@ jobs:
       contents: read
     steps:
       - name: "Get the artefacts"
-        uses: actions/download-artifact@v8
-        with:
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8        with:
           path: .
           name: sdk-csharp-${{ inputs.version }}
       - run: |
@@ -349,8 +330,7 @@ jobs:
       contents: read
     steps:
       - name: "Get the artefacts"
-        uses: actions/download-artifact@v8
-        with:
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8        with:
           path: .
           name: sdk-ts-${{ inputs.version }}
       - uses: actions/setup-node@v6
@@ -378,8 +358,7 @@ jobs:
         run: echo "secret_exist=${{ secrets.TEAMS_NOTIFICATION_WEBHOOK_URL != '' }}" >> $GITHUB_OUTPUT
       - name: "Notify on publishing packages"
         if: steps.check.outputs.secret_exist == 'true'
-        uses: nhs-england-tools/notify-msteams-action@v1.0.5
-        with:
+        uses: nhs-england-tools/notify-msteams-action@a9fbb9bb41ef7db9c74d4fdc893f12812094fecf # v1.0.5        with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           teams-webhook-url: ${{ secrets.TEAMS_NOTIFICATION_WEBHOOK_URL }}
           message-title: "Notification title"

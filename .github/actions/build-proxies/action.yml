@@ -36,8 +36,7 @@ runs:
   steps:
     - name: Download OAS Spec artifact from workflow
       if: ${{ inputs.isRelease == 'false' }}
-      uses: actions/download-artifact@v4
-      with:
+      uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4      with:
         name: api-oas-specification-${{ inputs.apimEnv }}${{ inputs.version != '' && format('-{0}', inputs.version) || '' }}
         path: ./build
 
@@ -96,8 +95,7 @@ runs:
         echo "APIM_ENV=$APIM_ENV" >> $GITHUB_ENV
 
     - name: Upload OAS Spec
-      uses: actions/upload-artifact@v6
-      with:
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6      with:
         name: ${{ env.APIM_ENV }}-build-output
         path: ./build
 
