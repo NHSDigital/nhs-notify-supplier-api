@@ -55,36 +55,43 @@ runs:
         make build VERSION="${{ inputs.version }}"
 
     - name: Upload html artifact
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6      with:
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      with:
         path: "sdk/html"
         name: sdk-html-${{ inputs.version }}
 
     - name: Upload swagger artifact
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6      with:
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      with:
         path: "sdk/swagger"
         name: sdk-swagger-${{ inputs.version }}
 
     - name: Upload ts artifact
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6      with:
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      with:
         path: "sdk/typescript"
         name: sdk-ts-${{ inputs.version }}
 
     - name: Upload python artifact
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6      with:
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      with:
         path: "sdk/python"
         name: sdk-python-${{ inputs.version }}
 
     - name: Upload csharp artifact
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6      with:
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      with:
         path: "sdk/csharp"
         name: sdk-csharp-${{ inputs.version }}
 
     - name: Upload artifact
-      uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3      with:
+      uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+      with:
         path: "sdk/html/"
         name: sdk-html-docs-${{ inputs.version }}
 
     - name: Upload swagger pages artifact
-      uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3      with:
+      uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+      with:
         path: "sdk/swagger/"
         name: sdk-swagger-docs-${{ inputs.version }}

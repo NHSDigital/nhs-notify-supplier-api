@@ -48,37 +48,44 @@ jobs:
       - name: "Checkout code"
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
       - name: "Get the artefacts 1"
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8        with:
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
           path: ./artifacts/jekyll-docs-${{ inputs.version }}
           name: jekyll-docs-${{ inputs.version }}
 
       - name: "Get the artefacts 2"
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8        with:
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
           path: ./artifacts/sdk-html-docs-${{ inputs.version }}
           name: sdk-html-docs-${{ inputs.version }}
 
       - name: "Get the artefacts 3"
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8        with:
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
           path: ./artifacts/sdk-swagger-docs-${{ inputs.version }}
           name: sdk-swagger-docs-${{ inputs.version }}
 
       - name: "Get the artefacts 4"
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8        with:
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
           path: ./artifacts/sdk-html-${{ inputs.version }}
           name: sdk-html-${{ inputs.version }}
 
       - name: "Get the artefacts 5"
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8        with:
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
           path: ./artifacts/sdk-ts-${{ inputs.version }}
           name: sdk-ts-${{ inputs.version }}
 
       - name: "Get the artefacts 6"
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8        with:
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
           path: ./artifacts/sdk-python-${{ inputs.version }}
           name: sdk-python-${{ inputs.version }}
 
       - name: "Get the artefacts 7"
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8        with:
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
           path: ./artifacts/sdk-csharp-${{ inputs.version }}
           name: sdk-csharp-${{ inputs.version }}
 
@@ -219,7 +226,8 @@ jobs:
         apimEnv: [internal-dev, int, ref, prod]
     steps:
       - name: "Download OAS spec artifact"
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8        with:
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
           path: ./artifacts/api-oas-specification-${{ matrix.apimEnv }}-${{ inputs.version }}
           name: api-oas-specification-${{ matrix.apimEnv }}-${{ inputs.version }}
 
@@ -275,7 +283,8 @@ jobs:
       contents: read
     steps:
       - name: "Get the artefacts"
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8        with:
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
           path: .
           name: sdk-csharp-${{ inputs.version }}
       - run: |
@@ -330,7 +339,8 @@ jobs:
       contents: read
     steps:
       - name: "Get the artefacts"
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8        with:
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
           path: .
           name: sdk-ts-${{ inputs.version }}
       - uses: actions/setup-node@v6

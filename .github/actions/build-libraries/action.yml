@@ -30,25 +30,29 @@ runs:
         make build VERSION="${{ inputs.version }}"
 
     - name: Upload abstractions artifact
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6      with:
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      with:
         path: "src/server/abstractions/bin/Release"
         name: libs-abstractions-${{ inputs.version }}
         include-hidden-files: true
 
     - name: Upload data artifact
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6      with:
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      with:
         path: "src/server/data/bin/Release"
         name: libs-data-${{ inputs.version }}
         include-hidden-files: true
 
     - name: Upload letter artifact
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6      with:
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      with:
         path: "src/server/letter/bin/Release"
         name: libs-letter-${{ inputs.version }}
         include-hidden-files: true
 
     - name: Upload host artifact
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6      with:
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      with:
         path: "src/server/host/bin/Release"
         name: libs-host-${{ inputs.version }}
         include-hidden-files: true
@@ -59,7 +63,8 @@ runs:
       shell: bash
 
     - name: Build and export
-      uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6      with:
+      uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+      with:
         context: src/server
         file: src/server/Dockerfile
         tags: |
@@ -68,6 +73,7 @@ runs:
         outputs: type=docker,dest=${{ runner.temp }}/myimage/myimage.tar
 
     - name: Upload artifact
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6      with:
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      with:
         name: libs-host-docker-${{ inputs.version }}
         path: ${{ runner.temp }}/myimage
