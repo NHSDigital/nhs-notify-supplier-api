@@ -16,7 +16,7 @@ type PendingLetterWithPriority = PendingLetterBase & { priority: number };
 
 function createLetter(
   overrides: Partial<PendingLetterWithPriority> = {},
-): PendingLetterBase {
+): PendingLetterWithPriority {
   return {
     letterId: "letter1",
     supplierId: "supplier1",
