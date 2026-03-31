@@ -30,7 +30,8 @@ runs:
         registry-url: 'https://npm.pkg.github.com'
 
     - name: "Cache node_modules"
-      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4      with:
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+      with:
         path: |
           **/node_modules
         key: ${{ runner.os }}-node-${{ inputs.nodejs_version }}-${{ hashFiles('**/package-lock.json') }}
@@ -66,6 +67,7 @@ runs:
         fi
 
     - name: Upload API OAS specification artifact
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6      with:
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+      with:
         path: "build"
         name: api-oas-specification-${{ inputs.apimEnv }}${{ inputs.version != '' && format('-{0}', inputs.version) || '' }}
