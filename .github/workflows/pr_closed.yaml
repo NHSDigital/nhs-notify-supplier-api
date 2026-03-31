@@ -110,7 +110,8 @@ jobs:
       packages: read
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0      - name: "Repo setup"
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - name: "Repo setup"
         uses: ./.github/actions/node-install
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
