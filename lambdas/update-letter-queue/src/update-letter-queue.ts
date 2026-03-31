@@ -184,7 +184,9 @@ function extractNewOrUpdatedLetter(record: DynamoDBRecord): Letter {
   return LetterSchema.parse(unmarshall(newImage as any));
 }
 
-function mapLetterToPendingLetter(letter: Letter): PendingLetterBase {
+function mapLetterToPendingLetter(
+  letter: Letter,
+): PendingLetterBase & { priority?: number } {
   return {
     supplierId: letter.supplierId,
     letterId: letter.id,
