@@ -11,8 +11,7 @@ runs:
   using: "composite"
   steps:
     - name: Checkout
-      uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6    - uses: actions/setup-node@v4
       with:
         node-version: 22
         registry-url: 'https://npm.pkg.github.com'
@@ -31,29 +30,25 @@ runs:
         make build VERSION="${{ inputs.version }}"
 
     - name: Upload abstractions artifact
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-      with:
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6      with:
         path: "src/server/abstractions/bin/Release"
         name: libs-abstractions-${{ inputs.version }}
         include-hidden-files: true
 
     - name: Upload data artifact
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-      with:
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6      with:
         path: "src/server/data/bin/Release"
         name: libs-data-${{ inputs.version }}
         include-hidden-files: true
 
     - name: Upload letter artifact
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-      with:
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6      with:
         path: "src/server/letter/bin/Release"
         name: libs-letter-${{ inputs.version }}
         include-hidden-files: true
 
     - name: Upload host artifact
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-      with:
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6      with:
         path: "src/server/host/bin/Release"
         name: libs-host-${{ inputs.version }}
         include-hidden-files: true
@@ -64,8 +59,7 @@ runs:
       shell: bash
 
     - name: Build and export
-      uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
-      with:
+      uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6      with:
         context: src/server
         file: src/server/Dockerfile
         tags: |
@@ -74,7 +68,6 @@ runs:
         outputs: type=docker,dest=${{ runner.temp }}/myimage/myimage.tar
 
     - name: Upload artifact
-      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-      with:
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6      with:
         name: libs-host-docker-${{ inputs.version }}
         path: ${{ runner.temp }}/myimage

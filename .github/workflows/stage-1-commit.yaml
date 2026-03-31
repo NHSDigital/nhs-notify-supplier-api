@@ -47,8 +47,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-        with:
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5        with:
           fetch-depth: 0 # Full history is needed to scan all commits
       - name: "Scan secrets"
         uses: NHSDigital/nhs-notify-shared-modules/.github/actions/scan-secrets@3.0.8
@@ -58,8 +57,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-        with:
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5        with:
           fetch-depth: 0 # Full history is needed to compare branches
       - name: "Check file format"
         uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-file-format@3.0.8
@@ -69,8 +67,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-        with:
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5        with:
           fetch-depth: 0 # Full history is needed to compare branches
       - name: "Check Markdown format"
         uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-markdown-format@3.0.8
@@ -83,8 +80,7 @@ jobs:
       contents: write
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-        with:
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5        with:
           fetch-depth: 0 # Full history is needed to compare branches
       - name: "Check to see if Terraform Docs are up-to-date"
         run: |
@@ -104,8 +100,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-        with:
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5        with:
           fetch-depth: 0 # Full history is needed to compare branches
       - name: "Check English usage"
         uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-english-usage@3.0.8
@@ -115,8 +110,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-        with:
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5        with:
           fetch-depth: 0 # Full history is needed to compare branches
       - name: "Check TODO usage"
         uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-todo-usage@3.0.8
@@ -150,8 +144,7 @@ jobs:
     if: needs.detect-terraform-changes.outputs.terraform_changed == 'true'
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-      - name: "Setup ASDF"
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5      - name: "Setup ASDF"
         uses: asdf-vm/actions/setup@1902764435ca0dd2f3388eea723a4f92a4eb8302
       - name: "Lint Terraform"
         uses: NHSDigital/nhs-notify-shared-modules/.github/actions/lint-terraform@3.0.8
@@ -169,7 +162,7 @@ jobs:
   #     NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   #   steps:
   #     - name: "Checkout code"
-  #       uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+  #       uses: actions/checkout@v4
   #     - name: "Setup ASDF"
   #       uses: asdf-vm/actions/setup@b7bcd026f18772e44fe1026d729e1611cc435d47
   #     - name: "Trivy IaC Scan"
@@ -184,7 +177,7 @@ jobs:
   #   timeout-minutes: 10
   #   steps:
   #     - name: "Checkout code"
-  #       uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+  #       uses: actions/checkout@v4
   #     - name: "Setup ASDF"
   #       uses: asdf-vm/actions/setup@b7bcd026f18772e44fe1026d729e1611cc435d47
   #     - name: "Trivy Package Scan"
@@ -198,8 +191,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-      - name: "Count lines of code"
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5      - name: "Count lines of code"
         uses: NHSDigital/nhs-notify-shared-modules/.github/actions/create-lines-of-code-report@3.0.8
         with:
           build_datetime: "${{ inputs.build_datetime }}"
@@ -217,8 +209,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-      - name: "Scan dependencies"
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5      - name: "Scan dependencies"
         uses: NHSDigital/nhs-notify-shared-modules/.github/actions/scan-dependencies@3.0.8
         with:
           build_datetime: "${{ inputs.build_datetime }}"
@@ -239,8 +230,7 @@ jobs:
 
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-        with:
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6        with:
           fetch-depth: 0
 
       - name: Detect package changes and current version
@@ -274,7 +264,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Check schema versions
         run: |
           source scripts/is_valid_increment.sh
@@ -302,10 +292,9 @@ jobs:
       packages: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
       - name: Setup NodeJS
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
-        with:
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4        with:
           node-version: ${{ inputs.nodejs_version }}
           registry-url: "https://npm.pkg.github.com"
 
