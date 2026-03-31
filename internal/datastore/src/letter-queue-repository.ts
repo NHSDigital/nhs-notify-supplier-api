@@ -7,7 +7,12 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 import { Logger } from "pino";
 import z from "zod";
-import { PendingLetter, PendingLetterBase, PendingLetterSchema } from "./types";
+import {
+  InsertPendingLetter,
+  PendingLetter,
+  PendingLetterBase,
+  PendingLetterSchema,
+} from "./types";
 import { LetterAlreadyExistsError } from "./letter-already-exists-error";
 import { LetterDoesNotExistError } from "./letter-does-not-exist-error";
 
@@ -26,7 +31,7 @@ export default class LetterQueueRepository {
   private readonly defaultPriority = 10;
 
   async putLetter(
-    insertPendingLetter: PendingLetterBase & { priority: number },
+    insertPendingLetter: InsertPendingLetter,
   ): Promise<PendingLetter> {
     // needs to be an ISO timestamp as Db sorts alphabetically
     const now = new Date().toISOString();

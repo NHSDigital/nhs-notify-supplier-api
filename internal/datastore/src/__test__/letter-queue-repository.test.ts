@@ -7,16 +7,14 @@ import {
   setupDynamoDBContainer,
 } from "./db";
 import LetterQueueRepository from "../letter-queue-repository";
-import { PendingLetterBase } from "../types";
+import { InsertPendingLetter } from "../types";
 import { LetterAlreadyExistsError } from "../letter-already-exists-error";
 import { createTestLogger } from "./logs";
 import { LetterDoesNotExistError } from "../letter-does-not-exist-error";
 
-type PendingLetterWithPriority = PendingLetterBase & { priority: number };
-
 function createLetter(
-  overrides: Partial<PendingLetterWithPriority> = {},
-): PendingLetterWithPriority {
+  overrides: Partial<InsertPendingLetter> = {},
+): InsertPendingLetter {
   return {
     letterId: "letter1",
     supplierId: "supplier1",

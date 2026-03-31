@@ -99,6 +99,7 @@ export const PendingLetterSchemaBase = z.object({
 
 export type PendingLetter = z.infer<typeof PendingLetterSchema>;
 export type PendingLetterBase = z.infer<typeof PendingLetterSchemaBase>;
+export type InsertPendingLetter = PendingLetterBase & { priority?: number };
 
 export const MISchemaBase = z.object({
   id: z.string(),
