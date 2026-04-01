@@ -7,6 +7,7 @@
     "@aws-sdk/lib-dynamodb": "^3.1008.0",
     "@aws-sdk/s3-request-presigner": "^3.925.0",
     "@internal/datastore": "*",
+    "@internal/event-builders": "*",
     "@internal/helpers": "*",
     "@nhsdigital/nhs-notify-event-schemas-supplier-api": "*",
     "aws-embedded-metrics": "^4.2.1",

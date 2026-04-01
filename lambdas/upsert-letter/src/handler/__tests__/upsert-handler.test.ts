@@ -1,6 +1,9 @@
 import { SQSEvent, SQSRecord } from "aws-lambda";
 import pino from "pino";
-import { LetterRepository } from "internal/datastore/src";
+import {
+  LetterAlreadyExistsError,
+  LetterRepository,
+} from "@internal/datastore";
 import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
 import {
@@ -10,6 +13,12 @@ import {
 import createUpsertLetterHandler from "../upsert-handler";
 import { Deps } from "../../config/deps";
 import { EnvVars } from "../../config/env";
+import packageJson from "../../../package.json";
+
+const renderingSchemaVersion: string =
+  packageJson.dependencies[
+    "@nhsdigital/nhs-notify-event-schemas-letter-rendering"
+  ];
 
 function createSQSEvent(records: SQSRecord[]): SQSEvent {
   return {
@@ -97,6 +106,7 @@ function createSupplierStatusChangeEventWithoutSupplier(
       billingRef: "1y3q9v1zzzz",
       status: "RETURNED",
       supplierId: "",
+      specificationBillingId: "billing1",
     },
     datacontenttype: "application/json",
     dataschema:
@@ -123,9 +133,8 @@ function createPreparedV2Event(
   return {
     ...createPreparedV1Event(overrides),
     type: "uk.nhs.notify.letter-rendering.letter-request.prepared.v2",
-    dataschema:
-      "https://notify.nhs.uk/cloudevents/schemas/letter-rendering/letter-request.prepared.2.0.1.schema.json",
-    dataschemaversion: "2.0.1",
+    dataschema: `https://notify.nhs.uk/cloudevents/schemas/letter-rendering/letter-request.prepared.${renderingSchemaVersion}.schema.json`,
+    dataschemaversion: renderingSchemaVersion,
   };
 }
 
@@ -151,6 +160,7 @@ function createSupplierStatusChangeEvent(
       billingRef: "1y3q9v1zzzz",
       status: "RETURNED",
       supplierId: "supplier1",
+      specificationBillingId: "billing1",
     },
     datacontenttype: "application/json",
     dataschema:
@@ -197,7 +207,11 @@ describe("createUpsertLetterHandler", () => {
       putLetter: jest.fn(),
       updateLetterStatus: jest.fn(),
     } as unknown as LetterRepository,
-    logger: { error: jest.fn(), info: jest.fn() } as unknown as pino.Logger,
+    logger: {
+      error: jest.fn(),
+      warn: jest.fn(),
+      info: jest.fn(),
+    } as unknown as pino.Logger,
     env: {
       LETTERS_TABLE_NAME: "LETTERS_TABLE_NAME",
       LETTER_TTL_HOURS: 12_960,
@@ -211,11 +225,21 @@ describe("createUpsertLetterHandler", () => {
   test("processes all records successfully and returns no batch failures", async () => {
     const v2message = {
       letterEvent: createPreparedV2Event(),
-      supplierSpec: { supplierId: "supplier1", specId: "spec1" },
+      supplierSpec: {
+        supplierId: "supplier1",
+        specId: "spec1",
+        priority: 10,
+        billingId: "billing1",
+      },
     };
     const v1message = {
       letterEvent: createPreparedV1Event(),
-      supplierSpec: { supplierId: "supplier1", specId: "spec1" },
+      supplierSpec: {
+        supplierId: "supplier2",
+        specId: "spec2",
+        priority: 10,
+        billingId: "billing2",
+      },
     };
 
     const evt: SQSEvent = createSQSEvent([
@@ -249,17 +273,21 @@ describe("createUpsertLetterHandler", () => {
     expect(insertedV2Letter.status).toBe("PENDING");
     expect(insertedV2Letter.groupId).toBe("client1campaign1template1");
     expect(insertedV2Letter.source).toBe("/data-plane/letter-rendering/test");
+    expect(insertedV2Letter.specificationBillingId).toBe("billing1");
+    expect(insertedV2Letter.priority).toBe(10);
 
     const insertedV1Letter = (mockedDeps.letterRepo.putLetter as jest.Mock).mock
       .calls[1][0];
     expect(insertedV1Letter.id).toBe("letter1");
-    expect(insertedV1Letter.supplierId).toBe("supplier1");
-    expect(insertedV1Letter.specificationId).toBe("spec1");
-    expect(insertedV1Letter.billingRef).toBe("spec1");
+    expect(insertedV1Letter.supplierId).toBe("supplier2");
+    expect(insertedV1Letter.specificationId).toBe("spec2");
+    expect(insertedV1Letter.billingRef).toBe("spec2");
     expect(insertedV1Letter.url).toBe("s3://letterDataBucket/letter1.pdf");
     expect(insertedV1Letter.status).toBe("PENDING");
     expect(insertedV1Letter.groupId).toBe("client1campaign1template1");
     expect(insertedV1Letter.source).toBe("/data-plane/letter-rendering/test");
+    expect(insertedV1Letter.specificationBillingId).toBe("billing2");
+    expect(insertedV1Letter.priority).toBe(10);
 
     const updatedLetter = (
       mockedDeps.letterRepo.updateLetterStatus as jest.Mock
@@ -275,9 +303,39 @@ describe("createUpsertLetterHandler", () => {
     });
     expect(mockMetrics.putMetric).toHaveBeenCalledWith(
       "MessagesProcessed",
-      3,
+      2,
       "Count",
     );
+    expect(mockMetrics.putMetric).toHaveBeenCalledWith(
+      "MessagesProcessed",
+      1,
+      "Count",
+    );
+  });
+
+  it("does not treat a replayed insert as a failure", async () => {
+    const v1message = {
+      letterEvent: createPreparedV1Event(),
+      supplierSpec: {
+        supplierId: "supplier1",
+        specId: "spec1",
+        priority: 10,
+        billingId: "billing1",
+      },
+    };
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("msg2", JSON.stringify(v1message)),
+    ]);
+    (mockedDeps.letterRepo.putLetter as jest.Mock).mockRejectedValue(
+      new LetterAlreadyExistsError("supplier1", "letter1"),
+    );
+
+    const result = await createUpsertLetterHandler(mockedDeps)(
+      evt,
+      {} as any,
+      {} as any,
+    );
+    expect(result!.batchItemFailures).toEqual([]);
   });
 
   test("unknown supplier has metric emitted with 'unknown' supplier dimension", async () => {
@@ -472,14 +530,24 @@ describe("createUpsertLetterHandler", () => {
         id: "7b9a03ca-342a-4150-b56b-989109c45615",
         domainId: "ok",
       }),
-      supplierSpec: { supplierId: "supplier1", specId: "spec1" },
+      supplierSpec: {
+        supplierId: "supplier1",
+        specId: "spec1",
+        priority: 10,
+        billingId: "billing1",
+      },
     };
     const message2 = {
       letterEvent: createPreparedV2Event({
         id: "7b9a03ca-342a-4150-b56b-989109c45616",
         domainId: "fail",
       }),
-      supplierSpec: { supplierId: "supplier1", specId: "spec1" },
+      supplierSpec: {
+        supplierId: "supplier1",
+        specId: "spec1",
+        priority: 10,
+        billingId: "billing1",
+      },
     };
     const evt: SQSEvent = createSQSEvent([
       createSqsRecord("ok-msg", JSON.stringify(message1)),

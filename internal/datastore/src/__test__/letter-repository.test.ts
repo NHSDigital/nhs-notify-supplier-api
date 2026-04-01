@@ -9,6 +9,7 @@ import {
 import { LetterRepository } from "../letter-repository";
 import { InsertLetter, Letter, UpdateLetter } from "../types";
 import { LogStream, createTestLogger } from "./logs";
+import { LetterAlreadyExistsError } from "../letter-already-exists-error";
 
 function createLetter(
   supplierId: string,
@@ -30,6 +31,7 @@ function createLetter(
     source: "/data-plane/letter-rendering/pdf",
     subject: `client/1/letter-request/${letterId}`,
     billingRef: "specification1",
+    specificationBillingId: "billing1",
   };
 }
 
@@ -148,9 +150,7 @@ describe("LetterRepository", () => {
     await letterRepository.putLetter(createLetter("supplier1", "letter1"));
     await expect(
       letterRepository.putLetter(createLetter("supplier1", "letter1")),
-    ).rejects.toThrow(
-      "Letter with id letter1 already exists for supplier supplier1",
-    );
+    ).rejects.toThrow(LetterAlreadyExistsError);
   });
 
   test("rethrows errors from DynamoDB when creating a letter", async () => {

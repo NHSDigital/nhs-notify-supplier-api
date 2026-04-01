@@ -1,5 +1,9 @@
 import { SQSBatchItemFailure, SQSEvent, SQSHandler } from "aws-lambda";
-import { InsertLetter, UpdateLetter } from "@internal/datastore";
+import {
+  InsertLetter,
+  LetterAlreadyExistsError,
+  UpdateLetter,
+} from "@internal/datastore";
 import {
   $LetterRequestPreparedEvent,
   LetterRequestPreparedEvent,
@@ -16,13 +20,16 @@ import z from "zod";
 import { MetricsLogger, Unit, metricScope } from "aws-embedded-metrics";
 import { Deps } from "../config/deps";
 
-type SupplierSpec = { supplierId: string; specId: string };
 type PreparedEvents = LetterRequestPreparedEventV2 | LetterRequestPreparedEvent;
 
 const SupplierSpecSchema = z.object({
   supplierId: z.string().min(1),
   specId: z.string().min(1),
+  priority: z.int().min(0).max(99).default(10),
+  billingId: z.string().min(1),
 });
+
+type SupplierSpec = z.infer<typeof SupplierSpecSchema>;
 
 const PreparedEventUnionSchema = z.discriminatedUnion("type", [
   $LetterRequestPreparedEventV2,
@@ -63,15 +70,29 @@ function getOperationFromType(type: string): UpsertOperation {
           supplierSpec.supplierId,
           supplierSpec.specId,
           supplierSpec.specId, // use specId for now
+          supplierSpec.priority,
+          supplierSpec.billingId, // use billingId for now
         );
-        await deps.letterRepo.putLetter(letterToInsert);
+        try {
+          await deps.letterRepo.putLetter(letterToInsert);
 
-        deps.logger.info({
-          description: "Inserted letter",
-          eventId: preparedRequest.id,
-          letterId: letterToInsert.id,
-          supplierId: letterToInsert.supplierId,
-        });
+          deps.logger.info({
+            description: "Inserted letter",
+            eventId: preparedRequest.id,
+            letterId: letterToInsert.id,
+            supplierId: letterToInsert.supplierId,
+          });
+        } catch (error) {
+          if (error instanceof LetterAlreadyExistsError) {
+            deps.logger.warn({
+              description: "Letter already exists",
+              supplierId: letterToInsert.supplierId,
+              letterId: letterToInsert.id,
+            });
+          } else {
+            throw error;
+          }
+        }
       },
     };
   }
@@ -99,6 +120,8 @@ function mapToInsertLetter(
   supplier: string,
   spec: string,
   billingRef: string,
+  priority: number,
+  billingId: string,
 ): InsertLetter {
   const now = new Date().toISOString();
   return {
@@ -107,6 +130,7 @@ function mapToInsertLetter(
     supplierId: supplier,
     status: "PENDING",
     specificationId: spec,
+    priority,
     groupId:
       upsertRequest.data.clientId +
       upsertRequest.data.campaignId +
@@ -117,6 +141,7 @@ function mapToInsertLetter(
     createdAt: now,
     updatedAt: now,
     billingRef,
+    specificationBillingId: billingId,
   };
 }
 
@@ -235,7 +260,12 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
           await runUpsert(
             operation,
             letterEvent,
-            supplierSpec ?? { supplierId: "unknown", specId: "unknown" },
+            supplierSpec ?? {
+              supplierId: "unknown",
+              specId: "unknown",
+              priority: 10,
+              billingId: "unknown",
+            },
             deps,
           );
 

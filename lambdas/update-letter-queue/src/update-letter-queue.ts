@@ -6,7 +6,7 @@ import {
 } from "aws-lambda";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import { Unit } from "aws-embedded-metrics";
-import { MetricStatus, buildEMFObject } from "@internal/helpers";
+import { buildEMFObject } from "@internal/helpers";
 import {
   InsertPendingLetter,
   Letter,
@@ -20,6 +20,9 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
   return async (streamEvent: KinesisStreamEvent) => {
     let successCount = 0;
 
+    // The change in the size of the pending letters queue, keyed by supplier
+    const deltasBySupplierId = new Map<string, number>();
+
     deps.logger.info({ description: "Received event", streamEvent });
     deps.logger.info({
       description: "Number of records",
@@ -31,11 +34,15 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
 
       try {
         if (isNewPendingLetter(ddbRecord)) {
-          const added = await addPendingLetterToQueue(ddbRecord, deps);
-          successCount += added ? 1 : 0;
+          const letter = extractNewOrUpdatedLetter(ddbRecord);
+          const added = await addPendingLetterToQueue(letter, deps);
+          updateDeltas(deltasBySupplierId, letter.supplierId, added);
+          successCount += added;
         } else if (isNoLongerPending(ddbRecord)) {
-          const deleted = await deletePendingLetterFromQueue(ddbRecord, deps);
-          successCount += deleted ? 1 : 0;
+          const letter = extractNewOrUpdatedLetter(ddbRecord);
+          const deleted = await deletePendingLetterFromQueue(letter, deps);
+          updateDeltas(deltasBySupplierId, letter.supplierId, -deleted);
+          successCount += deleted;
         }
       } catch (error) {
         deps.logger.error({
@@ -43,7 +50,7 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
           error,
           ddbRecord,
         });
-        recordProcessing(deps, successCount, 1);
+        recordProcessing(deps, successCount, 1, deltasBySupplierId);
         // If we get a failure, return immediately without processing the remaining records. Since we are
         // working with a Kinesis stream, AWS will retry from the point of failure and no records will be lost.
         // See https://docs.aws.amazon.com/lambda/latest/dg/example_serverless_Kinesis_Lambda_batch_item_failures_section.html
@@ -54,16 +61,15 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
         };
       }
     }
-    recordProcessing(deps, successCount, 0);
+    recordProcessing(deps, successCount, 0, deltasBySupplierId);
     return { batchItemFailures: [] };
   };
 }
 
 async function addPendingLetterToQueue(
-  ddbRecord: DynamoDBRecord,
+  letter: Letter,
   deps: Deps,
-): Promise<boolean> {
-  const letter = extractNewLetter(ddbRecord);
+): Promise<number> {
   const pendingLetter = mapLetterToPendingLetter(letter);
 
   try {
@@ -72,7 +78,7 @@ async function addPendingLetterToQueue(
       pendingLetter,
     });
     await deps.letterQueueRepository.putLetter(pendingLetter);
-    return true;
+    return 1;
   } catch (error) {
     if (error instanceof LetterAlreadyExistsError) {
       deps.logger.warn({
@@ -80,17 +86,16 @@ async function addPendingLetterToQueue(
         supplierId: pendingLetter.supplierId,
         letterId: pendingLetter.letterId,
       });
-      return false;
+      return 0;
     }
     throw error;
   }
 }
 
 async function deletePendingLetterFromQueue(
-  ddbRecord: DynamoDBRecord,
+  letter: Letter,
   deps: Deps,
-): Promise<boolean> {
-  const letter = extractNewLetter(ddbRecord);
+): Promise<number> {
   try {
     deps.logger.info({
       description: "Deleting pending letter",
@@ -98,7 +103,7 @@ async function deletePendingLetterFromQueue(
       letterId: letter.id,
     });
     await deps.letterQueueRepository.deleteLetter(letter.supplierId, letter.id);
-    return true;
+    return 1;
   } catch (error) {
     if (error instanceof LetterDoesNotExistError) {
       deps.logger.warn({
@@ -106,7 +111,7 @@ async function deletePendingLetterFromQueue(
         supplierId: letter.supplierId,
         letterId: letter.id,
       });
-      return false;
+      return 0;
     }
     throw error;
   }
@@ -116,6 +121,7 @@ function recordProcessing(
   deps: Deps,
   successCount: number,
   failureCount: number,
+  deltasBySupplierId: Map<string, number>,
 ) {
   deps.logger.info({
     description: "Processing complete",
@@ -124,8 +130,9 @@ function recordProcessing(
     totalProcessed: successCount + failureCount,
   });
 
-  deps.logger.info(buildMetric(MetricStatus.Success, successCount));
-  deps.logger.info(buildMetric(MetricStatus.Failure, failureCount));
+  for (const [supplierId, delta] of deltasBySupplierId) {
+    deps.logger.info(buildMetric(supplierId, delta));
+  }
 }
 
 function isNewPendingLetter(record: DynamoDBRecord): boolean {
@@ -172,8 +179,8 @@ function extractPayload(
   }
 }
 
-function extractNewLetter(record: DynamoDBRecord): Letter {
-  const newImage = record.dynamodb?.NewImage!;
+function extractNewOrUpdatedLetter(record: DynamoDBRecord): Letter {
+  const newImage = record.dynamodb?.NewImage;
   return LetterSchema.parse(unmarshall(newImage as any));
 }
 
@@ -183,17 +190,27 @@ function mapLetterToPendingLetter(letter: Letter): InsertPendingLetter {
     letterId: letter.id,
     specificationId: letter.specificationId,
     groupId: letter.groupId,
+    priority: letter.priority,
   };
 }
 
-function buildMetric(status: MetricStatus, count: number) {
+function buildMetric(supplierId: string, delta: number) {
   return buildEMFObject(
     "update-letter-queue",
-    {},
+    { supplier: supplierId },
     {
-      key: status,
-      value: count,
+      key: "QueueDelta",
+      value: delta,
       unit: Unit.Count,
     },
   );
+}
+
+function updateDeltas(
+  deltasBySupplierId: Map<string, number>,
+  supplierId: string,
+  delta: number,
+): void {
+  const current = deltasBySupplierId.get(supplierId) ?? 0;
+  deltasBySupplierId.set(supplierId, current + delta);
 }

@@ -6,11 +6,13 @@ import {
   QueryCommand,
 } from "@aws-sdk/lib-dynamodb";
 import {
+  LETTERQUEUE_TABLENAME,
   LETTERSTABLENAME,
   SUPPLIERTABLENAME,
   envName,
 } from "../constants/api-constants";
 import { createSupplierData, runCreateLetter } from "./pnpm-helpers";
+import { logger } from "./pino-logger";
 
 const ddb = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(ddb);
@@ -147,7 +149,7 @@ export async function checkSupplierExists(
     const { Items } = await docClient.send(new QueryCommand(params));
     return Items !== undefined && Items.length > 0;
   } catch (error) {
-    console.error("Error checking supplier existence:", error);
+    logger.error({ supplierId, error }, "Supplier existence check failed");
     return false;
   }
 }
@@ -161,4 +163,51 @@ export async function createSupplierEntry(supplierId: string): Promise<void> {
     environment: envName,
     status: "ENABLED",
   });
+}
+
+export async function checkLetterQueueTable(
+  supplierId: string,
+  letterId: string,
+  checkForDeletedLetters?: boolean,
+): Promise<[boolean, number?]> {
+  const MAX_ATTEMPTS = 5;
+  const RETRY_DELAY_MS = 10_000;
+  try {
+    const params = {
+      TableName: LETTERQUEUE_TABLENAME,
+      KeyConditionExpression:
+        "supplierId = :supplierId AND letterId = :letterId",
+      ExpressionAttributeValues: {
+        ":supplierId": supplierId,
+        ":letterId": letterId,
+      },
+    };
+
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      const { Items } = await docClient.send(new QueryCommand(params));
+      if (!checkForDeletedLetters && Items !== undefined && Items.length > 0) {
+        logger.info(
+          `Queried letter queue table to verify existence for letterId ${letterId} and found items, confirming existence`,
+        );
+        return [true, Items.length];
+      }
+      if (checkForDeletedLetters && Items !== undefined && Items.length === 0) {
+        logger.info(
+          `Queried letter queue table to verify deletion for letterId ${letterId} and found no items, confirming deletion`,
+        );
+        return [true];
+      }
+      if (attempt < MAX_ATTEMPTS) {
+        logger.info(
+          `Retrying letter queue query for supplierId ${supplierId} and letterId ${letterId} in ${RETRY_DELAY_MS}ms`,
+        );
+        await delay(RETRY_DELAY_MS);
+      }
+    }
+
+    return [false];
+  } catch (error) {
+    logger.error({ supplierId, letterId, error }, "Letter queue query failed");
+    return [false];
+  }
 }

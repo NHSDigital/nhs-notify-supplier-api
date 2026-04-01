@@ -136,11 +136,11 @@ variable "eventpub_control_plane_bus_arn" {
 }
 
 variable "letter_variant_map" {
-  type = map(object({ supplierId = string, specId = string }))
+  type = map(object({ supplierId = string, specId = string, priority = number, billingId = string }))
   default = {
-    "lv1" = { supplierId = "supplier1", specId = "spec1" },
-    "lv2" = { supplierId = "supplier1", specId = "spec2" },
-    "lv3" = { supplierId = "supplier2", specId = "spec3" }
+    "lv1" = { supplierId = "supplier1", specId = "spec1", priority = 10, billingId = "billing1" },
+    "lv2" = { supplierId = "supplier1", specId = "spec2", priority = 10, billingId = "billing1" },
+    "lv3" = { supplierId = "supplier2", specId = "spec3", priority = 10, billingId = "billing1" }
   }
 }
 

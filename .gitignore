@@ -36,6 +36,7 @@ dist
 
 # ignore PACTS
 .pacts
+pact-contracts/pacts/
 
 # python venvs
 .venv/
