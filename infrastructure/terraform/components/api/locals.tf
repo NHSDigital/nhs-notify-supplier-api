@@ -26,7 +26,7 @@ locals {
     LETTER_TTL_HOURS                = 12960, # 18 months * 30 days * 24 hours
     LETTER_QUEUE_TABLE_NAME         = aws_dynamodb_table.letter_queue.name,
     LETTER_QUEUE_TTL_HOURS          = 168  # 7 days * 24 hours
-    LETTER_QUEUE_VISIBILITY_TIMEOUT = 600, # 10 minutes * 60 seconds
+    LETTER_QUEUE_VISIBILITY_TIMEOUT = 300, # 5 minutes * 60 seconds
     LETTERS_TABLE_NAME              = aws_dynamodb_table.letters.name,
     MI_TABLE_NAME                   = aws_dynamodb_table.mi.name,
     MI_TTL_HOURS                    = 2160 # 90 days * 24 hours
