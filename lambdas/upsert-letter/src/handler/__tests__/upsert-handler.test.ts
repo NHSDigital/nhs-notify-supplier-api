@@ -13,6 +13,12 @@ import {
 import createUpsertLetterHandler from "../upsert-handler";
 import { Deps } from "../../config/deps";
 import { EnvVars } from "../../config/env";
+import packageJson from "../../../package.json";
+
+const renderingSchemaVersion: string =
+  packageJson.dependencies[
+    "@nhsdigital/nhs-notify-event-schemas-letter-rendering"
+  ];
 
 function createSQSEvent(records: SQSRecord[]): SQSEvent {
   return {
@@ -127,9 +133,8 @@ function createPreparedV2Event(
   return {
     ...createPreparedV1Event(overrides),
     type: "uk.nhs.notify.letter-rendering.letter-request.prepared.v2",
-    dataschema:
-      "https://notify.nhs.uk/cloudevents/schemas/letter-rendering/letter-request.prepared.2.0.1.schema.json",
-    dataschemaversion: "2.0.1",
+    dataschema: `https://notify.nhs.uk/cloudevents/schemas/letter-rendering/letter-request.prepared.${renderingSchemaVersion}.schema.json`,
+    dataschemaversion: renderingSchemaVersion,
   };
 }
 
