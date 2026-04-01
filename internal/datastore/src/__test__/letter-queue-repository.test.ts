@@ -174,21 +174,27 @@ describe("LetterQueueRepository", () => {
     });
 
     it("returns letters in timestamp order", async () => {
+      jest.useFakeTimers().setSystemTime(new Date());
       await letterQueueRepository.putLetter(
         createLetter({ letterId: "first-letter" }),
       );
+      jest.advanceTimersByTime(1);
       await letterQueueRepository.putLetter(
         createLetter({ letterId: "second-letter" }),
       );
+      jest.advanceTimersByTime(1);
       await letterQueueRepository.putLetter(
         createLetter({ letterId: "third-letter" }),
       );
+      jest.advanceTimersByTime(1);
       await letterQueueRepository.putLetter(
         createLetter({ letterId: "fourth-letter" }),
       );
+      jest.advanceTimersByTime(1);
       await letterQueueRepository.putLetter(
         createLetter({ letterId: "fifth-letter" }),
       );
+      jest.advanceTimersByTime(1);
 
       const letters = await letterQueueRepository.getLetters("supplier1", 5);
 
@@ -217,6 +223,80 @@ describe("LetterQueueRepository", () => {
 
       expect(letters).toHaveLength(3);
       expect(letters[2].letterId).toBe("third-letter");
+    });
+
+    it("applies the limit after filtering on supplier", async () => {
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "first-letter" }),
+      );
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "second-letter", supplierId: "supplier2" }),
+      );
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "third-letter" }),
+      );
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "fourth-letter" }),
+      );
+
+      const letters = await letterQueueRepository.getLetters("supplier1", 3);
+
+      expect(letters).toHaveLength(3);
+      expect(letters[2].letterId).toBe("fourth-letter");
+    });
+
+    it("applies the limit after filtering on visibilityTimestamp", async () => {
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "first-letter" }),
+      );
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "second-letter" }),
+      );
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "third-letter" }),
+      );
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "fourth-letter" }),
+      );
+      await letterQueueRepository.updateVisibilityTimestamp(
+        createLetter({ letterId: "second-letter" }),
+        new Date(Date.now() + 600_000),
+      );
+
+      const letters = await letterQueueRepository.getLetters("supplier1", 3);
+
+      expect(letters).toHaveLength(3);
+      expect(letters[2].letterId).toBe("fourth-letter");
+    });
+
+    it("paginates through multiple DynamoDB pages to reach the limit", async () => {
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "first-letter" }),
+      );
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "second-letter" }),
+      );
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "third-letter" }),
+      );
+
+      const pagedRepository = new LetterQueueRepository(db.docClient, logger, {
+        ...db.config,
+        queryPageSize: 1,
+      });
+
+      const letters = await pagedRepository.getLetters("supplier1", 3);
+
+      expect(letters).toHaveLength(3);
+      expect(letters[0].letterId).toBe("first-letter");
+      expect(letters[1].letterId).toBe("second-letter");
+      expect(letters[2].letterId).toBe("third-letter");
+    });
+
+    it("returns an empty array if no items found", async () => {
+      const letters = await letterQueueRepository.getLetters("supplier1", 3);
+
+      expect(letters).toHaveLength(0);
     });
   });
 

@@ -49,10 +49,6 @@ afterEach(async () => {
   jest.useRealTimers();
 });
 
-afterEach(async () => {
-  jest.useRealTimers();
-});
-
 describe("getPendingLetters", () => {
   beforeEach(() => {
     jest.clearAllMocks();

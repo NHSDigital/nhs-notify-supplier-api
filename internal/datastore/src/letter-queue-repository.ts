@@ -19,6 +19,8 @@ import { LetterDoesNotExistError } from "./letter-does-not-exist-error";
 type LetterQueueRepositoryConfig = {
   letterQueueTableName: string;
   letterQueueTtlHours: number;
+  /** Maximum number of items to fetch per DynamoDB page. Defaults to 100. */
+  queryPageSize?: number;
 };
 
 export default class LetterQueueRepository {
@@ -95,21 +97,34 @@ export default class LetterQueueRepository {
     supplierId: string,
     limit: number,
   ): Promise<PendingLetter[]> {
-    const result = await this.ddbClient.send(
-      new QueryCommand({
-        TableName: this.config.letterQueueTableName,
-        IndexName: "queueSortOrder-index",
-        KeyConditionExpression: "supplierId = :supplierId",
-        FilterExpression: "visibilityTimestamp < :now",
-        ExpressionAttributeValues: {
-          ":supplierId": supplierId,
-          ":now": new Date().toISOString(),
-        },
-        Limit: limit,
-      }),
-    );
+    const letters: PendingLetter[] = [];
+    let lastEvaluatedKey: Record<string, unknown> | undefined;
 
-    return z.array(PendingLetterSchema).parse(result.Items);
+    do {
+      const result = await this.ddbClient.send(
+        new QueryCommand({
+          TableName: this.config.letterQueueTableName,
+          IndexName: "queueSortOrder-index",
+          KeyConditionExpression: "supplierId = :supplierId",
+          FilterExpression: "visibilityTimestamp < :now",
+          ExpressionAttributeValues: {
+            ":supplierId": supplierId,
+            ":now": new Date().toISOString(),
+          },
+          // 1000 is a compromise - a smaller number might result in a lot of round trips, a larger one might
+          // entail fetching and then throwing away a lot of data
+          Limit: this.config.queryPageSize ?? 1000,
+          ExclusiveStartKey: lastEvaluatedKey,
+        }),
+      );
+
+      const page = z.array(PendingLetterSchema).parse(result.Items);
+      letters.push(...page);
+
+      lastEvaluatedKey = result.LastEvaluatedKey;
+    } while (lastEvaluatedKey !== undefined && letters.length < limit);
+
+    return letters.slice(0, limit);
   }
 
   async updateVisibilityTimestamp(
