@@ -9,7 +9,7 @@ import {
 import { LetterRepository } from "../letter-repository";
 import { InsertLetter, Letter, UpdateLetter } from "../types";
 import { LogStream, createTestLogger } from "./logs";
-import { LetterAlreadyExistsError } from "../letter-already-exists-error";
+import LetterAlreadyExistsError from "../errors/letter-already-exists-error";
 
 function createLetter(
   supplierId: string,
