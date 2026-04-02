@@ -19,4 +19,5 @@ runs:
         export PROXY_NAME=nhs-notify-supplier--internal-dev--nhs-notify-supplier
         export API_ENVIRONMENT=internal-dev
         export NON_PROD_PRIVATE_KEY="${GITHUB_WORKSPACE}/internal-dev-test-1.pem"
+        export STATUS_ENDPOINT_API_KEY="${STATUS_ENDPOINT_API_KEY}"
         make .internal-dev-test

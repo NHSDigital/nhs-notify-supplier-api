@@ -62,3 +62,7 @@ def bearer_token(authentication_cache):
     else:
         url = f"https://{environment}.api.service.nhs.uk/nhs-notify-supplier"
     return authentication_cache.generate_authentication(environment, url)
+
+@pytest.fixture(scope='session')
+def status_endpoint_api_key():
+    return os.environ["STATUS_ENDPOINT_API_KEY"]
