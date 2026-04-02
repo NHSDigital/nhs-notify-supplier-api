@@ -59,8 +59,8 @@ jobs:
           version: "${{ inputs.version }}"
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  artefact-oas-spec:
-    name: "Build OAS spec (${{ matrix.apimEnv }})"
+  artefact-oas-spec-main:
+    name: "Build OAS spec for main"
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     needs: [artefact-jekyll-docs]
@@ -76,6 +76,24 @@ jobs:
         with:
           version: "${{ inputs.version }}"
           apimEnv: "${{ matrix.apimEnv }}"
+          buildSandbox: false
+          nodejs_version: ${{ inputs.nodejs_version }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  artefact-oas-spec-pr:
+    name: "Build OAS spec for PR"
+    if: (inputs.pr_number != '')
+    runs-on: ubuntu-latest
+    needs: [artefact-jekyll-docs]
+    timeout-minutes: 10
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+      - name: "Build OAS spec"
+        uses: ./.github/actions/build-oas-spec
+        with:
+          version: "${{ inputs.version }}"
+          apimEnv: internal-dev-pr
           buildSandbox: false
           nodejs_version: ${{ inputs.nodejs_version }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -97,9 +115,18 @@ jobs:
           nodejs_version: ${{ inputs.nodejs_version }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  artefact-oas-spec:
+    name: "OAS spec ready"
+    runs-on: ubuntu-latest
+    needs: [artefact-oas-spec-pr, artefact-oas-spec-main]
+    if: always() && !failure()
+    steps:
+      - run: echo "OAS spec build complete"
+
   artefact-sdks:
     name: "Build SDKs"
     runs-on: ubuntu-latest
+    if: always() && !failure()
     needs: [artefact-oas-spec]
     timeout-minutes: 10
     steps:
@@ -165,8 +192,8 @@ jobs:
   artefact-proxies:
     name: "Build proxies"
     runs-on: ubuntu-latest
-    if: inputs.deploy_proxy == 'true'
-    needs: [artefact-oas-spec-sandbox, pr-create-dynamic-environment]
+    if: always() && !failure() && inputs.deploy_proxy == 'true'
+    needs: [artefact-oas-spec, pr-create-dynamic-environment]
     timeout-minutes: 10
     env:
       PROXYGEN_API_NAME: nhs-notify-supplier
@@ -180,7 +207,7 @@ jobs:
         with:
           version: "${{ inputs.version }}"
           environment: ${{ needs.pr-create-dynamic-environment.outputs.environment_name }}
-          apimEnv: "internal-dev-sandbox"
+          apimEnv: "${{ inputs.pr_number == '' && 'internal-dev' || 'internal-dev-pr' }}"
           runId: "${{ github.run_id }}"
           buildSandbox: true
           releaseVersion: ${{ github.head_ref || github.ref_name }}

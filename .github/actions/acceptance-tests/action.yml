@@ -23,28 +23,17 @@ runs:
   using: "composite"
 
   steps:
-    - name: Fetch terraform output
-      uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+
+    - name: Run component tests
+      if: ${{ inputs.testType != 'e2e' }}
+      uses: ./.github/actions/acceptance-tests-component
       with:
-        name: terraform-output-${{ inputs.targetComponent }}
+        testType: ${{ inputs.testType }}
+        targetEnvironment: ${{ inputs.targetEnvironment }}
+        targetComponent: ${{ inputs.targetComponent }}
 
-    - name: Get Node version
-      id: nodejs_version
-      shell: bash
-      run: |
-        echo "nodejs_version=$(grep "^nodejs\s" .tool-versions | cut -f2 -d' ')" >> $GITHUB_OUTPUT
-
-    - name: "Repo setup"
-      uses: ./.github/actions/node-install
+    - name: Run e2e tests
+      if: ${{ inputs.testType == 'e2e' && inputs.targetEnvironment == 'main' }}
+      uses: ./.github/actions/acceptance-tests-e2e
       with:
-        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
-
-    - name: "Set PR NUMBER"
-      shell: bash
-      run: |
-          echo "PR_NUMBER=${{ inputs.targetEnvironment }}" >> $GITHUB_ENV
-
-    - name: Run test - ${{ inputs.testType }}
-      shell: bash
-      run: |
-        make test-${{ inputs.testType }}
+        targetEnvironment: ${{ inputs.targetEnvironment }}
