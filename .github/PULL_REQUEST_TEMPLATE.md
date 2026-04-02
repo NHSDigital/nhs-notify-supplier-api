@@ -33,7 +33,6 @@
 
 - [ ] If I have added a new resource (SQS, Lambda, Gateway, DDB table, etc), I have created the appropriate alarms
 
-
 ---
 
 ## Sensitive Information Declaration
