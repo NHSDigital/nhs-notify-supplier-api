@@ -42,23 +42,22 @@ export class MIRepository {
   }
 
     async getMI(miId: string, supplierId: string): Promise<MI> {
-
-    const result = await this.ddbClient.send(
-      new GetCommand({
-        TableName: this.config.miTableName,
-        Key: {
-          id: miId,
-          supplierId,
-        },
-      }),
-    );
-
-    if (!result.Item) {
-      throw new Error(
-        `Management Information with id ${miId} not found for supplier ${supplierId}`,
+      const result = await this.ddbClient.send(
+        new GetCommand({
+          TableName: this.config.miTableName,
+          Key: {
+            id: miId,
+            supplierId,
+          },
+        }),
       );
-    }
 
-    return MISchema.parse(result.Item);
+      if (!result.Item) {
+        throw new Error(
+          `Management Information with id ${miId} not found for supplier ${supplierId}`,
+        );
+      }
+
+      return MISchema.parse(result.Item);
   }
 }
