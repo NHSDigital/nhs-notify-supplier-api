@@ -1,4 +1,8 @@
-import { DynamoDBDocumentClient, PutCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
+import { 
+  DynamoDBDocumentClient, 
+  GetCommand, 
+  PutCommand, 
+} from "@aws-sdk/lib-dynamodb";
 import { Logger } from "pino";
 import { randomUUID } from "node:crypto";
 import { MI, MISchema } from "./types";
@@ -37,10 +41,7 @@ export class MIRepository {
     return MISchema.parse(miDb);
   }
 
-    async getMI(
-    miId: string,
-    supplierId: string,
-  ): Promise<MI> {
+    async getMI(miId: string, supplierId: string): Promise<MI> {
 
     const result = await this.ddbClient.send(
       new GetCommand({
@@ -60,5 +61,4 @@ export class MIRepository {
 
     return MISchema.parse(result.Item);
   }
-
 }

@@ -92,7 +92,11 @@ describe("MiRepository", () => {
         }),
       );
 
-      const fetchedMi = await miRepository.getMI(persistedMi.id, persistedMi.supplierId);
+      const fetchedMi = await miRepository.getMI(
+        persistedMi.id, 
+        persistedMi.supplierId,
+      );
+
       expect(fetchedMi).toEqual(
         expect.objectContaining({
           id: expect.any(String),
@@ -100,8 +104,8 @@ describe("MiRepository", () => {
           updatedAt: "2020-02-01T00:00:00.000Z",
           ttl: 1_580_518_800, // 2020-02-01T00:01:00.000Z, seconds since epoch
           ...mi,
-        })
-      )
+        }),
+      );
     });
   });
 
