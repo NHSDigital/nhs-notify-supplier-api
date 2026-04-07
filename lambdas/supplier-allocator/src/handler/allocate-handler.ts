@@ -19,6 +19,7 @@ import {
   formatGroupId,
 } from "@internal/helpers";
 import {
+  filterPacksForLetter,
   getPackSpecification,
   getPreferredSupplierPacks,
   getSupplierAllocationsForVolumeGroup,
@@ -100,12 +101,14 @@ async function getSupplierFromConfig(letterEvent: PreparedEvents, deps: Deps) {
       deps,
     );
 
+    const eligiblePacks: string[] = await filterPacksForLetter(
+      letterEvent,
+      variantDetails.packSpecificationIds,
+      deps,
+    );
+
     const preferredSupplierPacks: SupplierPack[] =
-      await getPreferredSupplierPacks(
-        variantDetails.packSpecificationIds,
-        allocatedSuppliers,
-        deps,
-      );
+      await getPreferredSupplierPacks(eligiblePacks, allocatedSuppliers, deps);
 
     const preferredPack: PackSpecification = await getPackSpecification(
       preferredSupplierPacks[0].packSpecificationId,
@@ -124,7 +127,8 @@ async function getSupplierFromConfig(letterEvent: PreparedEvents, deps: Deps) {
       volumeGroupId: volumeGroupDetails.id,
       supplierAllocationIds: supplierAllocations.map((a) => a.id),
       allocatedSuppliers,
-      eligiblePacks: variantDetails.packSpecificationIds,
+      variantPacks: variantDetails.packSpecificationIds,
+      eligiblePacks,
       preferredSupplierPacks,
       preferredPack,
       suppliersForPack,
