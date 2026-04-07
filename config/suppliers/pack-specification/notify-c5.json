@@ -1,0 +1,48 @@
+{
+  "assembly": {
+    "duplex": true,
+    "envelopeId": "economy-c4",
+    "paper": {
+      "colour": "WHITE",
+      "id": "paper-std-white-80",
+      "name": "Standard White 80gsm",
+      "recycled": true,
+      "size": "A4",
+      "weightGSM": 80
+    },
+    "printColour": "BLACK"
+  },
+  "billingId": "notify-c5",
+  "constraints": {
+    "blackCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 20
+    },
+    "deliveryDays": {
+      "operator": "LESS_THAN",
+      "value": 3
+    },
+    "sheets": {
+      "operator": "LESS_THAN",
+      "value": 5
+    },
+    "sides": {
+      "operator": "LESS_THAN",
+      "value": 10
+    }
+  },
+  "createdAt": "2026-01-12T00:00:00.000Z",
+  "description": "C5 pack",
+  "id": "notify-c5",
+  "name": "Notify standard",
+  "postage": {
+    "deliveryDays": 3,
+    "id": "economy",
+    "maxThicknessMm": 5,
+    "maxWeightGrams": 100,
+    "size": "STANDARD"
+  },
+  "status": "PROD",
+  "updatedAt": "2026-01-12T00:00:00.000Z",
+  "version": 1
+}

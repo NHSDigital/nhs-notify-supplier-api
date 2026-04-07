@@ -104,6 +104,10 @@ while [[ $# -gt 0 ]]; do
       version="$2"
       shift 2
       ;;
+    --tableName) # Table name (optional)
+      tableName="$2"
+      shift 2
+      ;;
     *)
     echo "[ERROR] Unknown argument: $1"
       exit 1
@@ -202,6 +206,10 @@ if [[ -z "$version" ]]; then
   version=""
 fi
 
+if [{ -z "$tableName" }]; then
+  tableName=""
+fi
+
 echo "==================== Workflow Dispatch Parameters ===================="
 echo "  infraRepoName:      $infraRepoName"
 echo "  releaseVersion:     $releaseVersion"
@@ -221,6 +229,7 @@ echo "  apimEnvironment:     $apimEnvironment"
 echo "  boundedContext:       $boundedContext"
 echo "  targetDomain:         $targetDomain"
 echo "  version:              $version"
+echo "  tableName:            $tableName"
 
 DISPATCH_EVENT=$(jq -ncM \
   --arg infraRepoName "$infraRepoName" \
@@ -240,6 +249,7 @@ DISPATCH_EVENT=$(jq -ncM \
   --arg boundedContext "$boundedContext" \
   --arg targetDomain "$targetDomain" \
   --arg version "$version" \
+  --arg tableName "$tableName" \
   '{
     "ref": "'"$internalRef"'",
     "inputs": (
@@ -255,6 +265,7 @@ DISPATCH_EVENT=$(jq -ncM \
       (if $boundedContext != "" then { "boundedContext": $boundedContext } else {} end) +
       (if $targetDomain != "" then { "targetDomain": $targetDomain } else {} end) +
       (if $version != "" then { "version": $version } else {} end) +
+      (if $tableName != "" then { "tableName": $tableName } else {} end) +
       (if $targetAccountGroup != "" then { "targetAccountGroup": $targetAccountGroup } else {} end) +
       {
         "releaseVersion": $releaseVersion,
@@ -269,7 +280,7 @@ echo "[INFO] Triggering workflow '$targetWorkflow' in nhs-notify-internal..."
 echo "[DEBUG] Dispatch event payload: $DISPATCH_EVENT"
 
 trigger_response=$(curl -s -L \
-  --fail \
+  --fail-with-body \
   -X POST \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer ${PR_TRIGGER_PAT}" \

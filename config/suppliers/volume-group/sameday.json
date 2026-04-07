@@ -1,0 +1,8 @@
+{
+  "description": "Same day dispatch",
+  "endDate": "2028-03-31",
+  "id": "sameday",
+  "name": "Same Day",
+  "startDate": "2026-04-01",
+  "status": "DRAFT"
+}
