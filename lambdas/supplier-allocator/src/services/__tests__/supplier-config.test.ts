@@ -1,4 +1,5 @@
 import {
+  filterPacksForLetter,
   getPackSpecification,
   getPreferredSupplierPacks,
   getSupplierAllocationsForVolumeGroup,
@@ -477,6 +478,131 @@ describe("supplier-config service", () => {
       expect(result).toEqual([
         { id: "s1", name: "Supplier 1", status: "PROD" },
       ]);
+    });
+  });
+
+  describe("filterPacksForLetter", () => {
+    it("returns eligible packs for letter", async () => {
+      const deps = makeDeps();
+      deps.supplierConfigRepo.getPackSpecification = jest
+        .fn()
+        .mockResolvedValue({
+          id: "spec1",
+          constraints: {
+            sheets: { operator: "LESS_THAN", value: 2 },
+          },
+        } as any);
+      const letterEvent = {
+        data: {
+          pageCount: 1,
+        },
+      } as any;
+
+      const result = await filterPacksForLetter(letterEvent, ["spec1"], deps);
+
+      expect(result).toEqual(["spec1"]);
+    });
+    it("throws when no eligible packs found for letter", async () => {
+      const deps = makeDeps();
+      deps.supplierConfigRepo.getPackSpecification = jest
+        .fn()
+        .mockResolvedValue({
+          id: "spec1",
+          constraints: {
+            sheets: { operator: "LESS_THAN", value: 2 },
+          },
+        } as any);
+      const letterEvent = {
+        data: {
+          pageCount: 3,
+        },
+      } as any;
+
+      await expect(
+        filterPacksForLetter(letterEvent, ["spec1"], deps),
+      ).rejects.toThrow(
+        "No eligible pack specifications found for letter variant id undefined and pack specification ids spec1",
+      );
+      expect(deps.logger.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          description: "No eligible pack specifications found for letter",
+          letterVariantId: undefined,
+          packSpecificationIds: ["spec1"],
+        }),
+      );
+    });
+    it("returns eligible packs for all constraint types", async () => {
+      const deps = makeDeps();
+      const constraints: { operator: string; value: number }[] = [
+        { operator: "EQUALS", value: 2 },
+        { operator: "NOT_EQUALS", value: 1 },
+        { operator: "GREATER_THAN", value: 1 },
+        { operator: "LESS_THAN", value: 3 },
+        { operator: "GREATER_THAN_OR_EQUAL", value: 2 },
+        { operator: "LESS_THAN_OR_EQUAL", value: 2 },
+      ];
+      const letterEvent = {
+        data: {
+          pageCount: 2,
+        },
+      } as any;
+
+      for (const constraint of constraints) {
+        deps.supplierConfigRepo.getPackSpecification = jest
+          .fn()
+          .mockResolvedValue({
+            id: "spec1",
+            constraints: {
+              sheets: {
+                operator: constraint.operator,
+                value: constraint.value,
+              },
+            },
+          } as any);
+
+        const result = await filterPacksForLetter(letterEvent, ["spec1"], deps);
+
+        expect(result).toEqual(["spec1"]);
+      }
+    });
+    it("throws an error for unsupported operator", async () => {
+      const deps = makeDeps();
+      deps.supplierConfigRepo.getPackSpecification = jest
+        .fn()
+        .mockResolvedValue({
+          id: "spec1",
+          constraints: {
+            sheets: { operator: "UNSUPPORTED_OP", value: 2 },
+          },
+        } as any);
+      const letterEvent = {
+        data: {
+          pageCount: 2,
+        },
+      } as any;
+
+      await expect(
+        filterPacksForLetter(letterEvent, ["spec1"], deps),
+      ).rejects.toThrow(
+        "Unsupported operator UNSUPPORTED_OP in pack specification constraints",
+      );
+    });
+    it("returns all packs when no constraints defined", async () => {
+      const deps = makeDeps();
+      deps.supplierConfigRepo.getPackSpecification = jest
+        .fn()
+        .mockResolvedValue({
+          id: "spec1",
+        } as any);
+      const letterEvent = {
+        data: {
+          pageCount: 5,
+        },
+      } as any;
+
+      const result = await filterPacksForLetter(letterEvent, ["spec1"], deps);
+
+      expect(result).toEqual(["spec1"]);
     });
   });
 });
