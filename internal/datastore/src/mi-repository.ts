@@ -37,7 +37,6 @@ export class MIRepository {
     return MISchema.parse(miDb);
   }
 
-    // TODO should the miId and supplierId be encapsulated in a getMIRequest 
     async getMI(
     miId: string,
     supplierId: string,

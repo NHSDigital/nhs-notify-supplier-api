@@ -1,8 +1,6 @@
 import z from "zod";
 import { makeDocumentSchema } from "./json-api";
 
-// TODO this is exactly the same as the PostMIRequestResourceSchema
-// check if I should reuse  this
 export const GetMIResponseResourceSchema = z
   .object({
     id: z.string(),
