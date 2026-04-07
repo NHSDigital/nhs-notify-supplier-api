@@ -1,0 +1,13 @@
+description: "Management information returned successfully"
+headers:
+  X-Request-ID:
+    $ref: "../responseHeaders/xRequestId.yml"
+  X-Correlation-ID:
+    $ref: "../responseHeaders/xCorrelationId.yml"
+content:
+  application/vnd.api+json:
+    schema:
+      $ref: "../schemas/miResponse.yml"
+    examples:
+      get-mi-response:
+        $ref: "../examples/getMI/responses/getMI_2WL5eYSWGzCHlGmzNxuqVusPxDg.json"

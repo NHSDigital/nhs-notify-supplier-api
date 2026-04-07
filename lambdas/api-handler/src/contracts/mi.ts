@@ -1,6 +1,32 @@
 import z from "zod";
 import { makeDocumentSchema } from "./json-api";
 
+// TODO this is exactly the same as the PostMIRequestResourceSchema
+// check if I should reuse  this
+export const GetMIResponseResourceSchema = z
+  .object({
+    id: z.string(),
+    type: z.literal("ManagementInformation"),
+    attributes: z
+      .object({
+        lineItem: z.string(),
+        timestamp: z.string(),
+        quantity: z.string(),
+        specificationId: z.string().optional(),
+        groupId: z.string().optional(),
+        stockRemaining: z.number().optional()
+      })
+      .strict(),
+  })
+  .strict();
+
+export const GetMIResponseSchema = makeDocumentSchema(
+  GetMIResponseResourceSchema,
+);
+
+export type GetMIResponse = z.infer<typeof PostMIResponseSchema>;
+
+
 export const PostMIRequestResourceSchema = z
   .object({
     type: z.literal("ManagementInformation"),
