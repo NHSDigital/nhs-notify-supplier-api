@@ -37,17 +37,15 @@ export function mapToPostMIResponse(mi: MIBase): PostMIResponse {
 
 export function mapToGetMIResponse(mi: MIBase): GetMIResponse {
   return GetMIResponseResourceSchema.parse({
-    data: {
-      id: mi.id,
-      type: "ManagementInformation",
-      attributes: {
-        lineItem: mi.lineItem,
-        timestamp: mi.timestamp,
-        quantity: mi.quantity,
-        specificationId: mi.specificationId,
-        groupId: mi.groupId,
-        stockRemaining: mi.stockRemaining,
-      },
+    id: mi.id,
+    type: "ManagementInformation",
+    attributes: {
+      lineItem: mi.lineItem,
+      timestamp: mi.timestamp,
+      quantity: mi.quantity,
+      specificationId: mi.specificationId,
+      groupId: mi.groupId,
+      stockRemaining: mi.stockRemaining,
     },
   });
 }
