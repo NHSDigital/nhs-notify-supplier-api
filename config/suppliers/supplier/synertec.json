@@ -1,0 +1,7 @@
+{
+  "channelType": "LETTER",
+  "dailyCapacity": 500000,
+  "id": "synertec",
+  "name": "Synertec",
+  "status": "PROD"
+}

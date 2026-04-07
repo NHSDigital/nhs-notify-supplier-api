@@ -1,0 +1,56 @@
+{
+  "assembly": {
+    "duplex": true,
+    "envelopeId": "economy-c5",
+    "features": [
+      "ADMAIL"
+    ],
+    "insertIds": [
+      "digitrials-globalminds-booklet"
+    ],
+    "paper": {
+      "colour": "WHITE",
+      "id": "paper-std-white-80",
+      "name": "Standard White 80gsm",
+      "recycled": true,
+      "size": "A4",
+      "weightGSM": 80
+    },
+    "printColour": "COLOUR"
+  },
+  "billingId": "insert-admail-economy",
+  "constraints": {
+    "blackCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 20
+    },
+    "colourCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 10
+    },
+    "deliveryDays": {
+      "operator": "LESS_THAN",
+      "value": 4
+    },
+    "sheets": {
+      "operator": "LESS_THAN",
+      "value": 5
+    },
+    "sides": {
+      "operator": "LESS_THAN",
+      "value": 10
+    }
+  },
+  "createdAt": "2026-01-12T00:00:00.000Z",
+  "description": "Envelope and booklet for Global Minds",
+  "id": "digitrials-globalminds",
+  "name": "Digitrials - Global Minds",
+  "postage": {
+    "deliveryDays": 4,
+    "id": "admail-economy",
+    "size": "STANDARD"
+  },
+  "status": "PROD",
+  "updatedAt": "2026-01-12T00:00:00.000Z",
+  "version": 1
+}
