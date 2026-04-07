@@ -39,4 +39,9 @@ locals {
 
   event_cache_bucket_name          = lookup(module.eventpub.s3_bucket_event_cache, "bucket", null)
   eventsub_event_cache_bucket_name = lookup(module.eventsub.s3_bucket_event_cache, "bucket", null)
+
+  csoc_api_gw_log_destination_arn = format("arn:aws:logs:%s:%s:destination:api_gateway_log_destination",
+    var.region,
+    var.csoc_destination_account
+  )
 }
