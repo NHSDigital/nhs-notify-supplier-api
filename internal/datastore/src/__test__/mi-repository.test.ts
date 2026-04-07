@@ -93,7 +93,7 @@ describe("MiRepository", () => {
       );
 
       const fetchedMi = await miRepository.getMI(
-        persistedMi.id, 
+        persistedMi.id,
         persistedMi.supplierId,
       );
 

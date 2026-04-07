@@ -1,7 +1,7 @@
-import { 
-  DynamoDBDocumentClient, 
-  GetCommand, 
-  PutCommand, 
+import {
+  DynamoDBDocumentClient,
+  GetCommand,
+  PutCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { Logger } from "pino";
 import { randomUUID } from "node:crypto";
