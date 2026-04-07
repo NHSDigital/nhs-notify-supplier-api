@@ -42,7 +42,6 @@ export class MIRepository {
   }
 
   async getMI(miId: string, supplierId: string): Promise<MI> {
-
     const result = await this.ddbClient.send(
       new GetCommand({
         TableName: this.config.miTableName,
