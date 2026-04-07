@@ -16,8 +16,7 @@ jobs:
 
     steps:
     - name: Check out the repository
-      uses: actions/checkout@v5
-
+      uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
     - name: Sync repository template
       uses: NHSDigital/nhs-notify-shared-modules/.github/actions/sync-template-repo@3.0.8
       with:
@@ -25,7 +24,7 @@ jobs:
 
     - name: Create Pull Request
       if: ${{ !env.ACT }}
-      uses: peter-evans/create-pull-request@v8.1.0
+      uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         commit-message: Drift from template

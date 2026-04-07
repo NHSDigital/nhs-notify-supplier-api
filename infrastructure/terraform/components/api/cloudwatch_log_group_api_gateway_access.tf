@@ -10,3 +10,12 @@ resource "aws_cloudwatch_log_subscription_filter" "api_gateway_access" {
   filter_pattern  = ""
   destination_arn = local.destination_arn
 }
+
+resource "aws_cloudwatch_log_subscription_filter" "api_gateway" {
+  count           = var.csoc_log_forwarding ? 1 : 0
+  name            = replace(aws_cloudwatch_log_group.api_gateway_access.name, "/", "-")
+  log_group_name  = aws_cloudwatch_log_group.api_gateway_access.name
+  role_arn        = data.aws_iam_role.csoc_subscription[0].arn
+  filter_pattern  = ""
+  destination_arn = local.csoc_api_gw_log_destination_arn
+}

@@ -245,3 +245,15 @@ variable "event_anomaly_band_width" {
   description = "The width of the anomaly detection band. Higher values (e.g. 4-6) reduce sensitivity and noise, lower values (e.g. 2-3) increase sensitivity. Recommended: 2-4."
   default     = 4
 }
+
+variable "csoc_log_forwarding" {
+  type        = bool
+  description = "Enable forwarding of API Gateway logs to CSOC"
+  default     = true
+}
+
+variable "csoc_destination_account" {
+  type        = string
+  description = "value of the CSOC destination account, if applicable. If null, CSOC destination account will not be added as a resource in the logging policy"
+  default     = "000000000000"
+}
