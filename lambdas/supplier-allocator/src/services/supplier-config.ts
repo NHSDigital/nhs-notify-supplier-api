@@ -6,7 +6,12 @@ import {
   SupplierPack,
   VolumeGroup,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-config";
+import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
+import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
+
 import { Deps } from "../config/deps";
+
+type PreparedEvents = LetterRequestPreparedEventV2 | LetterRequestPreparedEvent;
 
 export async function getVariantDetails(
   variantId: string,
@@ -187,4 +192,89 @@ export async function getSuppliersWithValidPack(
   }
 
   return suppliersWithValidPack;
+}
+
+function evaluateContraint(
+  actualValue: number,
+  constraintValue: number,
+  operator: string,
+): boolean {
+  console.log(
+    `Evaluating constraint: actualValue ${actualValue}, constraintValue ${constraintValue}, operator ${operator}`,
+  );
+  switch (operator) {
+    case "EQUALS": {
+      return actualValue === constraintValue;
+    }
+    case "NOT_EQUALS": {
+      return actualValue !== constraintValue;
+    }
+    case "GREATER_THAN": {
+      return actualValue > constraintValue;
+    }
+    case "LESS_THAN": {
+      return actualValue < constraintValue;
+    }
+    case "GREATER_THAN_OR_EQUAL": {
+      return actualValue >= constraintValue;
+    }
+    case "LESS_THAN_OR_EQUAL": {
+      return actualValue <= constraintValue;
+    }
+    default: {
+      throw new Error(
+        `Unsupported operator ${operator} in pack specification constraints`,
+      );
+    }
+  }
+}
+
+// This function is used to filter the pack specifications for a letter based on the letter data pages and pack specification constraints sheets
+
+export async function filterPacksForLetter(
+  letterEvent: PreparedEvents,
+  packSpecificationIds: string[],
+  deps: Deps,
+): Promise<string[]> {
+  const filteredPackIds: string[] = [];
+  for (const packSpecId of packSpecificationIds) {
+    const packSpec =
+      await deps.supplierConfigRepo.getPackSpecification(packSpecId);
+    if (
+      !packSpec.constraints ||
+      !packSpec.constraints.sheets ||
+      !packSpec.constraints.sheets.value ||
+      !packSpec.constraints.sheets.operator
+    ) {
+      filteredPackIds.push(packSpecId);
+    } else {
+      deps.logger.info({
+        description: "Evaluating pack specification constraints for letter",
+        letterVariantId: letterEvent.data.letterVariantId,
+        packSpecId,
+        pageCount: letterEvent.data.pageCount,
+        constraintValue: packSpec.constraints.sheets.value,
+        constraintOperator: packSpec.constraints.sheets.operator,
+      });
+      const isValid = evaluateContraint(
+        letterEvent.data.pageCount,
+        packSpec.constraints.sheets.value,
+        packSpec.constraints.sheets.operator,
+      );
+      if (isValid) {
+        filteredPackIds.push(packSpecId);
+      }
+    }
+  }
+  if (filteredPackIds.length === 0) {
+    deps.logger.error({
+      description: "No eligible pack specifications found for letter",
+      letterVariantId: letterEvent.data.letterVariantId,
+      packSpecificationIds,
+    });
+    throw new Error(
+      `No eligible pack specifications found for letter variant id ${letterEvent.data.letterVariantId} and pack specification ids ${packSpecificationIds.join(", ")}`,
+    );
+  }
+  return filteredPackIds;
 }
