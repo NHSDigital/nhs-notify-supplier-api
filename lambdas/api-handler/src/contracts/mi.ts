@@ -1,29 +1,6 @@
 import z from "zod";
 import { makeDocumentSchema } from "./json-api";
 
-export const GetMIResponseResourceSchema = z
-  .object({
-    id: z.string(),
-    type: z.literal("ManagementInformation"),
-    attributes: z
-      .object({
-        lineItem: z.string(),
-        timestamp: z.string(),
-        quantity: z.string(),
-        specificationId: z.string().optional(),
-        groupId: z.string().optional(),
-        stockRemaining: z.number().optional(),
-      })
-      .strict(),
-  })
-  .strict();
-
-export const GetMIResponseSchema = makeDocumentSchema(
-  GetMIResponseResourceSchema,
-);
-
-export type GetMIResponse = z.infer<typeof GetMIResponseSchema>;
-
 export const PostMIRequestResourceSchema = z
   .object({
     type: z.literal("ManagementInformation"),
@@ -60,3 +37,16 @@ export type PostMIResponse = z.infer<typeof PostMIResponseSchema>;
 export type IncomingMI = PostMIRequest["data"]["attributes"] & {
   supplierId: string;
 };
+
+export const GetMIResponseResourceSchema = z
+  .object({
+    id: z.string(),
+    ...PostMIRequestResourceSchema.shape,
+  })
+  .strict();
+
+export const GetMIResponseSchema = makeDocumentSchema(
+  GetMIResponseResourceSchema,
+);
+
+export type GetMIResponse = z.infer<typeof GetMIResponseSchema>;
