@@ -45,23 +45,6 @@ export const GetMIResponseResourceSchema = z
   })
   .strict();
 
-  // export const GetMIResponseResourceSchema = z
-  // .object({
-  //   id: z.string(),
-  //   type: z.literal("ManagementInformation"),
-  //   attributes: z
-  //     .object({
-  //       lineItem: z.string(),
-  //       timestamp: z.string(),
-  //       quantity: z.number(),
-  //       specificationId: z.string().optional(),
-  //       groupId: z.string().optional(),
-  //       stockRemaining: z.number().optional(),
-  //     })
-  //     .strict(),
-  // })
-  // .strict();
-
 export const GetMIResponseSchema = makeDocumentSchema(
   GetMIResponseResourceSchema,
 );
