@@ -1,7 +1,7 @@
 import { MIBase } from "@internal/datastore/src";
 import {
   GetMIResponse,
-  GetMIResponseResourceSchema,
+  GetMIResponseSchema,
   IncomingMI,
   PostMIRequest,
   PostMIResponse,
@@ -36,8 +36,9 @@ export function mapToPostMIResponse(mi: MIBase): PostMIResponse {
 }
 
 export function mapToGetMIResponse(mi: MIBase): GetMIResponse {
-  return GetMIResponseResourceSchema.parse({
+  return GetMIResponseSchema.parse({
     data: {
+      id: mi.id,
       type: "ManagementInformation",
       attributes: {
         lineItem: mi.lineItem,
@@ -47,7 +48,6 @@ export function mapToGetMIResponse(mi: MIBase): GetMIResponse {
         groupId: mi.groupId,
         stockRemaining: mi.stockRemaining,
       },
-      id: mi.id,
     },
   });
 }
