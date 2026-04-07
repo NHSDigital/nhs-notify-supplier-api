@@ -1,11 +1,11 @@
 import { MIBase } from "@internal/datastore/src";
 import {
+  GetMIResponse,
+  GetMIResponseResourceSchema,
   IncomingMI,
   PostMIRequest,
   PostMIResponse,
   PostMIResponseSchema,
-  GetMIResponse,
-  GetMIResponseResourceSchema
 } from "../contracts/mi";
 
 export function mapToMI(
@@ -49,5 +49,5 @@ export function mapToGetMIResponse(mi: MIBase): GetMIResponse {
         stockRemaining: mi.stockRemaining,
       },
     },
-  })
+  });
 }

@@ -12,7 +12,7 @@ export const GetMIResponseResourceSchema = z
         quantity: z.string(),
         specificationId: z.string().optional(),
         groupId: z.string().optional(),
-        stockRemaining: z.number().optional()
+        stockRemaining: z.number().optional(),
       })
       .strict(),
   })
@@ -22,8 +22,7 @@ export const GetMIResponseSchema = makeDocumentSchema(
   GetMIResponseResourceSchema,
 );
 
-export type GetMIResponse = z.infer<typeof PostMIResponseSchema>;
-
+export type GetMIResponse = z.infer<typeof GetMIResponseSchema>;
 
 export const PostMIRequestResourceSchema = z
   .object({

@@ -1,6 +1,6 @@
 import { MIRepository } from "@internal/datastore/src/mi-repository";
-import { IncomingMI, PostMIResponse, GetMIResponse } from "../contracts/mi";
-import { mapToPostMIResponse, mapToGetMIResponse } from "../mappers/mi-mapper";
+import { GetMIResponse, IncomingMI, PostMIResponse } from "../contracts/mi";
+import { mapToGetMIResponse, mapToPostMIResponse } from "../mappers/mi-mapper";
 
 export const postMI = async (
   incomingMi: IncomingMI,
