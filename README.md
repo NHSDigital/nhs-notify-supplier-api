@@ -75,6 +75,8 @@ New developers of the NHS Notify Supplier API should understand the below.
 
 #### Prerequisites and Configuration
 
+- Copy .env.template to .env and edit for your specific PR / Github tokens
+- Extract your Zscaler CA certificate using Certificate manager on windows or extract from Keychain from Mac and copy to the /scripts/devcontainer/custom-ca-certs/ folder
 - Utilised the devcontainer, for pre reqs and configuration.
 - You should open in a devcontainer or a Github workspaces.
 - By default it will run `make config` when the container is first setup
