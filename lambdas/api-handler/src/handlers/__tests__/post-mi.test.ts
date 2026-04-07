@@ -4,7 +4,7 @@ import pino from "pino";
 import { MIRepository } from "@internal/datastore/src";
 import { makeApiGwEvent } from "./utils/test-utils";
 import { PostMIRequest, PostMIResponse } from "../../contracts/mi";
-import postMiOperation from "../../services/mi-operations";
+import { postMI as postMiOperation } from "../../services/mi-operations";
 import { Deps } from "../../config/deps";
 import { EnvVars } from "../../config/env";
 import createPostMIHandler from "../post-mi";

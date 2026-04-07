@@ -1,5 +1,5 @@
 import { IncomingMI } from "../../contracts/mi";
-import postMI from "../mi-operations";
+import {postMI} from "../mi-operations";
 
 describe("postMI function", () => {
   const incomingMi: IncomingMI = {
