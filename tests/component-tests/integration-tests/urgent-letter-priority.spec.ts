@@ -19,7 +19,7 @@ test.beforeAll(async () => {
 test.describe("Urgent Letter Priority Tests", () => {
   test.setTimeout(180_000); // 3 minutes for long running polling
 
-  test("Letter with higher urgency gets picked first", async ({ request }) => {
+  test("Letters with higher urgency get picked first", async ({ request }) => {
     const variantsUrgencyTen = getVariantsWithUrgency(10);
     const urgencyTenLetterIds = await sendEventsForVariants(variantsUrgencyTen);
 
