@@ -67,8 +67,7 @@ describe("MiRepository", () => {
 
   describe("getMi", () => {
     it("throws an error when fetching MI information that does not exist", async () => {
-      await expect(miRepository.getMI("XXX", "supplier1")
-      ).rejects.toThrow(
+      await expect(miRepository.getMI("XXX", "supplier1")).rejects.toThrow(
         "Management Information with id XXX not found for supplier supplier1",
       );
     });
