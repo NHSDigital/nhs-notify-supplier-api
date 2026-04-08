@@ -44,7 +44,7 @@ export default function createGetMIHandler(deps: Deps): APIGatewayProxyHandler {
       });
 
       // metric with count 1 specifying the supplier
-      const dimensions: Record<string, string> = {supplierId: supplierId};
+      const dimensions: Record<string, string> = { supplierId: supplierId };
       emitMetric("getMi", dimensions, deps.logger, MetricStatus.Success, 1);
 
       // metric displaying the type/number of lineItems posted per supplier
@@ -56,7 +56,7 @@ export default function createGetMIHandler(deps: Deps): APIGatewayProxyHandler {
         body: JSON.stringify(result, null, 2),
       };
     } catch (error) {
-      emitMetric("getMi", {supplierId: supplierId}, deps.logger, MetricStatus.Failure, 1);
+      emitMetric("getMi", { supplierId: supplierId }, deps.logger, MetricStatus.Failure, 1);
       return processError(error, commonIds.value.correlationId, deps.logger);
     }
   };
@@ -64,8 +64,8 @@ export default function createGetMIHandler(deps: Deps): APIGatewayProxyHandler {
 
 function emitMetric(source: string, dimensions: Record<string, string>, logger: pino.Logger, key: string, value: number){
   const metric: MetricEntry = {
-    key: key,
-    value: value,
+    key,
+    value,
     unit: Unit.Count,
   };
   const emf = buildEMFObject(source, dimensions, metric);
