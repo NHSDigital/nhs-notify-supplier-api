@@ -1,7 +1,7 @@
 import {
   AllocatedLetter,
   AllocatedLetterSchema,
-} from "lambdas/upsert-letter/src/handler/schemas";
+} from "nhs-notify-supplier-api-upsert-letter/src/handler/schemas";
 import { randomUUID } from "node:crypto";
 import { expect } from "playwright/test";
 import { pollSupplierAllocatorLogForResolvedSpec } from "./aws-cloudwatch-helper";
