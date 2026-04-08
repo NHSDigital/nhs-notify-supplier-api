@@ -32,7 +32,7 @@
 #     --overrideProjectName nhs \
 #     --overrideRoleName nhs-service-iam-role
 
-set -e
+#set -e
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -279,8 +279,17 @@ echo "[INFO] Triggering workflow '$targetWorkflow' in nhs-notify-internal..."
 
 echo "[DEBUG] Dispatch event payload: $DISPATCH_EVENT"
 
-trigger_response=$(curl -s -L \
+echo " curl -s -L \
   --fail \
+  -X POST \
+  -H \"Accept: application/vnd.github+json\" \
+  -H \"Authorization: Bearer ${PR_TRIGGER_PAT}\" \
+  -H \"X-GitHub-Api-Version: 2022-11-28\" \
+  \"https://api.github.com/repos/NHSDigital/nhs-notify-internal/actions/workflows/$targetWorkflow/dispatches\" \
+  -d \"$DISPATCH_EVENT\""
+
+trigger_response=$(curl -s -L \
+  --fail-with-body \
   -X POST \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer ${PR_TRIGGER_PAT}" \
