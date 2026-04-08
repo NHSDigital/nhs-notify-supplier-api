@@ -62,19 +62,19 @@ export default function createGetMIHandler(deps: Deps): APIGatewayProxyHandler {
         body: JSON.stringify(result, null, 2),
       };
     } catch (error) {
-      emitMetric(
-        "getMi",
-        { supplierId },
-        deps.logger,
-        MetricStatus.Failure,
-        1,
-      );
+      emitMetric("getMi", { supplierId }, deps.logger, MetricStatus.Failure, 1);
       return processError(error, commonIds.value.correlationId, deps.logger);
     }
   };
 }
 
-function emitMetric(source: string, dimensions: Record<string, string>, logger: pino.Logger, key: string, value: number){
+function emitMetric(
+  source: string,
+  dimensions: Record<string, string>,
+  logger: pino.Logger,
+  key: string,
+  value: number,
+) {
   const metric: MetricEntry = {
     key,
     value,
