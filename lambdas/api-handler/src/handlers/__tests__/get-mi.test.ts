@@ -2,7 +2,7 @@ import { Context } from "aws-lambda";
 import { mockDeep } from "jest-mock-extended";
 import pino from "pino";
 import { MIRepository } from "@internal/datastore/src";
-import { gettMI as getMiOperation } from "../../services/mi-operations";
+import { getMI as getMiOperation } from "../../services/mi-operations";
 import { makeApiGwEvent } from "./utils/test-utils";
 import { ApiErrorDetail } from "../../contracts/errors";
 import NotFoundError from "../../errors/not-found-error";
@@ -55,7 +55,7 @@ describe("API Lambda handler", () => {
       pathParameters: { id: "id1" },
     });
 
-    const getMi = createGetMiHandler(mockedDeps);
+    const getMi = createGetMIHandler(mockedDeps);
     const result = await getMi(event, mockDeep<Context>(), jest.fn());
 
     const expected = {
@@ -96,7 +96,7 @@ describe("API Lambda handler", () => {
       pathParameters: { id: "id1" },
     });
 
-    const getMi = createGetMiHandler(mockedDeps);
+    const getMi = createGetMIHandler(mockedDeps);
     const result = await getMi(event, mockDeep<Context>(), jest.fn());
 
     expect(result).toEqual(
@@ -113,7 +113,7 @@ describe("API Lambda handler", () => {
       pathParameters: { id: "id1" },
     });
 
-    const getMi = createGetMiHandler(mockedDeps);
+    const getMi = createGetMIHandler(mockedDeps);
     const result = await getMi(event, mockDeep<Context>(), jest.fn());
 
     expect(result).toEqual(
@@ -133,7 +133,7 @@ describe("API Lambda handler", () => {
       pathParameters: { id: "id1" },
     });
 
-    const getMi = createGetMiHandler(mockedDeps);
+    const getMi = createGetMIHandler(mockedDeps);
     const result = await getMi(event, mockDeep<Context>(), jest.fn());
 
     expect(result).toEqual(
@@ -153,7 +153,7 @@ describe("API Lambda handler", () => {
       },
     });
 
-    const getMi = createGetLetterHandler(mockedDeps);
+    const getMi = createGetMIHandler(mockedDeps);
     const result = await getMi(event, mockDeep<Context>(), jest.fn());
 
     expect(result).toEqual(
