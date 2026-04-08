@@ -10,8 +10,7 @@ import { assertNotEmpty } from "../utils/validation";
 import { extractCommonIds } from "../utils/common-ids";
 import { Deps } from "../config/deps";
 
-export default function createGetMIHandler(deps: Deps
-): APIGatewayProxyHandler {
+export default function createGetMIHandler(deps: Deps): APIGatewayProxyHandler {
   return async (event) => {
     const commonIds = extractCommonIds(
       event.headers,
