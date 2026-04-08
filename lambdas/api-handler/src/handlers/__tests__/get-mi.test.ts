@@ -31,18 +31,18 @@ describe("API Lambda handler", () => {
   it("returns 200 OK and the MI information", async () => {
     const mockedGetMiById = getMiOperation as jest.Mock;
     mockedGetMiById.mockResolvedValue({
-        data:{
-            id: "id1",
-            type: "ManagementInformation",
-            attributes: {
-                lineItem: "envelope-business-standard",
-                timestamp: "2023-11-17T14:27:51.413Z",
-                quantity: 22,
-                specificationId: "spec1",
-                groupId: "group1",
-                stockRemaining: 20_000,
-            },
+      data: {
+        id: "id1",
+        type: "ManagementInformation",
+        attributes: {
+          lineItem: "envelope-business-standard",
+          timestamp: "2023-11-17T14:27:51.413Z",
+          quantity: 22,
+          specificationId: "spec1",
+          groupId: "group1",
+          stockRemaining: 20_000,
         },
+      },
     });
 
     const event = makeApiGwEvent({
@@ -59,18 +59,18 @@ describe("API Lambda handler", () => {
     const result = await getMi(event, mockDeep<Context>(), jest.fn());
 
     const expected = {
-        data:{
-            id: "id1",
-            type: "ManagementInformation",
-            attributes: {
-                lineItem: "envelope-business-standard",
-                timestamp: "2023-11-17T14:27:51.413Z",
-                quantity: 22,
-                specificationId: "spec1",
-                groupId: "group1",
-                stockRemaining: 20_000,
-            },
+      data: {
+        id: "id1",
+        type: "ManagementInformation",
+        attributes: {
+          lineItem: "envelope-business-standard",
+          timestamp: "2023-11-17T14:27:51.413Z",
+          quantity: 22,
+          specificationId: "spec1",
+          groupId: "group1",
+          stockRemaining: 20_000,
         },
+      },
     };
 
     expect(result).toEqual({
