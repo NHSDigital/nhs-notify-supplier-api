@@ -32,6 +32,7 @@ export enum ApiErrorDetail {
   InvalidRequestMissingBody = "The request is missing the body",
   InvalidRequestMissingLetterIdPathParameter = "The request is missing the letter id path parameter",
   InvalidRequestLetterIdsMismatch = "The letter ID in the request body does not match the letter ID path parameter",
+  InvalidRequestMissingMiIdPathParameter = "The request is missing the mi id path parameter",
   InvalidRequestBody = "The request body is invalid",
   InvalidRequestLimitNotANumber = "The limit parameter is not a number",
   InvalidRequestLimitNotInRange = "The limit parameter must be a positive number not greater than %s",

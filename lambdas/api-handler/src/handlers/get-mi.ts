@@ -2,17 +2,15 @@ import { APIGatewayProxyHandler } from "aws-lambda";
 import { Unit } from "aws-embedded-metrics";
 import pino from "pino";
 import { MetricEntry, MetricStatus, buildEMFObject } from "@internal/helpers";
-import { postMI as postMIOperation } from "../services/mi-operations";
+import { getMI as getMIOperation } from "../services/mi-operations";
 import { ApiErrorDetail } from "../contracts/errors";
 import ValidationError from "../errors/validation-error";
 import { processError } from "../mappers/error-mapper";
-import { assertNotEmpty, validateIso8601Timestamp } from "../utils/validation";
+import { assertNotEmpty } from "../utils/validation";
 import { extractCommonIds } from "../utils/common-ids";
-import { PostMIRequest, PostMIRequestSchema } from "../contracts/mi";
-import { mapToMI } from "../mappers/mi-mapper";
 import { Deps } from "../config/deps";
 
-export default function createGettMIHandler(
+export default function createGetMIHandler(
   deps: Deps,
 ): APIGatewayProxyHandler {
   return async (event) => {
@@ -32,34 +30,21 @@ export default function createGettMIHandler(
 
     const { supplierId } = commonIds.value;
     try {
-      const body = assertNotEmpty(
-        event.body,
-        new ValidationError(ApiErrorDetail.InvalidRequestMissingBody),
+      const miId = assertNotEmpty(
+        event.pathParameters?.id,
+        new ValidationError(
+          ApiErrorDetail.InvalidRequestMissingMiIdPathParameter,
+        ),
       );
 
-      let postMIRequest: PostMIRequest;
-
-      try {
-        postMIRequest = PostMIRequestSchema.parse(JSON.parse(body));
-      } catch (error) {
-        emitErrorMetric(supplierId, deps.logger);
-        const typedError =
-          error instanceof Error
-            ? new ValidationError(ApiErrorDetail.InvalidRequestBody, {
-                cause: error,
-              })
-            : error;
-        throw typedError;
-      }
-      validateIso8601Timestamp(postMIRequest.data.attributes.timestamp);
-
-      const result = await postMIOperation(
-        mapToMI(postMIRequest, supplierId),
+      const result = await getMIOperation(
+        miId,
+        supplierId,
         deps.miRepo,
       );
 
       deps.logger.info({
-        description: "Posted management information",
+        description: "Retrieved management information",
         supplierId: commonIds.value.supplierId,
         correlationId: commonIds.value.correlationId,
       });
@@ -71,18 +56,18 @@ export default function createGettMIHandler(
         value: 1,
         unit: Unit.Count,
       };
-      let emf = buildEMFObject("postMi", dimensions, metric);
+      let emf = buildEMFObject("getMi", dimensions, metric);
       deps.logger.info(emf);
 
       // metric displaying the type/number of lineItems posted per supplier
-      dimensions.lineItem = postMIRequest.data.attributes.lineItem;
+      dimensions.lineItem = result.data.attributes.lineItem;
       metric.key = "LineItem per supplier";
-      metric.value = postMIRequest.data.attributes.quantity;
-      emf = buildEMFObject("postMi", dimensions, metric);
+      metric.value = result.data.attributes.quantity;
+      emf = buildEMFObject("getMi", dimensions, metric);
       deps.logger.info(emf);
 
       return {
-        statusCode: 201,
+        statusCode: 200,
         body: JSON.stringify(result, null, 2),
       };
     } catch (error) {
@@ -99,6 +84,6 @@ function emitErrorMetric(supplierId: string, logger: pino.Logger) {
     value: 1,
     unit: Unit.Count,
   };
-  const emf = buildEMFObject("postMi", dimensions, metric);
+  const emf = buildEMFObject("getMi", dimensions, metric);
   logger.info(emf);
 }
