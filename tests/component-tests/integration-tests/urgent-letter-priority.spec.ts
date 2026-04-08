@@ -1,41 +1,14 @@
-import { expect, test } from "@playwright/test";
-import { sendSnsEvent } from "tests/helpers/send-sns-event";
-import { createPreparedV1Event } from "tests/helpers/event-fixtures";
-import { randomUUID } from "node:crypto";
-import { logger } from "tests/helpers/pino-logger";
+import { test } from "@playwright/test";
 import getRestApiGatewayBaseUrl from "tests/helpers/aws-gateway-helper";
 import { pollForLetterStatus } from "tests/helpers/poll-for-letters-helper";
-import { pollSupplierAllocatorLogForResolvedSpec } from "tests/helpers/aws-cloudwatch-helper";
 import { getLettersFromQueueViaIndex } from "tests/helpers/generate-fetch-test-data";
 import {
-  AllocatedLetter,
-  AllocatedLetterSchema,
-} from "../../../lambdas/upsert-letter/src/handler/schemas";
-
-// Values for CI/CD are kept in group_nhs-notify-supplier-api-dev.tfvars in the nhs-notify-internal repo
-// If running locally see default of variant_map in infrastructure/terraform/components/api/variables.tf
-const variantUrgencyMap: Record<string, number> = {
-  "digitrials-aspiring": 0,
-  "digitrials-dmapp": 1,
-  "digitrials-globalminds": 2,
-  "digitrials-mymelanoma": 3,
-  "digitrials-ofh": 4,
-  "digitrials-prostateprogress": 5,
-  "digitrials-protectc": 6,
-  "digitrials-restore": 7,
-  "gpreg-admail": 8,
-  "nces-abnormal-results": 9,
-  "nces-abnormal-results-braille": 10,
-  "nces-invites": 10,
-  "nces-invites-braille": 10,
-  "nces-standard": 11,
-  "nces-standard-braille": 12,
-  "notify-braille": 13,
-  "notify-digital-letters-standard": 97,
-  "notify-standard": 98,
-  "notify-standard-colour": 99,
-};
-const supplier = "supplier1";
+  getVariantsWithUrgency,
+  sendEventsForVariants,
+  supplier,
+  verifyAllocationLogsContainPriority,
+  verifyIndexPositionOfLetterVariants,
+} from "tests/helpers/urgent-letter-priority-helper";
 
 let baseUrl: string;
 
@@ -47,11 +20,12 @@ test.describe("Urgent Letter Priority Tests", () => {
   test.setTimeout(180_000); // 3 minutes for long running polling
 
   test("Letter with higher urgency gets picked first", async ({ request }) => {
+    const variantsUrgencyTen = getVariantsWithUrgency(10);
+    const urgencyTenLetterIds = await sendEventsForVariants(variantsUrgencyTen);
+
     const variantsUrgencyNine = getVariantsWithUrgency(9);
     const urgencyNineLetterIds =
       await sendEventsForVariants(variantsUrgencyNine);
-    const variantsUrgencyTen = getVariantsWithUrgency(10);
-    const urgencyTenLetterIds = await sendEventsForVariants(variantsUrgencyTen);
 
     await Promise.all(
       [...urgencyNineLetterIds, ...urgencyTenLetterIds].map(async (domainId) =>
@@ -69,71 +43,8 @@ test.describe("Urgent Letter Priority Tests", () => {
 
     verifyIndexPositionOfLetterVariants(
       letterIdsFromQueue,
-      urgencyNineLetterIds,
       urgencyTenLetterIds,
+      urgencyNineLetterIds,
     );
   });
 });
-
-function getVariantsWithUrgency(urgency: number) {
-  const variants = Object.keys(variantUrgencyMap).filter(
-    // safe has comes from map's keys which are controlled by us
-    // eslint-disable-next-line security/detect-object-injection
-    (variant) => variantUrgencyMap[variant] === urgency,
-  );
-  if (variants.length === 0) {
-    throw new Error(`No variants found with urgency ${urgency}`);
-  }
-  return variants;
-}
-
-async function sendEventsForVariants(variants: string[]) {
-  const domainIds: string[] = [];
-  for (const variant of variants) {
-    const domainId = randomUUID();
-    logger.info(
-      `Testing event subscription with domainId: ${domainId} and variant: ${variant}`,
-    );
-    const preparedEvent = createPreparedV1Event({
-      domainId,
-      letterVariantId: variant,
-    });
-    const response = await sendSnsEvent(preparedEvent);
-    expect(response.MessageId).toBeTruthy();
-    domainIds.push(domainId);
-  }
-  return domainIds;
-}
-
-function verifyIndexPositionOfLetterVariants(
-  letterIds: string[],
-  letterIdsLeastUrgency: string[],
-  letterIdsHigherUrgency: string[],
-) {
-  for (const leastUrgencyLetterId of letterIdsLeastUrgency) {
-    expect(letterIds).toContain(leastUrgencyLetterId); // in case limit param is hit
-    const indexToTest = letterIds.indexOf(leastUrgencyLetterId);
-    for (const higherUrgencyLetterId of letterIdsHigherUrgency) {
-      expect(letterIds).toContain(higherUrgencyLetterId); // in case limit param is hit
-      const higherUrgencyIndex = letterIds.indexOf(higherUrgencyLetterId);
-      expect(indexToTest).toBeLessThan(higherUrgencyIndex); // higher urgency letters should come before lower urgency letters
-    }
-  }
-}
-
-async function verifyAllocationLogsContainPriority(
-  letterIds: string[],
-  priority: number,
-) {
-  for (const domainId of letterIds) {
-    const message = await pollSupplierAllocatorLogForResolvedSpec(domainId);
-    const supplierAllocatorLog = JSON.parse(message);
-    const allocatedLetter: AllocatedLetter = AllocatedLetterSchema.parse(
-      supplierAllocatorLog.msg,
-    );
-    const { supplierSpec } = allocatedLetter;
-    expect(supplierSpec).toBeDefined();
-    expect(supplierSpec.priority).toBeDefined();
-    expect(supplierSpec.priority).toBe(priority);
-  }
-}

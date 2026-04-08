@@ -247,6 +247,7 @@ export async function getLettersFromQueueViaIndex(
           `Queried letter queue table to verify existence for supplier ${supplierId} and found items.`,
         );
 
+        // assumes no pagination needed as we expect a small number of letters in the queue for the test supplier
         return z.array(PendingLetterSchema).parse(Items);
       }
       if (attempt < MAX_ATTEMPTS) {
