@@ -3,16 +3,10 @@ import { sendSnsEvent } from "tests/helpers/send-sns-event";
 import { createPreparedV1Event } from "tests/helpers/event-fixtures";
 import { randomUUID } from "node:crypto";
 import { logger } from "tests/helpers/pino-logger";
-// import { createValidRequestHeaders } from "tests/constants/request-headers";
 import getRestApiGatewayBaseUrl from "tests/helpers/aws-gateway-helper";
-// import { SUPPLIER_LETTERS } from "tests/constants/api-constants";
 import { pollForLetterStatus } from "tests/helpers/poll-for-letters-helper";
 import { pollSupplierAllocatorLogForResolvedSpec } from "tests/helpers/aws-cloudwatch-helper";
 import { getLettersFromQueueViaIndex } from "tests/helpers/generate-fetch-test-data";
-// import {
-//   GetLettersResponse,
-//   GetLettersResponseSchema,
-// } from "../../../lambdas/api-handler/src/contracts/letters";
 import {
   AllocatedLetter,
   AllocatedLetterSchema,
@@ -78,27 +72,6 @@ test.describe("Urgent Letter Priority Tests", () => {
       urgencyNineLetterIds,
       urgencyTenLetterIds,
     );
-
-    // TODO: CCM-15185 should call the endpoint directly to verify the order of letters
-    // const header = createValidRequestHeaders(supplier);
-    // const response = await request.get(`${baseUrl}/${SUPPLIER_LETTERS}`, {
-    //   headers: header,
-    // });
-
-    // expect(response.status()).toBe(200);
-    // const responseBody = await response.json();
-    // expect(responseBody.data.length).toBeGreaterThanOrEqual(1);
-
-    // const getLettersResponse: GetLettersResponse =
-    //   GetLettersResponseSchema.parse(responseBody);
-
-    // const letterIds = getLettersResponse.data.map((letter) => letter.id);
-
-    // verifyIndexPositionOfLetterVariants(
-    //   getLettersResponse,
-    //   urgencyNineLetterIds,
-    //   urgencyTenLetterIds,
-    // );
   });
 });
 
