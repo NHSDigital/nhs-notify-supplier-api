@@ -3,21 +3,23 @@ import { sendSnsEvent } from "tests/helpers/send-sns-event";
 import { createPreparedV1Event } from "tests/helpers/event-fixtures";
 import { randomUUID } from "node:crypto";
 import { logger } from "tests/helpers/pino-logger";
-import { createValidRequestHeaders } from "tests/constants/request-headers";
+// import { createValidRequestHeaders } from "tests/constants/request-headers";
 import getRestApiGatewayBaseUrl from "tests/helpers/aws-gateway-helper";
-import { SUPPLIER_LETTERS } from "tests/constants/api-constants";
+// import { SUPPLIER_LETTERS } from "tests/constants/api-constants";
 import { pollForLetterStatus } from "tests/helpers/poll-for-letters-helper";
 import { pollSupplierAllocatorLogForResolvedSpec } from "tests/helpers/aws-cloudwatch-helper";
-import {
-  GetLettersResponse,
-  GetLettersResponseSchema,
-} from "../../../lambdas/api-handler/src/contracts/letters";
+import { getLettersFromQueueViaIndex } from "tests/helpers/generate-fetch-test-data";
+// import {
+//   GetLettersResponse,
+//   GetLettersResponseSchema,
+// } from "../../../lambdas/api-handler/src/contracts/letters";
 import {
   AllocatedLetter,
   AllocatedLetterSchema,
 } from "../../../lambdas/upsert-letter/src/handler/schemas";
 
-// See group_nhs-notify-supplier-api-dev.tfvars in nhs-notify-internal
+// Values for CI/CD are kept in group_nhs-notify-supplier-api-dev.tfvars in the nhs-notify-internal repo
+// If running locally see default of variant_map in infrastructure/terraform/components/api/variables.tf
 const variantUrgencyMap: Record<string, number> = {
   "digitrials-aspiring": 0,
   "digitrials-dmapp": 1,
@@ -39,8 +41,6 @@ const variantUrgencyMap: Record<string, number> = {
   "notify-standard": 98,
   "notify-standard-colour": 99,
 };
-
-// See group_nhs-notify-supplier-api-dev.tfvars in nhs-notify-internal
 const supplier = "supplier1";
 
 let baseUrl: string;
@@ -68,6 +68,17 @@ test.describe("Urgent Letter Priority Tests", () => {
     await verifyAllocationLogsContainPriority(urgencyNineLetterIds, 9);
     await verifyAllocationLogsContainPriority(urgencyTenLetterIds, 10);
 
+    const lettersFromQueue = await getLettersFromQueueViaIndex(supplier);
+    const letterIdsFromQueue = lettersFromQueue.map(
+      (letter) => letter.letterId,
+    );
+
+    verifyIndexPositionOfLetterVariants(
+      letterIdsFromQueue,
+      urgencyNineLetterIds,
+      urgencyTenLetterIds,
+    );
+
     // TODO: CCM-15185 should call the endpoint directly to verify the order of letters
     // const header = createValidRequestHeaders(supplier);
     // const response = await request.get(`${baseUrl}/${SUPPLIER_LETTERS}`, {
@@ -80,6 +91,8 @@ test.describe("Urgent Letter Priority Tests", () => {
 
     // const getLettersResponse: GetLettersResponse =
     //   GetLettersResponseSchema.parse(responseBody);
+
+    // const letterIds = getLettersResponse.data.map((letter) => letter.id);
 
     // verifyIndexPositionOfLetterVariants(
     //   getLettersResponse,
@@ -120,11 +133,10 @@ async function sendEventsForVariants(variants: string[]) {
 }
 
 function verifyIndexPositionOfLetterVariants(
-  getLettersResponse: GetLettersResponse,
+  letterIds: string[],
   letterIdsLeastUrgency: string[],
   letterIdsHigherUrgency: string[],
 ) {
-  const letterIds = getLettersResponse.data.map((letter) => letter.id);
   for (const leastUrgencyLetterId of letterIdsLeastUrgency) {
     expect(letterIds).toContain(leastUrgencyLetterId); // in case limit param is hit
     const indexToTest = letterIds.indexOf(leastUrgencyLetterId);

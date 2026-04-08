@@ -13,9 +13,20 @@ import {
 } from "../constants/api-constants";
 import { createSupplierData, runCreateLetter } from "./pnpm-helpers";
 import { logger } from "./pino-logger";
+import z from "zod";
 
 const ddb = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(ddb);
+
+export const PendingLetterSchema = z.object({
+  supplierId: z.string(),
+  letterId: z.string(),
+  queueTimestamp: z.string(),
+  visibilityTimestamp: z.string(),
+  queueSortOrderSk: z.string().describe("Secondary index SK"),
+    priority: z.int().min(0).max(99).optional(),
+});
+export type PendingLetter = z.infer<typeof PendingLetterSchema>;
 
 export interface SupplierApiLetters {
   supplierId: string;
@@ -211,3 +222,78 @@ export async function checkLetterQueueTable(
     return [false];
   }
 }
+
+export async function getLettersFromQueueViaIndex(
+  supplierId: string,
+): Promise<PendingLetter[]> {
+  const MAX_ATTEMPTS = 5;
+  const RETRY_DELAY_MS = 10_000;
+
+  try {
+    const params = {
+      TableName: LETTERQUEUE_TABLENAME,
+      IndexName: "queueSortOrder-index",
+      KeyConditionExpression:
+        "supplierId = :supplierId",
+      ExpressionAttributeValues: {
+        ":supplierId": supplierId
+      },
+    };
+
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      const { Items } = await docClient.send(new QueryCommand(params));
+
+      if (Items !== undefined && Items.length > 0) {
+        logger.info(
+          `Queried letter queue table to verify existence for supplier ${supplierId} and found items.`,
+        );
+
+        return z.array(PendingLetterSchema).parse(Items);
+      }
+      if (attempt < MAX_ATTEMPTS) {
+        logger.info(
+          `Retrying get letters from queue for supplierId ${supplierId} in ${RETRY_DELAY_MS}ms`,
+        );
+        await delay(RETRY_DELAY_MS);
+      }
+    }
+    return [];
+  } catch (error) {
+    logger.error({ supplierId, error }, "Letter queue query failed");
+    return [];
+  }
+}
+
+  // async getLetters(
+  //   supplierId: string,
+  //   limit: number,
+  // ): Promise<PendingLetter[]> {
+  //   const letters: PendingLetter[] = [];
+  //   let lastEvaluatedKey: Record<string, unknown> | undefined;
+
+  //   do {
+  //     const result = await this.ddbClient.send(
+  //       new QueryCommand({
+  //         TableName: this.config.letterQueueTableName,
+  //         IndexName: "queueSortOrder-index",
+  //         KeyConditionExpression: "supplierId = :supplierId",
+  //         FilterExpression: "visibilityTimestamp < :now",
+  //         ExpressionAttributeValues: {
+  //           ":supplierId": supplierId,
+  //           ":now": new Date().toISOString(),
+  //         },
+  //         // 1000 is a compromise - a smaller number might result in a lot of round trips, a larger one might
+  //         // entail fetching and then throwing away a lot of data
+  //         Limit: this.config.queryPageSize ?? 1000,
+  //         ExclusiveStartKey: lastEvaluatedKey,
+  //       }),
+  //     );
+
+  //     const page = z.array(PendingLetterSchema).parse(result.Items);
+  //     letters.push(...page);
+
+  //     lastEvaluatedKey = result.LastEvaluatedKey;
+  //   } while (lastEvaluatedKey !== undefined && letters.length < limit);
+
+  //   return letters.slice(0, limit);
+  // }
