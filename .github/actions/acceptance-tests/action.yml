@@ -24,11 +24,13 @@ runs:
 
   steps:
     - name: Fetch terraform output
+      if: ${{ inputs.testType != 'e2e' }}
       uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
       with:
         name: terraform-output-${{ inputs.targetComponent }}
 
     - name: Get Node version
+      if: ${{ inputs.testType != 'e2e' }}
       id: nodejs_version
       shell: bash
       run: |
@@ -40,11 +42,75 @@ runs:
         GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 
     - name: "Set PR NUMBER"
+      if: ${{ inputs.testType == 'e2e' }}
+      id: set_pr_number
       shell: bash
       run: |
-          echo "PR_NUMBER=${{ inputs.targetEnvironment }}" >> $GITHUB_ENV
+        env="${{ inputs.targetEnvironment }}"
+        if [[ "$env" == main ]]; then
+          echo "pr_number=" >> $GITHUB_OUTPUT
+        elif [[ "$env" == pr* ]]; then
+          echo "pr_number=${env#pr}" >> $GITHUB_OUTPUT
+        else
+          echo "pr_number=$env" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Install poetry and e2e test dependencies
+      if: ${{ inputs.testType == 'e2e' }}
+      shell: bash
+      run: |
+        pipx install poetry
+        cd tests/e2e-tests && poetry install
+
+    - name: "Determine if proxy has been deployed"
+      if: ${{ inputs.testType == 'e2e' }}
+      id: check_proxy_deployed
+      env:
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+        PR_NUMBER: ${{ steps.set_pr_number.outputs.pr_number }}
+      shell: bash
+      run: |
+        if [[ -z "$PR_NUMBER" ]]; then
+          echo "No pull request detected; proxy was deployed."
+          echo "proxy_deployed=true" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+
+        branch_name=${GITHUB_HEAD_REF:-$(echo $GITHUB_REF | sed 's#refs/heads/##')}
+
+        labels=$(gh pr view "$PR_NUMBER" --json labels --jq '.labels[].name')
+        echo "Labels on PR #$PR_NUMBER: $labels"
+
+        if echo "$labels" | grep -Fxq 'deploy-proxy'; then
+          echo "proxy_deployed=true" >> $GITHUB_OUTPUT
+        else
+          echo "proxy_deployed=false" >> $GITHUB_OUTPUT
+        fi
 
     - name: Run test - ${{ inputs.testType }}
+      if: ${{ inputs.testType != 'e2e'}}
       shell: bash
+      env:
+        TARGET_ENVIRONMENT: ${{ inputs.targetEnvironment }}
       run: |
         make test-${{ inputs.testType }}
+
+    - name: Run test - e2e
+      if: ${{ inputs.testType == 'e2e' && steps.check_proxy_deployed.outputs.proxy_deployed == 'true'}}
+      shell: bash
+      env:
+        TARGET_ENVIRONMENT: ${{ inputs.targetEnvironment }}
+      run: |
+        echo "$SUPPLIER_API_PRIVATE_KEY" > "${GITHUB_WORKSPACE}/internal-dev-test-1.pem"
+        chmod 600 "${GITHUB_WORKSPACE}/internal-dev-test-1.pem"
+        BASE_PROXY_NAME=nhs-notify-supplier--internal-dev--nhs-notify-supplier
+        if [[ "${{ inputs.targetEnvironment }}" == "main" ]]; then
+          export PROXY_NAME="${BASE_PROXY_NAME}"
+        else
+          export PROXY_NAME="${BASE_PROXY_NAME}-${{ inputs.targetEnvironment }}"
+        fi
+        export API_ENVIRONMENT=internal-dev
+        export NON_PROD_API_KEY="${APIM_API_KEY}"
+        export STATUS_ENDPOINT_API_KEY="${APIM_STATUS_API_KEY}"
+        export NON_PROD_PRIVATE_KEY="${GITHUB_WORKSPACE}/internal-dev-test-1.pem"
+        make .internal-dev-test

@@ -6,7 +6,7 @@
 #   ./dispatch_internal_repo_workflow.sh \
 #     --infraRepoName <repo> \
 #     --releaseVersion <version> \
-#     --targetWorkflow <workflow.yaml> \
+#     --targetWorkflow "deploy.yaml" \
 #     --targetEnvironment <env> \
 #     --targetComponent <component> \
 #     --targetAccountGroup <group> \
@@ -17,7 +17,11 @@
 #     --overrideRoleName <name>
 
 #
-# All arguments are required except terraformAction, and internalRef.
+# Required arguments are:
+# infraRepoName, releaseVersion, targetWorkflow, targetEnvironment, targetComponent, targetAccountGroup.
+#
+# All other arguments are optional.
+#
 # Example:
 #   ./dispatch_internal_repo_workflow.sh \
 #     --infraRepoName "nhs-notify-web-template-management" \
@@ -30,7 +34,9 @@
 #     --internalRef "main" \
 #     --overrides "tf_var=someString" \
 #     --overrideProjectName nhs \
-#     --overrideRoleName nhs-service-iam-role
+#     --overrideRoleName nhs-service-iam-role \
+#     --extraSecretNames '["MY_API_KEY"]'
+
 
 set -e
 
@@ -102,6 +108,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --version) # Version (optional)
       version="$2"
+      shift 2
+      ;;
+    --extraSecretNames) # JSON array of secret names to fetch in the internal repo (optional)
+      extraSecretNames="$2"
       shift 2
       ;;
     *)
@@ -202,6 +212,10 @@ if [[ -z "$version" ]]; then
   version=""
 fi
 
+if [[ -z "$extraSecretNames" ]]; then
+  extraSecretNames=""
+fi
+
 echo "==================== Workflow Dispatch Parameters ===================="
 echo "  infraRepoName:      $infraRepoName"
 echo "  releaseVersion:     $releaseVersion"
@@ -240,6 +254,7 @@ DISPATCH_EVENT=$(jq -ncM \
   --arg boundedContext "$boundedContext" \
   --arg targetDomain "$targetDomain" \
   --arg version "$version" \
+  --argjson extraSecretNames "${extraSecretNames:-null}" \
   '{
     "ref": "'"$internalRef"'",
     "inputs": (
@@ -255,6 +270,7 @@ DISPATCH_EVENT=$(jq -ncM \
       (if $boundedContext != "" then { "boundedContext": $boundedContext } else {} end) +
       (if $targetDomain != "" then { "targetDomain": $targetDomain } else {} end) +
       (if $version != "" then { "version": $version } else {} end) +
+      (if $extraSecretNames != null then { "extraSecretNames": ($extraSecretNames | tojson) } else {} end) +
       (if $targetAccountGroup != "" then { "targetAccountGroup": $targetAccountGroup } else {} end) +
       {
         "releaseVersion": $releaseVersion,
@@ -269,7 +285,7 @@ echo "[INFO] Triggering workflow '$targetWorkflow' in nhs-notify-internal..."
 echo "[DEBUG] Dispatch event payload: $DISPATCH_EVENT"
 
 trigger_response=$(curl -s -L \
-  --fail \
+  -w "\nHTTP_STATUS:%{http_code}" \
   -X POST \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer ${PR_TRIGGER_PAT}" \
@@ -277,8 +293,14 @@ trigger_response=$(curl -s -L \
   "https://api.github.com/repos/NHSDigital/nhs-notify-internal/actions/workflows/$targetWorkflow/dispatches" \
   -d "$DISPATCH_EVENT" 2>&1)
 
-if [[ $? -ne 0 ]]; then
-  echo "[ERROR] Failed to trigger workflow. Response: $trigger_response"
+http_status=$(echo "$trigger_response" | grep "HTTP_STATUS:" | cut -d: -f2)
+body=$(echo "$trigger_response" | grep -v "HTTP_STATUS:")
+
+echo "[DEBUG] HTTP status: $http_status"
+echo "[DEBUG] Response body: $body"
+
+if [[ "$http_status" -lt 200 || "$http_status" -ge 300 ]]; then
+  echo "[ERROR] Failed to trigger workflow. HTTP $http_status. Response: $body"
   exit 1
 fi
 
