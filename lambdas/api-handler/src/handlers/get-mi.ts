@@ -44,40 +44,30 @@ export default function createGetMIHandler(deps: Deps): APIGatewayProxyHandler {
       });
 
       // metric with count 1 specifying the supplier
-      const dimensions: Record<string, string> = { supplier: supplierId };
-      const metric: MetricEntry = {
-        key: MetricStatus.Success,
-        value: 1,
-        unit: Unit.Count,
-      };
-      let emf = buildEMFObject("getMi", dimensions, metric);
-      deps.logger.info(emf);
+      const dimensions: Record<string, string> = {supplierId: supplierId};
+      emitMetric("getMi", dimensions, deps.logger, MetricStatus.Success, 1);
 
       // metric displaying the type/number of lineItems posted per supplier
       dimensions.lineItem = result.data.attributes.lineItem;
-      metric.key = "LineItem per supplier";
-      metric.value = result.data.attributes.quantity;
-      emf = buildEMFObject("getMi", dimensions, metric);
-      deps.logger.info(emf);
+      emitMetric("getMi", dimensions, deps.logger, "LineItem per supplier", result.data.attributes.quantity);
 
       return {
         statusCode: 200,
         body: JSON.stringify(result, null, 2),
       };
     } catch (error) {
-      emitErrorMetric(supplierId, deps.logger);
+      emitMetric("getMi", {supplierId: supplierId}, deps.logger, MetricStatus.Failure, 1);
       return processError(error, commonIds.value.correlationId, deps.logger);
     }
   };
 }
 
-function emitErrorMetric(supplierId: string, logger: pino.Logger) {
-  const dimensions: Record<string, string> = { supplier: supplierId };
+function emitMetric(source: string, dimensions: Record<string, string>, logger: pino.Logger, key: string, value: number){
   const metric: MetricEntry = {
-    key: MetricStatus.Failure,
-    value: 1,
+    key: key,
+    value: value,
     unit: Unit.Count,
   };
-  const emf = buildEMFObject("getMi", dimensions, metric);
+  const emf = buildEMFObject(source, dimensions, metric);
   logger.info(emf);
 }
