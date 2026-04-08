@@ -36,4 +36,29 @@ describe("postMI function", () => {
       },
     });
   });
+
+  it("retrieves the MI from the repository", async () => {
+    const persistedMi = { id: "id1", ...incomingMi };
+
+    const mockRepo = {
+      getMI: jest.fn().mockResolvedValue(persistedMi),
+    };
+
+    const result = await getMI("id1", "supplier1" , mockRepo as any);
+
+    expect(result).toEqual({
+      data: {
+        id: "id1",
+        type: "ManagementInformation",
+        attributes: {
+          lineItem: "envelope-business-standard",
+          timestamp: "2023-11-17T14:27:51.413Z",
+          quantity: 22,
+          specificationId: "spec1",
+          groupId: "group1",
+          stockRemaining: 20_000,
+        },
+      },
+    });
+  });
 });
