@@ -5,6 +5,7 @@ import {
   GetCommand,
   QueryCommand,
 } from "@aws-sdk/lib-dynamodb";
+import z from "zod";
 import {
   LETTERQUEUE_TABLENAME,
   LETTERSTABLENAME,
@@ -13,7 +14,6 @@ import {
 } from "../constants/api-constants";
 import { createSupplierData, runCreateLetter } from "./pnpm-helpers";
 import { logger } from "./pino-logger";
-import z from "zod";
 
 const ddb = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(ddb);
@@ -24,7 +24,7 @@ export const PendingLetterSchema = z.object({
   queueTimestamp: z.string(),
   visibilityTimestamp: z.string(),
   queueSortOrderSk: z.string().describe("Secondary index SK"),
-    priority: z.int().min(0).max(99).optional(),
+  priority: z.int().min(0).max(99).optional(),
 });
 export type PendingLetter = z.infer<typeof PendingLetterSchema>;
 
