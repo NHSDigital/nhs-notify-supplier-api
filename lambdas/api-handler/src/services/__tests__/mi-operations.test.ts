@@ -1,5 +1,5 @@
 import { IncomingMI } from "../../contracts/mi";
-import { postMI } from "../mi-operations";
+import { getMI, postMI } from "../mi-operations";
 
 describe("postMI function", () => {
   const incomingMi: IncomingMI = {
@@ -44,7 +44,7 @@ describe("postMI function", () => {
       getMI: jest.fn().mockResolvedValue(persistedMi),
     };
 
-    const result = await getMI("id1", "supplier1" , mockRepo as any);
+    const result = await getMI("id1", "supplier1", mockRepo as any);
 
     expect(result).toEqual({
       data: {
