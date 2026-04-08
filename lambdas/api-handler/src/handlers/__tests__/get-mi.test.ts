@@ -83,7 +83,7 @@ describe("API Lambda handler", () => {
     const mockedGetMiById = getMiOperation as jest.Mock;
 
     mockedGetMiById.mockImplementation(() => {
-      throw new NotFoundError(ApiErrorDetail.NotFoundMiId);
+      throw new NotFoundError(ApiErrorDetail.NotFoundId);
     });
 
     const event = makeApiGwEvent({

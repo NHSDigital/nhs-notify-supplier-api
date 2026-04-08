@@ -35,7 +35,7 @@ describe("processError", () => {
   });
 
   it("should map NotFoundError to NotFound response", () => {
-    const err = new NotFoundError(ApiErrorDetail.NotFoundLetterId);
+    const err = new NotFoundError(ApiErrorDetail.NotFoundId);
 
     const res = processError(err, undefined, {
       info: jest.fn(),
