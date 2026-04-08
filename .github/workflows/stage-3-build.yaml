@@ -204,13 +204,9 @@ jobs:
         shell: bash
         run: |
           .github/scripts/dispatch_internal_repo_workflow.sh \
-            --infraRepoName "$(echo ${{ github.repository }} | cut -d'/' -f2)" \
             --releaseVersion ${{ github.head_ref || github.ref_name }} \
             --targetWorkflow "publish-supplier-config.yaml" \
             --targetEnvironment "${{ steps.set-environment.outputs.environment_name }}" \
-            --targetComponent "api" \
             --targetAccountGroup "nhs-notify-suppliers-dev" \
-            --overrideProjectName "nhs" \
-            --overrideRoleName "nhs-main-acct-supplier-api-github-deploy" \
             --tableName "supplier-config" \
             --internalRef "feature/CCM-12444-supplier-config-publishing-workflow"
