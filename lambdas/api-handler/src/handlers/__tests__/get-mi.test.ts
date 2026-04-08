@@ -28,7 +28,7 @@ describe("API Lambda handler", () => {
     jest.resetModules();
   });
 
-  it("returns 200 OK and the letter status", async () => {
+  it("returns 200 OK and the MI information", async () => {
     const mockedGetMiById = getMiOperation as jest.Mock;
     mockedGetMiById.mockResolvedValue({
         data:{
@@ -75,7 +75,7 @@ describe("API Lambda handler", () => {
 
     expect(result).toEqual({
       statusCode: 200,
-      body: JSON.stringify(expected),
+      body: JSON.stringify(expected, null, 2),
     });
   });
 
