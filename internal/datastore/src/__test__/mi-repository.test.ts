@@ -66,6 +66,14 @@ describe("MiRepository", () => {
   });
 
   describe("getMi", () => {
+    it("throws an error when fetching MI information that does not exist", async() => {
+      await expect(
+        miRepository.getMI("XXX", "supplier1"),
+      ).rejects.toThrow(
+        "Management Information with id XXX not found for supplier supplier1",
+      );
+    });
+
     it("creates MI with id and timestamps", async () => {
       jest.useFakeTimers();
       // Month is zero-indexed in JS Date
