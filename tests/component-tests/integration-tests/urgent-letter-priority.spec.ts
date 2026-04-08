@@ -104,8 +104,8 @@ test.describe("Urgent Letter Priority Tests", () => {
 
 function getVariantsWithUrgency(urgency: number) {
   const variants = Object.keys(variantUrgencyMap).filter(
-    // eslint-disable-next-line security/detect-object-injection
     // safe has comes from map's keys which are controlled by us
+    // eslint-disable-next-line security/detect-object-injection
     (variant) => variantUrgencyMap[variant] === urgency,
   );
   if (variants.length === 0) {
