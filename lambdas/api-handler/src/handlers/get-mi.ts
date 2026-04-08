@@ -10,8 +10,7 @@ import { assertNotEmpty } from "../utils/validation";
 import { extractCommonIds } from "../utils/common-ids";
 import { Deps } from "../config/deps";
 
-export default function createGetMIHandler(
-  deps: Deps,
+export default function createGetMIHandler(deps: Deps
 ): APIGatewayProxyHandler {
   return async (event) => {
     const commonIds = extractCommonIds(
@@ -37,11 +36,7 @@ export default function createGetMIHandler(
         ),
       );
 
-      const result = await getMIOperation(
-        miId,
-        supplierId,
-        deps.miRepo,
-      );
+      const result = await getMIOperation(miId, supplierId, deps.miRepo);
 
       deps.logger.info({
         description: "Retrieved management information",
