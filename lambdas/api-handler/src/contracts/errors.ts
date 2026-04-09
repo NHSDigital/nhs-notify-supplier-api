@@ -12,7 +12,7 @@ export interface ApiError {
 export enum ApiErrorCode {
   InternalServerError = "NOTIFY_INTERNAL_SERVER_ERROR",
   InvalidRequest = "NOTIFY_INVALID_REQUEST",
-  NotFound = "NOTIFY_LETTER_NOT_FOUND",
+  NotFound = "NOTIFY_NOT_FOUND",
 }
 
 export enum ApiErrorTitle {

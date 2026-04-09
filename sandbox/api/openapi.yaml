@@ -1455,7 +1455,7 @@ components:
           enum:
           - NOTIFY_INTERNAL_SERVER_ERROR
           - NOTIFY_INVALID_REQUEST
-          - NOTIFY_LETTER_NOT_FOUND
+          - NOTIFY_NOT_FOUND
           type: string
         links:
           $ref: "#/components/schemas/listLetters_400_response_errors_inner_links"

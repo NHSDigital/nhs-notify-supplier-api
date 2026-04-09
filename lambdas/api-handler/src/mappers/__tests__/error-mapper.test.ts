@@ -46,7 +46,7 @@ describe("processError", () => {
     expect(JSON.parse(res.body)).toEqual({
       errors: [
         {
-          code: "NOTIFY_LETTER_NOT_FOUND",
+          code: "NOTIFY_NOT_FOUND",
           detail: "No resource found with that ID",
           id: expect.any(String),
           links: {
