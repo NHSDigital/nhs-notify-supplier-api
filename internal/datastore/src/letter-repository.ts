@@ -8,12 +8,7 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 import { ConditionalCheckFailedException } from "@aws-sdk/client-dynamodb";
 import { Logger } from "pino";
-import {
-  InsertLetter,
-  Letter,
-  LetterSchema,
-  UpdateLetter,
-} from "./types";
+import { InsertLetter, Letter, LetterSchema, UpdateLetter } from "./types";
 import LetterNotFoundError from "./errors/letter-not-found-error";
 import LetterAlreadyExistsError from "./errors/letter-already-exists-error";
 
