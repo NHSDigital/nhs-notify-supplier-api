@@ -5,6 +5,7 @@ import {
   GetCommand,
   QueryCommand,
 } from "@aws-sdk/lib-dynamodb";
+import z from "zod";
 import {
   LETTERQUEUE_TABLENAME,
   LETTERSTABLENAME,
@@ -16,6 +17,16 @@ import { logger } from "./pino-logger";
 
 const ddb = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(ddb);
+
+export const PendingLetterSchema = z.object({
+  supplierId: z.string(),
+  letterId: z.string(),
+  queueTimestamp: z.string(),
+  visibilityTimestamp: z.string(),
+  queueSortOrderSk: z.string().describe("Secondary index SK"),
+  priority: z.int().min(0).max(99).optional(),
+});
+export type PendingLetter = z.infer<typeof PendingLetterSchema>;
 
 export interface SupplierApiLetters {
   supplierId: string;
@@ -209,5 +220,46 @@ export async function checkLetterQueueTable(
   } catch (error) {
     logger.error({ supplierId, letterId, error }, "Letter queue query failed");
     return [false];
+  }
+}
+
+export async function getLettersFromQueueViaIndex(
+  supplierId: string,
+): Promise<PendingLetter[]> {
+  const MAX_ATTEMPTS = 5;
+  const RETRY_DELAY_MS = 10_000;
+
+  try {
+    const params = {
+      TableName: LETTERQUEUE_TABLENAME,
+      IndexName: "queueSortOrder-index",
+      KeyConditionExpression: "supplierId = :supplierId",
+      ExpressionAttributeValues: {
+        ":supplierId": supplierId,
+      },
+    };
+
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      const { Items } = await docClient.send(new QueryCommand(params));
+
+      if (Items !== undefined && Items.length > 0) {
+        logger.info(
+          `Queried letter queue table to verify existence for supplier ${supplierId} and found items.`,
+        );
+
+        // assumes no pagination needed as we expect a small number of letters in the queue for the test supplier
+        return z.array(PendingLetterSchema).parse(Items);
+      }
+      if (attempt < MAX_ATTEMPTS) {
+        logger.info(
+          `Retrying get letters from queue for supplierId ${supplierId} in ${RETRY_DELAY_MS}ms`,
+        );
+        await delay(RETRY_DELAY_MS);
+      }
+    }
+    return [];
+  } catch (error) {
+    logger.error({ supplierId, error }, "Letter queue query failed");
+    return [];
   }
 }

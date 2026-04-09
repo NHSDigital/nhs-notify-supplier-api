@@ -17,7 +17,8 @@ export function createPreparedV1Event(overrides: Record<string, unknown> = {}) {
       domainId:
         (overrides.domainId as string) ??
         "fe658e11-0ffc-44f4-8ad6-0fafe75bfeee",
-      letterVariantId: "digitrials-aspiring",
+      letterVariantId:
+        (overrides.letterVariantId as string) ?? "digitrials-aspiring",
       requestId: "request1",
       requestItemId: "requestItem1",
       requestItemPlanId: "requestItemPlan1",

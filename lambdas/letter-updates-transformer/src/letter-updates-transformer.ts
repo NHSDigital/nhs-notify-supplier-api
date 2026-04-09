@@ -9,7 +9,7 @@ import {
   PublishBatchCommand,
   PublishBatchRequestEntry,
 } from "@aws-sdk/client-sns";
-import { LetterEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
+import { LetterStatusChangeEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
 import { MetricEntry, buildEMFObject } from "@internal/helpers";
 import { Letter, LetterSchema } from "@internal/datastore";
 import { mapLetterToCloudEvent } from "@internal/event-builders/src";
@@ -33,7 +33,7 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
       extractPayload(record, deps),
     );
 
-    const cloudEvents: LetterEvent[] = ddbRecords
+    const cloudEvents: LetterStatusChangeEvent[] = ddbRecords
       .filter((record) => filterRecord(record, deps))
       .map((element) => extractNewLetter(element))
       .map((element) => mapLetterToCloudEvent(element, deps.env.EVENT_SOURCE));
@@ -59,7 +59,7 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
   };
 }
 
-function populateEventTypeMap(cloudEvents: LetterEvent[]) {
+function populateEventTypeMap(cloudEvents: LetterStatusChangeEvent[]) {
   const evtMap = new Map<string, number>();
   for (const event of cloudEvents) {
     evtMap.set(event.type, (evtMap.get(event.type) || 0) + 1);
@@ -142,14 +142,14 @@ function extractNewLetter(record: DynamoDBRecord): Letter {
   return LetterSchema.parse(unmarshall(newImage as any));
 }
 
-function* generateBatches(events: LetterEvent[]) {
+function* generateBatches(events: LetterStatusChangeEvent[]) {
   for (let i = 0; i < events.length; i += BATCH_SIZE) {
     yield events.slice(i, i + BATCH_SIZE);
   }
 }
 
 function buildMessage(
-  event: LetterEvent,
+  event: LetterStatusChangeEvent,
   index: number,
 ): PublishBatchRequestEntry {
   return {
