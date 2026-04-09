@@ -78,24 +78,28 @@ export type UpdateLetter = {
   reasonText?: string;
 };
 
-export const PendingLetterSchema = z.object({
+export const PendingLetterSchemaBase = z.object({
   supplierId: idRef(SupplierSchema, "id"),
   letterId: idRef(LetterSchema, "id"),
+  specificationId: z.string(),
+  groupId: z.string(),
+});
+
+export const PendingLetterSchema = PendingLetterSchemaBase.extend({
   queueTimestamp: z.string(),
   visibilityTimestamp: z.string(),
   queueSortOrderSk: z.string().describe("Secondary index SK"),
-  specificationId: z.string(),
-  groupId: z.string(),
   priority: z.int().min(0).max(99).optional(),
   ttl: z.int(),
 });
 
-export type PendingLetter = z.infer<typeof PendingLetterSchema>;
+export const InsertPendingLetter = PendingLetterSchemaBase.extend({
+  priority: z.int().min(0).max(99).optional(),
+});
 
-export type InsertPendingLetter = Omit<
-  PendingLetter,
-  "ttl" | "queueTimestamp" | "visibilityTimestamp" | "queueSortOrderSk"
->;
+export type PendingLetter = z.infer<typeof PendingLetterSchema>;
+export type PendingLetterBase = z.infer<typeof PendingLetterSchemaBase>;
+export type InsertPendingLetter = z.infer<typeof InsertPendingLetter>;
 
 export const MISchemaBase = z.object({
   id: z.string(),

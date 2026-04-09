@@ -22,16 +22,19 @@ locals {
   destination_arn = "arn:aws:logs:${var.region}:${var.shared_infra_account_id}:destination:nhs-main-obs-firehose-logs"
 
   common_lambda_env_vars = {
-    APIM_CORRELATION_HEADER    = "nhsd-correlation-id",
-    DOWNLOAD_URL_TTL_SECONDS   = 60
-    EVENT_SOURCE               = "/data-plane/supplier-api/${var.group}/${var.environment}/letters"
-    LETTER_TTL_HOURS           = 12960, # 18 months * 30 days * 24 hours
-    LETTERS_TABLE_NAME         = aws_dynamodb_table.letters.name,
-    MI_TABLE_NAME              = aws_dynamodb_table.mi.name,
-    MI_TTL_HOURS               = 2160 # 90 days * 24 hours
-    SNS_TOPIC_ARN              = "${module.eventsub.sns_topic.arn}",
-    SUPPLIER_CONFIG_TABLE_NAME = aws_dynamodb_table.supplier-configuration.name
-    SUPPLIER_ID_HEADER         = "nhsd-supplier-id",
+    APIM_CORRELATION_HEADER         = "nhsd-correlation-id",
+    DOWNLOAD_URL_TTL_SECONDS        = 60
+    EVENT_SOURCE                    = "/data-plane/supplier-api/${var.group}/${var.environment}/letters"
+    LETTER_TTL_HOURS                = 12960, # 18 months * 30 days * 24 hours
+    LETTER_QUEUE_TABLE_NAME         = aws_dynamodb_table.letter_queue.name,
+    LETTER_QUEUE_TTL_HOURS          = 168  # 7 days * 24 hours
+    LETTER_QUEUE_VISIBILITY_TIMEOUT = 300, # 5 minutes * 60 seconds
+    LETTERS_TABLE_NAME              = aws_dynamodb_table.letters.name,
+    MI_TABLE_NAME                   = aws_dynamodb_table.mi.name,
+    MI_TTL_HOURS                    = 2160 # 90 days * 24 hours
+    SNS_TOPIC_ARN                   = "${module.eventsub.sns_topic.arn}",
+    SUPPLIER_CONFIG_TABLE_NAME      = aws_dynamodb_table.supplier-configuration.name
+    SUPPLIER_ID_HEADER              = "nhsd-supplier-id",
   }
 
   core_pdf_bucket_arn        = "arn:aws:s3:::comms-${var.core_account_id}-eu-west-2-${var.core_environment}-api-stg-pdf-pipeline"
