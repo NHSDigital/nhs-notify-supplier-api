@@ -6,6 +6,7 @@ import createPatchLetterHandler from "./handlers/patch-letter";
 import createPostLettersHandler from "./handlers/post-letters";
 import createTransformAmendmentEventHandler from "./handlers/amendment-event-transformer";
 import createPostMIHandler from "./handlers/post-mi";
+import createGetMIHandler from "./handlers/get-mi";
 import createGetStatusHandler from "./handlers/get-status";
 
 const container = createDependenciesContainer();
@@ -19,4 +20,5 @@ export const transformAmendmentEvent =
 export const postLetters = createPostLettersHandler(container);
 
 export const postMI = createPostMIHandler(container);
+export const getMI = createGetMIHandler(container);
 export const getStatus = createGetStatusHandler(container);
