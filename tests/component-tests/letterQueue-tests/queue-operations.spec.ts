@@ -7,13 +7,17 @@ import {
 import { logger } from "tests/helpers/pino-logger";
 import { sendSnsBatchEvent, sendSnsEvent } from "tests/helpers/send-sns-event";
 import {
-  pollUpsertLetterLogForWarning,
+  pollUpsertLetterLogForError,
   supplierIdFromSupplierAllocatorLog,
 } from "tests/helpers/aws-cloudwatch-helper";
 import getRestApiGatewayBaseUrl from "tests/helpers/aws-gateway-helper";
 import { SUPPLIER_LETTERS } from "tests/constants/api-constants";
 import { supplierDataSetup } from "tests/helpers/suppliers-setup-helper";
-import { checkLetterQueueTable } from "tests/helpers/generate-fetch-test-data";
+import {
+  checkLetterQueueTable,
+  getLetterFromQueueById,
+} from "tests/helpers/generate-fetch-test-data";
+import { createValidRequestHeaders } from "../../constants/request-headers";
 import {
   patchRequestHeaders,
   patchValidRequestBody,
@@ -102,6 +106,70 @@ test.describe("Letter Queue Tests", () => {
     expect(letterExists).toBe(true);
     expect(itemCount).toBe(1);
 
-    await pollUpsertLetterLogForWarning("Letter already exists", letterId);
+    await pollUpsertLetterLogForError(
+      `Letter with id ${letterId} already exists for supplier ${supplierId}"`,
+      letterId,
+    );
+  });
+
+  test("Verify if VisibilityTimeStamp is updated when Get /letters endpoint is called and subsequent calls returns no data until VisibilityTimeStamp is reached", async ({
+    request,
+  }) => {
+    const letterId = randomUUID();
+    logger.info(`Sending event with domainId: ${letterId}`);
+    const preparedEvent = createPreparedV1Event({ domainId: letterId });
+    const response = await sendSnsEvent(preparedEvent);
+
+    expect(response.MessageId).toBeTruthy();
+
+    const supplierId = await supplierIdFromSupplierAllocatorLog(letterId);
+
+    await supplierDataSetup(supplierId);
+
+    const letters = await getLetterFromQueueById(supplierId, letterId);
+    expect(letters).toHaveLength(1);
+    const letter = letters[0];
+    expect(letter.visibilityTimestamp).toBe(letter.queueTimestamp);
+    logger.info(
+      "Visibility timestamp is same as queue timestamp before calling Get /letters endpoint",
+    );
+
+    // call get letters endpoint which should update the visibility timestamp
+    const header = createValidRequestHeaders(supplierId);
+    const getLettersResponse = await request.get(
+      `${baseUrl}/${SUPPLIER_LETTERS}`,
+      {
+        headers: header,
+      },
+    );
+
+    expect(getLettersResponse.status()).toBe(200);
+    const currentTimeWithTimeOut = Math.floor(
+      (Date.now() + 5 * 60 * 1000) / 1000,
+    );
+
+    logger.info(
+      "Called Get /letters endpoint verify visibility timestamp is updated and subsequent calls returns no data until visibility timestamp is reached",
+    );
+    const lettersAfterGet = await getLetterFromQueueById(supplierId, letterId);
+    const visibilityTimestampAfterGet = Math.floor(
+      new Date(lettersAfterGet[0].visibilityTimestamp).getTime() / 1000,
+    );
+
+    // allow a 1 second tolerance
+    expect(
+      Math.abs(visibilityTimestampAfterGet - currentTimeWithTimeOut),
+    ).toBeLessThanOrEqual(1);
+
+    const getLettersWithInVisibility = await request.get(
+      `${baseUrl}/${SUPPLIER_LETTERS}`,
+      {
+        headers: header,
+      },
+    );
+
+    expect(getLettersWithInVisibility.status()).toBe(200);
+    const responseBody = await getLettersWithInVisibility.json();
+    expect(responseBody.data).toHaveLength(0);
   });
 });
