@@ -74,7 +74,7 @@ export const getLetterById = async (
     letter = await letterRepo.getLetterById(supplierId, letterId);
   } catch (error) {
     if (error instanceof LetterNotFoundError) {
-      throw new NotFoundError(ApiErrorDetail.NotFoundLetterId);
+      throw new NotFoundError(ApiErrorDetail.NotFoundId);
     }
     throw error;
   }
@@ -98,7 +98,7 @@ export const getLetterDataUrl = async (
     );
   } catch (error) {
     if (error instanceof LetterNotFoundError) {
-      throw new NotFoundError(ApiErrorDetail.NotFoundLetterId);
+      throw new NotFoundError(ApiErrorDetail.NotFoundId);
     }
     throw error;
   }

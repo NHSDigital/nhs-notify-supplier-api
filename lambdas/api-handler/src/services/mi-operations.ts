@@ -3,13 +3,7 @@ import { GetMIResponse, IncomingMI, PostMIResponse } from "../contracts/mi";
 import { mapToGetMIResponse, mapToPostMIResponse } from "../mappers/mi-mapper";
 import { ApiErrorDetail } from "../contracts/errors";
 import NotFoundError from "../errors/not-found-error";
-
-function isNotFoundError(error: any) {
-  return (
-    error instanceof Error &&
-    /^Management Information with id \w+ not found for supplier \w+$/.test(error.message)
-  );
-}
+import MiNotFoundError from "@internal/datastore/src/errors/letter-not-found-error";
 
 export const postMI = async (
   incomingMi: IncomingMI,
@@ -28,7 +22,7 @@ export const getMI = async (
   try {
     mi = await miRepo.getMI(miId, supplierId);
   } catch (error) {
-    if (isNotFoundError(error)) {
+    if (error instanceof MiNotFoundError) {
       throw new NotFoundError(ApiErrorDetail.NotFoundId);
     }
     throw error;
