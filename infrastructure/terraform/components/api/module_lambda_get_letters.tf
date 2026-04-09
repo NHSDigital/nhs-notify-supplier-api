@@ -63,11 +63,12 @@ data "aws_iam_policy_document" "get_letters_lambda" {
       "dynamodb:GetItem",
       "dynamodb:Query",
       "dynamodb:Scan",
+      "dynamodb:UpdateItem",
     ]
 
     resources = [
-      aws_dynamodb_table.letters.arn,
-      "${aws_dynamodb_table.letters.arn}/index/supplierStatus-index"
+      aws_dynamodb_table.letter_queue.arn,
+      "${aws_dynamodb_table.letter_queue.arn}/index/queueSortOrder-index"
     ]
   }
 }
