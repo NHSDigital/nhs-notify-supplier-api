@@ -1,0 +1,31 @@
+{
+  "clientId": "nces",
+  "constraints": {
+    "blackCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 20
+    },
+    "deliveryDays": {
+      "operator": "LESS_THAN",
+      "value": 1
+    },
+    "sheets": {
+      "operator": "LESS_THAN",
+      "value": 4
+    },
+    "sides": {
+      "operator": "LESS_THAN",
+      "value": 8
+    }
+  },
+  "description": "Same Day, Whitemail, Booklet",
+  "id": "nces-abnormal-results",
+  "name": "Cervical Screening Abnormal Results",
+  "packSpecificationIds": [
+    "nces-abnormal-results"
+  ],
+  "status": "INT",
+  "supplierId": "synertec",
+  "type": "STANDARD",
+  "volumeGroupId": "sameday"
+}

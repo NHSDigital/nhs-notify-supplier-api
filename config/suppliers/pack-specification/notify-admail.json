@@ -1,0 +1,54 @@
+{
+  "assembly": {
+    "duplex": true,
+    "envelopeId": "economy-c5",
+    "features": [
+      "ADMAIL"
+    ],
+    "paper": {
+      "colour": "WHITE",
+      "id": "paper-std-white-80",
+      "name": "Standard White 80gsm",
+      "recycled": true,
+      "size": "A4",
+      "weightGSM": 80
+    },
+    "printColour": "BLACK"
+  },
+  "billingId": "admail",
+  "constraints": {
+    "blackCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 20
+    },
+    "colourCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 20
+    },
+    "deliveryDays": {
+      "operator": "LESS_THAN",
+      "value": 3
+    },
+    "sheets": {
+      "operator": "LESS_THAN",
+      "value": 5
+    },
+    "sides": {
+      "operator": "LESS_THAN",
+      "value": 10
+    }
+  },
+  "createdAt": "2026-01-12T00:00:00.000Z",
+  "description": "Admail economy tariff, B&W",
+  "id": "notify-admail",
+  "name": "Admail",
+  "postage": {
+    "id": "admail",
+    "maxThicknessMm": 5,
+    "maxWeightGrams": 100,
+    "size": "STANDARD"
+  },
+  "status": "PROD",
+  "updatedAt": "2026-01-12T00:00:00.000Z",
+  "version": 2
+}

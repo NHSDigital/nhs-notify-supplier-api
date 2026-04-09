@@ -1,0 +1,31 @@
+{
+  "clientId": "nces",
+  "constraints": {
+    "blackCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 20
+    },
+    "deliveryDays": {
+      "operator": "LESS_THAN",
+      "value": 3
+    },
+    "sheets": {
+      "operator": "LESS_THAN",
+      "value": 5
+    },
+    "sides": {
+      "operator": "LESS_THAN",
+      "value": 10
+    }
+  },
+  "description": "Braille, Whitemail",
+  "id": "nces-standard-braille",
+  "name": "Cervical Screening Standard Braille Letters",
+  "packSpecificationIds": [
+    "notify-braille-whitemail"
+  ],
+  "status": "INT",
+  "supplierId": "synertec",
+  "type": "BRAILLE",
+  "volumeGroupId": "accessible"
+}

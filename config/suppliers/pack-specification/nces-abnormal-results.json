@@ -1,0 +1,53 @@
+{
+  "assembly": {
+    "duplex": true,
+    "envelopeId": "first-c5-whitemail",
+    "features": [
+      "SAME_DAY"
+    ],
+    "insertIds": [
+      "CSP15"
+    ],
+    "paper": {
+      "colour": "WHITE",
+      "id": "paper-std-white-80",
+      "name": "Standard White 80gsm",
+      "recycled": true,
+      "size": "A4",
+      "weightGSM": 80
+    },
+    "printColour": "BLACK"
+  },
+  "billingId": "sameday-insert-c5",
+  "constraints": {
+    "blackCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 20
+    },
+    "deliveryDays": {
+      "operator": "LESS_THAN",
+      "value": 1
+    },
+    "sheets": {
+      "operator": "LESS_THAN",
+      "value": 4
+    },
+    "sides": {
+      "operator": "LESS_THAN",
+      "value": 8
+    }
+  },
+  "createdAt": "2026-01-12T00:00:00.000Z",
+  "id": "nces-abnormal-results",
+  "name": "NCES Abnormal Results",
+  "postage": {
+    "deliveryDays": 1,
+    "id": "first-class",
+    "maxThicknessMm": 5,
+    "maxWeightGrams": 100,
+    "size": "STANDARD"
+  },
+  "status": "INT",
+  "updatedAt": "2026-01-12T00:00:00.000Z",
+  "version": 1
+}
