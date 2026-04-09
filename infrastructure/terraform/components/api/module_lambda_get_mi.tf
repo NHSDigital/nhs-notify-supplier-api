@@ -58,6 +58,7 @@ data "aws_iam_policy_document" "get_mi_lambda" {
 
     actions = [
       "dynamodb:GetItem",
+      "dynamodb:Query"
     ]
 
     resources = [
