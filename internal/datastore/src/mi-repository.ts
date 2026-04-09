@@ -6,6 +6,7 @@ import {
 import { Logger } from "pino";
 import { randomUUID } from "node:crypto";
 import { MI, MISchema } from "./types";
+import MiNotFoundError from "./errors/mi-not-found-error";
 
 export type MIRepositoryConfig = {
   miTableName: string;
@@ -53,9 +54,7 @@ export class MIRepository {
     );
 
     if (!result.Item) {
-      throw new Error(
-        `Management Information with id ${miId} not found for supplier ${supplierId}`,
-      );
+      throw new MiNotFoundError(supplierId, miId);
     }
 
     return MISchema.parse(result.Item);

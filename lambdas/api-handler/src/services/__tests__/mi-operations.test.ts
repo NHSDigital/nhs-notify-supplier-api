@@ -38,8 +38,19 @@ describe("postMI function", () => {
       },
     });
   });
+});
 
+describe("getMI function", () => {
   it("retrieves the MI from the repository", async () => {
+  const incomingMi: IncomingMI = {
+    lineItem: "envelope-business-standard",
+    timestamp: "2023-11-17T14:27:51.413Z",
+    quantity: 22,
+    specificationId: "spec1",
+    groupId: "group1",
+    stockRemaining: 20_000,
+    supplierId: "supplier1",
+  };
     const persistedMi = { id: "id1", ...incomingMi };
 
     const mockRepo = {
@@ -68,7 +79,7 @@ describe("postMI function", () => {
     const mockRepo = {
       getMI: jest
         .fn()
-        .mockRejectedValue(new MiNotFoundError("miId1", "supplier1")),
+        .mockRejectedValue(new MiNotFoundError("supplier1", "miId1")),
     };
 
     await expect(
