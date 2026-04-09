@@ -8,9 +8,9 @@ import {
 } from "./db";
 import LetterQueueRepository from "../letter-queue-repository";
 import { InsertPendingLetter } from "../types";
-import { LetterAlreadyExistsError } from "../letter-already-exists-error";
+import LetterAlreadyExistsError from "../errors/letter-already-exists-error";
 import { createTestLogger } from "./logs";
-import { LetterDoesNotExistError } from "../letter-does-not-exist-error";
+import LetterNotFoundError from "../errors/letter-not-found-error";
 
 function createLetter(
   overrides: Partial<InsertPendingLetter> = {},
@@ -133,7 +133,7 @@ describe("LetterQueueRepository", () => {
     it("throws an error when the letter does not exist", async () => {
       await expect(
         letterQueueRepository.deleteLetter("supplier1", "letter1"),
-      ).rejects.toThrow(LetterDoesNotExistError);
+      ).rejects.toThrow(LetterNotFoundError);
     });
 
     it("rethrows errors from DynamoDB when deleting a letter", async () => {

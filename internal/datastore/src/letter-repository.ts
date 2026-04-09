@@ -9,7 +9,8 @@ import {
 import { ConditionalCheckFailedException } from "@aws-sdk/client-dynamodb";
 import { Logger } from "pino";
 import { InsertLetter, Letter, LetterSchema, UpdateLetter } from "./types";
-import { LetterAlreadyExistsError } from "./letter-already-exists-error";
+import LetterNotFoundError from "./errors/letter-not-found-error";
+import LetterAlreadyExistsError from "./errors/letter-already-exists-error";
 
 export type PagingOptions = Partial<{
   exclusiveStartKey: Record<string, any>;
@@ -103,9 +104,7 @@ export class LetterRepository {
     );
 
     if (!result.Item) {
-      throw new Error(
-        `Letter with id ${letterId} not found for supplier ${supplierId}`,
-      );
+      throw new LetterNotFoundError(supplierId, letterId);
     }
     return LetterSchema.parse(result.Item);
   }

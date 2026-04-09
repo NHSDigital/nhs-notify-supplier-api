@@ -7,17 +7,11 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { SendMessageBatchCommand } from "@aws-sdk/client-sqs";
+import LetterNotFoundError from "@internal/datastore/src/errors/letter-not-found-error";
 import NotFoundError from "../errors/not-found-error";
 import { UpdateLetterCommand } from "../contracts/letters";
 import { ApiErrorDetail } from "../contracts/errors";
 import { Deps } from "../config/deps";
-
-function isNotFoundError(error: any) {
-  return (
-    error instanceof Error &&
-    /^Letter with id \w+ not found for supplier \w+$/.test(error.message)
-  );
-}
 
 async function getDownloadUrl(
   s3Uri: string,
@@ -79,7 +73,7 @@ export const getLetterById = async (
   try {
     letter = await letterRepo.getLetterById(supplierId, letterId);
   } catch (error) {
-    if (isNotFoundError(error)) {
+    if (error instanceof LetterNotFoundError) {
       throw new NotFoundError(ApiErrorDetail.NotFoundLetterId);
     }
     throw error;
@@ -103,7 +97,7 @@ export const getLetterDataUrl = async (
       deps.env.DOWNLOAD_URL_TTL_SECONDS,
     );
   } catch (error) {
-    if (isNotFoundError(error)) {
+    if (error instanceof LetterNotFoundError) {
       throw new NotFoundError(ApiErrorDetail.NotFoundLetterId);
     }
     throw error;

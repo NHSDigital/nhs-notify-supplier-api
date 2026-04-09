@@ -1,7 +1,7 @@
 import {
   Letter,
   LetterAlreadyExistsError,
-  LetterDoesNotExistError,
+  LetterNotFoundError,
   LetterQueueRepository,
 } from "@internal/datastore";
 import { mockDeep } from "jest-mock-extended";
@@ -192,7 +192,7 @@ describe("update-letter-queue Lambda", () => {
       const newLetter1 = generateLetter("ACCEPTED", { id: "1" });
       const newLetter2 = generateLetter("ACCEPTED", { id: "2" });
       (mockedDeps.letterQueueRepository.deleteLetter as jest.Mock)
-        .mockRejectedValueOnce(new LetterDoesNotExistError("supplier1", "1"))
+        .mockRejectedValueOnce(new LetterNotFoundError("supplier1", "1"))
         .mockResolvedValueOnce({});
 
       const testData = generateKinesisEvent([
@@ -338,7 +338,7 @@ describe("update-letter-queue Lambda", () => {
       const newLetter1 = generateLetter("ACCEPTED", { id: "1" });
       const newLetter2 = generateLetter("ACCEPTED", { id: "2" });
       (mockedDeps.letterQueueRepository.deleteLetter as jest.Mock)
-        .mockRejectedValueOnce(new LetterDoesNotExistError("supplier1", "1"))
+        .mockRejectedValueOnce(new LetterNotFoundError("supplier1", "1"))
         .mockResolvedValueOnce({});
 
       const testData = generateKinesisEvent([
