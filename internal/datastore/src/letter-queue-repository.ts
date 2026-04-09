@@ -13,8 +13,8 @@ import {
   PendingLetterBase,
   PendingLetterSchema,
 } from "./types";
-import { LetterAlreadyExistsError } from "./letter-already-exists-error";
-import { LetterDoesNotExistError } from "./letter-does-not-exist-error";
+import LetterAlreadyExistsError from "./errors/letter-already-exists-error";
+import LetterNotFoundError from "./errors/letter-not-found-error";
 
 type LetterQueueRepositoryConfig = {
   letterQueueTableName: string;
@@ -87,7 +87,7 @@ export default class LetterQueueRepository {
         error instanceof Error &&
         error.name === "ConditionalCheckFailedException"
       ) {
-        throw new LetterDoesNotExistError(supplierId, letterId);
+        throw new LetterNotFoundError(supplierId, letterId);
       }
       throw error;
     }

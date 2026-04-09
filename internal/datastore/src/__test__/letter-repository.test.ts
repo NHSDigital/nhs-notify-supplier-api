@@ -8,7 +8,7 @@ import {
 import { LetterRepository } from "../letter-repository";
 import { InsertLetter, Letter, UpdateLetter } from "../types";
 import { createTestLogger } from "./logs";
-import { LetterAlreadyExistsError } from "../letter-already-exists-error";
+import LetterAlreadyExistsError from "../errors/letter-already-exists-error";
 
 function createLetter(
   supplierId: string,
@@ -140,7 +140,7 @@ describe("LetterRepository", () => {
     await expect(
       letterRepository.getLetterById("supplier1", "letter1"),
     ).rejects.toThrow(
-      "Letter with id letter1 not found for supplier supplier1",
+      "Letter not found: supplierId=supplier1, letterId=letter1",
     );
   });
 

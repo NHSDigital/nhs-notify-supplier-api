@@ -3,6 +3,7 @@ import pino from "pino";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { S3Client } from "@aws-sdk/client-s3";
 import { SQSClient } from "@aws-sdk/client-sqs";
+import LetterNotFoundError from "@internal/datastore/src/errors/letter-not-found-error";
 import {
   enqueueLetterUpdateRequests,
   getLetterById,
@@ -124,13 +125,11 @@ describe("getLetterById", () => {
     const mockRepo = {
       getLetterById: jest
         .fn()
-        .mockRejectedValue(
-          new Error("Letter with id l1 not found for supplier s1"),
-        ),
+        .mockRejectedValue(new LetterNotFoundError("supplier1", "letter1")),
     };
 
     await expect(
-      getLetterById("supplierid", "letter1", mockRepo as any),
+      getLetterById("supplier1", "letter1", mockRepo as any),
     ).rejects.toThrow("No resource found with that ID");
   });
 
@@ -191,9 +190,7 @@ describe("getLetterDataUrl function", () => {
     deps.letterRepo = {
       getLetterById: jest
         .fn()
-        .mockRejectedValue(
-          new Error("Letter with id l1 not found for supplier s1"),
-        ),
+        .mockRejectedValue(new LetterNotFoundError("supplier1", "letter42")),
     } as unknown as LetterRepository;
 
     await expect(
