@@ -1,18 +1,17 @@
-import { LetterBase, LetterRepository } from "@internal/datastore";
+import {
+  LetterBase,
+  LetterQueueRepository,
+  LetterRepository,
+  PendingLetterBase,
+} from "@internal/datastore";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { SendMessageBatchCommand } from "@aws-sdk/client-sqs";
+import LetterNotFoundError from "@internal/datastore/src/errors/letter-not-found-error";
 import NotFoundError from "../errors/not-found-error";
 import { UpdateLetterCommand } from "../contracts/letters";
 import { ApiErrorDetail } from "../contracts/errors";
 import { Deps } from "../config/deps";
-
-function isNotFoundError(error: any) {
-  return (
-    error instanceof Error &&
-    /^Letter with id \w+ not found for supplier \w+$/.test(error.message)
-  );
-}
 
 async function getDownloadUrl(
   s3Uri: string,
@@ -31,13 +30,37 @@ async function getDownloadUrl(
   return getSignedUrl(s3Client, command, { expiresIn: expiry });
 }
 
-export const getLettersForSupplier = async (
+function mapPendingLetterToLetterBase(pending: PendingLetterBase): LetterBase {
+  return {
+    id: pending.letterId,
+    status: "PENDING",
+    specificationId: pending.specificationId,
+    groupId: pending.groupId,
+  };
+}
+
+export const getPendingLetters = async (
   supplierId: string,
-  status: string,
+
   limit: number,
-  letterRepo: LetterRepository,
+  letterQueueRepo: LetterQueueRepository,
+  visibilityTimeout: number,
 ): Promise<LetterBase[]> => {
-  return letterRepo.getLettersBySupplier(supplierId, status, limit);
+  const CONCURRENCY = 5;
+
+  const pendingLetters = await letterQueueRepo.getLetters(supplierId, limit);
+  const timestamp = new Date(Date.now() + visibilityTimeout * 1000);
+
+  for (let i = 0; i < pendingLetters.length; i += CONCURRENCY) {
+    const window = pendingLetters.slice(i, i + CONCURRENCY);
+    await Promise.all(
+      window.map((letter) =>
+        letterQueueRepo.updateVisibilityTimestamp(letter, timestamp),
+      ),
+    );
+  }
+
+  return pendingLetters.map((letter) => mapPendingLetterToLetterBase(letter));
 };
 
 export const getLetterById = async (
@@ -50,8 +73,8 @@ export const getLetterById = async (
   try {
     letter = await letterRepo.getLetterById(supplierId, letterId);
   } catch (error) {
-    if (isNotFoundError(error)) {
-      throw new NotFoundError(ApiErrorDetail.NotFoundId);
+    if (error instanceof LetterNotFoundError) {
+      throw new NotFoundError(ApiErrorDetail.NotFoundLetterId);
     }
     throw error;
   }
@@ -74,8 +97,8 @@ export const getLetterDataUrl = async (
       deps.env.DOWNLOAD_URL_TTL_SECONDS,
     );
   } catch (error) {
-    if (isNotFoundError(error)) {
-      throw new NotFoundError(ApiErrorDetail.NotFoundId);
+    if (error instanceof LetterNotFoundError) {
+      throw new NotFoundError(ApiErrorDetail.NotFoundLetterId);
     }
     throw error;
   }

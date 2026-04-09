@@ -1,6 +1,6 @@
 import { SQSBatchItemFailure, SQSEvent, SQSHandler } from "aws-lambda";
 import { PublishCommand } from "@aws-sdk/client-sns";
-import { LetterEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
+import { LetterStatusChangeEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
 import { MetricEntry, MetricStatus, buildEMFObject } from "@internal/helpers";
 import { mapLetterToCloudEvent } from "@internal/event-builders/src";
 import { Unit } from "aws-embedded-metrics";
@@ -66,7 +66,7 @@ export default function createTransformAmendmentEventHandler(
 }
 
 function buildSnsCommand(
-  letterEvent: LetterEvent,
+  letterEvent: LetterStatusChangeEvent,
   topicArn: string,
 ): PublishCommand {
   return new PublishCommand({

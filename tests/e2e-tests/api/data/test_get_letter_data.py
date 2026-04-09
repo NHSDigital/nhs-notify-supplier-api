@@ -45,15 +45,3 @@ def test_404_letter_does_not_exist(url, bearer_token):
     ErrorHandler.handle_retry(get_message_response)
     assert get_message_response.status_code == 404
     assert get_message_response.json().get("errors")[0].get("detail") == "No resource found with that ID"
-
-@pytest.mark.test
-@pytest.mark.devtest
-@pytest.mark.inttest
-@pytest.mark.prodtest
-def test_500_letter_does_not_exist(url, bearer_token):
-    letter_id = "00000000-0000-0000-0000-000000000000"
-    headers = Generators.generate_valid_headers(bearer_token.value)
-    get_message_response = requests.get(f"{url}/{LETTERS_ENDPOINT}/{letter_id}/data", headers=headers)
-
-    ErrorHandler.handle_retry(get_message_response)
-    assert get_message_response.status_code == 500

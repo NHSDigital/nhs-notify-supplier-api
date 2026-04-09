@@ -25,6 +25,11 @@ const localConfig: PlaywrightTestConfig = {
       testDir: path.resolve(__dirname, "../component-tests/letterQueue-tests"),
       testMatch: "**/*.spec.ts",
     },
+    {
+      name: "integration-tests",
+      testDir: path.resolve(__dirname, "../component-tests/integration-tests"),
+      testMatch: "**/*.spec.ts",
+    },
   ],
 };
 

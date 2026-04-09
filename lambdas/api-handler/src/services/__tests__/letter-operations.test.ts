@@ -3,11 +3,12 @@ import pino from "pino";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { S3Client } from "@aws-sdk/client-s3";
 import { SQSClient } from "@aws-sdk/client-sqs";
+import LetterNotFoundError from "@internal/datastore/src/errors/letter-not-found-error";
 import {
   enqueueLetterUpdateRequests,
   getLetterById,
   getLetterDataUrl,
-  getLettersForSupplier,
+  getPendingLetters,
 } from "../letter-operations";
 import { UpdateLetterCommand } from "../../contracts/letters";
 import { Deps } from "../../config/deps";
@@ -45,34 +46,53 @@ function makeLetter(id: string, status: Letter["status"]): Letter {
   };
 }
 
-describe("getLetterIdsForSupplier", () => {
+afterEach(async () => {
+  jest.useRealTimers();
+});
+
+describe("getPendingLetters", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-
-  it("returns letter IDs from the repository", async () => {
+  it("returns letters from the letter queue repository", async () => {
+    jest.useFakeTimers().setSystemTime(new Date("2026-03-04T13:15:45.000Z"));
     const mockRepo = {
-      getLettersBySupplier: jest.fn().mockResolvedValue([
-        { id: "id1", status: "PENDING", specificationId: "s1" },
-        { id: "id2", status: "PENDING", specificationId: "s1" },
+      getLetters: jest.fn().mockResolvedValue([
+        {
+          supplierId: "supplier1",
+          letterId: "id1",
+          specificationId: "s1",
+          groupId: "g1",
+        },
+        {
+          supplierId: "supplier1",
+          letterId: "id2",
+          specificationId: "s1",
+          groupId: "g1",
+        },
       ]),
+      updateVisibilityTimestamp: jest.fn(),
     };
-
-    const result = await getLettersForSupplier(
+    const result = await getPendingLetters(
       "supplier1",
-      "PENDING",
       10,
       mockRepo as any,
+      600,
     );
-
-    expect(mockRepo.getLettersBySupplier).toHaveBeenCalledWith(
-      "supplier1",
-      "PENDING",
-      10,
+    expect(mockRepo.getLetters).toHaveBeenCalledWith("supplier1", 10);
+    expect(mockRepo.updateVisibilityTimestamp).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ supplierId: "supplier1", letterId: "id1" }),
+      new Date("2026-03-04T13:25:45.000Z"),
+    );
+    expect(mockRepo.updateVisibilityTimestamp).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ supplierId: "supplier1", letterId: "id2" }),
+      new Date("2026-03-04T13:25:45.000Z"),
     );
     expect(result).toEqual([
-      { id: "id1", status: "PENDING", specificationId: "s1" },
-      { id: "id2", status: "PENDING", specificationId: "s1" },
+      { id: "id1", status: "PENDING", specificationId: "s1", groupId: "g1" },
+      { id: "id2", status: "PENDING", specificationId: "s1", groupId: "g1" },
     ]);
   });
 });
@@ -105,13 +125,11 @@ describe("getLetterById", () => {
     const mockRepo = {
       getLetterById: jest
         .fn()
-        .mockRejectedValue(
-          new Error("Letter with id l1 not found for supplier s1"),
-        ),
+        .mockRejectedValue(new LetterNotFoundError("supplier1", "letter1")),
     };
 
     await expect(
-      getLetterById("supplierid", "letter1", mockRepo as any),
+      getLetterById("supplier1", "letter1", mockRepo as any),
     ).rejects.toThrow("No resource found with that ID");
   });
 
@@ -172,9 +190,7 @@ describe("getLetterDataUrl function", () => {
     deps.letterRepo = {
       getLetterById: jest
         .fn()
-        .mockRejectedValue(
-          new Error("Letter with id l1 not found for supplier s1"),
-        ),
+        .mockRejectedValue(new LetterNotFoundError("supplier1", "letter42")),
     } as unknown as LetterRepository;
 
     await expect(

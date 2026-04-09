@@ -11,7 +11,7 @@ import {
   InsertPendingLetter,
   Letter,
   LetterAlreadyExistsError,
-  LetterDoesNotExistError,
+  LetterNotFoundError,
   LetterSchema,
 } from "@internal/datastore";
 import { Deps } from "./deps";
@@ -105,7 +105,7 @@ async function deletePendingLetterFromQueue(
     await deps.letterQueueRepository.deleteLetter(letter.supplierId, letter.id);
     return 1;
   } catch (error) {
-    if (error instanceof LetterDoesNotExistError) {
+    if (error instanceof LetterNotFoundError) {
       deps.logger.warn({
         description: "Letter does not exist",
         supplierId: letter.supplierId,

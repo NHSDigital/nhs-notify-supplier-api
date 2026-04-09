@@ -1,60 +1,24 @@
 import { SQSBatchItemFailure, SQSEvent, SQSHandler } from "aws-lambda";
+import { $LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
 import {
   InsertLetter,
   LetterAlreadyExistsError,
   UpdateLetter,
 } from "@internal/datastore";
 import {
-  $LetterRequestPreparedEvent,
-  LetterRequestPreparedEvent,
-} from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
-import {
-  $LetterEvent,
-  LetterEvent,
+  $LetterStatusChangeEvent,
+  LetterStatusChangeEvent,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
-import {
-  $LetterRequestPreparedEventV2,
-  LetterRequestPreparedEventV2,
-} from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
-import z from "zod";
+import { $LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import { MetricsLogger, Unit, metricScope } from "aws-embedded-metrics";
 import { Deps } from "../config/deps";
-
-type PreparedEvents = LetterRequestPreparedEventV2 | LetterRequestPreparedEvent;
-
-const SupplierSpecSchema = z.object({
-  supplierId: z.string().min(1),
-  specId: z.string().min(1),
-  priority: z.int().min(0).max(99).default(10),
-  billingId: z.string().min(1),
-});
-
-type SupplierSpec = z.infer<typeof SupplierSpecSchema>;
-
-const PreparedEventUnionSchema = z.discriminatedUnion("type", [
-  $LetterRequestPreparedEventV2,
-  $LetterRequestPreparedEvent,
-]);
-
-const QueueMessageSchema = z.union([
-  $LetterEvent,
-  z.object({
-    letterEvent: PreparedEventUnionSchema,
-    supplierSpec: SupplierSpecSchema,
-  }),
-]);
-
-type QueueMessage = z.infer<typeof QueueMessageSchema>;
-
-type UpsertOperation = {
-  name: "Insert" | "Update";
-  schemas: z.ZodSchema[];
-  handler: (
-    request: unknown,
-    supplierSpec: SupplierSpec,
-    deps: Deps,
-  ) => Promise<void>;
-};
+import {
+  PreparedEvents,
+  QueueMessage,
+  QueueMessageSchema,
+  SupplierSpec,
+  UpsertOperation,
+} from "./schemas";
 
 function getOperationFromType(type: string): UpsertOperation {
   if (
@@ -99,9 +63,9 @@ function getOperationFromType(type: string): UpsertOperation {
   // if it's not an insert type, it must be an update as we've already parsed the message, but we want to have a separate operation for better logging and metrics
   return {
     name: "Update",
-    schemas: [$LetterEvent],
+    schemas: [$LetterStatusChangeEvent],
     handler: async (request, supplierSpec, deps) => {
-      const supplierEvent = request as LetterEvent;
+      const supplierEvent = request as LetterStatusChangeEvent;
       const letterToUpdate: UpdateLetter = mapToUpdateLetter(supplierEvent);
       await deps.letterRepo.updateLetterStatus(letterToUpdate);
 
@@ -145,7 +109,9 @@ function mapToInsertLetter(
   };
 }
 
-function mapToUpdateLetter(upsertRequest: LetterEvent): UpdateLetter {
+function mapToUpdateLetter(
+  upsertRequest: LetterStatusChangeEvent,
+): UpdateLetter {
   return {
     id: upsertRequest.data.domainId,
     eventId: upsertRequest.id,
@@ -232,7 +198,7 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
 
           const queueMessage: QueueMessage = parseQueueMessage(sqsMessage);
 
-          let letterEvent: LetterEvent | PreparedEvents;
+          let letterEvent: LetterStatusChangeEvent | PreparedEvents;
           let supplierSpec: SupplierSpec | undefined;
 
           if ("letterEvent" in queueMessage) {

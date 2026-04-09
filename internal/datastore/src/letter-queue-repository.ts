@@ -2,19 +2,25 @@ import {
   DeleteCommand,
   DynamoDBDocumentClient,
   PutCommand,
+  QueryCommand,
+  UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { Logger } from "pino";
+import z from "zod";
 import {
   InsertPendingLetter,
   PendingLetter,
+  PendingLetterBase,
   PendingLetterSchema,
 } from "./types";
-import { LetterAlreadyExistsError } from "./letter-already-exists-error";
-import { LetterDoesNotExistError } from "./letter-does-not-exist-error";
+import LetterAlreadyExistsError from "./errors/letter-already-exists-error";
+import LetterNotFoundError from "./errors/letter-not-found-error";
 
 type LetterQueueRepositoryConfig = {
   letterQueueTableName: string;
   letterQueueTtlHours: number;
+  /** Maximum number of items to fetch per DynamoDB page. Defaults to 100. */
+  queryPageSize?: number;
 };
 
 export default class LetterQueueRepository {
@@ -81,7 +87,72 @@ export default class LetterQueueRepository {
         error instanceof Error &&
         error.name === "ConditionalCheckFailedException"
       ) {
-        throw new LetterDoesNotExistError(supplierId, letterId);
+        throw new LetterNotFoundError(supplierId, letterId);
+      }
+      throw error;
+    }
+  }
+
+  async getLetters(
+    supplierId: string,
+    limit: number,
+  ): Promise<PendingLetter[]> {
+    const letters: PendingLetter[] = [];
+    let lastEvaluatedKey: Record<string, unknown> | undefined;
+
+    do {
+      const result = await this.ddbClient.send(
+        new QueryCommand({
+          TableName: this.config.letterQueueTableName,
+          IndexName: "queueSortOrder-index",
+          KeyConditionExpression: "supplierId = :supplierId",
+          FilterExpression: "visibilityTimestamp < :now",
+          ExpressionAttributeValues: {
+            ":supplierId": supplierId,
+            ":now": new Date().toISOString(),
+          },
+          // 1000 is a compromise - a smaller number might result in a lot of round trips, a larger one might
+          // entail fetching and then throwing away a lot of data
+          Limit: this.config.queryPageSize ?? 1000,
+          ExclusiveStartKey: lastEvaluatedKey,
+        }),
+      );
+
+      const page = z.array(PendingLetterSchema).parse(result.Items);
+      letters.push(...page);
+
+      lastEvaluatedKey = result.LastEvaluatedKey;
+    } while (lastEvaluatedKey !== undefined && letters.length < limit);
+
+    return letters.slice(0, limit);
+  }
+
+  async updateVisibilityTimestamp(
+    pendingLetter: PendingLetterBase,
+    timestamp: Date,
+  ): Promise<void> {
+    try {
+      await this.ddbClient.send(
+        new UpdateCommand({
+          TableName: this.config.letterQueueTableName,
+          Key: {
+            supplierId: pendingLetter.supplierId,
+            letterId: pendingLetter.letterId,
+          },
+          UpdateExpression: "SET visibilityTimestamp = :ts",
+          ConditionExpression: "attribute_exists(letterId)",
+          ExpressionAttributeValues: {
+            ":ts": timestamp.toISOString(),
+          },
+        }),
+      );
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.name === "ConditionalCheckFailedException"
+      ) {
+        // Letter has been deleted from queue as no longer pending - just ignore it
+        return;
       }
       throw error;
     }
