@@ -4,8 +4,6 @@ description:
 operationId: getMI
 tags:
   - mi
-requestBody:
-    $ref: '../requests/getMIRequest.yml'
 responses:
   "200":
     $ref: "../responses/getMI200.yml"
