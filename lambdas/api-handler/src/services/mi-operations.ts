@@ -1,9 +1,9 @@
+import MiNotFoundError from "@internal/datastore/src/errors/mi-not-found-error";
 import { MIRepository } from "@internal/datastore/src/mi-repository";
 import { GetMIResponse, IncomingMI, PostMIResponse } from "../contracts/mi";
 import { mapToGetMIResponse, mapToPostMIResponse } from "../mappers/mi-mapper";
 import { ApiErrorDetail } from "../contracts/errors";
 import NotFoundError from "../errors/not-found-error";
-import MiNotFoundError from "@internal/datastore/src/errors/mi-not-found-error";
 
 export const postMI = async (
   incomingMi: IncomingMI,
