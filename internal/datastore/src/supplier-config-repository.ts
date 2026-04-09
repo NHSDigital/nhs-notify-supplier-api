@@ -28,7 +28,7 @@ export class SupplierConfigRepository {
     const result = await this.ddbClient.send(
       new GetCommand({
         TableName: this.config.supplierConfigTableName,
-        Key: { PK: "LETTER_VARIANT", SK: variantId },
+        Key: { pk: "ENTITY#letter-variant", sk: `ID#${variantId}` },
       }),
     );
     if (!result.Item) {
@@ -42,7 +42,7 @@ export class SupplierConfigRepository {
     const result = await this.ddbClient.send(
       new GetCommand({
         TableName: this.config.supplierConfigTableName,
-        Key: { PK: "VOLUME_GROUP", SK: groupId },
+        Key: { pk: "ENTITY#volume-group", sk: `ID#${groupId}` },
       }),
     );
     if (!result.Item) {
@@ -61,12 +61,12 @@ export class SupplierConfigRepository {
         KeyConditionExpression: "#pk = :pk AND #group = :groupId",
         FilterExpression: "#status = :status ",
         ExpressionAttributeNames: {
-          "#pk": "PK",
+          "#pk": "pk",
           "#group": "volumeGroup",
           "#status": "status",
         },
         ExpressionAttributeValues: {
-          ":pk": "SUPPLIER_ALLOCATION",
+          ":pk": "ENTITY#supplier-allocation",
           ":groupId": groupId,
           ":status": "PROD",
         },
@@ -87,7 +87,7 @@ export class SupplierConfigRepository {
       const result = await this.ddbClient.send(
         new GetCommand({
           TableName: this.config.supplierConfigTableName,
-          Key: { PK: "SUPPLIER", SK: supplierId },
+          Key: { pk: "ENTITY#supplier", sk: `ID#${supplierId}` },
         }),
       );
       if (!result.Item) {

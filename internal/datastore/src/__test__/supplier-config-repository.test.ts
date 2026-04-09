@@ -9,8 +9,8 @@ import { SupplierConfigRepository } from "../supplier-config-repository";
 
 function createLetterVariantItem(variantId: string) {
   return {
-    PK: "LETTER_VARIANT",
-    SK: variantId,
+    pk: "ENTITY#letter-variant",
+    sk: `ID#${variantId}`,
     id: variantId,
     name: `Variant ${variantId}`,
     description: `Description for variant ${variantId}`,
@@ -29,8 +29,8 @@ function createVolumeGroupItem(groupId: string, status = "PROD") {
     .toISOString()
     .split("T")[0]; // Ends in a day to ensure it's active based on end date. Tests can override this if needed.
   return {
-    PK: "VOLUME_GROUP",
-    SK: groupId,
+    pk: "ENTITY#volume-group",
+    sk: `ID#${groupId}`,
     id: groupId,
     name: `Volume Group ${groupId}`,
     description: `Description for volume group ${groupId}`,
@@ -46,8 +46,8 @@ function createSupplierAllocationItem(
   supplier: string,
 ) {
   return {
-    PK: `SUPPLIER_ALLOCATION`,
-    SK: allocationId,
+    pk: "ENTITY#supplier-allocation",
+    sk: `ID#${allocationId}`,
     id: allocationId,
     status: "PROD",
     volumeGroup: groupId,
@@ -58,8 +58,8 @@ function createSupplierAllocationItem(
 
 function createSupplierItem(supplierId: string) {
   return {
-    PK: "SUPPLIER",
-    SK: supplierId,
+    pk: "ENTITY#supplier",
+    sk: `ID#${supplierId}`,
     id: supplierId,
     name: `Supplier ${supplierId}`,
     channelType: "LETTER",
