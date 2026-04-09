@@ -1,4 +1,4 @@
-## Overview
+# Overview
 
 Use this endpoint to retrieve management or operational metrics relating to letter processing and print fulfilment.
 
@@ -12,6 +12,6 @@ You can test the following scenarios in our sandbox environment.
 
 |Scenario|Request|Response|
 |--------|-------|--------|
-|Success|Request for successful MI record retrieval| 200 (Success) with the retrieved management information in the response|
-|Invalid Request|Invalid Request for MI record retrieval| 400 (Bad Request) with the error details in the body|
+|Success|Request for successful MI record retrieval|200 (Success) with the retrieved management information in the response|
+|Invalid Request|Invalid Request for MI record retrieval|400 (Bad Request) with the error details in the body|
 |Unknown specification|Request for MI record retrieval for unknown spec|404 (Not Found)  with the error details in the body|
