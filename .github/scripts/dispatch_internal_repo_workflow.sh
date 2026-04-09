@@ -323,6 +323,8 @@ for _ in {1..18}; do
     exit 1
   fi
 
+  echo "[INFO] actions response : $response"
+
   workflow_run_url=$(echo "$response" | jq -r \
     --arg targetWorkflow "$targetWorkflow" \
     --arg targetEnvironment "$targetEnvironment" \
