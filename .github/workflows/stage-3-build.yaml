@@ -207,6 +207,7 @@ jobs:
             --releaseVersion ${{ github.head_ref || github.ref_name }} \
             --targetWorkflow "publish-supplier-config.yaml" \
             --targetEnvironment "${{ steps.set-environment.outputs.environment_name }}" \
+            --targetComponent "config" \
             --targetAccountGroup "nhs-notify-suppliers-dev" \
             --tableName "supplier-config" \
             --internalRef "feature/CCM-12444-supplier-config-publishing-workflow"
