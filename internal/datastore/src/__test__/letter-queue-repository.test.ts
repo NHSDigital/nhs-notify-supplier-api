@@ -51,6 +51,7 @@ describe("LetterQueueRepository", () => {
   afterEach(async () => {
     await deleteTables(db);
     jest.useRealTimers();
+    jest.restoreAllMocks();
   });
 
   afterAll(async () => {
@@ -146,6 +147,196 @@ describe("LetterQueueRepository", () => {
       );
       await expect(
         misconfiguredRepository.deleteLetter("supplier1", "letter1"),
+      ).rejects.toThrow("Cannot do operations on a non-existent table");
+    });
+  });
+
+  describe("getLetters", () => {
+    it("filters by supplierId", async () => {
+      await letterQueueRepository.putLetter(createLetter());
+
+      const letters = await letterQueueRepository.getLetters("supplier2", 1);
+
+      expect(letters).toHaveLength(0);
+    });
+
+    it("filters by visibilityTimestamp", async () => {
+      const pendingLetter = createLetter();
+      await letterQueueRepository.putLetter(createLetter());
+      await letterQueueRepository.updateVisibilityTimestamp(
+        pendingLetter,
+        new Date(Date.now() + 600_000),
+      );
+
+      const letters = await letterQueueRepository.getLetters("supplier1", 1);
+
+      expect(letters).toHaveLength(0);
+    });
+
+    it("returns letters in timestamp order", async () => {
+      jest.useFakeTimers().setSystemTime(new Date());
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "first-letter" }),
+      );
+      jest.advanceTimersByTime(1);
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "second-letter" }),
+      );
+      jest.advanceTimersByTime(1);
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "third-letter" }),
+      );
+      jest.advanceTimersByTime(1);
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "fourth-letter" }),
+      );
+      jest.advanceTimersByTime(1);
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "fifth-letter" }),
+      );
+      jest.advanceTimersByTime(1);
+
+      const letters = await letterQueueRepository.getLetters("supplier1", 5);
+
+      expect(letters[0].letterId).toBe("first-letter");
+      expect(letters[1].letterId).toBe("second-letter");
+      expect(letters[2].letterId).toBe("third-letter");
+      expect(letters[3].letterId).toBe("fourth-letter");
+      expect(letters[4].letterId).toBe("fifth-letter");
+    });
+
+    it("limits results to the supplied number", async () => {
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "first-letter" }),
+      );
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "second-letter" }),
+      );
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "third-letter" }),
+      );
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "fourth-letter" }),
+      );
+
+      const letters = await letterQueueRepository.getLetters("supplier1", 3);
+
+      expect(letters).toHaveLength(3);
+      expect(letters[2].letterId).toBe("third-letter");
+    });
+
+    it("applies the limit after filtering on supplier", async () => {
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "first-letter" }),
+      );
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "second-letter", supplierId: "supplier2" }),
+      );
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "third-letter" }),
+      );
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "fourth-letter" }),
+      );
+
+      const letters = await letterQueueRepository.getLetters("supplier1", 3);
+
+      expect(letters).toHaveLength(3);
+      expect(letters[2].letterId).toBe("fourth-letter");
+    });
+
+    it("applies the limit after filtering on visibilityTimestamp", async () => {
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "first-letter" }),
+      );
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "second-letter" }),
+      );
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "third-letter" }),
+      );
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "fourth-letter" }),
+      );
+      await letterQueueRepository.updateVisibilityTimestamp(
+        createLetter({ letterId: "second-letter" }),
+        new Date(Date.now() + 600_000),
+      );
+
+      const letters = await letterQueueRepository.getLetters("supplier1", 3);
+
+      expect(letters).toHaveLength(3);
+      expect(letters[2].letterId).toBe("fourth-letter");
+    });
+
+    it("paginates through multiple DynamoDB pages to reach the limit", async () => {
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "first-letter" }),
+      );
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "second-letter" }),
+      );
+      await letterQueueRepository.putLetter(
+        createLetter({ letterId: "third-letter" }),
+      );
+
+      const pagedRepository = new LetterQueueRepository(db.docClient, logger, {
+        ...db.config,
+        queryPageSize: 1,
+      });
+
+      const letters = await pagedRepository.getLetters("supplier1", 3);
+
+      expect(letters).toHaveLength(3);
+      expect(letters[0].letterId).toBe("first-letter");
+      expect(letters[1].letterId).toBe("second-letter");
+      expect(letters[2].letterId).toBe("third-letter");
+    });
+
+    it("returns an empty array if no items found", async () => {
+      const letters = await letterQueueRepository.getLetters("supplier1", 3);
+
+      expect(letters).toHaveLength(0);
+    });
+  });
+
+  describe("updateVisibilityTimestamp", () => {
+    it("updates the visibilityTimestamp on an existing letter", async () => {
+      const pendingLetter =
+        await letterQueueRepository.putLetter(createLetter());
+
+      await letterQueueRepository.updateVisibilityTimestamp(
+        pendingLetter,
+        new Date("2026-03-04T13:15:45.000Z"),
+      );
+
+      const letter = await getLetter(db, "supplier1", "letter1");
+      expect(letter?.visibilityTimestamp).toBe("2026-03-04T13:15:45.000Z");
+    });
+
+    it("does nothing when the letter does not exist", async () => {
+      await letterQueueRepository.updateVisibilityTimestamp(
+        createLetter(),
+        new Date(),
+      );
+
+      expect(await letterExists(db, "supplier1", "letter1")).toBe(false);
+    });
+
+    it("rethrows errors from DynamoDB when updating the letter", async () => {
+      const misconfiguredRepository = new LetterQueueRepository(
+        db.docClient,
+        logger,
+        {
+          ...db.config,
+          letterQueueTableName: "nonexistent-table",
+        },
+      );
+      await expect(
+        misconfiguredRepository.updateVisibilityTimestamp(
+          createLetter(),
+          new Date(),
+        ),
       ).rejects.toThrow("Cannot do operations on a non-existent table");
     });
   });
