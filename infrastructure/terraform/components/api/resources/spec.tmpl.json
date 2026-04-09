@@ -307,5 +307,7 @@
         }
       }
     }
-  }
+  },
+  "x-amazon-apigateway-endpoint-access-mode": "${ENDPOINT_ACCESS_MODE}",
+  "x-amazon-apigateway-security-policy": "${SECURITY_POLICY}"
 }

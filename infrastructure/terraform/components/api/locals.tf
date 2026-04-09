@@ -7,6 +7,8 @@ locals {
   openapi_spec = templatefile("${path.module}/resources/spec.tmpl.json", {
     APIG_EXECUTION_ROLE_ARN    = aws_iam_role.api_gateway_execution_role.arn
     AWS_REGION                 = var.region
+    SECURITY_POLICY            = local.rest_api_security_policy
+    ENDPOINT_ACCESS_MODE       = local.rest_api_endpoint_access_mode
     AUTHORIZER_LAMBDA_ARN      = module.authorizer_lambda.function_arn
     GET_LETTER_LAMBDA_ARN      = module.get_letter.function_arn
     GET_LETTERS_LAMBDA_ARN     = module.get_letters.function_arn
@@ -40,4 +42,9 @@ locals {
 
   event_cache_bucket_name          = lookup(module.eventpub.s3_bucket_event_cache, "bucket", null)
   eventsub_event_cache_bucket_name = lookup(module.eventsub.s3_bucket_event_cache, "bucket", null)
+
+  csoc_api_gw_log_destination_arn = format("arn:aws:logs:%s:%s:destination:api_gateway_log_destination",
+    var.region,
+    var.csoc_destination_account
+  )
 }
