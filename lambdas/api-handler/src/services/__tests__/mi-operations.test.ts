@@ -1,7 +1,6 @@
+import MiNotFoundError from "@internal/datastore/src/errors/mi-not-found-error";
 import { IncomingMI } from "../../contracts/mi";
 import { getMI, postMI } from "../mi-operations";
-import MiNotFoundError from "@internal/datastore/src/errors/mi-not-found-error";
-
 
 describe("postMI function", () => {
   const incomingMi: IncomingMI = {
@@ -41,7 +40,6 @@ describe("postMI function", () => {
 });
 
 describe("getMI function", () => {
-  it("retrieves the MI from the repository", async () => {
   const incomingMi: IncomingMI = {
     lineItem: "envelope-business-standard",
     timestamp: "2023-11-17T14:27:51.413Z",
@@ -51,6 +49,7 @@ describe("getMI function", () => {
     stockRemaining: 20_000,
     supplierId: "supplier1",
   };
+  it("retrieves the MI from the repository", async () => {
     const persistedMi = { id: "id1", ...incomingMi };
 
     const mockRepo = {
@@ -82,9 +81,9 @@ describe("getMI function", () => {
         .mockRejectedValue(new MiNotFoundError("supplier1", "miId1")),
     };
 
-    await expect(
-      getMI("miId1", "supplier1", mockRepo as any),
-    ).rejects.toThrow("No resource found with that ID");
+    await expect(getMI("miId1", "supplier1", mockRepo as any)).rejects.toThrow(
+      "No resource found with that ID",
+    );
   });
 
   it("should throw unexpected error", async () => {
@@ -92,8 +91,8 @@ describe("getMI function", () => {
       getMI: jest.fn().mockRejectedValue(new Error("unexpected error")),
     };
 
-    await expect(
-      getMI("miId1", "supplier1", mockRepo as any),
-    ).rejects.toThrow("unexpected error");
+    await expect(getMI("miId1", "supplier1", mockRepo as any)).rejects.toThrow(
+      "unexpected error",
+    );
   });
 });
