@@ -126,6 +126,7 @@ jobs:
   artefact-sdks:
     name: "Build SDKs"
     runs-on: ubuntu-latest
+    if: always() && !failure()
     needs: [artefact-oas-spec]
     timeout-minutes: 10
     steps:
@@ -191,7 +192,7 @@ jobs:
   artefact-proxy:
     name: "Build proxy"
     runs-on: ubuntu-latest
-    if: inputs.deploy_proxy == 'true'
+    if: always() && !failure() && inputs.deploy_proxy == 'true'
     needs: [artefact-oas-spec, pr-create-dynamic-environment]
     timeout-minutes: 10
     env:
@@ -213,7 +214,7 @@ jobs:
   artefact-sandbox-proxy:
     name: "Build proxy for sandbox"
     runs-on: ubuntu-latest
-    if: inputs.deploy_proxy == 'true'
+    if: always() && !failure() && inputs.deploy_proxy == 'true'
     needs: [artefact-oas-spec-sandbox, artefact-oas-spec, pr-create-dynamic-environment]
     timeout-minutes: 10
     env:
