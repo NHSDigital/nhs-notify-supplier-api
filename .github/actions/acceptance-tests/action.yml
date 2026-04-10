@@ -104,10 +104,13 @@ runs:
         echo "$SUPPLIER_API_PRIVATE_KEY" > "${GITHUB_WORKSPACE}/internal-dev-test-1.pem"
         chmod 600 "${GITHUB_WORKSPACE}/internal-dev-test-1.pem"
         BASE_PROXY_NAME=nhs-notify-supplier--internal-dev--nhs-notify-supplier
+        BASE_API_ENVIRONMENT= internal-dev;
         if [[ "${{ inputs.targetEnvironment }}" == "main" ]]; then
           export PROXY_NAME="${BASE_PROXY_NAME}"
+          export API_ENVIRONMENT="${BASE_API_ENVIRONMENT}"
         else
           export PROXY_NAME="${BASE_PROXY_NAME}-${{ inputs.targetEnvironment }}"
+          export API_ENVIRONMENT="${BASE_API_ENVIRONMENT}pr"
         fi
         export API_ENVIRONMENT=internal-dev
         export NON_PROD_API_KEY="${APIM_API_KEY}"
