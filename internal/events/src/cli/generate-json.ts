@@ -2,7 +2,7 @@ import { z } from "zod";
 import * as fs from "node:fs";
 import { $Letter } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/domain/letter";
 import {
-  $LetterEvent,
+  $LetterStatusChangeEvent,
   letterEventMap,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
 import { $MISubmittedEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/mi-events";
@@ -36,7 +36,7 @@ for (const [key, schema] of Object.entries(letterEventMap)) {
 }
 
 // Generic letter status change event schema
-const json = z.toJSONSchema($LetterEvent, {
+const json = z.toJSONSchema($LetterStatusChangeEvent, {
   io: "input",
   target: "openapi-3.0",
   reused: "ref",

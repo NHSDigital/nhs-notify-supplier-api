@@ -4,8 +4,8 @@ import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
 import {
-  $LetterEvent,
-  LetterEvent,
+  $LetterStatusChangeEvent,
+  LetterStatusChangeEvent,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
 import { SupplierConfigRepository } from "@internal/datastore";
 import createSupplierAllocatorHandler from "../allocate-handler";
@@ -99,10 +99,10 @@ function createPreparedV2Event(
 
 function createSupplierStatusChangeEvent(
   overrides: Partial<any> = {},
-): LetterEvent {
+): LetterStatusChangeEvent {
   const now = new Date().toISOString();
 
-  return $LetterEvent.parse({
+  return $LetterStatusChangeEvent.parse({
     data: {
       domainId: overrides.domainId ?? "f47ac10b-58cc-4372-a567-0e02b2c3d479",
       groupId: "client_template",

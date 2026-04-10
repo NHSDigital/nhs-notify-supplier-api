@@ -138,9 +138,25 @@ variable "eventpub_control_plane_bus_arn" {
 variable "letter_variant_map" {
   type = map(object({ supplierId = string, specId = string, priority = number, billingId = string }))
   default = {
-    "lv1" = { supplierId = "supplier1", specId = "spec1", priority = 10, billingId = "billing1" },
-    "lv2" = { supplierId = "supplier1", specId = "spec2", priority = 10, billingId = "billing1" },
-    "lv3" = { supplierId = "supplier2", specId = "spec3", priority = 10, billingId = "billing1" }
+    "digitrials-aspiring"             = { supplierId = "supplier1", specId = "digitrials-aspiring", priority = "0", billingId = "digitrials-aspiring-billing" },
+    "digitrials-dmapp"                = { supplierId = "supplier1", specId = "notify-admail", priority = "1", billingId = "notify-admail-billing" },
+    "digitrials-globalminds"          = { supplierId = "supplier1", specId = "digitrials-globalminds", priority = "2", billingId = "digitrials-globalminds-billing" },
+    "digitrials-mymelanoma"           = { supplierId = "supplier1", specId = "digitrials-mymelanoma", priority = "3", billingId = "digitrials-mymelanoma-billing" },
+    "digitrials-ofh"                  = { supplierId = "supplier1", specId = "digitrials-ofh", priority = "4", billingId = "digitrials-ofh-billing" },
+    "digitrials-prostateprogress"     = { supplierId = "supplier1", specId = "digitrials-prostateprogress", priority = "5", billingId = "digitrials-prostateprogress-billing" },
+    "digitrials-protectc"             = { supplierId = "supplier1", specId = "notify-c5-colour", priority = "6", billingId = "notify-c5-colour-billing" },
+    "digitrials-restore"              = { supplierId = "supplier1", specId = "digitrials-restore", priority = "7", billingId = "digitrials-restore-billing" },
+    "gpreg-admail"                    = { supplierId = "supplier1", specId = "notify-admail", priority = "8", billingId = "notify-admail-billing" },
+    "nces-abnormal-results"           = { supplierId = "supplier1", specId = "nces-abnormal-results", priority = "9", billingId = "nces-abnormal-results-billing" },
+    "nces-abnormal-results-braille"   = { supplierId = "supplier1", specId = "nces-abnormal-results-braille", priority = "10", billingId = "nces-abnormal-results-braille-billing" },
+    "nces-invites"                    = { supplierId = "supplier1", specId = "nces-invites", priority = "10", billingId = "nces-invites-billing" },
+    "nces-invites-braille"            = { supplierId = "supplier1", specId = "nces-invites-braille", priority = "10", billingId = "nces-invites-braille-billing" },
+    "nces-standard"                   = { supplierId = "supplier1", specId = "notify-c5-whitemail", priority = "11", billingId = "notify-c5-whitemail-billing" },
+    "nces-standard-braille"           = { supplierId = "supplier1", specId = "notify-braille-whitemail", priority = "12", billingId = "notify-braille-whitemail-billing" },
+    "notify-braille"                  = { supplierId = "supplier1", specId = "notify-braille", priority = "13", billingId = "notify-braille-billing" },
+    "notify-digital-letters-standard" = { supplierId = "supplier1", specId = "notify-c5", priority = "97", billingId = "notify-c5-billing" },
+    "notify-standard"                 = { supplierId = "supplier1", specId = "notify-c5", priority = "98", billingId = "notify-c5-billing" },
+    "notify-standard-colour"          = { supplierId = "supplier1", specId = "notify-c5-colour", priority = "99", billingId = "notify-c5-colour-billing" }
   }
 }
 

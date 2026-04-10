@@ -1,13 +1,13 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import eventSchemaPackage from "@nhsdigital/nhs-notify-event-schemas-supplier-api/package.json";
 import { Letter } from "@internal/datastore";
-import { LetterEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
+import { LetterStatusChangeEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
 
 // eslint-disable-next-line import-x/prefer-default-export
 export function mapLetterToCloudEvent(
   letter: Letter,
   source: string,
-): LetterEvent {
+): LetterStatusChangeEvent {
   const eventId = randomUUID();
   const dataschemaversion = eventSchemaPackage.version;
   return {
@@ -21,7 +21,7 @@ export function mapLetterToCloudEvent(
     subject: `letter-origin/letter-rendering/letter/${letter.id}`,
 
     data: {
-      domainId: letter.id as LetterEvent["data"]["domainId"],
+      domainId: letter.id as LetterStatusChangeEvent["data"]["domainId"],
       status: letter.status,
       specificationId: letter.specificationId,
       billingRef: letter.billingRef,

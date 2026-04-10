@@ -13,7 +13,7 @@ export async function pollForLetterStatus(
   let statusCode = 0;
   let letterStatus: string | undefined;
   const RETRY_DELAY_MS = 10_000;
-  const MAX_ATTEMPTS = 5;
+  const MAX_ATTEMPTS = 6;
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     const getLetterResponse = await request.get(
@@ -33,7 +33,7 @@ export async function pollForLetterStatus(
       logger.info(
         `Attempt ${attempt}: Received status code ${statusCode} for domainId: ${domainId}`,
       );
-      break;
+      return { letterStatus, statusCode };
     }
 
     if (attempt < MAX_ATTEMPTS) {
@@ -46,5 +46,7 @@ export async function pollForLetterStatus(
     }
   }
 
-  return { letterStatus, statusCode };
+  throw new Error(
+    `Max attempts reached while polling for letter status for domainId: ${domainId}`,
+  );
 }

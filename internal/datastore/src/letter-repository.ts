@@ -3,31 +3,19 @@ import {
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
-  QueryCommand,
   UpdateCommand,
   UpdateCommandOutput,
 } from "@aws-sdk/lib-dynamodb";
 import { ConditionalCheckFailedException } from "@aws-sdk/client-dynamodb";
 import { Logger } from "pino";
-import { z } from "zod";
-import {
-  InsertLetter,
-  Letter,
-  LetterBase,
-  LetterSchema,
-  LetterSchemaBase,
-  UpdateLetter,
-} from "./types";
-import { LetterAlreadyExistsError } from "./letter-already-exists-error";
+import { InsertLetter, Letter, LetterSchema, UpdateLetter } from "./types";
+import LetterNotFoundError from "./errors/letter-not-found-error";
+import LetterAlreadyExistsError from "./errors/letter-already-exists-error";
 
 export type PagingOptions = Partial<{
   exclusiveStartKey: Record<string, any>;
   pageSize: number;
 }>;
-
-const defaultPagingOptions = {
-  pageSize: 50,
-};
 
 export type LetterRepositoryConfig = {
   lettersTableName: string;
@@ -116,51 +104,9 @@ export class LetterRepository {
     );
 
     if (!result.Item) {
-      throw new Error(
-        `Letter with id ${letterId} not found for supplier ${supplierId}`,
-      );
+      throw new LetterNotFoundError(supplierId, letterId);
     }
     return LetterSchema.parse(result.Item);
-  }
-
-  async getLettersByStatus(
-    supplierId: string,
-    status: Letter["status"],
-    options?: PagingOptions,
-  ): Promise<{
-    letters: Letter[];
-    lastEvaluatedKey?: Record<string, any>;
-  }> {
-    const extendedOptions = { ...defaultPagingOptions, ...options };
-
-    const result = await this.ddbClient.send(
-      new QueryCommand({
-        TableName: this.config.lettersTableName,
-        IndexName: "supplierStatus-index",
-        KeyConditionExpression: "supplierStatus = :supplierStatus",
-        ExpressionAttributeValues: {
-          ":supplierStatus": `${supplierId}#${status}`,
-        },
-        Limit: extendedOptions.pageSize,
-        ExclusiveStartKey: extendedOptions.exclusiveStartKey,
-      }),
-    );
-
-    // Items is an empty array if no items match the query
-    const letters = result
-      .Items!.map((item) => LetterSchema.safeParse(item))
-      .filter((letterItem) => {
-        if (!letterItem.success) {
-          this.log.warn(`Invalid letter data: ${letterItem.error}`);
-        }
-        return letterItem.success;
-      })
-      .map((successLetterItem) => successLetterItem.data);
-
-    return {
-      letters,
-      lastEvaluatedKey: result.LastEvaluatedKey,
-    };
   }
 
   async updateLetterStatus(
@@ -237,46 +183,5 @@ export class LetterRepository {
       expressionAttributeValues[":reasonText"] = letterToUpdate.reasonText;
     }
     return { updateExpression, expressionAttributeValues };
-  }
-
-  async getLettersBySupplier(
-    supplierId: string,
-    status: string,
-    limit: number,
-  ): Promise<LetterBase[]> {
-    const items: Record<string, any>[] = [];
-    let ExclusiveStartKey: Record<string, any> | undefined;
-    const supplierStatus = `${supplierId}#${status}`;
-    let res;
-
-    do {
-      const remaining = limit - items.length;
-
-      res = await this.ddbClient.send(
-        new QueryCommand({
-          TableName: this.config.lettersTableName,
-          IndexName: "supplierStatus-index",
-          KeyConditionExpression: "supplierStatus = :supplierStatus",
-          ExpressionAttributeNames: {
-            "#status": "status", // reserved keyword
-          },
-          ExpressionAttributeValues: {
-            ":supplierStatus": supplierStatus,
-          },
-          ProjectionExpression:
-            "id, #status, specificationId, groupId, reasonCode, reasonText",
-          Limit: remaining, // limit is a per-page cap
-          ExclusiveStartKey,
-        }),
-      );
-
-      if (res.Items?.length) {
-        items.push(...res.Items);
-      }
-
-      ExclusiveStartKey = res.LastEvaluatedKey;
-    } while (res.LastEvaluatedKey && items.length < limit);
-
-    return z.array(LetterSchemaBase).parse(items);
   }
 }
