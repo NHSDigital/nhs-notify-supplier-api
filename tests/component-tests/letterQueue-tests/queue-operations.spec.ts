@@ -7,7 +7,7 @@ import {
 import { logger } from "tests/helpers/pino-logger";
 import { sendSnsBatchEvent, sendSnsEvent } from "tests/helpers/send-sns-event";
 import {
-  pollUpsertLetterLogForError,
+  pollUpsertLetterLogForWarning,
   supplierIdFromSupplierAllocatorLog,
 } from "tests/helpers/aws-cloudwatch-helper";
 import getRestApiGatewayBaseUrl from "tests/helpers/aws-gateway-helper";
@@ -106,10 +106,7 @@ test.describe("Letter Queue Tests", () => {
     expect(letterExists).toBe(true);
     expect(itemCount).toBe(1);
 
-    await pollUpsertLetterLogForError(
-      `Letter with id ${letterId} already exists for supplier ${supplierId}"`,
-      letterId,
-    );
+    await pollUpsertLetterLogForWarning("Letter already exists", letterId);
   });
 
   test("Verify if VisibilityTimeStamp is updated when Get /letters endpoint is called and subsequent calls returns no data until VisibilityTimeStamp is reached", async ({
