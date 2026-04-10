@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import getRestApiGatewayBaseUrl from "tests/helpers/aws-gateway-helper";
 import { pollForLetterStatus } from "tests/helpers/poll-for-letters-helper";
 import { getLettersFromQueueViaIndex } from "tests/helpers/generate-fetch-test-data";
@@ -9,6 +9,12 @@ import {
   verifyAllocationLogsContainPriority,
   verifyIndexPositionOfLetterVariants,
 } from "tests/helpers/urgent-letter-priority-helper";
+import { createValidRequestHeaders } from "tests/constants/request-headers";
+import { SUPPLIER_LETTERS } from "tests/constants/api-constants";
+import {
+  GetLettersResponse,
+  GetLettersResponseSchema,
+} from "../../../lambdas/api-handler/src/contracts/letters";
 
 let baseUrl: string;
 
@@ -40,6 +46,21 @@ test.describe("Urgent Letter Priority Tests", () => {
     const letterIdsFromQueue = lettersFromQueue.map(
       (letter) => letter.letterId,
     );
+
+    const header = createValidRequestHeaders(supplier);
+    const response = await request.get(`${baseUrl}/${SUPPLIER_LETTERS}`, {
+      headers: header,
+    });
+
+    expect(response.status()).toBe(200);
+    const responseBody = await response.json();
+    expect(responseBody.data.length).toBeGreaterThanOrEqual(1);
+
+    const getLettersResponse: GetLettersResponse =
+      GetLettersResponseSchema.parse(responseBody);
+
+    const letterIds = getLettersResponse.data.map((letter) => letter.id);
+    expect(letterIds).toEqual(letterIdsFromQueue);
 
     verifyIndexPositionOfLetterVariants(
       letterIdsFromQueue,
