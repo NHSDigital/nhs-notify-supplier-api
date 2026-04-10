@@ -207,7 +207,7 @@ jobs:
         with:
           version: "${{ inputs.version }}"
           environment: ${{ needs.pr-create-dynamic-environment.outputs.environment_name }}
-          apimEnv: "internal-dev"
+          apimEnv: "internal-dev-pr"
           runId: "${{ github.run_id }}"
           buildSandbox: false
           releaseVersion: ${{ github.head_ref || github.ref_name }}
