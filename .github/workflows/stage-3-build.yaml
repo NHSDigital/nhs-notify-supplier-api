@@ -175,7 +175,16 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-      - name: "Build proxies"
+      - name: "Build proxy"
+        uses: ./.github/actions/build-proxies
+        with:
+          version: "${{ inputs.version }}"
+          environment: ${{ needs.pr-create-dynamic-environment.outputs.environment_name }}
+          apimEnv: "internal-dev"
+          runId: "${{ github.run_id }}"
+          buildSandbox: false
+          releaseVersion: ${{ github.head_ref || github.ref_name }}
+      - name: "Build proxy for sandbox"
         uses: ./.github/actions/build-proxies
         with:
           version: "${{ inputs.version }}"
