@@ -17,10 +17,10 @@ def test_header_letters_endpoint(
     url,
     method,
     endpoints,
-    bearer_token
+    authentication_secret
 ):
     resp = getattr(requests, method)(f"{url}/{endpoints}", headers={
-        "Authorization": bearer_token.value,
+        "Authorization": authentication_secret.value,
         "X-Request-ID": None
     })
 
@@ -33,10 +33,10 @@ def test_header_letters_endpoint(
 @pytest.mark.prodtest
 def test_header_mi_endpoint(
     url,
-    bearer_token
+    authentication_secret
 ):
     resp = getattr(requests, "post")(f"{url}/{MI_ENDPOINT}", headers={
-        "Authorization": bearer_token.value,
+        "Authorization": authentication_secret.value,
         "X-Request-ID": ""
     })
 

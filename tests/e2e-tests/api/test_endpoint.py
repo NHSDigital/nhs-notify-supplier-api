@@ -2,6 +2,7 @@ import pytest
 import requests
 from lib.errorhandler import ErrorHandler
 from lib.fixtures import *  # NOSONAR
+from lib.generators import Generators
 
 @pytest.mark.smoketest
 def test_ping(url):
@@ -11,10 +12,9 @@ def test_ping(url):
 @pytest.mark.smoketest
 @pytest.mark.sandboxtest
 @pytest.mark.devtest
-def test_status(url, status_endpoint_api_key):
-    resp = requests.get(
-        f"{url}/_status", headers={"apikey": status_endpoint_api_key}
-    )
+def test_status(url, authentication_secret):
+    headers = Generators.generate_valid_headers(authentication_secret)
+    resp = requests.get(f"{url}/_status", headers=headers)
 
     ErrorHandler.handle_retry(resp)
     assert resp.status_code == 200

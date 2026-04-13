@@ -9,8 +9,8 @@ from lib.errorhandler import ErrorHandler
 @pytest.mark.devtest
 @pytest.mark.inttest
 @pytest.mark.prodtest
-def test_200_get_letters(url, bearer_token):
-    headers = Generators.generate_valid_headers(bearer_token.value)
+def test_200_get_letters(url, authentication_secret):
+    headers = Generators.generate_valid_headers(authentication_secret)
 
     get_message_response = requests.get(f"{url}/{LETTERS_ENDPOINT}?limit=1", headers=headers)
 

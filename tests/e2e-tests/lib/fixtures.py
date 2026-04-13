@@ -52,15 +52,8 @@ def authentication_cache():
     return AuthenticationCache()
 
 @pytest.fixture()
-def bearer_token(authentication_cache):
+def authentication_secret(url, authentication_cache):
     environment = os.environ['API_ENVIRONMENT']
-    if environment == "prod":
-        url = "https://api.service.nhs.uk/nhs-notify-supplier"
-    # the ref2 url is structured slightly differently so it needs to be explicitly called out here
-    elif environment == "ref":
-        url = "https://internal-dev.api.service.nhs.uk/nhs-notify-supplier"
-    else:
-        url = f"https://{environment}.api.service.nhs.uk/nhs-notify-supplier"
     return authentication_cache.generate_authentication(environment, url)
 
 @pytest.fixture(scope='session')

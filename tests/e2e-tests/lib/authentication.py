@@ -56,14 +56,22 @@ class AuthenticationCache():
         else:
             raise ValueError("Unknown value: ", env)
 
+        if "-PR-" in base_url:
+            # PR environments use AAL0 - authentication is the API key passed directly
+            return Secret(api_key, auth_type="apikey")
+
+        if base_url.ends_with("/_status"):
+            # Special case - the status endpoint uses a different API key
+            api_key = os.environ.get("STATUS_ENDPOINT_API_KEY")
+
         _, latest_token_expiry = self.tokens.get(env, (None, 0))
 
         # Generate new token if latest token will expire in 15 seconds
         if env not in self.tokens or latest_token_expiry < int(time()) + 15:
             self.tokens[env] = self.generate_and_test_new_token(api_key, private_key, url, kid, test_url)
 
-        bearer_token = self.tokens[env][0]
-        return Secret(bearer_token)
+        authentication_secret = self.tokens[env][0]
+        return Secret(authentication_secret)
 
     def generate_and_test_new_token(self, api_key, private_key, url, kid, test_url):
         new_token = None
