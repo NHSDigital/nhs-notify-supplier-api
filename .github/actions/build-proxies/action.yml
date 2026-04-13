@@ -113,6 +113,7 @@ runs:
           --targetComponent "${{ inputs.targetComponent }}" \
           --targetWorkflow "proxy-deploy.yaml" \
           --targetEnvironment "${{ inputs.environment }}" \
+          --internalRef "feature/CCM-14778" \
           --runId "${{ inputs.runId }}" \
           --buildSandbox ${{ inputs.buildSandbox }} \
           --apimEnvironment "${{ env.APIM_ENV }}" \
