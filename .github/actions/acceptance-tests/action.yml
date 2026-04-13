@@ -109,7 +109,7 @@ runs:
         if [[ -z "$PR_NUMBER" ]]; then
           export PROXY_NAME="${BASE_PROXY_NAME}"
         else
-          export PROXY_NAME="${BASE_PROXY_NAME}-PR-{$PR_NUMBER}"
+          export PROXY_NAME="${BASE_PROXY_NAME}-PR-${PR_NUMBER}"
         fi
         export NON_PROD_API_KEY="${APIM_API_KEY}"
         export STATUS_ENDPOINT_API_KEY="${APIM_STATUS_API_KEY}"
