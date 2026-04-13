@@ -100,16 +100,16 @@ runs:
       shell: bash
       env:
         TARGET_ENVIRONMENT: ${{ inputs.targetEnvironment }}
+        PR_NUMBER: ${{ steps.set_pr_number.outputs.pr_number }}
       run: |
         echo "$SUPPLIER_API_PRIVATE_KEY" > "${GITHUB_WORKSPACE}/internal-dev-test-1.pem"
         chmod 600 "${GITHUB_WORKSPACE}/internal-dev-test-1.pem"
         BASE_PROXY_NAME=nhs-notify-supplier--internal-dev--nhs-notify-supplier
-        if [[ "${{ inputs.targetEnvironment }}" == "main" ]]; then
+        export API_ENVIRONMENT=internal-dev
+        if [[ -z "$PR_NUMBER" ]]; then
           export PROXY_NAME="${BASE_PROXY_NAME}"
-          export API_ENVIRONMENT=internal-dev
         else
-          export PROXY_NAME="${BASE_PROXY_NAME}-${{ inputs.targetEnvironment }}"
-          export API_ENVIRONMENT=internal-dev-pr
+          export PROXY_NAME="${BASE_PROXY_NAME}-PR-{$PR_NUMBER}"
         fi
         export NON_PROD_API_KEY="${APIM_API_KEY}"
         export STATUS_ENDPOINT_API_KEY="${APIM_STATUS_API_KEY}"
