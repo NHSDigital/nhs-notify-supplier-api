@@ -273,8 +273,8 @@ describe("SupplierConfigRepository", () => {
       new PutCommand({
         TableName: dbContext.config.supplierConfigTableName,
         Item: {
-          PK: "SUPPLIER_PACK",
-          SK: supplierPackId,
+          pk: "ENTITY#supplier-pack",
+          sk: `ID#${supplierPackId}`,
           id: supplierPackId,
           packSpecificationId: packSpecId,
           supplierId,
@@ -311,8 +311,8 @@ describe("SupplierConfigRepository", () => {
       new PutCommand({
         TableName: dbContext.config.supplierConfigTableName,
         Item: {
-          PK: "PACK_SPECIFICATION",
-          SK: packSpecId,
+          pk: "ENTITY#pack_specification",
+          sk: `ID#${packSpecId}`,
           id: packSpecId,
           name: `Pack Specification ${packSpecId}`,
           createdAt: new Date().toISOString(),

@@ -168,7 +168,7 @@ const createSupplierConfigTableCommand = new CreateTableCommand({
     {
       IndexName: "packSpecificationId-index",
       KeySchema: [
-        { AttributeName: "PK", KeyType: "HASH" }, // Partition key for GSI
+        { AttributeName: "pk", KeyType: "HASH" }, // Partition key for GSI
         { AttributeName: "packSpecificationId", KeyType: "RANGE" }, // Sort key for GSI
       ],
       Projection: {
