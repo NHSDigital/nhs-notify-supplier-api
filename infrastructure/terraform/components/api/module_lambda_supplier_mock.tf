@@ -22,7 +22,7 @@ module "supplier_mock" {
   function_code_base_path = local.aws_lambda_functions_dir_path
   function_code_dir       = "supplier-mock/dist"
   function_include_common = true
-  handler_function_name   = "supplierMockHandler" // double check that the handler function name is correct
+  handler_function_name   = "supplierMockHandler"
   runtime                 = "nodejs22.x"
   memory                  = 512
   timeout                 = 29
@@ -37,7 +37,6 @@ module "supplier_mock" {
   lambda_env_vars = merge(local.common_lambda_env_vars, {})
 }
 
-// TODO: add lambda invoke permissions
 data "aws_iam_policy_document" "supplier_mock_lambda" {
   statement {
     sid    = "KMSPermissions"
