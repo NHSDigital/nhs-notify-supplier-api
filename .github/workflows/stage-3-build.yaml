@@ -212,4 +212,5 @@ jobs:
             --targetComponent "config" \
             --targetAccountGroup "nhs-notify-suppliers-dev" \
             --tableName "supplier-config" \
-            --internalRef "feature/CCM-12444-supplier-config-publishing-workflow"
+            --internalRef "feature/CCM-12444-supplier-config-publishing-workflow" \
+            --force "false"

@@ -108,6 +108,10 @@ while [[ $# -gt 0 ]]; do
       tableName="$2"
       shift 2
       ;;
+    --force) # Force apply flag (optional)
+      force="$2"
+      shift 2
+      ;;
     *)
     echo "[ERROR] Unknown argument: $1"
       exit 1
@@ -210,6 +214,10 @@ if [{ -z "$tableName" }]; then
   tableName=""
 fi
 
+if [[ -z "$force" ]]; then
+  force=""
+fi
+
 echo "==================== Workflow Dispatch Parameters ===================="
 echo "  infraRepoName:      $infraRepoName"
 echo "  releaseVersion:     $releaseVersion"
@@ -230,6 +238,7 @@ echo "  boundedContext:       $boundedContext"
 echo "  targetDomain:         $targetDomain"
 echo "  version:              $version"
 echo "  tableName:            $tableName"
+echo "  force:                $force"
 
 DISPATCH_EVENT=$(jq -ncM \
   --arg infraRepoName "$infraRepoName" \
@@ -250,6 +259,7 @@ DISPATCH_EVENT=$(jq -ncM \
   --arg targetDomain "$targetDomain" \
   --arg version "$version" \
   --arg tableName "$tableName" \
+  --arg force "$force" \
   '{
     "ref": "'"$internalRef"'",
     "inputs": (
@@ -266,6 +276,7 @@ DISPATCH_EVENT=$(jq -ncM \
       (if $targetDomain != "" then { "targetDomain": $targetDomain } else {} end) +
       (if $version != "" then { "version": $version } else {} end) +
       (if $tableName != "" then { "tableName": $tableName } else {} end) +
+      (if $force != "" then { "force": $force } else {} end) +
       (if $targetAccountGroup != "" then { "targetAccountGroup": $targetAccountGroup } else {} end) +
       {
         "releaseVersion": $releaseVersion,
