@@ -1,4 +1,4 @@
-module "get_letter" {
+module "supplier_mock" {
   source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip"
 
   function_name = "supplier_mock"
