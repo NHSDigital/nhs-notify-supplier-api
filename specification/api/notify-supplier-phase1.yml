@@ -43,7 +43,7 @@ paths:
       - $ref: 'components/parameters/correlationId.yml'
     post:
       $ref: 'components/endpoints/createMI.yml'
-  '/mi/getMI/{id}':
+  '/mi/{id}':
     parameters:
       - $ref: 'components/parameters/authorization/authorization.yml'
       - $ref: 'components/parameters/requestId.yml'
