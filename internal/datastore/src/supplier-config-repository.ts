@@ -112,13 +112,13 @@ export class SupplierConfigRepository {
         KeyConditionExpression: "#pk = :pk AND #packSpecId = :packSpecId",
         FilterExpression: "#status = :status AND #approval = :approval",
         ExpressionAttributeNames: {
-          "#pk": "PK",
+          "#pk": "pk",
           "#packSpecId": "packSpecificationId",
           "#status": "status",
           "#approval": "approval",
         },
         ExpressionAttributeValues: {
-          ":pk": "SUPPLIER_PACK",
+          ":pk": "ENTITY#supplier-pack",
           ":packSpecId": packSpecId,
           ":status": "PROD",
           ":approval": "APPROVED",
@@ -133,7 +133,7 @@ export class SupplierConfigRepository {
     const result = await this.ddbClient.send(
       new GetCommand({
         TableName: this.config.supplierConfigTableName,
-        Key: { PK: "PACK_SPECIFICATION", SK: packSpecId },
+        Key: { pk: "ENTITY#pack_specification", sk: `ID#${packSpecId}` },
       }),
     );
     if (!result.Item) {

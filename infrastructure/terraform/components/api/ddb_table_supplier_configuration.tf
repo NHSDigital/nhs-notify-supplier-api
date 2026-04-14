@@ -52,7 +52,7 @@ resource "aws_dynamodb_table" "supplier-configuration" {
 
   global_secondary_index {
     name            = "packSpecificationId-index"
-    hash_key        = "PK"
+    hash_key        = "pk"
     range_key       = "packSpecificationId"
     projection_type = "ALL"
   }
