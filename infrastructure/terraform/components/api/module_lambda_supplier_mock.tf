@@ -22,7 +22,7 @@ module "supplier_mock" {
   function_code_base_path = local.aws_lambda_functions_dir_path
   function_code_dir       = "supplier-mock/dist"
   function_include_common = true
-  handler_function_name   = "supplierMockHandler"
+  handler_function_name   = "handler"
   runtime                 = "nodejs22.x"
   memory                  = 512
   timeout                 = 29
