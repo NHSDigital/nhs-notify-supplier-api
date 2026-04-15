@@ -75,6 +75,7 @@ New developers of the NHS Notify Supplier API should understand the below.
 
 #### Prerequisites and Configuration
 
+- add this line to your `.npmrc` file `//npm.pkg.github.com/:_authToken=<githubSshToken>` (make sure to replace the `githubSshToken` with the actual token value)
 - Utilised the devcontainer, for pre reqs and configuration.
 - You should open in a devcontainer or a Github workspaces.
 - By default it will run `make config` when the container is first setup
