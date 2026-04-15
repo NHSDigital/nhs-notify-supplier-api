@@ -1,3 +1,5 @@
+<!-- vale off -->
+
 # NHS Notify Supplier API
 
 [![1. CI/CD pull request](https://github.com/NHSDigital/nhs-notify-supplier-api/actions/workflows/cicd-1-pull-request.yaml/badge.svg)](https://github.com/NHSDigital/nhs-notify-supplier-api/actions/workflows/cicd-1-pull-request.yaml)
@@ -152,3 +154,5 @@ Import the files into postman
 Select a target environment in postman
 Run the collection
 The collections must be kept in sync manually
+
+<!-- vale on -->
