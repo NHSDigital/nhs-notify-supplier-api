@@ -94,7 +94,9 @@ data "aws_iam_policy_document" "supplier_allocator_lambda" {
 
     resources = [
       aws_dynamodb_table.supplier-configuration.arn,
-      "${aws_dynamodb_table.supplier-configuration.arn}/index/*"
+      aws_dynamodb_table.supplier-quotas.arn,
+      "${aws_dynamodb_table.supplier-configuration.arn}/index/*",
+      "${aws_dynamodb_table.supplier-quotas.arn}/index/*"
     ]
   }
 }
