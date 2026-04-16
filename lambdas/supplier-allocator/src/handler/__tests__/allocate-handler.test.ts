@@ -7,9 +7,13 @@ import {
   $LetterStatusChangeEvent,
   LetterStatusChangeEvent,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
-import { SupplierConfigRepository } from "@internal/datastore";
+import {
+  SupplierConfigRepository,
+  SupplierQuotasRepository,
+} from "@internal/datastore";
 import createSupplierAllocatorHandler from "../allocate-handler";
 import * as supplierConfig from "../../services/supplier-config";
+import * as supplierQuotas from "../../services/supplier-quotas";
 
 import { Deps } from "../../config/deps";
 import { EnvVars } from "../../config/env";
@@ -21,6 +25,7 @@ const renderingSchemaVersion: string =
   ];
 
 jest.mock("../../services/supplier-config");
+jest.mock("../../services/supplier-quotas");
 
 function createSQSEvent(records: SQSRecord[]): SQSEvent {
   return {
@@ -169,12 +174,19 @@ function setupDefaultMocks() {
     colour: false,
     duplex: false,
   });
+  (
+    supplierQuotas.calculateSupplierAllocatedFactor as jest.Mock
+  ).mockResolvedValue({
+    supplierId: "supplier-1",
+    factor: 0.5,
+  });
 }
 
 describe("createSupplierAllocatorHandler", () => {
   let mockSqsClient: jest.Mocked<SQSClient>;
   let mockedDeps: jest.Mocked<Deps>;
   let mockedSupplierConfigRepo: jest.Mocked<SupplierConfigRepository>;
+  let mockedSupplierQuotasRepo: jest.Mocked<SupplierQuotasRepository>;
   beforeEach(() => {
     mockSqsClient = {
       send: jest.fn(),
@@ -191,10 +203,22 @@ describe("createSupplierAllocatorHandler", () => {
       getPackSpecification: jest.fn(),
     } as jest.Mocked<SupplierConfigRepository>;
 
+    mockedSupplierQuotasRepo = {
+      ddbClient: {} as any,
+      config: {} as any,
+      getOverallAllocation: jest.fn(),
+      putOverallAllocation: jest.fn(),
+      updateOverallAllocation: jest.fn(),
+      getDailyAllocation: jest.fn(),
+      putDailyAllocation: jest.fn(),
+      updateDailyAllocation: jest.fn(),
+    } as jest.Mocked<SupplierQuotasRepository>;
+
     mockedDeps = {
       logger: { error: jest.fn(), info: jest.fn() } as unknown as pino.Logger,
       env: {
         SUPPLIER_CONFIG_TABLE_NAME: "SupplierConfigTable",
+        SUPPLIER_QUOTAS_TABLE_NAME: "SupplierQuotasTable",
         VARIANT_MAP: {
           lv1: {
             supplierId: "supplier1",
@@ -206,6 +230,7 @@ describe("createSupplierAllocatorHandler", () => {
       } as EnvVars,
       sqsClient: mockSqsClient,
       supplierConfigRepo: mockedSupplierConfigRepo,
+      supplierQuotasRepo: mockedSupplierQuotasRepo,
     } as jest.Mocked<Deps>;
     jest.clearAllMocks();
   });
@@ -424,6 +449,39 @@ describe("createSupplierAllocatorHandler", () => {
 
     expect(result.batchItemFailures).toHaveLength(1);
     expect(result.batchItemFailures[0].itemIdentifier).toBe("msg1");
+    expect(
+      (mockedDeps.logger.error as jest.Mock).mock.calls.length,
+    ).toBeGreaterThan(0);
+    expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        description: "No supplier mapping found for variant",
+      }),
+    );
+  });
+
+  test("returns batch failure when variant mapping is missing for multiple events", async () => {
+    const preparedEvent1 = createPreparedV2Event();
+    preparedEvent1.data.letterVariantId = "missing-variant1";
+    const preparedEvent2 = createPreparedV2Event();
+    preparedEvent2.data.letterVariantId = "missing-variant2";
+
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("msg1", JSON.stringify(preparedEvent1)),
+      createSqsRecord("msg2", JSON.stringify(preparedEvent2)),
+    ]);
+
+    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+
+    // Override variant map to be empty for this test
+    mockedDeps.env.VARIANT_MAP = {} as any;
+
+    const handler = createSupplierAllocatorHandler(mockedDeps);
+    const result = await handler(evt, {} as any, {} as any);
+    if (!result) throw new Error("expected BatchResponse, got void");
+
+    expect(result.batchItemFailures).toHaveLength(2);
+    expect(result.batchItemFailures[0].itemIdentifier).toBe("msg1");
+    expect(result.batchItemFailures[1].itemIdentifier).toBe("msg2");
     expect(
       (mockedDeps.logger.error as jest.Mock).mock.calls.length,
     ).toBeGreaterThan(0);
