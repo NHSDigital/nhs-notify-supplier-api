@@ -16,6 +16,8 @@ test.beforeAll(async () => {
 test.describe("API Gateway Tests To Get List Of Pending Letters", () => {
   test("GET /letters should return 200 and list items", async ({ request }) => {
     const header = createValidRequestHeaders();
+    console.log("VLASIOS - Base URL for API Gateway:", baseUrl);
+    console.log("VLASIOS - Request headers:", header);
     const response = await request.get(`${baseUrl}/${SUPPLIER_LETTERS}`, {
       headers: header,
       params: {
