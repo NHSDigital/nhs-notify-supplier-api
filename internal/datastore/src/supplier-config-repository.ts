@@ -133,7 +133,7 @@ export class SupplierConfigRepository {
     const result = await this.ddbClient.send(
       new GetCommand({
         TableName: this.config.supplierConfigTableName,
-        Key: { pk: "ENTITY#pack_specification", sk: `ID#${packSpecId}` },
+        Key: { pk: "ENTITY#pack-specification", sk: `ID#${packSpecId}` },
       }),
     );
     if (!result.Item) {

@@ -28,6 +28,7 @@ import {
   getVariantDetails,
   getVolumeGroupDetails,
 } from "../services/supplier-config";
+import { calculateSupplierAllocatedFactor } from "../services/supplier-quotas";
 import { Deps } from "../config/deps";
 
 type SupplierSpec = {
@@ -121,6 +122,28 @@ async function getSupplierFromConfig(letterEvent: PreparedEvents, deps: Deps) {
       deps,
     );
 
+    let supplierAllocationsForPack: SupplierAllocation[] = [];
+    let supplierFactors: { supplierId: string; factor: number }[] = [];
+
+    if (suppliersForPack && suppliersForPack.length > 0) {
+      supplierAllocationsForPack = supplierAllocations.filter((alloc) =>
+        suppliersForPack.some((supplier) => supplier.id === alloc.supplier),
+      );
+
+      console.log("Supplier allocations for pack", {
+        supplierAllocationsForPack,
+      });
+
+      supplierFactors = await calculateSupplierAllocatedFactor(
+        supplierAllocationsForPack,
+        deps,
+      );
+
+      console.log("Supplier factors calculated for allocation", {
+        supplierFactors,
+      });
+    }
+
     deps.logger.info({
       description: "Fetched supplier details for supplier allocations",
       variantId: letterEvent.data.letterVariantId,
@@ -132,6 +155,8 @@ async function getSupplierFromConfig(letterEvent: PreparedEvents, deps: Deps) {
       preferredSupplierPacks,
       preferredPack,
       suppliersForPack,
+      supplierAllocationsForPack,
+      supplierFactors,
     });
 
     return allocatedSuppliers;
@@ -211,6 +236,8 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
     const batchItemFailures: SQSBatchItemFailure[] = [];
     const perAllocationSuccess: AllocationMetrics = new Map();
     const perAllocationFailure: AllocationMetrics = new Map();
+
+    // Initialise the supplier quotas.
 
     const tasks = event.Records.map(async (record) => {
       let supplier = "unknown";
