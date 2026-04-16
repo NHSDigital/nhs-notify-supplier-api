@@ -311,7 +311,7 @@ describe("SupplierConfigRepository", () => {
       new PutCommand({
         TableName: dbContext.config.supplierConfigTableName,
         Item: {
-          pk: "ENTITY#pack_specification",
+          pk: "ENTITY#pack-specification",
           sk: `ID#${packSpecId}`,
           id: packSpecId,
           name: `Pack Specification ${packSpecId}`,
