@@ -45,6 +45,11 @@ export async function updateSupplierAllocation(
   const overallAllocation =
     await deps.supplierQuotasRepo.getOverallAllocation(volumeGroupId);
   if (overallAllocation) {
+    deps.logger.info({
+      description: "Existing overall allocation found for volume group",
+      volumeGroupId,
+      overallAllocation,
+    });
     await deps.supplierQuotasRepo.updateOverallAllocation(
       volumeGroupId,
       supplierId,
@@ -58,6 +63,12 @@ export async function updateSupplierAllocation(
         [supplierId]: newAllocation,
       },
     };
+    deps.logger.info({
+      description:
+        "No overall allocation found for volume group, creating new one",
+      volumeGroupId,
+      newOverallAllocation,
+    });
     await deps.supplierQuotasRepo.putOverallAllocation(newOverallAllocation);
   }
   const dailyAllocationDate = new Date().toISOString().split("T")[0]; // Get current date in YYYY-MM-DD format
