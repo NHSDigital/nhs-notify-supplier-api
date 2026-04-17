@@ -49,16 +49,26 @@ export class SupplierQuotasRepository {
   }
 
   async putOverallAllocation(allocation: OverallAllocation): Promise<void> {
-    await this.ddbClient.send(
-      new PutCommand({
-        TableName: this.config.supplierQuotasTableName,
-        Item: ItemForRecord(
-          "overall-allocation",
-          allocation.id,
-          $OverallAllocation.parse(allocation),
-        ),
-      }),
-    );
+    try {
+      const parsedAllocation = $OverallAllocation.parse(allocation);
+      await this.ddbClient.send(
+        new PutCommand({
+          TableName: this.config.supplierQuotasTableName,
+          Item: ItemForRecord(
+            "overall-allocation",
+            allocation.id,
+            parsedAllocation,
+          ),
+        }),
+      );
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(
+          `Failed to put overall allocation for id ${allocation.id}: ${error.message}`,
+        );
+      }
+      throw error;
+    }
   }
 
   // Update the overallAllocation table updating the allocations array for a given volume group
@@ -112,16 +122,26 @@ export class SupplierQuotasRepository {
   }
 
   async putDailyAllocation(allocation: DailyAllocation): Promise<void> {
-    await this.ddbClient.send(
-      new PutCommand({
-        TableName: this.config.supplierQuotasTableName,
-        Item: ItemForRecord(
-          "daily-allocation",
-          `${allocation.volumeGroup}#DATE#${allocation.date}`,
-          $DailyAllocation.parse(allocation),
-        ),
-      }),
-    );
+    try {
+      const parsedAllocation = $DailyAllocation.parse(allocation);
+      await this.ddbClient.send(
+        new PutCommand({
+          TableName: this.config.supplierQuotasTableName,
+          Item: ItemForRecord(
+            "daily-allocation",
+            `${allocation.volumeGroup}#DATE#${allocation.date}`,
+            parsedAllocation,
+          ),
+        }),
+      );
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(
+          `Failed to put daily allocation for volume group ${allocation.volumeGroup} and date ${allocation.date}: ${error.message}`,
+        );
+      }
+      throw error;
+    }
   }
 
   async updateDailyAllocation(
