@@ -199,9 +199,6 @@ function evaluateContraint(
   constraintValue: number,
   operator: string,
 ): boolean {
-  console.log(
-    `Evaluating constraint: actualValue ${actualValue}, constraintValue ${constraintValue}, operator ${operator}`,
-  );
   switch (operator) {
     case "EQUALS": {
       return actualValue === constraintValue;

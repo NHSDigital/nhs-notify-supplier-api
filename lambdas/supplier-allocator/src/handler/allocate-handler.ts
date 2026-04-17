@@ -137,18 +137,10 @@ async function getSupplierFromConfig(
         suppliersForPack.some((supplier) => supplier.id === alloc.supplier),
       );
 
-      console.log("Supplier allocations for pack", {
-        supplierAllocationsForPack,
-      });
-
       supplierFactors = await calculateSupplierAllocatedFactor(
         supplierAllocationsForPack,
         deps,
       );
-
-      console.log("Supplier factors calculated for allocation", {
-        supplierFactors,
-      });
 
       // Get the supplierid with the lowest factor
       selectedSupplierId = supplierFactors[0].supplierId;
@@ -241,17 +233,27 @@ function incrementAllocation(
   volumeGroupId: string,
   supplierId: string,
   allocation: number,
+  deps: Deps,
 ) {
   const groupAllocations = map.get(volumeGroupId) ?? {};
   groupAllocations[supplierId] =
     (groupAllocations[supplierId] ?? 0) + allocation;
   map.set(volumeGroupId, groupAllocations);
+  deps.logger.info({
+    description: "Updated allocations for volume group and supplier",
+    volumeGroupId,
+    groupAllocations,
+  });
 }
 
 async function saveAllocations(
   deps: Deps,
   volumeGroupAllocations: VolumeGroupAllocation,
 ) {
+  deps.logger.info({
+    description: "Saving supplier allocations for volume groups",
+    volumeGroupAllocations,
+  });
   for (const [volumeGroupId, allocations] of volumeGroupAllocations) {
     for (const [supplierId, allocation] of Object.entries(allocations)) {
       await updateSupplierAllocation(
@@ -291,11 +293,17 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
           deps,
         );
 
+        deps.logger.info({
+          description: "Resolved supplier details from config",
+          supplierDetails,
+        });
+
         incrementAllocation(
           volumeGroupAllocations,
           supplierDetails?.volumeGroupId ?? "unknown",
           supplierSpec.supplierId,
           1,
+          deps,
         );
 
         supplier = supplierSpec.supplierId;
