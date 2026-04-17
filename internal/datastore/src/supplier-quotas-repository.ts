@@ -95,7 +95,7 @@ export class SupplierQuotasRepository {
   async getDailyAllocation(
     groupId: string,
     date: string,
-  ): Promise<DailyAllocation> {
+  ): Promise<DailyAllocation | undefined> {
     const result = await this.ddbClient.send(
       new GetCommand({
         TableName: this.config.supplierQuotasTableName,
@@ -106,9 +106,7 @@ export class SupplierQuotasRepository {
       }),
     );
     if (!result.Item) {
-      throw new Error(
-        `No daily allocation found for volume group id ${groupId} and date ${date}`,
-      );
+      return undefined;
     }
     return $DailyAllocation.parse(result.Item);
   }
@@ -133,7 +131,8 @@ export class SupplierQuotasRepository {
     newAllocation: number,
   ): Promise<void> {
     const dailyAllocation = await this.getDailyAllocation(groupId, date);
-    const currentAllocation = dailyAllocation.allocations[supplierId] ?? 0;
+    const allocations = dailyAllocation?.allocations ?? {};
+    const currentAllocation = allocations[supplierId] ?? 0;
     const updatedAllocation = currentAllocation + newAllocation;
 
     await this.ddbClient.send(

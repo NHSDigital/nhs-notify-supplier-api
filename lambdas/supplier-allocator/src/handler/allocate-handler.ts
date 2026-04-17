@@ -23,7 +23,10 @@ import {
   getVariantDetails,
   getVolumeGroupDetails,
 } from "../services/supplier-config";
-import { calculateSupplierAllocatedFactor } from "../services/supplier-quotas";
+import {
+  calculateSupplierAllocatedFactor,
+  updateSupplierAllocation,
+} from "../services/supplier-quotas";
 import { Deps } from "../config/deps";
 
 type SupplierSpec = {
@@ -32,6 +35,12 @@ type SupplierSpec = {
   priority: number;
   billingId: string;
 };
+
+type SupplierDetails = {
+  supplierSpec: SupplierSpec;
+  volumeGroupId: string;
+};
+
 type PreparedEvents = LetterRequestPreparedEventV2 | LetterRequestPreparedEvent;
 
 // small envelope that must exist in all inputs
@@ -71,7 +80,10 @@ function validateType(event: unknown) {
   }
 }
 
-async function getSupplierFromConfig(letterEvent: PreparedEvents, deps: Deps) {
+async function getSupplierFromConfig(
+  letterEvent: PreparedEvents,
+  deps: Deps,
+): Promise<SupplierDetails | undefined> {
   try {
     const variantDetails: LetterVariant = await getVariantDetails(
       letterEvent.data.letterVariantId,
@@ -119,7 +131,7 @@ async function getSupplierFromConfig(letterEvent: PreparedEvents, deps: Deps) {
 
     let supplierAllocationsForPack: SupplierAllocation[] = [];
     let supplierFactors: { supplierId: string; factor: number }[] = [];
-
+    let selectedSupplierId = "unknown"; // Default to first supplier if no allocations or factors can be calculated
     if (suppliersForPack && suppliersForPack.length > 0) {
       supplierAllocationsForPack = supplierAllocations.filter((alloc) =>
         suppliersForPack.some((supplier) => supplier.id === alloc.supplier),
@@ -137,6 +149,16 @@ async function getSupplierFromConfig(letterEvent: PreparedEvents, deps: Deps) {
       console.log("Supplier factors calculated for allocation", {
         supplierFactors,
       });
+
+      // Get the supplierid with the lowest factor
+      selectedSupplierId = supplierFactors[0].supplierId;
+      let lowestFactor = supplierFactors[0].factor;
+      for (const supplierFactor of supplierFactors) {
+        if (supplierFactor.factor < lowestFactor) {
+          lowestFactor = supplierFactor.factor;
+          selectedSupplierId = supplierFactor.supplierId;
+        }
+      }
     }
 
     deps.logger.info({
@@ -152,16 +174,26 @@ async function getSupplierFromConfig(letterEvent: PreparedEvents, deps: Deps) {
       suppliersForPack,
       supplierAllocationsForPack,
       supplierFactors,
+      selectedSupplierId,
     });
 
-    return allocatedSuppliers;
+    const supplierDetails: SupplierDetails = {
+      supplierSpec: {
+        supplierId: selectedSupplierId,
+        specId: preferredPack.id,
+        priority: 0,
+        billingId: preferredPack.billingId,
+      },
+      volumeGroupId: volumeGroupDetails.id,
+    };
+    return supplierDetails;
   } catch (error) {
     deps.logger.error({
       description: "Error fetching supplier from config",
       err: error,
       variantId: letterEvent.data.letterVariantId,
     });
-    return [];
+    return undefined;
   }
 }
 
@@ -170,6 +202,7 @@ function getSupplier(letterEvent: PreparedEvents, deps: Deps): SupplierSpec {
 }
 
 type AllocationMetrics = Map<string, Map<string, number>>;
+type VolumeGroupAllocation = Map<string, Record<string, number>>;
 
 function incrementMetric(
   map: AllocationMetrics,
@@ -203,12 +236,40 @@ function emitMetrics(
   }
 }
 
+function incrementAllocation(
+  map: VolumeGroupAllocation,
+  volumeGroupId: string,
+  supplierId: string,
+  allocation: number,
+) {
+  const groupAllocations = map.get(volumeGroupId) ?? {};
+  groupAllocations[supplierId] =
+    (groupAllocations[supplierId] ?? 0) + allocation;
+  map.set(volumeGroupId, groupAllocations);
+}
+
+async function saveAllocations(
+  deps: Deps,
+  volumeGroupAllocations: VolumeGroupAllocation,
+) {
+  for (const [volumeGroupId, allocations] of volumeGroupAllocations) {
+    for (const [supplierId, allocation] of Object.entries(allocations)) {
+      await updateSupplierAllocation(
+        volumeGroupId,
+        supplierId,
+        allocation,
+        deps,
+      );
+    }
+  }
+}
+
 export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
   return async (event: SQSEvent) => {
     const batchItemFailures: SQSBatchItemFailure[] = [];
     const perAllocationSuccess: AllocationMetrics = new Map();
     const perAllocationFailure: AllocationMetrics = new Map();
-
+    const volumeGroupAllocations: VolumeGroupAllocation = new Map(); // Map of volume group id to supplier allocations for that group, used to track the allocations calculated in this batch for emitting metrics and updating the quotas after processing the batch
     // Initialise the supplier quotas.
 
     const tasks = event.Records.map(async (record) => {
@@ -225,7 +286,17 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
         validateType(letterEvent);
 
         const supplierSpec = getSupplier(letterEvent as PreparedEvents, deps);
-        await getSupplierFromConfig(letterEvent as PreparedEvents, deps);
+        const supplierDetails = await getSupplierFromConfig(
+          letterEvent as PreparedEvents,
+          deps,
+        );
+
+        incrementAllocation(
+          volumeGroupAllocations,
+          supplierDetails?.volumeGroupId ?? "unknown",
+          supplierSpec.supplierId,
+          1,
+        );
 
         supplier = supplierSpec.supplierId;
         priority = String(supplierSpec.priority);
@@ -276,6 +347,7 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
 
     emitMetrics(perAllocationSuccess, MetricStatus.Success, deps);
     emitMetrics(perAllocationFailure, MetricStatus.Failure, deps);
+    await saveAllocations(deps, volumeGroupAllocations);
     return { batchItemFailures };
   };
 }
