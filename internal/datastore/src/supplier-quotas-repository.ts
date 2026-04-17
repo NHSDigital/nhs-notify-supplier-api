@@ -33,7 +33,9 @@ export class SupplierQuotasRepository {
     readonly config: SupplierQuotasRepositoryConfig,
   ) {}
 
-  async getOverallAllocation(groupId: string): Promise<OverallAllocation> {
+  async getOverallAllocation(
+    groupId: string,
+  ): Promise<OverallAllocation | undefined> {
     const result = await this.ddbClient.send(
       new GetCommand({
         TableName: this.config.supplierQuotasTableName,
@@ -41,9 +43,7 @@ export class SupplierQuotasRepository {
       }),
     );
     if (!result.Item) {
-      throw new Error(
-        `No overall allocation found for volume group id ${groupId}`,
-      );
+      return undefined;
     }
     return $OverallAllocation.parse(result.Item);
   }
@@ -69,7 +69,10 @@ export class SupplierQuotasRepository {
     newAllocation: number,
   ): Promise<void> {
     const overallAllocation = await this.getOverallAllocation(groupId);
-    const currentAllocation = overallAllocation.allocations[supplierId] ?? 0;
+    const allocations = overallAllocation?.allocations ?? {};
+    const currentAllocation = Object.hasOwn(allocations, supplierId)
+      ? allocations[supplierId]
+      : 0;
     const updatedAllocation = currentAllocation + newAllocation;
 
     await this.ddbClient.send(

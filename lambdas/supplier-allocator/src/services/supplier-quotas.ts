@@ -7,8 +7,15 @@ export async function calculateSupplierAllocatedFactor(
   deps: Deps,
 ): Promise<{ supplierId: string; factor: number }[]> {
   const volumeGroupId = supplierAllocations[0].volumeGroup; // Assuming all allocations are for the same volume group
-  const overallAllocation: OverallAllocation =
+  const overallAllocation =
     await deps.supplierQuotasRepo.getOverallAllocation(volumeGroupId);
+
+  if (!overallAllocation) {
+    return supplierAllocations.map((allocation) => ({
+      supplierId: allocation.supplier,
+      factor: 0,
+    }));
+  }
 
   const { allocations } = overallAllocation;
 
@@ -35,15 +42,25 @@ export async function updateSupplierQuota(
   const overallAllocation =
     await deps.supplierQuotasRepo.getOverallAllocation(groupId);
 
-  const updatedAllocations = {
-    ...overallAllocation.allocations,
-    [supplierId]: newAllocation,
-  };
+  const updatedAllocations = overallAllocation
+    ? {
+        ...overallAllocation.allocations,
+        [supplierId]: newAllocation,
+      }
+    : {
+        [supplierId]: newAllocation,
+      };
 
-  const updatedOverallAllocation: OverallAllocation = {
-    ...overallAllocation,
-    allocations: updatedAllocations,
-  };
+  const updatedOverallAllocation: OverallAllocation = overallAllocation
+    ? {
+        ...overallAllocation,
+        allocations: updatedAllocations,
+      }
+    : {
+        id: groupId,
+        volumeGroup: groupId,
+        allocations: updatedAllocations,
+      };
 
   await deps.supplierQuotasRepo.putOverallAllocation(updatedOverallAllocation);
 }
