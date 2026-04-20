@@ -341,7 +341,7 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
         incrementAllocation(
           volumeGroupAllocations,
           supplierDetails?.volumeGroupId ?? "unknown",
-          supplierSpec.supplierId,
+          supplierDetails?.supplierSpec?.supplierId ?? "unknown",
           1,
           deps,
         );
