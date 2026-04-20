@@ -183,6 +183,10 @@ async function getSupplierFromConfig(
       },
       volumeGroupId: volumeGroupDetails.id,
     };
+    deps.logger.info({
+      description: "Resolved supplier details for letter event",
+      supplierDetails,
+    });
     return supplierDetails;
   } catch (error) {
     deps.logger.error({
@@ -263,6 +267,12 @@ function incrementAllocation(
   allocation: number,
   deps: Deps,
 ) {
+  deps.logger.info({
+    description: "Incrementing allocation for volume group and supplier",
+    volumeGroupId,
+    supplierId,
+    allocation,
+  });
   const groupAllocations = map.get(volumeGroupId) ?? {};
   groupAllocations[supplierId] =
     (groupAllocations[supplierId] ?? 0) + allocation;
