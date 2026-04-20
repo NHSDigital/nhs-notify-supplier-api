@@ -145,7 +145,7 @@ export type OverallAllocation = z.infer<typeof $OverallAllocation>;
 export const $DailyAllocation = z
   .object({
     id: z.string(),
-    date: z.ZodISODate,
+    date: z.string(),
     volumeGroup: idRef($VolumeGroup, "id"),
     allocations: z.record(
       idRef($Supplier, "id"),
