@@ -1,18 +1,9 @@
 name: Deploy proxy to environment
-run-name: Proxygen Deployment for ${{ inputs.proxy_environment }}
+run-name: Proxygen Deployment for internal-dev
 
 on:
   workflow_dispatch:
     inputs:
-      proxy_environment:
-        description: Name of the proxygen environment to deploy to
-        required: true
-        type: choice
-        default: internal-dev
-        options:
-          - internal-dev
-          - int
-          - prod
       build_sandbox:
         description: Build sandbox container?
         required: false
@@ -40,7 +31,8 @@ jobs:
           node-version: 22
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: "Check if pull request exists for this branch and set ENVIRONMENT/APIM_ENV"
+      - name: "Check if pull request exists for this branch and set
+          ENVIRONMENT/APIM_ENV"
         id: pr_exists
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -48,11 +40,7 @@ jobs:
           branch_name=${GITHUB_HEAD_REF:-$(echo $GITHUB_REF | sed 's#refs/heads/##')}
           echo "Current branch is '$branch_name'"
 
-          if [ -z "${{ inputs.proxy_environment }}" ]; then
-            ENVIRONMENT="internal-dev"
-          else
-            ENVIRONMENT="${{ inputs.proxy_environment }}"
-          fi
+          ENVIRONMENT="internal-dev"
 
           pr_json=$(gh pr list --head "$branch_name" --state open --json number --limit 1)
           pr_number=$(echo "$pr_json" | jq -r '.[0].number // empty')
@@ -62,14 +50,11 @@ jobs:
             echo "does_pull_request_exist=true" >> $GITHUB_OUTPUT
             echo "pr_number=$pr_number" >> $GITHUB_OUTPUT
             APIM_ENV="$ENVIRONMENT-pr"
-            echo "changing environment variable so that PR number is used in proxy pipeline for setting env vars"
+            # changing environment variable so that PR number is used in proxy pipeline for setting env vars
             ENVIRONMENT="pr$pr_number"
           else
-            echo "Pull request doesn't exist, setting target env to main"
-            echo "does_pull_request_exist=false" >> $GITHUB_OUTPUT
-            echo "pr_number=" >> $GITHUB_OUTPUT
-            APIM_ENV="$ENVIRONMENT"
-            ENVIRONMENT="main"
+            echo "[ERROR] Pull request $pr_number doesn't exist."
+            exit 1
           fi
 
           echo "ENVIRONMENT=$ENVIRONMENT" >> $GITHUB_ENV
