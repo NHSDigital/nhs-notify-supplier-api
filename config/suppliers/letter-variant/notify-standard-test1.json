@@ -24,6 +24,7 @@
     "notify-c5",
     "notify-c4"
   ],
+  "priority": 10,
   "status": "PROD",
   "type": "STANDARD",
   "volumeGroupId": "volumeGroup-test1"

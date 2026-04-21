@@ -151,7 +151,7 @@ async function getSupplierFromConfig(
       supplierSpec: {
         supplierId: selectedSupplierId,
         specId: preferredPack.id,
-        priority: 0,
+        priority: letterVariant.priority,
         billingId: preferredPack.billingId,
       },
       volumeGroupId: volumeGroup.id,
