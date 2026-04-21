@@ -14,6 +14,7 @@ import {
 import createSupplierAllocatorHandler from "../allocate-handler";
 import * as supplierConfig from "../../services/supplier-config";
 import * as supplierQuotas from "../../services/supplier-quotas";
+import * as allocationConfig from "../allocation-config";
 
 import { Deps } from "../../config/deps";
 import { EnvVars } from "../../config/env";
@@ -26,6 +27,7 @@ const renderingSchemaVersion: string =
 
 jest.mock("../../services/supplier-config");
 jest.mock("../../services/supplier-quotas");
+jest.mock("../allocation-config");
 
 function createSQSEvent(records: SQSRecord[]): SQSEvent {
   return {
@@ -154,26 +156,27 @@ function setupDefaultMocks() {
     id: "g1",
     status: "PROD",
   });
-  (
-    supplierConfig.getSupplierAllocationsForVolumeGroup as jest.Mock
-  ).mockResolvedValue([{ supplier: "s1" }]);
-  (supplierConfig.getSupplierDetails as jest.Mock).mockResolvedValue({
-    supplierId: "supplier-1",
-    specId: "spec-1",
-    priority: 1,
-    billingId: "billing-1",
+  (allocationConfig.eligibleSuppliers as jest.Mock).mockResolvedValue({
+    supplierAllocations: [{ supplier: "s1", variantId: "v1" }],
+    suppliers: [{ id: "s1", name: "Supplier 1", status: "PROD" }],
   });
-  (supplierConfig.getPreferredSupplierPacks as jest.Mock).mockResolvedValue([
-    {
-      packSpecificationId: "pack-spec-1",
-    },
-  ]);
-  (supplierConfig.getPackSpecification as jest.Mock).mockResolvedValue({
+  (allocationConfig.preferredSupplierPack as jest.Mock).mockResolvedValue({
     id: "pack-spec-1",
     type: "A4",
     colour: false,
     duplex: false,
   });
+  (allocationConfig.filterSuppliersWithCapacity as jest.Mock).mockResolvedValue(
+    [{ id: "s1", name: "Supplier 1", status: "PROD" }],
+  );
+  (allocationConfig.selectSupplierByFactor as jest.Mock).mockResolvedValue({
+    id: "s1",
+    name: "Supplier 1",
+    status: "PROD",
+  });
+  (allocationConfig.suppliersWithValidPack as jest.Mock).mockResolvedValue([
+    { id: "s1", name: "Supplier 1", status: "PROD" },
+  ]);
   (
     supplierQuotas.calculateSupplierAllocatedFactor as jest.Mock
   ).mockResolvedValue({
