@@ -5,8 +5,6 @@ import {
   LetterVariant,
   PackSpecification,
   Supplier,
-  SupplierAllocation,
-  SupplierPack,
   VolumeGroup,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-config";
 import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
@@ -14,19 +12,18 @@ import z from "zod";
 import { Unit } from "aws-embedded-metrics";
 import { MetricEntry, MetricStatus, buildEMFObject } from "@internal/helpers";
 import {
-  filterPacksForLetter,
-  getPackSpecification,
-  getPreferredSupplierPacks,
-  getSupplierAllocationsForVolumeGroup,
-  getSupplierDetails,
-  getSuppliersWithValidPack,
   getVariantDetails,
   getVolumeGroupDetails,
 } from "../services/supplier-config";
+import { updateSupplierAllocation } from "../services/supplier-quotas";
 import {
-  calculateSupplierAllocatedFactor,
-  updateSupplierAllocation,
-} from "../services/supplier-quotas";
+  eligibleSuppliers,
+  filterSuppliersWithCapacity,
+  preferredSupplierPack,
+  selectSupplierByFactor,
+  suppliersWithValidPack,
+} from "./allocation-config";
+
 import { Deps } from "../config/deps";
 
 type SupplierSpec = {
@@ -85,87 +82,68 @@ async function getSupplierFromConfig(
   deps: Deps,
 ): Promise<SupplierDetails | undefined> {
   try {
-    const variantDetails: LetterVariant = await getVariantDetails(
+    const letterVariant: LetterVariant = await getVariantDetails(
       letterEvent.data.letterVariantId,
       deps,
     );
 
-    const volumeGroupDetails: VolumeGroup = await getVolumeGroupDetails(
-      variantDetails.volumeGroupId,
+    const volumeGroup: VolumeGroup = await getVolumeGroupDetails(
+      letterVariant.volumeGroupId,
       deps,
     );
 
-    const supplierAllocations: SupplierAllocation[] =
-      await getSupplierAllocationsForVolumeGroup(
-        variantDetails.volumeGroupId,
-        deps,
-        variantDetails.supplierId,
-      );
+    const { supplierAllocations, suppliers: allocatedSuppliers } =
+      await eligibleSuppliers(volumeGroup, deps);
 
-    const supplierIds = supplierAllocations.map((alloc) => alloc.supplier);
-
-    const allocatedSuppliers: Supplier[] = await getSupplierDetails(
-      supplierIds,
-      deps,
-    );
-
-    const eligiblePacks: string[] = await filterPacksForLetter(
+    const preferredPack: PackSpecification = await preferredSupplierPack(
       letterEvent,
-      variantDetails.packSpecificationIds,
+      allocatedSuppliers,
+      letterVariant.packSpecificationIds,
       deps,
     );
 
-    const preferredSupplierPacks: SupplierPack[] =
-      await getPreferredSupplierPacks(eligiblePacks, allocatedSuppliers, deps);
-
-    const preferredPack: PackSpecification = await getPackSpecification(
-      preferredSupplierPacks[0].packSpecificationId,
-      deps,
-    );
-
-    const suppliersForPack: Supplier[] = await getSuppliersWithValidPack(
+    const allSuppliersForPack: Supplier[] = await suppliersWithValidPack(
       allocatedSuppliers,
       preferredPack.id,
       deps,
     );
 
-    let supplierAllocationsForPack: SupplierAllocation[] = [];
-    let supplierFactors: { supplierId: string; factor: number }[] = [];
-    let selectedSupplierId = "unknown"; // Default to first supplier if no allocations or factors can be calculated
-    if (suppliersForPack && suppliersForPack.length > 0) {
-      supplierAllocationsForPack = supplierAllocations.filter((alloc) =>
-        suppliersForPack.some((supplier) => supplier.id === alloc.supplier),
-      );
-
-      supplierFactors = await calculateSupplierAllocatedFactor(
-        supplierAllocationsForPack,
+    const suppliersForPackWithCapacity: Supplier[] =
+      await filterSuppliersWithCapacity(
+        allSuppliersForPack,
+        volumeGroup.id,
         deps,
       );
 
-      // Get the supplierid with the lowest factor
-      selectedSupplierId = supplierFactors[0].supplierId;
-      let lowestFactor = supplierFactors[0].factor;
-      for (const supplierFactor of supplierFactors) {
-        if (supplierFactor.factor < lowestFactor) {
-          lowestFactor = supplierFactor.factor;
-          selectedSupplierId = supplierFactor.supplierId;
-        }
-      }
+    // selected supplier id is determined by first calling selectSupplierByFactor for suppliers with capacity and if nothing is returned tryong again with all suppliers for pack
+    const selectedSupplierId =
+      (await selectSupplierByFactor(
+        suppliersForPackWithCapacity,
+        supplierAllocations,
+        deps,
+      )) ??
+      (await selectSupplierByFactor(
+        allSuppliersForPack,
+        supplierAllocations,
+        deps,
+      ));
+
+    if (!selectedSupplierId) {
+      throw new Error(
+        "No suppliers found with capacity or valid allocation factor for preferred pack",
+      );
     }
 
     deps.logger.info({
       description: "Fetched supplier details for supplier allocations",
       variantId: letterEvent.data.letterVariantId,
-      volumeGroupId: volumeGroupDetails.id,
+      volumeGroupId: volumeGroup.id,
       supplierAllocationIds: supplierAllocations.map((a) => a.id),
       allocatedSuppliers,
-      variantPacks: variantDetails.packSpecificationIds,
-      eligiblePacks,
-      preferredSupplierPacks,
-      preferredPack,
-      suppliersForPack,
-      supplierAllocationsForPack,
-      supplierFactors,
+      allSuppliersForPack: allSuppliersForPack.map((s) => s.id),
+      suppliersForPackWithCapacity: suppliersForPackWithCapacity.map(
+        (s) => s.id,
+      ),
       selectedSupplierId,
     });
 
@@ -176,7 +154,7 @@ async function getSupplierFromConfig(
         priority: 0,
         billingId: preferredPack.billingId,
       },
-      volumeGroupId: volumeGroupDetails.id,
+      volumeGroupId: volumeGroup.id,
     };
     deps.logger.info({
       description: "Resolved supplier details for letter event",

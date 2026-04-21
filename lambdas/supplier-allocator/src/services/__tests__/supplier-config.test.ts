@@ -4,7 +4,6 @@ import {
   getPreferredSupplierPacks,
   getSupplierAllocationsForVolumeGroup,
   getSupplierDetails,
-  getSuppliersWithValidPack,
   getVariantDetails,
   getVolumeGroupDetails,
 } from "../supplier-config";
@@ -456,28 +455,6 @@ describe("supplier-config service", () => {
           status: "DRAFT",
         }),
       );
-    });
-  });
-
-  describe("getSuppliersWithValidPack", () => {
-    it("returns suppliers that have the valid pack specification", async () => {
-      const suppliers = [
-        { id: "s1", name: "Supplier 1", status: "PROD" },
-        { id: "s2", name: "Supplier 2", status: "PROD" },
-      ] as any[];
-      const supplierPacks = [
-        { id: "p1", supplierId: "s1", packSpecificationId: "spec1" },
-      ] as any[];
-      const deps = makeDeps();
-      deps.supplierConfigRepo.getSupplierPacksForPackSpecification = jest
-        .fn()
-        .mockResolvedValue(supplierPacks);
-
-      const result = await getSuppliersWithValidPack(suppliers, "spec1", deps);
-
-      expect(result).toEqual([
-        { id: "s1", name: "Supplier 1", status: "PROD" },
-      ]);
     });
   });
 
