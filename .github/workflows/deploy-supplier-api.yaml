@@ -92,10 +92,18 @@ jobs:
               echo "[ERROR] Release tags must be semantic versions, for example v1.2.3."
               exit 1
             fi
-            release_json=$(gh release view "$source_value" --repo "$GITHUB_REPOSITORY" --json assets)
+            if ! release_json=$(gh release view "$source_value" --repo "$GITHUB_REPOSITORY" --json assets 2>&1); then
+              echo "[ERROR] Release '$source_value' not found in repository."
+              echo "$release_json"
+              exit 1
+            fi
             is_release="true"
           elif [[ "$source_type" == "branch" ]]; then
-            branch_matches=$(gh api "repos/${GITHUB_REPOSITORY}/git/matching-refs/heads/${source_value}" --jq 'length')
+            if ! branch_matches=$(gh api "repos/${GITHUB_REPOSITORY}/git/matching-refs/heads/${source_value}" --jq 'length' 2>&1); then
+              echo "[ERROR] Failed to check branch '$source_value'."
+              echo "$branch_matches"
+              exit 1
+            fi
             if [[ "$branch_matches" -eq 0 ]]; then
               echo "[ERROR] Branch '$source_value' not found in repository."
               exit 1
@@ -103,6 +111,19 @@ jobs:
           else
             echo "[ERROR] Unsupported source type '$source_type'. Use 'release' or 'branch'."
             exit 1
+          fi
+
+          # --- Cross-validation (only when deploying both) ---
+
+          if [[ "$deploy_backend" == "true" && "$deploy_proxy" == "true" ]]; then
+            case "${backend_account_group}:${apim_environment}" in
+              dev:internal-dev|nonprod:int|prod:prod) ;;
+              *)
+                echo "[ERROR] Mismatched backend/APIM pair: '${backend_account_group}' and '${apim_environment}'."
+                echo "[ERROR] Valid combinations: dev/internal-dev, nonprod/int, prod/prod."
+                exit 1
+                ;;
+            esac
           fi
 
           # --- Backend validation (only when deploying backend) ---
@@ -148,21 +169,13 @@ jobs:
 
             if [[ "$is_release" == "true" ]]; then
               oas_asset="api-oas-specification-${apim_environment}-${source_value}.zip"
-              echo "$release_json" | jq -r '.assets[].name' | grep -x "$oas_asset" >/dev/null
-            fi
-          fi
-
-          # --- Cross-validation (only when deploying both) ---
-
-          if [[ "$deploy_backend" == "true" && "$deploy_proxy" == "true" ]]; then
-            case "${backend_account_group}:${apim_environment}" in
-              dev:internal-dev|nonprod:int|prod:prod) ;;
-              *)
-                echo "[ERROR] Mismatched backend/APIM pair: '${backend_account_group}' and '${apim_environment}'."
-                echo "[ERROR] Valid combinations: dev/internal-dev, nonprod/int, prod/prod."
+              if ! echo "$release_json" | jq -r '.assets[].name' | grep -qx "$oas_asset"; then
+                echo "[ERROR] Release '$source_value' does not contain required OAS asset '$oas_asset'."
+                echo "Available assets:"
+                echo "$release_json" | jq -r '.assets[].name'
                 exit 1
-                ;;
-            esac
+              fi
+            fi
           fi
 
           build_artifact_version=""
