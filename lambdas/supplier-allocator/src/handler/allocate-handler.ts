@@ -154,7 +154,7 @@ function emitSupCampaignClientMetric(
   const { campaignId, clientId } = letterEvent.data;
   console.log("VLASIS and the campaignId is:", campaignId);
   const dimensions: Record<string, string> = {
-    Supplier: supplier,
+    Supplier: "supplierVlasis",
     ClientId: clientId,
     CampaignId: campaignId || "unknown",
   };
