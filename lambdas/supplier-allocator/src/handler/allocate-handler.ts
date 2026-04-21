@@ -151,12 +151,12 @@ function emitSupCampaignClientMetric(
   deps: Deps,
 ) {
   const namespace = "supplier-allocator";
-  const clientId = getClientId(letterEvent);
-  const campaignId = getCampaignId(letterEvent);
+  const { campaignId, clientId } = letterEvent.data;
+  console.log("VLASIS and the campaignId is:", campaignId);
   const dimensions: Record<string, string> = {
     Supplier: supplier,
     ClientId: clientId,
-    CampaignId: campaignId,
+    CampaignId: campaignId || "unknown",
   };
   const metric: MetricEntry = {
     key: status,
@@ -164,20 +164,6 @@ function emitSupCampaignClientMetric(
     unit: Unit.Count,
   };
   deps.logger.info(buildEMFObject(namespace, dimensions, metric));
-}
-
-function getClientId(letterEvent: PreparedEvents): string {
-  if (letterEvent && letterEvent.data && letterEvent.data.clientId) {
-    return letterEvent.data.clientId;
-  }
-  return "unknown";
-}
-
-function getCampaignId(letterEvent: PreparedEvents): string {
-  if (letterEvent && letterEvent.data && letterEvent.data.campaignId) {
-    return letterEvent.data.campaignId;
-  }
-  return "unknown";
 }
 
 export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
