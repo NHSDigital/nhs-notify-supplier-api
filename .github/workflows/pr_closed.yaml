@@ -3,7 +3,7 @@ name: PR Closed
 on:
   workflow_dispatch:
   pull_request:
-    types: [closed]
+    types: [ closed ]
     branches:
       - main
 
@@ -34,33 +34,15 @@ jobs:
   deploy-main:
     needs: check-merge-or-workflow-dispatch
     name: Deploy changes to main in dev AWS account
-    runs-on: ubuntu-latest
     if: needs.check-merge-or-workflow-dispatch.outputs.deploy == 'true'
-
-    permissions:
-      id-token: write
-      contents: read
-
-    strategy:
-      max-parallel: 1
-      matrix:
-        component: [api]
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-      - name: Updating Main Environment
-        env:
-          APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
-          APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
-        run: |
-          bash .github/scripts/dispatch_internal_repo_workflow.sh \
-            --releaseVersion "main" \
-            --targetWorkflow "dispatch-deploy-static-notify-supplier-api-env.yaml" \
-            --targetEnvironment "main" \
-            --targetAccountGroup "nhs-notify-supplier-api-dev" \
-            --targetComponent "${{ matrix.component }}" \
-            --terraformAction "apply"
+    uses: ./.github/workflows/deploy-supplier-api.yaml
+    secrets: inherit
+    with:
+      source_type: branch
+      source_value: main
+      deploy_backend: true
+      backend_account_group: dev
+      deploy_proxy: false
 
   check-event-schemas-version-change:
     name: Check for event schemas package version change
@@ -78,8 +60,8 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version-file: '.tool-versions'
-          registry-url: 'https://npm.pkg.github.com'
+          node-version-file: ".tool-versions"
+          registry-url: "https://npm.pkg.github.com"
 
       - name: check if local version differs from latest published version
         id: check-version
@@ -137,8 +119,8 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version-file: '.tool-versions'
-          registry-url: 'https://npm.pkg.github.com'
+          node-version-file: ".tool-versions"
+          registry-url: "https://npm.pkg.github.com"
 
       - name: Install dependencies
         env:

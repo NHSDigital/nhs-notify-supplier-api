@@ -231,7 +231,6 @@ jobs:
           APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
         uses: ./.github/actions/build-proxies
         with:
-          targetComponent: api
           environment: ${{ needs.validate.outputs.target_environment }}
           apimEnv: ${{ needs.validate.outputs.apim_environment }}
           runId: "${{ github.run_id }}"

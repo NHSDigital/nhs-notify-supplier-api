@@ -1,5 +1,5 @@
-name: Deploy proxy to environment
-run-name: Proxygen Deployment for internal-dev
+name: Deploy dynamic PR environment proxy
+run-name: Deploy proxy for PR environment on internal-dev by @${{ github.actor }}
 
 on:
   workflow_dispatch:
@@ -15,21 +15,22 @@ permissions:
   packages: read
 
 jobs:
-  deploy-environment:
+  deploy-pr-proxy:
     runs-on: ubuntu-latest
-    name: Deploy to Environment
+    name: Deploy proxy to dynamic PR environment
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
-        with:
-          node-version: 22
 
-      - name: Npm install
+      - name: Install dependencies
         uses: ./.github/actions/node-install
         with:
-          node-version: 22
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve nodejs version
+        id: toolversions
+        run: echo "nodejs_version=$(grep '^nodejs\s' .tool-versions | cut -f2 -d' ')" >>
+          "$GITHUB_OUTPUT"
 
       - name: "Check if pull request exists for this branch and set
           ENVIRONMENT/APIM_ENV"
@@ -60,14 +61,16 @@ jobs:
           echo "ENVIRONMENT=$ENVIRONMENT" >> $GITHUB_ENV
           echo "APIM_ENV=$APIM_ENV" >> $GITHUB_ENV
 
-      - name: "Build OAS spec"
+      - name: Build OAS spec
         uses: ./.github/actions/build-oas-spec
         with:
+          version: "pr${{ steps.pr_exists.outputs.pr_number }}"
           apimEnv: "${{ env.APIM_ENV }}"
           buildSandbox: ${{ inputs.build_sandbox }}
+          nodejs_version: ${{ steps.toolversions.outputs.nodejs_version }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: "Build proxies"
+      - name: Deploy proxy
         env:
           PROXYGEN_API_NAME: nhs-notify-supplier
           PR_NUMBER: ${{ steps.pr_exists.outputs.pr_number }}
@@ -75,8 +78,10 @@ jobs:
           APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
         uses: ./.github/actions/build-proxies
         with:
+          targetComponent: api
           environment: "${{ env.ENVIRONMENT }}"
           apimEnv: "${{ env.APIM_ENV }}"
           runId: "${{ github.run_id }}"
           buildSandbox: ${{ inputs.build_sandbox }}
           releaseVersion: ${{ github.ref_name }}
+          version: "pr${{ steps.pr_exists.outputs.pr_number }}"
