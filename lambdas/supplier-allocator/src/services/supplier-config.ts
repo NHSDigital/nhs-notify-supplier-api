@@ -170,28 +170,15 @@ export async function getPackSpecification(
   return packSpec;
 }
 
-// This function is used to filter the allocated suppliers based on those that support the supplied pack specification
-export async function getSuppliersWithValidPack(
-  suppliers: Supplier[],
+export async function getSupplierPacks(
   packSpecificationId: string,
   deps: Deps,
-): Promise<Supplier[]> {
-  const suppliersWithValidPack: Supplier[] = [];
+): Promise<SupplierPack[]> {
   const supplierPacks =
     await deps.supplierConfigRepo.getSupplierPacksForPackSpecification(
       packSpecificationId,
     );
-
-  for (const supplier of suppliers) {
-    const hasValidPack = supplierPacks.some(
-      (pack) => pack.supplierId === supplier.id,
-    );
-    if (hasValidPack) {
-      suppliersWithValidPack.push(supplier);
-    }
-  }
-
-  return suppliersWithValidPack;
+  return supplierPacks;
 }
 
 function evaluateContraint(
