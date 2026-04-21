@@ -74,6 +74,11 @@ jobs:
 
           # --- Shared source validation ---
 
+          if [[ "$deploy_backend" != "true" && "$deploy_proxy" != "true" ]]; then
+            echo "[ERROR] At least one of deploy_backend or deploy_proxy must be true."
+            exit 1
+          fi
+
           if [[ -z "$source_value" ]]; then
             echo "[ERROR] source_value cannot be empty."
             exit 1
@@ -87,7 +92,7 @@ jobs:
               echo "[ERROR] Release tags must be semantic versions, for example v1.2.3."
               exit 1
             fi
-            gh release view "$source_value" --repo "$GITHUB_REPOSITORY" >/dev/null
+            release_json=$(gh release view "$source_value" --repo "$GITHUB_REPOSITORY" --json assets)
             is_release="true"
           elif [[ "$source_type" == "branch" ]]; then
             branch_matches=$(gh api "repos/${GITHUB_REPOSITORY}/git/matching-refs/heads/${source_value}" --jq 'length')
@@ -143,8 +148,7 @@ jobs:
 
             if [[ "$is_release" == "true" ]]; then
               oas_asset="api-oas-specification-${apim_environment}-${source_value}.zip"
-              gh release view "$source_value" --repo "$GITHUB_REPOSITORY" --json assets \
-                --jq '.assets[].name' | grep -x "$oas_asset" >/dev/null
+              echo "$release_json" | jq -r '.assets[].name' | grep -x "$oas_asset" >/dev/null
             fi
           fi
 
@@ -180,7 +184,7 @@ jobs:
     needs: validate
     steps:
       - name: Checkout repository
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Deploy backend environment
         env:
@@ -203,7 +207,12 @@ jobs:
     needs: [ validate, deploy-backend ]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Resolve nodejs version
+        id: toolversions
+        run: echo "nodejs_version=$(grep '^nodejs\s' .tool-versions | cut -f2 -d' ')" >>
+          "$GITHUB_OUTPUT"
 
       - name: Build OAS spec for non-release source
         if: ${{ needs.validate.outputs.is_release == 'false' }}
@@ -212,7 +221,7 @@ jobs:
           version: ${{ needs.validate.outputs.build_artifact_version }}
           apimEnv: ${{ needs.validate.outputs.apim_environment }}
           buildSandbox: ${{ inputs.build_sandbox }}
-          nodejs_version: "22.22.0"
+          nodejs_version: ${{ steps.toolversions.outputs.nodejs_version }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Deploy proxy
