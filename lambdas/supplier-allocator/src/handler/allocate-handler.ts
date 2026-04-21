@@ -147,7 +147,7 @@ function emitMetrics(
 function emitSupCampaignClientMetric(
   letterEvent: PreparedEvents,
   supplier: string,
-  status: MetricStatus,
+  status: string,
   deps: Deps,
 ) {
   const namespace = "supplier-allocator";
@@ -242,7 +242,7 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
         emitSupCampaignClientMetric(
           letterEvent,
           supplier,
-          MetricStatus.Success,
+          "supplier_Campaign_Client",
           deps,
         );
       } catch (error) {
@@ -254,12 +254,6 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
         });
         incrementMetric(perAllocationFailure, supplier, priority);
         batchItemFailures.push({ itemIdentifier: record.messageId });
-        emitSupCampaignClientMetric(
-          letterEvent as PreparedEvents,
-          supplier,
-          MetricStatus.Failure,
-          deps,
-        );
       }
     });
 
