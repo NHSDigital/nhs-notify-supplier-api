@@ -155,10 +155,14 @@ jobs:
           # --- Cross-validation (only when deploying both) ---
 
           if [[ "$deploy_backend" == "true" && "$deploy_proxy" == "true" ]]; then
-            if [[ ("$backend_account_group" == "prod") != ("$apim_environment" == "prod") ]]; then
-              echo "[ERROR] PROD backend and PROD APIM can only be deployed together."
-              exit 1
-            fi
+            case "${backend_account_group}:${apim_environment}" in
+              dev:internal-dev|nonprod:int|prod:prod) ;;
+              *)
+                echo "[ERROR] Mismatched backend/APIM pair: '${backend_account_group}' and '${apim_environment}'."
+                echo "[ERROR] Valid combinations: dev/internal-dev, nonprod/int, prod/prod."
+                exit 1
+                ;;
+            esac
           fi
 
           build_artifact_version=""
