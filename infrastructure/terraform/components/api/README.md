@@ -58,6 +58,7 @@ No requirements.
 | <a name="module_ddb_alarms_letters"></a> [ddb\_alarms\_letters](#module\_ddb\_alarms\_letters) | ../../modules/alarms-ddb | n/a |
 | <a name="module_ddb_alarms_mi"></a> [ddb\_alarms\_mi](#module\_ddb\_alarms\_mi) | ../../modules/alarms-ddb | n/a |
 | <a name="module_ddb_alarms_suppliers"></a> [ddb\_alarms\_suppliers](#module\_ddb\_alarms\_suppliers) | ../../modules/alarms-ddb | n/a |
+| <a name="module_ddb_alarms_upsert_idempotency"></a> [ddb\_alarms\_upsert\_idempotency](#module\_ddb\_alarms\_upsert\_idempotency) | ../../modules/alarms-ddb | n/a |
 | <a name="module_domain_truststore"></a> [domain\_truststore](#module\_domain\_truststore) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.0.6/terraform-s3bucket.zip | n/a |
 | <a name="module_eventpub"></a> [eventpub](#module\_eventpub) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.0.6/terraform-eventpub.zip | n/a |
 | <a name="module_eventsub"></a> [eventsub](#module\_eventsub) | ../../modules/eventsub | n/a |
