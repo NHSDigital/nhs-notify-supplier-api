@@ -45,30 +45,24 @@ export class SupplierQuotasRepository {
     if (!result.Item) {
       return undefined;
     }
-    return $OverallAllocation.parse(result.Item);
+    // Strip DynamoDB keys before parsing
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { pk, sk, ...item } = result.Item;
+    return $OverallAllocation.parse(item);
   }
 
   async putOverallAllocation(allocation: OverallAllocation): Promise<void> {
-    try {
-      const parsedAllocation = $OverallAllocation.parse(allocation);
-      await this.ddbClient.send(
-        new PutCommand({
-          TableName: this.config.supplierQuotasTableName,
-          Item: ItemForRecord(
-            "overall-allocation",
-            allocation.id,
-            parsedAllocation,
-          ),
-        }),
-      );
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(
-          `Failed to put overall allocation for id ${allocation.id}: ${error.message}`,
-        );
-      }
-      throw error;
-    }
+    const parsedAllocation = $OverallAllocation.parse(allocation);
+    await this.ddbClient.send(
+      new PutCommand({
+        TableName: this.config.supplierQuotasTableName,
+        Item: ItemForRecord(
+          "overall-allocation",
+          allocation.id,
+          parsedAllocation,
+        ),
+      }),
+    );
   }
 
   // Update the overallAllocation table updating the allocations array for a given volume group
@@ -80,26 +74,36 @@ export class SupplierQuotasRepository {
   ): Promise<void> {
     const overallAllocation = await this.getOverallAllocation(groupId);
     const allocations = overallAllocation?.allocations ?? {};
-    const currentAllocation = Object.hasOwn(allocations, supplierId)
-      ? allocations[supplierId]
-      : 0;
+    const currentAllocation = allocations[supplierId] ?? 0;
     const updatedAllocation = currentAllocation + newAllocation;
 
-    await this.ddbClient.send(
-      new UpdateCommand({
-        TableName: this.config.supplierQuotasTableName,
-        Key: { pk: "ENTITY#overall-allocation", sk: `ID#${groupId}` },
-        UpdateExpression:
-          "SET allocations.#supplierId = :updatedAllocation, updatedAt = :updatedAt",
-        ExpressionAttributeNames: {
-          "#supplierId": supplierId,
-        },
-        ExpressionAttributeValues: {
-          ":updatedAllocation": updatedAllocation,
-          ":updatedAt": new Date().toISOString(),
-        },
-      }),
-    );
+    if (overallAllocation) {
+      // Update existing allocation
+      const updatedAllocations = {
+        ...allocations,
+        [supplierId]: updatedAllocation,
+      };
+      await this.ddbClient.send(
+        new UpdateCommand({
+          TableName: this.config.supplierQuotasTableName,
+          Key: { pk: "ENTITY#overall-allocation", sk: `ID#${groupId}` },
+          UpdateExpression:
+            "SET allocations = :allocations, updatedAt = :updatedAt",
+          ExpressionAttributeValues: {
+            ":allocations": updatedAllocations,
+            ":updatedAt": new Date().toISOString(),
+          },
+        }),
+      );
+    } else {
+      // Create new allocation
+      const newOverallAllocation: OverallAllocation = {
+        id: groupId,
+        volumeGroup: groupId,
+        allocations: { [supplierId]: updatedAllocation },
+      };
+      await this.putOverallAllocation(newOverallAllocation);
+    }
   }
 
   async getDailyAllocation(
@@ -118,30 +122,24 @@ export class SupplierQuotasRepository {
     if (!result.Item) {
       return undefined;
     }
-    return $DailyAllocation.parse(result.Item);
+    // Strip DynamoDB keys before parsing
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { pk, sk, ...item } = result.Item;
+    return $DailyAllocation.parse(item);
   }
 
   async putDailyAllocation(allocation: DailyAllocation): Promise<void> {
-    try {
-      const parsedAllocation = $DailyAllocation.parse(allocation);
-      await this.ddbClient.send(
-        new PutCommand({
-          TableName: this.config.supplierQuotasTableName,
-          Item: ItemForRecord(
-            "daily-allocation",
-            `${allocation.volumeGroup}#DATE#${allocation.date}`,
-            parsedAllocation,
-          ),
-        }),
-      );
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(
-          `Failed to put daily allocation for volume group ${allocation.volumeGroup} and date ${allocation.date}: ${error.message}`,
-        );
-      }
-      throw error;
-    }
+    const parsedAllocation = $DailyAllocation.parse(allocation);
+    await this.ddbClient.send(
+      new PutCommand({
+        TableName: this.config.supplierQuotasTableName,
+        Item: ItemForRecord(
+          "daily-allocation",
+          `${allocation.volumeGroup}#DATE#${allocation.date}`,
+          parsedAllocation,
+        ),
+      }),
+    );
   }
 
   async updateDailyAllocation(
@@ -155,23 +153,36 @@ export class SupplierQuotasRepository {
     const currentAllocation = allocations[supplierId] ?? 0;
     const updatedAllocation = currentAllocation + newAllocation;
 
-    await this.ddbClient.send(
-      new UpdateCommand({
-        TableName: this.config.supplierQuotasTableName,
-        Key: {
-          pk: "ENTITY#daily-allocation",
-          sk: `ID#${groupId}#DATE#${date}`,
-        },
-        UpdateExpression:
-          "SET allocations.#supplierId = :updatedAllocation, updatedAt = :updatedAt",
-        ExpressionAttributeNames: {
-          "#supplierId": supplierId,
-        },
-        ExpressionAttributeValues: {
-          ":updatedAllocation": updatedAllocation,
-          ":updatedAt": new Date().toISOString(),
-        },
-      }),
-    );
+    if (dailyAllocation) {
+      // Update existing allocation
+      const updatedAllocations = {
+        ...allocations,
+        [supplierId]: updatedAllocation,
+      };
+      await this.ddbClient.send(
+        new UpdateCommand({
+          TableName: this.config.supplierQuotasTableName,
+          Key: {
+            pk: "ENTITY#daily-allocation",
+            sk: `ID#${groupId}#DATE#${date}`,
+          },
+          UpdateExpression:
+            "SET allocations = :allocations, updatedAt = :updatedAt",
+          ExpressionAttributeValues: {
+            ":allocations": updatedAllocations,
+            ":updatedAt": new Date().toISOString(),
+          },
+        }),
+      );
+    } else {
+      // Create new allocation
+      const newDailyAllocation: DailyAllocation = {
+        id: `${groupId}#DATE#${date}`,
+        date,
+        volumeGroup: groupId,
+        allocations: { [supplierId]: updatedAllocation },
+      };
+      await this.putDailyAllocation(newDailyAllocation);
+    }
   }
 }

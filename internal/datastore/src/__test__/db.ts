@@ -38,6 +38,7 @@ export async function setupDynamoDBContainer() {
     letterQueueTtlHours: 1,
     miTtlHours: 1,
     supplierConfigTableName: "supplier-config",
+    supplierQuotasTableName: "supplier-quotas",
   };
 
   return {
@@ -184,6 +185,19 @@ const createSupplierConfigTableCommand = new CreateTableCommand({
   ],
 });
 
+const createSupplierQuotasTableCommand = new CreateTableCommand({
+  TableName: "supplier-quotas",
+  BillingMode: "PAY_PER_REQUEST",
+  KeySchema: [
+    { AttributeName: "pk", KeyType: "HASH" }, // Partition key
+    { AttributeName: "sk", KeyType: "RANGE" }, // Sort key
+  ],
+  AttributeDefinitions: [
+    { AttributeName: "pk", AttributeType: "S" },
+    { AttributeName: "sk", AttributeType: "S" },
+  ],
+});
+
 export async function createTables(context: DBContext) {
   const { ddbClient } = context;
 
@@ -194,6 +208,7 @@ export async function createTables(context: DBContext) {
   await ddbClient.send(createSupplierTableCommand);
   await ddbClient.send(createLetterQueueTableCommand);
   await ddbClient.send(createSupplierConfigTableCommand);
+  await ddbClient.send(createSupplierQuotasTableCommand);
 }
 
 export async function deleteTables(context: DBContext) {
@@ -205,6 +220,7 @@ export async function deleteTables(context: DBContext) {
     "suppliers",
     "letter-queue",
     "supplier-config",
+    "supplier-quotas",
   ]) {
     await ddbClient.send(
       new DeleteTableCommand({
