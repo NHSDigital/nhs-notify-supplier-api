@@ -43,6 +43,7 @@ test.describe("Urgent Letter Priority Tests", () => {
     await verifyAllocationLogsContainPriority(urgencyTenLetterIds, 10);
 
     const lettersFromQueue = await getLettersFromQueueViaIndex(supplier);
+
     const letterIdsFromQueue = lettersFromQueue.map(
       (letter) => letter.letterId,
     );
