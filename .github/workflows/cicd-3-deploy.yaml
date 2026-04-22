@@ -50,9 +50,10 @@ on:
         default: false
 
 run-name: >-
-  Deploy backend=${{ inputs.backend_account_group }} apim=${{
-  inputs.apim_environment }} source=${{ inputs.source_type }}:${{
-  inputs.source_value }} by @${{ github.actor }}
+  Deploy ${{ inputs.deploy_backend && format('backend={0}',
+  inputs.backend_account_group) || '' }} ${{ inputs.deploy_proxy &&
+  format('apim={0}', inputs.apim_environment) || '' }} source=${{
+  inputs.source_type }}:${{ inputs.source_value }} by @${{ github.actor }}
 
 permissions:
   id-token: write
