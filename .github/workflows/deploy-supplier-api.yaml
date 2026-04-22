@@ -168,9 +168,9 @@ jobs:
             fi
 
             if [[ "$is_release" == "true" ]]; then
-              oas_asset="api-oas-specification-${apim_environment}-${source_value}.zip"
-              if ! echo "$release_json" | jq -r '.assets[].name' | grep -qx "$oas_asset"; then
-                echo "[ERROR] Release '$source_value' does not contain required OAS asset '$oas_asset'."
+              oas_asset_pattern="^api-oas-specification-${apim_environment}-${source_value}-.*\.zip$"
+              if ! echo "$release_json" | jq -r '.assets[].name' | grep -qx "$oas_asset_pattern"; then
+                echo "[ERROR] Release '$source_value' does not contain required OAS asset matching pattern '$oas_asset_pattern'."
                 echo "Available assets:"
                 echo "$release_json" | jq -r '.assets[].name'
                 exit 1
