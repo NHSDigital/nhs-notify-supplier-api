@@ -32,10 +32,6 @@ function resolveSupplierForVariant(
   variantId: string,
   deps: Deps,
 ): SupplierSpec {
-  deps.logger.info({
-    description: "Resolving supplier for letter variant",
-    variantId,
-  });
   const supplier = deps.env.VARIANT_MAP[variantId];
   if (!supplier) {
     deps.logger.error({
@@ -135,13 +131,9 @@ async function getSupplierFromConfig(
       },
       volumeGroupId: volumeGroup.id,
     };
-    deps.logger.info({
-      description: "Resolved supplier details for letter event",
-      supplierDetails,
-    });
     return supplierDetails;
   } catch (error) {
-    deps.logger.error({
+    deps.logger.info({
       description: "Error fetching supplier from config",
       err: error,
       variantId: letterEvent.data.letterVariantId,
@@ -196,12 +188,6 @@ function incrementAllocation(
   allocation: number,
   deps: Deps,
 ) {
-  deps.logger.info({
-    description: "Incrementing allocation for volume group and supplier",
-    volumeGroupId,
-    supplierId,
-    allocation,
-  });
   const groupAllocations = map.get(volumeGroupId) ?? {};
   groupAllocations[supplierId] =
     (groupAllocations[supplierId] ?? 0) + allocation;
@@ -217,10 +203,6 @@ async function saveAllocations(
   deps: Deps,
   volumeGroupAllocations: VolumeGroupAllocation,
 ) {
-  deps.logger.info({
-    description: "Saving supplier allocations for volume groups",
-    volumeGroupAllocations,
-  });
   for (const [volumeGroupId, allocations] of volumeGroupAllocations) {
     for (const [supplierId, allocation] of Object.entries(allocations)) {
       await updateSupplierAllocation(

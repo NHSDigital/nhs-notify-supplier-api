@@ -229,14 +229,6 @@ export async function filterPacksForLetter(
     ) {
       filteredPackIds.push(packSpecId);
     } else {
-      deps.logger.info({
-        description: "Evaluating pack specification constraints for letter",
-        letterVariantId: letterEvent.data.letterVariantId,
-        packSpecId,
-        pageCount: letterEvent.data.pageCount,
-        constraintValue: packSpec.constraints.sheets.value,
-        constraintOperator: packSpec.constraints.sheets.operator,
-      });
       const isValid = evaluateContraint(
         letterEvent.data.pageCount,
         packSpec.constraints.sheets.value,
