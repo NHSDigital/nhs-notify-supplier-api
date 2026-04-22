@@ -152,9 +152,8 @@ function emitSupCampaignClientMetric(
 ) {
   const namespace = "supplier-allocator";
   const { campaignId, clientId } = letterEvent.data;
-  console.log("VLASIS and the campaignId is:", campaignId);
   const dimensions: Record<string, string> = {
-    Supplier: "supplierVlasis",
+    Supplier: supplier,
     ClientId: clientId,
     CampaignId: campaignId || "unknown",
   };
@@ -222,9 +221,6 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
         );
 
         incrementMetric(perAllocationSuccess, supplier, priority);
-        // increment clientid
-        // increment campaignid
-        // emit metric with current supplier, clientId and campaignId
         emitSupCampaignClientMetric(
           letterEvent,
           supplier,
