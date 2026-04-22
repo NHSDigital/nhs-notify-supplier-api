@@ -1,5 +1,3 @@
-import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
-import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import {
   PackSpecification,
   Supplier,
@@ -17,8 +15,7 @@ import {
 } from "../services/supplier-config";
 import { calculateSupplierAllocatedFactor } from "../services/supplier-quotas";
 import { Deps } from "../config/deps";
-
-type PreparedEvents = LetterRequestPreparedEventV2 | LetterRequestPreparedEvent;
+import { PreparedEvents } from "./types";
 
 export async function eligibleSuppliers(
   volumeGroup: VolumeGroup,
