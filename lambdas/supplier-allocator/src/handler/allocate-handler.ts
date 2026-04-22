@@ -1,13 +1,11 @@
 import { SQSBatchItemFailure, SQSEvent, SQSHandler } from "aws-lambda";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
-import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
 import {
   LetterVariant,
   PackSpecification,
   Supplier,
   VolumeGroup,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-config";
-import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import z from "zod";
 import { Unit } from "aws-embedded-metrics";
 import { MetricEntry, MetricStatus, buildEMFObject } from "@internal/helpers";
@@ -25,20 +23,7 @@ import {
 } from "./allocation-config";
 
 import { Deps } from "../config/deps";
-
-type SupplierSpec = {
-  supplierId: string;
-  specId: string;
-  priority: number;
-  billingId: string;
-};
-
-type SupplierDetails = {
-  supplierSpec: SupplierSpec;
-  volumeGroupId: string;
-};
-
-type PreparedEvents = LetterRequestPreparedEventV2 | LetterRequestPreparedEvent;
+import { PreparedEvents, SupplierDetails, SupplierSpec } from "./types";
 
 // small envelope that must exist in all inputs
 const TypeEnvelope = z.object({ type: z.string().min(1) });

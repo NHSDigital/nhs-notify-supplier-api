@@ -6,12 +6,9 @@ import {
   SupplierPack,
   VolumeGroup,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-config";
-import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
-import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
 
 import { Deps } from "../config/deps";
-
-type PreparedEvents = LetterRequestPreparedEventV2 | LetterRequestPreparedEvent;
+import { PreparedEvents } from "../handler/types";
 
 export async function getVariantDetails(
   variantId: string,
