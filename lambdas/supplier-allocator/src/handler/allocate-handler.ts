@@ -128,12 +128,6 @@ async function getSupplierFromConfig(
         deps,
       ));
 
-    if (!selectedSupplierId) {
-      throw new Error(
-        "No suppliers found with capacity or valid allocation factor for preferred pack",
-      );
-    }
-
     deps.logger.info({
       description: "Fetched supplier details for supplier allocations",
       variantId: letterEvent.data.letterVariantId,
