@@ -19,7 +19,7 @@ on:
         description: "Deploy backend infrastructure"
         type: boolean
         required: false
-        default: true
+        default: false
       backend_account_group:
         description: "Target backend account group"
         type: choice
@@ -33,7 +33,7 @@ on:
         description: "Deploy APIM proxy"
         type: boolean
         required: false
-        default: true
+        default: false
       apim_environment:
         description: "Target APIM environment"
         type: choice
