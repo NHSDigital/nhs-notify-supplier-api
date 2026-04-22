@@ -15,7 +15,7 @@ on:
         description: "Deploy backend infrastructure"
         type: boolean
         required: false
-        default: true
+        default: false
       backend_account_group:
         description: "Target backend account group (dev, nonprod, prod). Required when
           deploy_backend is true."
@@ -26,7 +26,7 @@ on:
         description: "Deploy APIM proxy"
         type: boolean
         required: false
-        default: true
+        default: false
       apim_environment:
         description: "Target APIM environment (internal-dev, int, prod). Required when
           deploy_proxy is true."
