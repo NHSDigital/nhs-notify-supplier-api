@@ -146,7 +146,6 @@ export const $DailyAllocation = z
   .object({
     id: z.string(),
     date: z.string(),
-    volumeGroup: idRef($VolumeGroup, "id"),
     allocations: z.record(
       idRef($Supplier, "id"),
       z.number().int().nonnegative(),
@@ -155,7 +154,7 @@ export const $DailyAllocation = z
   .meta({
     title: "DailyAllocation",
     description:
-      "The daily allocation for a volume group, including all suppliers",
+      "The daily allocation for a given date, including all suppliers",
   });
 
 export type DailyAllocation = z.infer<typeof $DailyAllocation>;
