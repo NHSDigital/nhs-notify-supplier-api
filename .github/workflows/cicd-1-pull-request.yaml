@@ -12,6 +12,20 @@ on:
       - main
 
 jobs:
+  check-pr-title:
+    name: "Check PR title"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: "Check PR title format"
+        if: github.event_name == 'pull_request'
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-pr-title-format@4e781d1d72739015821a380871aa5a66d070177c # 3.1.0
+        with:
+          title: ${{ github.event.pull_request.title }}
+      - name: "Skip on non-PR events"
+        if: github.event_name != 'pull_request'
+        run: echo "Skipping PR title check for ${GITHUB_EVENT_NAME}"
   metadata:
     name: "Set CI/CD metadata"
     runs-on: ubuntu-latest
@@ -125,7 +139,7 @@ jobs:
           make list-variables
   commit-stage: # Recommended maximum execution time is 2 minutes
     name: "Commit stage"
-    needs: [metadata]
+    needs: [check-pr-title, metadata]
     uses: ./.github/workflows/stage-1-commit.yaml
     with:
       build_datetime: "${{ needs.metadata.outputs.build_datetime }}"
