@@ -35,7 +35,6 @@ module "supplier_allocator" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
-    VARIANT_MAP              = jsonencode(var.letter_variant_map)
     UPSERT_LETTERS_QUEUE_URL = module.sqs_letter_updates.sqs_queue_url
   })
 }

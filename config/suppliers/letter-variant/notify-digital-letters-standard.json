@@ -1,4 +1,5 @@
 {
+  "clientId": "digital-letters",
   "constraints": {
     "blackCoveragePercentage": {
       "operator": "LESS_THAN",
@@ -18,13 +19,13 @@
     }
   },
   "description": "Black printing, economy postage tariff",
-  "id": "notify-standard",
-  "name": "Standard Letter",
+  "id": "notify-digital-letters-standard",
+  "name": "Standard Letter Variant for Digital Letters fallback",
   "packSpecificationIds": [
     "notify-c5"
   ],
-  "priority": 98,
-  "status": "PROD",
+  "priority": 97,
+  "status": "INT",
   "type": "STANDARD",
-  "volumeGroupId": "volumeGroup-test2"
+  "volumeGroupId": "volumeGroup-test3"
 }

@@ -17,14 +17,14 @@
       "value": 10
     }
   },
-  "description": "Black printing, economy postage tariff",
-  "id": "notify-standard",
-  "name": "Standard Letter",
+  "description": "Braille letter with standard letter",
+  "id": "notify-braille",
+  "name": "Braille Letter",
   "packSpecificationIds": [
-    "notify-c5"
+    "notify-braille"
   ],
-  "priority": 98,
-  "status": "PROD",
-  "type": "STANDARD",
-  "volumeGroupId": "volumeGroup-test2"
+  "priority": 13,
+  "status": "INT",
+  "type": "BRAILLE",
+  "volumeGroupId": "volumeGroup-test3"
 }

@@ -1,0 +1,31 @@
+{
+  "clientId": "client3",
+  "constraints": {
+    "blackCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 20
+    },
+    "deliveryDays": {
+      "operator": "LESS_THAN",
+      "value": 1
+    },
+    "sheets": {
+      "operator": "LESS_THAN",
+      "value": 4
+    },
+    "sides": {
+      "operator": "LESS_THAN",
+      "value": 8
+    }
+  },
+  "description": "Same Day, Braille, Whitemail, Booklet",
+  "id": "client3-abnormal-results-braille",
+  "name": "Client 3 Braille Abnormal Results",
+  "packSpecificationIds": [
+    "client3-abnormal-results-braille"
+  ],
+  "priority": 10,
+  "status": "INT",
+  "type": "BRAILLE",
+  "volumeGroupId": "volumeGroup-test3"
+}

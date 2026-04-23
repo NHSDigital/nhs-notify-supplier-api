@@ -1,8 +1,16 @@
 {
+  "campaignIds": [
+    "client1-campaign8"
+  ],
+  "clientId": "client1",
   "constraints": {
     "blackCoveragePercentage": {
       "operator": "LESS_THAN",
       "value": 20
+    },
+    "colourCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 10
     },
     "deliveryDays": {
       "operator": "LESS_THAN",
@@ -17,14 +25,14 @@
       "value": 10
     }
   },
-  "description": "Black printing, economy postage tariff",
-  "id": "notify-standard",
-  "name": "Standard Letter",
+  "description": "Admail?, colour printing, booklet",
+  "id": "client1-campaign8",
+  "name": "Client1 - Campaign 8",
   "packSpecificationIds": [
-    "notify-c5"
+    "client1-campaign8"
   ],
-  "priority": 98,
-  "status": "PROD",
+  "priority": 7,
+  "status": "INT",
   "type": "STANDARD",
-  "volumeGroupId": "volumeGroup-test2"
+  "volumeGroupId": "volumeGroup-test3"
 }

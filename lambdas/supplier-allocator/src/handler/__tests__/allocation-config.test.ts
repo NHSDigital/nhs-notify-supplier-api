@@ -640,10 +640,6 @@ describe("filterSuppliersWithCapacity", () => {
     (
       mockDeps.supplierQuotasRepo.getDailyAllocation as jest.Mock
     ).mockResolvedValue(mockDailyAllocation);
-    console.log(
-      "Testing filterSuppliersWithCapacity with mockDailyAllocation:",
-      mockDailyAllocation,
-    );
     const result = await filterSuppliersWithCapacity(mockSuppliers, mockDeps);
 
     expect(result).toEqual([mockSuppliers[0], mockSuppliers[1]]);

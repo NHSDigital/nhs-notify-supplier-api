@@ -1,4 +1,5 @@
 {
+  "clientId": "client3",
   "constraints": {
     "blackCoveragePercentage": {
       "operator": "LESS_THAN",
@@ -10,21 +11,21 @@
     },
     "sheets": {
       "operator": "LESS_THAN",
-      "value": 5
+      "value": 4
     },
     "sides": {
       "operator": "LESS_THAN",
-      "value": 10
+      "value": 8
     }
   },
-  "description": "Black printing, economy postage tariff",
-  "id": "notify-standard",
-  "name": "Standard Letter",
+  "description": "Business Economy, Whitemail, Booklet",
+  "id": "client3-invites",
+  "name": "Client 3 Invites",
   "packSpecificationIds": [
-    "notify-c5"
+    "client3-invites"
   ],
-  "priority": 98,
-  "status": "PROD",
+  "priority": 10,
+  "status": "INT",
   "type": "STANDARD",
-  "volumeGroupId": "volumeGroup-test2"
+  "volumeGroupId": "volumeGroup-test3"
 }

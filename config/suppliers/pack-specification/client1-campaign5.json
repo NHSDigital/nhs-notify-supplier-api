@@ -1,7 +1,10 @@
 {
   "assembly": {
     "duplex": true,
-    "envelopeId": "economy-c5",
+    "envelopeId": "client1-campaign5",
+    "features": [
+      "ADMAIL"
+    ],
     "paper": {
       "colour": "WHITE",
       "id": "paper-std-white-80",
@@ -10,37 +13,41 @@
       "size": "A4",
       "weightGSM": 80
     },
-    "printColour": "BLACK"
+    "printColour": "COLOUR"
   },
-  "billingId": "notify-c4",
+  "billingId": "admail-economy",
   "constraints": {
     "blackCoveragePercentage": {
       "operator": "LESS_THAN",
       "value": 20
     },
+    "colourCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 10
+    },
     "deliveryDays": {
       "operator": "LESS_THAN",
-      "value": 3
+      "value": 4
     },
     "sheets": {
       "operator": "LESS_THAN",
-      "value": 20
+      "value": 5
     },
     "sides": {
       "operator": "LESS_THAN",
-      "value": 40
+      "value": 10
     }
   },
   "createdAt": "2026-01-12T00:00:00.000Z",
-  "description": "C4 pack (large letter)",
-  "id": "notify-c4",
-  "name": "Notify standard (C4)",
+  "description": "Envelope for Campaign 5",
+  "id": "client1-campaign5",
+  "name": "Client1 - Campaign 5",
   "postage": {
-    "deliveryDays": 3,
-    "id": "economy",
-    "maxThicknessMm": 25,
-    "maxWeightGrams": 500,
-    "size": "LARGE"
+    "deliveryDays": 4,
+    "id": "admail-economy",
+    "maxThicknessMm": 5,
+    "maxWeightGrams": 100,
+    "size": "STANDARD"
   },
   "status": "PROD",
   "updatedAt": "2026-01-12T00:00:00.000Z",

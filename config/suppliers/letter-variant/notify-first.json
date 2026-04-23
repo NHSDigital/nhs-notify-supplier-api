@@ -6,7 +6,7 @@
     },
     "deliveryDays": {
       "operator": "LESS_THAN",
-      "value": 3
+      "value": 2
     },
     "sheets": {
       "operator": "LESS_THAN",
@@ -17,14 +17,14 @@
       "value": 10
     }
   },
-  "description": "Black printing, economy postage tariff",
-  "id": "notify-standard",
-  "name": "Standard Letter",
+  "description": "Black printing, first class postage tariff",
+  "id": "notify-first",
+  "name": "First class letter",
   "packSpecificationIds": [
-    "notify-c5"
+    "notify-first"
   ],
-  "priority": 98,
-  "status": "PROD",
+  "priority": 20,
+  "status": "DRAFT",
   "type": "STANDARD",
-  "volumeGroupId": "volumeGroup-test2"
+  "volumeGroupId": "volumeGroup-test3"
 }

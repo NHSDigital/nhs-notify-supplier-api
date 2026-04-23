@@ -1,4 +1,5 @@
 {
+  "clientId": "client3",
   "constraints": {
     "blackCoveragePercentage": {
       "operator": "LESS_THAN",
@@ -17,14 +18,14 @@
       "value": 10
     }
   },
-  "description": "Black printing, economy postage tariff",
-  "id": "notify-standard",
-  "name": "Standard Letter",
+  "description": "Business Economy, Whitemail",
+  "id": "client3-standard",
+  "name": "Client 3 Standard Letters",
   "packSpecificationIds": [
-    "notify-c5"
+    "notify-c5-whitemail"
   ],
-  "priority": 98,
+  "priority": 11,
   "status": "PROD",
   "type": "STANDARD",
-  "volumeGroupId": "volumeGroup-test2"
+  "volumeGroupId": "volumeGroup-test3"
 }
