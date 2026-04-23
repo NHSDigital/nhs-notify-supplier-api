@@ -163,28 +163,6 @@ jobs:
             --overrideProjectName "nhs" \
             --overrideRoleName "nhs-main-acct-supplier-api-github-deploy" \
             --internalRef "feature/CCM-12444-supplier-config-publishing-workflow"
-  artefact-proxies:
-    name: "Build proxies"
-    runs-on: ubuntu-latest
-    if: inputs.deploy_proxy == 'true'
-    needs: [artefact-oas-spec-sandbox, pr-create-dynamic-environment]
-    timeout-minutes: 10
-    env:
-      PROXYGEN_API_NAME: nhs-notify-supplier
-      APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
-      APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-      - name: "Build proxies"
-        uses: ./.github/actions/build-proxies
-        with:
-          version: "${{ inputs.version }}"
-          environment: ${{ needs.pr-create-dynamic-environment.outputs.environment_name }}
-          apimEnv: "internal-dev-sandbox"
-          runId: "${{ github.run_id }}"
-          buildSandbox: true
-          releaseVersion: ${{ github.head_ref || github.ref_name }}
   populate-config:
     name: "Populate Supplier Config"
     runs-on: ubuntu-latest
@@ -214,3 +192,25 @@ jobs:
             --tableName "supplier-config" \
             --internalRef "feature/CCM-12444-supplier-config-publishing-workflow" \
             --force "true"
+  artefact-proxies:
+    name: "Build proxies"
+    runs-on: ubuntu-latest
+    if: inputs.deploy_proxy == 'true'
+    needs: [artefact-oas-spec-sandbox, pr-create-dynamic-environment]
+    timeout-minutes: 10
+    env:
+      PROXYGEN_API_NAME: nhs-notify-supplier
+      APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
+      APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+      - name: "Build proxies"
+        uses: ./.github/actions/build-proxies
+        with:
+          version: "${{ inputs.version }}"
+          environment: ${{ needs.pr-create-dynamic-environment.outputs.environment_name }}
+          apimEnv: "internal-dev-sandbox"
+          runId: "${{ github.run_id }}"
+          buildSandbox: true
+          releaseVersion: ${{ github.head_ref || github.ref_name }}
