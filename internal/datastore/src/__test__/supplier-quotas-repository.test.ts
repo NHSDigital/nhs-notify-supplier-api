@@ -24,15 +24,13 @@ function createOverallAllocationItem(
 
 function createDailyAllocationItem(
   allocationId: string,
-  volumeGroupId: string,
   date: string,
   allocations: Record<string, number>,
 ) {
   return {
     pk: "ENTITY#daily-allocation",
-    sk: `ID#${volumeGroupId}#DATE#${date}`,
+    sk: `ID#${date}`,
     id: allocationId,
-    volumeGroup: volumeGroupId,
     date,
     allocations,
     updatedAt: new Date().toISOString(),
@@ -157,36 +155,28 @@ describe("SupplierQuotasRepository", () => {
 
   test("getDailyAllocation returns correct allocation for existing group and date", async () => {
     const allocationId = "daily-allocation-123";
-    const volumeGroupId = "group-123";
     const date = "2023-10-01";
     const allocations = { supplier1: 50, supplier2: 75 };
     await dbContext.docClient.send(
       new PutCommand({
         TableName: dbContext.config.supplierQuotasTableName,
-        Item: createDailyAllocationItem(
-          allocationId,
-          volumeGroupId,
-          date,
-          allocations,
-        ),
+        Item: createDailyAllocationItem(allocationId, date, allocations),
       }),
     );
 
-    const result = await repository.getDailyAllocation(volumeGroupId, date);
+    const result = await repository.getDailyAllocation(date);
 
     expect(result).toEqual({
       id: allocationId,
-      volumeGroup: volumeGroupId,
       date,
       allocations,
     });
   });
 
-  test("getDailyAllocation returns undefined for non-existent group and date", async () => {
-    const volumeGroupId = "non-existent-group";
-    const date = "2023-10-01";
+  test("getDailyAllocation returns undefined for non-existent date", async () => {
+    const date = "2023-09-01";
 
-    const result = await repository.getDailyAllocation(volumeGroupId, date);
+    const result = await repository.getDailyAllocation(date);
 
     expect(result).toBeUndefined();
   });
@@ -194,37 +184,26 @@ describe("SupplierQuotasRepository", () => {
   test("putDailyAllocation stores allocation correctly", async () => {
     const allocation = {
       id: "daily-allocation-123",
-      volumeGroup: "group-123",
       date: "2023-10-01",
       allocations: { supplier1: 50, supplier2: 75 },
     };
 
     await repository.putDailyAllocation(allocation);
 
-    const result = await repository.getDailyAllocation(
-      "group-123",
-      "2023-10-01",
-    );
+    const result = await repository.getDailyAllocation("2023-10-01");
     expect(result).toEqual(allocation);
   });
 
   test("updateDailyAllocation creates new allocation when none exists", async () => {
-    const volumeGroupId = "group-123";
     const date = "2023-10-01";
     const supplierId = "supplier-123";
     const newAllocation = 25;
 
-    await repository.updateDailyAllocation(
-      volumeGroupId,
-      date,
-      supplierId,
-      newAllocation,
-    );
+    await repository.updateDailyAllocation(date, supplierId, newAllocation);
 
-    const result = await repository.getDailyAllocation(volumeGroupId, date);
+    const result = await repository.getDailyAllocation(date);
     expect(result).toEqual({
-      id: `${volumeGroupId}#DATE#${date}`,
-      volumeGroup: volumeGroupId,
+      id: `ID#${date}`,
       date,
       allocations: { [supplierId]: newAllocation },
     });
@@ -232,31 +211,20 @@ describe("SupplierQuotasRepository", () => {
 
   test("updateDailyAllocation updates existing allocation", async () => {
     const allocationId = "daily-allocation-123";
-    const volumeGroupId = "group-123";
     const date = "2023-10-01";
     const supplierId = "supplier-123";
     const initialAllocations = { [supplierId]: 50 };
     await dbContext.docClient.send(
       new PutCommand({
         TableName: dbContext.config.supplierQuotasTableName,
-        Item: createDailyAllocationItem(
-          allocationId,
-          volumeGroupId,
-          date,
-          initialAllocations,
-        ),
+        Item: createDailyAllocationItem(allocationId, date, initialAllocations),
       }),
     );
 
     const newAllocation = 25;
-    await repository.updateDailyAllocation(
-      volumeGroupId,
-      date,
-      supplierId,
-      newAllocation,
-    );
+    await repository.updateDailyAllocation(date, supplierId, newAllocation);
 
-    const result = await repository.getDailyAllocation(volumeGroupId, date);
+    const result = await repository.getDailyAllocation(date);
     expect(result?.allocations[supplierId]).toBe(75);
   });
 });

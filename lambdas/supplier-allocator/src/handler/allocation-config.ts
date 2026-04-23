@@ -77,14 +77,11 @@ export async function suppliersWithValidPack(
 
 export async function filterSuppliersWithCapacity(
   suppliers: Supplier[],
-  volumeGroupId: string,
   deps: Deps,
 ): Promise<Supplier[]> {
   const dailyAllocationDate = new Date().toISOString().split("T")[0]; // Get current date in YYYY-MM-DD format
-  const dailyAllocation = await deps.supplierQuotasRepo.getDailyAllocation(
-    volumeGroupId,
-    dailyAllocationDate,
-  );
+  const dailyAllocation =
+    await deps.supplierQuotasRepo.getDailyAllocation(dailyAllocationDate);
   if (dailyAllocation) {
     const suppliersWithCapacity = suppliers.filter((supplier) => {
       const allocated = dailyAllocation.allocations[supplier.id] ?? 0;

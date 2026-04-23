@@ -90,11 +90,7 @@ async function getSupplierFromConfig(
     );
 
     const suppliersForPackWithCapacity: Supplier[] =
-      await filterSuppliersWithCapacity(
-        allSuppliersForPack,
-        volumeGroup.id,
-        deps,
-      );
+      await filterSuppliersWithCapacity(allSuppliersForPack, deps);
 
     // selected supplier id is determined by first calling selectSupplierByFactor for suppliers with capacity and if nothing is returned tryong again with all suppliers for pack
     const selectedSupplierId =

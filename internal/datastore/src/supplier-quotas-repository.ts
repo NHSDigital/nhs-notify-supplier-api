@@ -106,20 +106,19 @@ export class SupplierQuotasRepository {
     }
   }
 
-  async getDailyAllocation(
-    groupId: string,
-    date: string,
-  ): Promise<DailyAllocation | undefined> {
+  async getDailyAllocation(date: string): Promise<DailyAllocation | undefined> {
+    console.log("Getting daily allocation for date:", date);
     const result = await this.ddbClient.send(
       new GetCommand({
         TableName: this.config.supplierQuotasTableName,
         Key: {
           pk: "ENTITY#daily-allocation",
-          sk: `ID#${groupId}#DATE#${date}`,
+          sk: `ID#${date}`,
         },
       }),
     );
     if (!result.Item) {
+      console.log("No daily allocation found for date:", date);
       return undefined;
     }
     // Strip DynamoDB keys before parsing
@@ -130,25 +129,26 @@ export class SupplierQuotasRepository {
 
   async putDailyAllocation(allocation: DailyAllocation): Promise<void> {
     const parsedAllocation = $DailyAllocation.parse(allocation);
-    await this.ddbClient.send(
+    console.log("Putting daily allocation:", parsedAllocation);
+    const output = await this.ddbClient.send(
       new PutCommand({
         TableName: this.config.supplierQuotasTableName,
         Item: ItemForRecord(
           "daily-allocation",
-          `${allocation.volumeGroup}#DATE#${allocation.date}`,
+          allocation.date,
           parsedAllocation,
         ),
       }),
     );
+    console.log("PutDailyAllocation output:", output);
   }
 
   async updateDailyAllocation(
-    groupId: string,
     date: string,
     supplierId: string,
     newAllocation: number,
   ): Promise<void> {
-    const dailyAllocation = await this.getDailyAllocation(groupId, date);
+    const dailyAllocation = await this.getDailyAllocation(date);
     const allocations = dailyAllocation?.allocations ?? {};
     const currentAllocation = allocations[supplierId] ?? 0;
     const updatedAllocation = currentAllocation + newAllocation;
@@ -164,7 +164,7 @@ export class SupplierQuotasRepository {
           TableName: this.config.supplierQuotasTableName,
           Key: {
             pk: "ENTITY#daily-allocation",
-            sk: `ID#${groupId}#DATE#${date}`,
+            sk: `ID#${date}`,
           },
           UpdateExpression:
             "SET allocations = :allocations, updatedAt = :updatedAt",
@@ -177,9 +177,8 @@ export class SupplierQuotasRepository {
     } else {
       // Create new allocation
       const newDailyAllocation: DailyAllocation = {
-        id: `${groupId}#DATE#${date}`,
+        id: `ID#${date}`,
         date,
-        volumeGroup: groupId,
         allocations: { [supplierId]: updatedAllocation },
       };
       await this.putDailyAllocation(newDailyAllocation);

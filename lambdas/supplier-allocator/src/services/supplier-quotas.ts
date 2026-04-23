@@ -72,22 +72,18 @@ export async function updateSupplierAllocation(
     await deps.supplierQuotasRepo.putOverallAllocation(newOverallAllocation);
   }
   const dailyAllocationDate = new Date().toISOString().split("T")[0]; // Get current date in YYYY-MM-DD format
-  const dailyAllocation = await deps.supplierQuotasRepo.getDailyAllocation(
-    volumeGroupId,
-    dailyAllocationDate,
-  );
+  const dailyAllocation =
+    await deps.supplierQuotasRepo.getDailyAllocation(dailyAllocationDate);
   if (dailyAllocation) {
     await deps.supplierQuotasRepo.updateDailyAllocation(
-      volumeGroupId,
       dailyAllocationDate,
       supplierId,
       newAllocation,
     );
   } else {
     const newDailyAllocation: DailyAllocation = {
-      id: `${volumeGroupId}#DATE#${dailyAllocationDate}`,
+      id: `ID#${dailyAllocationDate}`,
       date: dailyAllocationDate,
-      volumeGroup: volumeGroupId,
       allocations: {
         [supplierId]: newAllocation,
       },
