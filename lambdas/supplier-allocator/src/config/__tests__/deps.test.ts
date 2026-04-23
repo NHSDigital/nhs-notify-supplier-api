@@ -4,13 +4,6 @@ describe("createDependenciesContainer", () => {
   const env = {
     SUPPLIER_CONFIG_TABLE_NAME: "SupplierConfigTable",
     SUPPLIER_QUOTAS_TABLE_NAME: "SupplierQuotasTable",
-    VARIANT_MAP: {
-      lv1: {
-        supplierId: "supplier1",
-        specId: "spec1",
-        billingId: "billing1",
-      },
-    },
   };
 
   beforeEach(() => {

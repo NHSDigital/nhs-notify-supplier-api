@@ -23,26 +23,10 @@ import {
 } from "./allocation-config";
 
 import { Deps } from "../config/deps";
-import { PreparedEvents, SupplierDetails, SupplierSpec } from "./types";
+import { PreparedEvents, SupplierDetails } from "./types";
 
 // small envelope that must exist in all inputs
 const TypeEnvelope = z.object({ type: z.string().min(1) });
-
-function resolveSupplierForVariant(
-  variantId: string,
-  deps: Deps,
-): SupplierSpec {
-  const supplier = deps.env.VARIANT_MAP[variantId];
-  if (!supplier) {
-    deps.logger.error({
-      description: "No supplier mapping found for variant",
-      variantId,
-    });
-    throw new Error(`No supplier mapping for variantId: ${variantId}`);
-  }
-
-  return supplier;
-}
 
 function validateType(event: unknown) {
   const env = TypeEnvelope.safeParse(event);
@@ -138,10 +122,6 @@ async function getSupplierFromConfig(
   }
 }
 
-function getSupplier(letterEvent: PreparedEvents, deps: Deps): SupplierSpec {
-  return resolveSupplierForVariant(letterEvent.data.letterVariantId, deps);
-}
-
 type AllocationMetrics = Map<string, Map<string, number>>;
 type VolumeGroupAllocation = Map<string, Record<string, number>>;
 
@@ -232,8 +212,7 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
 
         validateType(letterEvent);
 
-        const supplierSpec = getSupplier(letterEvent as PreparedEvents, deps);
-        const supplierDetails = await getSupplierFromConfig(
+        const supplierDetails: SupplierDetails = await getSupplierFromConfig(
           letterEvent as PreparedEvents,
           deps,
         );

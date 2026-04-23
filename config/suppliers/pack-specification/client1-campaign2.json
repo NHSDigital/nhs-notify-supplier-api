@@ -1,0 +1,55 @@
+{
+  "assembly": {
+    "duplex": true,
+    "envelopeId": "unbranded-economy-c5",
+    "features": [
+      "ADMAIL"
+    ],
+    "paper": {
+      "colour": "WHITE",
+      "id": "paper-std-white-80",
+      "name": "Standard White 80gsm",
+      "recycled": true,
+      "size": "A4",
+      "weightGSM": 80
+    },
+    "printColour": "COLOUR"
+  },
+  "billingId": "admail-economy-colour",
+  "constraints": {
+    "blackCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 20
+    },
+    "colourCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 10
+    },
+    "deliveryDays": {
+      "operator": "LESS_THAN",
+      "value": 4
+    },
+    "sheets": {
+      "operator": "LESS_THAN",
+      "value": 5
+    },
+    "sides": {
+      "operator": "LESS_THAN",
+      "value": 10
+    }
+  },
+  "createdAt": "2026-04-14T00:00:00.000Z",
+  "description": "Unbranded Envelope, Admail",
+  "id": "client1-campaign2",
+  "name": "Client1 - CAMPAIGN2",
+  "postage": {
+    "deliveryDays": 4,
+    "id": "admail-economy",
+    "maxThicknessMm": 5,
+    "maxWeightGrams": 100,
+    "size": "STANDARD"
+  },
+  "status": "INT",
+  "updatedAt": "2026-04-14T00:00:00.000Z",
+  "version": 1
+}

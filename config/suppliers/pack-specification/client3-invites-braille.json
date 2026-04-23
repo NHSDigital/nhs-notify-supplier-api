@@ -1,18 +1,24 @@
 {
   "assembly": {
     "duplex": true,
-    "envelopeId": "economy-c5",
+    "envelopeId": "braille-whitemail",
+    "features": [
+      "BRAILLE"
+    ],
+    "insertIds": [
+      "CSP14"
+    ],
     "paper": {
       "colour": "WHITE",
-      "id": "paper-std-white-80",
-      "name": "Standard White 80gsm",
+      "id": "paper-braille",
+      "name": "Braille Paper",
       "recycled": true,
       "size": "A4",
-      "weightGSM": 80
+      "weightGSM": 120
     },
     "printColour": "BLACK"
   },
-  "billingId": "notify-c4",
+  "billingId": "insert-braille",
   "constraints": {
     "blackCoveragePercentage": {
       "operator": "LESS_THAN",
@@ -24,23 +30,20 @@
     },
     "sheets": {
       "operator": "LESS_THAN",
-      "value": 20
+      "value": 4
     },
     "sides": {
       "operator": "LESS_THAN",
-      "value": 40
+      "value": 8
     }
   },
   "createdAt": "2026-01-12T00:00:00.000Z",
-  "description": "C4 pack (large letter)",
-  "id": "notify-c4",
-  "name": "Notify standard (C4)",
+  "id": "client3-invites-braille",
+  "name": "client3 Invites Braille",
   "postage": {
     "deliveryDays": 3,
-    "id": "economy",
-    "maxThicknessMm": 25,
-    "maxWeightGrams": 500,
-    "size": "LARGE"
+    "id": "articles-blind",
+    "size": "STANDARD"
   },
   "status": "PROD",
   "updatedAt": "2026-01-12T00:00:00.000Z",
