@@ -17,14 +17,14 @@
       "value": 10
     }
   },
-  "description": "Black printing, economy postage tariff",
-  "id": "notify-standard",
-  "name": "Standard Letter",
+  "description": "Audio CD with standard letter",
+  "id": "notify-audio",
+  "name": "Audio CD Letter",
   "packSpecificationIds": [
-    "notify-c5"
+    "notify-audio"
   ],
-  "priority": 98,
-  "status": "PROD",
-  "type": "STANDARD",
-  "volumeGroupId": "volumeGroup-test2"
+  "priority": 50,
+  "status": "DRAFT",
+  "type": "AUDIO",
+  "volumeGroupId": "volumeGroup-test3"
 }

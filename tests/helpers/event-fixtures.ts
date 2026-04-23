@@ -16,7 +16,7 @@ export function createPreparedV1Event(overrides: Record<string, unknown> = {}) {
     dataschemaversion: "1.0.0",
     data: {
       domainId: "fe658e11-0ffc-44f4-8ad6-0fafe75bfeee",
-      letterVariantId: "digitrials-aspiring",
+      letterVariantId: "client1-campaign1",
       requestId: "request1",
       requestItemId: "requestItem1",
       requestItemPlanId: "requestItemPlan1",

@@ -1,4 +1,5 @@
 {
+  "clientId": "client3",
   "constraints": {
     "blackCoveragePercentage": {
       "operator": "LESS_THAN",
@@ -17,14 +18,14 @@
       "value": 10
     }
   },
-  "description": "Black printing, economy postage tariff",
-  "id": "notify-standard",
-  "name": "Standard Letter",
+  "description": "Braille, Whitemail",
+  "id": "client3-standard-braille",
+  "name": "Client 3 Standard Braille Letters",
   "packSpecificationIds": [
-    "notify-c5"
+    "notify-braille-whitemail"
   ],
-  "priority": 98,
-  "status": "PROD",
-  "type": "STANDARD",
-  "volumeGroupId": "volumeGroup-test2"
+  "priority": 50,
+  "status": "INT",
+  "type": "BRAILLE",
+  "volumeGroupId": "volumeGroup-test3"
 }
