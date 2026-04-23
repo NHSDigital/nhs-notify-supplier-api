@@ -193,9 +193,8 @@ describe("supplier-quotas", () => {
       };
 
       const existingDailyAllocation: DailyAllocation = {
-        id: "vg1#DATE#2024-01-15",
+        id: "ID#2024-01-15",
         date: "2024-01-15",
-        volumeGroup: "vg1",
         allocations: {
           supplier1: 100,
         },
@@ -215,7 +214,7 @@ describe("supplier-quotas", () => {
       ).toHaveBeenCalledWith("vg1", "supplier1", 150);
       expect(
         mockDeps.supplierQuotasRepo.updateDailyAllocation,
-      ).toHaveBeenCalledWith("vg1", "2024-01-15", "supplier1", 150);
+      ).toHaveBeenCalledWith("2024-01-15", "supplier1", 150);
     });
 
     it("should create new overall allocation when none exists", async () => {
@@ -260,9 +259,8 @@ describe("supplier-quotas", () => {
       expect(
         mockDeps.supplierQuotasRepo.putDailyAllocation,
       ).toHaveBeenCalledWith({
-        id: "vg1#DATE#2024-01-15",
+        id: "ID#2024-01-15",
         date: "2024-01-15",
-        volumeGroup: "vg1",
         allocations: {
           supplier1: 150,
         },
