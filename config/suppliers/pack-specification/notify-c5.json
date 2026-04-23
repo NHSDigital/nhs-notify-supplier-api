@@ -12,7 +12,7 @@
     },
     "printColour": "BLACK"
   },
-  "billingId": "notify-c5",
+  "billingId": "notify-c5-billing",
   "constraints": {
     "blackCoveragePercentage": {
       "operator": "LESS_THAN",

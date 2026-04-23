@@ -1,7 +1,0 @@
-{
-  "channelType": "LETTER",
-  "dailyCapacity": 500000,
-  "id": "datagraphic",
-  "name": "PSL/Datagraphic",
-  "status": "PROD"
-}

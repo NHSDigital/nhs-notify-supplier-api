@@ -24,7 +24,6 @@
     "notify-c5"
   ],
   "status": "PROD",
-  "supplierId": "synertec",
   "type": "STANDARD",
-  "volumeGroupId": "synertec"
+  "volumeGroupId": "volumeGroup-test2"
 }

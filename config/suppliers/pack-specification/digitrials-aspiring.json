@@ -18,7 +18,7 @@
     },
     "printColour": "COLOUR"
   },
-  "billingId": "insert-economy",
+  "billingId": "digitrials-aspiring-billing",
   "constraints": {
     "blackCoveragePercentage": {
       "operator": "LESS_THAN",
