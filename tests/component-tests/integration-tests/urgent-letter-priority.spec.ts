@@ -61,6 +61,7 @@ test.describe("Urgent Letter Priority Tests", () => {
       GetLettersResponseSchema.parse(responseBody);
 
     const letterIds = getLettersResponse.data.map((letter) => letter.id);
+    expect(letterIds.length).toBe(letterIdsFromQueue.length);
     expect(letterIds).toEqual(letterIdsFromQueue);
 
     verifyIndexPositionOfLetterVariants(
