@@ -81,4 +81,4 @@ jobs:
             --targetEnvironment "$ENVIRONMENT" \
             --targetAccountGroup "nhs-notify-supplier-api-dev" \
             --targetComponent "api" \
-            --extraSecretNames '["/dev/e2e/keys/apim/main","/dev/e2e/keys/apim/pr","/dev/e2e/keys/apim/status, "/dev/e2e/keys/private"]'
+            --extraSecretNames '["/dev/e2e/keys/apim/main","/dev/e2e/keys/apim/pr","/dev/e2e/keys/apim/status","/dev/e2e/keys/private"]'
