@@ -579,11 +579,7 @@ describe("filterSuppliersWithCapacity", () => {
       mockDeps.supplierQuotasRepo.getDailyAllocation as jest.Mock
     ).mockResolvedValue(mockDailyAllocation);
 
-    const result = await filterSuppliersWithCapacity(
-      mockSuppliers,
-      "volume-group-1",
-      mockDeps,
-    );
+    const result = await filterSuppliersWithCapacity(mockSuppliers, mockDeps);
 
     expect(result).toEqual([mockSuppliers[0], mockSuppliers[2]]);
   });
@@ -593,14 +589,9 @@ describe("filterSuppliersWithCapacity", () => {
       mockDeps.supplierQuotasRepo.getDailyAllocation as jest.Mock
     ).mockResolvedValue(null);
 
-    await filterSuppliersWithCapacity(
-      mockSuppliers,
-      "volume-group-1",
-      mockDeps,
-    );
+    await filterSuppliersWithCapacity(mockSuppliers, mockDeps);
 
     expect(mockDeps.supplierQuotasRepo.getDailyAllocation).toHaveBeenCalledWith(
-      "volume-group-1",
       expect.any(String),
     );
   });
@@ -610,11 +601,7 @@ describe("filterSuppliersWithCapacity", () => {
       mockDeps.supplierQuotasRepo.getDailyAllocation as jest.Mock
     ).mockResolvedValue(null);
 
-    const result = await filterSuppliersWithCapacity(
-      mockSuppliers,
-      "volume-group-1",
-      mockDeps,
-    );
+    const result = await filterSuppliersWithCapacity(mockSuppliers, mockDeps);
 
     expect(result).toEqual(mockSuppliers);
   });
@@ -632,11 +619,7 @@ describe("filterSuppliersWithCapacity", () => {
       mockDeps.supplierQuotasRepo.getDailyAllocation as jest.Mock
     ).mockResolvedValue(mockDailyAllocation);
 
-    const result = await filterSuppliersWithCapacity(
-      mockSuppliers,
-      "volume-group-1",
-      mockDeps,
-    );
+    const result = await filterSuppliersWithCapacity(mockSuppliers, mockDeps);
 
     expect(result).toEqual([
       mockSuppliers[0],
@@ -661,11 +644,7 @@ describe("filterSuppliersWithCapacity", () => {
       "Testing filterSuppliersWithCapacity with mockDailyAllocation:",
       mockDailyAllocation,
     );
-    const result = await filterSuppliersWithCapacity(
-      mockSuppliers,
-      "volume-group-1",
-      mockDeps,
-    );
+    const result = await filterSuppliersWithCapacity(mockSuppliers, mockDeps);
 
     expect(result).toEqual([mockSuppliers[0], mockSuppliers[1]]);
   });
@@ -681,11 +660,7 @@ describe("filterSuppliersWithCapacity", () => {
       mockDeps.supplierQuotasRepo.getDailyAllocation as jest.Mock
     ).mockResolvedValue(mockDailyAllocation);
 
-    const result = await filterSuppliersWithCapacity(
-      mockSuppliers,
-      "volume-group-1",
-      mockDeps,
-    );
+    const result = await filterSuppliersWithCapacity(mockSuppliers, mockDeps);
 
     expect(result).toEqual(mockSuppliers);
   });
@@ -701,11 +676,7 @@ describe("filterSuppliersWithCapacity", () => {
       mockDeps.supplierQuotasRepo.getDailyAllocation as jest.Mock
     ).mockResolvedValue(mockDailyAllocation);
 
-    const result = await filterSuppliersWithCapacity(
-      [],
-      "volume-group-1",
-      mockDeps,
-    );
+    const result = await filterSuppliersWithCapacity([], mockDeps);
 
     expect(result).toEqual([]);
   });
@@ -717,7 +688,7 @@ describe("filterSuppliersWithCapacity", () => {
     ).mockRejectedValue(error);
 
     await expect(
-      filterSuppliersWithCapacity(mockSuppliers, "volume-group-1", mockDeps),
+      filterSuppliersWithCapacity(mockSuppliers, mockDeps),
     ).rejects.toThrow("Quotas service error");
   });
 
@@ -730,16 +701,12 @@ describe("filterSuppliersWithCapacity", () => {
       mockDeps.supplierQuotasRepo.getDailyAllocation as jest.Mock
     ).mockResolvedValue(mockDailyAllocation);
 
-    await filterSuppliersWithCapacity(
-      mockSuppliers,
-      "volume-group-1",
-      mockDeps,
-    );
+    await filterSuppliersWithCapacity(mockSuppliers, mockDeps);
 
     const callArgs = (
       mockDeps.supplierQuotasRepo.getDailyAllocation as jest.Mock
     ).mock.calls[0];
-    const dateArg = callArgs[1];
+    const dateArg = callArgs[0];
 
     expect(dateArg).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
@@ -757,11 +724,7 @@ describe("filterSuppliersWithCapacity", () => {
       mockDeps.supplierQuotasRepo.getDailyAllocation as jest.Mock
     ).mockResolvedValue(mockDailyAllocation);
 
-    const result = await filterSuppliersWithCapacity(
-      mockSuppliers,
-      "volume-group-1",
-      mockDeps,
-    );
+    const result = await filterSuppliersWithCapacity(mockSuppliers, mockDeps);
 
     expect(result).toEqual([
       mockSuppliers[0],
