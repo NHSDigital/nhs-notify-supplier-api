@@ -45,7 +45,7 @@ function validateType(event: unknown) {
 async function getSupplierFromConfig(
   letterEvent: PreparedEvents,
   deps: Deps,
-): Promise<SupplierDetails | undefined> {
+): Promise<SupplierDetails> {
   try {
     const letterVariant: LetterVariant = await getVariantDetails(
       letterEvent.data.letterVariantId,
@@ -113,12 +113,12 @@ async function getSupplierFromConfig(
     };
     return supplierDetails;
   } catch (error) {
-    deps.logger.info({
+    deps.logger.error({
       description: "Error fetching supplier from config",
       err: error,
       variantId: letterEvent.data.letterVariantId,
     });
-    return undefined;
+    throw error;
   }
 }
 
@@ -216,6 +216,7 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
           letterEvent as PreparedEvents,
           deps,
         );
+        const supplierSpec = supplierDetails?.supplierSpec;
 
         deps.logger.info({
           description: "Resolved supplier details from config",
@@ -224,8 +225,8 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
 
         incrementAllocation(
           volumeGroupAllocations,
-          supplierDetails?.volumeGroupId ?? "unknown",
-          supplierDetails?.supplierSpec?.supplierId ?? "unknown",
+          supplierDetails.volumeGroupId,
+          supplierDetails?.supplierSpec.supplierId,
           1,
           deps,
         );
