@@ -66,19 +66,19 @@ runs:
         TARGET_ENVIRONMENT: ${{ inputs.targetEnvironment }}
         PR_NUMBER: ${{ steps.set_pr_number.outputs.pr_number }}
       run: |
-        echo "$SUPPLIER_API_PRIVATE_KEY" > "${GITHUB_WORKSPACE}/internal-dev-test-1.pem"
+        echo "$DEV_E2E_KEYS_PRIVATE" > "${GITHUB_WORKSPACE}/internal-dev-test-1.pem"
         chmod 600 "${GITHUB_WORKSPACE}/internal-dev-test-1.pem"
         BASE_PROXY_NAME=nhs-notify-supplier--internal-dev--nhs-notify-supplier
 
         export API_ENVIRONMENT=internal-dev
         if [[ -z "$PR_NUMBER" ]]; then
           export PROXY_NAME="${BASE_PROXY_NAME}"
-          export NON_PROD_API_KEY="${SUPPLIER_API_APIM_API_KEY}"
+          export NON_PROD_API_KEY="${DEV_E2E_KEYS_APIM_MAIN}"
         else
           export PROXY_NAME="${BASE_PROXY_NAME}-PR-${PR_NUMBER}"
-          export NON_PROD_API_KEY="${SUPPLIER_API_APIM_PR_API_KEY}"
+          export NON_PROD_API_KEY="${DEV_E2E_KEYS_APIM_PR}"
         fi
 
-        export STATUS_ENDPOINT_API_KEY="${SUPPLIER_API_APIM_STATUS_API_KEY}"
+        export STATUS_ENDPOINT_API_KEY="${DEV_E2E_KEYS_APIM_STATUS}"
         export NON_PROD_PRIVATE_KEY="${GITHUB_WORKSPACE}/internal-dev-test-1.pem"
         make .internal-dev-test
