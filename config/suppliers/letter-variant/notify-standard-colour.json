@@ -4,6 +4,10 @@
       "operator": "LESS_THAN",
       "value": 20
     },
+    "colourCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 10
+    },
     "deliveryDays": {
       "operator": "LESS_THAN",
       "value": 3
@@ -17,14 +21,14 @@
       "value": 10
     }
   },
-  "description": "Black printing, economy postage tariff",
-  "id": "notify-standard",
-  "name": "Standard Letter",
+  "description": "Colour printing, economy postage tariff",
+  "id": "notify-standard-colour",
+  "name": "Standard Letter (colour)",
   "packSpecificationIds": [
-    "notify-c5"
+    "notify-c5-colour"
   ],
-  "priority": 98,
-  "status": "PROD",
+  "priority": 99,
+  "status": "INT",
   "type": "STANDARD",
-  "volumeGroupId": "volumeGroup-test2"
+  "volumeGroupId": "volumeGroup-test3"
 }

@@ -1,4 +1,5 @@
 {
+  "clientId": "client3",
   "constraints": {
     "blackCoveragePercentage": {
       "operator": "LESS_THAN",
@@ -6,25 +7,25 @@
     },
     "deliveryDays": {
       "operator": "LESS_THAN",
-      "value": 3
+      "value": 1
     },
     "sheets": {
       "operator": "LESS_THAN",
-      "value": 5
+      "value": 4
     },
     "sides": {
       "operator": "LESS_THAN",
-      "value": 10
+      "value": 8
     }
   },
-  "description": "Black printing, economy postage tariff",
-  "id": "notify-standard",
-  "name": "Standard Letter",
+  "description": "Same Day, Whitemail, Booklet",
+  "id": "client3-abnormal-results",
+  "name": "Client 3 Abnormal Results",
   "packSpecificationIds": [
-    "notify-c5"
+    "client3-abnormal-results"
   ],
-  "priority": 98,
-  "status": "PROD",
+  "priority": 9,
+  "status": "INT",
   "type": "STANDARD",
-  "volumeGroupId": "volumeGroup-test2"
+  "volumeGroupId": "volumeGroup-test3"
 }
