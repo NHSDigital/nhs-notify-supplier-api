@@ -144,6 +144,27 @@ function emitMetrics(
   }
 }
 
+function emitSupCampaignClientMetric(
+  letterEvent: PreparedEvents,
+  supplier: string,
+  status: string,
+  deps: Deps,
+) {
+  const namespace = "supplier-allocator";
+  const { campaignId, clientId } = letterEvent.data;
+  const dimensions: Record<string, string> = {
+    Supplier: supplier,
+    ClientId: clientId,
+    CampaignId: campaignId || "unknown",
+  };
+  const metric: MetricEntry = {
+    key: status,
+    value: 1,
+    unit: Unit.Count,
+  };
+  deps.logger.info(buildEMFObject(namespace, dimensions, metric));
+}
+
 export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
   return async (event: SQSEvent) => {
     const batchItemFailures: SQSBatchItemFailure[] = [];
@@ -153,8 +174,9 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
     const tasks = event.Records.map(async (record) => {
       let supplier = "unknown";
       let priority = "unknown";
+      let letterEvent: PreparedEvents | undefined;
       try {
-        const letterEvent: unknown = JSON.parse(record.body);
+        letterEvent = JSON.parse(record.body) as PreparedEvents;
 
         deps.logger.info({
           description: "Extracted letter event",
@@ -163,8 +185,8 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
 
         validateType(letterEvent);
 
-        const supplierSpec = getSupplier(letterEvent as PreparedEvents, deps);
-        await getSupplierFromConfig(letterEvent as PreparedEvents, deps);
+        const supplierSpec = getSupplier(letterEvent, deps);
+        await getSupplierFromConfig(letterEvent, deps);
 
         supplier = supplierSpec.supplierId;
         priority = String(supplierSpec.priority);
@@ -199,6 +221,12 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
         );
 
         incrementMetric(perAllocationSuccess, supplier, priority);
+        emitSupCampaignClientMetric(
+          letterEvent,
+          supplier,
+          "supplier_Campaign_Client",
+          deps,
+        );
       } catch (error) {
         deps.logger.error({
           description: "Error processing allocation of record",
