@@ -21,7 +21,8 @@
   "id": "notify-standard-test1",
   "name": "Dev Happy Path",
   "packSpecificationIds": [
-    "notify-c5"
+    "notify-c5",
+    "notify-c4"
   ],
   "status": "PROD",
   "type": "STANDARD",

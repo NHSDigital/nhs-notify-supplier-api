@@ -1,8 +1,8 @@
 {
   "campaignIds": [
-    "digitrials-aspiring"
+    "client1-aspiring"
   ],
-  "clientId": "digitrials",
+  "clientId": "client1",
   "constraints": {
     "blackCoveragePercentage": {
       "operator": "LESS_THAN",
@@ -26,10 +26,10 @@
     }
   },
   "description": "Colour printing, ASPIRING envelope, Attachment",
-  "id": "digitrials-aspiring",
-  "name": "Digitrials - ASPIRING",
+  "id": "client1-aspiring",
+  "name": "Client1 - ASPIRING",
   "packSpecificationIds": [
-    "digitrials-aspiring"
+    "client1-aspiring"
   ],
   "status": "INT",
   "type": "STANDARD",

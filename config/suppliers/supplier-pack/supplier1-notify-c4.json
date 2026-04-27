@@ -1,7 +1,7 @@
 {
   "approval": "DRAFT",
-  "id": "synertec-notify-c4",
+  "id": "supplier1-notify-c4",
   "packSpecificationId": "notify-c4",
   "status": "DRAFT",
-  "supplierId": "synertec"
+  "supplierId": "supplier1"
 }
