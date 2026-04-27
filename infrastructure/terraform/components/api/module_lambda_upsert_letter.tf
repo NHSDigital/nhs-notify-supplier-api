@@ -35,8 +35,8 @@ module "upsert_letter" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
-    VARIANT_MAP                   = jsonencode(var.letter_variant_map),
-    UPSERT_IDEMPOTENCY_TABLE_NAME = aws_dynamodb_table.upsert_idempotency.name
+    VARIANT_MAP            = jsonencode(var.letter_variant_map),
+    IDEMPOTENCY_TABLE_NAME = aws_dynamodb_table.idempotency.name
   })
 }
 
@@ -68,7 +68,7 @@ data "aws_iam_policy_document" "upsert_letter_lambda" {
 
     resources = [
       aws_dynamodb_table.letters.arn,
-      aws_dynamodb_table.upsert_idempotency.arn,
+      aws_dynamodb_table.idempotency.arn,
       "${aws_dynamodb_table.letters.arn}/index/supplierStatus-index"
     ]
   }

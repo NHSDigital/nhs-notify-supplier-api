@@ -16,14 +16,14 @@ describe("lambdaEnv", () => {
 
   it("should load all environment variables successfully", () => {
     process.env.LETTERS_TABLE_NAME = "letters-table";
-    process.env.UPSERT_IDEMPOTENCY_TABLE_NAME = "idempotency-table";
+    process.env.IDEMPOTENCY_TABLE_NAME = "idempotency-table";
     process.env.LETTER_TTL_HOURS = "12960";
 
     const { envVars } = require("../env");
 
     expect(envVars).toEqual({
       LETTERS_TABLE_NAME: "letters-table",
-      UPSERT_IDEMPOTENCY_TABLE_NAME: "idempotency-table",
+      IDEMPOTENCY_TABLE_NAME: "idempotency-table",
       LETTER_TTL_HOURS: 12_960,
     });
   });

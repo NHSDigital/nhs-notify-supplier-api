@@ -29,7 +29,7 @@ function createLetterRepository(log: Logger): LetterRepository {
 
 function createIdempotencyLayer(): DynamoDBPersistenceLayer {
   return new DynamoDBPersistenceLayer({
-    tableName: envVars.UPSERT_IDEMPOTENCY_TABLE_NAME,
+    tableName: envVars.IDEMPOTENCY_TABLE_NAME,
   });
 }
 

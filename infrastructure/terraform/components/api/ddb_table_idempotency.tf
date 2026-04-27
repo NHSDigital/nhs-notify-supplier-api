@@ -1,5 +1,5 @@
-resource "aws_dynamodb_table" "upsert_idempotency" {
-  name         = "${local.csi}-upsert-idempotency"
+resource "aws_dynamodb_table" "idempotency" {
+  name         = "${local.csi}-idempotency"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "id"
   attribute {
