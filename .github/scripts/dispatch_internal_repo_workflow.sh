@@ -291,7 +291,7 @@ echo "[INFO] Triggering workflow '$targetWorkflow' in nhs-notify-internal..."
 echo "[DEBUG] Dispatch event payload: $DISPATCH_EVENT"
 
 trigger_response=$(curl -s -L \
-  --fail-with-body \
+  --fail \
   -X POST \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer ${PR_TRIGGER_PAT}" \

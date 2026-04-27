@@ -1,12 +1,12 @@
 {
   "assembly": {
     "duplex": true,
-    "envelopeId": "client1-aspiring",
+    "envelopeId": "client1-campaign",
     "features": [
       "ADMAIL"
     ],
     "insertIds": [
-      "client1-aspiring-fast-facts-attachment"
+      "client1-campaign-fast-facts-attachment"
     ],
     "paper": {
       "colour": "WHITE",
@@ -18,7 +18,7 @@
     },
     "printColour": "COLOUR"
   },
-  "billingId": "client1-aspiring-billing",
+  "billingId": "client1-campaign-billing",
   "constraints": {
     "blackCoveragePercentage": {
       "operator": "LESS_THAN",
@@ -42,9 +42,9 @@
     }
   },
   "createdAt": "2026-01-12T00:00:00.000Z",
-  "description": "Envelope and attachment for ASPIRING",
-  "id": "client1-aspiring",
-  "name": "Client1 - ASPIRING",
+  "description": "Envelope and attachment for campaign",
+  "id": "client1-campaign",
+  "name": "Client1 - campaign",
   "postage": {
     "deliveryDays": 3,
     "id": "economy",

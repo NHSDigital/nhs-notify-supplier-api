@@ -21,21 +21,8 @@ resource "aws_dynamodb_table" "supplier-configuration" {
   }
 
   attribute {
-    name = "entityType"
-    type = "S"
-  }
-
-  attribute {
     name = "volumeGroup"
     type = "S"
-  }
-
-  // The type-index GSI allows us to query for all supplier configurations of a given type (e.g. all letter supplier configurations)
-  global_secondary_index {
-    name            = "EntityTypeIndex"
-    hash_key        = "entityType"
-    range_key       = "sk"
-    projection_type = "ALL"
   }
 
   global_secondary_index {
