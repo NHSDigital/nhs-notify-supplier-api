@@ -3,6 +3,7 @@ import subprocess
 import pathlib
 import time
 import requests
+from lib.errorhandler import ErrorHandler
 
 
 _REPO_ROOT = pathlib.Path(__file__).resolve().parents[3]
@@ -70,6 +71,7 @@ def get_pending_letter_ids(
             response = requests.get(
                 f"{url}/{letters_endpoint}?limit={limit}", headers=headers
             )
+            ErrorHandler.handle_retry(response)
             response.raise_for_status()
             data.extend(response.json().get("data", []))
             if len(data) >= limit:

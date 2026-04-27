@@ -3,7 +3,6 @@ from lib.fixtures import *  # NOSONAR
 from lib.constants import LETTERS_ENDPOINT
 from lib.generators import Generators
 from lib.letters import get_pending_letter_ids
-from lib.errorhandler import ErrorHandler
 
 @pytest.mark.test
 @pytest.mark.devtest
