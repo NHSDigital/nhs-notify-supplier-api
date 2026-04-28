@@ -150,7 +150,8 @@ describe("SupplierQuotasRepository", () => {
     );
 
     const result = await repository.getOverallAllocation(volumeGroupId);
-    expect(result?.allocations[supplierId]).toBe(150);
+    const resultMap = new Map(Object.entries(result?.allocations ?? {}));
+    expect(resultMap.get(supplierId)).toBe(150);
   });
 
   test("getDailyAllocation returns correct allocation for existing group and date", async () => {
@@ -225,6 +226,7 @@ describe("SupplierQuotasRepository", () => {
     await repository.updateDailyAllocation(date, supplierId, newAllocation);
 
     const result = await repository.getDailyAllocation(date);
-    expect(result?.allocations[supplierId]).toBe(75);
+    const resultMap = new Map(Object.entries(result?.allocations ?? {}));
+    expect(resultMap.get(supplierId)).toBe(75);
   });
 });

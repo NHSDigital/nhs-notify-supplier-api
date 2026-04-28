@@ -74,7 +74,9 @@ export class SupplierQuotasRepository {
   ): Promise<void> {
     const overallAllocation = await this.getOverallAllocation(groupId);
     const allocations = overallAllocation?.allocations ?? {};
-    const currentAllocation = allocations[supplierId] ?? 0;
+    const allocationsMap = new Map(Object.entries(allocations));
+    const currentAllocation = allocationsMap.get(supplierId) ?? 0;
+
     const updatedAllocation = currentAllocation + newAllocation;
 
     if (overallAllocation) {
@@ -107,7 +109,6 @@ export class SupplierQuotasRepository {
   }
 
   async getDailyAllocation(date: string): Promise<DailyAllocation | undefined> {
-    console.log("Getting daily allocation for date:", date);
     const result = await this.ddbClient.send(
       new GetCommand({
         TableName: this.config.supplierQuotasTableName,
@@ -118,7 +119,6 @@ export class SupplierQuotasRepository {
       }),
     );
     if (!result.Item) {
-      console.log("No daily allocation found for date:", date);
       return undefined;
     }
     // Strip DynamoDB keys before parsing
@@ -129,8 +129,7 @@ export class SupplierQuotasRepository {
 
   async putDailyAllocation(allocation: DailyAllocation): Promise<void> {
     const parsedAllocation = $DailyAllocation.parse(allocation);
-    console.log("Putting daily allocation:", parsedAllocation);
-    const output = await this.ddbClient.send(
+    await this.ddbClient.send(
       new PutCommand({
         TableName: this.config.supplierQuotasTableName,
         Item: ItemForRecord(
@@ -140,7 +139,6 @@ export class SupplierQuotasRepository {
         ),
       }),
     );
-    console.log("PutDailyAllocation output:", output);
   }
 
   async updateDailyAllocation(
@@ -150,7 +148,8 @@ export class SupplierQuotasRepository {
   ): Promise<void> {
     const dailyAllocation = await this.getDailyAllocation(date);
     const allocations = dailyAllocation?.allocations ?? {};
-    const currentAllocation = allocations[supplierId] ?? 0;
+    const allocationsMap = new Map(Object.entries(allocations));
+    const currentAllocation = allocationsMap.get(supplierId) ?? 0;
     const updatedAllocation = currentAllocation + newAllocation;
 
     if (dailyAllocation) {

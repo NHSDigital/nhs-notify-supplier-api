@@ -196,8 +196,7 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
     const batchItemFailures: SQSBatchItemFailure[] = [];
     const perAllocationSuccess: AllocationMetrics = new Map();
     const perAllocationFailure: AllocationMetrics = new Map();
-    const volumeGroupAllocations: VolumeGroupAllocation = new Map(); // Map of volume group id to supplier allocations for that group, used to track the allocations calculated in this batch for emitting metrics and updating the quotas after processing the batch
-    // Initialise the supplier quotas.
+    const volumeGroupAllocations: VolumeGroupAllocation = new Map();
 
     const tasks = event.Records.map(async (record) => {
       let supplier = "unknown";
