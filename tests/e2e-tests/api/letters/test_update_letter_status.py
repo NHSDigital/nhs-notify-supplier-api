@@ -5,17 +5,18 @@ import pytest
 from lib.fixtures import *  # NOSONAR
 from lib.constants import LETTERS_ENDPOINT
 from lib.generators import Generators
+from lib.letters import get_pending_letter_ids
 from lib.errorhandler import ErrorHandler
 
 @pytest.mark.test
 @pytest.mark.devtest
 @pytest.mark.inttest
 @pytest.mark.prodtest
-def test_202_with_valid_headers(url, bearer_token):
-    headers = Generators.generate_valid_headers(bearer_token.value)
-    get_letter_id = requests.get(f"{url}/{LETTERS_ENDPOINT}?limit=1", headers=headers)
+def test_202_with_valid_headers(url, authentication_secret):
+    headers = Generators.generate_valid_headers(authentication_secret)
 
-    letter_id = get_letter_id.json().get("data")[0].get("id")
+    ids = get_pending_letter_ids(url, headers, LETTERS_ENDPOINT, limit=1)
+    letter_id = ids[0]
 
     data = Generators.generate_valid_message_body("ACCEPTED", letter_id)
     update_letter_status = requests.patch(
@@ -27,11 +28,11 @@ def test_202_with_valid_headers(url, bearer_token):
     ErrorHandler.handle_retry(update_letter_status)
     assert update_letter_status.status_code == 202, f"Response: {update_letter_status.status_code}: {update_letter_status.text}"
 
-def test_202_with_rejected_status(url, bearer_token):
-    headers = Generators.generate_valid_headers(bearer_token.value)
-    get_letter_id = requests.get(f"{url}/{LETTERS_ENDPOINT}?limit=1", headers=headers)
+def test_202_with_rejected_status(url, authentication_secret):
+    headers = Generators.generate_valid_headers(authentication_secret)
 
-    letter_id = get_letter_id.json().get("data")[0].get("id")
+    ids = get_pending_letter_ids(url, headers, LETTERS_ENDPOINT, limit=1)
+    letter_id = ids[0]
 
     data = Generators.generate_valid_message_rejected("REJECTED", letter_id)
     update_letter_status = requests.patch(
@@ -47,11 +48,11 @@ def test_202_with_rejected_status(url, bearer_token):
 @pytest.mark.devtest
 @pytest.mark.inttest
 @pytest.mark.prodtest
-def test_400_with_invalid_status(url, bearer_token):
-    headers = Generators.generate_valid_headers(bearer_token.value)
-    get_letter_id = requests.get(f"{url}/{LETTERS_ENDPOINT}?limit=1", headers=headers)
+def test_400_with_invalid_status(url, authentication_secret):
+    headers = Generators.generate_valid_headers(authentication_secret)
 
-    letter_id = get_letter_id.json().get("data")[0].get("id")
+    ids = get_pending_letter_ids(url, headers, LETTERS_ENDPOINT, limit=1)
+    letter_id = ids[0]
 
     data = Generators.generate_valid_message_body("", letter_id)
     update_letter_status = requests.patch(
@@ -67,11 +68,11 @@ def test_400_with_invalid_status(url, bearer_token):
 @pytest.mark.devtest
 @pytest.mark.inttest
 @pytest.mark.prodtest
-def test_400_id_mismatch_with_request(url, bearer_token):
-    headers = Generators.generate_valid_headers(bearer_token.value)
-    get_letter_id = requests.get(f"{url}/{LETTERS_ENDPOINT}?limit=1", headers=headers)
+def test_400_id_mismatch_with_request(url, authentication_secret):
+    headers = Generators.generate_valid_headers(authentication_secret)
 
-    letter_id = get_letter_id.json().get("data")[0].get("id")
+    ids = get_pending_letter_ids(url, headers, LETTERS_ENDPOINT, limit=1)
+    letter_id = ids[0]
 
     data = Generators.generate_valid_message_body("ACCEPTED", "letter1")
     update_letter_status = requests.patch(
