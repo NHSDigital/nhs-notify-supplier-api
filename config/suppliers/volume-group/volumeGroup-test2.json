@@ -1,0 +1,7 @@
+{
+  "description": "Dev Test Volume Group 2",
+  "id": "volumeGroup-test2",
+  "name": "Dev Test Volume Group 2",
+  "startDate": "2026-01-01",
+  "status": "PROD"
+}

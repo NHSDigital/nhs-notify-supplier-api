@@ -17,7 +17,11 @@
 #     --overrideRoleName <name>
 
 #
-# All arguments are required except terraformAction, and internalRef.
+# Required arguments are:
+# infraRepoName, releaseVersion, targetWorkflow, targetEnvironment, targetComponent, targetAccountGroup.
+#
+# All other arguments are optional.
+#
 # Example:
 #   ./dispatch_internal_repo_workflow.sh \
 #     --infraRepoName "nhs-notify-web-template-management" \
@@ -30,7 +34,9 @@
 #     --internalRef "main" \
 #     --overrides "tf_var=someString" \
 #     --overrideProjectName nhs \
-#     --overrideRoleName nhs-service-iam-role
+#     --overrideRoleName nhs-service-iam-role \
+#     --extraSecretNames '["MY_API_KEY"]'
+
 
 set -e
 
@@ -102,6 +108,18 @@ while [[ $# -gt 0 ]]; do
       ;;
     --version) # Version (optional)
       version="$2"
+      shift 2
+      ;;
+    --extraSecretNames) # JSON array of secret names to fetch in the internal repo (optional)
+      extraSecretNames="$2"
+      shift 2
+      ;;
+    --tableName) # Table name (optional)
+      tableName="$2"
+      shift 2
+      ;;
+    --force) # Force apply flag (optional)
+      force="$2"
       shift 2
       ;;
     *)
@@ -202,6 +220,18 @@ if [[ -z "$version" ]]; then
   version=""
 fi
 
+if [[ -z "$extraSecretNames" ]]; then
+  extraSecretNames=""
+fi
+
+if [{ -z "$tableName" }]; then
+  tableName=""
+fi
+
+if [[ -z "$force" ]]; then
+  force=""
+fi
+
 echo "==================== Workflow Dispatch Parameters ===================="
 echo "  infraRepoName:      $infraRepoName"
 echo "  releaseVersion:     $releaseVersion"
@@ -221,6 +251,8 @@ echo "  apimEnvironment:     $apimEnvironment"
 echo "  boundedContext:       $boundedContext"
 echo "  targetDomain:         $targetDomain"
 echo "  version:              $version"
+echo "  tableName:            $tableName"
+echo "  force:                $force"
 
 DISPATCH_EVENT=$(jq -ncM \
   --arg infraRepoName "$infraRepoName" \
@@ -240,6 +272,9 @@ DISPATCH_EVENT=$(jq -ncM \
   --arg boundedContext "$boundedContext" \
   --arg targetDomain "$targetDomain" \
   --arg version "$version" \
+  --argjson extraSecretNames "${extraSecretNames:-null}" \
+  --arg tableName "$tableName" \
+  --arg force "$force" \
   '{
     "ref": "'"$internalRef"'",
     "inputs": (
@@ -255,6 +290,9 @@ DISPATCH_EVENT=$(jq -ncM \
       (if $boundedContext != "" then { "boundedContext": $boundedContext } else {} end) +
       (if $targetDomain != "" then { "targetDomain": $targetDomain } else {} end) +
       (if $version != "" then { "version": $version } else {} end) +
+      (if $extraSecretNames != null then { "extraSecretNames": ($extraSecretNames | tojson) } else {} end) +
+      (if $tableName != "" then { "tableName": $tableName } else {} end) +
+      (if $force != "" then { "force": $force } else {} end) +
       (if $targetAccountGroup != "" then { "targetAccountGroup": $targetAccountGroup } else {} end) +
       {
         "releaseVersion": $releaseVersion,
