@@ -20,21 +20,6 @@ resource "aws_dynamodb_table" "supplier-quotas" {
     type = "S"
   }
 
-  attribute {
-    name = "entityType"
-    type = "S"
-  }
-
-
-
-  // The type-index GSI allows us to query for all supplier quotas of a given type (e.g. all supplier daily quotas)
-  global_secondary_index {
-    name            = "EntityTypeIndex"
-    hash_key        = "entityType"
-    range_key       = "sk"
-    projection_type = "ALL"
-  }
-
   point_in_time_recovery {
     enabled = true
   }
