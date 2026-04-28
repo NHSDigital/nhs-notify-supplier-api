@@ -112,6 +112,12 @@ while [[ $# -gt 0 ]]; do
       ;;
     --extraSecretNames) # JSON array of secret names to fetch in the internal repo (optional)
       extraSecretNames="$2"
+    --tableName) # Table name (optional)
+      tableName="$2"
+      shift 2
+      ;;
+    --force) # Force apply flag (optional)
+      force="$2"
       shift 2
       ;;
     *)
@@ -214,6 +220,12 @@ fi
 
 if [[ -z "$extraSecretNames" ]]; then
   extraSecretNames=""
+if [{ -z "$tableName" }]; then
+  tableName=""
+fi
+
+if [[ -z "$force" ]]; then
+  force=""
 fi
 
 echo "==================== Workflow Dispatch Parameters ===================="
@@ -235,6 +247,8 @@ echo "  apimEnvironment:     $apimEnvironment"
 echo "  boundedContext:       $boundedContext"
 echo "  targetDomain:         $targetDomain"
 echo "  version:              $version"
+echo "  tableName:            $tableName"
+echo "  force:                $force"
 
 DISPATCH_EVENT=$(jq -ncM \
   --arg infraRepoName "$infraRepoName" \
@@ -255,6 +269,8 @@ DISPATCH_EVENT=$(jq -ncM \
   --arg targetDomain "$targetDomain" \
   --arg version "$version" \
   --argjson extraSecretNames "${extraSecretNames:-null}" \
+  --arg tableName "$tableName" \
+  --arg force "$force" \
   '{
     "ref": "'"$internalRef"'",
     "inputs": (
@@ -271,6 +287,8 @@ DISPATCH_EVENT=$(jq -ncM \
       (if $targetDomain != "" then { "targetDomain": $targetDomain } else {} end) +
       (if $version != "" then { "version": $version } else {} end) +
       (if $extraSecretNames != null then { "extraSecretNames": ($extraSecretNames | tojson) } else {} end) +
+      (if $tableName != "" then { "tableName": $tableName } else {} end) +
+      (if $force != "" then { "force": $force } else {} end) +
       (if $targetAccountGroup != "" then { "targetAccountGroup": $targetAccountGroup } else {} end) +
       {
         "releaseVersion": $releaseVersion,
