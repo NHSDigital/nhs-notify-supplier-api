@@ -13,8 +13,12 @@ class Generators:
 
     @staticmethod
     def generate_valid_headers(auth):
+        if auth.auth_type == "apikey":
+            auth_header = {"apikey": auth.value}
+        else:
+            auth_header = {"Authorization": auth.value}
         return {
-            "Authorization": auth,
+            **auth_header,
             "X-Request-ID":"123e4567-e89b-12d3-a456-426614174000",
         }
 
