@@ -112,6 +112,8 @@ while [[ $# -gt 0 ]]; do
       ;;
     --extraSecretNames) # JSON array of secret names to fetch in the internal repo (optional)
       extraSecretNames="$2"
+      shift 2
+      ;;
     --tableName) # Table name (optional)
       tableName="$2"
       shift 2
