@@ -52,7 +52,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: "Build docs"
         uses: ./.github/actions/build-docs
         with:
@@ -70,7 +70,7 @@ jobs:
         apimEnv: [internal-dev-pr, internal-dev, int, ref, prod]
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: "Build OAS spec"
         uses: ./.github/actions/build-oas-spec
         with:
@@ -88,7 +88,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: "Build OAS spec"
         uses: ./.github/actions/build-oas-spec
         with:
@@ -105,7 +105,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: "Build proxies"
         uses: ./.github/actions/build-oas-spec
         with:
@@ -131,7 +131,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: "Build sdks"
         uses: ./.github/actions/build-sdk
         with:
@@ -145,7 +145,7 @@ jobs:
   #   timeout-minutes: 10
   #   steps:
   #     - name: "Checkout code"
-  #       uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+  #       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
   #     - name: "Build servers"
   #       uses: ./.github/actions/build-server
   #       with:
@@ -156,7 +156,7 @@ jobs:
   #   timeout-minutes: 10
   #   steps:
   #     - name: "Checkout code"
-  #       uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+  #       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
   #     - name: "Build servers"
   #       uses: ./.github/actions/build-libraries
   #       with:
@@ -167,7 +167,7 @@ jobs:
     outputs:
       environment_name: ${{ steps.set-environment.outputs.environment_name }}
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Set environment name
         id: set-environment
         run: echo "environment_name=${{ inputs.pr_number != '' && format('pr{0}', inputs.pr_number) || 'main' }}" >> $GITHUB_OUTPUT
@@ -197,7 +197,7 @@ jobs:
 
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Set Environment Name
         id: set-environment
         run: echo "environment_name=${{ inputs.pr_number != '' && format('pr{0}', inputs.pr_number) || 'main' }}" >> $GITHUB_OUTPUT
@@ -229,7 +229,7 @@ jobs:
       APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: "Build proxies"
         uses: ./.github/actions/build-proxies
         with:
