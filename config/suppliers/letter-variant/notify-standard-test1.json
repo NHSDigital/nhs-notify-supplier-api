@@ -1,0 +1,30 @@
+{
+  "constraints": {
+    "blackCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 20
+    },
+    "deliveryDays": {
+      "operator": "LESS_THAN",
+      "value": 3
+    },
+    "sheets": {
+      "operator": "LESS_THAN",
+      "value": 5
+    },
+    "sides": {
+      "operator": "LESS_THAN",
+      "value": 10
+    }
+  },
+  "description": "Dev test variant for happy path testing",
+  "id": "notify-standard-test1",
+  "name": "Dev Happy Path",
+  "packSpecificationIds": [
+    "notify-c5",
+    "notify-c4"
+  ],
+  "status": "PROD",
+  "type": "STANDARD",
+  "volumeGroupId": "volumeGroup-test1"
+}
