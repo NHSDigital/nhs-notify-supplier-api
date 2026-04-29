@@ -1,4 +1,4 @@
-import { SQSBatchItemFailure, SQSEvent, SQSHandler } from "aws-lambda";
+import { Context, SQSBatchItemFailure, SQSEvent, SQSHandler } from "aws-lambda";
 import { $LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
 import {
   InsertLetter,
@@ -11,6 +11,10 @@ import {
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
 import { $LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import { MetricsLogger, Unit, metricScope } from "aws-embedded-metrics";
+import {
+  IdempotencyConfig,
+  makeIdempotent,
+} from "@aws-lambda-powertools/idempotency";
 import { Deps } from "../config/deps";
 import {
   PreparedEvents,
@@ -19,6 +23,10 @@ import {
   SupplierSpec,
   UpsertOperation,
 } from "./schemas";
+
+const idempotencyConfig = new IdempotencyConfig({
+  eventKeyJmesPath: "id",
+});
 
 function getOperationFromType(type: string): UpsertOperation {
   if (
@@ -180,8 +188,13 @@ function parseQueueMessage(queueMessage: string): QueueMessage {
 }
 
 export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
+  const processRecordIdempotently = makeIdempotent(processRecord, {
+    persistenceStore: deps.idempotencyLayer,
+    config: idempotencyConfig,
+  });
+
   return metricScope((metrics: MetricsLogger) => {
-    return async (event: SQSEvent) => {
+    return async (event: SQSEvent, context: Context) => {
       const batchItemFailures: SQSBatchItemFailure[] = [];
       const perSupplierSuccess: Map<string, number> = new Map<string, number>();
       const perSupplierFailure: Map<string, number> = new Map<string, number>();
@@ -216,28 +229,12 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
             supplier: supplierSpec,
           });
 
-          supplier =
-            !supplierSpec || !supplierSpec.supplierId
-              ? getSupplierIdFromEvent(letterEvent)
-              : supplierSpec.supplierId;
-
-          const operation = getOperationFromType(letterEvent.type);
-
-          await runUpsert(
-            operation,
+          idempotencyConfig.registerLambdaContext(context);
+          supplier = await processRecordIdempotently(
             letterEvent,
-            supplierSpec ?? {
-              supplierId: "unknown",
-              specId: "unknown",
-              priority: 10,
-              billingId: "unknown",
-            },
+            supplierSpec,
+            perSupplierSuccess,
             deps,
-          );
-
-          perSupplierSuccess.set(
-            supplier,
-            (perSupplierSuccess.get(supplier) || 0) + 1,
           );
         } catch (error) {
           deps.logger.error({
@@ -260,4 +257,33 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
       return { batchItemFailures };
     };
   });
+}
+
+async function processRecord(
+  letterEvent: LetterStatusChangeEvent | PreparedEvents,
+  supplierSpec: SupplierSpec | undefined,
+  perSupplierSuccess: Map<string, number>,
+  deps: Deps,
+) {
+  const supplier =
+    !supplierSpec || !supplierSpec.supplierId
+      ? getSupplierIdFromEvent(letterEvent)
+      : supplierSpec.supplierId;
+
+  const operation = getOperationFromType(letterEvent.type);
+
+  await runUpsert(
+    operation,
+    letterEvent,
+    supplierSpec ?? {
+      supplierId: "unknown",
+      specId: "unknown",
+      priority: 10,
+      billingId: "unknown",
+    },
+    deps,
+  );
+
+  perSupplierSuccess.set(supplier, (perSupplierSuccess.get(supplier) || 0) + 1);
+  return supplier;
 }

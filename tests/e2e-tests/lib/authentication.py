@@ -26,12 +26,12 @@ class AuthenticationCache():
         # How long the token will stay valid
         self.token_validity = 180
 
-    def generate_authentication(self, env, base_url):
+    def generate_authentication(self, env, base_url, path):
 
         # For the test_url, note that we don't need a message_id that actually exists in
         # the backend. The test will only check that the API doesn't return a 401,
         # a 404 response means the authentication is working.
-        test_url = f"{base_url}/letters"
+        test_url = f"{base_url}{path}"
 
         if env == "internal-dev":
             api_key = os.environ["NON_PROD_API_KEY"]
@@ -56,14 +56,21 @@ class AuthenticationCache():
         else:
             raise ValueError("Unknown value: ", env)
 
+        if path == "/_status":
+            api_key = os.environ["STATUS_ENDPOINT_API_KEY"]
+
+        if path == "/_status" or "-PR-" in base_url:
+            # PR environments (and the status endpoint) use AAL0 - authentication is the API key passed directly
+            return Secret(api_key, auth_type="apikey")
+
         _, latest_token_expiry = self.tokens.get(env, (None, 0))
 
         # Generate new token if latest token will expire in 15 seconds
         if env not in self.tokens or latest_token_expiry < int(time()) + 15:
             self.tokens[env] = self.generate_and_test_new_token(api_key, private_key, url, kid, test_url)
 
-        bearer_token = self.tokens[env][0]
-        return Secret(bearer_token)
+        authentication_secret = self.tokens[env][0]
+        return Secret(authentication_secret)
 
     def generate_and_test_new_token(self, api_key, private_key, url, kid, test_url):
         new_token = None
