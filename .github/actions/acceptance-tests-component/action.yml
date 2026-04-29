@@ -1,0 +1,43 @@
+name: Acceptance tests - component
+description: "Run component acceptance tests for this repo"
+
+inputs:
+  testType:
+    description: Type of test to run
+    required: true
+
+  targetEnvironment:
+    description: Name of the environment under test
+    required: true
+
+  targetComponent:
+    description: Name of the component under test
+    required: true
+
+runs:
+  using: "composite"
+
+  steps:
+
+    - name: Repo setup
+      uses: ./.github/actions/node-install
+      with:
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+
+    - name: Fetch terraform output
+      uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+      with:
+        name: terraform-output-${{ inputs.targetComponent }}
+
+    - name: Get Node version
+      id: nodejs_version
+      shell: bash
+      run: |
+        echo "nodejs_version=$(grep "^nodejs\s" .tool-versions | cut -f2 -d' ')" >> $GITHUB_OUTPUT
+
+    - name: Run test - ${{ inputs.testType }}
+      shell: bash
+      env:
+        TARGET_ENVIRONMENT: ${{ inputs.targetEnvironment }}
+      run: |
+        make test-${{ inputs.testType }}
