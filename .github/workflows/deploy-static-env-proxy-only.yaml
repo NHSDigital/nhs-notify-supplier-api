@@ -1,0 +1,53 @@
+name: Deploy proxy only
+
+on:
+  workflow_dispatch:
+    inputs:
+      apim_environment:
+        description: "Target APIM environment"
+        type: choice
+        required: true
+        default: internal-dev
+        options:
+          - internal-dev
+          - ref
+          - int
+          - prod
+      source_type:
+        description: "Deployment source type"
+        type: choice
+        required: true
+        default: release
+        options:
+          - release
+          - branch
+      source_value:
+        description: "Release tag or branch name"
+        type: string
+        required: true
+      build_sandbox:
+        description: "Build sandbox container"
+        type: boolean
+        required: false
+        default: false
+
+run-name: >-
+  Deploy proxy apim=${{ inputs.apim_environment }} source=${{ inputs.source_type
+  }}:${{ inputs.source_value }} by @${{ github.actor }}
+
+permissions:
+  id-token: write
+  contents: read
+  packages: read
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy-supplier-api.yaml
+    secrets: inherit
+    with:
+      apim_environment: ${{ inputs.apim_environment }}
+      source_type: ${{ inputs.source_type }}
+      source_value: ${{ inputs.source_value }}
+      deploy_backend: false
+      deploy_proxy: true
+      build_sandbox: ${{ inputs.build_sandbox }}

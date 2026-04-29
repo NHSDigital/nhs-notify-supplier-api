@@ -1,0 +1,257 @@
+name: Deploy Supplier API
+
+on:
+  workflow_call:
+    inputs:
+      source_type:
+        description: "Deployment source type (release, branch)"
+        type: string
+        required: true
+      source_value:
+        description: "Release tag or branch name"
+        type: string
+        required: true
+      deploy_backend:
+        description: "Deploy backend infrastructure"
+        type: boolean
+        required: false
+        default: false
+      backend_account_group:
+        description: "Target backend account group (dev, nonprod, prod). Required when
+          deploy_backend is true."
+        type: string
+        required: false
+        default: ""
+      deploy_proxy:
+        description: "Deploy APIM proxy"
+        type: boolean
+        required: false
+        default: false
+      apim_environment:
+        description: "Target APIM environment (internal-dev, int, prod). Required when
+          deploy_proxy is true."
+        type: string
+        required: false
+        default: ""
+      build_sandbox:
+        description: "Build sandbox container"
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  id-token: write
+  contents: read
+  packages: read
+
+jobs:
+  validate:
+    name: Validate deployment request
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      release_version: ${{ steps.validate.outputs.release_version }}
+      is_release: ${{ steps.validate.outputs.is_release }}
+      build_artifact_version: ${{ steps.validate.outputs.build_artifact_version }}
+      target_account_group: ${{ steps.validate.outputs.target_account_group }}
+      target_environment: ${{ steps.validate.outputs.target_environment }}
+      apim_environment: ${{ steps.validate.outputs.apim_environment }}
+    steps:
+      - name: Validate inputs and resolve source
+        id: validate
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          backend_account_group="${{ inputs.backend_account_group }}"
+          apim_environment="${{ inputs.apim_environment }}"
+          source_type="${{ inputs.source_type }}"
+          source_value="${{ inputs.source_value }}"
+          deploy_backend="${{ inputs.deploy_backend }}"
+          deploy_proxy="${{ inputs.deploy_proxy }}"
+
+          # --- Shared source validation ---
+
+          if [[ "$deploy_backend" != "true" && "$deploy_proxy" != "true" ]]; then
+            echo "[ERROR] At least one of deploy_backend or deploy_proxy must be true."
+            exit 1
+          fi
+
+          if [[ -z "$source_value" ]]; then
+            echo "[ERROR] source_value cannot be empty."
+            exit 1
+          fi
+
+          is_release="false"
+          release_version="$source_value"
+
+          if [[ "$source_type" == "release" ]]; then
+            if [[ ! "$source_value" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+([-.+][0-9A-Za-z.-]+)?$ ]]; then
+              echo "[ERROR] Release tags must be semantic versions, for example v1.2.3."
+              exit 1
+            fi
+            if ! release_json=$(gh release view "$source_value" --repo "$GITHUB_REPOSITORY" --json assets 2>&1); then
+              echo "[ERROR] Release '$source_value' not found in repository."
+              echo "$release_json"
+              exit 1
+            fi
+            is_release="true"
+          elif [[ "$source_type" == "branch" ]]; then
+            if ! branch_matches=$(gh api "repos/${GITHUB_REPOSITORY}/git/matching-refs/heads/${source_value}" --jq 'length' 2>&1); then
+              echo "[ERROR] Failed to check branch '$source_value'."
+              echo "$branch_matches"
+              exit 1
+            fi
+            if [[ "$branch_matches" -eq 0 ]]; then
+              echo "[ERROR] Branch '$source_value' not found in repository."
+              exit 1
+            fi
+          else
+            echo "[ERROR] Unsupported source type '$source_type'. Use 'release' or 'branch'."
+            exit 1
+          fi
+
+          # --- Cross-validation (only when deploying both) ---
+
+          if [[ "$deploy_backend" == "true" && "$deploy_proxy" == "true" ]]; then
+            case "${backend_account_group}:${apim_environment}" in
+              dev:internal-dev|nonprod:int|nonprod:ref|prod:prod) ;;
+              *)
+                echo "[ERROR] Mismatched backend/APIM pair: '${backend_account_group}' and '${apim_environment}'."
+                echo "[ERROR] Valid combinations: dev/internal-dev, nonprod/int, nonprod/ref, prod/prod."
+                exit 1
+                ;;
+            esac
+          fi
+
+          # --- Backend validation (only when deploying backend) ---
+
+          target_account_group=""
+
+          if [[ "$deploy_backend" == "true" ]]; then
+            if [[ -z "$backend_account_group" ]]; then
+              echo "[ERROR] backend_account_group is required when deploy_backend is true."
+              exit 1
+            fi
+
+            if [[ "$source_type" == "branch" && "$backend_account_group" != "dev" ]]; then
+              echo "[ERROR] Branch deployments are only allowed for dev backend deployments."
+              exit 1
+            fi
+
+            if [[ "$backend_account_group" == "nonprod" || "$backend_account_group" == "prod" ]]; then
+              if [[ "$is_release" == "false" ]]; then
+                echo "[ERROR] Only tagged releases can be deployed to NONPROD and PROD backends."
+                exit 1
+              fi
+            fi
+
+            case "$backend_account_group" in
+              dev)     target_account_group="nhs-notify-supplier-api-dev" ;;
+              nonprod) target_account_group="nhs-notify-supplier-api-nonprod" ;;
+              prod)    target_account_group="nhs-notify-supplier-api-prod" ;;
+              *)
+                echo "[ERROR] Unsupported backend account group '$backend_account_group'."
+                exit 1
+                ;;
+            esac
+          fi
+
+          # --- Proxy validation (only when deploying proxy) ---
+
+          if [[ "$deploy_proxy" == "true" ]]; then
+            if [[ -z "$apim_environment" ]]; then
+              echo "[ERROR] apim_environment is required when deploy_proxy is true."
+              exit 1
+            fi
+
+            if [[ "$is_release" == "true" ]]; then
+              oas_asset_pattern="^api-oas-specification-${apim_environment}-${source_value}-.*\.zip$"
+              if ! echo "$release_json" | jq -r '.assets[].name' | grep -qx "$oas_asset_pattern"; then
+                echo "[ERROR] Release '$source_value' does not contain required OAS asset matching pattern '$oas_asset_pattern'."
+                echo "Available assets:"
+                echo "$release_json" | jq -r '.assets[].name'
+                exit 1
+              fi
+            fi
+          fi
+
+          build_artifact_version=""
+          if [[ "$is_release" == "false" ]]; then
+            build_artifact_version="nonrelease-$source_type-$source_value"
+          fi
+
+          # --- Outputs ---
+
+          echo "release_version=$release_version" >> "$GITHUB_OUTPUT"
+          echo "is_release=$is_release" >> "$GITHUB_OUTPUT"
+          echo "build_artifact_version=$build_artifact_version" >> "$GITHUB_OUTPUT"
+          echo "target_account_group=$target_account_group" >> "$GITHUB_OUTPUT"
+          # For static envs we want to deploy to main
+          echo "target_environment=main" >> "$GITHUB_OUTPUT"
+          echo "apim_environment=$apim_environment" >> "$GITHUB_OUTPUT"
+
+  deploy-backend:
+    name: Deploy backend
+    if: ${{ inputs.deploy_backend }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: validate
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Deploy backend environment
+        env:
+          APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
+          APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
+        run: |
+          bash .github/scripts/dispatch_internal_repo_workflow.sh \
+            --releaseVersion "${{ needs.validate.outputs.release_version }}" \
+            --targetWorkflow "dispatch-deploy-static-notify-supplier-api-env.yaml" \
+            --targetEnvironment "${{ needs.validate.outputs.target_environment }}" \
+            --targetAccountGroup "${{ needs.validate.outputs.target_account_group }}" \
+            --targetComponent "api" \
+            --terraformAction "apply"
+
+  deploy-proxy:
+    name: Deploy proxy
+    if: ${{ inputs.deploy_proxy && !failure() && !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [ validate, deploy-backend ]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Resolve nodejs version
+        id: toolversions
+        run: echo "nodejs_version=$(grep '^nodejs\s' .tool-versions | cut -f2 -d' ')" >>
+          "$GITHUB_OUTPUT"
+
+      - name: Build OAS spec for non-release source
+        if: ${{ needs.validate.outputs.is_release == 'false' }}
+        uses: ./.github/actions/build-oas-spec
+        with:
+          version: ${{ needs.validate.outputs.build_artifact_version }}
+          apimEnv: ${{ needs.validate.outputs.apim_environment }}
+          buildSandbox: ${{ inputs.build_sandbox }}
+          nodejs_version: ${{ steps.toolversions.outputs.nodejs_version }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy proxy
+        env:
+          PROXYGEN_API_NAME: nhs-notify-supplier
+          APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
+          APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
+        uses: ./.github/actions/build-proxies
+        with:
+          environment: ${{ needs.validate.outputs.target_environment }}
+          apimEnv: ${{ needs.validate.outputs.apim_environment }}
+          runId: "${{ github.run_id }}"
+          releaseVersion: ${{ needs.validate.outputs.release_version }}
+          isRelease: ${{ needs.validate.outputs.is_release }}
+          buildSandbox: ${{ inputs.build_sandbox }}
+          version: ${{ needs.validate.outputs.build_artifact_version }}
