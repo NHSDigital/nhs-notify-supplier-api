@@ -86,9 +86,10 @@ export async function supplierIdFromSupplierAllocatorLog(
 ): Promise<string> {
   const message = await pollSupplierAllocatorLogForResolvedSpec(domainId);
   const supplierAllocatorLog = JSON.parse(message) as {
-    msg?: { supplierSpec?: { supplierId?: string } };
+    msg?: { allocationDetails?: { supplierSpec?: { supplierId?: string } } };
   };
-  const supplierId = supplierAllocatorLog.msg?.supplierSpec?.supplierId;
+  const supplierId =
+    supplierAllocatorLog.msg?.allocationDetails?.supplierSpec?.supplierId;
 
   logger.info(
     `Supplier ${supplierId} allocated for domainId ${domainId} in supplier allocator lambda`,

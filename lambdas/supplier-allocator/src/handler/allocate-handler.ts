@@ -47,6 +47,34 @@ function validateType(event: unknown) {
   }
 }
 
+function buildSupplierDetails(
+  supplierId: string,
+  packSpecificationId: string,
+  billingId: string,
+  priority: number,
+  status: "PENDING" | "REJECTED",
+  volumeGroupId: string,
+  reasonCode?: string,
+  reasonText?: string,
+): SupplierDetails {
+  return {
+    allocationDetails: {
+      supplierSpec: {
+        supplierId,
+        specId: packSpecificationId,
+        priority,
+        billingId,
+      },
+      allocationStatus: {
+        status,
+        reasonCode,
+        reasonText,
+      },
+    },
+    volumeGroupId,
+  };
+}
+
 async function getSupplierFromConfig(
   letterEvent: PreparedEvents,
   deps: Deps,
@@ -116,23 +144,30 @@ async function getSupplierFromConfig(
       selectedSupplierId,
     });
 
-    const supplierDetails: SupplierDetails = {
-      supplierSpec: {
-        supplierId: selectedSupplierId,
-        specId: preferredPack.id,
-        priority: letterVariant.priority,
-        billingId: preferredPack.billingId,
-      },
-      volumeGroupId: volumeGroup.id,
-    };
-    return supplierDetails;
+    return buildSupplierDetails(
+      selectedSupplierId,
+      preferredPack.id,
+      preferredPack.billingId,
+      letterVariant.priority,
+      "PENDING",
+      volumeGroup.id,
+    );
   } catch (error) {
     deps.logger.error({
       description: "Error fetching supplier from config",
       err: error,
       variantId: letterEvent.data.letterVariantId,
     });
-    throw error;
+    return buildSupplierDetails(
+      "unknown",
+      "unknown",
+      "unknown",
+      0,
+      "REJECTED",
+      "unknown",
+      "NO_SUPPLIERS_AVAILABLE",
+      error instanceof Error ? error.message : "Unknown error",
+    );
   }
 }
 
@@ -195,16 +230,16 @@ function emitDataMetrics(
 }
 
 function incrementAllocation(
-  map: VolumeGroupAllocation,
+  volumeGroupAllocation: VolumeGroupAllocation,
   volumeGroupId: string,
   supplierId: string,
   allocation: number,
   deps: Deps,
 ) {
-  const groupAllocations = map.get(volumeGroupId) ?? {};
+  const groupAllocations = volumeGroupAllocation.get(volumeGroupId) ?? {};
   groupAllocations[supplierId] =
     (groupAllocations[supplierId] ?? 0) + allocation;
-  map.set(volumeGroupId, groupAllocations);
+  volumeGroupAllocation.set(volumeGroupId, groupAllocations);
   deps.logger.info({
     description: "Updated allocations for volume group and supplier",
     volumeGroupId,
@@ -254,28 +289,32 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
           letterEvent as PreparedEvents,
           deps,
         );
-        const supplierSpec = supplierDetails?.supplierSpec;
 
         deps.logger.info({
           description: "Resolved supplier details from config",
           supplierDetails,
         });
-
-        incrementAllocation(
-          volumeGroupAllocations,
-          supplierDetails.volumeGroupId,
-          supplierDetails?.supplierSpec.supplierId,
-          1,
-          deps,
-        );
+        const supplierSpec = supplierDetails?.allocationDetails?.supplierSpec;
 
         supplier = supplierSpec.supplierId;
         priority = String(supplierSpec.priority);
 
-        deps.logger.info({
-          description: "Resolved supplier spec",
-          supplierSpec,
-        });
+        if (
+          supplierDetails.allocationDetails.allocationStatus.status ===
+          "PENDING"
+        ) {
+          incrementMetric(perAllocationSuccess, supplier, priority);
+
+          incrementAllocation(
+            volumeGroupAllocations,
+            supplierDetails.volumeGroupId,
+            supplier,
+            1,
+            deps,
+          );
+        } else {
+          incrementMetric(perAllocationFailure, supplier, priority);
+        }
 
         // Send to allocated letters queue
         const queueUrl = process.env.UPSERT_LETTERS_QUEUE_URL;
@@ -285,7 +324,7 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
 
         const queueMessage = {
           letterEvent,
-          supplierSpec,
+          allocationDetails: supplierDetails.allocationDetails,
         };
 
         deps.logger.info({
