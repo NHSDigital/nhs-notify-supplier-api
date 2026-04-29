@@ -12,7 +12,7 @@ export interface ApiError {
 export enum ApiErrorCode {
   InternalServerError = "NOTIFY_INTERNAL_SERVER_ERROR",
   InvalidRequest = "NOTIFY_INVALID_REQUEST",
-  NotFound = "NOTIFY_LETTER_NOT_FOUND",
+  NotFound = "NOTIFY_NOT_FOUND",
 }
 
 export enum ApiErrorTitle {
@@ -28,10 +28,11 @@ export enum ApiErrorStatus {
 }
 
 export enum ApiErrorDetail {
-  NotFoundLetterId = "No resource found with that ID",
+  NotFoundId = "No resource found with that ID",
   InvalidRequestMissingBody = "The request is missing the body",
   InvalidRequestMissingLetterIdPathParameter = "The request is missing the letter id path parameter",
   InvalidRequestLetterIdsMismatch = "The letter ID in the request body does not match the letter ID path parameter",
+  InvalidRequestMissingMiIdPathParameter = "The request is missing the mi id path parameter",
   InvalidRequestBody = "The request body is invalid",
   InvalidRequestLimitNotANumber = "The limit parameter is not a number",
   InvalidRequestLimitNotInRange = "The limit parameter must be a positive number not greater than %s",

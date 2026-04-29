@@ -64,4 +64,54 @@ describe("MiRepository", () => {
       );
     });
   });
+
+  describe("getMi", () => {
+    it("throws an error when fetching MI information that does not exist", async () => {
+      await expect(miRepository.getMI("XXX", "supplier1")).rejects.toThrow(
+        "Management information not found: supplierId=supplier1, miId=XXX",
+      );
+    });
+
+    it("creates MI with id and timestamps", async () => {
+      jest.useFakeTimers();
+      // Month is zero-indexed in JS Date
+      jest.setSystemTime(new Date(2020, 1, 1));
+      const mi = {
+        specificationId: "spec1",
+        supplierId: "supplier1",
+        groupId: "group1",
+        lineItem: "item1",
+        quantity: 12,
+        timestamp: new Date().toISOString(),
+        stockRemaining: 0,
+      };
+
+      const persistedMi = await miRepository.putMI(mi);
+
+      expect(persistedMi).toEqual(
+        expect.objectContaining({
+          id: expect.any(String),
+          createdAt: "2020-02-01T00:00:00.000Z",
+          updatedAt: "2020-02-01T00:00:00.000Z",
+          ttl: 1_580_518_800, // 2020-02-01T00:01:00.000Z, seconds since epoch
+          ...mi,
+        }),
+      );
+
+      const fetchedMi = await miRepository.getMI(
+        persistedMi.id,
+        persistedMi.supplierId,
+      );
+
+      expect(fetchedMi).toEqual(
+        expect.objectContaining({
+          id: expect.any(String),
+          createdAt: "2020-02-01T00:00:00.000Z",
+          updatedAt: "2020-02-01T00:00:00.000Z",
+          ttl: 1_580_518_800, // 2020-02-01T00:01:00.000Z, seconds since epoch
+          ...mi,
+        }),
+      );
+    });
+  });
 });

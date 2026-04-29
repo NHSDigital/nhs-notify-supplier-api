@@ -37,3 +37,16 @@ export type PostMIResponse = z.infer<typeof PostMIResponseSchema>;
 export type IncomingMI = PostMIRequest["data"]["attributes"] & {
   supplierId: string;
 };
+
+export const GetMIResponseResourceSchema = z
+  .object({
+    id: z.string(),
+    ...PostMIRequestResourceSchema.shape,
+  })
+  .strict();
+
+export const GetMIResponseSchema = makeDocumentSchema(
+  GetMIResponseResourceSchema,
+);
+
+export type GetMIResponse = z.infer<typeof GetMIResponseSchema>;
