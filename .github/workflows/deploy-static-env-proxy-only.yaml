@@ -10,6 +10,7 @@ on:
         default: internal-dev
         options:
           - internal-dev
+          - ref
           - int
           - prod
       source_type:

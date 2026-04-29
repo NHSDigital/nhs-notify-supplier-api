@@ -117,10 +117,10 @@ jobs:
 
           if [[ "$deploy_backend" == "true" && "$deploy_proxy" == "true" ]]; then
             case "${backend_account_group}:${apim_environment}" in
-              dev:internal-dev|nonprod:int|prod:prod) ;;
+              dev:internal-dev|nonprod:int|nonprod:ref|prod:prod) ;;
               *)
                 echo "[ERROR] Mismatched backend/APIM pair: '${backend_account_group}' and '${apim_environment}'."
-                echo "[ERROR] Valid combinations: dev/internal-dev, nonprod/int, prod/prod."
+                echo "[ERROR] Valid combinations: dev/internal-dev, nonprod/int, nonprod/ref, prod/prod."
                 exit 1
                 ;;
             esac
