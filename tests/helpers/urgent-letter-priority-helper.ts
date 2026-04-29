@@ -110,10 +110,10 @@ export async function verifyAllocationLogsContainPriority(
     const allocatedLetter: AllocatedLetter = AllocatedLetterSchema.parse(
       supplierAllocatorLog.msg,
     );
-    const { supplierSpec } = allocatedLetter;
-    expect(supplierSpec).toBeDefined();
-    expect(supplierSpec.priority).toBeDefined();
-    expect(supplierSpec.priority).toBe(priority);
+    const { allocationDetails } = allocatedLetter;
+    expect(allocationDetails).toBeDefined();
+    expect(allocationDetails.supplierSpec.priority).toBeDefined();
+    expect(allocationDetails.supplierSpec.priority).toBe(priority);
     logger.info(
       `Verified log for domainId ${domainId} contains priority ${priority}`,
     );

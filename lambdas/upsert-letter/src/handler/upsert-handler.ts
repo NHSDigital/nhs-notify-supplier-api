@@ -17,10 +17,10 @@ import {
 } from "@aws-lambda-powertools/idempotency";
 import { Deps } from "../config/deps";
 import {
+  AllocationDetails,
   PreparedEvents,
   QueueMessage,
   QueueMessageSchema,
-  SupplierSpec,
   UpsertOperation,
 } from "./schemas";
 
@@ -35,15 +35,11 @@ function getOperationFromType(type: string): UpsertOperation {
     return {
       name: "Insert",
       schemas: [$LetterRequestPreparedEventV2, $LetterRequestPreparedEvent],
-      handler: async (request, supplierSpec, deps) => {
+      handler: async (request, allocationDetails, deps) => {
         const preparedRequest = request as PreparedEvents;
         const letterToInsert: InsertLetter = mapToInsertLetter(
           preparedRequest,
-          supplierSpec.supplierId,
-          supplierSpec.specId,
-          supplierSpec.specId, // use specId for now
-          supplierSpec.priority,
-          supplierSpec.billingId, // use billingId for now
+          allocationDetails,
         );
         try {
           await deps.letterRepo.putLetter(letterToInsert);
@@ -72,7 +68,7 @@ function getOperationFromType(type: string): UpsertOperation {
   return {
     name: "Update",
     schemas: [$LetterStatusChangeEvent],
-    handler: async (request, supplierSpec, deps) => {
+    handler: async (request, allocationDetails, deps) => {
       const supplierEvent = request as LetterStatusChangeEvent;
       const letterToUpdate: UpdateLetter = mapToUpdateLetter(supplierEvent);
       await deps.letterRepo.updateLetterStatus(letterToUpdate);
@@ -89,20 +85,21 @@ function getOperationFromType(type: string): UpsertOperation {
 
 function mapToInsertLetter(
   upsertRequest: PreparedEvents,
-  supplier: string,
-  spec: string,
-  billingRef: string,
-  priority: number,
-  billingId: string,
+  allocationDetails: AllocationDetails,
 ): InsertLetter {
   const now = new Date().toISOString();
   return {
     id: upsertRequest.data.domainId,
     eventId: upsertRequest.id,
-    supplierId: supplier,
-    status: "PENDING",
-    specificationId: spec,
-    priority,
+    supplierId: allocationDetails.supplierSpec.supplierId,
+    status:
+      allocationDetails.allocationStatus.status === "REJECTED"
+        ? "REJECTED"
+        : "PENDING",
+    reasonCode: allocationDetails.allocationStatus.reasonCode,
+    reasonText: allocationDetails.allocationStatus.reasonText,
+    specificationId: allocationDetails.supplierSpec.specId,
+    priority: allocationDetails.supplierSpec.priority,
     groupId:
       upsertRequest.data.clientId +
       upsertRequest.data.campaignId +
@@ -112,8 +109,8 @@ function mapToInsertLetter(
     subject: upsertRequest.subject,
     createdAt: now,
     updatedAt: now,
-    billingRef,
-    specificationBillingId: billingId,
+    billingRef: allocationDetails.supplierSpec.specId,
+    specificationBillingId: allocationDetails.supplierSpec.billingId,
   };
 }
 
@@ -133,13 +130,13 @@ function mapToUpdateLetter(
 async function runUpsert(
   operation: UpsertOperation,
   letterEvent: unknown,
-  supplierSpec: SupplierSpec,
+  allocationDetails: AllocationDetails,
   deps: Deps,
 ) {
   for (const schema of operation.schemas) {
     const r = schema.safeParse(letterEvent);
     if (r.success) {
-      await operation.handler(r.data, supplierSpec, deps);
+      await operation.handler(r.data, allocationDetails, deps);
       return;
     }
   }
@@ -212,27 +209,27 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
           const queueMessage: QueueMessage = parseQueueMessage(sqsMessage);
 
           let letterEvent: LetterStatusChangeEvent | PreparedEvents;
-          let supplierSpec: SupplierSpec | undefined;
+          let allocationDetails: AllocationDetails | undefined;
 
           if ("letterEvent" in queueMessage) {
             letterEvent = queueMessage.letterEvent;
-            supplierSpec = queueMessage.supplierSpec;
+            allocationDetails = queueMessage.allocationDetails;
           } else {
             letterEvent = queueMessage;
-            supplierSpec = undefined;
+            allocationDetails = undefined;
           }
 
           deps.logger.info({
             description: "Extracted letter event",
             messageId: record.messageId,
             type: letterEvent.type,
-            supplier: supplierSpec,
+            supplier: allocationDetails?.supplierSpec,
           });
 
           idempotencyConfig.registerLambdaContext(context);
           supplier = await processRecordIdempotently(
             letterEvent,
-            supplierSpec,
+            allocationDetails,
             perSupplierSuccess,
             deps,
           );
@@ -261,25 +258,31 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
 
 async function processRecord(
   letterEvent: LetterStatusChangeEvent | PreparedEvents,
-  supplierSpec: SupplierSpec | undefined,
+  allocationDetails: AllocationDetails | undefined,
   perSupplierSuccess: Map<string, number>,
   deps: Deps,
 ) {
   const supplier =
-    !supplierSpec || !supplierSpec.supplierId
-      ? getSupplierIdFromEvent(letterEvent)
-      : supplierSpec.supplierId;
+    allocationDetails?.supplierSpec.supplierId ??
+    getSupplierIdFromEvent(letterEvent);
 
   const operation = getOperationFromType(letterEvent.type);
 
   await runUpsert(
     operation,
     letterEvent,
-    supplierSpec ?? {
-      supplierId: "unknown",
-      specId: "unknown",
-      priority: 10,
-      billingId: "unknown",
+    allocationDetails ?? {
+      supplierSpec: {
+        supplierId: "unknown",
+        specId: "unknown",
+        priority: 10,
+        billingId: "unknown",
+      },
+      allocationStatus: {
+        status: "REJECTED",
+        reasonCode: "NO_ALLOCATION_DETAILS",
+        reasonText: "No allocation details were provided for this event",
+      },
     },
     deps,
   );

@@ -251,11 +251,14 @@ describe("createSupplierAllocatorHandler", () => {
 
     const messageBody = JSON.parse(sendCall.input.MessageBody);
     expect(messageBody.letterEvent).toEqual(preparedEvent);
-    expect(messageBody.supplierSpec).toEqual({
+    expect(messageBody.allocationDetails.supplierSpec).toEqual({
       supplierId: "supplier1",
       specId: "spec1",
       priority: 1,
       billingId: "billing1",
+    });
+    expect(messageBody.allocationDetails.allocationStatus).toEqual({
+      status: "PENDING",
     });
   });
 
@@ -279,11 +282,14 @@ describe("createSupplierAllocatorHandler", () => {
     expect(mockSqsClient.send).toHaveBeenCalledTimes(1);
     const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
     const messageBody = JSON.parse(sendCall.input.MessageBody);
-    expect(messageBody.supplierSpec).toEqual({
+    expect(messageBody.allocationDetails.supplierSpec).toEqual({
       supplierId: "supplier1",
       specId: "spec1",
       priority: 1,
       billingId: "billing1",
+    });
+    expect(messageBody.allocationDetails.allocationStatus).toEqual({
+      status: "PENDING",
     });
   });
 
@@ -484,8 +490,7 @@ describe("createSupplierAllocatorHandler", () => {
     const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
     if (!result) throw new Error("expected BatchResponse, got void");
-    expect(result.batchItemFailures).toHaveLength(1);
-    expect((mockedDeps.logger.error as jest.Mock).mock.calls).toHaveLength(2);
+    expect((mockedDeps.logger.error as jest.Mock).mock.calls).toHaveLength(1);
     expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][0]).toEqual(
       expect.objectContaining({
         description: "Error fetching supplier from config",
@@ -493,65 +498,97 @@ describe("createSupplierAllocatorHandler", () => {
         variantId: "lv1",
       }),
     );
+    expect(mockSqsClient.send).toHaveBeenCalledTimes(1);
+    const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
+    expect(sendCall).toBeInstanceOf(SendMessageCommand);
+
+    const messageBody = JSON.parse(sendCall.input.MessageBody);
+    expect(messageBody.letterEvent).toEqual(preparedEvent);
+    expect(messageBody.allocationDetails.supplierSpec).toEqual({
+      supplierId: "unknown",
+      specId: "unknown",
+      priority: 0,
+      billingId: "unknown",
+    });
+    expect(messageBody.allocationDetails.allocationStatus).toEqual({
+      status: "REJECTED",
+      reasonCode: "NO_SUPPLIERS_AVAILABLE",
+      reasonText: "Failed to retrieve supplier config",
+    });
   });
 
-  const rejectWith = (mock: jest.Mock, error: Error) =>
-    mock.mockRejectedValueOnce(error);
+  const rejectWith = (mock: jest.Mock, errorMessage: string) =>
+    mock.mockRejectedValueOnce(new Error(errorMessage));
+
+  const throwAny = (mock: jest.Mock) =>
+    mock.mockRejectedValueOnce("anything that is not an Error");
 
   const supplierConfigErrorCases = [
     {
       name: "getVolumeGroupDetails",
+      errorMessage: "Volume group retrieval failed",
       setup: () =>
         rejectWith(
           supplierConfig.getVolumeGroupDetails as jest.Mock,
-          new Error("Volume group retrieval failed"),
+          "Volume group retrieval failed",
         ),
     },
     {
       name: "eligibleSuppliers",
+      errorMessage: "Eligible suppliers retrieval failed",
       setup: () =>
         rejectWith(
           allocationConfig.eligibleSuppliers as jest.Mock,
-          new Error("Eligible suppliers retrieval failed"),
+          "Eligible suppliers retrieval failed",
         ),
     },
     {
       name: "preferredSupplierPack",
+      errorMessage: "Preferred supplier pack retrieval failed",
       setup: () =>
         rejectWith(
           allocationConfig.preferredSupplierPack as jest.Mock,
-          new Error("Preferred supplier pack retrieval failed"),
+          "Preferred supplier pack retrieval failed",
         ),
     },
     {
       name: "suppliersWithValidPack",
+      errorMessage: "Suppliers with valid pack retrieval failed",
       setup: () =>
         rejectWith(
           allocationConfig.suppliersWithValidPack as jest.Mock,
-          new Error("Suppliers with valid pack retrieval failed"),
+          "Suppliers with valid pack retrieval failed",
         ),
     },
     {
       name: "filterSuppliersWithCapacity",
+      errorMessage: "Filter suppliers with capacity failed",
       setup: () =>
         rejectWith(
           allocationConfig.filterSuppliersWithCapacity as jest.Mock,
-          new Error("Filter suppliers with capacity failed"),
+          "Filter suppliers with capacity failed",
         ),
     },
     {
       name: "selectSupplierByFactor",
+      errorMessage: "Select supplier by factor failed",
       setup: () =>
         rejectWith(
           allocationConfig.selectSupplierByFactor as jest.Mock,
-          new Error("Select supplier by factor failed"),
+          "Select supplier by factor failed",
         ),
+    },
+    {
+      name: "unexpectedError",
+      errorMessage: "Unknown error",
+      setup: () =>
+        throwAny(allocationConfig.selectSupplierByFactor as jest.Mock),
     },
   ];
 
   test.each(supplierConfigErrorCases)(
     "logs error when %s rejects during supplier config resolution",
-    async ({ setup }) => {
+    async ({ errorMessage, setup }) => {
       const preparedEvent = createPreparedV2Event();
       const evt: SQSEvent = createSQSEvent([
         createSqsRecord("msg1", JSON.stringify(preparedEvent)),
@@ -564,14 +601,30 @@ describe("createSupplierAllocatorHandler", () => {
       const result = await handler(evt, {} as any, {} as any);
       if (!result) throw new Error("expected BatchResponse, got void");
 
-      expect(result.batchItemFailures).toHaveLength(1);
-      expect((mockedDeps.logger.error as jest.Mock).mock.calls).toHaveLength(2);
+      expect((mockedDeps.logger.error as jest.Mock).mock.calls).toHaveLength(1);
       expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][0]).toEqual(
         expect.objectContaining({
           description: "Error fetching supplier from config",
           variantId: "lv1",
         }),
       );
+      expect(mockSqsClient.send).toHaveBeenCalledTimes(1);
+      const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
+      expect(sendCall).toBeInstanceOf(SendMessageCommand);
+
+      const messageBody = JSON.parse(sendCall.input.MessageBody);
+      expect(messageBody.letterEvent).toEqual(preparedEvent);
+      expect(messageBody.allocationDetails.supplierSpec).toEqual({
+        supplierId: "unknown",
+        specId: "unknown",
+        priority: 0,
+        billingId: "unknown",
+      });
+      expect(messageBody.allocationDetails.allocationStatus).toEqual({
+        status: "REJECTED",
+        reasonCode: "NO_SUPPLIERS_AVAILABLE",
+        reasonText: errorMessage,
+      });
     },
   );
 
@@ -592,16 +645,30 @@ describe("createSupplierAllocatorHandler", () => {
     const result = await handler(evt, {} as any, {} as any);
     if (!result) throw new Error("expected BatchResponse, got void");
 
-    expect(result.batchItemFailures).toHaveLength(1);
-    expect(result.batchItemFailures[0].itemIdentifier).toBe("msg1");
-    expect((mockedDeps.logger.error as jest.Mock).mock.calls).toHaveLength(2);
+    expect((mockedDeps.logger.error as jest.Mock).mock.calls).toHaveLength(1);
     expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][0]).toEqual(
       expect.objectContaining({
         description: "Error fetching supplier from config",
-        err: new Error("No suppliers found for pack specification spec1"),
         variantId: "lv1",
       }),
     );
+    expect(mockSqsClient.send).toHaveBeenCalledTimes(1);
+    const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
+    expect(sendCall).toBeInstanceOf(SendMessageCommand);
+
+    const messageBody = JSON.parse(sendCall.input.MessageBody);
+    expect(messageBody.letterEvent).toEqual(preparedEvent);
+    expect(messageBody.allocationDetails.supplierSpec).toEqual({
+      supplierId: "unknown",
+      specId: "unknown",
+      priority: 0,
+      billingId: "unknown",
+    });
+    expect(messageBody.allocationDetails.allocationStatus).toEqual({
+      status: "REJECTED",
+      reasonCode: "NO_SUPPLIERS_AVAILABLE",
+      reasonText: "No suppliers found for pack specification spec1",
+    });
   });
 
   test("does not call selectSupplierByFactor for suppliers with capacity when there are no suppliers with capacity", async () => {

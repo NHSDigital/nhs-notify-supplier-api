@@ -234,20 +234,30 @@ describe("createUpsertLetterHandler", () => {
   test("processes all records successfully and returns no batch failures", async () => {
     const v2message = {
       letterEvent: createPreparedV2Event(),
-      supplierSpec: {
-        supplierId: "supplier1",
-        specId: "spec1",
-        priority: 10,
-        billingId: "billing1",
+      allocationDetails: {
+        supplierSpec: {
+          supplierId: "supplier1",
+          specId: "spec1",
+          priority: 10,
+          billingId: "billing1",
+        },
+        allocationStatus: {
+          status: "PENDING",
+        },
       },
     };
     const v1message = {
       letterEvent: createPreparedV1Event(),
-      supplierSpec: {
-        supplierId: "supplier2",
-        specId: "spec2",
-        priority: 10,
-        billingId: "billing2",
+      allocationDetails: {
+        supplierSpec: {
+          supplierId: "supplier2",
+          specId: "spec2",
+          priority: 10,
+          billingId: "billing2",
+        },
+        allocationStatus: {
+          status: "PENDING",
+        },
       },
     };
 
@@ -322,14 +332,132 @@ describe("createUpsertLetterHandler", () => {
     );
   });
 
+  test("processes all rejected records successfully and returns no batch failures", async () => {
+    const v2message = {
+      letterEvent: createPreparedV2Event(),
+      allocationDetails: {
+        supplierSpec: {
+          supplierId: "unknown",
+          specId: "unknown",
+          priority: 0,
+          billingId: "unknown",
+        },
+        allocationStatus: {
+          status: "REJECTED",
+          reasonCode: "NO_SUPPLIERS_AVAILABLE",
+          reasonText: "No suppliers available for allocation of V2",
+        },
+      },
+    };
+    const v1message = {
+      letterEvent: createPreparedV1Event(),
+      allocationDetails: {
+        supplierSpec: {
+          supplierId: "unknown",
+          specId: "unknown",
+          priority: 0,
+          billingId: "unknown",
+        },
+        allocationStatus: {
+          status: "REJECTED",
+          reasonCode: "NO_SUPPLIERS_AVAILABLE",
+          reasonText: "No suppliers available for allocation of V1",
+        },
+      },
+    };
+
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("msg1", JSON.stringify(v2message)),
+      createSqsRecord("msg2", JSON.stringify(v1message)),
+      createSqsRecord(
+        "msg3",
+        JSON.stringify(createSupplierStatusChangeEvent()),
+      ),
+    ]);
+
+    const result = await createUpsertLetterHandler(mockedDeps)(
+      evt,
+      {} as any,
+      {} as any,
+    );
+
+    expect(result).toBeDefined();
+    if (!result) throw new Error("expected BatchResponse, got void");
+    expect(result.batchItemFailures).toHaveLength(0);
+
+    expect(mockedDeps.letterRepo.putLetter).toHaveBeenCalledTimes(2);
+    expect(mockedDeps.letterRepo.updateLetterStatus).toHaveBeenCalledTimes(1);
+    const insertedV2Letter = (mockedDeps.letterRepo.putLetter as jest.Mock).mock
+      .calls[0][0];
+    expect(insertedV2Letter.id).toBe("letter1");
+    expect(insertedV2Letter.supplierId).toBe("unknown");
+    expect(insertedV2Letter.specificationId).toBe("unknown");
+    expect(insertedV2Letter.billingRef).toBe("unknown");
+    expect(insertedV2Letter.url).toBe("s3://letterDataBucket/letter1.pdf");
+    expect(insertedV2Letter.status).toBe("REJECTED");
+    expect(insertedV2Letter.reasonCode).toBe("NO_SUPPLIERS_AVAILABLE");
+    expect(insertedV2Letter.reasonText).toBe(
+      "No suppliers available for allocation of V2",
+    );
+    expect(insertedV2Letter.groupId).toBe("client1campaign1template1");
+    expect(insertedV2Letter.source).toBe("/data-plane/letter-rendering/test");
+    expect(insertedV2Letter.specificationBillingId).toBe("unknown");
+    expect(insertedV2Letter.priority).toBe(0);
+
+    const insertedV1Letter = (mockedDeps.letterRepo.putLetter as jest.Mock).mock
+      .calls[1][0];
+    expect(insertedV1Letter.id).toBe("letter1");
+    expect(insertedV1Letter.supplierId).toBe("unknown");
+    expect(insertedV1Letter.specificationId).toBe("unknown");
+    expect(insertedV1Letter.billingRef).toBe("unknown");
+    expect(insertedV1Letter.url).toBe("s3://letterDataBucket/letter1.pdf");
+    expect(insertedV1Letter.status).toBe("REJECTED");
+    expect(insertedV1Letter.reasonCode).toBe("NO_SUPPLIERS_AVAILABLE");
+    expect(insertedV1Letter.reasonText).toBe(
+      "No suppliers available for allocation of V1",
+    );
+    expect(insertedV1Letter.groupId).toBe("client1campaign1template1");
+    expect(insertedV1Letter.source).toBe("/data-plane/letter-rendering/test");
+    expect(insertedV1Letter.specificationBillingId).toBe("unknown");
+    expect(insertedV1Letter.priority).toBe(0);
+
+    const updatedLetter = (
+      mockedDeps.letterRepo.updateLetterStatus as jest.Mock
+    ).mock.calls[0][0];
+    expect(updatedLetter.id).toBe("f47ac10b-58cc-4372-a567-0e02b2c3d479");
+    expect(updatedLetter.status).toBe("RETURNED");
+    expect(updatedLetter.reasonCode).toBe("R07");
+    expect(updatedLetter.reasonText).toBe("No such address");
+    expect(updatedLetter.supplierId).toBe("supplier1");
+    expect(mockMetrics.setNamespace).toHaveBeenCalledWith("upsertLetter");
+    expect(mockMetrics.putDimensions).toHaveBeenCalledWith({
+      Supplier: "supplier1",
+    });
+    expect(mockMetrics.putMetric).toHaveBeenCalledWith(
+      "MessagesProcessed",
+      2,
+      "Count",
+    );
+    expect(mockMetrics.putMetric).toHaveBeenCalledWith(
+      "MessagesProcessed",
+      1,
+      "Count",
+    );
+  });
+
   it("does not treat a second insert for the same letter as a failure", async () => {
     const v1message = {
       letterEvent: createPreparedV1Event(),
-      supplierSpec: {
-        supplierId: "supplier1",
-        specId: "spec1",
-        priority: 10,
-        billingId: "billing1",
+      allocationDetails: {
+        supplierSpec: {
+          supplierId: "supplier1",
+          specId: "spec1",
+          priority: 10,
+          billingId: "billing1",
+        },
+        allocationStatus: {
+          status: "PENDING",
+        },
       },
     };
     const evt: SQSEvent = createSQSEvent([
@@ -350,11 +478,16 @@ describe("createUpsertLetterHandler", () => {
   it("does not insert a letter if the same message is replayed", async () => {
     const v1message = {
       letterEvent: createPreparedV1Event(),
-      supplierSpec: {
-        supplierId: "supplier1",
-        specId: "spec1",
-        priority: 10,
-        billingId: "billing1",
+      allocationDetails: {
+        supplierSpec: {
+          supplierId: "supplier1",
+          specId: "spec1",
+          priority: 10,
+          billingId: "billing1",
+        },
+        allocationStatus: {
+          status: "PENDING",
+        },
       },
     };
     const evt: SQSEvent = createSQSEvent([
@@ -559,11 +692,16 @@ describe("createUpsertLetterHandler", () => {
         id: "7b9a03ca-342a-4150-b56b-989109c45615",
         domainId: "ok",
       }),
-      supplierSpec: {
-        supplierId: "supplier1",
-        specId: "spec1",
-        priority: 10,
-        billingId: "billing1",
+      allocationDetails: {
+        supplierSpec: {
+          supplierId: "supplier1",
+          specId: "spec1",
+          priority: 10,
+          billingId: "billing1",
+        },
+        allocationStatus: {
+          status: "PENDING",
+        },
       },
     };
     const message2 = {
@@ -571,11 +709,16 @@ describe("createUpsertLetterHandler", () => {
         id: "7b9a03ca-342a-4150-b56b-989109c45616",
         domainId: "fail",
       }),
-      supplierSpec: {
-        supplierId: "supplier1",
-        specId: "spec1",
-        priority: 10,
-        billingId: "billing1",
+      allocationDetails: {
+        supplierSpec: {
+          supplierId: "supplier1",
+          specId: "spec1",
+          priority: 10,
+          billingId: "billing1",
+        },
+        allocationStatus: {
+          status: "PENDING",
+        },
       },
     };
     const evt: SQSEvent = createSQSEvent([

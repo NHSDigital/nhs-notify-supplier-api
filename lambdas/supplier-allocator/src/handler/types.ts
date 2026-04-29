@@ -8,8 +8,19 @@ export type SupplierSpec = {
   billingId: string;
 };
 
-export type SupplierDetails = {
+export type AllocationStatus = {
+  status: string;
+  reasonCode?: string;
+  reasonText?: string;
+};
+
+export type AllocationDetails = {
   supplierSpec: SupplierSpec;
+  allocationStatus: AllocationStatus;
+};
+
+export type SupplierDetails = {
+  allocationDetails: AllocationDetails;
   volumeGroupId: string;
 };
 
