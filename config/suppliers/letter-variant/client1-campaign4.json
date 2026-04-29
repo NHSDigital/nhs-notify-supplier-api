@@ -1,0 +1,38 @@
+{
+  "campaignIds": [
+    "client1-campaign4"
+  ],
+  "clientId": "client1",
+  "constraints": {
+    "blackCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 20
+    },
+    "colourCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 10
+    },
+    "deliveryDays": {
+      "operator": "LESS_THAN",
+      "value": 3
+    },
+    "sheets": {
+      "operator": "LESS_THAN",
+      "value": 5
+    },
+    "sides": {
+      "operator": "LESS_THAN",
+      "value": 10
+    }
+  },
+  "description": "Admail, colour printing, campaign4 envelope",
+  "id": "client1-campaign4",
+  "name": "Client1 - Campaign 4",
+  "packSpecificationIds": [
+    "client1-campaign4"
+  ],
+  "priority": 3,
+  "status": "INT",
+  "type": "STANDARD",
+  "volumeGroupId": "volumeGroup-test3"
+}

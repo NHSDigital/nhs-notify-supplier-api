@@ -1,54 +1,32 @@
 import { SQSBatchItemFailure, SQSEvent, SQSHandler } from "aws-lambda";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
-import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
 import {
   LetterVariant,
+  PackSpecification,
   Supplier,
-  SupplierAllocation,
   VolumeGroup,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-config";
-import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import z from "zod";
 import { Unit } from "aws-embedded-metrics";
 import { MetricEntry, MetricStatus, buildEMFObject } from "@internal/helpers";
 import {
-  getSupplierAllocationsForVolumeGroup,
-  getSupplierDetails,
   getVariantDetails,
   getVolumeGroupDetails,
 } from "../services/supplier-config";
-import { Deps } from "../config/deps";
+import { updateSupplierAllocation } from "../services/supplier-quotas";
+import {
+  eligibleSuppliers,
+  filterSuppliersWithCapacity,
+  preferredSupplierPack,
+  selectSupplierByFactor,
+  suppliersWithValidPack,
+} from "./allocation-config";
 
-type SupplierSpec = {
-  supplierId: string;
-  specId: string;
-  priority: number;
-  billingId: string;
-};
-type PreparedEvents = LetterRequestPreparedEventV2 | LetterRequestPreparedEvent;
+import { Deps } from "../config/deps";
+import { PreparedEvents, SupplierDetails } from "./types";
 
 // small envelope that must exist in all inputs
 const TypeEnvelope = z.object({ type: z.string().min(1) });
-
-function resolveSupplierForVariant(
-  variantId: string,
-  deps: Deps,
-): SupplierSpec {
-  deps.logger.info({
-    description: "Resolving supplier for letter variant",
-    variantId,
-  });
-  const supplier = deps.env.VARIANT_MAP[variantId];
-  if (!supplier) {
-    deps.logger.error({
-      description: "No supplier mapping found for variant",
-      variantId,
-    });
-    throw new Error(`No supplier mapping for variantId: ${variantId}`);
-  }
-
-  return supplier;
-}
 
 function validateType(event: unknown) {
   const env = TypeEnvelope.safeParse(event);
@@ -64,37 +42,75 @@ function validateType(event: unknown) {
   }
 }
 
-async function getSupplierFromConfig(letterEvent: PreparedEvents, deps: Deps) {
+async function getSupplierFromConfig(
+  letterEvent: PreparedEvents,
+  deps: Deps,
+): Promise<SupplierDetails> {
   try {
-    const variantDetails: LetterVariant = await getVariantDetails(
+    const letterVariant: LetterVariant = await getVariantDetails(
       letterEvent.data.letterVariantId,
       deps,
     );
 
-    const volumeGroupDetails: VolumeGroup = await getVolumeGroupDetails(
-      variantDetails.volumeGroupId,
+    const volumeGroup: VolumeGroup = await getVolumeGroupDetails(
+      letterVariant.volumeGroupId,
       deps,
     );
 
-    const supplierAllocations: SupplierAllocation[] =
-      await getSupplierAllocationsForVolumeGroup(
-        variantDetails.volumeGroupId,
+    const { supplierAllocations, suppliers: allocatedSuppliers } =
+      await eligibleSuppliers(volumeGroup, deps);
+
+    const preferredPack: PackSpecification = await preferredSupplierPack(
+      letterEvent,
+      allocatedSuppliers,
+      letterVariant.packSpecificationIds,
+      deps,
+    );
+
+    const allSuppliersForPack: Supplier[] = await suppliersWithValidPack(
+      allocatedSuppliers,
+      preferredPack.id,
+      deps,
+    );
+
+    const suppliersForPackWithCapacity: Supplier[] =
+      await filterSuppliersWithCapacity(allSuppliersForPack, deps);
+
+    // selected supplier id is determined by first calling selectSupplierByFactor for suppliers with capacity and if nothing is returned tryong again with all suppliers for pack
+    const selectedSupplierId =
+      (await selectSupplierByFactor(
+        suppliersForPackWithCapacity,
+        supplierAllocations,
         deps,
-        variantDetails.supplierId,
-      );
+      )) ??
+      (await selectSupplierByFactor(
+        allSuppliersForPack,
+        supplierAllocations,
+        deps,
+      ));
 
-    const supplierDetails: Supplier[] = await getSupplierDetails(
-      supplierAllocations,
-      deps,
-    );
     deps.logger.info({
       description: "Fetched supplier details for supplier allocations",
       variantId: letterEvent.data.letterVariantId,
-      volumeGroupId: volumeGroupDetails.id,
+      volumeGroupId: volumeGroup.id,
       supplierAllocationIds: supplierAllocations.map((a) => a.id),
-      supplierDetails,
+      allocatedSuppliers,
+      allSuppliersForPack: allSuppliersForPack.map((s) => s.id),
+      suppliersForPackWithCapacity: suppliersForPackWithCapacity.map(
+        (s) => s.id,
+      ),
+      selectedSupplierId,
     });
 
+    const supplierDetails: SupplierDetails = {
+      supplierSpec: {
+        supplierId: selectedSupplierId,
+        specId: preferredPack.id,
+        priority: letterVariant.priority,
+        billingId: preferredPack.billingId,
+      },
+      volumeGroupId: volumeGroup.id,
+    };
     return supplierDetails;
   } catch (error) {
     deps.logger.error({
@@ -102,15 +118,12 @@ async function getSupplierFromConfig(letterEvent: PreparedEvents, deps: Deps) {
       err: error,
       variantId: letterEvent.data.letterVariantId,
     });
-    return [];
+    throw error;
   }
 }
 
-function getSupplier(letterEvent: PreparedEvents, deps: Deps): SupplierSpec {
-  return resolveSupplierForVariant(letterEvent.data.letterVariantId, deps);
-}
-
 type AllocationMetrics = Map<string, Map<string, number>>;
+type VolumeGroupAllocation = Map<string, Record<string, number>>;
 
 function incrementMetric(
   map: AllocationMetrics,
@@ -144,11 +157,46 @@ function emitMetrics(
   }
 }
 
+function incrementAllocation(
+  map: VolumeGroupAllocation,
+  volumeGroupId: string,
+  supplierId: string,
+  allocation: number,
+  deps: Deps,
+) {
+  const groupAllocations = map.get(volumeGroupId) ?? {};
+  groupAllocations[supplierId] =
+    (groupAllocations[supplierId] ?? 0) + allocation;
+  map.set(volumeGroupId, groupAllocations);
+  deps.logger.info({
+    description: "Updated allocations for volume group and supplier",
+    volumeGroupId,
+    groupAllocations,
+  });
+}
+
+async function saveAllocations(
+  deps: Deps,
+  volumeGroupAllocations: VolumeGroupAllocation,
+) {
+  for (const [volumeGroupId, allocations] of volumeGroupAllocations) {
+    for (const [supplierId, allocation] of Object.entries(allocations)) {
+      await updateSupplierAllocation(
+        volumeGroupId,
+        supplierId,
+        allocation,
+        deps,
+      );
+    }
+  }
+}
+
 export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
   return async (event: SQSEvent) => {
     const batchItemFailures: SQSBatchItemFailure[] = [];
     const perAllocationSuccess: AllocationMetrics = new Map();
     const perAllocationFailure: AllocationMetrics = new Map();
+    const volumeGroupAllocations: VolumeGroupAllocation = new Map();
 
     const tasks = event.Records.map(async (record) => {
       let supplier = "unknown";
@@ -163,8 +211,24 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
 
         validateType(letterEvent);
 
-        const supplierSpec = getSupplier(letterEvent as PreparedEvents, deps);
-        await getSupplierFromConfig(letterEvent as PreparedEvents, deps);
+        const supplierDetails: SupplierDetails = await getSupplierFromConfig(
+          letterEvent as PreparedEvents,
+          deps,
+        );
+        const supplierSpec = supplierDetails?.supplierSpec;
+
+        deps.logger.info({
+          description: "Resolved supplier details from config",
+          supplierDetails,
+        });
+
+        incrementAllocation(
+          volumeGroupAllocations,
+          supplierDetails.volumeGroupId,
+          supplierDetails?.supplierSpec.supplierId,
+          1,
+          deps,
+        );
 
         supplier = supplierSpec.supplierId;
         priority = String(supplierSpec.priority);
@@ -215,6 +279,7 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
 
     emitMetrics(perAllocationSuccess, MetricStatus.Success, deps);
     emitMetrics(perAllocationFailure, MetricStatus.Failure, deps);
+    await saveAllocations(deps, volumeGroupAllocations);
     return { batchItemFailures };
   };
 }

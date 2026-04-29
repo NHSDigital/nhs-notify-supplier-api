@@ -1,6 +1,6 @@
 {
   "campaignIds": [
-    "client1-campaign"
+    "client1-campaign2"
   ],
   "clientId": "client1",
   "constraints": {
@@ -18,19 +18,20 @@
     },
     "sheets": {
       "operator": "LESS_THAN",
-      "value": 3
+      "value": 5
     },
     "sides": {
       "operator": "LESS_THAN",
-      "value": 6
+      "value": 10
     }
   },
-  "description": "Colour printing, campaign envelope, Attachment",
-  "id": "client1-campaign",
-  "name": "Client1 - campaign",
+  "description": "Admail, colour printing",
+  "id": "client1-campaign2",
+  "name": "Client1 - CAMPAIGN2",
   "packSpecificationIds": [
-    "client1-campaign"
+    "client1-campaign2"
   ],
+  "priority": 1,
   "status": "INT",
   "type": "STANDARD",
   "volumeGroupId": "volumeGroup-test3"

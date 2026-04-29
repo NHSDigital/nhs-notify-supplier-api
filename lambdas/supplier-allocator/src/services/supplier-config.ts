@@ -1,10 +1,14 @@
 import {
   LetterVariant,
+  PackSpecification,
   Supplier,
   SupplierAllocation,
+  SupplierPack,
   VolumeGroup,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-config";
+
 import { Deps } from "../config/deps";
+import { PreparedEvents } from "../handler/types";
 
 export async function getVariantDetails(
   variantId: string,
@@ -75,11 +79,9 @@ export async function getSupplierAllocationsForVolumeGroup(
 }
 
 export async function getSupplierDetails(
-  supplierAllocations: SupplierAllocation[],
+  supplierIds: string[],
   deps: Deps,
 ): Promise<Supplier[]> {
-  const supplierIds = supplierAllocations.map((alloc) => alloc.supplier);
-
   const supplierDetails: Supplier[] =
     await deps.supplierConfigRepo.getSuppliersDetails(supplierIds);
 
@@ -93,14 +95,14 @@ export async function getSupplierDetails(
     );
   }
   // Log a warning if some supplier details are missing compared to allocations
-  if (supplierAllocations.length !== supplierDetails.length) {
+  if (supplierIds.length !== supplierDetails.length) {
     const foundSupplierIds = new Set(supplierDetails.map((s) => s.id));
     const missingSupplierIds = supplierIds.filter(
       (id) => !foundSupplierIds.has(id),
     );
     deps.logger.warn({
       description: "Mismatch between supplier allocations and supplier details",
-      allocationsCount: supplierAllocations.length,
+      allocationsCount: supplierIds.length,
       detailsCount: supplierDetails.length,
       missingSuppliers: missingSupplierIds,
     });
@@ -116,4 +118,136 @@ export async function getSupplierDetails(
     );
   }
   return activeSuppliers;
+}
+
+export async function getPreferredSupplierPacks(
+  packSpecificationIds: string[],
+  suppliers: Supplier[],
+  deps: Deps,
+): Promise<SupplierPack[]> {
+  for (const packSpecId of packSpecificationIds) {
+    const supplierPacks =
+      await deps.supplierConfigRepo.getSupplierPacksForPackSpecification(
+        packSpecId,
+      );
+    if (supplierPacks.length > 0) {
+      const preferredPacks = supplierPacks.filter((pack) =>
+        suppliers.some((supplier) => supplier.id === pack.supplierId),
+      );
+      if (preferredPacks.length > 0) {
+        return preferredPacks;
+      }
+    }
+  }
+  deps.logger.error({
+    description:
+      "No preferred supplier packs found for pack specification ids and suppliers",
+    packSpecificationIds,
+    supplierIds: suppliers.map((s) => s.id),
+  });
+  throw new Error(
+    `No preferred supplier packs found for pack specification ids ${packSpecificationIds.join(", ")} and suppliers ${suppliers.map((s) => s.id).join(", ")}`,
+  );
+}
+
+export async function getPackSpecification(
+  packSpecId: string,
+  deps: Deps,
+): Promise<PackSpecification> {
+  const packSpec =
+    await deps.supplierConfigRepo.getPackSpecification(packSpecId);
+  if (packSpec.status !== "PROD") {
+    deps.logger.error({
+      description: "Pack specification is not active based on status",
+      packSpecId,
+      status: packSpec.status,
+    });
+    throw new Error(`Pack specification with id ${packSpecId} is not active`);
+  }
+  return packSpec;
+}
+
+export async function getSupplierPacks(
+  packSpecificationId: string,
+  deps: Deps,
+): Promise<SupplierPack[]> {
+  const supplierPacks =
+    await deps.supplierConfigRepo.getSupplierPacksForPackSpecification(
+      packSpecificationId,
+    );
+  return supplierPacks;
+}
+
+function evaluateContraint(
+  actualValue: number,
+  constraintValue: number,
+  operator: string,
+): boolean {
+  switch (operator) {
+    case "EQUALS": {
+      return actualValue === constraintValue;
+    }
+    case "NOT_EQUALS": {
+      return actualValue !== constraintValue;
+    }
+    case "GREATER_THAN": {
+      return actualValue > constraintValue;
+    }
+    case "LESS_THAN": {
+      return actualValue < constraintValue;
+    }
+    case "GREATER_THAN_OR_EQUAL": {
+      return actualValue >= constraintValue;
+    }
+    case "LESS_THAN_OR_EQUAL": {
+      return actualValue <= constraintValue;
+    }
+    default: {
+      throw new Error(
+        `Unsupported operator ${operator} in pack specification constraints`,
+      );
+    }
+  }
+}
+
+// This function is used to filter the pack specifications for a letter based on the letter data pages and pack specification constraints sheets
+
+export async function filterPacksForLetter(
+  letterEvent: PreparedEvents,
+  packSpecificationIds: string[],
+  deps: Deps,
+): Promise<string[]> {
+  const filteredPackIds: string[] = [];
+  for (const packSpecId of packSpecificationIds) {
+    const packSpec =
+      await deps.supplierConfigRepo.getPackSpecification(packSpecId);
+    if (
+      !packSpec.constraints ||
+      !packSpec.constraints.sheets ||
+      !packSpec.constraints.sheets.value ||
+      !packSpec.constraints.sheets.operator
+    ) {
+      filteredPackIds.push(packSpecId);
+    } else {
+      const isValid = evaluateContraint(
+        letterEvent.data.pageCount,
+        packSpec.constraints.sheets.value,
+        packSpec.constraints.sheets.operator,
+      );
+      if (isValid) {
+        filteredPackIds.push(packSpecId);
+      }
+    }
+  }
+  if (filteredPackIds.length === 0) {
+    deps.logger.error({
+      description: "No eligible pack specifications found for letter",
+      letterVariantId: letterEvent.data.letterVariantId,
+      packSpecificationIds,
+    });
+    throw new Error(
+      `No eligible pack specifications found for letter variant id ${letterEvent.data.letterVariantId} and pack specification ids ${packSpecificationIds.join(", ")}`,
+    );
+  }
+  return filteredPackIds;
 }

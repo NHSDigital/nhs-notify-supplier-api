@@ -35,7 +35,6 @@ module "supplier_allocator" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
-    VARIANT_MAP              = jsonencode(var.letter_variant_map)
     UPSERT_LETTERS_QUEUE_URL = module.sqs_letter_updates.sqs_queue_url
   })
 }
@@ -89,13 +88,16 @@ data "aws_iam_policy_document" "supplier_allocator_lambda" {
 
     actions = [
       "dynamodb:GetItem",
-      "dynamodb:Query"
+      "dynamodb:Query",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem"
     ]
 
     resources = [
       aws_dynamodb_table.supplier-configuration.arn,
-      "${aws_dynamodb_table.supplier-configuration.arn}/index/volumeGroup-index"
-
+      aws_dynamodb_table.supplier-quotas.arn,
+      "${aws_dynamodb_table.supplier-configuration.arn}/index/*",
+      "${aws_dynamodb_table.supplier-quotas.arn}/index/*"
     ]
   }
 }
