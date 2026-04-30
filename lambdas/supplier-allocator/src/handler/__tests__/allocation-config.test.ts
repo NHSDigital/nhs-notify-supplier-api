@@ -961,4 +961,14 @@ describe("selectSupplierByFactor", () => {
 
     expect(result).toBe("supplier-5");
   });
+
+  it("should throw an error if no supplier factors are returned", async () => {
+    (
+      supplierQuotasService.calculateSupplierAllocatedFactor as jest.Mock
+    ).mockResolvedValue([]);
+
+    await expect(
+      selectSupplierByFactor(mockSuppliers, mockSupplierAllocations, mockDeps),
+    ).rejects.toThrow("No supplier factors could be calculated for allocation");
+  });
 });

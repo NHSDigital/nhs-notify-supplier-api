@@ -83,7 +83,22 @@ data "aws_iam_policy_document" "supplier_allocator_lambda" {
   }
 
   statement {
-    sid    = "AllowDynamoDBAccess"
+    sid    = "AllowConfigDynamoDBAccess"
+    effect = "Allow"
+
+    actions = [
+      "dynamodb:GetItem",
+      "dynamodb:Query",
+    ]
+
+    resources = [
+      aws_dynamodb_table.supplier-configuration.arn,
+      "${aws_dynamodb_table.supplier-configuration.arn}/index/*",
+    ]
+  }
+
+  statement {
+    sid    = "AllowQuotaDynamoDBAccess"
     effect = "Allow"
 
     actions = [
@@ -94,9 +109,7 @@ data "aws_iam_policy_document" "supplier_allocator_lambda" {
     ]
 
     resources = [
-      aws_dynamodb_table.supplier-configuration.arn,
       aws_dynamodb_table.supplier-quotas.arn,
-      "${aws_dynamodb_table.supplier-configuration.arn}/index/*",
       "${aws_dynamodb_table.supplier-quotas.arn}/index/*"
     ]
   }
