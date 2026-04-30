@@ -12,6 +12,8 @@
     "@types/aws-lambda": "^8.10.148",
     "aws-embedded-metrics": "^4.2.1",
     "aws-lambda": "^1.0.7",
+    "date-fns": "^3.0.0",
+    "date-fns-tz": "^3.0.0",
     "esbuild": "^0.27.2",
     "pino": "^9.7.0",
     "zod": "^4.1.11"

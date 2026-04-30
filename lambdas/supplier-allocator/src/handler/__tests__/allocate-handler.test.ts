@@ -611,6 +611,58 @@ describe("createSupplierAllocatorHandler", () => {
     },
   );
 
+  test("returns batch failure when no suppliers are found for pack specification", async () => {
+    const preparedEvent = createPreparedV2Event();
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("msg1", JSON.stringify(preparedEvent)),
+    ]);
+
+    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+
+    setupDefaultMocks();
+    (allocationConfig.suppliersWithValidPack as jest.Mock).mockResolvedValue(
+      [],
+    );
+
+    const handler = createSupplierAllocatorHandler(mockedDeps);
+    const result = await handler(evt, {} as any, {} as any);
+    if (!result) throw new Error("expected BatchResponse, got void");
+
+    expect(result.batchItemFailures).toHaveLength(1);
+    expect(result.batchItemFailures[0].itemIdentifier).toBe("msg1");
+    expect((mockedDeps.logger.error as jest.Mock).mock.calls).toHaveLength(2);
+    expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        description: "Error fetching supplier from config",
+        err: new Error("No suppliers found for pack specification spec1"),
+        variantId: "lv1",
+      }),
+    );
+  });
+
+  test("does not call selectSupplierByFactor for suppliers with capacity when there are no suppliers with capacity", async () => {
+    setupDefaultMocks();
+    (
+      allocationConfig.filterSuppliersWithCapacity as jest.Mock
+    ).mockResolvedValue([]);
+    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("msg1", JSON.stringify(createPreparedV2Event())),
+    ]);
+
+    const handler = createSupplierAllocatorHandler(mockedDeps);
+    const result = await handler(evt, {} as any, {} as any);
+    if (!result) throw new Error("expected BatchResponse, got void");
+
+    expect(result.batchItemFailures).toHaveLength(0);
+    expect(allocationConfig.selectSupplierByFactor).toHaveBeenCalledWith(
+      expect.any(Array),
+      expect.any(Array),
+      mockedDeps,
+    );
+  });
+
   test("falls back to the second selectSupplierByFactor call when the first returns undefined", async () => {
     setupDefaultMocks();
     (allocationConfig.selectSupplierByFactor as jest.Mock)

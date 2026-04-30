@@ -5,6 +5,8 @@ import {
   SupplierPack,
   VolumeGroup,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-config";
+import { format } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 import {
   filterPacksForLetter,
   getPackSpecification,
@@ -14,6 +16,7 @@ import {
   getSupplierPacks,
 } from "../services/supplier-config";
 import { calculateSupplierAllocatedFactor } from "../services/supplier-quotas";
+
 import { Deps } from "../config/deps";
 import { PreparedEvents } from "./types";
 
@@ -79,7 +82,10 @@ export async function filterSuppliersWithCapacity(
   suppliers: Supplier[],
   deps: Deps,
 ): Promise<Supplier[]> {
-  const dailyAllocationDate = new Date().toISOString().split("T")[0]; // Get current date in YYYY-MM-DD format
+  const dailyAllocationDate = format(
+    toZonedTime(new Date(), "Europe/London"),
+    "yyyy-MM-dd",
+  ); // Get current date in YYYY-MM-DD format (London timezone)
   const dailyAllocation =
     await deps.supplierQuotasRepo.getDailyAllocation(dailyAllocationDate);
   if (dailyAllocation) {
@@ -102,6 +108,10 @@ export async function selectSupplierByFactor(
   );
   const supplierFactors: { supplierId: string; factor: number }[] =
     await calculateSupplierAllocatedFactor(supplierAllocationsForPack, deps);
+
+  if (supplierFactors.length === 0) {
+    throw new Error("No supplier factors could be calculated for allocation");
+  }
 
   deps.logger.info({
     description: "Calculated supplier factors for allocation",

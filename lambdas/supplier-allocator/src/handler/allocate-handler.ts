@@ -78,16 +78,25 @@ async function getSupplierFromConfig(
       deps,
     );
 
+    if (allSuppliersForPack.length === 0) {
+      throw new Error(
+        `No suppliers found for pack specification ${preferredPack.id}`,
+      );
+    }
+
     const suppliersForPackWithCapacity: Supplier[] =
       await filterSuppliersWithCapacity(allSuppliersForPack, deps);
 
-    // selected supplier id is determined by first calling selectSupplierByFactor for suppliers with capacity and if nothing is returned tryong again with all suppliers for pack
+    // selected supplier id is determined by first calling selectSupplierByFactor for suppliers with capacity
+    // and if that returns nothing, try again with all suppliers for the pack
     const selectedSupplierId =
-      (await selectSupplierByFactor(
-        suppliersForPackWithCapacity,
-        supplierAllocations,
-        deps,
-      )) ??
+      (suppliersForPackWithCapacity.length > 0
+        ? await selectSupplierByFactor(
+            suppliersForPackWithCapacity,
+            supplierAllocations,
+            deps,
+          )
+        : undefined) ??
       (await selectSupplierByFactor(
         allSuppliersForPack,
         supplierAllocations,
