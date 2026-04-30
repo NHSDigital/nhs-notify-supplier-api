@@ -15,7 +15,7 @@ import LetterReturnedEvent from "@nhsdigital/nhs-notify-event-schemas-supplier-a
 describe("Supplier API -> Digital Letters pact tests", () => {
   test("verify pacts", async () => {
     const p = new MessageProviderPact({
-      provider: "ssupplier-api",
+      provider: "supplier-api",
       pactUrls: [
         path.join(
           __dirname,
