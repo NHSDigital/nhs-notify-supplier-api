@@ -1,2 +1,2 @@
-endpoint_url: https://proxygen.prod.api.platform.nhs.uk
+endpoint_url: https://proxygen.$PROXYGEN_ENV.api.platform.nhs.uk
 api: nhs-notify-supplier

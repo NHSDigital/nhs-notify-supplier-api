@@ -13,10 +13,10 @@ inputs:
     required: false
     default: false
   environment:
-    description: "Deployment environment"
+    description: "Deployment environment (e.g. main, prNNN)"
     required: true
   apimEnv:
-    description: "APIM environment"
+    description: "APIM environment (e.g. internal-dev, int, ref, prod)"
     required: true
   runId:
     description: "GitHub Actions run ID to fetch the OAS artifact from"
