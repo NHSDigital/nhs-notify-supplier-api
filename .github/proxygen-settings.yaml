@@ -1,3 +1,0 @@
-# delete?
-endpoint_url: https://proxygen.$PROXYGEN_ENV.api.platform.nhs.uk
-api: nhs-notify-supplier
