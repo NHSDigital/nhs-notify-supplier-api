@@ -118,4 +118,5 @@ runs:
           --apimEnvironment "${{ env.APIM_ENV }}" \
           --boundedContext "notify-supplier" \
           --targetDomain "$TARGET_DOMAIN" \
-          --version "${{ inputs.version }}"
+          --version "${{ inputs.version }}" \
+          --internalRef "feature/CCM-15594"
