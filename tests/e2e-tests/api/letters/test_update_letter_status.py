@@ -12,8 +12,8 @@ from lib.errorhandler import ErrorHandler
 @pytest.mark.devtest
 @pytest.mark.inttest
 @pytest.mark.prodtest
-def test_202_with_valid_headers(url, authentication_secret):
-    headers = Generators.generate_valid_headers(authentication_secret)
+def test_202_with_valid_headers(url, authentication_secrets):
+    headers = Generators.generate_valid_headers(authentication_secrets[1])
 
     ids = get_pending_letter_ids(url, headers, LETTERS_ENDPOINT, limit=1)
     letter_id = ids[0]
@@ -28,8 +28,8 @@ def test_202_with_valid_headers(url, authentication_secret):
     ErrorHandler.handle_retry(update_letter_status)
     assert update_letter_status.status_code == 202, f"Response: {update_letter_status.status_code}: {update_letter_status.text}"
 
-def test_202_with_rejected_status(url, authentication_secret):
-    headers = Generators.generate_valid_headers(authentication_secret)
+def test_202_with_rejected_status(url, authentication_secrets):
+    headers = Generators.generate_valid_headers(authentication_secrets[1])
 
     ids = get_pending_letter_ids(url, headers, LETTERS_ENDPOINT, limit=1)
     letter_id = ids[0]
@@ -48,8 +48,8 @@ def test_202_with_rejected_status(url, authentication_secret):
 @pytest.mark.devtest
 @pytest.mark.inttest
 @pytest.mark.prodtest
-def test_400_with_invalid_status(url, authentication_secret):
-    headers = Generators.generate_valid_headers(authentication_secret)
+def test_400_with_invalid_status(url, authentication_secrets):
+    headers = Generators.generate_valid_headers(authentication_secrets[1])
 
     ids = get_pending_letter_ids(url, headers, LETTERS_ENDPOINT, limit=1)
     letter_id = ids[0]
@@ -68,8 +68,8 @@ def test_400_with_invalid_status(url, authentication_secret):
 @pytest.mark.devtest
 @pytest.mark.inttest
 @pytest.mark.prodtest
-def test_400_id_mismatch_with_request(url, authentication_secret):
-    headers = Generators.generate_valid_headers(authentication_secret)
+def test_400_id_mismatch_with_request(url, authentication_secrets):
+    headers = Generators.generate_valid_headers(authentication_secrets[1])
 
     ids = get_pending_letter_ids(url, headers, LETTERS_ENDPOINT, limit=1)
     letter_id = ids[0]

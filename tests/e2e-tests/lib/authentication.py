@@ -9,7 +9,8 @@ from .secret import Secret
 
 class AuthenticationCache():
     def __init__(self):
-        self.tokens = {}
+        self.primary_tokens = {}
+        self.secondary_tokens = {}
 
         # Number of consecutive authentication tests before considering it worked.
         # This is required because apigee might be using load balancing.
@@ -32,45 +33,62 @@ class AuthenticationCache():
         # the backend. The test will only check that the API doesn't return a 401,
         # a 404 response means the authentication is working.
         test_url = f"{base_url}{path}"
+        all_secrets = []
 
         if env == "internal-dev":
             api_key = os.environ["NON_PROD_API_KEY"]
             private_key = os.environ["NON_PROD_PRIVATE_KEY"]
+            secondary_api_key = os.environ["NON_PROD_SECONDARY_API_KEY"]
             url = "https://internal-dev.api.service.nhs.uk/oauth2/token"
             kid = "internal-dev-test-1"
         elif env == "ref":
             api_key = os.environ["NON_PROD_API_KEY"]
             private_key = os.environ["NON_PROD_PRIVATE_KEY"]
+            secondary_api_key = os.environ["NON_PROD_SECONDARY_API_KEY"]
             url = "https://ref.api.service.nhs.uk/oauth2/token"
             kid = "internal-dev-test-1"
         elif env == "int":
             api_key = os.environ.get("INTEGRATION_API_KEY")
             private_key = os.environ.get("INTEGRATION_PRIVATE_KEY")
+            secondary_api_key = os.environ["INTEGRATION_SECONDARY_API_KEY"]
             url = "https://int.api.service.nhs.uk/oauth2/token"
             kid = "internal-dev-test-1"
         elif env == "prod":
             api_key = os.environ.get("PRODUCTION_API_KEY")
             private_key = os.environ.get("PRODUCTION_PRIVATE_KEY")
+            secondary_api_key = os.environ.get("PRODUCTION_SECONDARY_API_KEY")
             url = "https://api.service.nhs.uk/oauth2/token"
             kid = "prod-1"
         else:
             raise ValueError("Unknown value: ", env)
 
         if path == "/_status":
-            api_key = os.environ["STATUS_ENDPOINT_API_KEY"]
-
-        if path == "/_status" or "-PR-" in base_url:
             # PR environments (and the status endpoint) use AAL0 - authentication is the API key passed directly
-            return Secret(api_key, auth_type="apikey")
+            api_key = os.environ["STATUS_ENDPOINT_API_KEY"]
+            all_secrets.append(Secret(api_key, auth_type="apikey"))
+            return all_secrets
 
-        _, latest_token_expiry = self.tokens.get(env, (None, 0))
+        if "-PR-" in base_url:
+            all_secrets.append(Secret(api_key, auth_type="apikey"))
+            all_secrets.append(Secret(secondary_api_key, auth_type="apikey"))
+            return all_secrets
 
-        # Generate new token if latest token will expire in 15 seconds
-        if env not in self.tokens or latest_token_expiry < int(time()) + 15:
-            self.tokens[env] = self.generate_and_test_new_token(api_key, private_key, url, kid, test_url)
+        _, latest_primary_token_expiry = self.primary_tokens.get(env, (None, 0))
+        _, latest_secondary_token_expiry = self.secondary_tokens.get(env, (None, 0))
 
-        authentication_secret = self.tokens[env][0]
-        return Secret(authentication_secret)
+        # Generate new primary token if latest token will expire in 15 seconds
+        if env not in self.primary_tokens or latest_primary_token_expiry < int(time()) + 15:
+            self.primary_tokens[env] = self.generate_and_test_new_token(api_key, private_key, url, kid, test_url)
+
+        # Generate new secondary token if latest token will expire in 15 seconds
+        if env not in self.secondary_tokens or latest_secondary_token_expiry < int(time()) + 15:
+            self.secondary_tokens[env] = self.generate_and_test_new_token(secondary_api_key, private_key, url, kid, test_url)
+
+        authentication_secret = self.primary_tokens[env][0]
+        secondary_authentication_secret = self.secondary_tokens[env][0]
+        all_secrets.append(Secret(authentication_secret))
+        all_secrets.append(Secret(secondary_authentication_secret))
+        return all_secrets
 
     def generate_and_test_new_token(self, api_key, private_key, url, kid, test_url):
         new_token = None

@@ -12,8 +12,8 @@ def test_ping(url):
 @pytest.mark.smoketest
 @pytest.mark.sandboxtest
 @pytest.mark.devtest
-def test_status(url, status_authentication_secret):
-    headers = Generators.generate_valid_headers(status_authentication_secret)
+def test_status(url, status_authentication_secrets):
+    headers = Generators.generate_valid_headers(status_authentication_secrets[0])
     resp = requests.get(f"{url}/_status", headers=headers)
 
     ErrorHandler.handle_retry(resp)

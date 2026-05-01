@@ -16,10 +16,10 @@ def test_header_letters_endpoint(
     url,
     method,
     endpoints,
-    authentication_secret
+    authentication_secrets
 ):
-    auth_header = {"apikey": authentication_secret.value} if authentication_secret.auth_type == "apikey" \
-        else {"Authorization": authentication_secret.value}
+    auth_header = {"apikey": authentication_secrets[0].value} if authentication_secrets[0].auth_type == "apikey" \
+        else {"Authorization": authentication_secrets[0].value}
     resp = getattr(requests, method)(f"{url}/{endpoints}", headers={
         **auth_header,
         "X-Request-ID": None
@@ -34,10 +34,10 @@ def test_header_letters_endpoint(
 @pytest.mark.prodtest
 def test_header_mi_endpoint(
     url,
-    authentication_secret
+    authentication_secrets
 ):
-    auth_header = {"apikey": authentication_secret.value} if authentication_secret.auth_type == "apikey" \
-        else {"Authorization": authentication_secret.value}
+    auth_header = {"apikey": authentication_secrets[0].value} if authentication_secrets[0].auth_type == "apikey" \
+        else {"Authorization": authentication_secrets[0].value}
     resp = getattr(requests, "post")(f"{url}/{MI_ENDPOINT}", headers={
         **auth_header,
         "X-Request-ID": ""

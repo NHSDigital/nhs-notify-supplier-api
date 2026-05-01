@@ -8,8 +8,8 @@ from lib.letters import get_pending_letter_ids
 @pytest.mark.devtest
 @pytest.mark.inttest
 @pytest.mark.prodtest
-def test_200_get_letters(url, authentication_secret):
-    headers = Generators.generate_valid_headers(authentication_secret)
+def test_200_get_letters(url, authentication_secrets):
+    headers = Generators.generate_valid_headers(authentication_secrets[1])
 
     ids = get_pending_letter_ids(url, headers, LETTERS_ENDPOINT, limit=1)
     assert ids, "Expected at least one PENDING letter"

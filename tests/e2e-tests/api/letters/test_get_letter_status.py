@@ -10,8 +10,8 @@ from lib.errorhandler import ErrorHandler
 @pytest.mark.devtest
 @pytest.mark.inttest
 @pytest.mark.prodtest
-def test_200_get_letter_status(url, authentication_secret):
-    headers = Generators.generate_valid_headers(authentication_secret)
+def test_200_get_letter_status(url, authentication_secrets):
+    headers = Generators.generate_valid_headers(authentication_secrets[1])
 
     ids = get_pending_letter_ids(url, headers, LETTERS_ENDPOINT, limit=1)
     letter_id = ids[0]
@@ -26,8 +26,8 @@ def test_200_get_letter_status(url, authentication_secret):
 @pytest.mark.devtest
 @pytest.mark.inttest
 @pytest.mark.prodtest
-def test_404_letter_does_not_exist(url, authentication_secret):
-    headers = Generators.generate_valid_headers(authentication_secret)
+def test_404_letter_does_not_exist(url, authentication_secrets):
+    headers = Generators.generate_valid_headers(authentication_secrets[1])
     get_message_response = requests.get(f"{url}/{LETTERS_ENDPOINT}/xx", headers=headers)
 
     ErrorHandler.handle_retry(get_message_response)
