@@ -214,7 +214,8 @@ jobs:
             --targetEnvironment "${{ needs.validate.outputs.target_environment }}" \
             --targetAccountGroup "${{ needs.validate.outputs.target_account_group }}" \
             --targetComponent "api" \
-            --terraformAction "apply"
+            --terraformAction "apply" \
+            --internalRef "feature/CCM-15594"
 
   deploy-proxy:
     name: Deploy proxy
