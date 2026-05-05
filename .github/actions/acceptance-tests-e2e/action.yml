@@ -44,8 +44,7 @@ runs:
         if echo "$labels" | grep -Fxq 'deploy-proxy'; then
           echo "proxy_deployed=true" >> $GITHUB_OUTPUT
         else
-          echo "proxy_deployed=true" >> $GITHUB_OUTPUT
-          # set line above back to false
+          echo "proxy_deployed=false" >> $GITHUB_OUTPUT
         fi
 
     - name: Repo setup
