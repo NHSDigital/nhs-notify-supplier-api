@@ -60,7 +60,7 @@ runs:
         cd tests/e2e-tests && poetry install
 
     - name: Run tests
-      # if: ${{ steps.check_proxy_deployed.outputs.proxy_deployed == 'true' }}
+      if: ${{ steps.check_proxy_deployed.outputs.proxy_deployed == 'true' }}
       shell: bash
       env:
         TARGET_ENVIRONMENT: ${{ inputs.targetEnvironment }}
