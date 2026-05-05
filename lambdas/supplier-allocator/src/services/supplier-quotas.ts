@@ -1,5 +1,6 @@
-import { DailyAllocation, OverallAllocation } from "@internal/datastore";
 import { SupplierAllocation } from "@nhsdigital/nhs-notify-event-schemas-supplier-config";
+import { format } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 import { Deps } from "../config/deps";
 
 export async function calculateSupplierAllocatedFactor(
@@ -42,52 +43,20 @@ export async function updateSupplierAllocation(
   newAllocation: number,
   deps: Deps,
 ): Promise<void> {
-  const overallAllocation =
-    await deps.supplierQuotasRepo.getOverallAllocation(volumeGroupId);
-  if (overallAllocation) {
-    deps.logger.info({
-      description: "Existing overall allocation found for volume group",
-      volumeGroupId,
-      overallAllocation,
-    });
-    await deps.supplierQuotasRepo.updateOverallAllocation(
-      volumeGroupId,
-      supplierId,
-      newAllocation,
-    );
-  } else {
-    const newOverallAllocation: OverallAllocation = {
-      id: volumeGroupId,
-      volumeGroup: volumeGroupId,
-      allocations: {
-        [supplierId]: newAllocation,
-      },
-    };
-    deps.logger.info({
-      description:
-        "No overall allocation found for volume group, creating new one",
-      volumeGroupId,
-      newOverallAllocation,
-    });
-    await deps.supplierQuotasRepo.putOverallAllocation(newOverallAllocation);
-  }
-  const dailyAllocationDate = new Date().toISOString().split("T")[0]; // Get current date in YYYY-MM-DD format
-  const dailyAllocation =
-    await deps.supplierQuotasRepo.getDailyAllocation(dailyAllocationDate);
-  if (dailyAllocation) {
-    await deps.supplierQuotasRepo.updateDailyAllocation(
-      dailyAllocationDate,
-      supplierId,
-      newAllocation,
-    );
-  } else {
-    const newDailyAllocation: DailyAllocation = {
-      id: `ID#${dailyAllocationDate}`,
-      date: dailyAllocationDate,
-      allocations: {
-        [supplierId]: newAllocation,
-      },
-    };
-    await deps.supplierQuotasRepo.putDailyAllocation(newDailyAllocation);
-  }
+  await deps.supplierQuotasRepo.updateOverallAllocation(
+    volumeGroupId,
+    supplierId,
+    newAllocation,
+  );
+
+  const dailyAllocationDate = format(
+    toZonedTime(new Date(), "Europe/London"),
+    "yyyy-MM-dd",
+  );
+
+  await deps.supplierQuotasRepo.updateDailyAllocation(
+    dailyAllocationDate,
+    supplierId,
+    newAllocation,
+  );
 }

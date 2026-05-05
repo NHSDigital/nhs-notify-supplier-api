@@ -14,10 +14,8 @@ describe("supplier-quotas", () => {
       supplierQuotasRepo: {
         getOverallAllocation: jest.fn(),
         updateOverallAllocation: jest.fn(),
-        putOverallAllocation: jest.fn(),
         getDailyAllocation: jest.fn(),
         updateDailyAllocation: jest.fn(),
-        putDailyAllocation: jest.fn(),
       } as any,
       logger: {
         info: jest.fn(),
@@ -215,101 +213,6 @@ describe("supplier-quotas", () => {
       expect(
         mockDeps.supplierQuotasRepo.updateDailyAllocation,
       ).toHaveBeenCalledWith("2024-01-15", "supplier1", 150);
-    });
-
-    it("should create new overall allocation when none exists", async () => {
-      (
-        mockDeps.supplierQuotasRepo.getOverallAllocation as jest.Mock
-      ).mockResolvedValue(null);
-      (
-        mockDeps.supplierQuotasRepo.getDailyAllocation as jest.Mock
-      ).mockResolvedValue(null);
-
-      await updateSupplierAllocation("vg1", "supplier1", 100, mockDeps);
-
-      expect(
-        mockDeps.supplierQuotasRepo.putOverallAllocation,
-      ).toHaveBeenCalledWith({
-        id: "vg1",
-        volumeGroup: "vg1",
-        allocations: {
-          supplier1: 100,
-        },
-      });
-    });
-
-    it("should create new daily allocation when none exists", async () => {
-      const existingOverallAllocation: OverallAllocation = {
-        id: "vg1",
-        volumeGroup: "vg1",
-        allocations: {
-          supplier1: 100,
-        },
-      };
-
-      (
-        mockDeps.supplierQuotasRepo.getOverallAllocation as jest.Mock
-      ).mockResolvedValue(existingOverallAllocation);
-      (
-        mockDeps.supplierQuotasRepo.getDailyAllocation as jest.Mock
-      ).mockResolvedValue(null);
-
-      await updateSupplierAllocation("vg1", "supplier1", 150, mockDeps);
-
-      expect(
-        mockDeps.supplierQuotasRepo.putDailyAllocation,
-      ).toHaveBeenCalledWith({
-        id: "ID#2024-01-15",
-        date: "2024-01-15",
-        allocations: {
-          supplier1: 150,
-        },
-      });
-    });
-
-    it("should log when updating existing overall allocation", async () => {
-      const existingOverallAllocation: OverallAllocation = {
-        id: "vg1",
-        volumeGroup: "vg1",
-        allocations: {
-          supplier1: 100,
-        },
-      };
-
-      (
-        mockDeps.supplierQuotasRepo.getOverallAllocation as jest.Mock
-      ).mockResolvedValue(existingOverallAllocation);
-      (
-        mockDeps.supplierQuotasRepo.getDailyAllocation as jest.Mock
-      ).mockResolvedValue(null);
-
-      await updateSupplierAllocation("vg1", "supplier1", 150, mockDeps);
-
-      expect(mockDeps.logger.info).toHaveBeenCalledWith(
-        expect.objectContaining({
-          description: "Existing overall allocation found for volume group",
-          volumeGroupId: "vg1",
-        }),
-      );
-    });
-
-    it("should log when creating new overall allocation", async () => {
-      (
-        mockDeps.supplierQuotasRepo.getOverallAllocation as jest.Mock
-      ).mockResolvedValue(null);
-      (
-        mockDeps.supplierQuotasRepo.getDailyAllocation as jest.Mock
-      ).mockResolvedValue(null);
-
-      await updateSupplierAllocation("vg1", "supplier1", 100, mockDeps);
-
-      expect(mockDeps.logger.info).toHaveBeenCalledWith(
-        expect.objectContaining({
-          description:
-            "No overall allocation found for volume group, creating new one",
-          volumeGroupId: "vg1",
-        }),
-      );
     });
   });
 });

@@ -15,18 +15,6 @@ export type SupplierQuotasRepositoryConfig = {
   supplierQuotasTableName: string;
 };
 
-function ItemForRecord(
-  entity: string,
-  id: string,
-  record: Record<string, any>,
-): Record<string, any> {
-  return {
-    pk: `ENTITY#${entity}`,
-    sk: `ID#${id}`,
-    ...record,
-  };
-}
-
 export class SupplierQuotasRepository {
   constructor(
     readonly ddbClient: DynamoDBDocumentClient,
@@ -51,61 +39,89 @@ export class SupplierQuotasRepository {
     return $OverallAllocation.parse(item);
   }
 
-  async putOverallAllocation(allocation: OverallAllocation): Promise<void> {
-    const parsedAllocation = $OverallAllocation.parse(allocation);
-    await this.ddbClient.send(
-      new PutCommand({
-        TableName: this.config.supplierQuotasTableName,
-        Item: ItemForRecord(
-          "overall-allocation",
-          allocation.id,
-          parsedAllocation,
-        ),
-      }),
+  private static isValidationException(err: unknown): boolean {
+    return err instanceof Error && err.name === "ValidationException";
+  }
+
+  private static isConditionalCheckFailed(err: unknown): boolean {
+    return (
+      err instanceof Error && err.name === "ConditionalCheckFailedException"
     );
   }
 
-  // Update the overallAllocation table updating the allocations array for a given volume group
-  // or adding the value if the supplier is not present //
   async updateOverallAllocation(
     groupId: string,
     supplierId: string,
     newAllocation: number,
   ): Promise<void> {
-    const overallAllocation = await this.getOverallAllocation(groupId);
-    const allocations = overallAllocation?.allocations ?? {};
-    const allocationsMap = new Map(Object.entries(allocations));
-    const currentAllocation = allocationsMap.get(supplierId) ?? 0;
+    const now = new Date().toISOString();
 
-    const updatedAllocation = currentAllocation + newAllocation;
+    const key = {
+      pk: "ENTITY#overall-allocation",
+      sk: `ID#${groupId}`,
+    };
 
-    if (overallAllocation) {
-      // Update existing allocation
-      const updatedAllocations = {
-        ...allocations,
-        [supplierId]: updatedAllocation,
-      };
+    const increment = async () => {
       await this.ddbClient.send(
         new UpdateCommand({
           TableName: this.config.supplierQuotasTableName,
-          Key: { pk: "ENTITY#overall-allocation", sk: `ID#${groupId}` },
-          UpdateExpression:
-            "SET allocations = :allocations, updatedAt = :updatedAt",
+          Key: key,
+          UpdateExpression: `
+          SET
+            allocations.#supplierId = if_not_exists(allocations.#supplierId, :zero) + :delta,
+            id = if_not_exists(id, :groupId),
+            volumeGroup = if_not_exists(volumeGroup, :groupId),
+            createdAt = if_not_exists(createdAt, :now),
+            updatedAt = :now
+        `,
+          ExpressionAttributeNames: {
+            "#supplierId": supplierId,
+          },
           ExpressionAttributeValues: {
-            ":allocations": updatedAllocations,
-            ":updatedAt": new Date().toISOString(),
+            ":zero": 0,
+            ":delta": newAllocation,
+            ":groupId": groupId,
+            ":now": now,
           },
         }),
       );
-    } else {
-      // Create new allocation
-      const newOverallAllocation: OverallAllocation = {
-        id: groupId,
-        volumeGroup: groupId,
-        allocations: { [supplierId]: updatedAllocation },
-      };
-      await this.putOverallAllocation(newOverallAllocation);
+    };
+
+    try {
+      await increment();
+      return;
+    } catch (error) {
+      if (!SupplierQuotasRepository.isValidationException(error)) {
+        throw error;
+      }
     }
+
+    try {
+      await this.ddbClient.send(
+        new PutCommand({
+          TableName: this.config.supplierQuotasTableName,
+          Item: {
+            ...key,
+            id: groupId,
+            volumeGroup: groupId,
+            allocations: {
+              [supplierId]: newAllocation,
+            },
+            createdAt: now,
+            updatedAt: now,
+          },
+          ConditionExpression: "attribute_not_exists(pk)",
+        }),
+      );
+      return;
+    } catch (error) {
+      if (!SupplierQuotasRepository.isConditionalCheckFailed(error)) {
+        throw error;
+      }
+    }
+
+    // Another writer created the item first; retry the atomic increment.
+    await increment();
   }
 
   async getDailyAllocation(date: string): Promise<DailyAllocation | undefined> {
@@ -127,60 +143,80 @@ export class SupplierQuotasRepository {
     return $DailyAllocation.parse(item);
   }
 
-  async putDailyAllocation(allocation: DailyAllocation): Promise<void> {
-    const parsedAllocation = $DailyAllocation.parse(allocation);
-    await this.ddbClient.send(
-      new PutCommand({
-        TableName: this.config.supplierQuotasTableName,
-        Item: ItemForRecord(
-          "daily-allocation",
-          allocation.date,
-          parsedAllocation,
-        ),
-      }),
-    );
-  }
-
   async updateDailyAllocation(
-    date: string,
+    allocationDate: string,
     supplierId: string,
     newAllocation: number,
   ): Promise<void> {
-    const dailyAllocation = await this.getDailyAllocation(date);
-    const allocations = dailyAllocation?.allocations ?? {};
-    const allocationsMap = new Map(Object.entries(allocations));
-    const currentAllocation = allocationsMap.get(supplierId) ?? 0;
-    const updatedAllocation = currentAllocation + newAllocation;
+    const now = new Date().toISOString();
 
-    if (dailyAllocation) {
-      // Update existing allocation
-      const updatedAllocations = {
-        ...allocations,
-        [supplierId]: updatedAllocation,
-      };
+    const key = {
+      pk: "ENTITY#daily-allocation",
+      sk: `ID#${allocationDate}`,
+    };
+
+    const increment = async () => {
       await this.ddbClient.send(
         new UpdateCommand({
           TableName: this.config.supplierQuotasTableName,
-          Key: {
-            pk: "ENTITY#daily-allocation",
-            sk: `ID#${date}`,
+          Key: key,
+          UpdateExpression: `
+          SET
+            allocations.#supplierId = if_not_exists(allocations.#supplierId, :zero) + :delta,
+            id = if_not_exists(id, :id),
+            #date = if_not_exists(#date, :date),
+            createdAt = if_not_exists(createdAt, :now),
+            updatedAt = :now
+        `,
+          ExpressionAttributeNames: {
+            "#supplierId": supplierId,
+            "#date": "date",
           },
-          UpdateExpression:
-            "SET allocations = :allocations, updatedAt = :updatedAt",
           ExpressionAttributeValues: {
-            ":allocations": updatedAllocations,
-            ":updatedAt": new Date().toISOString(),
+            ":zero": 0,
+            ":delta": newAllocation,
+            ":id": `ID#${allocationDate}`,
+            ":date": allocationDate,
+            ":now": now,
           },
         }),
       );
-    } else {
-      // Create new allocation
-      const newDailyAllocation: DailyAllocation = {
-        id: `ID#${date}`,
-        date,
-        allocations: { [supplierId]: updatedAllocation },
-      };
-      await this.putDailyAllocation(newDailyAllocation);
+    };
+
+    try {
+      await increment();
+      return;
+    } catch (error) {
+      if (!SupplierQuotasRepository.isValidationException(error)) {
+        throw error;
+      }
     }
+
+    try {
+      await this.ddbClient.send(
+        new PutCommand({
+          TableName: this.config.supplierQuotasTableName,
+          Item: {
+            ...key,
+            id: `ID#${allocationDate}`,
+            date: allocationDate,
+            allocations: {
+              [supplierId]: newAllocation,
+            },
+            createdAt: now,
+            updatedAt: now,
+          },
+          ConditionExpression: "attribute_not_exists(pk)",
+        }),
+      );
+      return;
+    } catch (error) {
+      if (!SupplierQuotasRepository.isConditionalCheckFailed(error)) {
+        throw error;
+      }
+    }
+
+    // Another request created the item first, so retry the atomic increment.
+    await increment();
   }
 }

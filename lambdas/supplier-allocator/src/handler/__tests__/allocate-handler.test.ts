@@ -210,10 +210,8 @@ describe("createSupplierAllocatorHandler", () => {
       ddbClient: {} as any,
       config: {} as any,
       getOverallAllocation: jest.fn(),
-      putOverallAllocation: jest.fn(),
       updateOverallAllocation: jest.fn(),
       getDailyAllocation: jest.fn(),
-      putDailyAllocation: jest.fn(),
       updateDailyAllocation: jest.fn(),
     } as jest.Mocked<SupplierQuotasRepository>;
 
