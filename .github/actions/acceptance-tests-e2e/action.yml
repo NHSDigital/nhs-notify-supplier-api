@@ -43,6 +43,7 @@ runs:
 
         if echo "$labels" | grep -Fxq 'deploy-proxy'; then
           echo "proxy_deployed=true" >> $GITHUB_OUTPUT
+          echo "proxy_deployed=true"
         else
           echo "proxy_deployed=false" >> $GITHUB_OUTPUT
         fi
