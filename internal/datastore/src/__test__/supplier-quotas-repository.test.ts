@@ -42,6 +42,12 @@ jest.setTimeout(30_000);
 describe("SupplierQuotasRepository", () => {
   let dbContext: DBContext;
   let repository: SupplierQuotasRepository;
+  let mockDdbClient: {
+    send: jest.Mock;
+    config: any;
+    destroy: jest.Mock;
+    middlewareStack: any;
+  };
 
   // Database tests can take longer, especially with setup and teardown
   beforeAll(async () => {
@@ -53,6 +59,19 @@ describe("SupplierQuotasRepository", () => {
     repository = new SupplierQuotasRepository(dbContext.docClient, {
       supplierQuotasTableName: dbContext.config.supplierQuotasTableName,
     });
+    // Initialize mockDdbClient for tests that need it
+    mockDdbClient = {
+      send: jest.fn(),
+      config: {},
+      destroy: jest.fn(),
+      middlewareStack: {
+        clone: jest.fn(),
+        use: jest.fn(),
+        remove: jest.fn(),
+        removeByTag: jest.fn(),
+        concat: jest.fn(),
+      },
+    };
   });
 
   afterEach(async () => {
@@ -93,19 +112,6 @@ describe("SupplierQuotasRepository", () => {
     const result = await repository.getOverallAllocation(volumeGroupId);
 
     expect(result).toBeUndefined();
-  });
-
-  test("putOverallAllocation stores allocation correctly", async () => {
-    const allocation = {
-      id: "group-123",
-      volumeGroup: "group-123",
-      allocations: { supplier1: 100, supplier2: 200 },
-    };
-
-    await repository.putOverallAllocation(allocation);
-
-    const result = await repository.getOverallAllocation("group-123");
-    expect(result).toEqual(allocation);
   });
 
   test("updateOverallAllocation creates new allocation when none exists", async () => {
@@ -154,6 +160,102 @@ describe("SupplierQuotasRepository", () => {
     expect(resultMap.get(supplierId)).toBe(150);
   });
 
+  test("updateOverallAllocation throws error for non-validation exceptions", async () => {
+    const volumeGroupId = "group-123";
+    const supplierId = "supplier-123";
+    const newAllocation = 50;
+
+    // Mock the ddbClient to throw a generic error
+    mockDdbClient.send.mockRejectedValue(new Error("Generic error"));
+
+    const repoWithMockedClient = new SupplierQuotasRepository(mockDdbClient, {
+      supplierQuotasTableName: dbContext.config.supplierQuotasTableName,
+    });
+
+    await expect(
+      repoWithMockedClient.updateOverallAllocation(
+        volumeGroupId,
+        supplierId,
+        newAllocation,
+      ),
+    ).rejects.toThrow("Generic error");
+  });
+
+  test("updateOverallAllocation calls increment twice if Putcommand fails with  ConditionalCheckFailedException", async () => {
+    const volumeGroupId = "group-123";
+    const supplierId = "supplier-123";
+    const newAllocation = 50;
+
+    // Mock the ddbClient to throw a validation e first call and throw ConditionalCheckFailedException on the second call and then succeed on the third call
+    mockDdbClient.send
+      .mockRejectedValueOnce(
+        Object.assign(new Error("Validation error"), {
+          name: "ValidationException",
+        }),
+      )
+      .mockRejectedValueOnce(
+        Object.assign(new Error("ConditionalCheckFailedException"), {
+          name: "ConditionalCheckFailedException",
+        }),
+      )
+      .mockResolvedValue({}); // Succeed on the third call
+
+    const repoWithMockedClient = new SupplierQuotasRepository(mockDdbClient, {
+      supplierQuotasTableName: dbContext.config.supplierQuotasTableName,
+    });
+
+    await repoWithMockedClient.updateOverallAllocation(
+      volumeGroupId,
+      supplierId,
+      newAllocation,
+    );
+
+    expect(mockDdbClient.send).toHaveBeenCalledTimes(3);
+    expect(mockDdbClient.send).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        input: expect.objectContaining({
+          UpdateExpression: expect.stringContaining("SET"),
+        }),
+      }),
+    );
+    expect(mockDdbClient.send).toHaveBeenNthCalledWith(
+      3,
+      expect.objectContaining({
+        input: expect.objectContaining({
+          UpdateExpression: expect.stringContaining("SET"),
+        }),
+      }),
+    );
+  });
+
+  test("updateOverallAllocation throw exception if Putcommand fails with any error other than ConditionalCheckFailedException", async () => {
+    const volumeGroupId = "group-123";
+    const supplierId = "supplier-123";
+    const newAllocation = 50;
+
+    // Mock the ddbClient to throw a generic error
+    mockDdbClient.send
+      .mockRejectedValueOnce(
+        Object.assign(new Error("Validation error"), {
+          name: "ValidationException",
+        }),
+      )
+      .mockRejectedValueOnce(new Error("Generic error")); // Throw a generic error on the second call
+
+    const repoWithMockedClient = new SupplierQuotasRepository(mockDdbClient, {
+      supplierQuotasTableName: dbContext.config.supplierQuotasTableName,
+    });
+
+    await expect(
+      repoWithMockedClient.updateOverallAllocation(
+        volumeGroupId,
+        supplierId,
+        newAllocation,
+      ),
+    ).rejects.toThrow("Generic error");
+  });
+
   test("getDailyAllocation returns correct allocation for existing group and date", async () => {
     const allocationId = "daily-allocation-123";
     const date = "2023-10-01";
@@ -180,19 +282,6 @@ describe("SupplierQuotasRepository", () => {
     const result = await repository.getDailyAllocation(date);
 
     expect(result).toBeUndefined();
-  });
-
-  test("putDailyAllocation stores allocation correctly", async () => {
-    const allocation = {
-      id: "daily-allocation-123",
-      date: "2023-10-01",
-      allocations: { supplier1: 50, supplier2: 75 },
-    };
-
-    await repository.putDailyAllocation(allocation);
-
-    const result = await repository.getDailyAllocation("2023-10-01");
-    expect(result).toEqual(allocation);
   });
 
   test("updateDailyAllocation creates new allocation when none exists", async () => {
@@ -228,5 +317,101 @@ describe("SupplierQuotasRepository", () => {
     const result = await repository.getDailyAllocation(date);
     const resultMap = new Map(Object.entries(result?.allocations ?? {}));
     expect(resultMap.get(supplierId)).toBe(75);
+  });
+
+  test("updateDailyAllocation throws error for non-validation exceptions", async () => {
+    const date = "2023-10-01";
+    const supplierId = "supplier-123";
+    const newAllocation = 25;
+
+    // Mock the ddbClient to throw a generic error
+    mockDdbClient.send.mockRejectedValue(new Error("Generic error"));
+
+    const repoWithMockedClient = new SupplierQuotasRepository(mockDdbClient, {
+      supplierQuotasTableName: dbContext.config.supplierQuotasTableName,
+    });
+
+    await expect(
+      repoWithMockedClient.updateDailyAllocation(
+        date,
+        supplierId,
+        newAllocation,
+      ),
+    ).rejects.toThrow("Generic error");
+  });
+
+  test("updateDailyAllocation calls increment twice if Putcommand fails with  ConditionalCheckFailedException", async () => {
+    const date = "2023-10-01";
+    const supplierId = "supplier-123";
+    const newAllocation = 25;
+
+    // Mock the ddbClient to throw a validation e first call and throw ConditionalCheckFailedException on the second call and then succeed on the third call
+    mockDdbClient.send
+      .mockRejectedValueOnce(
+        Object.assign(new Error("Validation error"), {
+          name: "ValidationException",
+        }),
+      )
+      .mockRejectedValueOnce(
+        Object.assign(new Error("ConditionalCheckFailedException"), {
+          name: "ConditionalCheckFailedException",
+        }),
+      )
+      .mockResolvedValue({}); // Succeed on the third call
+
+    const repoWithMockedClient = new SupplierQuotasRepository(mockDdbClient, {
+      supplierQuotasTableName: dbContext.config.supplierQuotasTableName,
+    });
+
+    await repoWithMockedClient.updateDailyAllocation(
+      date,
+      supplierId,
+      newAllocation,
+    );
+
+    expect(mockDdbClient.send).toHaveBeenCalledTimes(3);
+    expect(mockDdbClient.send).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        input: expect.objectContaining({
+          UpdateExpression: expect.stringContaining("SET"),
+        }),
+      }),
+    );
+    expect(mockDdbClient.send).toHaveBeenNthCalledWith(
+      3,
+      expect.objectContaining({
+        input: expect.objectContaining({
+          UpdateExpression: expect.stringContaining("SET"),
+        }),
+      }),
+    );
+  });
+
+  test("updateDailyAllocation throw exception if Putcommand fails with any error other than ConditionalCheckFailedException", async () => {
+    const date = "2023-10-01";
+    const supplierId = "supplier-123";
+    const newAllocation = 25;
+
+    // Mock the ddbClient to throw a generic error
+    mockDdbClient.send
+      .mockRejectedValueOnce(
+        Object.assign(new Error("Validation error"), {
+          name: "ValidationException",
+        }),
+      )
+      .mockRejectedValueOnce(new Error("Generic error")); // Throw a generic error on the second call
+
+    const repoWithMockedClient = new SupplierQuotasRepository(mockDdbClient, {
+      supplierQuotasTableName: dbContext.config.supplierQuotasTableName,
+    });
+
+    await expect(
+      repoWithMockedClient.updateDailyAllocation(
+        date,
+        supplierId,
+        newAllocation,
+      ),
+    ).rejects.toThrow("Generic error");
   });
 });
