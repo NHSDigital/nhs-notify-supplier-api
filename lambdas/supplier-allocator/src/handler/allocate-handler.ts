@@ -147,7 +147,7 @@ function emitMetrics(
 function emitSupCampaignClientMetric(
   letterEvent: PreparedEvents,
   supplier: string,
-  status: string,
+  metricKey: string,
   deps: Deps,
 ) {
   const namespace = "supplier-allocator";
@@ -158,7 +158,7 @@ function emitSupCampaignClientMetric(
     CampaignId: campaignId || "unknown",
   };
   const metric: MetricEntry = {
-    key: status,
+    key: metricKey,
     value: 1,
     unit: Unit.Count,
   };
