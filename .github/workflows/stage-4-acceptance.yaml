@@ -81,5 +81,4 @@ jobs:
             --targetEnvironment "$ENVIRONMENT" \
             --targetAccountGroup "nhs-notify-supplier-api-dev" \
             --targetComponent "api" \
-            --extraSecretNames '["/dev/e2e/keys/apim/main","/dev/e2e/keys/apim/pr","/dev/e2e/keys/apim/status","/dev/e2e/keys/private"]' \
-            --internalRef "feature/CCM-17012" # TO BE REMOVED - used to trigger workflow until internal branch merges
+            --extraSecretNames '["/dev/e2e/keys/apim/main","/dev/e2e/keys/apim/pr","/dev/e2e/keys/apim/status","/dev/e2e/keys/private"]'

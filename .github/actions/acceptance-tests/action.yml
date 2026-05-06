@@ -25,7 +25,7 @@ runs:
   steps:
 
     - name: Run component tests
-      if: ${{ inputs.testType != 'e2e' }}
+      if: ${{ inputs.testType == 'component' }}
       uses: ./.github/actions/acceptance-tests-component
       with:
         testType: ${{ inputs.testType }}
@@ -33,7 +33,7 @@ runs:
         targetComponent: ${{ inputs.targetComponent }}
 
     - name: Run e2e tests
-      if: ${{ inputs.testType == 'e2e' && inputs.targetEnvironment == 'main' }}
+      if: ${{ inputs.testType == 'e2e' }}
       uses: ./.github/actions/acceptance-tests-e2e
       with:
         targetEnvironment: ${{ inputs.targetEnvironment }}
