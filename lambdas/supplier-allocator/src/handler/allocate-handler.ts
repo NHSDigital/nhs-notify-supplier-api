@@ -144,18 +144,24 @@ function emitMetrics(
   }
 }
 
-function emitSupCampaignClientMetric(
+/**
+ * NOTE: `groupId` needs to match the groupId in the function {@link upsert-handler#mapToInsertLetter}
+ * so the value always needs to be updated in both places
+ */
+function emitDataMetrics(
   letterEvent: PreparedEvents,
   supplier: string,
   metricKey: string,
   deps: Deps,
 ) {
   const namespace = "supplier-allocator";
-  const { campaignId, clientId } = letterEvent.data;
+  const { campaignId, clientId, templateId } = letterEvent.data;
   const dimensions: Record<string, string> = {
     Supplier: supplier,
     ClientId: clientId,
     CampaignId: campaignId || "unknown",
+    TemplateId: templateId || "unknown",
+    GroupId: `${clientId}_${campaignId}_${templateId}`
   };
   const metric: MetricEntry = {
     key: metricKey,
@@ -221,10 +227,10 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
         );
 
         incrementMetric(perAllocationSuccess, supplier, priority);
-        emitSupCampaignClientMetric(
+        emitDataMetrics(
           letterEvent,
           supplier,
-          "supplier_Campaign_Client",
+          "extra_data_dimensions",
           deps,
         );
       } catch (error) {
