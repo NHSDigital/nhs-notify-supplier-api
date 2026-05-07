@@ -50,6 +50,13 @@ describe("eligibleSuppliers", () => {
         allocationPercentage: 30,
         status: "PROD",
       } as SupplierAllocation,
+      {
+        id: "allocation-3",
+        volumeGroup: "volume-group-1",
+        supplier: "supplier-3",
+        allocationPercentage: 20,
+        status: "PROD",
+      } as SupplierAllocation,
     ];
 
     mockSuppliers = [
@@ -66,7 +73,7 @@ describe("eligibleSuppliers", () => {
     ];
 
     mockDeps = {
-      logger: { info: jest.fn(), error: jest.fn() },
+      logger: { info: jest.fn(), error: jest.fn(), warn: jest.fn() },
     } as unknown as jest.Mocked<Deps>;
   });
 
@@ -110,7 +117,7 @@ describe("eligibleSuppliers", () => {
     await eligibleSuppliers(mockVolumeGroup, mockDeps);
 
     expect(supplierConfigService.getSupplierDetails).toHaveBeenCalledWith(
-      ["supplier-1", "supplier-2"],
+      ["supplier-1", "supplier-2", "supplier-3"],
       mockDeps,
     );
   });
@@ -131,6 +138,38 @@ describe("eligibleSuppliers", () => {
       [],
       mockDeps,
     );
+  });
+
+  it("should log a warning if allocation percentages do not sum to 100%", async () => {
+    const invalidAllocations = [
+      {
+        id: "allocation-1",
+        volumeGroup: "volume-group-1",
+        supplier: "supplier-1",
+        allocationPercentage: 40,
+        status: "PROD",
+      } as SupplierAllocation,
+      {
+        id: "allocation-2",
+        volumeGroup: "volume-group-1",
+        supplier: "supplier-2",
+
+        allocationPercentage: 30,
+        status: "PROD",
+      } as SupplierAllocation,
+    ];
+    (
+      supplierConfigService.getSupplierAllocationsForVolumeGroup as jest.Mock
+    ).mockResolvedValue(invalidAllocations);
+    (supplierConfigService.getSupplierDetails as jest.Mock).mockResolvedValue(
+      mockSuppliers,
+    );
+    await eligibleSuppliers(mockVolumeGroup, mockDeps);
+    expect(mockDeps.logger.warn).toHaveBeenCalledWith({
+      description: "Supplier allocations do not sum to 100%",
+      volumeGroupId: "volume-group-1",
+      allocationPercentageSum: 70,
+    });
   });
 
   it("should propagate errors from getSupplierAllocationsForVolumeGroup", async () => {
@@ -802,6 +841,42 @@ describe("selectSupplierByFactor", () => {
     );
 
     expect(result).toBe("supplier-2");
+  });
+
+  it("should log an error if a supplier allocation has zero percentage and exclude it from factor calculation", async () => {
+    const allocationsWithZeroPercentage = [
+      mockSupplierAllocations[0],
+      {
+        id: "allocation-zero",
+        volumeGroup: "volume-group-1",
+        supplier: "supplier-2",
+        allocationPercentage: 0,
+        status: "PROD",
+      } as SupplierAllocation,
+      mockSupplierAllocations[2],
+    ];
+
+    const mockSupplierFactors = [
+      { supplierId: "supplier-1", factor: 0.5 },
+      { supplierId: "supplier-3", factor: 0.8 },
+    ];
+
+    (
+      supplierQuotasService.calculateSupplierAllocatedFactor as jest.Mock
+    ).mockResolvedValue(mockSupplierFactors);
+
+    const result = await selectSupplierByFactor(
+      mockSuppliers,
+      allocationsWithZeroPercentage,
+      mockDeps,
+    );
+
+    expect(mockDeps.logger.error).toHaveBeenCalledWith({
+      description: "Supplier allocation has zero percentage",
+      supplierId: "supplier-2",
+      allocationPercentage: 0,
+    });
+    expect(result).toBe("supplier-1");
   });
 
   it("should return first supplier when all factors are equal", async () => {

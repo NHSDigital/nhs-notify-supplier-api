@@ -31,6 +31,18 @@ export async function eligibleSuppliers(
     volumeGroup.id,
     deps,
   );
+  const allocationPercentageSum = supplierAllocations.reduce(
+    (sum, alloc) => sum + alloc.allocationPercentage,
+    0,
+  );
+  console.log("Allocation percentage sum:", allocationPercentageSum);
+  if (allocationPercentageSum !== 100) {
+    deps.logger.warn({
+      description: "Supplier allocations do not sum to 100%",
+      volumeGroupId: volumeGroup.id,
+      allocationPercentageSum,
+    });
+  }
   const supplierIds = supplierAllocations.map((alloc) => alloc.supplier);
 
   const suppliers = await getSupplierDetails(supplierIds, deps);
@@ -103,9 +115,17 @@ export async function selectSupplierByFactor(
   supplierAllocations: SupplierAllocation[],
   deps: Deps,
 ): Promise<string> {
-  const supplierAllocationsForPack = supplierAllocations.filter((alloc) =>
-    suppliers.some((supplier) => supplier.id === alloc.supplier),
-  );
+  const supplierAllocationsForPack = supplierAllocations.filter((alloc) => {
+    if (alloc.allocationPercentage === 0) {
+      deps.logger.error({
+        description: "Supplier allocation has zero percentage",
+        supplierId: alloc.supplier,
+        allocationPercentage: alloc.allocationPercentage,
+      });
+      return false;
+    }
+    return suppliers.some((supplier) => supplier.id === alloc.supplier);
+  });
   const supplierFactors: { supplierId: string; factor: number }[] =
     await calculateSupplierAllocatedFactor(supplierAllocationsForPack, deps);
 
