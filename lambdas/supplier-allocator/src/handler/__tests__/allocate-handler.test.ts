@@ -70,7 +70,7 @@ function createPreparedV1Event(
       requestItemPlanId: "requestItemPlan1",
       clientId: "client1",
       campaignId: overrides.campaignId ?? "campaign1",
-      templateId: "template1",
+      templateId: overrides.templateId ?? "template1",
       url: overrides.url ?? "s3://letterDataBucket/letter1.pdf",
       sha256Hash:
         "3a7bd3e2360a3d29eea436fcfb7e44c735d117c8f2f1d2d1e4f6e8f7e6e8f7e6",
@@ -230,8 +230,11 @@ describe("createSupplierAllocatorHandler", () => {
     });
   });
 
-  test("parses SNS notification and sends message to SQS queue for v2 event without a campaignId", async () => {
-    const preparedEvent = createPreparedV2Event({ campaignId: "" });
+  test("parses SNS notification and sends message to SQS queue for v2 event without a campaignId and templateId", async () => {
+    const preparedEvent = createPreparedV2Event({
+      campaignId: "",
+      templateId: "",
+    });
     const evt: SQSEvent = createSQSEvent([
       createSqsRecord("msg1", JSON.stringify(preparedEvent)),
     ]);

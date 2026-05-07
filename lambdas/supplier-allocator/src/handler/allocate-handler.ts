@@ -161,7 +161,7 @@ function emitDataMetrics(
     ClientId: clientId,
     CampaignId: campaignId || "unknown",
     TemplateId: templateId || "unknown",
-    GroupId: `${clientId}_${campaignId}_${templateId}`
+    GroupId: `${clientId}_${campaignId}_${templateId}`,
   };
   const metric: MetricEntry = {
     key: metricKey,
@@ -227,12 +227,7 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
         );
 
         incrementMetric(perAllocationSuccess, supplier, priority);
-        emitDataMetrics(
-          letterEvent,
-          supplier,
-          "extra_data_dimensions",
-          deps,
-        );
+        emitDataMetrics(letterEvent, supplier, "extra_data_dimensions", deps);
       } catch (error) {
         deps.logger.error({
           description: "Error processing allocation of record",

@@ -11,6 +11,8 @@ import {
   $LetterStatusChangeEvent,
   LetterStatusChangeEvent,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
+import { MetricStatus, buildEMFObject } from "@internal/helpers";
+import { Unit } from "aws-embedded-metrics";
 import createUpsertLetterHandler from "../upsert-handler";
 import { Deps } from "../../config/deps";
 import { EnvVars } from "../../config/env";
@@ -21,6 +23,15 @@ jest.mock("@aws-lambda-powertools/idempotency", () => {
   return {
     ...original,
     makeIdempotent: jest.fn((fn, _) => fn),
+  };
+});
+
+// mock the buildEMFObject function to just return its input so we can assert on it
+jest.mock("@internal/helpers", () => {
+  const original = jest.requireActual("@internal/helpers");
+  return {
+    ...original,
+    buildEMFObject: jest.fn(original.buildEMFObject),
   };
 });
 
@@ -190,26 +201,6 @@ function createSupplierStatusChangeEvent(
   });
 }
 
-// Mock aws-embedded-metrics
-let mockMetrics: any;
-jest.mock("aws-embedded-metrics", () => ({
-  metricScope: (
-    handler: (metrics: any) => (event: SQSEvent) => Promise<any>,
-  ) => {
-    return async (event: SQSEvent) => {
-      mockMetrics = {
-        setNamespace: jest.fn(),
-        putDimensions: jest.fn(),
-        putMetric: jest.fn(),
-      };
-      return handler(mockMetrics)(event);
-    };
-  },
-  Unit: {
-    Count: "Count",
-  },
-}));
-
 describe("createUpsertLetterHandler", () => {
   const mockedDeps: jest.Mocked<Deps> = {
     letterRepo: {
@@ -280,7 +271,7 @@ describe("createUpsertLetterHandler", () => {
     expect(insertedV2Letter.billingRef).toBe("spec1");
     expect(insertedV2Letter.url).toBe("s3://letterDataBucket/letter1.pdf");
     expect(insertedV2Letter.status).toBe("PENDING");
-    expect(insertedV2Letter.groupId).toBe("client1campaign1template1");
+    expect(insertedV2Letter.groupId).toBe("client1_campaign1_template1");
     expect(insertedV2Letter.source).toBe("/data-plane/letter-rendering/test");
     expect(insertedV2Letter.specificationBillingId).toBe("billing1");
     expect(insertedV2Letter.priority).toBe(10);
@@ -293,7 +284,7 @@ describe("createUpsertLetterHandler", () => {
     expect(insertedV1Letter.billingRef).toBe("spec2");
     expect(insertedV1Letter.url).toBe("s3://letterDataBucket/letter1.pdf");
     expect(insertedV1Letter.status).toBe("PENDING");
-    expect(insertedV1Letter.groupId).toBe("client1campaign1template1");
+    expect(insertedV1Letter.groupId).toBe("client1_campaign1_template1");
     expect(insertedV1Letter.source).toBe("/data-plane/letter-rendering/test");
     expect(insertedV1Letter.specificationBillingId).toBe("billing2");
     expect(insertedV1Letter.priority).toBe(10);
@@ -306,19 +297,17 @@ describe("createUpsertLetterHandler", () => {
     expect(updatedLetter.reasonCode).toBe("R07");
     expect(updatedLetter.reasonText).toBe("No such address");
     expect(updatedLetter.supplierId).toBe("supplier1");
-    expect(mockMetrics.setNamespace).toHaveBeenCalledWith("upsertLetter");
-    expect(mockMetrics.putDimensions).toHaveBeenCalledWith({
-      Supplier: "supplier1",
-    });
-    expect(mockMetrics.putMetric).toHaveBeenCalledWith(
-      "MessagesProcessed",
-      2,
-      "Count",
-    );
-    expect(mockMetrics.putMetric).toHaveBeenCalledWith(
-      "MessagesProcessed",
-      1,
-      "Count",
+    expect(buildEMFObject as jest.Mock).toHaveBeenCalledWith(
+      "upsertLetter",
+      {
+        Supplier: "supplier1",
+        GroupId: "client1_campaign1_template1",
+      },
+      expect.objectContaining({
+        key: MetricStatus.Success,
+        value: 1,
+        unit: Unit.Count,
+      }),
     );
   });
 
@@ -376,14 +365,17 @@ describe("createUpsertLetterHandler", () => {
 
     await createUpsertLetterHandler(mockedDeps)(evt, {} as any, {} as any);
 
-    expect(mockMetrics.setNamespace).toHaveBeenCalledWith("upsertLetter");
-    expect(mockMetrics.putDimensions).toHaveBeenCalledWith({
-      Supplier: "unknown",
-    });
-    expect(mockMetrics.putMetric).toHaveBeenCalledWith(
-      "MessagesProcessed",
-      1,
-      "Count",
+    expect(buildEMFObject as jest.Mock).toHaveBeenCalledWith(
+      "upsertLetter",
+      {
+        Supplier: "unknown",
+        GroupId: "unknown",
+      },
+      expect.objectContaining({
+        key: MetricStatus.Success,
+        value: 1,
+        unit: Unit.Count,
+      }),
     );
   });
 
@@ -410,14 +402,18 @@ describe("createUpsertLetterHandler", () => {
       }),
     );
     expect(mockedDeps.letterRepo.putLetter).not.toHaveBeenCalled();
-    expect(mockMetrics.setNamespace).toHaveBeenCalledWith("upsertLetter");
-    expect(mockMetrics.putDimensions).toHaveBeenCalledWith({
-      Supplier: "unknown",
-    });
-    expect(mockMetrics.putMetric).toHaveBeenCalledWith(
-      "MessageFailed",
-      1,
-      "Count",
+    // replace these
+    expect(buildEMFObject as jest.Mock).toHaveBeenCalledWith(
+      "upsertLetter",
+      {
+        Supplier: "unknown",
+        GroupId: "unknown",
+      },
+      expect.objectContaining({
+        key: MetricStatus.Failure,
+        value: 1,
+        unit: Unit.Count,
+      }),
     );
   });
 
@@ -506,14 +502,18 @@ describe("createUpsertLetterHandler", () => {
         messageId: "bad-event",
       }),
     );
-    expect(mockMetrics.setNamespace).toHaveBeenCalledWith("upsertLetter");
-    expect(mockMetrics.putDimensions).toHaveBeenCalledWith({
-      Supplier: "unknown",
-    });
-    expect(mockMetrics.putMetric).toHaveBeenCalledWith(
-      "MessageFailed",
-      1,
-      "Count",
+    // replace these
+    expect(buildEMFObject as jest.Mock).toHaveBeenCalledWith(
+      "upsertLetter",
+      {
+        Supplier: "unknown",
+        GroupId: "unknown",
+      },
+      expect.objectContaining({
+        key: MetricStatus.Failure,
+        value: 1,
+        unit: Unit.Count,
+      }),
     );
   });
 

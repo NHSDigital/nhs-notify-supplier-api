@@ -10,7 +10,7 @@ import {
   LetterStatusChangeEvent,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
 import { $LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
-import { MetricsLogger, Unit, metricScope } from "aws-embedded-metrics";
+import { Unit } from "aws-embedded-metrics";
 import {
   IdempotencyConfig,
   makeIdempotent,
@@ -91,36 +91,19 @@ function getOperationFromType(type: string): UpsertOperation {
     handler: async (request, supplierSpec, deps) => {
       const supplierEvent = request as LetterStatusChangeEvent;
       const letterToUpdate: UpdateLetter = mapToUpdateLetter(supplierEvent);
-      try {
-        await deps.letterRepo.updateLetterStatus(letterToUpdate);
+      await deps.letterRepo.updateLetterStatus(letterToUpdate);
 
-        deps.logger.info({
-          description: "Updated letter",
-          eventId: supplierEvent.id,
-          letterId: letterToUpdate.id,
-          supplierId: letterToUpdate.supplierId,
-        });
-        emitIndividualMetric(
-          deps.logger,
-          letterToUpdate.supplierId,
-          MetricStatus.Success,
-        );
-      } catch (error) {
-        emitIndividualMetric(
-          deps.logger,
-          letterToUpdate.supplierId,
-          MetricStatus.Failure,
-        );
-        if (error instanceof LetterAlreadyExistsError) {
-          deps.logger.warn({
-            description: "Letter already exists",
-            supplierId: letterToUpdate.supplierId,
-            letterId: letterToUpdate.id,
-          });
-        } else {
-          throw error;
-        }
-      }
+      deps.logger.info({
+        description: "Updated letter",
+        eventId: supplierEvent.id,
+        letterId: letterToUpdate.id,
+        supplierId: letterToUpdate.supplierId,
+      });
+      emitIndividualMetric(
+        deps.logger,
+        letterToUpdate.supplierId,
+        MetricStatus.Success,
+      );
     },
   };
 }
@@ -192,11 +175,9 @@ async function emitIndividualMetric(
 ) {
   const namespace = process.env.AWS_LAMBDA_FUNCTION_NAME || "upsertLetter";
   const dimensions: Record<string, string> = {
-    Supplier: supplier,
+    Supplier: supplier || "unknown",
+    GroupId: groupId || "unknown",
   };
-  if (groupId) {
-    dimensions.GroupId = groupId;
-  }
 
   const metric: MetricEntry = {
     key: metricKey,
@@ -273,6 +254,11 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
           messageId: record.messageId,
           message: record.body,
         });
+        await emitIndividualMetric(
+          deps.logger,
+          "unknown",
+          MetricStatus.Failure,
+        );
         batchItemFailures.push({ itemIdentifier: record.messageId });
       }
     });
