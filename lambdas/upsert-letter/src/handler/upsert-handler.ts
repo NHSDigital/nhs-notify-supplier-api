@@ -1,4 +1,4 @@
-import { SQSBatchItemFailure, SQSEvent, SQSHandler } from "aws-lambda";
+import { Context, SQSBatchItemFailure, SQSEvent, SQSHandler } from "aws-lambda";
 import { $LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
 import {
   InsertLetter,
@@ -11,6 +11,12 @@ import {
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
 import { $LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import { MetricsLogger, Unit, metricScope } from "aws-embedded-metrics";
+import {
+  IdempotencyConfig,
+  makeIdempotent,
+} from "@aws-lambda-powertools/idempotency";
+import { MetricEntry, MetricStatus, buildEMFObject } from "@internal/helpers";
+import { Logger } from "pino";
 import { Deps } from "../config/deps";
 import {
   PreparedEvents,
@@ -19,8 +25,10 @@ import {
   SupplierSpec,
   UpsertOperation,
 } from "./schemas";
-import { MetricEntry, MetricStatus, buildEMFObject } from "@internal/helpers";
-import { Logger } from "pino";
+
+const idempotencyConfig = new IdempotencyConfig({
+  eventKeyJmesPath: "id",
+});
 
 function getOperationFromType(type: string): UpsertOperation {
   if (
@@ -49,10 +57,20 @@ function getOperationFromType(type: string): UpsertOperation {
             supplierId: letterToInsert.supplierId,
           });
           // emit success metric
-          emitIndividualMetric(deps.logger, letterToInsert.supplierId, letterToInsert.groupId, MetricStatus.Success)
+          emitIndividualMetric(
+            deps.logger,
+            letterToInsert.supplierId,
+            MetricStatus.Success,
+            letterToInsert.groupId,
+          );
         } catch (error) {
           // emit failure metric
-          emitIndividualMetric(deps.logger, letterToInsert.supplierId, letterToInsert.groupId, MetricStatus.Failure)
+          emitIndividualMetric(
+            deps.logger,
+            letterToInsert.supplierId,
+            MetricStatus.Failure,
+            letterToInsert.groupId,
+          );
           if (error instanceof LetterAlreadyExistsError) {
             deps.logger.warn({
               description: "Letter already exists",
@@ -82,9 +100,17 @@ function getOperationFromType(type: string): UpsertOperation {
           letterId: letterToUpdate.id,
           supplierId: letterToUpdate.supplierId,
         });
-        emitIndividualMetric(deps.logger, letterToUpdate.supplierId, undefined, MetricStatus.Success)
+        emitIndividualMetric(
+          deps.logger,
+          letterToUpdate.supplierId,
+          MetricStatus.Success,
+        );
       } catch (error) {
-        emitIndividualMetric(deps.logger, letterToUpdate.supplierId, undefined, MetricStatus.Failure)
+        emitIndividualMetric(
+          deps.logger,
+          letterToUpdate.supplierId,
+          MetricStatus.Failure,
+        );
         if (error instanceof LetterAlreadyExistsError) {
           deps.logger.warn({
             description: "Letter already exists",
@@ -158,24 +184,27 @@ async function runUpsert(
   }
 }
 
-async function emitIndividualMetric(logger: Logger, supplier: string, groupId?: string, metricKey: MetricStatus) {
-  const namespace = process.env.AWS_LAMBDA_FUNCTION_NAME || 'upsertLetter'
+async function emitIndividualMetric(
+  logger: Logger,
+  supplier: string,
+  metricKey: MetricStatus,
+  groupId?: string,
+) {
+  const namespace = process.env.AWS_LAMBDA_FUNCTION_NAME || "upsertLetter";
   const dimensions: Record<string, string> = {
     Supplier: supplier,
-  }
+  };
   if (groupId) {
-    dimensions.GroupId = groupId
+    dimensions.GroupId = groupId;
   }
 
   const metric: MetricEntry = {
     key: metricKey,
     value: 1,
-    unit: Unit.Count
-  }
-  logger.info(buildEMFObject(namespace, dimensions, metric))
+    unit: Unit.Count,
+  };
+  logger.info(buildEMFObject(namespace, dimensions, metric));
 }
-
-
 
 function getSupplierIdFromEvent(letterEvent: any): string {
   if (letterEvent && letterEvent.data && letterEvent.data.supplierId) {
@@ -198,11 +227,15 @@ function parseQueueMessage(queueMessage: string): QueueMessage {
 }
 
 export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
-  return async (event: SQSEvent) => {
+  const processRecordIdempotently = makeIdempotent(processRecord, {
+    persistenceStore: deps.idempotencyLayer,
+    config: idempotencyConfig,
+  });
+
+  return async (event: SQSEvent, context: Context) => {
     const batchItemFailures: SQSBatchItemFailure[] = [];
 
     const tasks = event.Records.map(async (record) => {
-      let supplier = "unknown";
       try {
         deps.logger.info({
           description: "Processing record",
@@ -231,25 +264,8 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
           supplier: supplierSpec,
         });
 
-        supplier =
-          !supplierSpec || !supplierSpec.supplierId
-            ? getSupplierIdFromEvent(letterEvent)
-            : supplierSpec.supplierId;
-
-        const operation = getOperationFromType(letterEvent.type);
-
-        await runUpsert(
-          operation,
-          letterEvent,
-          supplierSpec ?? {
-            supplierId: "unknown",
-            specId: "unknown",
-            priority: 10,
-            billingId: "unknown",
-          },
-          deps,
-        );
-
+        idempotencyConfig.registerLambdaContext(context);
+        await processRecordIdempotently(letterEvent, supplierSpec, deps);
       } catch (error) {
         deps.logger.error({
           description: "Error processing upsert of record",
@@ -260,11 +276,35 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
         batchItemFailures.push({ itemIdentifier: record.messageId });
       }
     });
-
     await Promise.all(tasks);
 
     return { batchItemFailures };
   };
 }
 
+async function processRecord(
+  letterEvent: LetterStatusChangeEvent | PreparedEvents,
+  supplierSpec: SupplierSpec | undefined,
+  deps: Deps,
+) {
+  const supplier =
+    !supplierSpec || !supplierSpec.supplierId
+      ? getSupplierIdFromEvent(letterEvent)
+      : supplierSpec.supplierId;
 
+  const operation = getOperationFromType(letterEvent.type);
+
+  await runUpsert(
+    operation,
+    letterEvent,
+    supplierSpec ?? {
+      supplierId: "unknown",
+      specId: "unknown",
+      priority: 10,
+      billingId: "unknown",
+    },
+    deps,
+  );
+
+  return supplier;
+}

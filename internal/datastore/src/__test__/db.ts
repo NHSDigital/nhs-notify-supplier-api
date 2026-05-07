@@ -151,14 +151,14 @@ const createSupplierConfigTableCommand = new CreateTableCommand({
   TableName: "supplier-config",
   BillingMode: "PAY_PER_REQUEST",
   KeySchema: [
-    { AttributeName: "PK", KeyType: "HASH" }, // Partition key
-    { AttributeName: "SK", KeyType: "RANGE" }, // Sort key
+    { AttributeName: "pk", KeyType: "HASH" }, // Partition key
+    { AttributeName: "sk", KeyType: "RANGE" }, // Sort key
   ],
   GlobalSecondaryIndexes: [
     {
       IndexName: "volumeGroup-index",
       KeySchema: [
-        { AttributeName: "PK", KeyType: "HASH" }, // Partition key for GSI
+        { AttributeName: "pk", KeyType: "HASH" }, // Partition key for GSI
         { AttributeName: "volumeGroup", KeyType: "RANGE" }, // Sort key for GSI
       ],
       Projection: {
@@ -167,8 +167,8 @@ const createSupplierConfigTableCommand = new CreateTableCommand({
     },
   ],
   AttributeDefinitions: [
-    { AttributeName: "PK", AttributeType: "S" },
-    { AttributeName: "SK", AttributeType: "S" },
+    { AttributeName: "pk", AttributeType: "S" },
+    { AttributeName: "sk", AttributeType: "S" },
     { AttributeName: "volumeGroup", AttributeType: "S" },
   ],
 });

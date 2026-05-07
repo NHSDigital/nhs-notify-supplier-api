@@ -11,6 +11,7 @@ import {
 } from "tests/helpers/urgent-letter-priority-helper";
 import { createValidRequestHeaders } from "tests/constants/request-headers";
 import { SUPPLIER_LETTERS } from "tests/constants/api-constants";
+import { supplierDataSetup } from "tests/helpers/suppliers-setup-helper";
 import {
   GetLettersResponse,
   GetLettersResponseSchema,
@@ -20,6 +21,7 @@ let baseUrl: string;
 
 test.beforeAll(async () => {
   baseUrl = await getRestApiGatewayBaseUrl();
+  await supplierDataSetup(supplier);
 });
 
 test.describe("Urgent Letter Priority Tests", () => {
@@ -43,6 +45,7 @@ test.describe("Urgent Letter Priority Tests", () => {
     await verifyAllocationLogsContainPriority(urgencyTenLetterIds, 10);
 
     const lettersFromQueue = await getLettersFromQueueViaIndex(supplier);
+
     const letterIdsFromQueue = lettersFromQueue.map(
       (letter) => letter.letterId,
     );

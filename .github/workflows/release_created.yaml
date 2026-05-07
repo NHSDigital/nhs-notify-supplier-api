@@ -2,67 +2,25 @@ name: Github Release Created
 
 on:
   release:
-    types: ["released"] # Inherits all input defaults
-  workflow_dispatch:
-    inputs:
-      releaseVersion:
-        description: Release, tag, branch, or commit ID to be used for deployment
-        required: false
-        default: "main"
-        type: string
+    types: [ "released" ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
+permissions:
+  id-token: write
+  contents: read
+  packages: read
+
 jobs:
-  deploy-main:
-    name: Deploy changes to main in nonprod AWS Account
-    runs-on: ubuntu-latest
-
-    permissions:
-      id-token: write
-      contents: read
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-      - name: Deploy Nonprod Environment
-        env:
-          APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
-          APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
-        run: |
-          bash .github/scripts/dispatch_internal_repo_workflow.sh \
-            --releaseVersion "${{ github.event.release.tag_name || inputs.releaseVersion }}" \
-            --targetWorkflow "dispatch-deploy-static-notify-supplier-api-env.yaml" \
-            --targetEnvironment "main" \
-            --targetAccountGroup "nhs-notify-supplier-api-nonprod" \
-            --targetComponent "api" \
-            --terraformAction "apply"
-  deploy-proxy:
-    needs: deploy-main #wait for backend deploy to complete
-    name: "Deploy proxy"
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    permissions:
-      id-token: write
-      contents: read
-      actions: read
-
-    env:
-      PROXYGEN_API_NAME: nhs-notify-supplier
-      APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
-      APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
-
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
-      - name: "Build proxies"
-        uses: ./.github/actions/build-proxies
-        with:
-          environment: "main"
-          apimEnv: "int"
-          runId: "${{ github.run_id }}"
-          releaseVersion: "${{ github.event.release.tag_name || inputs.releaseVersion }}"
-          isRelease: true
+  deploy:
+    uses: ./.github/workflows/deploy-supplier-api.yaml
+    secrets: inherit
+    with:
+      source_type: release
+      source_value: ${{ github.event.release.tag_name }}
+      deploy_backend: true
+      backend_account_group: nonprod
+      deploy_proxy: true
+      apim_environment: int

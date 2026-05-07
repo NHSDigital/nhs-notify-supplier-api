@@ -6,6 +6,7 @@ import {
 } from "@internal/datastore";
 import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
+import { makeIdempotent } from "@aws-lambda-powertools/idempotency";
 import {
   $LetterStatusChangeEvent,
   LetterStatusChangeEvent,
@@ -14,6 +15,14 @@ import createUpsertLetterHandler from "../upsert-handler";
 import { Deps } from "../../config/deps";
 import { EnvVars } from "../../config/env";
 import packageJson from "../../../package.json";
+
+jest.mock("@aws-lambda-powertools/idempotency", () => {
+  const original = jest.requireActual("@aws-lambda-powertools/idempotency");
+  return {
+    ...original,
+    makeIdempotent: jest.fn((fn, _) => fn),
+  };
+});
 
 const renderingSchemaVersion: string =
   packageJson.dependencies[
@@ -313,7 +322,7 @@ describe("createUpsertLetterHandler", () => {
     );
   });
 
-  it("does not treat a replayed insert as a failure", async () => {
+  it("does not treat a second insert for the same letter as a failure", async () => {
     const v1message = {
       letterEvent: createPreparedV1Event(),
       supplierSpec: {
@@ -336,6 +345,26 @@ describe("createUpsertLetterHandler", () => {
       {} as any,
     );
     expect(result!.batchItemFailures).toEqual([]);
+  });
+
+  it("does not insert a letter if the same message is replayed", async () => {
+    const v1message = {
+      letterEvent: createPreparedV1Event(),
+      supplierSpec: {
+        supplierId: "supplier1",
+        specId: "spec1",
+        priority: 10,
+        billingId: "billing1",
+      },
+    };
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("msg2", JSON.stringify(v1message)),
+    ]);
+    (makeIdempotent as jest.Mock).mockImplementationOnce((_fn) => "supplier1");
+
+    await createUpsertLetterHandler(mockedDeps)(evt, {} as any, {} as any);
+
+    expect(mockedDeps.letterRepo.putLetter).not.toHaveBeenCalled();
   });
 
   test("unknown supplier has metric emitted with 'unknown' supplier dimension", async () => {

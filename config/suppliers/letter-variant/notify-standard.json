@@ -1,0 +1,29 @@
+{
+  "constraints": {
+    "blackCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 20
+    },
+    "deliveryDays": {
+      "operator": "LESS_THAN",
+      "value": 3
+    },
+    "sheets": {
+      "operator": "LESS_THAN",
+      "value": 5
+    },
+    "sides": {
+      "operator": "LESS_THAN",
+      "value": 10
+    }
+  },
+  "description": "Black printing, economy postage tariff",
+  "id": "notify-standard",
+  "name": "Standard Letter",
+  "packSpecificationIds": [
+    "notify-c5"
+  ],
+  "status": "PROD",
+  "type": "STANDARD",
+  "volumeGroupId": "volumeGroup-test2"
+}

@@ -2,8 +2,8 @@ resource "aws_dynamodb_table" "supplier-configuration" {
   name         = "${local.csi}-supplier-config"
   billing_mode = "PAY_PER_REQUEST"
 
-  hash_key  = "PK"
-  range_key = "SK"
+  hash_key  = "pk"
+  range_key = "sk"
 
   ttl {
     attribute_name = "ttl"
@@ -11,17 +11,12 @@ resource "aws_dynamodb_table" "supplier-configuration" {
   }
 
   attribute {
-    name = "PK"
+    name = "pk"
     type = "S"
   }
 
   attribute {
-    name = "SK"
-    type = "S"
-  }
-
-  attribute {
-    name = "entityType"
+    name = "sk"
     type = "S"
   }
 
@@ -30,17 +25,9 @@ resource "aws_dynamodb_table" "supplier-configuration" {
     type = "S"
   }
 
-  // The type-index GSI allows us to query for all supplier configurations of a given type (e.g. all letter supplier configurations)
-  global_secondary_index {
-    name            = "EntityTypeIndex"
-    hash_key        = "entityType"
-    range_key       = "SK"
-    projection_type = "ALL"
-  }
-
   global_secondary_index {
     name            = "volumeGroup-index"
-    hash_key        = "PK"
+    hash_key        = "pk"
     range_key       = "volumeGroup"
     projection_type = "ALL"
   }

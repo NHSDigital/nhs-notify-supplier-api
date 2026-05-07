@@ -95,6 +95,9 @@ export function verifyIndexPositionOfLetterVariants(
 
   // All higher-urgency letters must appear before any lower-urgency letter
   expect(highestUrgencyMaxIndex).toBeLessThan(lowerUrgencyMinIndex);
+  logger.info(
+    `Verified all higher urgency letters appear before lower urgency letters in index. Highest index for urgency ${variantUrgencyMap[letterIdsHigherUrgency[0]]} was ${highestUrgencyMaxIndex}, lowest index for urgency ${variantUrgencyMap[letterIdsLowerUrgency[0]]} was ${lowerUrgencyMinIndex}`,
+  );
 }
 
 export async function verifyAllocationLogsContainPriority(
@@ -111,5 +114,8 @@ export async function verifyAllocationLogsContainPriority(
     expect(supplierSpec).toBeDefined();
     expect(supplierSpec.priority).toBeDefined();
     expect(supplierSpec.priority).toBe(priority);
+    logger.info(
+      `Verified log for domainId ${domainId} contains priority ${priority}`,
+    );
   }
 }
