@@ -16,11 +16,11 @@ def test_200_get_letter_status(url, authentication_secret):
     ids = get_pending_letter_ids(url, headers, LETTERS_ENDPOINT, limit=1)
     letter_id = ids[0]
 
+    print(f"calling GET {url}/{LETTERS_ENDPOINT}/{letter_id} with headers {headers}")
     get_message_response = requests.get(f"{url}/{LETTERS_ENDPOINT}/{letter_id}", headers=headers)
 
     ErrorHandler.handle_retry(get_message_response)
     assert get_message_response.status_code == 200, f"Response: {get_message_response.status_code}: {get_message_response.text}"
-
 
 @pytest.mark.test
 @pytest.mark.devtest

@@ -75,6 +75,7 @@ def get_pending_letter_ids(
             response.raise_for_status()
             data.extend(response.json().get("data", []))
             if len(data) >= limit:
+                print(f"Created and found letters with IDs {[item.get('id') for item in data]}")
                 return [item.get("id") for item in data]
             time.sleep(interval_s)
 

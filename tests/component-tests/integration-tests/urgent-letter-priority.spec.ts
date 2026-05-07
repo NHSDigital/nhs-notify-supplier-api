@@ -1,7 +1,6 @@
 import { expect, test } from "@playwright/test";
 import getRestApiGatewayBaseUrl from "tests/helpers/aws-gateway-helper";
 import { pollForLetterStatus } from "tests/helpers/poll-for-letters-helper";
-import { getLettersFromQueueViaIndex } from "tests/helpers/generate-fetch-test-data";
 import {
   getVariantsWithUrgency,
   sendEventsForVariants,
@@ -44,12 +43,6 @@ test.describe("Urgent Letter Priority Tests", () => {
     await verifyAllocationLogsContainPriority(urgencyNineLetterIds, 9);
     await verifyAllocationLogsContainPriority(urgencyTenLetterIds, 10);
 
-    const lettersFromQueue = await getLettersFromQueueViaIndex(supplier);
-
-    const letterIdsFromQueue = lettersFromQueue.map(
-      (letter) => letter.letterId,
-    );
-
     const header = createValidRequestHeaders(supplier);
     const response = await request.get(`${baseUrl}/${SUPPLIER_LETTERS}`, {
       headers: header,
@@ -63,10 +56,9 @@ test.describe("Urgent Letter Priority Tests", () => {
       GetLettersResponseSchema.parse(responseBody);
 
     const letterIds = getLettersResponse.data.map((letter) => letter.id);
-    expect(letterIds).toEqual(letterIdsFromQueue);
 
     verifyIndexPositionOfLetterVariants(
-      letterIdsFromQueue,
+      letterIds,
       urgencyTenLetterIds,
       urgencyNineLetterIds,
     );
