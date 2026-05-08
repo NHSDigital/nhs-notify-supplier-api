@@ -15,7 +15,7 @@ module "sqs_letter_updates" {
   create_dlq                        = true
   enable_dlq_alarm                  = false
   enable_queue_oldest_message_alarm = false
-  sqs_policy_overload = data.aws_iam_policy_document.letter_updates_queue_policy.json
+  sqs_policy_overload               = data.aws_iam_policy_document.letter_updates_queue_policy.json
 }
 
 data "aws_iam_policy_document" "letter_updates_queue_policy" {
