@@ -1,7 +1,7 @@
 {
-  "approval": "DRAFT",
+  "approval": "APPROVED",
   "id": "supplier1-notify-c4",
   "packSpecificationId": "notify-c4",
-  "status": "DRAFT",
+  "status": "PROD",
   "supplierId": "supplier1"
 }

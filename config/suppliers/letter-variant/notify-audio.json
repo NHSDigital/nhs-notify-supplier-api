@@ -1,0 +1,30 @@
+{
+  "constraints": {
+    "blackCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 20
+    },
+    "deliveryDays": {
+      "operator": "LESS_THAN",
+      "value": 3
+    },
+    "sheets": {
+      "operator": "LESS_THAN",
+      "value": 5
+    },
+    "sides": {
+      "operator": "LESS_THAN",
+      "value": 10
+    }
+  },
+  "description": "Audio CD with standard letter",
+  "id": "notify-audio",
+  "name": "Audio CD Letter",
+  "packSpecificationIds": [
+    "notify-audio"
+  ],
+  "priority": 50,
+  "status": "DRAFT",
+  "type": "AUDIO",
+  "volumeGroupId": "volumeGroup-test3"
+}
