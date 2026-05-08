@@ -35,7 +35,6 @@ export async function eligibleSuppliers(
     (sum, alloc) => sum + alloc.allocationPercentage,
     0,
   );
-  console.log("Allocation percentage sum:", allocationPercentageSum);
   if (allocationPercentageSum !== 100) {
     deps.logger.warn({
       description: "Supplier allocations do not sum to 100%",
@@ -103,7 +102,16 @@ export async function filterSuppliersWithCapacity(
   if (dailyAllocation) {
     const suppliersWithCapacity = suppliers.filter((supplier) => {
       const allocated = dailyAllocation.allocations[supplier.id] ?? 0;
-      return allocated < supplier.dailyCapacity;
+      const hasCapacity = allocated < supplier.dailyCapacity;
+      if (!hasCapacity) {
+        deps.logger.info({
+          description: "Supplier has exceeded daily capacity",
+          supplierId: supplier.id,
+          allocated,
+          dailyCapacity: supplier.dailyCapacity,
+        });
+      }
+      return hasCapacity;
     });
     return suppliersWithCapacity;
   }

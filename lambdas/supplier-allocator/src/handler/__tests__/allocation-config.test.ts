@@ -621,6 +621,13 @@ describe("filterSuppliersWithCapacity", () => {
     const result = await filterSuppliersWithCapacity(mockSuppliers, mockDeps);
 
     expect(result).toEqual([mockSuppliers[0], mockSuppliers[2]]);
+    expect(mockDeps.logger.info).toHaveBeenCalledTimes(1);
+    expect(mockDeps.logger.info).toHaveBeenCalledWith({
+      description: "Supplier has exceeded daily capacity",
+      supplierId: "supplier-2",
+      allocated: 600,
+      dailyCapacity: 500,
+    });
   });
 
   it("should call getDailyAllocation with correct parameters", async () => {

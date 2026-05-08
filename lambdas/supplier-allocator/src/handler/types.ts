@@ -1,5 +1,12 @@
-import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
-import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
+import {
+  $LetterRequestPreparedEvent,
+  LetterRequestPreparedEvent,
+} from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
+import {
+  $LetterRequestPreparedEventV2,
+  LetterRequestPreparedEventV2,
+} from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
+import z from "zod";
 
 export type SupplierSpec = {
   supplierId: string;
@@ -23,6 +30,11 @@ export type SupplierDetails = {
   allocationDetails: AllocationDetails;
   volumeGroupId: string;
 };
+
+export const PreparedEventSchema = z.discriminatedUnion("type", [
+  $LetterRequestPreparedEventV2,
+  $LetterRequestPreparedEvent,
+]);
 
 export type PreparedEvents =
   | LetterRequestPreparedEventV2

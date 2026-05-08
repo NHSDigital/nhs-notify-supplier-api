@@ -504,6 +504,13 @@ describe("supplier-config service", () => {
       ).rejects.toThrow(
         "No eligible pack specifications found for letter variant id undefined and pack specification ids spec1",
       );
+      expect(deps.logger.info).toHaveBeenCalledWith({
+        description: "Pack specification filtered out based on constraints",
+        packSpecId: "spec1",
+        pageCount: 3,
+        constraintValue: 2,
+        constraintOperator: "LESS_THAN",
+      });
       expect(deps.logger.error).toHaveBeenCalledWith(
         expect.objectContaining({
           description: "No eligible pack specifications found for letter",

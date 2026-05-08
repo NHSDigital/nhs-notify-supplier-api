@@ -364,6 +364,29 @@ describe("createSupplierAllocatorHandler", () => {
     expect(messageBody.letterEvent.data.domainId).toBe("letter-test");
   });
 
+  test("Throws batch failure when event type is unsupported", async () => {
+    const preparedEvent = {
+      ...createPreparedV2Event(),
+      type: "unsupported.event.type",
+    };
+
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("msg1", JSON.stringify(preparedEvent)),
+    ]);
+
+    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+
+    const handler = createSupplierAllocatorHandler(mockedDeps);
+    const result = await handler(evt, {} as any, {} as any);
+
+    expect(result).toBeDefined();
+    if (!result) throw new Error("expected BatchResponse, got void");
+
+    expect(result.batchItemFailures).toHaveLength(1);
+    expect(result.batchItemFailures[0].itemIdentifier).toBe("msg1");
+    expect((mockedDeps.logger.error as jest.Mock).mock.calls).toHaveLength(1);
+  });
+
   test("processes multiple messages in batch", async () => {
     const evt: SQSEvent = createSQSEvent([
       createSqsRecord(

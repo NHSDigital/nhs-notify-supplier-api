@@ -6,7 +6,6 @@ import {
   Supplier,
   VolumeGroup,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-config";
-import z from "zod";
 import { Unit } from "aws-embedded-metrics";
 import {
   MetricEntry,
@@ -28,23 +27,19 @@ import {
 } from "./allocation-config";
 
 import { Deps } from "../config/deps";
-import { PreparedEvents, SupplierDetails } from "./types";
+import { PreparedEventSchema, PreparedEvents, SupplierDetails } from "./types";
 
-// small envelope that must exist in all inputs
-const TypeEnvelope = z.object({ type: z.string().min(1) });
+function parseQueueMessage(queueMessage: string): PreparedEvents {
+  const result = PreparedEventSchema.safeParse(queueMessage);
 
-function validateType(event: unknown) {
-  const env = TypeEnvelope.safeParse(event);
-  if (!env.success) {
-    throw new Error("Missing or invalid envelope.type field");
+  if (!result.success) {
+    throw new Error(
+      `Message did not match an expected schema: ${JSON.stringify(
+        result.error.issues,
+      )}`,
+    );
   }
-  if (
-    !env.data.type.startsWith(
-      "uk.nhs.notify.letter-rendering.letter-request.prepared",
-    )
-  ) {
-    throw new Error(`Unexpected event type: ${env.data.type}`);
-  }
+  return result.data;
 }
 
 function buildSupplierDetails(
@@ -274,19 +269,16 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
       let supplier = "unknown";
       let priority = "unknown";
       try {
-        const letterEvent: PreparedEvents = JSON.parse(
-          record.body,
-        ) as PreparedEvents;
+        const sqsMessage = JSON.parse(record.body);
 
+        const letterEvent: PreparedEvents = parseQueueMessage(sqsMessage);
         deps.logger.info({
           description: "Extracted letter event",
           messageId: record.messageId,
         });
 
-        validateType(letterEvent);
-
         const supplierDetails: SupplierDetails = await getSupplierFromConfig(
-          letterEvent as PreparedEvents,
+          letterEvent,
           deps,
         );
 

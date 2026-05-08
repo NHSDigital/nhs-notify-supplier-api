@@ -236,6 +236,14 @@ export async function filterPacksForLetter(
       );
       if (isValid) {
         filteredPackIds.push(packSpecId);
+      } else {
+        deps.logger.info({
+          description: "Pack specification filtered out based on constraints",
+          packSpecId,
+          pageCount: letterEvent.data.pageCount,
+          constraintValue: packSpec.constraints.sheets.value,
+          constraintOperator: packSpec.constraints.sheets.operator,
+        });
       }
     }
   }
