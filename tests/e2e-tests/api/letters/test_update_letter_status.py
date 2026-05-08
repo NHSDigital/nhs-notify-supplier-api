@@ -19,8 +19,10 @@ def test_202_with_valid_headers(url, authentication_secret):
     letter_id = ids[0]
 
     data = Generators.generate_valid_message_body("ACCEPTED", letter_id)
+
+    print(f"calling PATCH {url}{LETTERS_ENDPOINT}/{letter_id} with headers {headers} and body {data}")
     update_letter_status = requests.patch(
-        f"{url}/{LETTERS_ENDPOINT}/{letter_id}",
+        f"{url}{LETTERS_ENDPOINT}/{letter_id}",
         headers=headers,
         json=data,
     )
@@ -35,8 +37,10 @@ def test_202_with_rejected_status(url, authentication_secret):
     letter_id = ids[0]
 
     data = Generators.generate_valid_message_rejected("REJECTED", letter_id)
+
+    print(f"calling PATCH {url}{LETTERS_ENDPOINT}/{letter_id} with headers {headers} and body {data}")
     update_letter_status = requests.patch(
-        f"{url}/{LETTERS_ENDPOINT}/{letter_id}",
+        f"{url}{LETTERS_ENDPOINT}/{letter_id}",
         headers=headers,
         json=data,
     )
@@ -55,8 +59,10 @@ def test_400_with_invalid_status(url, authentication_secret):
     letter_id = ids[0]
 
     data = Generators.generate_valid_message_body("", letter_id)
+
+    print(f"calling PATCH {url}{LETTERS_ENDPOINT}/{letter_id} with headers {headers} and body {data}")
     update_letter_status = requests.patch(
-        f"{url}/{LETTERS_ENDPOINT}/{letter_id}",
+        f"{url}{LETTERS_ENDPOINT}/{letter_id}",
         headers=headers,
         json=data,
     )
@@ -75,8 +81,10 @@ def test_400_id_mismatch_with_request(url, authentication_secret):
     letter_id = ids[0]
 
     data = Generators.generate_valid_message_body("ACCEPTED", "letter1")
+
+    print(f"calling PATCH {url}{LETTERS_ENDPOINT}/{letter_id} with headers {headers} and body {data}")
     update_letter_status = requests.patch(
-        f"{url}/{LETTERS_ENDPOINT}/{letter_id}",
+        f"{url}{LETTERS_ENDPOINT}/{letter_id}",
         headers=headers,
         json=data,
     )

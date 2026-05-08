@@ -8,7 +8,7 @@ from lib.errorhandler import ErrorHandler
 
 _REPO_ROOT = pathlib.Path(__file__).resolve().parents[3]
 _CLI_WORKSPACE = "nhs-notify-supplier-api-letter-test-data-utility"
-_SUPPLIER_ID = "TestSupplier1"
+_SUPPLIER_ID = "supplier1" # This should be the same id registered in the Apigee App to which the proxy will be associated
 
 
 def create_test_data(count: int = 10) -> None:
@@ -68,18 +68,19 @@ def get_pending_letter_ids(
         deadline = time.monotonic() + timeout_s
         data = []
         while time.monotonic() < deadline:
+            # Retrieves letters based on the supplier registered in the Apigee App
             response = requests.get(
-                f"{url}/{letters_endpoint}?limit={limit}", headers=headers
+                f"{url}{letters_endpoint}?limit={limit}", headers=headers
             )
             ErrorHandler.handle_retry(response)
             response.raise_for_status()
             data.extend(response.json().get("data", []))
             if len(data) >= limit:
-                print(f"Created and found letters with IDs {[item.get('id') for item in data]}")
+                print(f"Created and found letters with IDs {[item.get('id') for item in data]} for supplier registered in the Apigee App, to which the proxy is associated")
                 return [item.get("id") for item in data]
             time.sleep(interval_s)
 
     raise TimeoutError(
         f"Timed out after {retries} retries waiting for {limit} PENDING letter(s) at "
-        f"{url}/{letters_endpoint}"
+        f"{url}{letters_endpoint}"
     )
