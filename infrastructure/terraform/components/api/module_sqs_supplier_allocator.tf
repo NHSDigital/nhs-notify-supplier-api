@@ -13,7 +13,6 @@ module "sqs_supplier_allocator" {
   visibility_timeout_seconds = 60
 
   create_dlq                        = true
-  enable_dlq_alarm                  = false
   enable_queue_oldest_message_alarm = false
   sqs_policy_overload               = data.aws_iam_policy_document.supplier_allocator_queue_policy.json
 }

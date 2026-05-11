@@ -14,6 +14,5 @@ module "letter_status_updates_queue" {
   sqs_kms_key_arn = module.kms.key_arn
 
   create_dlq                        = true
-  enable_dlq_alarm                  = false
   enable_queue_oldest_message_alarm = false
 }

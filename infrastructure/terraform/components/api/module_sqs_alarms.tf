@@ -4,6 +4,5 @@ module "sqs_alarms" {
 
   alarm_prefix   = local.csi
   queue_name     = each.value
-  dlq_queue_name = replace(each.value, "-queue", "-dlq")
   tags           = local.default_tags
 }
