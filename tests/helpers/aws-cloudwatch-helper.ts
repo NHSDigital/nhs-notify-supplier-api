@@ -58,6 +58,19 @@ export async function pollSupplierAllocatorLogForResolvedSpec(
     `"${domainId}"`,
   ]);
 }
+export async function pollSupplierAllocatorLogForError(
+  msgToCheck: string,
+  domainId?: string,
+): Promise<string> {
+  const filterPatterns = ['"Error processing allocation of record"'];
+  if (domainId) {
+    filterPatterns.push(`"${domainId}"`);
+  }
+  return pollLambdaLog("supplier-allocator", filterPatterns, [
+    `"message": "${msgToCheck}`,
+    `"message":"${msgToCheck}`,
+  ]);
+}
 
 export async function pollUpsertLetterLogForError(
   msgToCheck: string,

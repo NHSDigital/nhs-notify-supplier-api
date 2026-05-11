@@ -134,6 +134,11 @@ export async function selectSupplierByFactor(
     }
     return suppliers.some((supplier) => supplier.id === alloc.supplier);
   });
+  if (supplierAllocationsForPack.length === 0) {
+    throw new Error(
+      "No valid supplier allocations found for suppliers with valid pack",
+    );
+  }
   const supplierFactors: { supplierId: string; factor: number }[] =
     await calculateSupplierAllocatedFactor(supplierAllocationsForPack, deps);
 

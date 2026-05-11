@@ -850,6 +850,37 @@ describe("selectSupplierByFactor", () => {
     expect(result).toBe("supplier-2");
   });
 
+  it("should exclude suppliers without allocations from factor calculation", async () => {
+    const allocationsWithMissingSupplier = [
+      mockSupplierAllocations[0],
+      {
+        id: "allocation-missing",
+        volumeGroup: "volume-group-1",
+        supplier: "supplier-unknown",
+        allocationPercentage: 10,
+        status: "PROD",
+      } as SupplierAllocation,
+      mockSupplierAllocations[2],
+    ];
+
+    const mockSupplierFactors = [
+      { supplierId: "supplier-1", factor: 0.5 },
+      { supplierId: "supplier-3", factor: 0.8 },
+    ];
+
+    (
+      supplierQuotasService.calculateSupplierAllocatedFactor as jest.Mock
+    ).mockResolvedValue(mockSupplierFactors);
+
+    const result = await selectSupplierByFactor(
+      mockSuppliers,
+      allocationsWithMissingSupplier,
+      mockDeps,
+    );
+
+    expect(result).toBe("supplier-1");
+  });
+
   it("should log an error if a supplier allocation has zero percentage and exclude it from factor calculation", async () => {
     const allocationsWithZeroPercentage = [
       mockSupplierAllocations[0],
@@ -884,6 +915,31 @@ describe("selectSupplierByFactor", () => {
       allocationPercentage: 0,
     });
     expect(result).toBe("supplier-1");
+  });
+
+  it("should throw an error if all suppliers have zero allocation percentage", async () => {
+    const zeroAllocations = [
+      {
+        id: "allocation-1",
+        volumeGroup: "volume-group-1",
+        supplier: "supplier-1",
+        allocationPercentage: 0,
+        status: "PROD",
+      } as SupplierAllocation,
+      {
+        id: "allocation-2",
+        volumeGroup: "volume-group-1",
+        supplier: "supplier-2",
+        allocationPercentage: 0,
+        status: "PROD",
+      } as SupplierAllocation,
+    ];
+
+    await expect(
+      selectSupplierByFactor(mockSuppliers, zeroAllocations, mockDeps),
+    ).rejects.toThrow(
+      "No valid supplier allocations found for suppliers with valid pack",
+    );
   });
 
   it("should return first supplier when all factors are equal", async () => {
