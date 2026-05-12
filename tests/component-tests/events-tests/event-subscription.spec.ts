@@ -1,6 +1,10 @@
 import { expect, test } from "@playwright/test";
 import { sendSnsEvent } from "tests/helpers/send-sns-event";
-import { createPreparedV1Event } from "tests/helpers/event-fixtures";
+import { sendSqsEvent } from "tests/helpers/send-sqs-event";
+import {
+  createPendingAllocatedEvent,
+  createPreparedV1Event,
+} from "tests/helpers/event-fixtures";
 import { randomUUID } from "node:crypto";
 import { logger } from "tests/helpers/pino-logger";
 import { createValidRequestHeaders } from "tests/constants/request-headers";
@@ -91,35 +95,14 @@ test.describe("Event Subscription SNS Tests", () => {
     );
     expect(getLetterResponse.status()).toBe(404);
   });
-
-  test("Verify that an error is logged for a duplicate letter id", async () => {
+  test("Verify that an error is logged for duplicates sent on the sqs queue", async () => {
     const domainId = randomUUID();
     logger.info(`Testing event subscription with domainId: ${domainId}`);
-    const preparedEvent1 = createPreparedV1Event({ domainId });
-    const response1 = await sendSnsEvent(preparedEvent1);
+    const pendingEvent = createPendingAllocatedEvent({ domainId });
+    await sendSqsEvent(JSON.stringify(pendingEvent));
+    const pendingEventDuplicate = createPendingAllocatedEvent({ domainId });
+    await sendSqsEvent(JSON.stringify(pendingEventDuplicate));
 
-    expect(response1.MessageId).toBeTruthy();
-
-    // poll supplier allocator to check if supplier has been allocated
-    const message = await pollSupplierAllocatorLogForResolvedSpec(domainId);
-    const supplierAllocatorLog = JSON.parse(message) as {
-      msg?: { allocationDetails?: { supplierSpec?: { supplierId?: string } } };
-    };
-    const supplierId =
-      supplierAllocatorLog.msg?.allocationDetails?.supplierSpec?.supplierId;
-
-    logger.info(
-      `Supplier ${supplierId} allocated to letter ${domainId} in supplier allocator lambda`,
-    );
-    if (!supplierId) {
-      throw new Error("supplierId was not found in supplier allocator log");
-    }
-
-    const preparedEvent2 = createPreparedV1Event({ domainId });
-    const response2 = await sendSnsEvent(preparedEvent2);
-    expect(response2.MessageId).toBeTruthy();
-
-    // poll supplier upsert to check if duplicate letter id was processed
     await pollUpsertLetterLogForWarning("Letter already exists", domainId);
   });
 });
