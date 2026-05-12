@@ -135,5 +135,11 @@
     "scripts/utilities/*",
     "tests",
     "tests/contracts/*"
-  ]
+  ],
+  "dependencies": {
+    "@nhsdigital/nhs-notify-event-schemas-letter-rendering": "^2.0.2",
+    "@nhsdigital/notify-digital-letters-consumer-contracts": "^1.0.1",
+    "@pact-foundation/pact": "^16.4.0",
+    "@pact-foundation/pact-core": "^19.2.0"
+  }
 }
