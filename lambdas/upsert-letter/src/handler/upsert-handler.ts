@@ -15,7 +15,7 @@ import {
   IdempotencyConfig,
   makeIdempotent,
 } from "@aws-lambda-powertools/idempotency";
-import { MetricEntry, MetricStatus, buildEMFObject } from "@internal/helpers";
+import { MetricEntry, MetricStatus, buildEMFObject, formatGroupId} from "@internal/helpers";
 import { Logger } from "pino";
 import { Deps } from "../config/deps";
 import {
@@ -108,10 +108,6 @@ function getOperationFromType(type: string): UpsertOperation {
   };
 }
 
-/**
- * NOTE: `groupId` needs to match the groupId in the function {@link allocate-handler#emitDataMetrics}
- * so the value always needs to be updated in both places
- */
 function mapToInsertLetter(
   upsertRequest: PreparedEvents,
   supplier: string,
@@ -128,7 +124,7 @@ function mapToInsertLetter(
     status: "PENDING",
     specificationId: spec,
     priority,
-    groupId: `${upsertRequest.data.clientId}_${upsertRequest.data.campaignId}_${upsertRequest.data.templateId}`,
+    groupId: formatGroupId(upsertRequest.data.clientId, upsertRequest.data.campaignId, upsertRequest.data.templateId),
     url: upsertRequest.data.url,
     source: upsertRequest.source,
     subject: upsertRequest.subject,

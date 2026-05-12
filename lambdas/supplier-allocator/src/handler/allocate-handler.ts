@@ -10,7 +10,7 @@ import {
 import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import z from "zod";
 import { Unit } from "aws-embedded-metrics";
-import { MetricEntry, MetricStatus, buildEMFObject } from "@internal/helpers";
+import { MetricEntry, MetricStatus, buildEMFObject, formatGroupId } from "@internal/helpers";
 import {
   getSupplierAllocationsForVolumeGroup,
   getSupplierDetails,
@@ -144,10 +144,6 @@ function emitMetrics(
   }
 }
 
-/**
- * NOTE: `groupId` needs to match the groupId in the function {@link upsert-handler#mapToInsertLetter}
- * so the value always needs to be updated in both places
- */
 function emitDataMetrics(
   letterEvent: PreparedEvents,
   supplier: string,
@@ -161,7 +157,7 @@ function emitDataMetrics(
     ClientId: clientId,
     CampaignId: campaignId || "unknown",
     TemplateId: templateId || "unknown",
-    GroupId: `${clientId}_${campaignId}_${templateId}`,
+    GroupId: formatGroupId(clientId, campaignId, templateId),
   };
   const metric: MetricEntry = {
     key: metricKey,
@@ -180,9 +176,8 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
     const tasks = event.Records.map(async (record) => {
       let supplier = "unknown";
       let priority = "unknown";
-      let letterEvent: PreparedEvents | undefined;
       try {
-        letterEvent = JSON.parse(record.body) as PreparedEvents;
+        const letterEvent: PreparedEvents = JSON.parse(record.body) as PreparedEvents;
 
         deps.logger.info({
           description: "Extracted letter event",

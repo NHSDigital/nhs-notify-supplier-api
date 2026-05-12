@@ -76,7 +76,7 @@ New developers of the NHS Notify Supplier API should understand the below.
 
 #### Prerequisites and Configuration
 
-- create the file `~/.aws/config` with the following contents:
+- Create the file `~/.aws/config` with the following contents:
 
   ```dsconfig
   [profile ]
@@ -100,9 +100,9 @@ New developers of the NHS Notify Supplier API should understand the below.
   output = json
   ```
 
-- in your `~/.bashrc` or `~/.zshrc` add the export `export AWS_PROFILE=supplier-dev`, or whichever profile you need
-- In the project's root directory create an `.env` file based on the `.env.template` file and fille variables as needed.
-- create the file `~/.npmrc` with the contents:
+- In your `~/.bashrc` or `~/.zshrc` add the export `export AWS_PROFILE=supplier-dev`, or whichever profile you need
+- In the project's root directory create an `.env` file based on the `.env.template` file and fill variables as needed.
+- Create the file `~/.npmrc` with the contents:
 
    ```dsconfig
     # Authenticate to GitHub Packages for github.com
@@ -114,11 +114,10 @@ New developers of the NHS Notify Supplier API should understand the below.
    ```
 
 - Install `node` (to run `npm install` and build the project)
-- install `aws cli` to be able to connect to AWS (needed for some tests)
+- Install `aws cli` to be able to connect to AWS (needed for some tests)
 - If AWS CLI calls are blocked by a firewall (e.g. Zscaler), you need to add the custom certificates in the location `/scripts/devcontainer/custom-ca-certs`
-- install `docker` or `Rancher` for containerisation
-  - Utilised the devcontainer, for pre reqs and configuration.
-  - You should open in a devcontainer or a Github workspaces. (In VSCode -> open control palet -> "Dev containers: rebuild without cache and reopen in container")
+- Install `docker` or `Rancher` for containerisation
+  - You should open in a devcontainer or a Github workspaces. (In VSCode -> Open Command Palet -> "Dev containers: rebuild without cache and reopen in container")
   - By default it will run `make config` when the container is first setup
 
 ##### SDKs

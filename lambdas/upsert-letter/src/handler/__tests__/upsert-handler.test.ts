@@ -402,7 +402,6 @@ describe("createUpsertLetterHandler", () => {
       }),
     );
     expect(mockedDeps.letterRepo.putLetter).not.toHaveBeenCalled();
-    // replace these
     expect(buildEMFObject as jest.Mock).toHaveBeenCalledWith(
       "upsertLetter",
       {
@@ -502,7 +501,6 @@ describe("createUpsertLetterHandler", () => {
         messageId: "bad-event",
       }),
     );
-    // replace these
     expect(buildEMFObject as jest.Mock).toHaveBeenCalledWith(
       "upsertLetter",
       {
