@@ -4,6 +4,7 @@ describe("createDependenciesContainer", () => {
   const env = {
     SUPPLIER_CONFIG_TABLE_NAME: "SupplierConfigTable",
     SUPPLIER_QUOTAS_TABLE_NAME: "SupplierQuotasTable",
+    IDEMPOTENCY_TABLE_NAME: "IdempotencyTable",
   };
 
   beforeEach(() => {
@@ -27,6 +28,10 @@ describe("createDependenciesContainer", () => {
       SupplierQuotasRepository: jest.fn(),
     }));
 
+    jest.mock("@aws-lambda-powertools/idempotency/dynamodb", () => ({
+      DynamoDBPersistenceLayer: jest.fn(),
+    }));
+
     // Env
     jest.mock("../env", () => ({ envVars: env }));
   });
@@ -39,6 +44,9 @@ describe("createDependenciesContainer", () => {
     );
     const { SupplierQuotasRepository } = jest.requireMock(
       "@internal/datastore",
+    );
+    const { DynamoDBPersistenceLayer } = jest.requireMock(
+      "@aws-lambda-powertools/idempotency/dynamodb",
     );
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { createDependenciesContainer } = require("../deps");
@@ -53,6 +61,11 @@ describe("createDependenciesContainer", () => {
     const supplierQuotasRepoCtorArgs = SupplierQuotasRepository.mock.calls[0];
     expect(supplierQuotasRepoCtorArgs[1]).toEqual({
       supplierQuotasTableName: "SupplierQuotasTable",
+    });
+    expect(DynamoDBPersistenceLayer).toHaveBeenCalledTimes(1);
+    const idempotencyLayerCtorArgs = DynamoDBPersistenceLayer.mock.calls[0][0];
+    expect(idempotencyLayerCtorArgs).toEqual({
+      tableName: "IdempotencyTable",
     });
     expect(deps.env).toEqual(env);
   });

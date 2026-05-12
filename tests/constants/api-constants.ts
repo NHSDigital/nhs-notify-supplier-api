@@ -16,3 +16,5 @@ export const EVENT_SUBSCRIPTION_TOPIC_ARN =
   process.env.EVENT_SUBSCRIPTION_TOPIC_ARN ??
   `arn:aws:sns:${AWS_REGION}:${AWS_ACCOUNT_ID}:${EVENT_SUBSCRIPTION_TOPIC_NAME}`;
 export const LETTERQUEUE_TABLENAME = `nhs-${envName}-supapi-letter-queue`;
+export const SUPPLIER_QUOTAS_TABLENAME = `nhs-${envName}-supapi-supplier-quotas`;
+export const UPSERT_LETTERS_QUEUE_URL = `https://sqs.${AWS_REGION}.amazonaws.com/${AWS_ACCOUNT_ID}/nhs-${envName}-supapi-letter-updates-queue`;
