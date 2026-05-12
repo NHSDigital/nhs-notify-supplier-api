@@ -1,5 +1,7 @@
-export function formatGroupId(clientId: string, campaignId?: string, templateId?: string): string {
-  const safeCampaignId = campaignId || "unknown";
-  const safeTemplateId = templateId || "unknown";
-  return `${clientId}_${safeCampaignId}_${safeTemplateId}`;
+export default function formatGroupId(
+  clientId: string,
+  campaignId = "unknown",
+  safeTemplateId = "unknown",
+): string {
+  return `${clientId}_${campaignId}_${safeTemplateId}`;
 }
