@@ -69,8 +69,8 @@ function createPreparedV1Event(
       requestItemId: "requestItem1",
       requestItemPlanId: "requestItemPlan1",
       clientId: "client1",
-      campaignId: "campaign1",
-      templateId: "template1",
+      campaignId: overrides.campaignId ?? "campaign1",
+      templateId: overrides.templateId ?? "template1",
       url: overrides.url ?? "s3://letterDataBucket/letter1.pdf",
       sha256Hash:
         "3a7bd3e2360a3d29eea436fcfb7e44c735d117c8f2f1d2d1e4f6e8f7e6e8f7e6",
@@ -201,6 +201,40 @@ describe("createSupplierAllocatorHandler", () => {
 
   test("parses SNS notification and sends message to SQS queue for v2 event", async () => {
     const preparedEvent = createPreparedV2Event();
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("msg1", JSON.stringify(preparedEvent)),
+    ]);
+
+    setupDefaultMocks();
+    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+
+    const handler = createSupplierAllocatorHandler(mockedDeps);
+    const result = await handler(evt, {} as any, {} as any);
+
+    expect(result).toBeDefined();
+    if (!result) throw new Error("expected BatchResponse, got void");
+
+    expect(result.batchItemFailures).toHaveLength(0);
+
+    expect(mockSqsClient.send).toHaveBeenCalledTimes(1);
+    const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
+    expect(sendCall).toBeInstanceOf(SendMessageCommand);
+
+    const messageBody = JSON.parse(sendCall.input.MessageBody);
+    expect(messageBody.letterEvent).toEqual(preparedEvent);
+    expect(messageBody.supplierSpec).toEqual({
+      supplierId: "supplier1",
+      specId: "spec1",
+      priority: 1,
+      billingId: "billing1",
+    });
+  });
+
+  test("parses SNS notification and sends message to SQS queue for v2 event without a campaignId and templateId", async () => {
+    const preparedEvent = createPreparedV2Event({
+      campaignId: "",
+      templateId: "",
+    });
     const evt: SQSEvent = createSQSEvent([
       createSqsRecord("msg1", JSON.stringify(preparedEvent)),
     ]);

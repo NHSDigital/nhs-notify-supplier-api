@@ -10,7 +10,12 @@ import {
 import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import z from "zod";
 import { Unit } from "aws-embedded-metrics";
-import { MetricEntry, MetricStatus, buildEMFObject } from "@internal/helpers";
+import {
+  MetricEntry,
+  MetricStatus,
+  buildEMFObject,
+  formatGroupId,
+} from "@internal/helpers";
 import {
   getSupplierAllocationsForVolumeGroup,
   getSupplierDetails,
@@ -144,6 +149,29 @@ function emitMetrics(
   }
 }
 
+function emitDataMetrics(
+  letterEvent: PreparedEvents,
+  supplier: string,
+  metricKey: string,
+  deps: Deps,
+) {
+  const namespace = "supplier-allocator";
+  const { campaignId, clientId, templateId } = letterEvent.data;
+  const dimensions: Record<string, string> = {
+    Supplier: supplier,
+    ClientId: clientId,
+    CampaignId: campaignId || "unknown",
+    TemplateId: templateId || "unknown",
+    GroupId: formatGroupId(clientId, campaignId, templateId),
+  };
+  const metric: MetricEntry = {
+    key: metricKey,
+    value: 1,
+    unit: Unit.Count,
+  };
+  deps.logger.info(buildEMFObject(namespace, dimensions, metric));
+}
+
 export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
   return async (event: SQSEvent) => {
     const batchItemFailures: SQSBatchItemFailure[] = [];
@@ -154,7 +182,9 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
       let supplier = "unknown";
       let priority = "unknown";
       try {
-        const letterEvent: unknown = JSON.parse(record.body);
+        const letterEvent: PreparedEvents = JSON.parse(
+          record.body,
+        ) as PreparedEvents;
 
         deps.logger.info({
           description: "Extracted letter event",
@@ -163,8 +193,8 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
 
         validateType(letterEvent);
 
-        const supplierSpec = getSupplier(letterEvent as PreparedEvents, deps);
-        await getSupplierFromConfig(letterEvent as PreparedEvents, deps);
+        const supplierSpec = getSupplier(letterEvent, deps);
+        await getSupplierFromConfig(letterEvent, deps);
 
         supplier = supplierSpec.supplierId;
         priority = String(supplierSpec.priority);
@@ -199,6 +229,7 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
         );
 
         incrementMetric(perAllocationSuccess, supplier, priority);
+        emitDataMetrics(letterEvent, supplier, "extra_data_dimensions", deps);
       } catch (error) {
         deps.logger.error({
           description: "Error processing allocation of record",
