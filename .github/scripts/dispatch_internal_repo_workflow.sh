@@ -224,7 +224,7 @@ if [[ -z "$extraSecretNames" ]]; then
   extraSecretNames=""
 fi
 
-if [{ -z "$tableName" }]; then
+if [[ -z "$tableName" ]]; then
   tableName=""
 fi
 
