@@ -213,6 +213,7 @@ jobs:
             --releaseVersion ${{ github.head_ref || github.ref_name }} \
             --targetWorkflow "publish-supplier-config-to-ddb.yaml" \
             --targetEnvironment "${{ steps.set-environment.outputs.environment_name }}" \
+            --internalRef "feature/CCM-17337-Publish-Supplier-Configuration-Event" \
             --targetComponent "config" \
             --targetAccountGroup "nhs-notify-suppliers-dev" \
             --tableName "supplier-config" \
