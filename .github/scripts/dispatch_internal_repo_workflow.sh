@@ -306,17 +306,21 @@ echo "[INFO] Triggering workflow '$targetWorkflow' in nhs-notify-internal..."
 
 echo "[DEBUG] Dispatch event payload: $DISPATCH_EVENT"
 
-trigger_response=$(curl -s -L \
-  --fail \
+trigger_http_code=$(curl -s -L \
+  -o /tmp/dispatch_response.json \
+  -w "%{http_code}" \
   -X POST \
   -H "Accept: application/vnd.github+json" \
   -H "Authorization: Bearer ${PR_TRIGGER_PAT}" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
   "https://api.github.com/repos/NHSDigital/nhs-notify-internal/actions/workflows/$targetWorkflow/dispatches" \
-  -d "$DISPATCH_EVENT" 2>&1)
+  -d "$DISPATCH_EVENT")
 
-if [[ $? -ne 0 ]]; then
-  echo "[ERROR] Failed to trigger workflow. Response: $trigger_response"
+trigger_response=$(cat /tmp/dispatch_response.json)
+
+if [[ "$trigger_http_code" -lt 200 || "$trigger_http_code" -ge 300 ]]; then
+  echo "[ERROR] Failed to trigger workflow. HTTP status: $trigger_http_code"
+  echo "[ERROR] Response body: $trigger_response"
   exit 1
 fi
 
