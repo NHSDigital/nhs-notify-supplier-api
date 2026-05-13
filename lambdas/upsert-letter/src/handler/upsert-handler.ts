@@ -15,7 +15,12 @@ import {
   IdempotencyConfig,
   makeIdempotent,
 } from "@aws-lambda-powertools/idempotency";
-import { MetricEntry, MetricStatus, buildEMFObject, formatGroupId} from "@internal/helpers";
+import {
+  MetricEntry,
+  MetricStatus,
+  buildEMFObject,
+  formatGroupId,
+} from "@internal/helpers";
 import { Logger } from "pino";
 import { Deps } from "../config/deps";
 import {
@@ -124,7 +129,11 @@ function mapToInsertLetter(
     status: "PENDING",
     specificationId: spec,
     priority,
-    groupId: formatGroupId(upsertRequest.data.clientId, upsertRequest.data.campaignId, upsertRequest.data.templateId),
+    groupId: formatGroupId(
+      upsertRequest.data.clientId,
+      upsertRequest.data.campaignId,
+      upsertRequest.data.templateId,
+    ),
     url: upsertRequest.data.url,
     source: upsertRequest.source,
     subject: upsertRequest.subject,

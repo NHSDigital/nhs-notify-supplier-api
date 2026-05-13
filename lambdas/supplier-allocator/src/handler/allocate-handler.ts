@@ -10,7 +10,12 @@ import {
 import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import z from "zod";
 import { Unit } from "aws-embedded-metrics";
-import { MetricEntry, MetricStatus, buildEMFObject, formatGroupId } from "@internal/helpers";
+import {
+  MetricEntry,
+  MetricStatus,
+  buildEMFObject,
+  formatGroupId,
+} from "@internal/helpers";
 import {
   getSupplierAllocationsForVolumeGroup,
   getSupplierDetails,
@@ -177,7 +182,9 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
       let supplier = "unknown";
       let priority = "unknown";
       try {
-        const letterEvent: PreparedEvents = JSON.parse(record.body) as PreparedEvents;
+        const letterEvent: PreparedEvents = JSON.parse(
+          record.body,
+        ) as PreparedEvents;
 
         deps.logger.info({
           description: "Extracted letter event",

@@ -9,4 +9,4 @@ export { default as $Environment } from "./environment";
 export * from "./id-ref";
 export * from "./logger";
 export * from "./metrics";
-export * from "./group-id";
+export { default as formatGroupId } from "./group-id";
