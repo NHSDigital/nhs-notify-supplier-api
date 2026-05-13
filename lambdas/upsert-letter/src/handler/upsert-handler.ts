@@ -10,11 +10,18 @@ import {
   LetterStatusChangeEvent,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
 import { $LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
-import { MetricsLogger, Unit, metricScope } from "aws-embedded-metrics";
+import { Unit } from "aws-embedded-metrics";
 import {
   IdempotencyConfig,
   makeIdempotent,
 } from "@aws-lambda-powertools/idempotency";
+import {
+  MetricEntry,
+  MetricStatus,
+  buildEMFObject,
+  formatGroupId,
+} from "@internal/helpers";
+import { Logger } from "pino";
 import { Deps } from "../config/deps";
 import {
   PreparedEvents,
@@ -54,7 +61,21 @@ function getOperationFromType(type: string): UpsertOperation {
             letterId: letterToInsert.id,
             supplierId: letterToInsert.supplierId,
           });
+          // emit success metric
+          emitIndividualMetric(
+            deps.logger,
+            letterToInsert.supplierId,
+            MetricStatus.Success,
+            letterToInsert.groupId,
+          );
         } catch (error) {
+          // emit failure metric
+          emitIndividualMetric(
+            deps.logger,
+            letterToInsert.supplierId,
+            MetricStatus.Failure,
+            letterToInsert.groupId,
+          );
           if (error instanceof LetterAlreadyExistsError) {
             deps.logger.warn({
               description: "Letter already exists",
@@ -83,6 +104,11 @@ function getOperationFromType(type: string): UpsertOperation {
         letterId: letterToUpdate.id,
         supplierId: letterToUpdate.supplierId,
       });
+      emitIndividualMetric(
+        deps.logger,
+        letterToUpdate.supplierId,
+        MetricStatus.Success,
+      );
     },
   };
 }
@@ -103,10 +129,11 @@ function mapToInsertLetter(
     status: "PENDING",
     specificationId: spec,
     priority,
-    groupId:
-      upsertRequest.data.clientId +
-      upsertRequest.data.campaignId +
+    groupId: formatGroupId(
+      upsertRequest.data.clientId,
+      upsertRequest.data.campaignId,
       upsertRequest.data.templateId,
+    ),
     url: upsertRequest.data.url,
     source: upsertRequest.source,
     subject: upsertRequest.subject,
@@ -145,26 +172,24 @@ async function runUpsert(
   }
 }
 
-async function emitMetrics(
-  metrics: MetricsLogger,
-  successMetrics: Map<string, number>,
-  failedMetrics: Map<string, number>,
+async function emitIndividualMetric(
+  logger: Logger,
+  supplier: string,
+  metricKey: MetricStatus,
+  groupId?: string,
 ) {
-  metrics.setNamespace(process.env.AWS_LAMBDA_FUNCTION_NAME || `upsertLetter`);
-  // emit success metrics
-  for (const [supplier, count] of successMetrics) {
-    metrics.putDimensions({
-      Supplier: supplier,
-    });
-    metrics.putMetric("MessagesProcessed", count, Unit.Count);
-  }
-  // emit failure metrics
-  for (const [supplier, count] of failedMetrics) {
-    metrics.putDimensions({
-      Supplier: supplier,
-    });
-    metrics.putMetric("MessageFailed", count, Unit.Count);
-  }
+  const namespace = process.env.AWS_LAMBDA_FUNCTION_NAME || "upsertLetter";
+  const dimensions: Record<string, string> = {
+    Supplier: supplier || "unknown",
+    GroupId: groupId || "unknown",
+  };
+
+  const metric: MetricEntry = {
+    key: metricKey,
+    value: 1,
+    unit: Unit.Count,
+  };
+  logger.info(buildEMFObject(namespace, dimensions, metric));
 }
 
 function getSupplierIdFromEvent(letterEvent: any): string {
@@ -193,76 +218,64 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
     config: idempotencyConfig,
   });
 
-  return metricScope((metrics: MetricsLogger) => {
-    return async (event: SQSEvent, context: Context) => {
-      const batchItemFailures: SQSBatchItemFailure[] = [];
-      const perSupplierSuccess: Map<string, number> = new Map<string, number>();
-      const perSupplierFailure: Map<string, number> = new Map<string, number>();
+  return async (event: SQSEvent, context: Context) => {
+    const batchItemFailures: SQSBatchItemFailure[] = [];
 
-      const tasks = event.Records.map(async (record) => {
-        let supplier = "unknown";
-        try {
-          deps.logger.info({
-            description: "Processing record",
-            messageId: record.messageId,
-            message: record.body,
-          });
-          const sqsMessage = JSON.parse(record.body);
+    const tasks = event.Records.map(async (record) => {
+      try {
+        deps.logger.info({
+          description: "Processing record",
+          messageId: record.messageId,
+          message: record.body,
+        });
+        const sqsMessage = JSON.parse(record.body);
 
-          const queueMessage: QueueMessage = parseQueueMessage(sqsMessage);
+        const queueMessage: QueueMessage = parseQueueMessage(sqsMessage);
 
-          let letterEvent: LetterStatusChangeEvent | PreparedEvents;
-          let supplierSpec: SupplierSpec | undefined;
+        let letterEvent: LetterStatusChangeEvent | PreparedEvents;
+        let supplierSpec: SupplierSpec | undefined;
 
-          if ("letterEvent" in queueMessage) {
-            letterEvent = queueMessage.letterEvent;
-            supplierSpec = queueMessage.supplierSpec;
-          } else {
-            letterEvent = queueMessage;
-            supplierSpec = undefined;
-          }
-
-          deps.logger.info({
-            description: "Extracted letter event",
-            messageId: record.messageId,
-            type: letterEvent.type,
-            supplier: supplierSpec,
-          });
-
-          idempotencyConfig.registerLambdaContext(context);
-          supplier = await processRecordIdempotently(
-            letterEvent,
-            supplierSpec,
-            perSupplierSuccess,
-            deps,
-          );
-        } catch (error) {
-          deps.logger.error({
-            description: "Error processing upsert of record",
-            err: error,
-            messageId: record.messageId,
-            message: record.body,
-          });
-          perSupplierFailure.set(
-            supplier,
-            (perSupplierFailure.get(supplier) || 0) + 1,
-          );
-          batchItemFailures.push({ itemIdentifier: record.messageId });
+        if ("letterEvent" in queueMessage) {
+          letterEvent = queueMessage.letterEvent;
+          supplierSpec = queueMessage.supplierSpec;
+        } else {
+          letterEvent = queueMessage;
+          supplierSpec = undefined;
         }
-      });
 
-      await Promise.all(tasks);
+        deps.logger.info({
+          description: "Extracted letter event",
+          messageId: record.messageId,
+          type: letterEvent.type,
+          supplier: supplierSpec,
+        });
 
-      await emitMetrics(metrics, perSupplierSuccess, perSupplierFailure);
-      return { batchItemFailures };
-    };
-  });
+        idempotencyConfig.registerLambdaContext(context);
+        await processRecordIdempotently(letterEvent, supplierSpec, deps);
+      } catch (error) {
+        deps.logger.error({
+          description: "Error processing upsert of record",
+          err: error,
+          messageId: record.messageId,
+          message: record.body,
+        });
+        await emitIndividualMetric(
+          deps.logger,
+          "unknown",
+          MetricStatus.Failure,
+        );
+        batchItemFailures.push({ itemIdentifier: record.messageId });
+      }
+    });
+    await Promise.all(tasks);
+
+    return { batchItemFailures };
+  };
 }
 
 async function processRecord(
   letterEvent: LetterStatusChangeEvent | PreparedEvents,
   supplierSpec: SupplierSpec | undefined,
-  perSupplierSuccess: Map<string, number>,
   deps: Deps,
 ) {
   const supplier =
@@ -284,6 +297,5 @@ async function processRecord(
     deps,
   );
 
-  perSupplierSuccess.set(supplier, (perSupplierSuccess.get(supplier) || 0) + 1);
   return supplier;
 }
