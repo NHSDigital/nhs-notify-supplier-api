@@ -30,7 +30,6 @@ import {
   QueueMessageSchema,
   UpsertOperation,
 } from "./schemas";
-import { format } from "node:path";
 
 const idempotencyConfig = new IdempotencyConfig({
   eventKeyJmesPath: "id",
@@ -128,8 +127,8 @@ function mapToInsertLetter(
     specificationId: allocationDetails.supplierSpec.specId,
     priority: allocationDetails.supplierSpec.priority,
     groupId: formatGroupId(
-      upsertRequest.data.clientId +
-      upsertRequest.data.campaignId +
+      upsertRequest.data.clientId,
+      upsertRequest.data.campaignId,
       upsertRequest.data.templateId,
     ),
     url: upsertRequest.data.url,
@@ -230,47 +229,43 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
 
         const queueMessage: QueueMessage = parseQueueMessage(sqsMessage);
 
-          let letterEvent: LetterStatusChangeEvent | PreparedEvents;
-          let allocationDetails: AllocationDetails | undefined;
+        let letterEvent: LetterStatusChangeEvent | PreparedEvents;
+        let allocationDetails: AllocationDetails | undefined;
 
-          if ("letterEvent" in queueMessage) {
-            letterEvent = queueMessage.letterEvent;
-            allocationDetails = queueMessage.allocationDetails;
-          } else {
-            letterEvent = queueMessage;
-            allocationDetails = undefined;
-          }
+        if ("letterEvent" in queueMessage) {
+          letterEvent = queueMessage.letterEvent;
+          allocationDetails = queueMessage.allocationDetails;
+        } else {
+          letterEvent = queueMessage;
+          allocationDetails = undefined;
+        }
 
-          deps.logger.info({
-            description: "Extracted letter event",
-            messageId: record.messageId,
-            type: letterEvent.type,
-            supplier: allocationDetails?.supplierSpec,
-          });
+        deps.logger.info({
+          description: "Extracted letter event",
+          messageId: record.messageId,
+          type: letterEvent.type,
+          supplier: allocationDetails?.supplierSpec,
+        });
 
-          idempotencyConfig.registerLambdaContext(context);
-          await processRecordIdempotently(
-            letterEvent,
-            allocationDetails,
-            deps,
-          );
-        } catch (error) {
-          deps.logger.error({
-            description: "Error processing upsert of record",
-            err: error,
-            messageId: record.messageId,
-            message: record.body,
-          });
-          await emitIndividualMetric(
+        idempotencyConfig.registerLambdaContext(context);
+        await processRecordIdempotently(letterEvent, allocationDetails, deps);
+      } catch (error) {
+        deps.logger.error({
+          description: "Error processing upsert of record",
+          err: error,
+          messageId: record.messageId,
+          message: record.body,
+        });
+        await emitIndividualMetric(
           deps.logger,
           "unknown",
           MetricStatus.Failure,
         );
-          batchItemFailures.push({ itemIdentifier: record.messageId });
-        }
-      });
+        batchItemFailures.push({ itemIdentifier: record.messageId });
+      }
+    });
 
-      await Promise.all(tasks);
+    await Promise.all(tasks);
 
     return { batchItemFailures };
   };

@@ -24,11 +24,11 @@ function makeDeps(overrides: Partial<Deps> = {}): Deps {
   } as unknown as Deps["supplierConfigRepo"];
 
   const base: Partial<Deps> = {
-    logger: logger as any,
-    supplierConfigRepo: supplierConfigRepo as any,
+    logger,
+    supplierConfigRepo,
   };
 
-  return { ...(base as Deps), ...overrides } as Deps;
+  return { ...(base as Deps), ...overrides };
 }
 
 describe("supplier-config service", () => {

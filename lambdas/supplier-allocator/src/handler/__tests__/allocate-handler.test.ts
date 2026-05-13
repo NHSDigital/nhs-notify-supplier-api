@@ -17,7 +17,6 @@ import * as supplierQuotas from "../../services/supplier-quotas";
 import * as allocationConfig from "../allocation-config";
 
 import { Deps } from "../../config/deps";
-import { EnvVars } from "../../config/env";
 import packageJson from "../../../package.json";
 
 const renderingSchemaVersion: string =
@@ -204,7 +203,7 @@ describe("createSupplierAllocatorHandler", () => {
       getSuppliersDetails: jest.fn(),
       getSupplierPacksForPackSpecification: jest.fn(),
       getPackSpecification: jest.fn(),
-    } as jest.Mocked<SupplierConfigRepository>;
+    };
 
     mockedSupplierQuotasRepo = {
       ddbClient: {} as any,
@@ -213,18 +212,18 @@ describe("createSupplierAllocatorHandler", () => {
       updateOverallAllocation: jest.fn(),
       getDailyAllocation: jest.fn(),
       updateDailyAllocation: jest.fn(),
-    } as jest.Mocked<SupplierQuotasRepository>;
+    };
 
     mockedDeps = {
       logger: { error: jest.fn(), info: jest.fn() } as unknown as pino.Logger,
       env: {
         SUPPLIER_CONFIG_TABLE_NAME: "SupplierConfigTable",
         SUPPLIER_QUOTAS_TABLE_NAME: "SupplierQuotasTable",
-      } as EnvVars,
+      },
       sqsClient: mockSqsClient,
       supplierConfigRepo: mockedSupplierConfigRepo,
       supplierQuotasRepo: mockedSupplierQuotasRepo,
-    } as jest.Mocked<Deps>;
+    };
     jest.clearAllMocks();
   });
 
@@ -288,11 +287,14 @@ describe("createSupplierAllocatorHandler", () => {
 
     const messageBody = JSON.parse(sendCall.input.MessageBody);
     expect(messageBody.letterEvent).toEqual(preparedEvent);
-    expect(messageBody.supplierSpec).toEqual({
+    expect(messageBody.allocationDetails.supplierSpec).toEqual({
       supplierId: "supplier1",
       specId: "spec1",
       priority: 1,
       billingId: "billing1",
+    });
+    expect(messageBody.allocationDetails.allocationStatus).toEqual({
+      status: "PENDING",
     });
   });
 

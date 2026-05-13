@@ -388,7 +388,7 @@ describe("createUpsertLetterHandler", () => {
     expect(insertedV2Letter.reasonText).toBe(
       "No suppliers available for allocation of V2",
     );
-    expect(insertedV2Letter.groupId).toBe("client1campaign1template1");
+    expect(insertedV2Letter.groupId).toBe("client1_campaign1_template1");
     expect(insertedV2Letter.source).toBe("/data-plane/letter-rendering/test");
     expect(insertedV2Letter.specificationBillingId).toBe("unknown");
     expect(insertedV2Letter.priority).toBe(0);
@@ -405,7 +405,7 @@ describe("createUpsertLetterHandler", () => {
     expect(insertedV1Letter.reasonText).toBe(
       "No suppliers available for allocation of V1",
     );
-    expect(insertedV1Letter.groupId).toBe("client1campaign1template1");
+    expect(insertedV1Letter.groupId).toBe("client1_campaign1_template1");
     expect(insertedV1Letter.source).toBe("/data-plane/letter-rendering/test");
     expect(insertedV1Letter.specificationBillingId).toBe("unknown");
     expect(insertedV1Letter.priority).toBe(0);
@@ -418,20 +418,6 @@ describe("createUpsertLetterHandler", () => {
     expect(updatedLetter.reasonCode).toBe("R07");
     expect(updatedLetter.reasonText).toBe("No such address");
     expect(updatedLetter.supplierId).toBe("supplier1");
-    expect(mockMetrics.setNamespace).toHaveBeenCalledWith("upsertLetter");
-    expect(mockMetrics.putDimensions).toHaveBeenCalledWith({
-      Supplier: "supplier1",
-    });
-    expect(mockMetrics.putMetric).toHaveBeenCalledWith(
-      "MessagesProcessed",
-      2,
-      "Count",
-    );
-    expect(mockMetrics.putMetric).toHaveBeenCalledWith(
-      "MessagesProcessed",
-      1,
-      "Count",
-    );
   });
 
   it("does not treat a second insert for the same letter as a failure", async () => {

@@ -42,21 +42,21 @@ describe("eligibleSuppliers", () => {
         supplier: "supplier-1",
         allocationPercentage: 50,
         status: "PROD",
-      } as SupplierAllocation,
+      },
       {
         id: "allocation-2",
         volumeGroup: "volume-group-1",
         supplier: "supplier-2",
         allocationPercentage: 30,
         status: "PROD",
-      } as SupplierAllocation,
+      },
       {
         id: "allocation-3",
         volumeGroup: "volume-group-1",
         supplier: "supplier-3",
         allocationPercentage: 20,
         status: "PROD",
-      } as SupplierAllocation,
+      },
     ];
 
     mockSuppliers = [
@@ -808,21 +808,21 @@ describe("selectSupplierByFactor", () => {
         supplier: "supplier-1",
         allocationPercentage: 50,
         status: "PROD",
-      } as SupplierAllocation,
+      },
       {
         id: "allocation-2",
         volumeGroup: "volume-group-1",
         supplier: "supplier-2",
         allocationPercentage: 30,
         status: "PROD",
-      } as SupplierAllocation,
+      },
       {
         id: "allocation-3",
         volumeGroup: "volume-group-1",
         supplier: "supplier-3",
         allocationPercentage: 20,
         status: "PROD",
-      } as SupplierAllocation,
+      },
     ];
 
     mockDeps = {
@@ -1074,7 +1074,6 @@ describe("selectSupplierByFactor", () => {
       { length: 10 },
       (_, i) =>
         ({
-          id: `allocation-${i}`,
           volumeGroup: "volume-group-1",
           supplier: `supplier-${i}`,
           allocationPercentage: 10,
