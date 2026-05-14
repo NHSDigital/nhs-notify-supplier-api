@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-commented-code */
 import { Deps } from "./deps";
 import { RequestHeaders } from "../../../tests/constants/request-headers";
 

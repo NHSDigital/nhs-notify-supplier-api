@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-commented-code */
 import { Logger } from "pino";
 import { createLogger } from "@internal/helpers/src";
 import { LambdaClient } from "@aws-sdk/client-lambda";
@@ -19,7 +20,7 @@ export async function createDependenciesContainer(): Promise<Deps> {
   const log = createLogger({ logLevel: envVars.PINO_LOG_LEVEL });
   const lambdaClient = new LambdaClient();
   const apiClient = new APIGatewayClient();
-  const baseUrl = await getRestApiGatewayBaseUrl(envVars, apiClient);
+  const baseUrl = await getRestApiGatewayBaseUrl(envVars, apiClient, log);
 
   return {
     logger: log,
@@ -33,8 +34,9 @@ export async function createDependenciesContainer(): Promise<Deps> {
 async function getRestApiGatewayBaseUrl(
   environment: EnvVars,
   apiClient: APIGatewayClient,
+  logger: Logger,
 ): Promise<string> {
-  console.log(
+  logger.info(
     "VLASIS - about to retrieve API Gateway base URL using API client",
   );
   // const apiName = `nhs-${environment.ENVIRONMENT}-supapi`;
