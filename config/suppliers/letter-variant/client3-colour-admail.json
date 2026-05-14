@@ -1,0 +1,35 @@
+{
+  "clientId": "client3",
+  "constraints": {
+    "blackCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 20
+    },
+    "colourCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 10
+    },
+    "deliveryDays": {
+      "operator": "LESS_THAN",
+      "value": 3
+    },
+    "sheets": {
+      "operator": "LESS_THAN",
+      "value": 5
+    },
+    "sides": {
+      "operator": "LESS_THAN",
+      "value": 10
+    }
+  },
+  "description": "Colour printing, whitemail, admail-economy postage tariff",
+  "id": "client3-colour-admail",
+  "name": "Client 3 Colour Admail",
+  "packSpecificationIds": [
+    "notify-admail-colour-whitemail"
+  ],
+  "priority": 50,
+  "status": "INT",
+  "type": "STANDARD",
+  "volumeGroupId": "volumeGroup-test3"
+}
