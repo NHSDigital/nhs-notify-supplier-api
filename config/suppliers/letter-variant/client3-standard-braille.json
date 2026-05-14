@@ -1,0 +1,31 @@
+{
+  "clientId": "client3",
+  "constraints": {
+    "blackCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 20
+    },
+    "deliveryDays": {
+      "operator": "LESS_THAN",
+      "value": 3
+    },
+    "sheets": {
+      "operator": "LESS_THAN",
+      "value": 5
+    },
+    "sides": {
+      "operator": "LESS_THAN",
+      "value": 10
+    }
+  },
+  "description": "Braille, Whitemail",
+  "id": "client3-standard-braille",
+  "name": "Client 3 Standard Braille Letters",
+  "packSpecificationIds": [
+    "notify-braille-whitemail"
+  ],
+  "priority": 50,
+  "status": "INT",
+  "type": "BRAILLE",
+  "volumeGroupId": "volumeGroup-test3"
+}
