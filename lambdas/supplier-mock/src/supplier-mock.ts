@@ -2,11 +2,11 @@ import { Deps } from "./deps";
 import { RequestHeaders } from "../../../tests/constants/request-headers";
 
 export default function createHandler(deps: Deps) {
-  return async function handler() {
+  return async () => {
     deps.logger.info("Hello from the supplier mock lambda!");
     // const envName = deps.env.ENVIRONMENT;
     const envName = "pr535";
-    console.log(`Environment: ${envName}`);
+    deps.logger.info(`Environment: ${envName}`);
     // const input: ListFunctionsRequest = {
     //   MaxItems: 1000,
     // };
@@ -30,10 +30,10 @@ export default function createHandler(deps: Deps) {
     //   }),
     // );
 
-    console.log(
+    deps.logger.info(
       "VLASIS - about to make a request to the get letters endpoint of the supplier API",
     );
-    console.log(`Base URL from deps: ${deps.baseUrl}`);
+    deps.logger.info(`Base URL from deps: ${deps.baseUrl}`);
     const headers: RequestHeaders = {
       "NHSD-Supplier-ID": "TestSupplier1",
       "NHSD-Correlation-ID": "12345",
@@ -44,7 +44,7 @@ export default function createHandler(deps: Deps) {
       method: "GET",
       headers,
     });
-    console.log(
+    deps.logger.info(
       `Response from get letters lambda: ${getLettersResponse.status} - ${getLettersResponse.statusText}`,
     );
   };

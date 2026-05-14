@@ -1,10 +1,9 @@
 {
   "compilerOptions": {
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "ignoreDeprecations": "6.0",
+    "module": "ES2022"
   },
   "extends": "../../tsconfig.base.json",
-  "include": [
-    "src/**/*",
-    "jest.config.ts"
-  ]
+  "include": ["src/**/*", "jest.config.ts"]
 }
