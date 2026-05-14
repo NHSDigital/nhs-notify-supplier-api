@@ -23,6 +23,7 @@
   "packSpecificationIds": [
     "notify-c5"
   ],
+  "priority": 98,
   "status": "PROD",
   "type": "STANDARD",
   "volumeGroupId": "volumeGroup-test2"

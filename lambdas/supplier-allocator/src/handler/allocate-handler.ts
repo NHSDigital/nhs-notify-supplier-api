@@ -1,14 +1,11 @@
 import { SQSBatchItemFailure, SQSEvent, SQSHandler } from "aws-lambda";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
-import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
 import {
   LetterVariant,
+  PackSpecification,
   Supplier,
-  SupplierAllocation,
   VolumeGroup,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-config";
-import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
-import z from "zod";
 import { Unit } from "aws-embedded-metrics";
 import {
   MetricEntry,
@@ -17,105 +14,160 @@ import {
   formatGroupId,
 } from "@internal/helpers";
 import {
-  getSupplierAllocationsForVolumeGroup,
-  getSupplierDetails,
   getVariantDetails,
   getVolumeGroupDetails,
 } from "../services/supplier-config";
+import { updateSupplierAllocation } from "../services/supplier-quotas";
+import {
+  eligibleSuppliers,
+  filterSuppliersWithCapacity,
+  preferredSupplierPack,
+  selectSupplierByFactor,
+  suppliersWithValidPack,
+} from "./allocation-config";
+
 import { Deps } from "../config/deps";
+import { PreparedEventSchema, PreparedEvents, SupplierDetails } from "./types";
 
-type SupplierSpec = {
-  supplierId: string;
-  specId: string;
-  priority: number;
-  billingId: string;
-};
-type PreparedEvents = LetterRequestPreparedEventV2 | LetterRequestPreparedEvent;
+function parseQueueMessage(queueMessage: string): PreparedEvents {
+  const result = PreparedEventSchema.safeParse(queueMessage);
 
-// small envelope that must exist in all inputs
-const TypeEnvelope = z.object({ type: z.string().min(1) });
+  if (!result.success) {
+    throw new Error(
+      `Message did not match an expected schema: ${JSON.stringify(
+        result.error.issues,
+      )}`,
+    );
+  }
+  return result.data;
+}
 
-function resolveSupplierForVariant(
-  variantId: string,
+function buildSupplierDetails(
+  supplierId: string,
+  packSpecificationId: string,
+  billingId: string,
+  priority: number,
+  status: "PENDING" | "REJECTED",
+  volumeGroupId: string,
+  reasonCode?: string,
+  reasonText?: string,
+): SupplierDetails {
+  return {
+    allocationDetails: {
+      supplierSpec: {
+        supplierId,
+        specId: packSpecificationId,
+        priority,
+        billingId,
+      },
+      allocationStatus: {
+        status,
+        reasonCode,
+        reasonText,
+      },
+    },
+    volumeGroupId,
+  };
+}
+
+async function getSupplierFromConfig(
+  letterEvent: PreparedEvents,
   deps: Deps,
-): SupplierSpec {
-  deps.logger.info({
-    description: "Resolving supplier for letter variant",
-    variantId,
-  });
-  const supplier = deps.env.VARIANT_MAP[variantId];
-  if (!supplier) {
-    deps.logger.error({
-      description: "No supplier mapping found for variant",
-      variantId,
-    });
-    throw new Error(`No supplier mapping for variantId: ${variantId}`);
-  }
-
-  return supplier;
-}
-
-function validateType(event: unknown) {
-  const env = TypeEnvelope.safeParse(event);
-  if (!env.success) {
-    throw new Error("Missing or invalid envelope.type field");
-  }
-  if (
-    !env.data.type.startsWith(
-      "uk.nhs.notify.letter-rendering.letter-request.prepared",
-    )
-  ) {
-    throw new Error(`Unexpected event type: ${env.data.type}`);
-  }
-}
-
-async function getSupplierFromConfig(letterEvent: PreparedEvents, deps: Deps) {
+): Promise<SupplierDetails> {
   try {
-    const variantDetails: LetterVariant = await getVariantDetails(
+    const letterVariant: LetterVariant = await getVariantDetails(
       letterEvent.data.letterVariantId,
       deps,
     );
 
-    const volumeGroupDetails: VolumeGroup = await getVolumeGroupDetails(
-      variantDetails.volumeGroupId,
+    const volumeGroup: VolumeGroup = await getVolumeGroupDetails(
+      letterVariant.volumeGroupId,
       deps,
     );
 
-    const supplierAllocations: SupplierAllocation[] =
-      await getSupplierAllocationsForVolumeGroup(
-        variantDetails.volumeGroupId,
-        deps,
-        variantDetails.supplierId,
+    const { supplierAllocations, suppliers: allocatedSuppliers } =
+      await eligibleSuppliers(volumeGroup, deps);
+
+    const preferredPack: PackSpecification = await preferredSupplierPack(
+      letterEvent,
+      allocatedSuppliers,
+      letterVariant.packSpecificationIds,
+      deps,
+    );
+
+    const allSuppliersForPack: Supplier[] = await suppliersWithValidPack(
+      allocatedSuppliers,
+      preferredPack.id,
+      deps,
+    );
+
+    if (allSuppliersForPack.length === 0) {
+      throw new Error(
+        `No suppliers found for pack specification ${preferredPack.id}`,
       );
+    }
 
-    const supplierDetails: Supplier[] = await getSupplierDetails(
-      supplierAllocations,
-      deps,
-    );
+    const suppliersForPackWithCapacity: Supplier[] =
+      await filterSuppliersWithCapacity(allSuppliersForPack, deps);
+
+    // selected supplier id is determined by first calling selectSupplierByFactor for suppliers with capacity
+    // and if that returns nothing, try again with all suppliers for the pack
+    const selectedSupplierId =
+      (suppliersForPackWithCapacity.length > 0
+        ? await selectSupplierByFactor(
+            suppliersForPackWithCapacity,
+            supplierAllocations,
+            deps,
+          )
+        : undefined) ??
+      (await selectSupplierByFactor(
+        allSuppliersForPack,
+        supplierAllocations,
+        deps,
+      ));
+
     deps.logger.info({
       description: "Fetched supplier details for supplier allocations",
       variantId: letterEvent.data.letterVariantId,
-      volumeGroupId: volumeGroupDetails.id,
+      volumeGroupId: volumeGroup.id,
       supplierAllocationIds: supplierAllocations.map((a) => a.id),
-      supplierDetails,
+      allocatedSuppliers,
+      allSuppliersForPack: allSuppliersForPack.map((s) => s.id),
+      suppliersForPackWithCapacity: suppliersForPackWithCapacity.map(
+        (s) => s.id,
+      ),
+      selectedSupplierId,
     });
 
-    return supplierDetails;
+    return buildSupplierDetails(
+      selectedSupplierId,
+      preferredPack.id,
+      preferredPack.billingId,
+      letterVariant.priority,
+      "PENDING",
+      volumeGroup.id,
+    );
   } catch (error) {
     deps.logger.error({
       description: "Error fetching supplier from config",
       err: error,
       variantId: letterEvent.data.letterVariantId,
     });
-    return [];
+    return buildSupplierDetails(
+      "unknown",
+      "unknown",
+      "unknown",
+      0,
+      "REJECTED",
+      "unknown",
+      "NO_SUPPLIERS_AVAILABLE",
+      error instanceof Error ? error.message : "Unknown error",
+    );
   }
 }
 
-function getSupplier(letterEvent: PreparedEvents, deps: Deps): SupplierSpec {
-  return resolveSupplierForVariant(letterEvent.data.letterVariantId, deps);
-}
-
 type AllocationMetrics = Map<string, Map<string, number>>;
+type VolumeGroupAllocation = Map<string, Record<string, number>>;
 
 function incrementMetric(
   map: AllocationMetrics,
@@ -172,37 +224,89 @@ function emitDataMetrics(
   deps.logger.info(buildEMFObject(namespace, dimensions, metric));
 }
 
+function incrementAllocation(
+  volumeGroupAllocation: VolumeGroupAllocation,
+  volumeGroupId: string,
+  supplierId: string,
+  allocation: number,
+  deps: Deps,
+) {
+  const groupAllocations = volumeGroupAllocation.get(volumeGroupId) ?? {};
+  groupAllocations[supplierId] =
+    (groupAllocations[supplierId] ?? 0) + allocation;
+  volumeGroupAllocation.set(volumeGroupId, groupAllocations);
+  deps.logger.info({
+    description: "Updated allocations for volume group and supplier",
+    volumeGroupId,
+    groupAllocations,
+  });
+}
+
+async function saveAllocations(
+  deps: Deps,
+  volumeGroupAllocations: VolumeGroupAllocation,
+) {
+  for (const [volumeGroupId, allocations] of volumeGroupAllocations) {
+    for (const [supplierId, allocation] of Object.entries(allocations)) {
+      await updateSupplierAllocation(
+        volumeGroupId,
+        supplierId,
+        allocation,
+        deps,
+      );
+    }
+  }
+}
+
 export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
   return async (event: SQSEvent) => {
     const batchItemFailures: SQSBatchItemFailure[] = [];
     const perAllocationSuccess: AllocationMetrics = new Map();
     const perAllocationFailure: AllocationMetrics = new Map();
+    const volumeGroupAllocations: VolumeGroupAllocation = new Map();
 
     const tasks = event.Records.map(async (record) => {
       let supplier = "unknown";
       let priority = "unknown";
       try {
-        const letterEvent: PreparedEvents = JSON.parse(
-          record.body,
-        ) as PreparedEvents;
+        const sqsMessage = JSON.parse(record.body);
 
+        const letterEvent: PreparedEvents = parseQueueMessage(sqsMessage);
         deps.logger.info({
           description: "Extracted letter event",
           messageId: record.messageId,
         });
 
-        validateType(letterEvent);
+        const supplierDetails: SupplierDetails = await getSupplierFromConfig(
+          letterEvent,
+          deps,
+        );
 
-        const supplierSpec = getSupplier(letterEvent, deps);
-        await getSupplierFromConfig(letterEvent, deps);
+        deps.logger.info({
+          description: "Resolved supplier details from config",
+          supplierDetails,
+        });
+        const supplierSpec = supplierDetails?.allocationDetails?.supplierSpec;
 
         supplier = supplierSpec.supplierId;
         priority = String(supplierSpec.priority);
 
-        deps.logger.info({
-          description: "Resolved supplier spec",
-          supplierSpec,
-        });
+        if (
+          supplierDetails.allocationDetails.allocationStatus.status ===
+          "PENDING"
+        ) {
+          incrementMetric(perAllocationSuccess, supplier, priority);
+
+          incrementAllocation(
+            volumeGroupAllocations,
+            supplierDetails.volumeGroupId,
+            supplier,
+            1,
+            deps,
+          );
+        } else {
+          incrementMetric(perAllocationFailure, supplier, priority);
+        }
 
         // Send to allocated letters queue
         const queueUrl = process.env.UPSERT_LETTERS_QUEUE_URL;
@@ -212,7 +316,7 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
 
         const queueMessage = {
           letterEvent,
-          supplierSpec,
+          allocationDetails: supplierDetails.allocationDetails,
         };
 
         deps.logger.info({
@@ -246,6 +350,7 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
 
     emitMetrics(perAllocationSuccess, MetricStatus.Success, deps);
     emitMetrics(perAllocationFailure, MetricStatus.Failure, deps);
+    await saveAllocations(deps, volumeGroupAllocations);
     return { batchItemFailures };
   };
 }

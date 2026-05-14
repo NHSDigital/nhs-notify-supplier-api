@@ -42,7 +42,7 @@
     "maxWeightGrams": 500,
     "size": "LARGE"
   },
-  "status": "DRAFT",
+  "status": "PROD",
   "updatedAt": "2026-01-12T00:00:00.000Z",
   "version": 1
 }
