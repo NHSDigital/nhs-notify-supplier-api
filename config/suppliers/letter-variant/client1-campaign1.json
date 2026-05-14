@@ -1,0 +1,38 @@
+{
+  "campaignIds": [
+    "client1-campaign1"
+  ],
+  "clientId": "client1",
+  "constraints": {
+    "blackCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 20
+    },
+    "colourCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 10
+    },
+    "deliveryDays": {
+      "operator": "LESS_THAN",
+      "value": 3
+    },
+    "sheets": {
+      "operator": "LESS_THAN",
+      "value": 3
+    },
+    "sides": {
+      "operator": "LESS_THAN",
+      "value": 6
+    }
+  },
+  "description": "Colour printing, campaign1 envelope, Attachment",
+  "id": "client1-campaign1",
+  "name": "Client1 - Campaign1",
+  "packSpecificationIds": [
+    "client1-campaign1"
+  ],
+  "priority": 1,
+  "status": "INT",
+  "type": "STANDARD",
+  "volumeGroupId": "volumeGroup-test3"
+}
