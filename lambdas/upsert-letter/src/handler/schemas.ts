@@ -21,16 +21,29 @@ const SupplierSpecSchema = z.object({
   billingId: z.string().min(1),
 });
 
+const AllocationStatusSchema = z.object({
+  status: z.string().min(1),
+  reasonCode: z.string().min(1).optional(),
+  reasonText: z.string().min(1).optional(),
+});
+
+export type AllocationStatus = z.infer<typeof AllocationStatusSchema>;
+
 export type SupplierSpec = z.infer<typeof SupplierSpecSchema>;
 
 export const PreparedEventUnionSchema = z.discriminatedUnion("type", [
   $LetterRequestPreparedEventV2,
   $LetterRequestPreparedEvent,
 ]);
+export const AllocationDetailsSchema = z.object({
+  supplierSpec: SupplierSpecSchema,
+  allocationStatus: AllocationStatusSchema,
+});
+export type AllocationDetails = z.infer<typeof AllocationDetailsSchema>;
 
 export const AllocatedLetterSchema = z.object({
   letterEvent: PreparedEventUnionSchema,
-  supplierSpec: SupplierSpecSchema,
+  allocationDetails: AllocationDetailsSchema,
 });
 
 export type AllocatedLetter = z.infer<typeof AllocatedLetterSchema>;
@@ -47,7 +60,7 @@ export type UpsertOperation = {
   schemas: z.ZodSchema[];
   handler: (
     request: unknown,
-    supplierSpec: SupplierSpec,
+    allocationDetails: AllocationDetails,
     deps: Deps,
   ) => Promise<void>;
 };

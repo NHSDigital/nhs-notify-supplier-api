@@ -9,8 +9,8 @@ import { SupplierConfigRepository } from "../supplier-config-repository";
 
 function createLetterVariantItem(variantId: string) {
   return {
-    PK: "LETTER_VARIANT",
-    SK: variantId,
+    pk: "ENTITY#letter-variant",
+    sk: `ID#${variantId}`,
     id: variantId,
     name: `Variant ${variantId}`,
     description: `Description for variant ${variantId}`,
@@ -29,8 +29,8 @@ function createVolumeGroupItem(groupId: string, status = "PROD") {
     .toISOString()
     .split("T")[0]; // Ends in a day to ensure it's active based on end date. Tests can override this if needed.
   return {
-    PK: "VOLUME_GROUP",
-    SK: groupId,
+    pk: "ENTITY#volume-group",
+    sk: `ID#${groupId}`,
     id: groupId,
     name: `Volume Group ${groupId}`,
     description: `Description for volume group ${groupId}`,
@@ -46,8 +46,8 @@ function createSupplierAllocationItem(
   supplier: string,
 ) {
   return {
-    PK: `SUPPLIER_ALLOCATION`,
-    SK: allocationId,
+    pk: "ENTITY#supplier-allocation",
+    sk: `ID#${allocationId}`,
     id: allocationId,
     status: "PROD",
     volumeGroup: groupId,
@@ -58,8 +58,8 @@ function createSupplierAllocationItem(
 
 function createSupplierItem(supplierId: string) {
   return {
-    PK: "SUPPLIER",
-    SK: supplierId,
+    pk: "ENTITY#supplier",
+    sk: `ID#${supplierId}`,
     id: supplierId,
     name: `Supplier ${supplierId}`,
     channelType: "LETTER",
@@ -261,6 +261,88 @@ describe("SupplierConfigRepository", () => {
 
     await expect(repository.getSuppliersDetails([supplierId])).rejects.toThrow(
       `Supplier with id ${supplierId} not found`,
+    );
+  });
+
+  test("getSupplierPacksForPackSpecification returns correct supplier packs", async () => {
+    const packSpecId = "pack-spec-123";
+    const supplierId = "supplier-123";
+    const supplierPackId = "supplier-pack-123";
+
+    await dbContext.docClient.send(
+      new PutCommand({
+        TableName: dbContext.config.supplierConfigTableName,
+        Item: {
+          pk: "ENTITY#supplier-pack",
+          sk: `ID#${supplierPackId}`,
+          id: supplierPackId,
+          packSpecificationId: packSpecId,
+          supplierId,
+          status: "PROD",
+          approval: "APPROVED",
+        },
+      }),
+    );
+
+    const result =
+      await repository.getSupplierPacksForPackSpecification(packSpecId);
+    expect(result).toEqual([
+      {
+        approval: "APPROVED",
+        id: supplierPackId,
+        packSpecificationId: packSpecId,
+        supplierId,
+        status: "PROD",
+      },
+    ]);
+  });
+
+  test("getSupplierPacksForPackSpecification returns empty array for non-existent pack specification", async () => {
+    const packSpecId = "non-existent-pack-spec";
+    const result =
+      await repository.getSupplierPacksForPackSpecification(packSpecId);
+    expect(result).toEqual([]);
+  });
+
+  test("getPackSpecification returns correct pack specification details", async () => {
+    const packSpecId = "pack-spec-123";
+
+    await dbContext.docClient.send(
+      new PutCommand({
+        TableName: dbContext.config.supplierConfigTableName,
+        Item: {
+          pk: "ENTITY#pack-specification",
+          sk: `ID#${packSpecId}`,
+          id: packSpecId,
+          name: `Pack Specification ${packSpecId}`,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          version: 1,
+          billingId: `billing-${packSpecId}`,
+          postage: { id: "postageId", size: "STANDARD" },
+          status: "PROD",
+        },
+      }),
+    );
+
+    const result = await repository.getPackSpecification(packSpecId);
+    expect(result).toEqual({
+      billingId: `billing-${packSpecId}`,
+      createdAt: expect.any(String),
+      id: packSpecId,
+      name: `Pack Specification ${packSpecId}`,
+      postage: { id: "postageId", size: "STANDARD" },
+      updatedAt: expect.any(String),
+      version: 1,
+      status: "PROD",
+    });
+  });
+
+  test("getPackSpecification throws error for non-existent pack specification", async () => {
+    const packSpecId = "non-existent-pack-spec";
+
+    await expect(repository.getPackSpecification(packSpecId)).rejects.toThrow(
+      `No pack specification found for id ${packSpecId}`,
     );
   });
 });

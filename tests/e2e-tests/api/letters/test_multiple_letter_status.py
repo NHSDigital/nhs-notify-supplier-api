@@ -5,22 +5,18 @@ import pytest
 from lib.fixtures import *  # NOSONAR
 from lib.constants import LETTERS_ENDPOINT
 from lib.generators import Generators
+from lib.letters import get_pending_letter_ids
 from lib.errorhandler import ErrorHandler
 
 @pytest.mark.test
 @pytest.mark.devtest
 @pytest.mark.inttest
 @pytest.mark.prodtest
-def test_202_with_valid_headers(url, bearer_token):
-    headers = Generators.generate_valid_headers(bearer_token.value)
-    get_letter_id = requests.get(f"{url}/{LETTERS_ENDPOINT}?limit=2", headers=headers)
+def test_202_with_valid_headers(url, authentication_secret):
+    headers = Generators.generate_valid_headers(authentication_secret)
 
-    ids = [item.get("id") for item in get_letter_id.json().get("data", [])]
-
-    if ids:
-        data = Generators.generate_multiple_valid_request(ids)
-    else:
-        raise ValueError("No letter IDs returned from API")
+    ids = get_pending_letter_ids(url, headers, LETTERS_ENDPOINT, limit=2)
+    data = Generators.generate_multiple_valid_request(ids)
 
     update_letter_status = requests.post(
         f"{url}/{LETTERS_ENDPOINT}",
@@ -35,16 +31,11 @@ def test_202_with_valid_headers(url, bearer_token):
 @pytest.mark.devtest
 @pytest.mark.inttest
 @pytest.mark.prodtest
-def test_400_duplicates_in_request_body(url, bearer_token):
-    headers = Generators.generate_valid_headers(bearer_token.value)
-    get_letter_id = requests.get(f"{url}/{LETTERS_ENDPOINT}?limit=2", headers=headers)
+def test_400_duplicates_in_request_body(url, authentication_secret):
+    headers = Generators.generate_valid_headers(authentication_secret)
 
-    ids = [item.get("id") for item in get_letter_id.json().get("data", [])]
-
-    if ids:
-        data = Generators.generate_duplicate_request(ids)
-    else:
-        raise ValueError("No letter IDs returned from API")
+    ids = get_pending_letter_ids(url, headers, LETTERS_ENDPOINT, limit=2)
+    data = Generators.generate_duplicate_request(ids)
 
     update_letter_status = requests.post(
         f"{url}/{LETTERS_ENDPOINT}",
@@ -60,16 +51,11 @@ def test_400_duplicates_in_request_body(url, bearer_token):
 @pytest.mark.devtest
 @pytest.mark.inttest
 @pytest.mark.prodtest
-def test_400_invalid_status_in_request_body(url, bearer_token):
-    headers = Generators.generate_valid_headers(bearer_token.value)
-    get_letter_id = requests.get(f"{url}/{LETTERS_ENDPOINT}?limit=3", headers=headers)
+def test_400_invalid_status_in_request_body(url, authentication_secret):
+    headers = Generators.generate_valid_headers(authentication_secret)
 
-    ids = [item.get("id") for item in get_letter_id.json().get("data", [])]
-
-    if ids:
-        data = Generators.generate_invalid_status_request(ids)
-    else:
-        raise ValueError("No letter IDs returned from API")
+    ids = get_pending_letter_ids(url, headers, LETTERS_ENDPOINT, limit=3)
+    data = Generators.generate_invalid_status_request(ids)
 
     update_letter_status = requests.post(
         f"{url}/{LETTERS_ENDPOINT}",

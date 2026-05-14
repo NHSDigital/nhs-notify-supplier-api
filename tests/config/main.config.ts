@@ -13,6 +13,7 @@ const localConfig: PlaywrightTestConfig = {
       name: "apiGateway-tests",
       testDir: path.resolve(__dirname, "../component-tests/apiGateway-tests"),
       testMatch: "**/*.spec.ts",
+      dependencies: ["integration-tests"],
     },
     {
       name: "events-tests",
@@ -24,6 +25,7 @@ const localConfig: PlaywrightTestConfig = {
       name: "letterQueue-tests",
       testDir: path.resolve(__dirname, "../component-tests/letterQueue-tests"),
       testMatch: "**/*.spec.ts",
+      dependencies: ["apiGateway-tests"],
     },
     {
       name: "integration-tests",

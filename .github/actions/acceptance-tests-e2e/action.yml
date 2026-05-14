@@ -1,0 +1,84 @@
+name: Acceptance tests - e2e
+description: "Run e2e acceptance tests for this repo"
+
+inputs:
+  targetEnvironment:
+    description: Name of the environment under test
+    required: true
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: "Set PR NUMBER"
+      id: set_pr_number
+      shell: bash
+      run: |
+        env="${{ inputs.targetEnvironment }}"
+        if [[ "$env" == main ]]; then
+          echo "pr_number=" >> $GITHUB_OUTPUT
+        elif [[ "$env" == pr* ]]; then
+          echo "pr_number=${env#pr}" >> $GITHUB_OUTPUT
+        else
+          echo "pr_number=$env" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Determine if proxy has been deployed
+      id: check_proxy_deployed
+      env:
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+        PR_NUMBER: ${{ steps.set_pr_number.outputs.pr_number }}
+      shell: bash
+      run: |
+        if [[ -z "$PR_NUMBER" ]]; then
+          echo "No pull request detected; proxy was deployed."
+          echo "proxy_deployed=true" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+
+        branch_name=${GITHUB_HEAD_REF:-$(echo $GITHUB_REF | sed 's#refs/heads/##')}
+
+        labels=$(gh pr view "$PR_NUMBER" --json labels --jq '.labels[].name')
+        echo "Labels on PR #$PR_NUMBER: $labels"
+
+        if echo "$labels" | grep -Fxq 'deploy-proxy'; then
+          echo "proxy_deployed=true" >> $GITHUB_OUTPUT
+        else
+          echo "proxy_deployed=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Repo setup
+      if: ${{ steps.check_proxy_deployed.outputs.proxy_deployed == 'true' }}
+      uses: ./.github/actions/node-install
+      with:
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+
+    - name: Install poetry and e2e test dependencies
+      shell: bash
+      run: |
+        pipx install poetry
+        cd tests/e2e-tests && poetry install
+
+    - name: Run tests
+      if: ${{ steps.check_proxy_deployed.outputs.proxy_deployed == 'true' }}
+      shell: bash
+      env:
+        TARGET_ENVIRONMENT: ${{ inputs.targetEnvironment }}
+        PR_NUMBER: ${{ steps.set_pr_number.outputs.pr_number }}
+      run: |
+        echo "$DEV_E2E_KEYS_PRIVATE" > "${GITHUB_WORKSPACE}/internal-dev-test-1.pem"
+        chmod 600 "${GITHUB_WORKSPACE}/internal-dev-test-1.pem"
+        BASE_PROXY_NAME=nhs-notify-supplier--internal-dev--nhs-notify-supplier
+
+        export API_ENVIRONMENT=internal-dev
+        if [[ -z "$PR_NUMBER" ]]; then
+          export PROXY_NAME="${BASE_PROXY_NAME}"
+          export NON_PROD_API_KEY="${DEV_E2E_KEYS_APIM_MAIN}"
+        else
+          export PROXY_NAME="${BASE_PROXY_NAME}-PR-${PR_NUMBER}"
+          export NON_PROD_API_KEY="${DEV_E2E_KEYS_APIM_PR}"
+        fi
+
+        export STATUS_ENDPOINT_API_KEY="${DEV_E2E_KEYS_APIM_STATUS}"
+        export NON_PROD_PRIVATE_KEY="${GITHUB_WORKSPACE}/internal-dev-test-1.pem"
+        make .internal-dev-test
