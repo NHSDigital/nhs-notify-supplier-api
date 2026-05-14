@@ -1,0 +1,31 @@
+{
+  "clientId": "digital-letters",
+  "constraints": {
+    "blackCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 20
+    },
+    "deliveryDays": {
+      "operator": "LESS_THAN",
+      "value": 3
+    },
+    "sheets": {
+      "operator": "LESS_THAN",
+      "value": 5
+    },
+    "sides": {
+      "operator": "LESS_THAN",
+      "value": 10
+    }
+  },
+  "description": "Black printing, economy postage tariff",
+  "id": "notify-digital-letters-standard",
+  "name": "Standard Letter Variant for Digital Letters fallback",
+  "packSpecificationIds": [
+    "notify-c5"
+  ],
+  "priority": 97,
+  "status": "INT",
+  "type": "STANDARD",
+  "volumeGroupId": "volumeGroup-test3"
+}

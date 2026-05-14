@@ -1,5 +1,9 @@
 import { z } from "zod";
 import { idRef } from "@internal/helpers";
+import {
+  $Supplier,
+  $VolumeGroup,
+} from "@nhsdigital/nhs-notify-event-schemas-supplier-config";
 
 export const SupplierStatus = z.enum(["ENABLED", "DISABLED"]);
 
@@ -120,3 +124,37 @@ export const MISchema = MISchemaBase.extend({
 
 export type MI = z.infer<typeof MISchema>;
 export type MIBase = z.infer<typeof MISchemaBase>;
+
+export const $OverallAllocation = z
+  .object({
+    id: z.string(),
+    volumeGroup: idRef($VolumeGroup, "id"),
+    allocations: z.record(
+      idRef($Supplier, "id"),
+      z.number().int().nonnegative(),
+    ),
+  })
+  .meta({
+    title: "OverallAllocation",
+    description:
+      "The overall allocation for a volume group, including all suppliers",
+  });
+
+export type OverallAllocation = z.infer<typeof $OverallAllocation>;
+
+export const $DailyAllocation = z
+  .object({
+    id: z.string(),
+    date: z.string(),
+    allocations: z.record(
+      idRef($Supplier, "id"),
+      z.number().int().nonnegative(),
+    ),
+  })
+  .meta({
+    title: "DailyAllocation",
+    description:
+      "The daily allocation for a given date, including all suppliers",
+  });
+
+export type DailyAllocation = z.infer<typeof $DailyAllocation>;
