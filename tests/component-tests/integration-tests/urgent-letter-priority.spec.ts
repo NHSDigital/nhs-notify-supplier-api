@@ -11,6 +11,7 @@ import {
 import { createValidRequestHeaders } from "tests/constants/request-headers";
 import { SUPPLIER_LETTERS } from "tests/constants/api-constants";
 import { supplierDataSetup } from "tests/helpers/suppliers-setup-helper";
+import { logger } from "tests/helpers/pino-logger";
 import {
   GetLettersResponse,
   GetLettersResponseSchema,
@@ -33,6 +34,8 @@ test.describe("Urgent Letter Priority Tests", () => {
     const variantsUrgencyNine = getVariantsWithUrgency(9);
     const urgencyNineLetterIds =
       await sendEventsForVariants(variantsUrgencyNine);
+
+    logger.info({ urgencyNineLetterIds, urgencyTenLetterIds });
 
     await Promise.all(
       [...urgencyNineLetterIds, ...urgencyTenLetterIds].map(async (domainId) =>
