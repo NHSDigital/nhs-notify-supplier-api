@@ -15,6 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Check PR title format"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-pr-title-format@2e0290add04f46fa5c5fc816f02beeffa38f6a51 # 3.0.9
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-pr-title-format@3009a36549abae57bae8fe0119c2f3fed156a628 # 3.1.2
         with:
           title: ${{ github.event.pull_request.title }}
