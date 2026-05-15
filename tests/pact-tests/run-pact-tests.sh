@@ -4,6 +4,7 @@ set -euo pipefail
 
 # Ensure we have the latest package matching the major version
 npm install --no-lockfile @nhsdigital/nhs-notify-event-schemas-letter-rendering@^2
+npm install --no-lockfile @nhsdigital/notify-digital-letters-consumer-contracts@^1
 
 # Reinstall pact to ensure platform-specific native dependencies are present
 # CI may run on a different architectures to local dev
