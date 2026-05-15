@@ -12,8 +12,8 @@ from lib.errorhandler import ErrorHandler
 @pytest.mark.devtest
 @pytest.mark.inttest
 @pytest.mark.prodtest
-def test_202_with_valid_headers(url, authentication_secrets):
-    headers = Generators.generate_valid_headers(authentication_secrets[1])
+def test_202_with_valid_headers(url, authentication_secret):
+    headers = Generators.generate_valid_headers(authentication_secret)
 
     ids = get_pending_letter_ids(url, headers, LETTERS_ENDPOINT, limit=2)
     data = Generators.generate_multiple_valid_request(ids)
@@ -31,8 +31,8 @@ def test_202_with_valid_headers(url, authentication_secrets):
 @pytest.mark.devtest
 @pytest.mark.inttest
 @pytest.mark.prodtest
-def test_400_duplicates_in_request_body(url, authentication_secrets):
-    headers = Generators.generate_valid_headers(authentication_secrets[1])
+def test_400_duplicates_in_request_body(url, authentication_secret):
+    headers = Generators.generate_valid_headers(authentication_secret)
 
     ids = get_pending_letter_ids(url, headers, LETTERS_ENDPOINT, limit=2)
     data = Generators.generate_duplicate_request(ids)
@@ -51,8 +51,8 @@ def test_400_duplicates_in_request_body(url, authentication_secrets):
 @pytest.mark.devtest
 @pytest.mark.inttest
 @pytest.mark.prodtest
-def test_400_invalid_status_in_request_body(url, authentication_secrets):
-    headers = Generators.generate_valid_headers(authentication_secrets[1])
+def test_400_invalid_status_in_request_body(url, authentication_secret):
+    headers = Generators.generate_valid_headers(authentication_secret)
 
     ids = get_pending_letter_ids(url, headers, LETTERS_ENDPOINT, limit=3)
     data = Generators.generate_invalid_status_request(ids)

@@ -43,10 +43,7 @@ export default function createGetMIHandler(deps: Deps): APIGatewayProxyHandler {
         correlationId: commonIds.value.correlationId,
       });
 
-      // metric with count 1 specifying the supplier
       const dimensions: Record<string, string> = { supplierId };
-      emitMetric("getMi", dimensions, deps.logger, MetricStatus.Success, 1);
-
       // metric displaying the type/number of lineItems posted per supplier
       dimensions.lineItem = result.data.attributes.lineItem;
       emitMetric(

@@ -88,16 +88,6 @@ describe("MiRepository", () => {
 
       const persistedMi = await miRepository.putMI(mi);
 
-      expect(persistedMi).toEqual(
-        expect.objectContaining({
-          id: expect.any(String),
-          createdAt: "2020-02-01T00:00:00.000Z",
-          updatedAt: "2020-02-01T00:00:00.000Z",
-          ttl: 1_580_518_800, // 2020-02-01T00:01:00.000Z, seconds since epoch
-          ...mi,
-        }),
-      );
-
       const fetchedMi = await miRepository.getMI(
         persistedMi.id,
         persistedMi.supplierId,

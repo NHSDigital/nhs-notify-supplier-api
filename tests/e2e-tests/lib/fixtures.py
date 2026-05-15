@@ -52,20 +52,20 @@ def authentication_cache():
     return AuthenticationCache()
 
 @pytest.fixture()
-def authentication_secrets(url, authentication_cache):
+def authentication_secret(url, authentication_cache):
     environment = os.environ['API_ENVIRONMENT']
-    return authentication_cache.generate_authentication(environment, url, "/letters")
+    return authentication_cache.generate_authentication(environment, url, "/", "TestSupplier1")
 
 @pytest.fixture()
-def status_authentication_secrets(url, authentication_cache):
+def status_authentication_secret(url, authentication_cache):
     environment = os.environ['API_ENVIRONMENT']
     return authentication_cache.generate_authentication(environment, url, "/_status")
-
-@pytest.fixture()
-def mi_authentication_secrets(url, authentication_cache):
-    environment = os.environ['API_ENVIRONMENT']
-    return authentication_cache.generate_authentication(environment, url, "/mi")
 
 @pytest.fixture(scope='session')
 def status_endpoint_api_key():
     return os.environ["STATUS_ENDPOINT_API_KEY"]
+
+@pytest.fixture()
+def supplier1_authentication_secret(url, authentication_cache):
+    environment = os.environ['API_ENVIRONMENT']
+    return authentication_cache.generate_authentication(environment, url, "/", "supplier1")

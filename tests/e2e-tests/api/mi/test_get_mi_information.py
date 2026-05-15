@@ -9,8 +9,8 @@ from lib.errorhandler import ErrorHandler
 @pytest.mark.devtest
 @pytest.mark.inttest
 @pytest.mark.prodtest
-def test_200_get_management_information(url, authentication_secrets):
-    headers = Generators.generate_valid_headers(authentication_secrets[0])
+def test_200_get_management_information(url, authentication_secret):
+    headers = Generators.generate_valid_headers(authentication_secret)
 
     data = Generators.generate_valid_mi_record_body()
     create_mi = requests.post(
@@ -29,8 +29,8 @@ def test_200_get_management_information(url, authentication_secrets):
 @pytest.mark.devtest
 @pytest.mark.inttest
 @pytest.mark.prodtest
-def test_404_mi_does_not_exist(url, authentication_secrets):
-    headers = Generators.generate_valid_headers(authentication_secrets[0])
+def test_404_mi_does_not_exist(url, authentication_secret):
+    headers = Generators.generate_valid_headers(authentication_secret)
     get_message_response = requests.get(f"{url}/{MI_ENDPOINT}/xx", headers=headers)
 
     ErrorHandler.handle_retry(get_message_response)
@@ -41,9 +41,9 @@ def test_404_mi_does_not_exist(url, authentication_secrets):
 @pytest.mark.devtest
 @pytest.mark.inttest
 @pytest.mark.prodtest
-def test_404_mi_miId_from_different_supplier_returns_does_not_exist(url, authentication_secrets):
-    headers = Generators.generate_valid_headers(authentication_secrets[0])
-    other_supplier_headers = Generators.generate_valid_headers(authentication_secrets[1]) # secondary_auth
+def test_404_mi_miId_from_different_supplier_returns_does_not_exist(url, authentication_secret, supplier1_authentication_secret):
+    headers = Generators.generate_valid_headers(authentication_secret)
+    other_supplier_headers = Generators.generate_valid_headers(supplier1_authentication_secret) # secondary_auth
     data = Generators.generate_valid_mi_record_body()
     create_mi = requests.post(
         f"{url}/{MI_ENDPOINT}",
