@@ -44,7 +44,11 @@ export default function createGetMIHandler(deps: Deps): APIGatewayProxyHandler {
       });
 
       // metric displaying the type/number of lineItems posted per supplier
-      const dimensions: Record<string, string> = { supplierId, lineItem: result.data.attributes.lineItem };
+      const dimensions: Record<string, string> = {
+        supplierId,
+        lineItem: result.data.attributes.lineItem
+      };
+
       emitMetric(
         "getMi",
         dimensions,
