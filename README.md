@@ -75,13 +75,13 @@ New developers of the NHS Notify Supplier API should understand the below.
 
 #### Prerequisites and Configuration
 
-- Utilised the devcontainer, for pre reqs and configuration.
+- Utilised the devcontainer, for pre requisites and configuration.
 - You should open in a devcontainer or a Github workspaces.
 - By default it will run `make config` when the container is first setup
 
 ##### SDKs
 
-- The [SDK](sdk) folder is excluded from all pre reqs
+- The [SDK](sdk) folder is excluded from all pre requisites
 - DO NOT make manual changes to the [SDK](sdk), instead [build](#build) it
 - The SDK folder is excluded from git commits,
   and will be built as part of the CI/CD pipeline and released as a GitHub
