@@ -1,4 +1,3 @@
-# Test
 name: Deploy dynamic PR environment proxy
 run-name: Deploy proxy for PR environment on internal-dev by @${{ github.actor }}
 
@@ -30,7 +29,8 @@ jobs:
 
       - name: Resolve nodejs version
         id: toolversions
-        run: echo "nodejs_version=$(grep '^nodejs\s' .tool-versions | cut -f2 -d' ')" >>
+        run:
+          echo "nodejs_version=$(grep '^nodejs\s' .tool-versions | cut -f2 -d' ')" >>
           "$GITHUB_OUTPUT"
 
       - name: "Check if pull request exists for this branch and set
