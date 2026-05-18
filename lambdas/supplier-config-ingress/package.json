@@ -1,7 +1,14 @@
 {
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.858.0",
+    "@aws-sdk/lib-dynamodb": "^3.1008.0",
+    "@internal/datastore": "*",
+    "@internal/helpers": "^0.1.0",
+    "@nhsdigital/nhs-notify-event-schemas-supplier-config": "^1.1.0",
     "@types/aws-lambda": "^8.10.148",
-    "esbuild": "^0.27.2"
+    "esbuild": "^0.27.2",
+    "pino": "^9.7.0",
+    "zod": "^4.1.11"
   },
   "name": "nhs-notify-supplier-api-supplier-config-ingress",
   "private": true,
