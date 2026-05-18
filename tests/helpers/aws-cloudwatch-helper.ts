@@ -113,3 +113,22 @@ export async function supplierIdFromSupplierAllocatorLog(
   }
   return supplierId;
 }
+
+export async function pollAllocatorLogForPackSpec(
+  description: string,
+): Promise<string> {
+  const filterPatterns = ['"INFO"', `"${description}"`];
+  const log = await pollLambdaLog("supplier-allocator", filterPatterns);
+  return log;
+}
+
+export async function pollSupplierAllocatorLogForExceededDailyCapacity(
+  supplierId: string,
+): Promise<string> {
+  const filterPatterns = [
+    '"INFO"',
+    '"Supplier has exceeded daily capacity"',
+    `"${supplierId}"`,
+  ];
+  return pollLambdaLog("supplier-allocator", filterPatterns);
+}
