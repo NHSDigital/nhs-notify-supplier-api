@@ -1,8 +1,7 @@
 {
   "compilerOptions": {
     "esModuleInterop": true,
-    "ignoreDeprecations": "5.0",
-    "module": "ES2022"
+    "ignoreDeprecations": "5.0"
   },
   "extends": "../../tsconfig.base.json",
   "include": ["src/**/*", "jest.config.ts"]

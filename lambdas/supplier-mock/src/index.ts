@@ -1,7 +1,10 @@
 import { createDependenciesContainer } from "./deps";
 import createHandler from "./supplier-mock";
 
-const container = createDependenciesContainer();
+const containerPromise = createDependenciesContainer();
 
-// eslint-disable-next-line import-x/prefer-default-export
-export const handler = createHandler(await container);
+export default async function handler(
+  ...args: Parameters<ReturnType<typeof createHandler>>
+) {
+  return createHandler(await containerPromise)(...args);
+}

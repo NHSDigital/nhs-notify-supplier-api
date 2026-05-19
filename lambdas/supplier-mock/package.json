@@ -17,6 +17,5 @@
     "test:unit": "jest",
     "typecheck": "tsc --noEmit"
   },
-  "type": "module",
   "version": "0.0.1"
 }
