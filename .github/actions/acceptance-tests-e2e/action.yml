@@ -74,9 +74,12 @@ runs:
         if [[ -z "$PR_NUMBER" ]]; then
           export PROXY_NAME="${BASE_PROXY_NAME}"
           export NON_PROD_API_KEY="${DEV_E2E_KEYS_APIM_MAIN}"
+          export NON_PROD_SECONDARY_API_KEY="${DEV_E2E_KEYS_APIM_MAIN_SECONDARY}"
         else
           export PROXY_NAME="${BASE_PROXY_NAME}-PR-${PR_NUMBER}"
           export NON_PROD_API_KEY="${DEV_E2E_KEYS_APIM_PR}"
+          export NON_PROD_SECONDARY_API_KEY="${DEV_E2E_KEYS_APIM_PR_SECONDARY}"
+
         fi
 
         export STATUS_ENDPOINT_API_KEY="${DEV_E2E_KEYS_APIM_STATUS}"

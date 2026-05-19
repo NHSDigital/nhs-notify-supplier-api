@@ -2044,6 +2044,157 @@
             }
           },
           "response": []
+        },
+        {
+          "item": [
+            {
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 200\", () => {",
+                      "    pm.expect(pm.response.code).to.equal(200);",
+                      "});",
+                      "",
+                      "const jsonData = pm.response.json();",
+                      "pm.test(\"Response Body contains data field and status\", () => {",
+                      "    pm.expect(jsonData).to.have.property(\"data\");",
+                      "    pm.expect(jsonData.data.attributes).to.have.property(\"id\");",
+                      "});"
+                    ],
+                    "packages": {},
+                    "requests": {},
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "name": "200 Get Management Information",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "description": "Retrieve managaement information.",
+                "header": [
+                  {
+                    "disabled": true,
+                    "key": "Accept",
+                    "type": "default",
+                    "value": "application/vnd.api+json"
+                  },
+                  {
+                    "disabled": false,
+                    "key": "Content-Type",
+                    "type": "default",
+                    "value": "application/vnd.api+json"
+                  },
+                  {
+                    "disabled": false,
+                    "key": "X-Correlation-Id",
+                    "type": "default",
+                    "value": "{{correlation_id}}"
+                  },
+                  {
+                    "disabled": false,
+                    "key": "X-Request-ID",
+                    "type": "default",
+                    "value": "{{x_request_id}}"
+                  }
+                ],
+                "method": "GET",
+                "url": {
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "mi",
+                    ":id"
+                  ],
+                  "protocol": "",
+                  "query": [],
+                  "raw": "{{baseUrl}}/mi/:id",
+                  "variable": [
+                    {
+                      "description": "(Required) Unique identifier of this resource",
+                      "key": "id",
+                      "value": "2AL5eYSWGzCHlGmzNxuqVusPxDg"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 404\", () => {",
+                      "    pm.expect(pm.response.code).to.equal(404);",
+                      "});",
+                      "",
+                      "const jsonData = pm.response.json();",
+                      "pm.test(\"Response Body contains errors with correct code\", () => {",
+                      "    pm.expect(jsonData).to.have.property(\"errors\");",
+                      "    pm.expect(jsonData.errors[0].code).to.equal(\"NOTIFY_RESOURCE_NOT_FOUND\");",
+                      "});"
+                    ],
+                    "packages": {},
+                    "requests": {},
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "name": "404 Not Found",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "description": "Retrieve management information.",
+                "header": [
+                  {
+                    "disabled": false,
+                    "key": "Content-Type",
+                    "type": "default",
+                    "value": "application/vnd.api+json"
+                  },
+                  {
+                    "disabled": false,
+                    "key": "X-Correlation-Id",
+                    "type": "default",
+                    "value": "{{correlation_id}}"
+                  },
+                  {
+                    "disabled": false,
+                    "key": "X-Request-ID",
+                    "type": "default",
+                    "value": "{{x_request_id}}"
+                  }
+                ],
+                "method": "GET",
+                "url": {
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "mi",
+                    ":id"
+                  ],
+                  "protocol": "",
+                  "query": [],
+                  "raw": "{{baseUrl}}/mi/:id",
+                  "variable": [
+                    {
+                      "description": "(Required) Unique identifier of this resource",
+                      "key": "id",
+                      "value": "24L5eYSWGzCHlGmzNxuqVusP"
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "name": "Get Management Information"
         }
       ],
       "name": "MI"

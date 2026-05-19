@@ -26,7 +26,7 @@ class AuthenticationCache():
         # How long the token will stay valid
         self.token_validity = 180
 
-    def generate_authentication(self, env, base_url, path):
+    def generate_authentication(self, env, base_url, path, supplier_id = None):
 
         # For the test_url, note that we don't need a message_id that actually exists in
         # the backend. The test will only check that the API doesn't return a 401,
@@ -34,22 +34,38 @@ class AuthenticationCache():
         test_url = f"{base_url}{path}"
 
         if env == "internal-dev":
-            api_key = os.environ["NON_PROD_API_KEY"]
+            if (supplier_id == "TestSupplier1"):
+                api_key = os.environ["NON_PROD_SECONDARY_API_KEY"]
+            else:
+                api_key = os.environ["NON_PROD_API_KEY"]
+
             private_key = os.environ["NON_PROD_PRIVATE_KEY"]
             url = "https://internal-dev.api.service.nhs.uk/oauth2/token"
             kid = "internal-dev-test-1"
         elif env == "ref":
-            api_key = os.environ["NON_PROD_API_KEY"]
+            if (supplier_id == "TestSupplier1"):
+                api_key = os.environ["NON_PROD_SECONDARY_API_KEY"]
+            else:
+                api_key = os.environ["NON_PROD_API_KEY"]
+
             private_key = os.environ["NON_PROD_PRIVATE_KEY"]
             url = "https://ref.api.service.nhs.uk/oauth2/token"
             kid = "internal-dev-test-1"
         elif env == "int":
-            api_key = os.environ.get("INTEGRATION_API_KEY")
+            if (supplier_id == "TestSupplier1"):
+                api_key = os.environ["INTEGRATION_SECONDARY_API_KEY"]
+            else:
+                api_key = os.environ["INTEGRATION_API_KEY"]
+
             private_key = os.environ.get("INTEGRATION_PRIVATE_KEY")
             url = "https://int.api.service.nhs.uk/oauth2/token"
             kid = "internal-dev-test-1"
         elif env == "prod":
-            api_key = os.environ.get("PRODUCTION_API_KEY")
+            if (supplier_id == "TestSupplier1"):
+                api_key = os.environ.get("PRODUCTION_SECONDARY_API_KEY")
+            else:
+                api_key = os.environ.get("PRODUCTION_API_KEY")
+
             private_key = os.environ.get("PRODUCTION_PRIVATE_KEY")
             url = "https://api.service.nhs.uk/oauth2/token"
             kid = "prod-1"
