@@ -10,9 +10,6 @@ export default function createHandler(deps: Deps) {
     deps.logger.info("VLASIS - second log");
     deps.logger.info(`Environment: ${envName}`);
     deps.logger.info({
-      msg: "VLASIS - about to retrieve API Gateway base URL using API client",
-    });
-    deps.logger.info({
       msg: `Environment: ${envName}`,
     });
     // const input: ListFunctionsRequest = {
