@@ -1,0 +1,13 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  SupplierMockFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: supplier_mock
+      Runtime: nodejs22.x
+      Handler: index.handler
+      CodeUri: dist
+      MemorySize: 512
+      Timeout: 29

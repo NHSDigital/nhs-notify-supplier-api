@@ -1,0 +1,21 @@
+{
+  "dependencies": {
+    "@aws-sdk/client-api-gateway": "^3.1030.0",
+    "@aws-sdk/client-lambda": "^3.1030.0",
+    "@internal/helpers": "^0.1.0",
+    "aws-embedded-metrics": "^4.2.1",
+    "aws-lambda": "^1.0.7",
+    "pino": "^10.3.1",
+    "zod": "^4.3.6"
+  },
+  "name": "nhs-notify-supplier-api-supplier-mock",
+  "private": true,
+  "scripts": {
+    "lambda-build": "rm -rf dist && npx esbuild --bundle --minify --sourcemap --target=es2020 --platform=node --loader:.node=file --entry-names=[name] --outdir=dist src/index.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test:unit": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "version": "0.0.1"
+}
