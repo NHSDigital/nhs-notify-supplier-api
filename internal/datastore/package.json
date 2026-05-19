@@ -16,7 +16,7 @@
     "diagrams": "tsx src/cli/diagrams.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test:unit": "jest",
+    "test:unit": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest",
     "typecheck": "tsc --noEmit"
   },
   "version": "0.1.0"

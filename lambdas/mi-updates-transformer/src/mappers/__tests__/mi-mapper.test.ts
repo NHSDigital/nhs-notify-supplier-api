@@ -3,7 +3,6 @@ import * as pino from "pino";
 import { $MISubmittedEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
 import { MI } from "@internal/datastore";
 import { mapMIToCloudEvent } from "../mi-mapper";
-import { EnvVars } from "../../env";
 import { Deps } from "../../deps";
 
 describe("mi-mapper", () => {
@@ -12,8 +11,8 @@ describe("mi-mapper", () => {
     logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
     env: {
       EVENTPUB_SNS_TOPIC_ARN: "arn:aws:sns:region:account:topic",
-    } as unknown as EnvVars,
-  } as Deps;
+    },
+  };
 
   it("maps an MI to an MI event", async () => {
     const mi: MI = {

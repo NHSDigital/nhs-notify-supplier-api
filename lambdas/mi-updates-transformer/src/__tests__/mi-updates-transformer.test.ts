@@ -11,7 +11,6 @@ import { mockDeep } from "jest-mock-extended";
 import { MI } from "@internal/datastore";
 import createHandler from "../mi-updates-transformer";
 import { Deps } from "../deps";
-import { EnvVars } from "../env";
 import { mapMIToCloudEvent } from "../mappers/mi-mapper";
 
 // Make crypto return consistent values, since we're calling it in both prod and test code and comparing the values
@@ -98,8 +97,8 @@ describe("mi-updates-transformer Lambda", () => {
     logger: { info: jest.fn(), error: jest.fn() } as unknown as pino.Logger,
     env: {
       EVENTPUB_SNS_TOPIC_ARN: "arn:aws:sns:region:account:topic",
-    } as unknown as EnvVars,
-  } as Deps;
+    },
+  };
 
   beforeEach(() => {
     jest.useFakeTimers();
