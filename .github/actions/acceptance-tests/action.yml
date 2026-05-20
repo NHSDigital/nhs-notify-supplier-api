@@ -24,9 +24,9 @@ runs:
 
   steps:
 
-    - name: Run component tests
-      if: ${{ inputs.testType == 'component' }}
-      uses: ./.github/actions/acceptance-tests-component
+    - name: Run components tests (sandbox and component tests)
+      if: ${{ inputs.testType != 'e2e' }}
+      uses: ./.github/actions/acceptance-tests-components
       with:
         testType: ${{ inputs.testType }}
         targetEnvironment: ${{ inputs.targetEnvironment }}
