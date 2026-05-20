@@ -1,4 +1,4 @@
-import type { SQSEvent, SQSRecord } from "aws-lambda";
+import type { SQSRecord } from "aws-lambda";
 import { Unit } from "aws-embedded-metrics";
 import { MetricStatus } from "@internal/helpers";
 import createSupplierConfigIngressHandler from "../handler/supplier-config-ingress-handler";
@@ -54,7 +54,7 @@ describe("supplierConfigHandler", () => {
   });
 
   it("returns an empty batchItemFailures list when there are no records", async () => {
-    const event = { Records: [] } as unknown as SQSEvent;
+    const event = { Records: [] };
 
     const result = await handler(event);
 
@@ -64,7 +64,7 @@ describe("supplierConfigHandler", () => {
   it("upserts supplier config from an SNS message in an SQS record", async () => {
     const data = createSupplierConfig();
     const record = createSqsRecord(data);
-    const event = { Records: [record] } as unknown as SQSEvent;
+    const event = { Records: [record] };
 
     const result = await handler(event);
 
@@ -80,7 +80,7 @@ describe("supplierConfigHandler", () => {
     ).mockRejectedValue(new Error("DynamoDB error"));
     const data = createSupplierConfig();
     const record = createSqsRecord(data);
-    const event = { Records: [record] } as unknown as SQSEvent;
+    const event = { Records: [record] };
 
     const result = await handler(event);
 
@@ -92,7 +92,7 @@ describe("supplierConfigHandler", () => {
   it("rejects a type field containing no dots", async () => {
     const data = createSupplierConfig();
     const record = createSqsRecord(data, "look-no-dots");
-    const event = { Records: [record] } as unknown as SQSEvent;
+    const event = { Records: [record] };
 
     const result = await handler(event);
 
@@ -110,7 +110,7 @@ describe("supplierConfigHandler", () => {
       data,
       "uk.nhs.notify.supplier-config.suppler",
     );
-    const event = { Records: [record] } as unknown as SQSEvent;
+    const event = { Records: [record] };
 
     const result = await handler(event);
 
@@ -128,7 +128,7 @@ describe("supplierConfigHandler", () => {
       data,
       "uk.nhs.notify.supplier-config.supplier-pack.prod.v1",
     );
-    const event = { Records: [record] } as unknown as SQSEvent;
+    const event = { Records: [record] };
 
     const result = await handler(event);
 
@@ -141,7 +141,7 @@ describe("supplierConfigHandler", () => {
   it("rejects an entity not matching the appropriate schema", async () => {
     const invalidData = createSupplierConfig({ dailyCapacity: undefined });
     const record = createSqsRecord(invalidData);
-    const event = { Records: [record] } as unknown as SQSEvent;
+    const event = { Records: [record] };
 
     const result = await handler(event);
 
@@ -156,7 +156,7 @@ describe("supplierConfigHandler", () => {
   it("emits a success metric for a created config event", async () => {
     const data = createSupplierConfig();
     const record = createSqsRecord(data);
-    const event = { Records: [record] } as unknown as SQSEvent;
+    const event = { Records: [record] };
 
     await handler(event);
 
@@ -188,7 +188,7 @@ describe("supplierConfigHandler", () => {
     ).mockResolvedValue("UPDATED");
     const data = createSupplierConfig();
     const record = createSqsRecord(data);
-    const event = { Records: [record] } as unknown as SQSEvent;
+    const event = { Records: [record] };
 
     await handler(event);
 
@@ -220,7 +220,7 @@ describe("supplierConfigHandler", () => {
     ).mockRejectedValue(new Error("DynamoDB error"));
     const data = createSupplierConfig();
     const record = createSqsRecord(data);
-    const event = { Records: [record] } as unknown as SQSEvent;
+    const event = { Records: [record] };
 
     await handler(event);
 
