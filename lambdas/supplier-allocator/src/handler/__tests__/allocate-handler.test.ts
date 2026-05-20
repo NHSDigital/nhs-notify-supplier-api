@@ -7,15 +7,11 @@ import {
   $LetterStatusChangeEvent,
   LetterStatusChangeEvent,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
-import {
-  SupplierConfigRepository,
-  SupplierQuotasRepository,
-} from "@internal/datastore";
+import { makeIdempotent } from "@aws-lambda-powertools/idempotency";
 import createSupplierAllocatorHandler from "../allocate-handler";
 import * as supplierConfig from "../../services/supplier-config";
 import * as supplierQuotas from "../../services/supplier-quotas";
 import * as allocationConfig from "../allocation-config";
-
 import { Deps } from "../../config/deps";
 import packageJson from "../../../package.json";
 
@@ -27,6 +23,14 @@ const renderingSchemaVersion: string =
 jest.mock("../../services/supplier-config");
 jest.mock("../../services/supplier-quotas");
 jest.mock("../allocation-config");
+
+jest.mock("@aws-lambda-powertools/idempotency", () => {
+  const original = jest.requireActual("@aws-lambda-powertools/idempotency");
+  return {
+    ...original,
+    makeIdempotent: jest.fn((fn, _) => fn),
+  };
+});
 
 function createSQSEvent(records: SQSRecord[]): SQSEvent {
   return {
@@ -185,16 +189,15 @@ function setupDefaultMocks() {
 }
 
 describe("createSupplierAllocatorHandler", () => {
-  let mockSqsClient: jest.Mocked<SQSClient>;
-  let mockedDeps: jest.Mocked<Deps>;
-  let mockedSupplierConfigRepo: jest.Mocked<SupplierConfigRepository>;
-  let mockedSupplierQuotasRepo: jest.Mocked<SupplierQuotasRepository>;
-  beforeEach(() => {
-    mockSqsClient = {
-      send: jest.fn(),
-    } as unknown as jest.Mocked<SQSClient>;
-
-    mockedSupplierConfigRepo = {
+  const mockedDeps: jest.Mocked<Deps> = {
+    logger: { error: jest.fn(), info: jest.fn() } as unknown as pino.Logger,
+    env: {
+      SUPPLIER_CONFIG_TABLE_NAME: "SupplierConfigTable",
+      SUPPLIER_QUOTAS_TABLE_NAME: "SupplierQuotasTable",
+      IDEMPOTENCY_TABLE_NAME: "IdempotencyTable",
+    },
+    sqsClient: { send: jest.fn() } as unknown as SQSClient,
+    supplierConfigRepo: {
       ddbClient: {} as any,
       config: {} as any,
       getLetterVariant: jest.fn(),
@@ -203,27 +206,18 @@ describe("createSupplierAllocatorHandler", () => {
       getSuppliersDetails: jest.fn(),
       getSupplierPacksForPackSpecification: jest.fn(),
       getPackSpecification: jest.fn(),
-    };
-
-    mockedSupplierQuotasRepo = {
+    },
+    supplierQuotasRepo: {
       ddbClient: {} as any,
       config: {} as any,
       getOverallAllocation: jest.fn(),
       updateOverallAllocation: jest.fn(),
       getDailyAllocation: jest.fn(),
       updateDailyAllocation: jest.fn(),
-    };
+    },
+  } as unknown as Deps;
 
-    mockedDeps = {
-      logger: { error: jest.fn(), info: jest.fn() } as unknown as pino.Logger,
-      env: {
-        SUPPLIER_CONFIG_TABLE_NAME: "SupplierConfigTable",
-        SUPPLIER_QUOTAS_TABLE_NAME: "SupplierQuotasTable",
-      },
-      sqsClient: mockSqsClient,
-      supplierConfigRepo: mockedSupplierConfigRepo,
-      supplierQuotasRepo: mockedSupplierQuotasRepo,
-    };
+  beforeEach(() => {
     jest.clearAllMocks();
   });
 
@@ -244,8 +238,8 @@ describe("createSupplierAllocatorHandler", () => {
 
     expect(result.batchItemFailures).toHaveLength(0);
 
-    expect(mockSqsClient.send).toHaveBeenCalledTimes(1);
-    const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
+    expect(mockedDeps.sqsClient.send).toHaveBeenCalledTimes(1);
+    const sendCall = (mockedDeps.sqsClient.send as jest.Mock).mock.calls[0][0];
     expect(sendCall).toBeInstanceOf(SendMessageCommand);
 
     const messageBody = JSON.parse(sendCall.input.MessageBody);
@@ -281,8 +275,8 @@ describe("createSupplierAllocatorHandler", () => {
 
     expect(result.batchItemFailures).toHaveLength(0);
 
-    expect(mockSqsClient.send).toHaveBeenCalledTimes(1);
-    const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
+    expect(mockedDeps.sqsClient.send).toHaveBeenCalledTimes(1);
+    const sendCall = (mockedDeps.sqsClient.send as jest.Mock).mock.calls[0][0];
     expect(sendCall).toBeInstanceOf(SendMessageCommand);
 
     const messageBody = JSON.parse(sendCall.input.MessageBody);
@@ -315,8 +309,8 @@ describe("createSupplierAllocatorHandler", () => {
 
     expect(result.batchItemFailures).toHaveLength(0);
 
-    expect(mockSqsClient.send).toHaveBeenCalledTimes(1);
-    const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
+    expect(mockedDeps.sqsClient.send).toHaveBeenCalledTimes(1);
+    const sendCall = (mockedDeps.sqsClient.send as jest.Mock).mock.calls[0][0];
     const messageBody = JSON.parse(sendCall.input.MessageBody);
     expect(messageBody.allocationDetails.supplierSpec).toEqual({
       supplierId: "supplier1",
@@ -361,7 +355,7 @@ describe("createSupplierAllocatorHandler", () => {
     const handler = createSupplierAllocatorHandler(mockedDeps);
     await handler(evt, {} as any, {} as any);
 
-    const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
+    const sendCall = (mockedDeps.sqsClient.send as jest.Mock).mock.calls[0][0];
     const messageBody = JSON.parse(sendCall.input.MessageBody);
     expect(messageBody.letterEvent.data.domainId).toBe("letter-test");
   });
@@ -410,7 +404,7 @@ describe("createSupplierAllocatorHandler", () => {
     if (!result) throw new Error("expected BatchResponse, got void");
 
     expect(result.batchItemFailures).toHaveLength(0);
-    expect(mockSqsClient.send).toHaveBeenCalledTimes(2);
+    expect(mockedDeps.sqsClient.send).toHaveBeenCalledTimes(2);
   });
 
   test("returns batch failure for invalid JSON", async () => {
@@ -480,7 +474,7 @@ describe("createSupplierAllocatorHandler", () => {
     process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
     const sqsError = new Error("SQS send failed");
-    (mockSqsClient.send as jest.Mock).mockRejectedValueOnce(sqsError);
+    (mockedDeps.sqsClient.send as jest.Mock).mockRejectedValueOnce(sqsError);
 
     const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
@@ -513,7 +507,7 @@ describe("createSupplierAllocatorHandler", () => {
     expect(result.batchItemFailures).toHaveLength(1);
     expect(result.batchItemFailures[0].itemIdentifier).toBe("fail-msg");
 
-    expect(mockSqsClient.send).toHaveBeenCalledTimes(2);
+    expect(mockedDeps.sqsClient.send).toHaveBeenCalledTimes(2);
   });
 
   test("sends correct queue URL in SQS message command", async () => {
@@ -529,7 +523,7 @@ describe("createSupplierAllocatorHandler", () => {
     const handler = createSupplierAllocatorHandler(mockedDeps);
     await handler(evt, {} as any, {} as any);
 
-    const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
+    const sendCall = (mockedDeps.sqsClient.send as jest.Mock).mock.calls[0][0];
     expect(sendCall.input.QueueUrl).toBe(queueUrl);
   });
 
@@ -557,8 +551,8 @@ describe("createSupplierAllocatorHandler", () => {
         variantId: "lv1",
       }),
     );
-    expect(mockSqsClient.send).toHaveBeenCalledTimes(1);
-    const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
+    expect(mockedDeps.sqsClient.send).toHaveBeenCalledTimes(1);
+    const sendCall = (mockedDeps.sqsClient.send as jest.Mock).mock.calls[0][0];
     expect(sendCall).toBeInstanceOf(SendMessageCommand);
 
     const messageBody = JSON.parse(sendCall.input.MessageBody);
@@ -667,8 +661,9 @@ describe("createSupplierAllocatorHandler", () => {
           variantId: "lv1",
         }),
       );
-      expect(mockSqsClient.send).toHaveBeenCalledTimes(1);
-      const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
+      expect(mockedDeps.sqsClient.send).toHaveBeenCalledTimes(1);
+      const sendCall = (mockedDeps.sqsClient.send as jest.Mock).mock
+        .calls[0][0];
       expect(sendCall).toBeInstanceOf(SendMessageCommand);
 
       const messageBody = JSON.parse(sendCall.input.MessageBody);
@@ -711,8 +706,8 @@ describe("createSupplierAllocatorHandler", () => {
         variantId: "lv1",
       }),
     );
-    expect(mockSqsClient.send).toHaveBeenCalledTimes(1);
-    const sendCall = (mockSqsClient.send as jest.Mock).mock.calls[0][0];
+    expect(mockedDeps.sqsClient.send).toHaveBeenCalledTimes(1);
+    const sendCall = (mockedDeps.sqsClient.send as jest.Mock).mock.calls[0][0];
     expect(sendCall).toBeInstanceOf(SendMessageCommand);
 
     const messageBody = JSON.parse(sendCall.input.MessageBody);
@@ -770,5 +765,23 @@ describe("createSupplierAllocatorHandler", () => {
 
     expect(result.batchItemFailures).toHaveLength(0);
     expect(allocationConfig.selectSupplierByFactor).toHaveBeenCalledTimes(2);
+  });
+
+  test("does not process a message more than once due to idempotency wrapper", async () => {
+    const preparedEvent = createPreparedV2Event();
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("msg1", JSON.stringify(preparedEvent)),
+    ]);
+
+    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+
+    setupDefaultMocks();
+    (makeIdempotent as jest.Mock).mockImplementationOnce((_fn) => "supplier1");
+
+    const handler = createSupplierAllocatorHandler(mockedDeps);
+    await handler(evt, {} as any, {} as any);
+
+    expect(makeIdempotent).toHaveBeenCalledTimes(1);
+    expect(mockedDeps.sqsClient.send).not.toHaveBeenCalled();
   });
 });
