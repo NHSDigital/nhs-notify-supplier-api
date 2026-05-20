@@ -23,10 +23,10 @@
     "lint": "npm run lint:node && npm run lint:schema",
     "lint:fix": "eslint . --fix",
     "lint:node": "eslint .",
-    "lint:schema": "spectral lint client-config/client-config.yaml",
+    "lint:schema": "spectral lint ./schemas/supplier-api.yaml",
     "prebuild": "rm -rf dist && npm run gen:asyncapi",
     "pregen:asyncapi": "npm run gen:jsonschema",
-    "pregen:jsonschema": "rm -rf ./client-config/json",
+    "pregen:jsonschema": "rm -rf ./schemas/events/*.json",
     "prelint:schema": "npm run gen:jsonschema",
     "prepublishOnly": "npm run build",
     "pretest:unit": "npm run gen:jsonschema",
@@ -36,5 +36,5 @@
     "typecheck": "tsc --noEmit"
   },
   "types": "dist/index.d.ts",
-  "version": "1.0.18"
+  "version": "1.0.19"
 }

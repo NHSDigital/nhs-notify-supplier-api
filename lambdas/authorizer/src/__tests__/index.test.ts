@@ -41,7 +41,7 @@ const mockedDeps: jest.Mocked<Deps> = {
   supplierRepo: {
     getSupplierByApimId: jest.fn(),
   } as any,
-} as Deps;
+};
 
 const buildCertWithExpiry = (
   expiry: string,
