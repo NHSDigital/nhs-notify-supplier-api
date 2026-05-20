@@ -29,7 +29,7 @@ const mockedDeps: jest.Mocked<Deps> = {
     error: jest.fn(),
   } as unknown as pino.Logger,
   env: {} as unknown as EnvVars,
-} as Deps;
+};
 
 function generateLetter(
   status: LetterStatus,

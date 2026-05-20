@@ -1,12 +1,12 @@
 {
   "author": "",
   "dependencies": {
-    "@aws-sdk/client-api-gateway": "^3.906.0",
+    "@aws-sdk/client-api-gateway": "^3.1044.0",
     "@aws-sdk/client-dynamodb": "^3.984.0",
     "@aws-sdk/client-kinesis": "^3.964.0",
     "@aws-sdk/client-lambda": "^3.986.0",
-    "@aws-sdk/client-sns": "^3.984.0",
-    "@aws-sdk/lib-dynamodb": "^3.1008.0",
+    "@aws-sdk/client-sns": "^3.1044.0",
+    "@aws-sdk/lib-dynamodb": "^3.1044.0",
     "@nhsdigital/nhs-notify-event-schemas-letter-rendering": "^2.0.2",
     "@nhsdigital/notify-digital-letters-consumer-contracts": "^1.0.1",
     "@pact-foundation/pact": "^16.4.0",
