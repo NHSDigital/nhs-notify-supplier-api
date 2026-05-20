@@ -35,7 +35,8 @@ module "supplier_mock" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
-    ENVIRONMENT = var.environment
+    ENVIRONMENT               = var.environment
+    GET_LETTERS_FUNCTION_NAME = module.get_letters.function_name
   })
 }
 

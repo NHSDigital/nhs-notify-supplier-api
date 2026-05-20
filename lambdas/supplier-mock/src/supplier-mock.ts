@@ -1,4 +1,5 @@
 /* eslint-disable sonarjs/no-commented-code */
+import { InvokeCommand } from "@aws-sdk/client-lambda";
 import { Deps } from "./deps";
 import { RequestHeaders } from "../../../tests/constants/request-headers";
 
@@ -35,22 +36,46 @@ export default function createHandler(deps: Deps) {
     //   }),
     // );
 
-    deps.logger.info(
-      "VLASIS - about to make a request to the get letters endpoint of the supplier API",
-    );
-    deps.logger.info(`Base URL from deps: ${deps.baseUrl}`);
+    deps.logger.info("Invoking get_letters lambda directly");
+
+    if (!deps.env.GET_LETTERS_FUNCTION_NAME) {
+      throw new Error("GET_LETTERS_FUNCTION_NAME is not configured");
+    }
+
     const headers: RequestHeaders = {
       "NHSD-Supplier-ID": "TestSupplier1",
       "NHSD-Correlation-ID": "12345",
       "X-Request-ID": "requestId1",
     };
 
-    const getLettersResponse = await fetch(`${deps.baseUrl}/letters`, {
-      method: "GET",
-      headers,
-    });
+    const invokeResponse = await deps.lambdaClient.send(
+      new InvokeCommand({
+        FunctionName: deps.env.GET_LETTERS_FUNCTION_NAME,
+        InvocationType: "RequestResponse",
+        Payload: Buffer.from(
+          JSON.stringify({
+            headers: {
+              "nhsd-supplier-id": headers["NHSD-Supplier-ID"],
+              "nhsd-correlation-id": headers["NHSD-Correlation-ID"],
+              "x-request-id": headers["X-Request-ID"],
+            },
+            queryStringParameters: null,
+            requestContext: {},
+          }),
+        ),
+      }),
+    );
+
+    const responsePayload = invokeResponse.Payload
+      ? JSON.parse(Buffer.from(invokeResponse.Payload).toString("utf8"))
+      : undefined;
+
     deps.logger.info(
-      `Response from get letters lambda: ${getLettersResponse.status} - ${getLettersResponse.statusText}`,
+      {
+        statusCode: responsePayload?.statusCode,
+        functionError: invokeResponse.FunctionError,
+      },
+      "Received response from get_letters lambda",
     );
   };
 }
