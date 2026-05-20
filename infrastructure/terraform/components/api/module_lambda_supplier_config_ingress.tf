@@ -1,12 +1,3 @@
-
-
-
-
-
-
-
-
-
 module "supplier_config_ingress" {
   source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip"
 
@@ -73,6 +64,19 @@ data "aws_iam_policy_document" "supplier_config_ingress_lambda" {
 
     resources = [
       module.sqs_supplier_config.sqs_queue_arn
+    ]
+  }
+
+  statement {
+    sid    = "AllowConfigDynamoDBWrite"
+    effect = "Allow"
+
+    actions = [
+      "dynamodb:UpdateItem",
+    ]
+
+    resources = [
+      aws_dynamodb_table.supplier-configuration.arn,
     ]
   }
 }
