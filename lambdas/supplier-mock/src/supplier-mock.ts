@@ -77,5 +77,8 @@ export default function createHandler(deps: Deps) {
       },
       "Received response from get_letters lambda",
     );
+    deps.logger.info({
+      body: responsePayload?.body,
+    });
   };
 }
