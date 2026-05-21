@@ -24,7 +24,7 @@
     "notify-first-test"
   ],
   "priority": 10,
-  "status": "DRAFT",
+  "status": "PROD",
   "type": "STANDARD",
   "volumeGroupId": "volumeGroup-test5"
 }
