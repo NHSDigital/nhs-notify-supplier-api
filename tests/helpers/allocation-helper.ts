@@ -2,11 +2,12 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
   DynamoDBDocumentClient,
   GetCommand,
+  PutCommand,
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { envName } from "tests/constants/api-constants";
 import {
-  pollAllocatorLogForPackSpec,
+  pollAllocatorLogWithOptions,
   pollSupplierAllocatorLogForExceededDailyCapacity,
   pollSupplierAllocatorLogForResolvedSpec,
 } from "./aws-cloudwatch-helper";
@@ -17,11 +18,12 @@ const docClient = DynamoDBDocumentClient.from(ddb);
 export const AllocationTestVariantMap: Record<string, number> = {
   "notify-standard-test1": 1,
   "client1-campaign1": 2,
+  "notify-standard-colour": 3,
+  "client1-campaign2": 4,
 };
 
 export function getVariantsForAllocation(testCase: number) {
   const variants = Object.keys(AllocationTestVariantMap).filter(
-    // safe as comes from map's keys which are controlled by us
     // eslint-disable-next-line security/detect-object-injection
     (variant) => AllocationTestVariantMap[variant] === testCase,
   );
@@ -55,14 +57,47 @@ type PackSpecificationLog = {
   constraintOperator?: string;
 };
 
+exporttype PackErrorLog = {
+  description: string;
+  letterVariantId?: string;
+  packSpecificationId?: string[];
+};
+
+export type SupplierFactorEntry = {
+  supplierId: string;
+  factor: number;
+};
+
+export type SupplierFactorLog = {
+  description: string;
+  supplierFactors?: SupplierFactorEntry[];
+};
+
+export type AllocationLogOptions = {
+  startTimeMs?: number;
+  extraPatterns?: string[];
+};
+
 type LetterVariantConfig = {
   id: string;
   packSpecificationIds: string[];
+  constraints: {
+    blackCoveragePercentage: Record<string, number>;
+    deliveryDays: Record<string, number>;
+    sides: Record<string, number>;
+    sheets: Record<string, number>;
+  };
 };
 
 type DailyAllocationConfig = {
   id: string;
   date: string;
+  allocations: Record<string, number>;
+};
+
+type OverallAllocationConfig = {
+  id: string;
+  volumeGroup: string;
   allocations: Record<string, number>;
 };
 
@@ -82,7 +117,8 @@ const getSupplierConfigTableName = (): string =>
   `nhs-${envName}-supapi-supplier-config`;
 
 const getSupplierQuotasTableName = (): string =>
-  process.env.SUPPLIER_QUOTAS_TABLE_NAME ?? "nhs-pr578-supapi-supplier-quotas";
+  process.env.SUPPLIER_QUOTAS_TABLE_NAME ??
+  `nhs-${envName}-supapi-supplier-quotas`;
 
 const getAllocationDate = (): string => new Date().toISOString().slice(0, 10);
 
@@ -95,49 +131,20 @@ export async function getAllocationLogForDomainId(
   return supplierAllocatorLog;
 }
 
-export async function getAllocationPackSpecLog(
-  description: string,
-): Promise<PackSpecificationLog> {
-  const message = await pollAllocatorLogForPackSpec(description);
-  const packSpecificationLog = JSON.parse(message) as PackSpecificationLog;
-  return packSpecificationLog;
+export async function getAllocationLog<
+  TLog extends { description: string } = PackSpecificationLog,
+>(description: string, options?: AllocationLogOptions): Promise<TLog> {
+  const message = await pollAllocatorLogWithOptions(description, options);
+  const allocationLog = JSON.parse(message) as TLog;
+  return allocationLog;
 }
 
 export async function getExceededDailyCapacityLog(
   supplierId: string,
-  allocated: number,
-  dailyCapacity: number,
 ): Promise<SupplierDailyCapacityExceededLog> {
   const message =
     await pollSupplierAllocatorLogForExceededDailyCapacity(supplierId);
-  const exceededCapacityLog = JSON.parse(
-    message,
-  ) as SupplierDailyCapacityExceededLog;
-
-  if (
-    exceededCapacityLog.description !== "Supplier has exceeded daily capacity"
-  ) {
-    throw new Error(
-      `Unexpected log description: ${exceededCapacityLog.description}`,
-    );
-  }
-  if (exceededCapacityLog.supplierId !== supplierId) {
-    throw new Error(
-      `Unexpected supplierId in log: ${exceededCapacityLog.supplierId}`,
-    );
-  }
-  if (exceededCapacityLog.allocated !== allocated) {
-    throw new Error(
-      `Unexpected allocated value in log: ${exceededCapacityLog.allocated}`,
-    );
-  }
-  if (exceededCapacityLog.dailyCapacity !== dailyCapacity) {
-    throw new Error(
-      `Unexpected dailyCapacity value in log: ${exceededCapacityLog.dailyCapacity}`,
-    );
-  }
-
-  return exceededCapacityLog;
+  return JSON.parse(message) as SupplierDailyCapacityExceededLog;
 }
 
 export async function getLetterVariantConfigFromDb(
@@ -184,6 +191,112 @@ export async function getLetterDailyAllocationFromDb(
   return Item as DailyAllocationConfig;
 }
 
+export async function getOverallAllocationFromDb(
+  volumeGroupId: string,
+): Promise<OverallAllocationConfig> {
+  const { Item } = await docClient.send(
+    new GetCommand({
+      TableName: getSupplierQuotasTableName(),
+      Key: {
+        pk: "ENTITY#overall-allocation",
+        sk: `ID#${volumeGroupId}`,
+      },
+    }),
+  );
+
+  if (!Item) {
+    throw new Error(
+      `Overall allocation was not found in supplier config table for volume group ${volumeGroupId}`,
+    );
+  }
+
+  return Item as OverallAllocationConfig;
+}
+
+export async function seedLetterDailyAllocation(
+  allocations: Record<string, number>,
+  allocationDate: string = getAllocationDate(),
+): Promise<DailyAllocationConfig> {
+  const now = new Date().toISOString();
+  const item: DailyAllocationConfig & {
+    pk: string;
+    sk: string;
+    createdAt: string;
+    updatedAt: string;
+  } = {
+    pk: "ENTITY#daily-allocation",
+    sk: `ID#${allocationDate}`,
+    id: `ID#${allocationDate}`,
+    date: allocationDate,
+    allocations,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: getSupplierQuotasTableName(),
+      Item: item,
+      ConditionExpression: "attribute_not_exists(pk)",
+    }),
+  );
+
+  return item;
+}
+
+export async function seedOverallAllocation(
+  allocations: Record<string, number>,
+  volumeGroupId: string,
+): Promise<OverallAllocationConfig> {
+  const now = new Date().toISOString();
+  const item: OverallAllocationConfig & {
+    pk: string;
+    sk: string;
+    createdAt: string;
+    updatedAt: string;
+  } = {
+    pk: "ENTITY#overall-allocation",
+    sk: `ID#${volumeGroupId}`,
+    id: volumeGroupId,
+    volumeGroup: volumeGroupId,
+    allocations,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  await docClient.send(
+    new PutCommand({
+      TableName: getSupplierQuotasTableName(),
+      Item: item,
+      ConditionExpression: "attribute_not_exists(pk)",
+    }),
+  );
+
+  return item;
+}
+
+export async function getOrSeedLetterDailyAllocationFromDb(
+  defaultAllocations: Record<string, number>,
+  allocationDate: string = getAllocationDate(),
+): Promise<DailyAllocationConfig> {
+  try {
+    return await getLetterDailyAllocationFromDb(allocationDate);
+  } catch {
+    return seedLetterDailyAllocation(defaultAllocations, allocationDate);
+  }
+}
+
+export async function getOrSeedOverallAllocationFromDb(
+  defaultAllocations: Record<string, number>,
+  volumeGroupId: string,
+): Promise<OverallAllocationConfig> {
+  try {
+    return await getOverallAllocationFromDb(volumeGroupId);
+  } catch {
+    return seedOverallAllocation(defaultAllocations, volumeGroupId);
+  }
+}
+
 export async function updateSupplierDailyAllocation(
   supplierId: string,
   allocation: number,
@@ -216,6 +329,43 @@ export async function updateSupplierDailyAllocation(
         ":allocation": allocation,
         ":id": `ID#${allocationDate}`,
         ":date": allocationDate,
+        ":now": now,
+      },
+    }),
+  );
+}
+
+export async function updateSupplierOverallAllocation(
+  supplierId: string,
+  allocation: number,
+  volumeGroupId: string,
+): Promise<void> {
+  const now = new Date().toISOString();
+
+  const key = {
+    pk: "ENTITY#overall-allocation",
+    sk: `ID#${volumeGroupId}`,
+  };
+
+  await docClient.send(
+    new UpdateCommand({
+      TableName: getSupplierQuotasTableName(),
+      Key: key,
+      UpdateExpression: `
+        SET
+          allocations.#supplierId = :allocation,
+          id = if_not_exists(id, :id),
+          volumeGroup = if_not_exists(volumeGroup, :volumeGroup),
+          createdAt = if_not_exists(createdAt, :now),
+          updatedAt = :now
+      `,
+      ExpressionAttributeNames: {
+        "#supplierId": supplierId,
+      },
+      ExpressionAttributeValues: {
+        ":allocation": allocation,
+        ":id": volumeGroupId,
+        ":volumeGroup": volumeGroupId,
         ":now": now,
       },
     }),

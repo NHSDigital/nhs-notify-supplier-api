@@ -14,9 +14,10 @@ async function pollLambdaLog(
   lambdaName: string,
   filterPatterns: string[],
   extraPatterns?: string[],
+  startTimeMs?: number,
 ): Promise<string> {
   const intervalMs = 5000;
-  const startTimeMs = Date.now() - 5 * 60_000;
+  const queryStartTimeMs = startTimeMs ?? Date.now() - 5 * 60_000;
   const timeoutMs = 120_000;
 
   const client = new CloudWatchLogsClient({ region: AWS_REGION });
@@ -27,7 +28,7 @@ async function pollLambdaLog(
     const response = await client.send(
       new FilterLogEventsCommand({
         logGroupName,
-        startTime: startTimeMs,
+        startTime: queryStartTimeMs,
         interleaved: true,
         limit: 100,
         filterPattern: filterPatterns.join(" "),
@@ -40,6 +41,7 @@ async function pollLambdaLog(
         ? extraPatterns.some((pattern) => message.includes(pattern))
         : true;
     });
+
     if (foundEvent?.message) {
       return foundEvent.message;
     }
@@ -114,11 +116,29 @@ export async function supplierIdFromSupplierAllocatorLog(
   return supplierId;
 }
 
-export async function pollAllocatorLogForPackSpec(
-  description: string,
-): Promise<string> {
+export async function pollAllocatorLog(description: string): Promise<string> {
   const filterPatterns = ['"INFO"', `"${description}"`];
   const log = await pollLambdaLog("supplier-allocator", filterPatterns);
+  return log;
+}
+
+export type AllocatorLogPollOptions = {
+  startTimeMs?: number;
+  extraPatterns?: string[];
+};
+
+export async function pollAllocatorLogWithOptions(
+  description: string,
+  options?: AllocatorLogPollOptions,
+): Promise<string> {
+  const filterPatterns = [`"${description}"`];
+  console.log(filterPatterns);
+  const log = await pollLambdaLog(
+    "supplier-allocator",
+    filterPatterns,
+    options?.extraPatterns,
+    options?.startTimeMs,
+  );
   return log;
 }
 
