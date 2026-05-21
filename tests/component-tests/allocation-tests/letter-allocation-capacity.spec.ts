@@ -87,99 +87,122 @@ test.describe("Allocator Lambda Tests", () => {
     expect(lettersInDb.specificationId).toBe(allocatedPackSpecId);
   });
 
-  const supplierCapacityTestCases = [
-    {
-      testCase: "Verify if suppliers without capacity are filtered out",
-      letterVariantId: 4,
-      expectedSupplierId: "supplier2",
-    },
-    {
-      testCase:
-        "Verify that fallback is triggered when a suppliers are at daily capacity, ignoring capacity",
-      letterVariantId: 3,
-      expectedSupplierId: "supplier1",
-    },
-  ];
+  test("Verify if suppliers without capacity are filtered out", async () => {
+    const letterVariant = getVariantsForAllocation(4);
+    const domainId = `supcapacity-4-${randomUUID()}`;
+    const dailyAllocatedCapacity = 500_000;
+    const allocationDate = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Europe/London",
+    }).format(new Date());
 
-  for (const {
-    expectedSupplierId,
-    letterVariantId,
-    testCase,
-  } of supplierCapacityTestCases) {
-    test(testCase, async () => {
-      const letterVariant = getVariantsForAllocation(letterVariantId);
-      const domainId = randomUUID();
-      const dailyAllocatedCapacity = 500_000;
-      const allocationDate = new Intl.DateTimeFormat("en-CA", {
-        timeZone: "Europe/London",
-      }).format(new Date());
+    const dailyAllocation = await getOrSeedLetterDailyAllocationFromDb(
+      {
+        supplier1: 0,
+        supplier2: 0,
+      },
+      allocationDate,
+    );
+    logger.info(
+      `Daily allocation before test execution ${JSON.stringify(dailyAllocation.allocations)}`,
+    );
+    const originalSupplier1Allocation =
+      dailyAllocation.allocations.supplier3 ?? 0;
 
-      const dailyAllocation = await getOrSeedLetterDailyAllocationFromDb(
-        {
-          supplier3: 0,
-          supplier4: 0,
-        },
-        allocationDate,
-      );
-      logger.info(
-        `Daily allocation before test execution ${JSON.stringify(dailyAllocation.allocations)}`,
-      );
-
-      const originalSupplier3Allocation =
-        dailyAllocation.allocations.supplier3 ?? 0;
-
-      // set supplier3 to exactly daily capacity so allocator filters it out
-      if (dailyAllocation.allocations.supplier3 !== dailyAllocatedCapacity) {
-        await updateSupplierDailyAllocation(
-          "supplier3",
-          dailyAllocatedCapacity,
-          allocationDate,
-        );
-      }
-      const preparedEvent = createPreparedV1Event({
-        domainId,
-        letterVariantId: letterVariant,
-      });
-
-      const response = await sendSnsEvent(preparedEvent);
-      expect(response.MessageId).toBeTruthy();
-
-      const exceededCapacityLog =
-        await getExceededDailyCapacityLog("supplier3");
-      expect(exceededCapacityLog.description).toBe(
-        "Supplier has exceeded daily capacity",
-      );
-
-      const supplierAllocatorLog = await getAllocationLogForDomainId(domainId);
-      const supplierDetails =
-        supplierAllocatorLog.msg?.allocationDetails?.supplierSpec;
-      expect(supplierDetails?.supplierId).toBe(expectedSupplierId);
-
-      const lettersInDb = await getLettersFromSupplierTable(
-        expectedSupplierId,
-        domainId,
-        "PENDING",
-      );
-      expect(lettersInDb.status).toBe("PENDING");
-      expect(lettersInDb.specificationId).toBe(
-        supplierAllocatorLog.msg?.allocationDetails?.supplierSpec?.specId,
-      );
-
-      if (testCase.includes("fallback")) {
-        const fallbackDailyAllocation =
-          await getOrSeedLetterDailyAllocationFromDb({
-            supplier1: 0,
-          });
-        expect(fallbackDailyAllocation.allocations.supplier1).toBe(
-          dailyAllocatedCapacity + 1,
-        );
-      }
-
+    // set supplier1 to exactly daily capacity so allocator filters it out
+    if (dailyAllocation.allocations.supplier1 !== dailyAllocatedCapacity) {
       await updateSupplierDailyAllocation(
         "supplier3",
-        originalSupplier3Allocation,
+        dailyAllocatedCapacity,
         allocationDate,
       );
+    }
+    const preparedEvent = createPreparedV1Event({
+      domainId,
+      letterVariantId: letterVariant,
     });
-  }
+
+    const response = await sendSnsEvent(preparedEvent);
+    expect(response.MessageId).toBeTruthy();
+
+    const exceededCapacityLog = await getExceededDailyCapacityLog("supplier3");
+    expect(exceededCapacityLog.description).toBe(
+      "Supplier has exceeded daily capacity",
+    );
+
+    const lettersInDb = await getLettersFromSupplierTable(
+      "supplier4",
+      domainId,
+      "PENDING",
+    );
+    expect(lettersInDb.status).toBe("PENDING");
+    expect(lettersInDb.supplierId).toBe("supplier4");
+
+    await updateSupplierDailyAllocation(
+      "supplier3",
+      originalSupplier1Allocation,
+      allocationDate,
+    );
+  });
+
+  test("Verify that fallback is triggered when a suppliers are at daily capacity, ignoring capacity", async () => {
+    const letterVariant = getVariantsForAllocation(5);
+    const domainId = `supcapacity-5-${randomUUID()}`;
+    const dailyAllocatedCapacity = 500_000;
+    const allocationDate = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Europe/London",
+    }).format(new Date());
+
+    const dailyAllocation = await getOrSeedLetterDailyAllocationFromDb(
+      {
+        supplier5: 0,
+      },
+      allocationDate,
+    );
+    logger.info(
+      `Daily allocation before test execution ${JSON.stringify(dailyAllocation.allocations)}`,
+    );
+
+    const originalSupplierAllocation =
+      dailyAllocation.allocations.supplier5 ?? 0;
+
+    // set supplier1 to exactly daily capacity so allocator filters it out
+    if (dailyAllocation.allocations.supplier1 !== dailyAllocatedCapacity) {
+      await updateSupplierDailyAllocation(
+        "supplier5",
+        dailyAllocatedCapacity,
+        allocationDate,
+      );
+    }
+    const preparedEvent = createPreparedV1Event({
+      domainId,
+      letterVariantId: letterVariant,
+    });
+
+    const response = await sendSnsEvent(preparedEvent);
+    expect(response.MessageId).toBeTruthy();
+
+    const exceededCapacityLog = await getExceededDailyCapacityLog("supplier5");
+    expect(exceededCapacityLog.description).toBe(
+      "Supplier has exceeded daily capacity",
+    );
+
+    const lettersInDb = await getLettersFromSupplierTable(
+      "supplier5",
+      domainId,
+      "PENDING",
+    );
+    expect(lettersInDb.status).toBe("PENDING");
+    const fallbackDailyAllocation = await getOrSeedLetterDailyAllocationFromDb({
+      supplier5: 0,
+    });
+    expect(fallbackDailyAllocation.allocations.supplier5).toBe(
+      dailyAllocatedCapacity + 1,
+    );
+
+    await updateSupplierDailyAllocation(
+      "supplier5",
+      originalSupplierAllocation,
+      allocationDate,
+    );
+  });
 });

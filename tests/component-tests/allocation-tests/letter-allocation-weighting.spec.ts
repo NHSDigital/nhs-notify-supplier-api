@@ -17,7 +17,6 @@ import {
   buildWeightingSnapshot,
   getLowestWeightingSupplier,
 } from "tests/helpers/allocation-factor-helper";
-import { logger } from "tests/helpers/pino-logger";
 
 test.describe("Allocator Weighting Tests", () => {
   test.setTimeout(180_000);
@@ -223,11 +222,6 @@ test.describe("Allocator Weighting Tests", () => {
         supplierAllocatorLog.msg?.allocationDetails?.supplierSpec?.supplierId;
 
       expect(selectedSupplierId).toBe(lowestWeightingSupplier);
-      logger.info(
-        `Weighting snapshot: ${JSON.stringify(weightingSnapshot)}, Supplier factors from log: ${JSON.stringify(
-          supplierFactorLog.supplierFactors,
-        )}`,
-      );
       expect(weightingSnapshot.supplier1.weighting).toBe(
         supplierFactorLog.supplierFactors?.find(
           (factor) => factor.supplierId === "supplier1",

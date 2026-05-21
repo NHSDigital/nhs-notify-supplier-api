@@ -53,7 +53,7 @@ test.describe("Allocator Rejected Allocation Tests", () => {
 
   test("Verify that the letters are REJECTED when no pack specification is eligible", async () => {
     const letterVariant = getVariantsForAllocation(1);
-    const domainId = randomUUID();
+    const domainId = `NoEligiblePackSpecs-${randomUUID()}`;
     const preparedEvent = createPreparedV1Event({
       domainId,
       letterVariantId: letterVariant,
@@ -67,7 +67,7 @@ test.describe("Allocator Rejected Allocation Tests", () => {
       "No eligible pack specifications found for letter",
     );
 
-    const packSpecificationIds = supplierAllocatorLog.packSpecificationId;
+    const { packSpecificationIds } = supplierAllocatorLog;
     expect(packSpecificationIds).toBeTruthy();
     expect(supplierAllocatorLog.letterVariantId).toBe(letterVariant);
 

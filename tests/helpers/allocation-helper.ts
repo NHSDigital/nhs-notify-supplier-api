@@ -20,6 +20,7 @@ export const AllocationTestVariantMap: Record<string, number> = {
   "client1-campaign1": 2,
   "notify-standard-colour": 3,
   "client1-campaign2": 4,
+  "notify-first-test": 5,
 };
 
 export function getVariantsForAllocation(testCase: number) {
@@ -60,7 +61,7 @@ type PackSpecificationLog = {
 export type PackErrorLog = {
   description: string;
   letterVariantId?: string;
-  packSpecificationId?: string[];
+  packSpecificationIds?: string[];
 };
 
 export type SupplierFactorEntry = {
