@@ -31,8 +31,8 @@ Python
 rawContent
 relative_url
 repo
-SDK
-SDKs
+reqs
+SDKs?
 sed
 semver
 src

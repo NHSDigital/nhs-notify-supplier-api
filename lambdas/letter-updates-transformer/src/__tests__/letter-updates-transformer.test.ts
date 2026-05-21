@@ -11,7 +11,6 @@ import { Letter } from "@internal/datastore";
 import { mapLetterToCloudEvent } from "@internal/event-builders/src";
 import createHandler from "../letter-updates-transformer";
 import { Deps } from "../deps";
-import { EnvVars } from "../env";
 import { LetterStatus } from "../../../api-handler/src/contracts/letters";
 
 // Make crypto return consistent values, since we"re calling it in both prod and test code and comparing the values
@@ -33,8 +32,8 @@ const mockedDeps: jest.Mocked<Deps> = {
   env: {
     EVENTPUB_SNS_TOPIC_ARN: "arn:aws:sns:region:account:topic",
     EVENT_SOURCE: eventSource,
-  } as unknown as EnvVars,
-} as Deps;
+  },
+};
 
 describe("letter-updates-transformer Lambda", () => {
   beforeEach(() => {
