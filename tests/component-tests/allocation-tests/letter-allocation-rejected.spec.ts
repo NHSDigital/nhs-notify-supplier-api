@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
 import test, { expect } from "playwright/test";
 import {
+  PackErrorLog,
   getAllocationLog,
   getAllocationLogForDomainId,
   getVariantsForAllocation,
-  PackErrorLog,
 } from "tests/helpers/allocation-helper";
 import { createPreparedV1Event } from "tests/helpers/event-fixtures";
 import { getLettersFromSupplierTable } from "tests/helpers/generate-fetch-test-data";
