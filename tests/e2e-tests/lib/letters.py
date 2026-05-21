@@ -4,6 +4,7 @@ import pathlib
 import time
 import json
 import requests
+from lib.constants import resolve_aws_account_id
 from lib.errorhandler import ErrorHandler
 
 
@@ -21,7 +22,7 @@ def create_test_data(count: int = 10) -> list[str]:
     Returns a list of letter IDs created by the CLI.
     """
     environment = os.environ.get("TARGET_ENVIRONMENT", "main")
-    aws_account_id = os.environ.get("AWS_ACCOUNT_ID", "820178564574")
+    aws_account_id = resolve_aws_account_id()
 
     cmd = [
         "npm",
@@ -77,9 +78,14 @@ def get_pending_letter_ids(
     retries: int = 5,
 ) -> list:
     """Injects the given number of pending letters as test data, then waits for them to become
-    visible via the letters endpoint. Retries to account for other tests running in parallel stealing the letters
+    visible via the getLetters endpoint.
+
+    Because the getLetters endpoint increases the visibility timeout, if it is called immediately again before the letter's visibility timeout expires, the same letter will not be returned in the response.
+
+    Retries to account for other tests running in parallel stealing the letters.
 
     Returns a list of letter ID strings.
+
     Raises TimeoutError if the expected number of pending letters do not appear within the timeout period.
     """
 
