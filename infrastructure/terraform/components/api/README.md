@@ -33,7 +33,7 @@ No requirements.
 | <a name="input_eventpub_data_plane_bus_arn"></a> [eventpub\_data\_plane\_bus\_arn](#input\_eventpub\_data\_plane\_bus\_arn) | ARN of the EventBridge data plane bus for eventpub | `string` | `""` | no |
 | <a name="input_force_destroy"></a> [force\_destroy](#input\_force\_destroy) | Flag to force deletion of S3 buckets | `bool` | `false` | no |
 | <a name="input_force_lambda_code_deploy"></a> [force\_lambda\_code\_deploy](#input\_force\_lambda\_code\_deploy) | If the lambda package in s3 has the same commit id tag as the terraform build branch, the lambda will not update automatically. Set to True if making changes to Lambda code from on the same commit for example during development | `bool` | `false` | no |
-| <a name="input_group"></a> [group](#input\_group) | The group variables are being inherited from (often synonmous with account short-name) | `string` | n/a | yes |
+| <a name="input_group"></a> [group](#input\_group) | The account group short-name | `string` | n/a | yes |
 | <a name="input_kms_deletion_window"></a> [kms\_deletion\_window](#input\_kms\_deletion\_window) | When a kms key is deleted, how long should it wait in the pending deletion state? | `string` | `"30"` | no |
 | <a name="input_letter_event_source"></a> [letter\_event\_source](#input\_letter\_event\_source) | Source value to use for the letter status event updates | `string` | `"/data-plane/supplier-api/nhs-supplier-api-prod/main/update-status"` | no |
 | <a name="input_letter_table_ttl_hours"></a> [letter\_table\_ttl\_hours](#input\_letter\_table\_ttl\_hours) | Number of hours to set as TTL on letters table | `number` | `24` | no |

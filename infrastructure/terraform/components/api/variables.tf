@@ -24,7 +24,7 @@ variable "region" {
 
 variable "group" {
   type        = string
-  description = "The group variables are being inherited from (often synonmous with account short-name)"
+  description = "The account group short-name"
 }
 
 ##
