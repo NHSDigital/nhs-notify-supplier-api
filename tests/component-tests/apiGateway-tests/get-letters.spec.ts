@@ -1,11 +1,15 @@
 import { expect, test } from "@playwright/test";
-import { SUPPLIER_LETTERS } from "../../constants/api-constants";
 import {
   createHeaderWithNoCorrelationId,
   createInvalidRequestHeaders,
   createValidRequestHeaders,
 } from "../../constants/request-headers";
 import getRestApiGatewayBaseUrl from "../../helpers/aws-gateway-helper";
+import {
+  getLettersWithRetry,
+  isErrorResponse,
+  isGetLettersResponse,
+} from "../../helpers/generate-fetch-test-data";
 
 let baseUrl: string;
 
@@ -15,31 +19,36 @@ test.beforeAll(async () => {
 
 test.describe("API Gateway Tests To Get List Of Pending Letters", () => {
   test("GET /letters should return 200 and list items", async ({ request }) => {
-    const header = createValidRequestHeaders();
-    const response = await request.get(`${baseUrl}/${SUPPLIER_LETTERS}`, {
-      headers: header,
-      params: {
-        limit: "2",
+    const headers = createValidRequestHeaders();
+    const { responseBody, statusCode } = await getLettersWithRetry(
+      request,
+      baseUrl,
+      headers,
+      {
+        lettersLimit: "2",
       },
-    });
+    );
 
-    expect(response.status()).toBe(200);
-    const responseBody = await response.json();
+    expect(statusCode).toBe(200);
+    if (!isGetLettersResponse(responseBody)) {
+      throw new Error("Expected GetLettersResponse body for 200 status");
+    }
     expect(responseBody.data.length).toBeGreaterThanOrEqual(1);
   });
 
   test("GET /letters with invalid authentication should return 403", async ({
     request,
   }) => {
-    const header = createInvalidRequestHeaders();
-    const response = await request.get(`${baseUrl}/${SUPPLIER_LETTERS}`, {
-      headers: header,
-      params: {
-        limit: "2",
+    const headers = createInvalidRequestHeaders();
+    const { responseBody, statusCode } = await getLettersWithRetry(
+      request,
+      baseUrl,
+      headers,
+      {
+        waitForVisibilityTimeout: false,
       },
-    });
-    expect(response.status()).toBe(403);
-    const responseBody = await response.json();
+    );
+    expect(statusCode).toBe(403);
     expect(responseBody).toMatchObject({
       Message:
         "User is not authorized to access this resource with an explicit deny in an identity-based policy",
@@ -49,15 +58,19 @@ test.describe("API Gateway Tests To Get List Of Pending Letters", () => {
   test("GET /letters with empty correlationId should return 500", async ({
     request,
   }) => {
-    const header = createHeaderWithNoCorrelationId();
-    const response = await request.get(`${baseUrl}/${SUPPLIER_LETTERS}`, {
-      headers: header,
-      params: {
-        limit: "2",
+    const headers = createHeaderWithNoCorrelationId();
+    const { responseBody, statusCode } = await getLettersWithRetry(
+      request,
+      baseUrl,
+      headers,
+      {
+        waitForVisibilityTimeout: false,
       },
-    });
-    expect(response.status()).toBe(500);
-    const responseBody = await response.json();
+    );
+    expect(statusCode).toBe(500);
+    if (!isErrorResponse(responseBody)) {
+      throw new Error("Expected ErrorResponse body for 500 status");
+    }
     expect(responseBody.errors[0].code).toBe("NOTIFY_INTERNAL_SERVER_ERROR");
     expect(responseBody.errors[0].detail).toBe("Unexpected error");
   });
@@ -65,15 +78,17 @@ test.describe("API Gateway Tests To Get List Of Pending Letters", () => {
   test("GET /letters with invalid query param return 400", async ({
     request,
   }) => {
-    const header = createValidRequestHeaders();
-    const response = await request.get(`${baseUrl}/${SUPPLIER_LETTERS}`, {
-      headers: header,
-      params: {
-        limit: "?",
+    const headers = createValidRequestHeaders();
+    const { responseBody, statusCode } = await getLettersWithRetry(
+      request,
+      baseUrl,
+      headers,
+      {
+        lettersLimit: "?",
+        waitForVisibilityTimeout: false,
       },
-    });
-    expect(response.status()).toBe(400);
-    const responseBody = await response.json();
+    );
+    expect(statusCode).toBe(400);
     expect(responseBody).toMatchObject({
       errors: [
         {

@@ -9,13 +9,12 @@ import {
   verifyIndexPositionOfLetterVariants,
 } from "tests/helpers/urgent-letter-priority-helper";
 import { createValidRequestHeaders } from "tests/constants/request-headers";
-import { SUPPLIER_LETTERS } from "tests/constants/api-constants";
 import { supplierDataSetup } from "tests/helpers/suppliers-setup-helper";
 import { logger } from "tests/helpers/pino-logger";
 import {
-  GetLettersResponse,
-  GetLettersResponseSchema,
-} from "../../../lambdas/api-handler/src/contracts/letters";
+  getLettersWithRetry,
+  isGetLettersResponse,
+} from "tests/helpers/generate-fetch-test-data";
 
 let baseUrl: string;
 
@@ -46,19 +45,21 @@ test.describe("Urgent Letter Priority Tests", () => {
     await verifyAllocationLogsContainPriority(urgencyNineLetterIds, 9);
     await verifyAllocationLogsContainPriority(urgencyTenLetterIds, 10);
 
-    const header = createValidRequestHeaders(supplier);
-    const response = await request.get(`${baseUrl}/${SUPPLIER_LETTERS}`, {
-      headers: header,
-    });
+    const headers = createValidRequestHeaders(supplier);
+    const { responseBody, statusCode } = await getLettersWithRetry(
+      request,
+      baseUrl,
+      headers,
+    );
 
-    expect(response.status()).toBe(200);
-    const responseBody = await response.json();
+    expect(statusCode).toBe(200);
+    if (!isGetLettersResponse(responseBody)) {
+      throw new Error("Expected GetLettersResponse body for 200 status");
+    }
+
     expect(responseBody.data.length).toBeGreaterThanOrEqual(1);
 
-    const getLettersResponse: GetLettersResponse =
-      GetLettersResponseSchema.parse(responseBody);
-
-    const letterIds = getLettersResponse.data.map((letter) => letter.id);
+    const letterIds = responseBody.data.map((letter) => letter.id);
 
     verifyIndexPositionOfLetterVariants(
       letterIds,
