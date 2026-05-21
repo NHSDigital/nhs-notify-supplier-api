@@ -1,0 +1,7 @@
+{
+  "channelType": "LETTER",
+  "dailyCapacity": 500000,
+  "id": "supplier4",
+  "name": "Supplier4",
+  "status": "PROD"
+}
