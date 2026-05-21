@@ -4,6 +4,7 @@ import {
   getAllocationLog,
   getAllocationLogForDomainId,
   getVariantsForAllocation,
+  PackErrorLog,
 } from "tests/helpers/allocation-helper";
 import { createPreparedV1Event } from "tests/helpers/event-fixtures";
 import { getLettersFromSupplierTable } from "tests/helpers/generate-fetch-test-data";
@@ -66,9 +67,7 @@ test.describe("Allocator Rejected Allocation Tests", () => {
       "No eligible pack specifications found for letter",
     );
 
-    const packSpecificationIds =
-      supplierAllocatorLog.packSpecificationIds ??
-      supplierAllocatorLog.packSpecificationId;
+    const packSpecificationIds = supplierAllocatorLog.packSpecificationId;
     expect(packSpecificationIds).toBeTruthy();
     expect(supplierAllocatorLog.letterVariantId).toBe(letterVariant);
 
