@@ -57,7 +57,7 @@ type PackSpecificationLog = {
   constraintOperator?: string;
 };
 
-exporttype PackErrorLog = {
+export type PackErrorLog = {
   description: string;
   letterVariantId?: string;
   packSpecificationId?: string[];

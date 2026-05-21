@@ -90,7 +90,6 @@ test.describe("Allocator Weighting Tests", () => {
       const response = await sendSnsEvent(preparedEvent);
       expect(response.MessageId).toBeTruthy();
 
-      console.log(`testStartedAt: ${testStartedAt}`);
       const supplierAllocatorLog = await getAllocationLogForDomainId(domainId);
       const supplierFactorLog = await getAllocationLog<SupplierFactorLog>(
         "Calculated supplier factors for allocation",
