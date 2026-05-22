@@ -19,6 +19,7 @@ No requirements.
 | <a name="input_csoc_log_forwarding"></a> [csoc\_log\_forwarding](#input\_csoc\_log\_forwarding) | Enable forwarding of API Gateway logs to CSOC | `bool` | `true` | no |
 | <a name="input_default_tags"></a> [default\_tags](#input\_default\_tags) | A map of default tags to apply to all taggable resources within the component | `map(string)` | `{}` | no |
 | <a name="input_disable_gateway_execute_endpoint"></a> [disable\_gateway\_execute\_endpoint](#input\_disable\_gateway\_execute\_endpoint) | Disable the execution endpoint for the API Gateway | `bool` | `true` | no |
+| <a name="input_download_url_ttl_seconds"></a> [download\_url\_ttl\_seconds](#input\_download\_url\_ttl\_seconds) | TTL in seconds for generated download URLs | `number` | `60` | no |
 | <a name="input_enable_alarms"></a> [enable\_alarms](#input\_enable\_alarms) | Enable CloudWatch alarms for this deployed environment | `bool` | `true` | no |
 | <a name="input_enable_api_data_trace"></a> [enable\_api\_data\_trace](#input\_enable\_api\_data\_trace) | Enable API Gateway data trace logging | `bool` | `false` | no |
 | <a name="input_enable_backups"></a> [enable\_backups](#input\_enable\_backups) | Enable backups | `bool` | `false` | no |
@@ -36,11 +37,15 @@ No requirements.
 | <a name="input_group"></a> [group](#input\_group) | The account group short-name | `string` | n/a | yes |
 | <a name="input_kms_deletion_window"></a> [kms\_deletion\_window](#input\_kms\_deletion\_window) | When a kms key is deleted, how long should it wait in the pending deletion state? | `string` | `"30"` | no |
 | <a name="input_letter_event_source"></a> [letter\_event\_source](#input\_letter\_event\_source) | Source value to use for the letter status event updates | `string` | `"/data-plane/supplier-api/nhs-supplier-api-prod/main/update-status"` | no |
+| <a name="input_letter_queue_ttl_hours"></a> [letter\_queue\_ttl\_hours](#input\_letter\_queue\_ttl\_hours) | TTL in hours for letter queue records | `number` | `168` | no |
+| <a name="input_letter_queue_visibility_timeout"></a> [letter\_queue\_visibility\_timeout](#input\_letter\_queue\_visibility\_timeout) | Visibility timeout in seconds for processing queued letter updates | `number` | `300` | no |
 | <a name="input_letter_table_ttl_hours"></a> [letter\_table\_ttl\_hours](#input\_letter\_table\_ttl\_hours) | Number of hours to set as TTL on letters table | `number` | `24` | no |
+| <a name="input_letter_ttl_hours"></a> [letter\_ttl\_hours](#input\_letter\_ttl\_hours) | TTL in hours for letter records | `number` | `12960` | no |
 | <a name="input_log_level"></a> [log\_level](#input\_log\_level) | The log level to be used in lambda functions within the component. Any log with a lower severity than the configured value will not be logged: https://docs.python.org/3/library/logging.html#levels | `string` | `"INFO"` | no |
 | <a name="input_log_retention_in_days"></a> [log\_retention\_in\_days](#input\_log\_retention\_in\_days) | The retention period in days for the Cloudwatch Logs events to be retained, default of 0 is indefinite | `number` | `0` | no |
 | <a name="input_manually_configure_mtls_truststore"></a> [manually\_configure\_mtls\_truststore](#input\_manually\_configure\_mtls\_truststore) | Manually manage the truststore used for API Gateway mTLS (e.g. for prod environment) | `bool` | `false` | no |
 | <a name="input_max_get_limit"></a> [max\_get\_limit](#input\_max\_get\_limit) | Default limit to apply to GET requests that support pagination | `number` | `2500` | no |
+| <a name="input_mi_ttl_hours"></a> [mi\_ttl\_hours](#input\_mi\_ttl\_hours) | TTL in hours for MI records | `number` | `2160` | no |
 | <a name="input_parent_acct_environment"></a> [parent\_acct\_environment](#input\_parent\_acct\_environment) | Name of the environment responsible for the acct resources used, affects things like DNS zone. Useful for named dev environments | `string` | `"main"` | no |
 | <a name="input_project"></a> [project](#input\_project) | The name of the tfscaffold project | `string` | n/a | yes |
 | <a name="input_region"></a> [region](#input\_region) | The AWS Region | `string` | n/a | yes |

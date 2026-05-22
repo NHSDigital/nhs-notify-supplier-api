@@ -111,6 +111,36 @@ variable "max_get_limit" {
   default     = 2500
 }
 
+variable "download_url_ttl_seconds" {
+  type        = number
+  description = "TTL in seconds for generated download URLs"
+  default     = 60
+}
+
+variable "letter_ttl_hours" {
+  type        = number
+  description = "TTL in hours for letter records"
+  default     = 12960
+}
+
+variable "letter_queue_ttl_hours" {
+  type        = number
+  description = "TTL in hours for letter queue records"
+  default     = 168
+}
+
+variable "letter_queue_visibility_timeout" {
+  type        = number
+  description = "Visibility timeout in seconds for processing queued letter updates"
+  default     = 300
+}
+
+variable "mi_ttl_hours" {
+  type        = number
+  description = "TTL in hours for MI records"
+  default     = 2160
+}
+
 variable "parent_acct_environment" {
   type        = string
   description = "Name of the environment responsible for the acct resources used, affects things like DNS zone. Useful for named dev environments"
