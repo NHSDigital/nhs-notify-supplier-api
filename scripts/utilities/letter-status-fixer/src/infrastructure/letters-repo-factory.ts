@@ -10,7 +10,7 @@ export function createLetterDocClient(environment: string) {
   const config = {
     lettersTableName:
       process.env.LETTERS_TABLE || `nhs-${environment}-supapi-letters`,
-    supplierStatusIndex: process.env.SUPPLIER_STATUS_INDEX || "supplierStatus",
+    supplierStatusIndex: process.env.SUPPLIER_STATUS_INDEX || "supplierStatus-index",
   };
   return { docClient, log, config };
 }
