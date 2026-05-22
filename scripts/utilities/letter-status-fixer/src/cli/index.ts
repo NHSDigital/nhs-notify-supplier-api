@@ -9,6 +9,7 @@ const commandOptions = {
   environment: { type: "string" as const, demandOption: true },
   supplierId: { type: "string" as const, demandOption: true },
   status: { type: "string" as const, demandOption: true },
+  dryrun: { type: "boolean" as const, demandOption: false, default: true},
 };
 
 /* eslint-disable import-x/prefer-default-export */
@@ -16,19 +17,21 @@ export async function updateFailedLetters(
   environment: string,
   supplierId: string,
   status: string,
+  dryrun: boolean
 ) {
   const { config, docClient, log } = createLetterDocClient(environment);
   const compoundKey = `${supplierId}#${status}`;
   let lastKey: Record<string, any> | undefined;
   let updatedCount = 0;
   let failedCount = 0;
+  const dryrunSuffix = dryrun ? "-dryrun" : "";
   const logFile = path.resolve(
     process.cwd(),
-    `updated-letters-${Date.now()}.log`,
+    `updated-letters-${Date.now()}${dryrunSuffix}.log`,
   );
   const failuresFile = path.resolve(
     process.cwd(),
-    `failed-letters-${Date.now()}.log`,
+    `failed-letters-${Date.now()}${dryrunSuffix}.log`,
   );
 
   do {
@@ -36,31 +39,42 @@ export async function updateFailedLetters(
       TableName: config.lettersTableName,
       IndexName: config.supplierStatusIndex,
       KeyConditionExpression: "supplierStatus = :ss",
-      FilterExpression: "attribute_exists(groupId) AND size(groupId) > :len",
-      ExpressionAttributeValues: { ":ss": compoundKey, ":len": 100 },
+    //   FilterExpression: "attribute_exists(groupId) AND size(groupId) > :len",
+    //   ExpressionAttributeValues: { ":ss": compoundKey, ":len": 100 },
+      ExpressionAttributeValues: { ":ss": compoundKey },
       ExclusiveStartKey: lastKey,
     });
 
+    log.info(queryCmd);
+
     const result = await docClient.send(queryCmd);
+
+    // TODO: filter length here
+
+    log.info(
+      `Found ${result.Items?.length || 0} letters with supplierId ${supplierId} and status ${status} that have groupId longer than 100 characters.`,
+    );
 
     for (const item of result.Items || []) {
       try {
         log.info(
-          `Updating letter ${item.letterId} (groupId length: ${item.groupId?.length}) to FAILED`,
+          `Updating letter ${item.id} (groupId length: ${item.groupId?.length}) to FAILED`,
         );
         const updateCmd = new UpdateCommand({
           TableName: config.lettersTableName,
-          Key: { letterId: item.letterId },
+          Key: { letterId: item.id },
           UpdateExpression: "SET #status = :failed",
           ExpressionAttributeNames: { "#status": "status" },
           ExpressionAttributeValues: { ":failed": "FAILED" },
         });
-        await docClient.send(updateCmd);
-        fs.appendFileSync(logFile, `${item.letterId}\n`, "utf8");
+        if(!dryrun) {
+            await docClient.send(updateCmd);
+        }
+        fs.appendFileSync(logFile, `${item.id}\n`, "utf8");
         updatedCount += 1;
       } catch (error) {
-        log.error({ err: error }, `Failed to update letter ${item.letterId}`);
-        fs.appendFileSync(failuresFile, `${item.letterId}\n`, "utf8");
+        log.error({ err: error }, `Failed to update letter ${item.id}`);
+        fs.appendFileSync(failuresFile, `${item.id}\n`, "utf8");
         failedCount += 1;
       }
     }
@@ -83,7 +97,8 @@ async function main() {
         const environment = argv.environment as string;
         const supplierId = argv.supplierId as string;
         const status = argv.status as string;
-        await updateFailedLetters(environment, supplierId, status);
+        const dryrun = argv.dryrun as boolean;
+        await updateFailedLetters(environment, supplierId, status, dryrun);
       },
     )
     .demandCommand(1)
