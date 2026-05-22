@@ -1,17 +1,8 @@
 {
-  "compilerOptions": {
-    "esModuleInterop": true,
-    "module": "ES2020",
-    "moduleResolution": "node",
-    "outDir": "dist",
-    "resolveJsonModule": true,
-    "rootDir": "src",
-    "skipLibCheck": true,
-    "strict": true,
-    "target": "ES2022"
-  },
+  "compilerOptions": {},
   "extends": "../../../tsconfig.base.json",
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "jest.config.ts"
   ]
 }

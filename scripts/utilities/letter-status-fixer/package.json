@@ -9,7 +9,11 @@
   "name": "letter-status-fixer",
   "private": true,
   "scripts": {
-    "fix-status": "tsx src/cli/index.ts fix-status"
+    "fix-status": "tsx src/cli/index.ts fix-status",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test:unit": "jest",
+    "typecheck": "tsc --noEmit"
   },
   "type": "module",
   "version": "0.1.0"
