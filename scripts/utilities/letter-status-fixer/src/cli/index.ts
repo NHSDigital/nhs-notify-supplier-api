@@ -9,7 +9,7 @@ const commandOptions = {
   environment: { type: "string" as const, demandOption: true },
   supplierId: { type: "string" as const, demandOption: true },
   status: { type: "string" as const, demandOption: true },
-  dryrun: { type: "boolean" as const, demandOption: false, default: true},
+  dryrun: { type: "boolean" as const, demandOption: false, default: true },
 };
 
 /* eslint-disable import-x/prefer-default-export */
@@ -17,7 +17,7 @@ export async function updateFailedLetters(
   environment: string,
   supplierId: string,
   status: string,
-  dryrun: boolean
+  dryrun: boolean,
 ) {
   const { config, docClient, log } = createLetterDocClient(environment);
   const compoundKey = `${supplierId}#${status}`;
@@ -39,17 +39,14 @@ export async function updateFailedLetters(
       TableName: config.lettersTableName,
       IndexName: config.supplierStatusIndex,
       KeyConditionExpression: "supplierStatus = :ss",
-    //   FilterExpression: "attribute_exists(groupId) AND size(groupId) > :len",
-    //   ExpressionAttributeValues: { ":ss": compoundKey, ":len": 100 },
-      ExpressionAttributeValues: { ":ss": compoundKey },
+      FilterExpression: "attribute_exists(groupId) AND size(groupId) > :len",
+      ExpressionAttributeValues: { ":ss": compoundKey, ":len": 100 },
       ExclusiveStartKey: lastKey,
     });
 
     log.info(queryCmd);
 
     const result = await docClient.send(queryCmd);
-
-    // TODO: filter length here
 
     log.info(
       `Found ${result.Items?.length || 0} letters with supplierId ${supplierId} and status ${status} that have groupId longer than 100 characters.`,
@@ -67,8 +64,8 @@ export async function updateFailedLetters(
           ExpressionAttributeNames: { "#status": "status" },
           ExpressionAttributeValues: { ":failed": "FAILED" },
         });
-        if(!dryrun) {
-            await docClient.send(updateCmd);
+        if (!dryrun) {
+          await docClient.send(updateCmd);
         }
         fs.appendFileSync(logFile, `${item.id}\n`, "utf8");
         updatedCount += 1;
@@ -97,7 +94,7 @@ async function main() {
         const environment = argv.environment as string;
         const supplierId = argv.supplierId as string;
         const status = argv.status as string;
-        const dryrun = argv.dryrun as boolean;
+        const { dryrun } = argv;
         await updateFailedLetters(environment, supplierId, status, dryrun);
       },
     )
@@ -105,8 +102,9 @@ async function main() {
     .parse();
 }
 
-
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}

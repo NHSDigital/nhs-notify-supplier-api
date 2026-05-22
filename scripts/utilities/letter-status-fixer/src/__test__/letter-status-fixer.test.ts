@@ -2,6 +2,7 @@ import { QueryCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import * as fs from "node:fs";
 
 // Import after mocks
+import { expect, jest } from "@jest/globals";
 import { updateFailedLetters } from "../cli";
 
 jest.mock("@aws-sdk/lib-dynamodb");
@@ -39,14 +40,14 @@ describe("updateFailedLetters", () => {
     mockSend
       .mockImplementationOnce(() => ({
         Items: [
-          { letterId: "id1", groupId: "x".repeat(101) },
-          { letterId: "id2", groupId: "y".repeat(102) },
+          { id: "id1", groupId: "x".repeat(101) },
+          { id: "id2", groupId: "y".repeat(102) },
         ],
         LastEvaluatedKey: undefined,
       }))
       .mockImplementation(() => ({})); // For UpdateCommand
 
-    await updateFailedLetters(environment, supplierId, status);
+    await updateFailedLetters(environment, supplierId, status, false);
 
     expect(mockSend).toHaveBeenCalledWith(expect.any(QueryCommand));
     expect(mockSend).toHaveBeenCalledWith(expect.any(UpdateCommand));
@@ -68,14 +69,14 @@ describe("updateFailedLetters", () => {
   it("logs failed updates to failures file", async () => {
     mockSend
       .mockImplementationOnce(() => ({
-        Items: [{ letterId: "id3", groupId: "z".repeat(120) }],
+        Items: [{ id: "id3", groupId: "z".repeat(120) }],
         LastEvaluatedKey: undefined,
       }))
       .mockImplementationOnce(() => {
         throw new Error("fail");
       });
 
-    await updateFailedLetters(environment, supplierId, status);
+    await updateFailedLetters(environment, supplierId, status, false);
 
     expect(fs.appendFileSync).toHaveBeenCalledWith(
       expect.stringMatching(/failed-letters-\d+\.log/),
