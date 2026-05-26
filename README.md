@@ -122,7 +122,7 @@ New developers of the NHS Notify Supplier API should understand the below.
 
 ##### SDKs
 
-- The [SDK](sdk) folder is excluded from all pre requisites
+- The [SDK](sdk) folder is excluded from all pre reqs
 - DO NOT make manual changes to the [SDK](sdk), instead [build](#build) it
 - The SDK folder is excluded from git commits,
   and will be built as part of the CI/CD pipeline and released as a GitHub

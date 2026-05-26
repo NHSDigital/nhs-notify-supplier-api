@@ -3,12 +3,12 @@ import subprocess
 import pathlib
 import time
 import requests
+from .constants import SUPPLIER
 from lib.errorhandler import ErrorHandler
 
 
 _REPO_ROOT = pathlib.Path(__file__).resolve().parents[3]
 _CLI_WORKSPACE = "nhs-notify-supplier-api-letter-test-data-utility"
-_SUPPLIER_ID = "TestSupplier1"
 
 
 def create_test_data(count: int = 10) -> None:
@@ -28,7 +28,7 @@ def create_test_data(count: int = 10) -> None:
         "cli",
         "--",
         "create-letter-batch",
-        "--supplier-id", _SUPPLIER_ID,
+        "--supplier-id", SUPPLIER,
         "--environment", environment,
         "--awsAccountId", aws_account_id,
         "--group-id", "TestGroupID",

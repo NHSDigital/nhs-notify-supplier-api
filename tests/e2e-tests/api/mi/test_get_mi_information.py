@@ -41,9 +41,9 @@ def test_404_mi_does_not_exist(url, authentication_secret):
 @pytest.mark.devtest
 @pytest.mark.inttest
 @pytest.mark.prodtest
-def test_404_mi_miId_from_different_supplier_returns_does_not_exist(url, authentication_secret, supplier1_authentication_secret):
+def test_404_mi_miId_from_different_supplier_returns_does_not_exist(url, authentication_secret, secondary_supplier_authentication_secret):
     headers = Generators.generate_valid_headers(authentication_secret)
-    other_supplier_headers = Generators.generate_valid_headers(supplier1_authentication_secret) # secondary_auth
+    other_supplier_headers = Generators.generate_valid_headers(secondary_supplier_authentication_secret)
     data = Generators.generate_valid_mi_record_body()
     create_mi = requests.post(
         f"{url}/{MI_ENDPOINT}",

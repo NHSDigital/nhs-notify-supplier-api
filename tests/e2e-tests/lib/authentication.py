@@ -4,6 +4,7 @@ import os
 import jwt
 import requests
 import json
+from .constants import SUPPLIER, SECONDARY_SUPPLIER
 from .secret import Secret
 
 
@@ -32,38 +33,39 @@ class AuthenticationCache():
         # the backend. The test will only check that the API doesn't return a 401,
         # a 404 response means the authentication is working.
         test_url = f"{base_url}{path}"
+        api_key = None
 
         if env == "internal-dev":
-            if (supplier_id == "TestSupplier1"):
+            if (supplier_id == SECONDARY_SUPPLIER):
                 api_key = os.environ["NON_PROD_SECONDARY_API_KEY"]
-            else:
+            elif (supplier_id == SUPPLIER):
                 api_key = os.environ["NON_PROD_API_KEY"]
 
             private_key = os.environ["NON_PROD_PRIVATE_KEY"]
             url = "https://internal-dev.api.service.nhs.uk/oauth2/token"
             kid = "internal-dev-test-1"
         elif env == "ref":
-            if (supplier_id == "TestSupplier1"):
+            if (supplier_id == SECONDARY_SUPPLIER):
                 api_key = os.environ["NON_PROD_SECONDARY_API_KEY"]
-            else:
+            elif (supplier_id == SUPPLIER):
                 api_key = os.environ["NON_PROD_API_KEY"]
 
             private_key = os.environ["NON_PROD_PRIVATE_KEY"]
             url = "https://ref.api.service.nhs.uk/oauth2/token"
             kid = "internal-dev-test-1"
         elif env == "int":
-            if (supplier_id == "TestSupplier1"):
+            if (supplier_id == SECONDARY_SUPPLIER):
                 api_key = os.environ["INTEGRATION_SECONDARY_API_KEY"]
-            else:
+            elif (supplier_id == SUPPLIER):
                 api_key = os.environ["INTEGRATION_API_KEY"]
 
             private_key = os.environ.get("INTEGRATION_PRIVATE_KEY")
             url = "https://int.api.service.nhs.uk/oauth2/token"
             kid = "internal-dev-test-1"
         elif env == "prod":
-            if (supplier_id == "TestSupplier1"):
+            if (supplier_id == SECONDARY_SUPPLIER):
                 api_key = os.environ.get("PRODUCTION_SECONDARY_API_KEY")
-            else:
+            elif (supplier_id == SUPPLIER):
                 api_key = os.environ.get("PRODUCTION_API_KEY")
 
             private_key = os.environ.get("PRODUCTION_PRIVATE_KEY")
@@ -82,10 +84,10 @@ class AuthenticationCache():
         _, latest_token_expiry = self.tokens.get(env, (None, 0))
 
         # Generate new token if latest token will expire in 15 seconds
-        if env not in self.tokens or latest_token_expiry < int(time()) + 15:
-            self.tokens[env] = self.generate_and_test_new_token(api_key, private_key, url, kid, test_url)
+        if (env, supplier_id) not in self.tokens or latest_token_expiry < int(time()) + 15:
+            self.tokens[(env, supplier_id)] = self.generate_and_test_new_token(api_key, private_key, url, kid, test_url)
 
-        authentication_secret = self.tokens[env][0]
+        authentication_secret = self.tokens[(env, supplier_id)][0]
         return Secret(authentication_secret)
 
     def generate_and_test_new_token(self, api_key, private_key, url, kid, test_url):
