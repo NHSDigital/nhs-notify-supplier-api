@@ -24,7 +24,6 @@
 | <a name="input_log_group_name"></a> [log\_group\_name](#input\_log\_group\_name) | n/a | `string` | `""` | no |
 | <a name="input_period_seconds"></a> [period\_seconds](#input\_period\_seconds) | n/a | `number` | `300` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | n/a | `map(string)` | `{}` | no |
-| <a name="input_throttles_threshold"></a> [throttles\_threshold](#input\_throttles\_threshold) | n/a | `number` | `0` | no |
 ## Modules
 
 No modules.
