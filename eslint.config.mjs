@@ -56,6 +56,7 @@ export default defineConfig([
     '**/node_modules',
     '**/dist',
     '**/test-results',
+    '**/target/**',
     '**/playwright-report*',
     'eslint.config.mjs',
     // newly ignored generated/build artifacts
@@ -91,6 +92,10 @@ export default defineConfig([
     },
   },
   { files: ['**/*.json'], extends: [tseslint.configs.disableTypeChecked] },
+  {
+    files: ['**/*.js', '**/*.cjs', '**/*.mjs'],
+    extends: [tseslint.configs.disableTypeChecked],
+  },
 
   {
     settings: {
