@@ -1,5 +1,5 @@
 module "mi_updates_transformer" {
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-lambda.zip"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.2/terraform-lambda.zip"
 
   function_name = "mi-updates-transformer"
   description   = "MI Update Filter/Producer"

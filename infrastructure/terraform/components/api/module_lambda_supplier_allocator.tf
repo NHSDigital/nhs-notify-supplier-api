@@ -1,5 +1,5 @@
 module "supplier_allocator" {
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.2/terraform-lambda.zip"
 
   function_name = "supplier-allocator"
   description   = "Allocate a letter to a supplier"
