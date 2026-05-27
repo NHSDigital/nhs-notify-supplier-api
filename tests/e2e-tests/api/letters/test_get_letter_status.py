@@ -16,7 +16,7 @@ def test_200_get_letter_status(url, authentication_secret):
     ids = get_pending_letter_ids(url, headers, LETTERS_ENDPOINT, limit=1)
     letter_id = ids[0]
 
-    print(f"calling GET {url}{LETTERS_ENDPOINT}/{letter_id} with headers {headers}")
+    print(f"calling GET {url}{LETTERS_ENDPOINT}/{letter_id}")
     get_message_response = requests.get(f"{url}{LETTERS_ENDPOINT}/{letter_id}", headers=headers)
 
     ErrorHandler.handle_retry(get_message_response)
@@ -29,7 +29,7 @@ def test_200_get_letter_status(url, authentication_secret):
 def test_404_letter_does_not_exist(url, authentication_secret):
     headers = Generators.generate_valid_headers(authentication_secret)
 
-    print(f"calling GET {url}{LETTERS_ENDPOINT}/xx with headers {headers}")
+    print(f"calling GET {url}{LETTERS_ENDPOINT}/xx")
     get_message_response = requests.get(f"{url}{LETTERS_ENDPOINT}/xx", headers=headers)
 
     ErrorHandler.handle_retry(get_message_response)

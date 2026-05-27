@@ -15,7 +15,7 @@ def test_200_get_letter_data(url, authentication_secret):
     headers = Generators.generate_valid_headers(authentication_secret)
     ids = get_pending_letter_ids(url, headers, LETTERS_ENDPOINT, limit=1)
 
-    print(f"calling GET {url}{LETTERS_ENDPOINT}/{ids[0]}/data with headers {headers}")
+    print(f"calling GET {url}{LETTERS_ENDPOINT}/{ids[0]}/data")
     get_letter_data = requests.get(f"{url}{LETTERS_ENDPOINT}/{ids[0]}/data", headers=headers)
 
     ErrorHandler.handle_retry(get_letter_data)
@@ -30,7 +30,7 @@ def test_404_letter_does_not_exist(url, authentication_secret):
     letter_id = uuid.uuid4().hex
     headers = Generators.generate_valid_headers(authentication_secret)
 
-    print(f"calling GET {url}{LETTERS_ENDPOINT}/{letter_id}/data with headers {headers}")
+    print(f"calling GET {url}{LETTERS_ENDPOINT}/{letter_id}/data")
     get_message_response = requests.get(f"{url}{LETTERS_ENDPOINT}/{letter_id}/data", headers=headers)
 
     ErrorHandler.handle_retry(get_message_response)
