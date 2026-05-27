@@ -16,11 +16,11 @@ def test_200_get_letter_status(url, authentication_secret):
     ids = get_pending_letter_ids(url, headers, LETTERS_ENDPOINT, limit=1)
     letter_id = ids[0]
 
-    get_message_response = requests.get(f"{url}/{LETTERS_ENDPOINT}/{letter_id}", headers=headers)
+    print(f"calling GET {url}{LETTERS_ENDPOINT}/{letter_id}")
+    get_message_response = requests.get(f"{url}{LETTERS_ENDPOINT}/{letter_id}", headers=headers)
 
     ErrorHandler.handle_retry(get_message_response)
     assert get_message_response.status_code == 200, f"Response: {get_message_response.status_code}: {get_message_response.text}"
-
 
 @pytest.mark.test
 @pytest.mark.devtest
@@ -28,7 +28,9 @@ def test_200_get_letter_status(url, authentication_secret):
 @pytest.mark.prodtest
 def test_404_letter_does_not_exist(url, authentication_secret):
     headers = Generators.generate_valid_headers(authentication_secret)
-    get_message_response = requests.get(f"{url}/{LETTERS_ENDPOINT}/xx", headers=headers)
+
+    print(f"calling GET {url}{LETTERS_ENDPOINT}/xx")
+    get_message_response = requests.get(f"{url}{LETTERS_ENDPOINT}/xx", headers=headers)
 
     ErrorHandler.handle_retry(get_message_response)
     assert get_message_response.status_code == 404, f"Response: {get_message_response.status_code}: {get_message_response.text}"
