@@ -1,5 +1,4 @@
 import { randomUUID } from "node:crypto";
-import { url } from "node:inspector";
 
 export function createPreparedV1Event(overrides: Record<string, unknown> = {}) {
   const now = new Date().toISOString();
