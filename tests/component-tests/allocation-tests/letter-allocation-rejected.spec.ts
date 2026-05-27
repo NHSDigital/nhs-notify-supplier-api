@@ -105,9 +105,6 @@ test.describe("Allocator Rejected Allocation Tests", () => {
       const supplierAllocatorLog =
         await getAllocationLog<PackErrorLog>(expectedError);
 
-      const { packSpecificationIds } = supplierAllocatorLog;
-      expect(packSpecificationIds).toBeTruthy();
-
       const allocationLog = await getAllocationLogForDomainId(domainId);
       const lettersInDb = await getLettersFromSupplierTable(
         "unknown",
@@ -121,12 +118,16 @@ test.describe("Allocator Rejected Allocation Tests", () => {
       );
       switch (testCase) {
         case 1: {
+          const { packSpecificationIds } = supplierAllocatorLog;
+          expect(packSpecificationIds).toBeTruthy();
           expect(lettersInDb.reasonText).toBe(
             `No eligible pack specifications found for letter variant id ${letterVariant} and pack specification ids ${packSpecificationIds?.join(", ")}`,
           );
           break;
         }
         case 2: {
+          const { packSpecificationIds } = supplierAllocatorLog;
+          expect(packSpecificationIds).toBeTruthy();
           expect(lettersInDb.reasonText).toContain(
             `No preferred supplier packs found for pack specification ids ${packSpecificationIds?.join(", ")} and suppliers`,
           );
@@ -134,7 +135,7 @@ test.describe("Allocator Rejected Allocation Tests", () => {
         }
         case 3: {
           expect(lettersInDb.reasonText).toBe(
-            `No pack specification found for id`,
+            `No pack specification found for id `,
           );
           break;
         }
