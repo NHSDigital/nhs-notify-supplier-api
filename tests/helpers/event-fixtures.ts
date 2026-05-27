@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { url } from "node:inspector";
 
 export function createPreparedV1Event(overrides: Record<string, unknown> = {}) {
   const now = new Date().toISOString();
@@ -47,4 +48,29 @@ export function createPreparedEventBatchWithSameDomainId(
     createPreparedV1Event(overrides),
     createPreparedV1Event(overrides),
   ];
+}
+
+export function createEventRemoveFields(fieldToRemove: string) {
+  const event = createPreparedV1Event();
+  const eventData = event.data as Partial<typeof event.data>;
+
+  switch (fieldToRemove) {
+    case "pageCount": {
+      delete eventData.pageCount;
+      break;
+    }
+    case "domainId": {
+      delete eventData.domainId;
+      break;
+    }
+    case "url": {
+      delete eventData.url;
+      break;
+    }
+    default: {
+      break;
+    }
+  }
+
+  return event;
 }

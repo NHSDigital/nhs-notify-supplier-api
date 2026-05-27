@@ -11,6 +11,7 @@ import {
   pollSupplierAllocatorLogForExceededDailyCapacity,
   pollSupplierAllocatorLogForResolvedSpec,
 } from "./aws-cloudwatch-helper";
+import { logger } from "./pino-logger";
 
 const ddb = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(ddb);
@@ -21,6 +22,9 @@ export const AllocationTestVariantMap: Record<string, number> = {
   "notify-standard-colour": 3,
   "client1-campaign2": 4,
   "notify-first-test": 5,
+  "client1-campaign8": 6,
+  "client1-campaign7": 7,
+  "notify-standard": 8,
 };
 
 export function getVariantsForAllocation(testCase: number) {
@@ -111,6 +115,15 @@ export type SupplierDailyCapacityExceededLog = {
   supplierId?: string;
   allocated?: number;
   dailyCapacity?: number;
+};
+
+type VolumeGroupDateField = "startDate" | "endDate";
+
+export type VolumeGroupInactiveTestCase = {
+  testName: string;
+  volumeGroupId: string;
+  fieldToUpdate: VolumeGroupDateField;
+  daysInFuture: number;
 };
 
 const getSupplierConfigTableName = (): string =>
@@ -369,6 +382,70 @@ export async function updateSupplierOverallAllocation(
         ":volumeGroup": volumeGroupId,
         ":now": now,
       },
+    }),
+  );
+}
+
+export async function updateVolumeGroupData(
+  volumeGroupId: string,
+  daysInFuture: number,
+  fieldName: "startDate" | "endDate" = "startDate",
+) {
+  const days = Math.abs(daysInFuture);
+  const dayOffset = fieldName === "endDate" ? -days : days;
+  const targetDate = new Date(Date.now() + dayOffset * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split("T")[0];
+
+  logger.info(`targetDate for volume group update is ${targetDate}`);
+
+  const key = {
+    pk: "ENTITY#volume-group",
+    sk: `ID#${volumeGroupId}`,
+  };
+
+  await docClient.send(
+    new UpdateCommand({
+      TableName: getSupplierConfigTableName(),
+      Key: key,
+      UpdateExpression:
+        fieldName === "endDate"
+          ? "SET endDate = :targetDate, updatedAt = :updatedAt"
+          : "SET startDate = :targetDate, updatedAt = :updatedAt",
+      ExpressionAttributeValues: {
+        ":targetDate": targetDate,
+        ":updatedAt": targetDate,
+      },
+      ConditionExpression: "attribute_exists(pk) AND attribute_exists(sk)",
+    }),
+  );
+}
+
+export async function updateSupplierAllocation(
+  supplierId: string,
+  volumeGroupId: string,
+  allocation: number,
+): Promise<void> {
+  const now = new Date().toISOString();
+  const key = {
+    pk: "ENTITY#supplier-allocation",
+    sk: `ID#${supplierId}-${volumeGroupId}`,
+  };
+
+  await docClient.send(
+    new UpdateCommand({
+      TableName: getSupplierConfigTableName(),
+      Key: key,
+      UpdateExpression: `
+        SET
+          allocationPercentage = :allocationPercentage,
+          updatedAt = :now
+      `,
+      ExpressionAttributeValues: {
+        ":allocationPercentage": allocation,
+        ":now": now,
+      },
+      ConditionExpression: "attribute_exists(pk) AND attribute_exists(sk)",
     }),
   );
 }

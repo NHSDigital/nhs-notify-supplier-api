@@ -1,6 +1,10 @@
 import { expect, test } from "@playwright/test";
 import { sendSnsEvent } from "tests/helpers/send-sns-event";
-import { createPreparedV1Event } from "tests/helpers/event-fixtures";
+import {
+  createEventRemoveFields,
+  createEventWithNoPageCount,
+  createPreparedV1Event,
+} from "tests/helpers/event-fixtures";
 import { randomUUID } from "node:crypto";
 import { logger } from "tests/helpers/pino-logger";
 import { createValidRequestHeaders } from "tests/constants/request-headers";
@@ -13,6 +17,7 @@ import {
 } from "tests/helpers/aws-cloudwatch-helper";
 import { supplierDataSetup } from "tests/helpers/suppliers-setup-helper";
 import { pollForLetterStatus } from "tests/helpers/poll-for-letters-helper";
+import { getVariantsForAllocation } from "tests/helpers/allocation-helper";
 
 let baseUrl: string;
 
@@ -122,4 +127,25 @@ test.describe("Event Subscription SNS Tests", () => {
     // poll supplier upsert to check if duplicate letter id was processed
     await pollUpsertLetterLogForWarning("Letter already exists", domainId);
   });
+
+  for (const fieldToRemove of ["pageCount", "url"] as const) {
+    test(`Verify that publish event with missing ${fieldToRemove} is handled correctly`, async () => {
+      const domainId = `missing${fieldToRemove}-${randomUUID()}`;
+      logger.info(
+        `Testing missing ${fieldToRemove} with domainId: ${domainId}`,
+      );
+
+      const preparedEvent = createEventRemoveFields(fieldToRemove);
+      preparedEvent.data.domainId = domainId;
+      preparedEvent.data.letterVariantId = getVariantsForAllocation(1);
+
+      const response = await sendSnsEvent(preparedEvent);
+
+      expect(response.MessageId).toBeTruthy();
+      await pollSupplierAllocatorLogForError(
+        "Message did not match an expected schema",
+        domainId,
+      );
+    });
+  }
 });

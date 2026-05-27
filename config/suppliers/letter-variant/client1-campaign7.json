@@ -28,9 +28,7 @@
   "description": "Economy, colour printing",
   "id": "client1-campaign7",
   "name": "Client1 - Campaign 7",
-  "packSpecificationIds": [
-    "notify-c5-colour"
-  ],
+  "packSpecificationIds": [],
   "priority": 50,
   "status": "INT",
   "type": "STANDARD",
