@@ -188,7 +188,8 @@ jobs:
             --targetAccountGroup "nhs-notify-supplier-api-dev" \
             --terraformAction "apply" \
             --overrideProjectName "nhs" \
-            --overrideRoleName "nhs-main-acct-supplier-api-github-deploy"
+            --overrideRoleName "nhs-main-acct-supplier-api-github-deploy" \
+            --internalRef "feature/CCM-17012" # TO BE REMOVED - used to trigger workflow until internal branch merges.
   populate-config:
     name: "Populate Supplier Config"
     runs-on: ubuntu-latest
