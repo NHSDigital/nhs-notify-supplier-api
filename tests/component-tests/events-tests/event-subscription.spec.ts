@@ -2,7 +2,6 @@ import { expect, test } from "@playwright/test";
 import { sendSnsEvent } from "tests/helpers/send-sns-event";
 import {
   createEventRemoveFields,
-  createEventWithNoPageCount,
   createPreparedV1Event,
 } from "tests/helpers/event-fixtures";
 import { randomUUID } from "node:crypto";
