@@ -1,6 +1,6 @@
 # Queue to transport letter status amendment messages
 module "amendments_queue" {
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.0.6/terraform-sqs.zip"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.1.5/terraform-sqs.zip"
 
   name = "amendments_queue"
 
@@ -12,5 +12,6 @@ module "amendments_queue" {
 
   sqs_kms_key_arn = module.kms.key_arn
 
-  create_dlq = true
+  create_dlq                        = true
+  enable_queue_oldest_message_alarm = false
 }

@@ -1,5 +1,5 @@
 module "sqs_supplier_allocator" {
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.0.6/terraform-sqs.zip"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.1.5/terraform-sqs.zip"
 
   aws_account_id = var.aws_account_id
   component      = var.component
@@ -12,8 +12,9 @@ module "sqs_supplier_allocator" {
 
   visibility_timeout_seconds = 60
 
-  create_dlq          = true
-  sqs_policy_overload = data.aws_iam_policy_document.supplier_allocator_queue_policy.json
+  create_dlq                        = true
+  enable_queue_oldest_message_alarm = false
+  sqs_policy_overload               = data.aws_iam_policy_document.supplier_allocator_queue_policy.json
 }
 
 data "aws_iam_policy_document" "supplier_allocator_queue_policy" {
