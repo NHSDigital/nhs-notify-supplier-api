@@ -118,5 +118,4 @@ runs:
           --apimEnvironment "${{ env.APIM_ENV }}" \
           --boundedContext "notify-supplier" \
           --targetDomain "$TARGET_DOMAIN" \
-          --version "${{ inputs.version }}" \
-          --internalRef "feature/CCM-17012" # TO BE REMOVED - used to trigger workflow until internal branch merges.
+          --version "${{ inputs.version }}"
