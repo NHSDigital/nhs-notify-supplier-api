@@ -137,19 +137,6 @@ test.describe("Letter Queue Tests", () => {
     );
 
     // call get letters endpoint which should update the visibility timestamp
-<<<<<<< HEAD
-    const header = createValidRequestHeaders(supplierId);
-    const getLettersResponse = await request.get(
-      `${baseUrl}/${SUPPLIER_LETTERS}`,
-      {
-        headers: header,
-      },
-    );
-
-    expect(getLettersResponse.status()).toBe(200);
-    const currentTimeWithTimeOut = Math.floor(
-      (Date.now() + 5 * 60 * 1000) / 1000,
-=======
     const headers = createValidRequestHeaders(supplierId);
     const { responseBody, statusCode } = await getLettersWithRetry(
       request,
@@ -165,7 +152,6 @@ test.describe("Letter Queue Tests", () => {
 
     const currentTimeWithTimeOut = Math.floor(
       (Date.now() + VISIBILITY_TIMEOUT_SECONDS * 1000) / 1000,
->>>>>>> main
     );
 
     logger.info(
@@ -181,18 +167,6 @@ test.describe("Letter Queue Tests", () => {
       Math.abs(visibilityTimestampAfterGet - currentTimeWithTimeOut),
     ).toBeLessThanOrEqual(1);
 
-<<<<<<< HEAD
-    const getLettersWithInVisibility = await request.get(
-      `${baseUrl}/${SUPPLIER_LETTERS}`,
-      {
-        headers: header,
-      },
-    );
-
-    expect(getLettersWithInVisibility.status()).toBe(200);
-    const responseBody = await getLettersWithInVisibility.json();
-    expect(responseBody.data).toHaveLength(0);
-=======
     const { responseBody: secondResponseBody, statusCode: secondStatusCode } =
       await getLettersWithRetry(request, baseUrl, headers, {
         waitForVisibilityTimeout: false,
@@ -203,6 +177,5 @@ test.describe("Letter Queue Tests", () => {
       throw new Error("Expected GetLettersResponse body for 200 status");
     }
     expect(secondResponseBody.data).toHaveLength(0);
->>>>>>> main
   });
 });
