@@ -18,7 +18,7 @@ jobs:
     - name: Check out the repository
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Sync repository template
-      uses: NHSDigital/nhs-notify-shared-modules/.github/actions/sync-template-repo@5be2f2e952a6f439fb673e04aac5f5b7afcc2c2f # v4.0.1
+      uses: NHSDigital/nhs-notify-shared-modules/.github/actions/sync-template-repo@100d865a9925fde63d097a3749cf302fb219273e # v4.0.2
       with:
         github_token: ${{ github.token }}
 
