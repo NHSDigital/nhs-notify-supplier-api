@@ -6,6 +6,8 @@ import {
   getAllocationLog,
   getAllocationLogForDomainId,
   getVariantsForAllocation,
+  getVolumeGroupData,
+  updateLetterVariantConfig,
   updateVolumeGroupData,
 } from "tests/helpers/allocation-helper";
 import { createPreparedV1Event } from "tests/helpers/event-fixtures";
@@ -99,6 +101,10 @@ test.describe("Allocator Rejected Allocation Tests", () => {
         pageCount,
       });
 
+      if (letterVariantMapping === 7) {
+        await updateLetterVariantConfig(letterVariant, [""]);
+      }
+
       const response = await sendSnsEvent(preparedEvent);
       expect(response.MessageId).toBeTruthy();
 
@@ -134,9 +140,10 @@ test.describe("Allocator Rejected Allocation Tests", () => {
           break;
         }
         case 3: {
-          expect(lettersInDb.reasonText).toBe(
-            `No pack specification found for id `,
+          expect(lettersInDb.reasonText).toContain(
+            `No pack specification found for id`,
           );
+          await updateLetterVariantConfig(letterVariant, ["notify-c5-colour"]); // update back to valid config for other tests
           break;
         }
         default: {
@@ -146,36 +153,43 @@ test.describe("Allocator Rejected Allocation Tests", () => {
     });
   }
 
-  const volumeGroupInactiveTestCases: VolumeGroupInactiveTestCase[] = [
+  for (const { fieldToUpdate, testName, volumeGroupId } of [
     {
       testName:
         "Verify that letters are rejected when volumeGroup is not active",
       volumeGroupId: "volumeGroup-test2",
       fieldToUpdate: "startDate",
-      daysInFuture: 1,
     },
     {
       testName:
         "Verify that letters are rejected when volumeGroup is no longer active",
       volumeGroupId: "volumeGroup-test2",
       fieldToUpdate: "endDate",
-      daysInFuture: -1,
     },
-  ];
-
-  for (const {
-    daysInFuture,
-    fieldToUpdate,
-    testName,
-    volumeGroupId,
-  } of volumeGroupInactiveTestCases) {
+  ]) {
     test(testName, async () => {
       const domainId = `${fieldToUpdate}-${randomUUID()}`;
       const letterVariant = getVariantsForAllocation(8);
       logger.info(`Testing volumeGroup with futureDate: ${domainId}`);
 
-      // set volume group date to future date
-      await updateVolumeGroupData(volumeGroupId, daysInFuture, fieldToUpdate);
+      const { originalEndDate, originalStartDate } =
+        await getVolumeGroupData(volumeGroupId);
+
+      const [futureStartDate] = new Date(Date.now() + 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split("T"); // move start date to future
+      const [pastEndDate] = new Date(Date.now() - 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split("T"); // move end date to past
+
+      const targetUpdateDate =
+        fieldToUpdate === "startDate" ? futureStartDate : pastEndDate;
+
+      await updateVolumeGroupData(
+        volumeGroupId,
+        targetUpdateDate,
+        fieldToUpdate,
+      );
 
       const preparedEvent = createPreparedV1Event({
         domainId,
@@ -199,8 +213,11 @@ test.describe("Allocator Rejected Allocation Tests", () => {
       expect(lettersInDb.reasonText).toContain(
         `Volume group with id ${volumeGroupId} is not active`,
       );
-      // update back to current date
-      await updateVolumeGroupData(volumeGroupId, 0, fieldToUpdate);
+      await updateVolumeGroupData(
+        volumeGroupId,
+        fieldToUpdate === "startDate" ? originalStartDate : originalEndDate,
+        fieldToUpdate,
+      );
     });
   }
 });

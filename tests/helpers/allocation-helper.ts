@@ -123,7 +123,6 @@ export type VolumeGroupInactiveTestCase = {
   testName: string;
   volumeGroupId: string;
   fieldToUpdate: VolumeGroupDateField;
-  daysInFuture: number;
 };
 
 const getSupplierConfigTableName = (): string =>
@@ -388,17 +387,9 @@ export async function updateSupplierOverallAllocation(
 
 export async function updateVolumeGroupData(
   volumeGroupId: string,
-  daysInFuture: number,
-  fieldName: "startDate" | "endDate" = "startDate",
+  targetDate: string,
+  fieldName: string,
 ) {
-  const days = Math.abs(daysInFuture);
-  const dayOffset = fieldName === "endDate" ? -days : days;
-  const targetDate = new Date(Date.now() + dayOffset * 24 * 60 * 60 * 1000)
-    .toISOString()
-    .split("T")[0];
-
-  logger.info(`targetDate for volume group update is ${targetDate}`);
-
   const key = {
     pk: "ENTITY#volume-group",
     sk: `ID#${volumeGroupId}`,
@@ -419,6 +410,32 @@ export async function updateVolumeGroupData(
       ConditionExpression: "attribute_exists(pk) AND attribute_exists(sk)",
     }),
   );
+}
+
+export async function getVolumeGroupData(volumeGroupId: string): Promise<{
+  originalStartDate: string;
+  originalEndDate: string;
+}> {
+  const { Item } = await docClient.send(
+    new GetCommand({
+      TableName: getSupplierConfigTableName(),
+      Key: {
+        pk: "ENTITY#volume-group",
+        sk: `ID#${volumeGroupId}`,
+      },
+    }),
+  );
+
+  if (!Item) {
+    throw new Error(
+      `Volume group data was not found in supplier config table for id ${volumeGroupId}`,
+    );
+  }
+
+  return {
+    originalEndDate: Item.endDate,
+    originalStartDate: Item.startDate,
+  };
 }
 
 export async function updateSupplierAllocation(
@@ -443,6 +460,33 @@ export async function updateSupplierAllocation(
       `,
       ExpressionAttributeValues: {
         ":allocationPercentage": allocation,
+        ":now": now,
+      },
+      ConditionExpression: "attribute_exists(pk) AND attribute_exists(sk)",
+    }),
+  );
+}
+
+export async function updateLetterVariantConfig(
+  letterVariantId: string,
+  packSpecificationIds: string[],
+) {
+  const now = new Date().toISOString();
+  const key = {
+    pk: "ENTITY#letter-variant",
+    sk: `ID#${letterVariantId}`,
+  };
+  await docClient.send(
+    new UpdateCommand({
+      TableName: getSupplierConfigTableName(),
+      Key: key,
+      UpdateExpression: `
+          SET
+            packSpecificationIds = :packSpecificationIds,
+            updatedAt = :now
+        `,
+      ExpressionAttributeValues: {
+        ":packSpecificationIds": packSpecificationIds,
         ":now": now,
       },
       ConditionExpression: "attribute_exists(pk) AND attribute_exists(sk)",
