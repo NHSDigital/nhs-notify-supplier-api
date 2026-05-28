@@ -22,7 +22,19 @@ function makeDeps(): Deps {
     ssmClient: {
       send: jest.fn(),
     } as unknown as Deps["ssmClient"],
-  } as Deps;
+  };
+}
+
+function getSsmSendMock(deps: Deps): jest.Mock {
+  return deps.ssmClient.send as unknown as jest.Mock;
+}
+
+function getLambdaSendMock(deps: Deps): jest.Mock {
+  return deps.lambdaClient.send as unknown as jest.Mock;
+}
+
+function getLogErrorMock(deps: Deps): jest.Mock {
+  return deps.logger.error as unknown as jest.Mock;
 }
 
 describe("Supplier Mock Lambda", () => {
@@ -32,13 +44,11 @@ describe("Supplier Mock Lambda", () => {
 
   it("invokes get letters and patch letter successfully", async () => {
     const deps = makeDeps();
-    const ssmSend = jest
-      .mocked(deps.ssmClient.send)
+    const ssmSend = getSsmSendMock(deps)
       .mockResolvedValueOnce({ Parameter: { Value: "250" } })
       .mockResolvedValueOnce({ Parameter: { Value: "SupplierA" } });
 
-    const lambdaSend = jest
-      .mocked(deps.lambdaClient.send)
+    const lambdaSend = getLambdaSendMock(deps)
       .mockResolvedValueOnce({
         Payload: Buffer.from(
           JSON.stringify({
@@ -118,21 +128,18 @@ describe("Supplier Mock Lambda", () => {
 
   it("falls back to default limit and supplier id when parameter values are empty", async () => {
     const deps = makeDeps();
-    const ssmSend = jest
-      .mocked(deps.ssmClient.send)
+    const ssmSend = getSsmSendMock(deps)
       .mockResolvedValueOnce({ Parameter: { Value: "1" } })
       .mockResolvedValueOnce({ Parameter: { Value: "" } });
 
-    const lambdaSend = jest
-      .mocked(deps.lambdaClient.send)
-      .mockResolvedValueOnce({
-        Payload: Buffer.from(
-          JSON.stringify({
-            statusCode: 200,
-            body: JSON.stringify({ data: [] }),
-          }),
-        ),
-      });
+    const lambdaSend = getLambdaSendMock(deps).mockResolvedValueOnce({
+      Payload: Buffer.from(
+        JSON.stringify({
+          statusCode: 200,
+          body: JSON.stringify({ data: [] }),
+        }),
+      ),
+    });
 
     const handler = createHandler(deps);
     await expect(handler()).resolves.toBeUndefined();
@@ -152,49 +159,44 @@ describe("Supplier Mock Lambda", () => {
   it("throws when reading limit parameter fails", async () => {
     const deps = makeDeps();
     const ssmError = new Error("SSM unavailable");
-    jest.mocked(deps.ssmClient.send).mockRejectedValueOnce(ssmError);
+    getSsmSendMock(deps).mockRejectedValueOnce(ssmError);
 
     const handler = createHandler(deps);
     await expect(handler()).rejects.toThrow("SSM unavailable");
-    expect(jest.mocked(deps.logger.error)).toHaveBeenCalled();
+    expect(getLogErrorMock(deps)).toHaveBeenCalled();
   });
 
   it("throws when reading supplier id parameter fails", async () => {
     const deps = makeDeps();
-    jest
-      .mocked(deps.ssmClient.send)
+    getSsmSendMock(deps)
       .mockResolvedValueOnce({ Parameter: { Value: "250" } })
       .mockRejectedValueOnce(new Error("Supplier parameter not found"));
 
     const handler = createHandler(deps);
     await expect(handler()).rejects.toThrow("Supplier parameter not found");
-    expect(jest.mocked(deps.logger.error)).toHaveBeenCalled();
+    expect(getLogErrorMock(deps)).toHaveBeenCalled();
   });
 
   it("throws when invoking get letters fails", async () => {
     const deps = makeDeps();
-    jest
-      .mocked(deps.ssmClient.send)
+    getSsmSendMock(deps)
       .mockResolvedValueOnce({ Parameter: { Value: "200" } })
       .mockResolvedValueOnce({ Parameter: { Value: "SupplierA" } });
 
-    jest
-      .mocked(deps.lambdaClient.send)
-      .mockRejectedValueOnce(new Error("Invoke failed"));
+    getLambdaSendMock(deps).mockRejectedValueOnce(new Error("Invoke failed"));
 
     const handler = createHandler(deps);
     await expect(handler()).rejects.toThrow("Invoke failed");
-    expect(jest.mocked(deps.logger.error)).toHaveBeenCalled();
+    expect(getLogErrorMock(deps)).toHaveBeenCalled();
   });
 
   it("throws when get letters lambda returns function error", async () => {
     const deps = makeDeps();
-    jest
-      .mocked(deps.ssmClient.send)
+    getSsmSendMock(deps)
       .mockResolvedValueOnce({ Parameter: { Value: "200" } })
       .mockResolvedValueOnce({ Parameter: { Value: "SupplierA" } });
 
-    jest.mocked(deps.lambdaClient.send).mockResolvedValueOnce({
+    getLambdaSendMock(deps).mockResolvedValueOnce({
       FunctionError: "Unhandled",
       Payload: Buffer.from(JSON.stringify({ statusCode: 200, body: "{}" })),
     });
@@ -207,12 +209,11 @@ describe("Supplier Mock Lambda", () => {
 
   it("throws when get letters lambda returns non-200 status", async () => {
     const deps = makeDeps();
-    jest
-      .mocked(deps.ssmClient.send)
+    getSsmSendMock(deps)
       .mockResolvedValueOnce({ Parameter: { Value: "200" } })
       .mockResolvedValueOnce({ Parameter: { Value: "SupplierA" } });
 
-    jest.mocked(deps.lambdaClient.send).mockResolvedValueOnce({
+    getLambdaSendMock(deps).mockResolvedValueOnce({
       Payload: Buffer.from(JSON.stringify({ statusCode: 500, body: "{}" })),
     });
 
@@ -224,12 +225,11 @@ describe("Supplier Mock Lambda", () => {
 
   it("throws when get letters lambda response has no payload", async () => {
     const deps = makeDeps();
-    jest
-      .mocked(deps.ssmClient.send)
+    getSsmSendMock(deps)
       .mockResolvedValueOnce({ Parameter: { Value: "200" } })
       .mockResolvedValueOnce({ Parameter: { Value: "SupplierA" } });
 
-    jest.mocked(deps.lambdaClient.send).mockResolvedValueOnce({});
+    getLambdaSendMock(deps).mockResolvedValueOnce({});
 
     const handler = createHandler(deps);
     await expect(handler()).rejects.toThrow(
@@ -239,13 +239,11 @@ describe("Supplier Mock Lambda", () => {
 
   it("throws when invoking patch letter fails", async () => {
     const deps = makeDeps();
-    jest
-      .mocked(deps.ssmClient.send)
+    getSsmSendMock(deps)
       .mockResolvedValueOnce({ Parameter: { Value: "200" } })
       .mockResolvedValueOnce({ Parameter: { Value: "SupplierA" } });
 
-    jest
-      .mocked(deps.lambdaClient.send)
+    getLambdaSendMock(deps)
       .mockResolvedValueOnce({
         Payload: Buffer.from(
           JSON.stringify({
@@ -260,18 +258,16 @@ describe("Supplier Mock Lambda", () => {
 
     const handler = createHandler(deps);
     await expect(handler()).rejects.toThrow("Patch invoke failed");
-    expect(jest.mocked(deps.logger.error)).toHaveBeenCalled();
+    expect(getLogErrorMock(deps)).toHaveBeenCalled();
   });
 
   it("throws when patch letter lambda returns function error", async () => {
     const deps = makeDeps();
-    jest
-      .mocked(deps.ssmClient.send)
+    getSsmSendMock(deps)
       .mockResolvedValueOnce({ Parameter: { Value: "200" } })
       .mockResolvedValueOnce({ Parameter: { Value: "SupplierA" } });
 
-    jest
-      .mocked(deps.lambdaClient.send)
+    getLambdaSendMock(deps)
       .mockResolvedValueOnce({
         Payload: Buffer.from(
           JSON.stringify({
@@ -291,18 +287,16 @@ describe("Supplier Mock Lambda", () => {
     await expect(handler()).rejects.toThrow(
       "patch_letter lambda invocation failed for letter letter-3",
     );
-    expect(jest.mocked(deps.logger.error)).toHaveBeenCalled();
+    expect(getLogErrorMock(deps)).toHaveBeenCalled();
   });
 
   it("throws when patch letter lambda returns function error without payload", async () => {
     const deps = makeDeps();
-    jest
-      .mocked(deps.ssmClient.send)
+    getSsmSendMock(deps)
       .mockResolvedValueOnce({ Parameter: { Value: "200" } })
       .mockResolvedValueOnce({ Parameter: { Value: "SupplierA" } });
 
-    jest
-      .mocked(deps.lambdaClient.send)
+    getLambdaSendMock(deps)
       .mockResolvedValueOnce({
         Payload: Buffer.from(
           JSON.stringify({
@@ -321,21 +315,18 @@ describe("Supplier Mock Lambda", () => {
     await expect(handler()).rejects.toThrow(
       "patch_letter lambda invocation failed for letter letter-4",
     );
-    expect(jest.mocked(deps.logger.error)).toHaveBeenCalled();
+    expect(getLogErrorMock(deps)).toHaveBeenCalled();
   });
 
   it("handles get letters response with no body by returning no letters", async () => {
     const deps = makeDeps();
-    jest
-      .mocked(deps.ssmClient.send)
+    getSsmSendMock(deps)
       .mockResolvedValueOnce({ Parameter: { Value: "200" } })
       .mockResolvedValueOnce({ Parameter: { Value: "SupplierA" } });
 
-    const lambdaSend = jest
-      .mocked(deps.lambdaClient.send)
-      .mockResolvedValueOnce({
-        Payload: Buffer.from(JSON.stringify({ statusCode: 200 })),
-      });
+    const lambdaSend = getLambdaSendMock(deps).mockResolvedValueOnce({
+      Payload: Buffer.from(JSON.stringify({ statusCode: 200 })),
+    });
 
     const handler = createHandler(deps);
     await expect(handler()).resolves.toBeUndefined();
@@ -344,12 +335,11 @@ describe("Supplier Mock Lambda", () => {
 
   it("sends the expected parameter names to SSM", async () => {
     const deps = makeDeps();
-    const ssmSend = jest
-      .mocked(deps.ssmClient.send)
+    const ssmSend = getSsmSendMock(deps)
       .mockResolvedValueOnce({ Parameter: { Value: "200" } })
       .mockResolvedValueOnce({ Parameter: { Value: "SupplierA" } });
 
-    jest.mocked(deps.lambdaClient.send).mockResolvedValueOnce({
+    getLambdaSendMock(deps).mockResolvedValueOnce({
       Payload: Buffer.from(
         JSON.stringify({
           statusCode: 200,
