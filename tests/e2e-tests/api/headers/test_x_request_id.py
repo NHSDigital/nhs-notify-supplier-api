@@ -20,7 +20,7 @@ def test_header_letters_endpoint(
 ):
     auth_header = {"apikey": authentication_secret.value} if authentication_secret.auth_type == "apikey" \
         else {"Authorization": authentication_secret.value}
-    resp = getattr(requests, method)(f"{url}/{endpoints}", headers={
+    resp = getattr(requests, method)(f"{url}{endpoints}", headers={
         **auth_header,
         "X-Request-ID": None
     })
@@ -38,7 +38,7 @@ def test_header_mi_endpoint(
 ):
     auth_header = {"apikey": authentication_secret.value} if authentication_secret.auth_type == "apikey" \
         else {"Authorization": authentication_secret.value}
-    resp = getattr(requests, "post")(f"{url}/{MI_ENDPOINT}", headers={
+    resp = getattr(requests, "post")(f"{url}{MI_ENDPOINT}", headers={
         **auth_header,
         "X-Request-ID": ""
     })

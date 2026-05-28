@@ -1,5 +1,5 @@
 module "amendment_event_transformer" {
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.2/terraform-lambda.zip"
 
   function_name = "amendment_event_transformer"
   description   = "Processes letter status updates"

@@ -6,7 +6,8 @@ import { expect, test } from "@playwright/test";
 import { snsClient } from "tests/helpers/aws-sns-helper";
 import { retrieveKinesisRecordsAtTimestamp } from "tests/helpers/aws-kinesis-helper";
 import { logger } from "tests/helpers/pino-logger";
-import { envName } from "tests/constants/api-constants";
+import { AWS_ACCOUNT_ID, envName } from "tests/constants/api-constants";
+import { randomUUID } from "node:crypto";
 import PREPARED_LETTER from "../../resources/prepared-letter.json";
 
 test.describe("Performance test checking how long it takes letter requests from the EventSub SNS to reach the Letters Database ", () => {
@@ -14,8 +15,8 @@ test.describe("Performance test checking how long it takes letter requests from 
     const MESSAGES_TO_SEND = 2500;
     const FIVE_MINUTES = 1000 * 60 * 5;
     const BATCH_SIZE = 10;
-    const SNS_ARN = `arn:aws:sns:eu-west-2:820178564574:nhs-${envName}-supapi-eventsub`;
-    const KINESIS_STREAM_ARN = `arn:aws:kinesis:eu-west-2:820178564574:stream/nhs-${envName}-supapi-letter-change-stream`;
+    const SNS_ARN = `arn:aws:sns:eu-west-2:${AWS_ACCOUNT_ID}:nhs-${envName}-supapi-eventsub`;
+    const KINESIS_STREAM_ARN = `arn:aws:kinesis:eu-west-2:${AWS_ACCOUNT_ID}:stream/nhs-${envName}-supapi-letter-change-stream`;
     test.setTimeout(FIVE_MINUTES);
     const startTime = Date.now();
 
@@ -25,8 +26,10 @@ test.describe("Performance test checking how long it takes letter requests from 
     let batch: PublishBatchRequestEntry[] = [];
     for (let i = 1; i <= MESSAGES_TO_SEND; i++) {
       const id = `performance-test-letter${i}-${startTime}`;
+      const eventId = randomUUID();
       const message = JSON.stringify({
         ...PREPARED_LETTER,
+        id: eventId,
         data: { ...PREPARED_LETTER.data, domainId: id },
       });
       batch.push({ Id: id, Message: message });

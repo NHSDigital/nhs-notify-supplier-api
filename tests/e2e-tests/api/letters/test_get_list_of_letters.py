@@ -12,5 +12,6 @@ def test_200_get_letters(url, authentication_secret):
     headers = Generators.generate_valid_headers(authentication_secret)
 
     ids = get_pending_letter_ids(url, headers, LETTERS_ENDPOINT, limit=1)
+
     assert ids, "Expected at least one PENDING letter"
     assert len(ids) == 1
