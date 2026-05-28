@@ -45,28 +45,6 @@ test.describe("Urgent Letter Priority Tests", () => {
     await verifyAllocationLogsContainPriority(urgencyNineLetterIds, 9);
     await verifyAllocationLogsContainPriority(urgencyTenLetterIds, 10);
 
-<<<<<<< HEAD
-    const lettersFromQueue = await getLettersFromQueueViaIndex(supplier);
-
-    const letterIdsFromQueue = lettersFromQueue.map(
-      (letter) => letter.letterId,
-    );
-
-    const header = createValidRequestHeaders(supplier);
-    const response = await request.get(`${baseUrl}/${SUPPLIER_LETTERS}`, {
-      headers: header,
-    });
-
-    expect(response.status()).toBe(200);
-    const responseBody = await response.json();
-    expect(responseBody.data.length).toBeGreaterThanOrEqual(1);
-
-    const getLettersResponse: GetLettersResponse =
-      GetLettersResponseSchema.parse(responseBody);
-
-    const letterIds = getLettersResponse.data.map((letter) => letter.id);
-    expect(letterIds).toEqual(letterIdsFromQueue);
-=======
     const headers = createValidRequestHeaders(supplier);
     const { responseBody, statusCode } = await getLettersWithRetry(
       request,
@@ -82,7 +60,6 @@ test.describe("Urgent Letter Priority Tests", () => {
     expect(responseBody.data.length).toBeGreaterThanOrEqual(1);
 
     const letterIds = responseBody.data.map((letter) => letter.id);
->>>>>>> main
 
     verifyIndexPositionOfLetterVariants(
       letterIds,
