@@ -6,20 +6,10 @@ export default {
   coveragePathIgnorePatterns: ["/node_modules/", "__tests__"],
   testPathIgnorePatterns: ["/node_modules/", "/dist/"],
   transform: {
-    "^.+\\.[tj]s$": [
-      "ts-jest",
-      {
-        useESM: true,
-        tsconfig: {
-          allowJs: true,
-        },
-      },
-    ],
+    "^.+\\.ts$": ["ts-jest"],
+    "^.+\\.(js|mjs)$": "babel-jest",
   },
   transformIgnorePatterns: [
-    "node_modules/(?!(https-proxy-agent|agent-base|@pact-foundation/pact|@pact-foundation/pact-core|@pact-foundation/src)/)",
+    "/node_modules/(?!(?:@pact-foundation|https-proxy-agent|agent-base)/)",
   ],
-  moduleNameMapper: {
-    "^(\\.{1,2}/.*)\\.js$": "$1",
-  },
 };

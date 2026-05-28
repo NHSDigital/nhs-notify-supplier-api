@@ -5,6 +5,9 @@ inputs:
   targetEnvironment:
     description: Name of the environment under test
     required: true
+  targetAccountGroup:
+    description: Name of the account group under test
+    required: true
 
 runs:
   using: "composite"
@@ -65,6 +68,10 @@ runs:
       env:
         TARGET_ENVIRONMENT: ${{ inputs.targetEnvironment }}
         PR_NUMBER: ${{ steps.set_pr_number.outputs.pr_number }}
+<<<<<<< HEAD
+=======
+        TARGET_ACCOUNT_GROUP: ${{ inputs.targetAccountGroup }}
+>>>>>>> main
       run: |
         echo "$DEV_E2E_KEYS_PRIVATE" > "${GITHUB_WORKSPACE}/internal-dev-test-1.pem"
         chmod 600 "${GITHUB_WORKSPACE}/internal-dev-test-1.pem"

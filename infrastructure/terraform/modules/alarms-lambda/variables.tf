@@ -31,11 +31,6 @@ variable "errors_threshold" {
   default = 0
 }
 
-variable "throttles_threshold" {
-  type    = number
-  default = 0
-}
-
 variable "enable_error_log_metric" {
   type    = bool
   default = true

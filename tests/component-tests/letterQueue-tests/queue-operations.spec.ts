@@ -11,11 +11,16 @@ import {
   supplierIdFromSupplierAllocatorLog,
 } from "tests/helpers/aws-cloudwatch-helper";
 import getRestApiGatewayBaseUrl from "tests/helpers/aws-gateway-helper";
-import { SUPPLIER_LETTERS } from "tests/constants/api-constants";
+import {
+  SUPPLIER_LETTERS,
+  VISIBILITY_TIMEOUT_SECONDS,
+} from "tests/constants/api-constants";
 import { supplierDataSetup } from "tests/helpers/suppliers-setup-helper";
 import {
   checkLetterQueueTable,
   getLetterFromQueueById,
+  getLettersWithRetry,
+  isGetLettersResponse,
 } from "tests/helpers/generate-fetch-test-data";
 import { createValidRequestHeaders } from "../../constants/request-headers";
 import {
@@ -132,6 +137,7 @@ test.describe("Letter Queue Tests", () => {
     );
 
     // call get letters endpoint which should update the visibility timestamp
+<<<<<<< HEAD
     const header = createValidRequestHeaders(supplierId);
     const getLettersResponse = await request.get(
       `${baseUrl}/${SUPPLIER_LETTERS}`,
@@ -143,6 +149,23 @@ test.describe("Letter Queue Tests", () => {
     expect(getLettersResponse.status()).toBe(200);
     const currentTimeWithTimeOut = Math.floor(
       (Date.now() + 5 * 60 * 1000) / 1000,
+=======
+    const headers = createValidRequestHeaders(supplierId);
+    const { responseBody, statusCode } = await getLettersWithRetry(
+      request,
+      baseUrl,
+      headers,
+    );
+
+    expect(statusCode).toBe(200);
+    if (!isGetLettersResponse(responseBody)) {
+      throw new Error("Expected GetLettersResponse body for 200 status");
+    }
+    expect(responseBody.data.length).toBeGreaterThanOrEqual(1);
+
+    const currentTimeWithTimeOut = Math.floor(
+      (Date.now() + VISIBILITY_TIMEOUT_SECONDS * 1000) / 1000,
+>>>>>>> main
     );
 
     logger.info(
@@ -158,6 +181,7 @@ test.describe("Letter Queue Tests", () => {
       Math.abs(visibilityTimestampAfterGet - currentTimeWithTimeOut),
     ).toBeLessThanOrEqual(1);
 
+<<<<<<< HEAD
     const getLettersWithInVisibility = await request.get(
       `${baseUrl}/${SUPPLIER_LETTERS}`,
       {
@@ -168,5 +192,17 @@ test.describe("Letter Queue Tests", () => {
     expect(getLettersWithInVisibility.status()).toBe(200);
     const responseBody = await getLettersWithInVisibility.json();
     expect(responseBody.data).toHaveLength(0);
+=======
+    const { responseBody: secondResponseBody, statusCode: secondStatusCode } =
+      await getLettersWithRetry(request, baseUrl, headers, {
+        waitForVisibilityTimeout: false,
+      });
+
+    expect(secondStatusCode).toBe(200);
+    if (!isGetLettersResponse(secondResponseBody)) {
+      throw new Error("Expected GetLettersResponse body for 200 status");
+    }
+    expect(secondResponseBody.data).toHaveLength(0);
+>>>>>>> main
   });
 });
