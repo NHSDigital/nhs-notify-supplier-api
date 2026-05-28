@@ -22,7 +22,7 @@ module "supplier_mock" {
   function_code_base_path = local.aws_lambda_functions_dir_path
   function_code_dir       = "supplier-mock/dist"
   function_include_common = true
-  handler_function_name   = "handler"
+  handler_function_name   = "supplierMockHandler"
   runtime                 = "nodejs22.x"
   memory                  = 512
   timeout                 = 29
@@ -34,7 +34,11 @@ module "supplier_mock" {
   log_destination_arn       = local.destination_arn
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
-  lambda_env_vars = merge(local.common_lambda_env_vars, {})
+  lambda_env_vars = merge(local.common_lambda_env_vars, {
+    ENVIRONMENT                = var.environment
+    GET_LETTERS_FUNCTION_NAME  = module.get_letters.function_name
+    PATCH_LETTER_FUNCTION_NAME = module.patch_letter.function_name
+  })
 }
 
 data "aws_iam_policy_document" "supplier_mock_lambda" {

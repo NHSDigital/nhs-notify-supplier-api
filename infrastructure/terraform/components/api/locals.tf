@@ -33,7 +33,8 @@ locals {
     MI_TABLE_NAME                   = aws_dynamodb_table.mi.name,
     MI_TTL_HOURS                    = 2160 # 90 days * 24 hours
     SNS_TOPIC_ARN                   = "${module.eventsub.sns_topic.arn}",
-    SUPPLIER_CONFIG_TABLE_NAME      = aws_dynamodb_table.supplier-configuration.name
+    SUPPLIER_CONFIG_TABLE_NAME      = aws_dynamodb_table.supplier-configuration.name,
+    SUPPLIER_QUOTAS_TABLE_NAME      = aws_dynamodb_table.supplier-quotas.name,
     SUPPLIER_ID_HEADER              = "nhsd-supplier-id",
   }
 

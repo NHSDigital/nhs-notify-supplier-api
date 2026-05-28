@@ -131,6 +131,7 @@ ${VERBOSE}.SILENT: \
 #####################
 
 TEST_CMD := APIGEE_ACCESS_TOKEN="$(APIGEE_ACCESS_TOKEN)" \
+	STATUS_ENDPOINT_API_KEY="$(STATUS_ENDPOINT_API_KEY)" \
 	PYTHONPATH=. poetry run pytest --disable-warnings -vv \
 	--color=yes \
 	-n 4 \

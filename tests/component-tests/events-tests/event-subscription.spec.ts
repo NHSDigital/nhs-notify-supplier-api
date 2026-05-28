@@ -7,8 +7,8 @@ import { createValidRequestHeaders } from "tests/constants/request-headers";
 import getRestApiGatewayBaseUrl from "tests/helpers/aws-gateway-helper";
 import { SUPPLIER_LETTERS, envName } from "tests/constants/api-constants";
 import {
+  pollSupplierAllocatorLogForError,
   pollSupplierAllocatorLogForResolvedSpec,
-  pollUpsertLetterLogForError,
   pollUpsertLetterLogForWarning,
 } from "tests/helpers/aws-cloudwatch-helper";
 import { supplierDataSetup } from "tests/helpers/suppliers-setup-helper";
@@ -35,9 +35,10 @@ test.describe("Event Subscription SNS Tests", () => {
     // poll supplier allocator to check if supplier has been allocated
     const message = await pollSupplierAllocatorLogForResolvedSpec(domainId);
     const supplierAllocatorLog = JSON.parse(message) as {
-      msg?: { supplierSpec?: { supplierId?: string } };
+      msg?: { allocationDetails?: { supplierSpec?: { supplierId?: string } } };
     };
-    const supplierId = supplierAllocatorLog.msg?.supplierSpec?.supplierId;
+    const supplierId =
+      supplierAllocatorLog.msg?.allocationDetails?.supplierSpec?.supplierId;
 
     logger.info(
       `Supplier ${supplierId} allocated for domainId ${domainId} in supplier allocator lambda`,
@@ -74,21 +75,13 @@ test.describe("Event Subscription SNS Tests", () => {
 
     expect(response.MessageId).toBeTruthy();
 
-    // poll supplier allocator to check if supplier has been allocated
-    const message = await pollSupplierAllocatorLogForResolvedSpec(domainId);
-    const supplierAllocatorLog = JSON.parse(message) as {
-      msg?: { supplierSpec?: { supplierId?: string } };
-    };
-    const supplierId = supplierAllocatorLog.msg?.supplierSpec?.supplierId;
-
-    logger.info(
-      `Supplier ${supplierId} allocated for domainId ${domainId} in supplier allocator lambda`,
+    // poll supplier allocator to check for error log for cancelled status
+    await pollSupplierAllocatorLogForError(
+      "Message did not match an expected schema",
+      domainId,
     );
-    if (!supplierId) {
-      throw new Error("supplierId was not found in supplier allocator log");
-    }
 
-    const headers = createValidRequestHeaders(supplierId);
+    const headers = createValidRequestHeaders();
 
     const getLetterResponse = await request.get(
       `${baseUrl}/${SUPPLIER_LETTERS}/${domainId}`,
@@ -97,30 +90,23 @@ test.describe("Event Subscription SNS Tests", () => {
       },
     );
     expect(getLetterResponse.status()).toBe(404);
-
-    await pollUpsertLetterLogForError(
-      "Message did not match an expected schema",
-      domainId,
-    );
   });
 
-  test("Verify that the duplicate event throws an error", async () => {
+  test("Verify that an error is logged for a duplicate letter id", async () => {
     const domainId = randomUUID();
     logger.info(`Testing event subscription with domainId: ${domainId}`);
-    const preparedEvent = createPreparedV1Event({
-      domainId,
-      status: "PREPARED",
-    });
-    const response = await sendSnsEvent(preparedEvent);
+    const preparedEvent1 = createPreparedV1Event({ domainId });
+    const response1 = await sendSnsEvent(preparedEvent1);
 
-    expect(response.MessageId).toBeTruthy();
+    expect(response1.MessageId).toBeTruthy();
 
     // poll supplier allocator to check if supplier has been allocated
     const message = await pollSupplierAllocatorLogForResolvedSpec(domainId);
     const supplierAllocatorLog = JSON.parse(message) as {
-      msg?: { supplierSpec?: { supplierId?: string } };
+      msg?: { allocationDetails?: { supplierSpec?: { supplierId?: string } } };
     };
-    const supplierId = supplierAllocatorLog.msg?.supplierSpec?.supplierId;
+    const supplierId =
+      supplierAllocatorLog.msg?.allocationDetails?.supplierSpec?.supplierId;
 
     logger.info(
       `Supplier ${supplierId} allocated for domainId ${domainId} in supplier allocator lambda`,
@@ -129,11 +115,11 @@ test.describe("Event Subscription SNS Tests", () => {
       throw new Error("supplierId was not found in supplier allocator log");
     }
 
-    // send same event again to simulate duplicate event
-    const duplicateResponse = await sendSnsEvent(preparedEvent);
-    expect(duplicateResponse.MessageId).toBeTruthy();
+    const preparedEvent2 = createPreparedV1Event({ domainId });
+    const response2 = await sendSnsEvent(preparedEvent2);
+    expect(response2.MessageId).toBeTruthy();
 
-    // poll supplier upsert to check if duplicate event was processed
+    // poll supplier upsert to check if duplicate letter id was processed
     await pollUpsertLetterLogForWarning("Letter already exists", domainId);
   });
 });

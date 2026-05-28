@@ -263,3 +263,46 @@ export async function getLettersFromQueueViaIndex(
     return [];
   }
 }
+
+export async function getLetterFromQueueById(
+  supplierId: string,
+  letterId: string,
+): Promise<PendingLetter[]> {
+  const MAX_ATTEMPTS = 5;
+  const RETRY_DELAY_MS = 10_000;
+
+  try {
+    const params = {
+      TableName: LETTERQUEUE_TABLENAME,
+      KeyConditionExpression:
+        "supplierId = :supplierId AND letterId = :letterId",
+      ExpressionAttributeValues: {
+        ":supplierId": supplierId,
+        ":letterId": letterId,
+      },
+    };
+
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      const { Items } = await docClient.send(new QueryCommand(params));
+
+      if (Items !== undefined && Items.length > 0) {
+        logger.info(
+          `Queried letter queue table to verify existence for supplier ${supplierId} and found items.`,
+        );
+
+        // assumes no pagination needed as we expect a small number of letters in the queue for the test supplier
+        return z.array(PendingLetterSchema).parse(Items);
+      }
+      if (attempt < MAX_ATTEMPTS) {
+        logger.info(
+          `Retrying get letters from queue for supplierId ${supplierId} in ${RETRY_DELAY_MS}ms`,
+        );
+        await delay(RETRY_DELAY_MS);
+      }
+    }
+    return [];
+  } catch (error) {
+    logger.error({ supplierId, error }, "Letter queue query failed");
+    return [];
+  }
+}

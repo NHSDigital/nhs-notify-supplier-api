@@ -6,7 +6,6 @@ from lib.generators import Generators
 
 METHODS = ["get", "post"]
 
-
 @pytest.mark.test
 @pytest.mark.devtest
 @pytest.mark.inttest
@@ -17,10 +16,12 @@ def test_header_letters_endpoint(
     url,
     method,
     endpoints,
-    bearer_token
+    authentication_secret
 ):
+    auth_header = {"apikey": authentication_secret.value} if authentication_secret.auth_type == "apikey" \
+        else {"Authorization": authentication_secret.value}
     resp = getattr(requests, method)(f"{url}/{endpoints}", headers={
-        "Authorization": bearer_token.value,
+        **auth_header,
         "X-Request-ID": None
     })
 
@@ -33,10 +34,12 @@ def test_header_letters_endpoint(
 @pytest.mark.prodtest
 def test_header_mi_endpoint(
     url,
-    bearer_token
+    authentication_secret
 ):
+    auth_header = {"apikey": authentication_secret.value} if authentication_secret.auth_type == "apikey" \
+        else {"Authorization": authentication_secret.value}
     resp = getattr(requests, "post")(f"{url}/{MI_ENDPOINT}", headers={
-        "Authorization": bearer_token.value,
+        **auth_header,
         "X-Request-ID": ""
     })
 

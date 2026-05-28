@@ -1,0 +1,38 @@
+{
+  "campaignIds": [
+    "client1-campaign2"
+  ],
+  "clientId": "client1",
+  "constraints": {
+    "blackCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 20
+    },
+    "colourCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 10
+    },
+    "deliveryDays": {
+      "operator": "LESS_THAN",
+      "value": 3
+    },
+    "sheets": {
+      "operator": "LESS_THAN",
+      "value": 5
+    },
+    "sides": {
+      "operator": "LESS_THAN",
+      "value": 10
+    }
+  },
+  "description": "Admail, colour printing",
+  "id": "client1-campaign2",
+  "name": "Client1 - CAMPAIGN2",
+  "packSpecificationIds": [
+    "client1-campaign2"
+  ],
+  "priority": 1,
+  "status": "INT",
+  "type": "STANDARD",
+  "volumeGroupId": "volumeGroup-test3"
+}
