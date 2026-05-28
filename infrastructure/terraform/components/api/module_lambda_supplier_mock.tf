@@ -35,10 +35,34 @@ module "supplier_mock" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
-    ENVIRONMENT                = var.environment
-    GET_LETTERS_FUNCTION_NAME  = module.get_letters.function_name
-    PATCH_LETTER_FUNCTION_NAME = module.patch_letter.function_name
+    ENVIRONMENT                                = var.environment
+    GET_LETTERS_FUNCTION_NAME                  = module.get_letters.function_name
+    PATCH_LETTER_FUNCTION_NAME                 = module.patch_letter.function_name
+    SUPPLIER_MOCK_GET_LETTERS_LIMIT_PARAM_NAME = aws_ssm_parameter.supplier_mock_get_letters_limit.name
+    SUPPLIER_MOCK_SUPPLIER_ID                  = aws_ssm_parameter.supplier_mock_supplier_id.name
   })
+}
+
+resource "aws_ssm_parameter" "supplier_mock_get_letters_limit" {
+  name        = format("/nhs/supapi/supplier-mock/%s/get-letters-limit", var.environment)
+  description = "Default get_letters limit for supplier mock lambda"
+  type        = "String"
+  value       = "100"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
+resource "aws_ssm_parameter" "supplier_mock_supplier_id" {
+  name        = format("/nhs/supapi/supplier-mock/%s/supplier-id", var.environment)
+  description = "Supplier ID to be used by the supplier mock lambda"
+  type        = "String"
+  value       = "TestSupplier1"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
 
 data "aws_iam_policy_document" "supplier_mock_lambda" {
@@ -67,6 +91,19 @@ data "aws_iam_policy_document" "supplier_mock_lambda" {
     resources = [
       module.get_letters.function_arn,
       module.patch_letter.function_arn
+    ]
+  }
+
+  statement {
+    sid    = "AllowReadSupplierMockLimitParameter"
+    effect = "Allow"
+
+    actions = [
+      "ssm:GetParameter",
+    ]
+
+    resources = [
+      aws_ssm_parameter.supplier_mock_get_letters_limit.arn
     ]
   }
 }
