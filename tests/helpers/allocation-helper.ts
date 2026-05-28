@@ -11,6 +11,7 @@ import {
   pollSupplierAllocatorLogForExceededDailyCapacity,
   pollSupplierAllocatorLogForResolvedSpec,
 } from "./aws-cloudwatch-helper";
+
 const ddb = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(ddb);
 
