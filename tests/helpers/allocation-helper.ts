@@ -11,8 +11,6 @@ import {
   pollSupplierAllocatorLogForExceededDailyCapacity,
   pollSupplierAllocatorLogForResolvedSpec,
 } from "./aws-cloudwatch-helper";
-import { logger } from "./pino-logger";
-
 const ddb = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(ddb);
 
@@ -115,14 +113,6 @@ export type SupplierDailyCapacityExceededLog = {
   supplierId?: string;
   allocated?: number;
   dailyCapacity?: number;
-};
-
-type VolumeGroupDateField = "startDate" | "endDate";
-
-export type VolumeGroupInactiveTestCase = {
-  testName: string;
-  volumeGroupId: string;
-  fieldToUpdate: VolumeGroupDateField;
 };
 
 const getSupplierConfigTableName = (): string =>

@@ -2,7 +2,6 @@ import { randomUUID } from "node:crypto";
 import test, { expect } from "playwright/test";
 import {
   PackErrorLog,
-  VolumeGroupInactiveTestCase,
   getAllocationLog,
   getAllocationLogForDomainId,
   getVariantsForAllocation,
