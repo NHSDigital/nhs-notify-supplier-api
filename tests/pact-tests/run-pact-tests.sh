@@ -4,7 +4,7 @@ set -euo pipefail
 
 # Keep pact runs deterministic by relying on the repository lockfile.
 # Rebuild optional native bindings for the current platform without resolving new versions.
-npm rebuild --include=optional @pact-foundation/pact-core
+npm rebuild --include=optional @pact-foundation/pact @pact-foundation/pact-core
 
 # Remove old PACTs
 rm -rf ./.pacts
