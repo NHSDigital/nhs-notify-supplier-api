@@ -167,6 +167,11 @@ jobs:
               exit 1
             fi
 
+            if [[ "${apim_environment}"" == "internal-dev-sandbox" && "${build_sandbox}" != "true" ]]; then
+              echo "[ERROR] APIM environment 'internal-dev-sandbox' requires build_sandbox to be true."
+              exit 1
+            fi
+
             if [[ "$is_release" == "true" ]]; then
               oas_asset_pattern="^api-oas-specification-${apim_environment}-${source_value}-.*\.zip$"
               if ! echo "$release_json" | jq -r '.assets[].name' | grep -qx "$oas_asset_pattern"; then
