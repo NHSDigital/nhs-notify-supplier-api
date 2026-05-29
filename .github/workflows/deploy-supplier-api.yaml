@@ -71,6 +71,7 @@ jobs:
           source_value="${{ inputs.source_value }}"
           deploy_backend="${{ inputs.deploy_backend }}"
           deploy_proxy="${{ inputs.deploy_proxy }}"
+          build_sandbox="${{ inputs.build_sandbox }}"
 
           # --- Shared source validation ---
 
@@ -167,7 +168,7 @@ jobs:
               exit 1
             fi
 
-            if [[ "${apim_environment}"" == "internal-dev-sandbox" && "${build_sandbox}" != "true" ]]; then
+            if [[ "${apim_environment}"" == "internal-dev-sandbox" && "${build_sandbox}" !== "true" ]]; then
               echo "[ERROR] APIM environment 'internal-dev-sandbox' requires build_sandbox to be true."
               exit 1
             fi
