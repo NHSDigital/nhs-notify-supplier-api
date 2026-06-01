@@ -7,6 +7,7 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 import { APIRequestContext } from "@playwright/test";
 import z from "zod";
+import { Letter } from "@internal/datastore";
 import {
   AWS_ACCOUNT_ID,
   GET_LETTERS_MAX_RETRIES,
@@ -38,23 +39,6 @@ export const PendingLetterSchema = z.object({
 });
 export type PendingLetter = z.infer<typeof PendingLetterSchema>;
 
-export interface SupplierApiLetters {
-  supplierId: string;
-  specificationId: string;
-  supplierStatus: string;
-  createdAt: string;
-  supplierStatusSk: string;
-  updatedAt: string;
-  groupId: string;
-  reasonCode: string;
-  id: string;
-  url: string;
-  ttl: string;
-  reasonText: string;
-  status: string;
-  source: string;
-}
-
 export async function createTestData(
   supplierId: string,
   count?: number,
@@ -82,8 +66,6 @@ export const getLettersBySupplier = async (
     TableName: LETTERSTABLENAME,
     IndexName: "supplierStatus-index",
     KeyConditionExpression: "supplierStatus = :supplierStatus",
-    ProjectionExpression:
-      "id, specificationId, groupId, reasonCode, reasonText",
     ExpressionAttributeValues: {
       ":supplierStatus": supplierStatus,
     },
@@ -94,7 +76,7 @@ export const getLettersBySupplier = async (
   if (!Items || Items.length === 0) {
     throw new Error(`Unexpectedly found no data found for ${supplierId}.`);
   }
-  return Items as SupplierApiLetters[];
+  return Items as Letter[];
 };
 
 const delay = (ms: number) =>
@@ -215,7 +197,7 @@ export async function waitForLetterStatus(
     timeoutMs?: number;
     intervalMs?: number;
   },
-): Promise<SupplierApiLetters> {
+): Promise<Letter> {
   const timeoutMs = options?.timeoutMs ?? 60_000;
   const intervalMs = options?.intervalMs ?? 5000;
   const startedAt = Date.now();
@@ -233,7 +215,7 @@ export async function waitForLetterStatus(
       }),
     );
 
-    const letter = Item as SupplierApiLetters;
+    const letter = Item as Letter;
 
     if (letter && letter.status === status) {
       return letter;
