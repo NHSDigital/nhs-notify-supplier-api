@@ -1,0 +1,30 @@
+{
+  "constraints": {
+    "blackCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 20
+    },
+    "deliveryDays": {
+      "operator": "LESS_THAN",
+      "value": 3
+    },
+    "sheets": {
+      "operator": "LESS_THAN",
+      "value": 5
+    },
+    "sides": {
+      "operator": "LESS_THAN",
+      "value": 10
+    }
+  },
+  "description": "Braille letter with standard letter",
+  "id": "notify-braille",
+  "name": "Braille Letter",
+  "packSpecificationIds": [
+    "notify-braille"
+  ],
+  "priority": 13,
+  "status": "INT",
+  "type": "BRAILLE",
+  "volumeGroupId": "volumeGroup-test3"
+}

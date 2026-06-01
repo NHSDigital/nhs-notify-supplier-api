@@ -1,5 +1,5 @@
 module "upsert_letter" {
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.2/terraform-lambda.zip"
 
   function_name = "upsert_letter"
   description   = "Update or Insert the letter data in the letters table"
@@ -35,7 +35,6 @@ module "upsert_letter" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
-    VARIANT_MAP            = jsonencode(var.letter_variant_map),
     IDEMPOTENCY_TABLE_NAME = aws_dynamodb_table.idempotency.name
   })
 }

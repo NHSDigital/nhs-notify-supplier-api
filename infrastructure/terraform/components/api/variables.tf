@@ -24,7 +24,7 @@ variable "region" {
 
 variable "group" {
   type        = string
-  description = "The group variables are being inherited from (often synonmous with account short-name)"
+  description = "The account group short-name"
 }
 
 ##
@@ -111,6 +111,36 @@ variable "max_get_limit" {
   default     = 2500
 }
 
+variable "download_url_ttl_seconds" {
+  type        = number
+  description = "TTL in seconds for generated download URLs"
+  default     = 60
+}
+
+variable "letter_ttl_hours" {
+  type        = number
+  description = "TTL in hours for letter records"
+  default     = 12960
+}
+
+variable "letter_queue_ttl_hours" {
+  type        = number
+  description = "TTL in hours for letter queue records"
+  default     = 168
+}
+
+variable "letter_queue_visibility_timeout" {
+  type        = number
+  description = "Visibility timeout in seconds for processing queued letter updates"
+  default     = 300
+}
+
+variable "mi_ttl_hours" {
+  type        = number
+  description = "TTL in hours for MI records"
+  default     = 2160
+}
+
 variable "parent_acct_environment" {
   type        = string
   description = "Name of the environment responsible for the acct resources used, affects things like DNS zone. Useful for named dev environments"
@@ -133,31 +163,6 @@ variable "eventpub_control_plane_bus_arn" {
   type        = string
   description = "ARN of the EventBridge control plane bus for eventpub"
   default     = ""
-}
-
-variable "letter_variant_map" {
-  type = map(object({ supplierId = string, specId = string, priority = number, billingId = string }))
-  default = {
-    "digitrials-aspiring"             = { supplierId = "supplier1", specId = "digitrials-aspiring", priority = "0", billingId = "digitrials-aspiring-billing" },
-    "digitrials-dmapp"                = { supplierId = "supplier1", specId = "notify-admail", priority = "1", billingId = "notify-admail-billing" },
-    "digitrials-globalminds"          = { supplierId = "supplier1", specId = "digitrials-globalminds", priority = "2", billingId = "digitrials-globalminds-billing" },
-    "digitrials-mymelanoma"           = { supplierId = "supplier1", specId = "digitrials-mymelanoma", priority = "3", billingId = "digitrials-mymelanoma-billing" },
-    "digitrials-ofh"                  = { supplierId = "supplier1", specId = "digitrials-ofh", priority = "4", billingId = "digitrials-ofh-billing" },
-    "digitrials-prostateprogress"     = { supplierId = "supplier1", specId = "digitrials-prostateprogress", priority = "5", billingId = "digitrials-prostateprogress-billing" },
-    "digitrials-protectc"             = { supplierId = "supplier1", specId = "notify-c5-colour", priority = "6", billingId = "notify-c5-colour-billing" },
-    "digitrials-restore"              = { supplierId = "supplier1", specId = "digitrials-restore", priority = "7", billingId = "digitrials-restore-billing" },
-    "gpreg-admail"                    = { supplierId = "supplier1", specId = "notify-admail", priority = "8", billingId = "notify-admail-billing" },
-    "nces-abnormal-results"           = { supplierId = "supplier1", specId = "nces-abnormal-results", priority = "9", billingId = "nces-abnormal-results-billing" },
-    "nces-abnormal-results-braille"   = { supplierId = "supplier1", specId = "nces-abnormal-results-braille", priority = "10", billingId = "nces-abnormal-results-braille-billing" },
-    "nces-invites"                    = { supplierId = "supplier1", specId = "nces-invites", priority = "10", billingId = "nces-invites-billing" },
-    "nces-invites-braille"            = { supplierId = "supplier1", specId = "nces-invites-braille", priority = "10", billingId = "nces-invites-braille-billing" },
-    "nces-standard"                   = { supplierId = "supplier1", specId = "notify-c5-whitemail", priority = "11", billingId = "notify-c5-whitemail-billing" },
-    "nces-standard-braille"           = { supplierId = "supplier1", specId = "notify-braille-whitemail", priority = "12", billingId = "notify-braille-whitemail-billing" },
-    "notify-braille"                  = { supplierId = "supplier1", specId = "notify-braille", priority = "13", billingId = "notify-braille-billing" },
-    "notify-digital-letters-standard" = { supplierId = "supplier1", specId = "notify-c5", priority = "97", billingId = "notify-c5-billing" },
-    "notify-standard"                 = { supplierId = "supplier1", specId = "notify-c5", priority = "98", billingId = "notify-c5-billing" },
-    "notify-standard-colour"          = { supplierId = "supplier1", specId = "notify-c5-colour", priority = "99", billingId = "notify-c5-colour-billing" }
-  }
 }
 
 variable "disable_gateway_execute_endpoint" {

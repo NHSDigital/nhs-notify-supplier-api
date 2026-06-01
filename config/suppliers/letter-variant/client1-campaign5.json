@@ -1,0 +1,38 @@
+{
+  "campaignIds": [
+    "client1-campaign5"
+  ],
+  "clientId": "client1",
+  "constraints": {
+    "blackCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 20
+    },
+    "colourCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 10
+    },
+    "deliveryDays": {
+      "operator": "LESS_THAN",
+      "value": 3
+    },
+    "sheets": {
+      "operator": "LESS_THAN",
+      "value": 5
+    },
+    "sides": {
+      "operator": "LESS_THAN",
+      "value": 10
+    }
+  },
+  "description": "Admail, colour printing, Campaign 5 envelope",
+  "id": "client1-campaign5",
+  "name": "Client1 - Campaign 5",
+  "packSpecificationIds": [
+    "client1-campaign5"
+  ],
+  "priority": 4,
+  "status": "PROD",
+  "type": "STANDARD",
+  "volumeGroupId": "volumeGroup-test3"
+}

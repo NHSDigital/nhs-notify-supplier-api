@@ -6,5 +6,9 @@ export default {
   testPathIgnorePatterns: ["/node_modules/", "/dist/"],
   transform: {
     "^.+\\.ts$": ["ts-jest"],
+    "^.+\\.(js|mjs)$": "babel-jest",
   },
+  transformIgnorePatterns: [
+    "/node_modules/(?!(?:@pact-foundation|https-proxy-agent|agent-base)/)",
+  ],
 };

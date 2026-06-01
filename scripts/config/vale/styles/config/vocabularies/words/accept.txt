@@ -32,7 +32,7 @@ rawContent
 relative_url
 repo
 reqs
-SDK|SDKs
+SDKs?
 sed
 semver
 src

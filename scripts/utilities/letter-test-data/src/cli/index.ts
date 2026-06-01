@@ -229,6 +229,9 @@ async function main() {
         await letterRepository.unsafePutLetterBatch(letterDtos);
 
         console.log(`Created batch ${batchId} of ${letterDtos.length} letters`);
+        console.log(
+          `LETTER_IDS:${JSON.stringify(letterDtos.map(({ id }) => id))}`,
+        );
       },
     )
     .demandCommand(1)
