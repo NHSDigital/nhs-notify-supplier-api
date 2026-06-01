@@ -57,7 +57,7 @@ test.describe("API Gateway Tests To Get MI data", () => {
       timestamp: insertedTimestamp,
     });
     expect(responseBody.data.type).toBe("ManagementInformation");
-});
+  });
 
   test("GET /mi with invalid authentication should return 403", async ({
     request,
