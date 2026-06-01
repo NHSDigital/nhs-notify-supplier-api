@@ -16,7 +16,7 @@ export async function runCreateLetter(options: {
   status: string;
   count: number;
   testLetter: string;
-}) {
+}): Promise<string[]> {
   const {
     awsAccountId,
     count,
@@ -63,20 +63,37 @@ export async function runCreateLetter(options: {
     testLetter,
   ];
 
-  await new Promise<void>((resolve, reject) => {
+  return new Promise<string[]>((resolve, reject) => {
     const child = spawn(cmd, args, {
-      stdio: "inherit",
+      stdio: ["inherit", "pipe", "inherit"],
       cwd: root,
       shell: false,
     });
-    child.stdout?.on("id", (id) => {
-      const text = id.toString();
+    let output = "";
+    child.stdout?.on("data", (chunk) => {
+      const text = chunk.toString();
+      output += text;
       process.stdout.write(text);
     });
+    child.on("close", (code) => {
+      if (code !== 0) {
+        reject(new Error(`pnpm exited with ${code}`));
+        return;
+      }
 
-    child.on("close", (code) =>
-      code === 0 ? resolve() : reject(new Error(`pnpm exited with ${code}`)),
-    );
+      const letterIdsMatch = /LETTER_IDS:(\[[^\n]*\])/.exec(output);
+      if (!letterIdsMatch) {
+        reject(new Error("LETTER_IDS not found in output"));
+        return;
+      }
+
+      try {
+        const letterIds = JSON.parse(letterIdsMatch[1]) as string[];
+        resolve(letterIds);
+      } catch (error) {
+        reject(new Error(`Failed to parse LETTER_IDS JSON: ${String(error)}`));
+      }
+    });
     child.on("error", reject);
   });
 }

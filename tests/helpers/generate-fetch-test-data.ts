@@ -58,8 +58,8 @@ export interface SupplierApiLetters {
 export async function createTestData(
   supplierId: string,
   count?: number,
-): Promise<void> {
-  await runCreateLetter({
+): Promise<string[]> {
+  return runCreateLetter({
     filter: "nhs-notify-supplier-api-letter-test-data-utility",
     supplierId,
     environment: envName,
@@ -225,7 +225,8 @@ export async function waitForLetterStatus(
       new GetCommand({
         TableName: LETTERSTABLENAME,
         Key: { id, supplierId },
-        ProjectionExpression: "id, #status, supplierId",
+        ProjectionExpression:
+          "id, #status, supplierId, specificationId, groupId, reasonCode, reasonText",
         ExpressionAttributeNames: {
           "#status": "status",
         },
