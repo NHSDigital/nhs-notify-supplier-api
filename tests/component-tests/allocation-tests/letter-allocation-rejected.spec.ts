@@ -212,9 +212,18 @@ test.describe("Allocator Rejected Allocation Tests", () => {
       expect(lettersInDb.reasonText).toContain(
         `Volume group with id ${volumeGroupId} is not active`,
       );
+
+      const resolvedOriginalEndDate =
+        originalEndDate ??
+        new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split("T")[0];
+
       await updateVolumeGroupData(
         volumeGroupId,
-        fieldToUpdate === "startDate" ? originalStartDate : originalEndDate,
+        fieldToUpdate === "startDate"
+          ? originalStartDate
+          : resolvedOriginalEndDate,
         fieldToUpdate,
       );
     });

@@ -3,6 +3,7 @@ import {
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
+  QueryCommand,
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { envName } from "tests/constants/api-constants";
@@ -91,6 +92,7 @@ type LetterVariantConfig = {
     sides: Record<string, number>;
     sheets: Record<string, number>;
   };
+  volumeGroupId: string;
 };
 
 type DailyAllocationConfig = {
@@ -483,4 +485,38 @@ export async function updateLetterVariantConfig(
       ConditionExpression: "attribute_exists(pk) AND attribute_exists(sk)",
     }),
   );
+}
+
+export async function getSupplierFromSupplierPack(
+  packSpecificationId: string,
+): Promise<string[]> {
+  const { Items } = await docClient.send(
+    new QueryCommand({
+      TableName: getSupplierConfigTableName(),
+      IndexName: "packSpecificationId-index",
+      KeyConditionExpression:
+        "#pk = :pk AND #packSpecificationId = :packSpecificationId",
+      FilterExpression: "#status = :status AND #approval = :approval",
+      ExpressionAttributeNames: {
+        "#pk": "pk",
+        "#packSpecificationId": "packSpecificationId",
+        "#status": "status",
+        "#approval": "approval",
+      },
+      ExpressionAttributeValues: {
+        ":pk": "ENTITY#supplier-pack",
+        ":packSpecificationId": packSpecificationId,
+        ":status": "PROD",
+        ":approval": "APPROVED",
+      },
+    }),
+  );
+
+  if (!Items || Items.length === 0) {
+    throw new Error(
+      `No suppliers found for pack specification ${packSpecificationId}`,
+    );
+  }
+
+  return Items.map((item) => String(item.supplierId));
 }

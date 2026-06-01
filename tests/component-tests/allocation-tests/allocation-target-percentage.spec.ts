@@ -2,6 +2,8 @@ import { randomUUID } from "node:crypto";
 import test, { expect } from "playwright/test";
 import {
   getAllocationLogForDomainId,
+  getLetterVariantConfigFromDb,
+  getSupplierFromSupplierPack,
   getVariantsForAllocation,
   updateSupplierAllocation,
 } from "tests/helpers/allocation-helper";
@@ -14,10 +16,13 @@ test.describe("Allocation Target Percentage Tests", () => {
   test("Verify that supplier with zero target percentage is handled correctly", async () => {
     const letterVariant = getVariantsForAllocation(8);
     const domainId = `Zero-Percentage-${randomUUID()}`;
-    const volumeGroupId = "volumeGroup-test2";
+
+    const letterVariantConfig =
+      await getLetterVariantConfigFromDb(letterVariant);
+    const volGroupId = letterVariantConfig.volumeGroupId;
 
     // update target percentage
-    await updateSupplierAllocation("supplier1", volumeGroupId, 0);
+    await updateSupplierAllocation("supplier1", volGroupId, 0);
     const preparedEvent = createPreparedV1Event({
       domainId,
       letterVariantId: letterVariant,
@@ -44,12 +49,18 @@ test.describe("Allocation Target Percentage Tests", () => {
   });
 
   test("Verify that supplier with less than 100 target percentage is handled correctly", async () => {
-    const letterVariant = getVariantsForAllocation(8);
+    const letterVariant = getVariantsForAllocation(5);
     const domainId = `Less-Than-100-Percentage-${randomUUID()}`;
-    const volumeGroupId = "volumeGroup-test2";
+
+    const letterVariantConfig =
+      await getLetterVariantConfigFromDb(letterVariant);
+    const volGroupId = letterVariantConfig.volumeGroupId;
+    const [packSpecificationId] = letterVariantConfig.packSpecificationIds;
 
     // update target percentage
-    await updateSupplierAllocation("supplier1", volumeGroupId, 50);
+    const [supplier] = await getSupplierFromSupplierPack(packSpecificationId);
+
+    await updateSupplierAllocation(supplier, volGroupId, 50);
     const preparedEvent = createPreparedV1Event({
       domainId,
       letterVariantId: letterVariant,
@@ -68,6 +79,6 @@ test.describe("Allocation Target Percentage Tests", () => {
     expect(lettersInDb.supplierId).toBe(
       allocationLog.msg?.allocationDetails?.supplierSpec?.supplierId,
     );
-    updateSupplierAllocation("supplier1", volumeGroupId, 100); // reset target percentage to avoid impact on other tests
+    await updateSupplierAllocation(supplier, volGroupId, 100); // reset target percentage to avoid impact on other tests
   });
 });
