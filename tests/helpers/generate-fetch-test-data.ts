@@ -26,7 +26,7 @@ import {
 } from "../../lambdas/api-handler/src/contracts/letters";
 import {
   GetMIResponse,
-  GetMIResponseSchema
+  GetMIResponseSchema,
 } from "../../lambdas/api-handler/src/contracts/mi";
 import { ErrorResponse } from "../../lambdas/api-handler/src/contracts/errors";
 
@@ -170,8 +170,7 @@ function parseGetLettersResponseBody(
 }
 
 function parseGetMIResponseBody(parsedBody: unknown): GetMIResponseBody {
-  const parsedGetMIResponse =
-    GetMIResponseSchema.safeParse(parsedBody);
+  const parsedGetMIResponse = GetMIResponseSchema.safeParse(parsedBody);
   if (parsedGetMIResponse.success) {
     return parsedGetMIResponse.data;
   }
@@ -243,16 +242,15 @@ export async function getLettersWithRetry(
 }
 
 export async function getMI(
-  miId:    string,
+  miId: string,
   request: APIRequestContext,
   baseUrl: string,
   headers: Record<string, string>,
 ): Promise<FetchMiResult> {
-  const executeGetMiRequest =
-    () =>
-          request.get(`${baseUrl}/${MI_ENDPOINT}/${miId}`, {
-            headers,
-        });
+  const executeGetMiRequest = () =>
+    request.get(`${baseUrl}/${MI_ENDPOINT}/${miId}`, {
+      headers,
+    });
 
   const response = await executeGetMiRequest();
   const statusCode = response.status();
@@ -261,7 +259,6 @@ export async function getMI(
   const responseBody = parseGetMIResponseBody(parsedBody);
   return { statusCode, responseBody };
 }
-
 
 export async function waitForLetterStatus(
   supplierId: string,
