@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { MI_ENDPOINT } from "tests/constants/api-constants";
 import {
   createHeaderWithNoCorrelationId,
   createInvalidRequestHeaders,
@@ -11,29 +12,30 @@ import {
   isGetMIResponse,
 } from "../../helpers/generate-fetch-test-data";
 import { miValidRequest } from "./testCases/create-mi";
-import { MI_ENDPOINT } from "tests/constants/api-constants";
 
 let baseUrl: string;
 let insertedId: string;
 let insertedTimestamp: string;
 
-test.beforeAll(async ( { request }) => {
-    baseUrl = await getRestApiGatewayBaseUrl();
-    const headers = createValidRequestHeaders();
-    const body = miValidRequest();
+test.beforeAll(async ({ request }) => {
+  baseUrl = await getRestApiGatewayBaseUrl();
+  const headers = createValidRequestHeaders();
+  const body = miValidRequest();
 
-    const response = await request.post(`${baseUrl}/${MI_ENDPOINT}`, {
-        headers,
-        data: body,
-    });
+  const response = await request.post(`${baseUrl}/${MI_ENDPOINT}`, {
+    headers,
+    data: body,
+  });
 
-    const miResponseBody = await response.json();
-    insertedId = miResponseBody.data.id;
-    insertedTimestamp = miResponseBody.data.attributes.timestamp;
+  const miResponseBody = await response.json();
+  insertedId = miResponseBody.data.id;
+  insertedTimestamp = miResponseBody.data.attributes.timestamp;
 });
 
 test.describe("API Gateway Tests To Get MI data", () => {
-  test("GET /mi should return 200 and MI data for specified id", async ({ request }) => {
+  test("GET /mi should return 200 and MI data for specified id", async ({
+    request,
+  }) => {
     const headers = createValidRequestHeaders();
     const { responseBody, statusCode } = await getMI(
       insertedId,
