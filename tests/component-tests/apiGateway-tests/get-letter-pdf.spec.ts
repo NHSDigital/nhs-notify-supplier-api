@@ -73,8 +73,7 @@ test.describe("API Gateway Tests to Verify Get Letter PDF Endpoint", () => {
     const id = "non-existing-id-12345";
     const headers = createValidRequestHeaders();
     const response = await request.get(
-      `
-      ${baseUrl}/${SUPPLIER_LETTERS}/${id}/${DATA}`,
+      `${baseUrl}/${SUPPLIER_LETTERS}/${id}/${DATA}`,
       {
         headers,
       },
