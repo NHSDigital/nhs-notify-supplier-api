@@ -1,6 +1,9 @@
 import { expect, test } from "@playwright/test";
 import getRestApiGatewayBaseUrl from "../../helpers/aws-gateway-helper";
-import { getLettersBySupplier } from "../../helpers/generate-fetch-test-data";
+import {
+  createTestData,
+  waitForLetterStatus,
+} from "../../helpers/generate-fetch-test-data";
 import { SUPPLIERID, SUPPLIER_LETTERS } from "../../constants/api-constants";
 import { createValidRequestHeaders } from "../../constants/request-headers";
 import { error404ResponseBody } from "../../helpers/common-types";
@@ -15,16 +18,16 @@ test.describe("API Gateway Tests to Verify Get Letter Status Endpoint", () => {
   test(`Get /letters/{id} returns 200 and valid response for a given id`, async ({
     request,
   }) => {
-    const letters = await getLettersBySupplier(SUPPLIERID, "PENDING", 1);
+    const letterIds: string[] = await createTestData(SUPPLIERID);
+    const createdLetter = await waitForLetterStatus(
+      SUPPLIERID,
+      letterIds[0],
+      "PENDING",
+    );
 
-    if (!letters?.length) {
-      test.fail(true, `No PENDING letters found for supplier ${SUPPLIERID}`);
-      return;
-    }
-    const letter = letters[0];
     const headers = createValidRequestHeaders();
     const response = await request.get(
-      `${baseUrl}/${SUPPLIER_LETTERS}/${letter.id}`,
+      `${baseUrl}/${SUPPLIER_LETTERS}/${createdLetter.id}`,
       {
         headers,
       },
@@ -37,10 +40,10 @@ test.describe("API Gateway Tests to Verify Get Letter Status Endpoint", () => {
       data: {
         attributes: {
           status: "PENDING",
-          specificationId: letter.specificationId,
-          groupId: letter.groupId,
+          specificationId: createdLetter.specificationId,
+          groupId: createdLetter.groupId,
         },
-        id: letter.id,
+        id: createdLetter.id,
         type: "Letter",
       },
     });
