@@ -24,7 +24,10 @@ import {
   GetLettersResponse,
   GetLettersResponseSchema,
 } from "../../lambdas/api-handler/src/contracts/letters";
-import { GetMIResponse, GetMIResponseSchema } from "../../lambdas/api-handler/src/contracts/mi";
+import {
+  GetMIResponse,
+  GetMIResponseSchema
+} from "../../lambdas/api-handler/src/contracts/mi";
 import { ErrorResponse } from "../../lambdas/api-handler/src/contracts/errors";
 
 const ddb = new DynamoDBClient({});
@@ -166,9 +169,7 @@ function parseGetLettersResponseBody(
   return parsedBody as Record<string, unknown>;
 }
 
-function parseGetMIResponseBody(
-  parsedBody: unknown,
-): GetMIResponseBody {
+function parseGetMIResponseBody(parsedBody: unknown): GetMIResponseBody {
   const parsedGetMIResponse =
     GetMIResponseSchema.safeParse(parsedBody);
   if (parsedGetMIResponse.success) {
@@ -246,16 +247,12 @@ export async function getMI(
   request: APIRequestContext,
   baseUrl: string,
   headers: Record<string, string>,
-): Promise<FetchMiResult> { // change retrun type to FetchMiResult and create new type if the response body shape is different to the get letters response, currently reusing as the response shapes are the same and to avoid code duplication
-
+): Promise<FetchMiResult> {
   const executeGetMiRequest =
     () =>
-          request.get(`${baseUrl}/${MI_ENDPOINT}`, {
+          request.get(`${baseUrl}/${MI_ENDPOINT}/${miId}`, {
             headers,
-            params: {
-              miId,
-            },
-          });
+        });
 
   const response = await executeGetMiRequest();
   const statusCode = response.status();
