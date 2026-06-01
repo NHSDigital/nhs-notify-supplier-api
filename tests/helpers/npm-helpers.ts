@@ -77,7 +77,7 @@ export async function runCreateLetter(options: {
     });
     child.on("close", (code) => {
       if (code !== 0) {
-        reject(new Error(`pnpm exited with ${code}`));
+        reject(new Error(`npm exited with ${code}`));
         return;
       }
 
@@ -148,7 +148,7 @@ export async function createSupplierData(options: {
     });
 
     child.on("close", (code) =>
-      code === 0 ? resolve() : reject(new Error(`pnpm exited with ${code}`)),
+      code === 0 ? resolve() : reject(new Error(`npm exited with ${code}`)),
     );
     child.on("error", reject);
   });

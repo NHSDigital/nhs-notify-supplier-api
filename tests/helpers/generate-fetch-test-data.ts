@@ -17,7 +17,7 @@ import {
   VISIBILITY_TIMEOUT_SECONDS,
   envName,
 } from "../constants/api-constants";
-import { createSupplierData, runCreateLetter } from "./pnpm-helpers";
+import { createSupplierData, runCreateLetter } from "./npm-helpers";
 import { logger } from "./pino-logger";
 import {
   GetLettersResponse,
