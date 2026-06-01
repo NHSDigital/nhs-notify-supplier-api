@@ -39,6 +39,23 @@ export const PendingLetterSchema = z.object({
 });
 export type PendingLetter = z.infer<typeof PendingLetterSchema>;
 
+export interface SupplierApiLetters {
+  supplierId: string;
+  specificationId: string;
+  supplierStatus: string;
+  createdAt: string;
+  supplierStatusSk: string;
+  updatedAt: string;
+  groupId: string;
+  reasonCode: string;
+  id: string;
+  url: string;
+  ttl: string;
+  reasonText: string;
+  status: string;
+  source: string;
+}
+
 export async function createTestData(
   supplierId: string,
   count?: number,
