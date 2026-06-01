@@ -1,12 +1,3 @@
-
-
-
-
-
-
-
-
-
 module "supplier_config_ingress" {
   source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip"
 

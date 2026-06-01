@@ -2,6 +2,7 @@
 # the project as automated steps to be executed on locally and in the CD pipeline.
 
 include scripts/init.mk
+-include .env # Load environment variables from .env file if it exists
 
 # ==============================================================================
 
@@ -130,11 +131,14 @@ ${VERBOSE}.SILENT: \
 # E2E Test commands #
 #####################
 
+# https://pytest-xdist.readthedocs.io/en/stable/known-limitations.html#output-stdout-and-stderr-from-workers means pytest won't print to stdout even with -s
+PYTEST_WORKERS := 4 # set to 0 to see stdout/stderr when debugging e2e tests
+
 TEST_CMD := APIGEE_ACCESS_TOKEN="$(APIGEE_ACCESS_TOKEN)" \
 	STATUS_ENDPOINT_API_KEY="$(STATUS_ENDPOINT_API_KEY)" \
 	PYTHONPATH=. poetry run pytest --disable-warnings -vv \
 	--color=yes \
-	-n 4 \
+		-n $(PYTEST_WORKERS) \
 	--api-name=nhs-notify-supplier \
 	--proxy-name="$(PROXY_NAME)" \
 	-s \
@@ -144,7 +148,6 @@ TEST_CMD := APIGEE_ACCESS_TOKEN="$(APIGEE_ACCESS_TOKEN)" \
 	--only-rerun 'AssertionError: Unexpected 504' \
 	--only-rerun 'AssertionError: Unexpected 502' \
 	--junitxml=test-report.xml
-
 
 .internal-dev-test:
 	@cd tests/e2e-tests && \
@@ -161,7 +164,7 @@ TEST_CMD := APIGEE_ACCESS_TOKEN="$(APIGEE_ACCESS_TOKEN)" \
 PROD_CMD := APIGEE_ACCESS_TOKEN="$(APIGEE_ACCESS_TOKEN)" \
 	PYTHONPATH=. poetry run pytest --disable-warnings -vv \
 	--color=yes \
-	-n 4 \
+	-n $(PYTEST_WORKERS) \
 	--api-name=nhs-notify-supplier \
 	--proxy-name="$(PROXY_NAME)" \
 	-s \
