@@ -45,7 +45,7 @@ test.describe("Event Subscription SNS Tests", () => {
       supplierAllocatorLog.msg?.allocationDetails?.supplierSpec?.supplierId;
 
     logger.info(
-      `Supplier ${supplierId} allocated for domainId ${domainId} in supplier allocator lambda`,
+      `Supplier ${supplierId} allocated to letter ${domainId} in supplier allocator lambda`,
     );
     if (!supplierId) {
       throw new Error("supplierId was not found in supplier allocator log");
@@ -113,7 +113,7 @@ test.describe("Event Subscription SNS Tests", () => {
       supplierAllocatorLog.msg?.allocationDetails?.supplierSpec?.supplierId;
 
     logger.info(
-      `Supplier ${supplierId} allocated for domainId ${domainId} in supplier allocator lambda`,
+      `Supplier ${supplierId} allocated to letter ${domainId} in supplier allocator lambda`,
     );
     if (!supplierId) {
       throw new Error("supplierId was not found in supplier allocator log");

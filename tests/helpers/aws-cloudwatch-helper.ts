@@ -107,7 +107,7 @@ export async function supplierIdFromSupplierAllocatorLog(
     supplierAllocatorLog.msg?.allocationDetails?.supplierSpec?.supplierId;
 
   logger.info(
-    `Supplier ${supplierId} allocated for domainId ${domainId} in supplier allocator lambda`,
+    `Supplier ${supplierId} allocated to letter ${domainId} in supplier allocator lambda`,
   );
 
   if (!supplierId) {

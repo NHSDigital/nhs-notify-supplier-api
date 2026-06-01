@@ -10,7 +10,6 @@ import {
 } from "./testCases/update-letter-status";
 import {
   createTestData,
-  getLettersBySupplier,
   waitForLetterStatus,
 } from "../../helpers/generate-fetch-test-data";
 import { createInvalidRequestHeaders } from "../../constants/request-headers";
@@ -20,33 +19,26 @@ import {
 } from "../../helpers/common-types";
 
 let baseUrl: string;
-let letters: Awaited<ReturnType<typeof getLettersBySupplier>>;
 
 test.beforeAll(async () => {
   baseUrl = await getRestApiGatewayBaseUrl();
 });
 
 test.describe("API Gateway Tests to Verify Patch Status Endpoint", () => {
-  test.beforeAll(async () => {
-    await createTestData(SUPPLIERID, 2);
-    letters = await getLettersBySupplier(SUPPLIERID, "PENDING", 2);
-
-    if (letters.length < 2) {
-      throw new Error(
-        `Expected 2 PENDING letters for supplier ${SUPPLIERID}, got ${letters.length}.`,
-      );
-    }
-  });
-
   test(`Patch /letters returns 202 and status is updated to ACCEPTED`, async ({
     request,
   }) => {
-    const letter = letters[0];
+    const letterIds: string[] = await createTestData(SUPPLIERID);
+    const createdLetter = await waitForLetterStatus(
+      SUPPLIERID,
+      letterIds[0],
+      "PENDING",
+    );
     const headers = patchRequestHeaders();
-    const body = patchValidRequestBody(letter.id, "ACCEPTED");
+    const body = patchValidRequestBody(createdLetter.id, "ACCEPTED");
 
     const response = await request.patch(
-      `${baseUrl}/${SUPPLIER_LETTERS}/${letter.id}`,
+      `${baseUrl}/${SUPPLIER_LETTERS}/${createdLetter.id}`,
       {
         headers,
         data: body,
@@ -57,7 +49,7 @@ test.describe("API Gateway Tests to Verify Patch Status Endpoint", () => {
 
     const updated = await waitForLetterStatus(
       SUPPLIERID,
-      letter.id,
+      createdLetter.id,
       "ACCEPTED",
     );
     expect(updated.status).toBe("ACCEPTED");
@@ -66,12 +58,17 @@ test.describe("API Gateway Tests to Verify Patch Status Endpoint", () => {
   test(`Patch /letters returns 202 and status is updated to REJECTED`, async ({
     request,
   }) => {
-    const letter = letters[1];
+    const letterIds: string[] = await createTestData(SUPPLIERID);
+    const createdLetter = await waitForLetterStatus(
+      SUPPLIERID,
+      letterIds[0],
+      "PENDING",
+    );
     const headers = patchRequestHeaders();
-    const body = patchFailureRequestBody(letter.id, "REJECTED");
+    const body = patchFailureRequestBody(createdLetter.id, "REJECTED");
 
     const response = await request.patch(
-      `${baseUrl}/${SUPPLIER_LETTERS}/${letter.id}`,
+      `${baseUrl}/${SUPPLIER_LETTERS}/${createdLetter.id}`,
       {
         headers,
         data: body,
@@ -82,7 +79,7 @@ test.describe("API Gateway Tests to Verify Patch Status Endpoint", () => {
 
     const updated = await waitForLetterStatus(
       SUPPLIERID,
-      letter.id,
+      createdLetter.id,
       "REJECTED",
     );
     expect(updated.status).toBe("REJECTED");
