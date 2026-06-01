@@ -7,10 +7,10 @@ import { apiSandboxGetMiTestData } from "./testCases/get-mi-test-cases";
 
 test.describe("Sandbox Tests To Verify Get Mi Endpoint", () => {
   for (const {
-    id,
     expectedResponse,
     expectedStatus,
     header,
+    id,
     testCase,
   } of apiSandboxGetMiTestData) {
     test(`Get /Mi endpoint returns ${testCase}`, async ({ request }) => {
