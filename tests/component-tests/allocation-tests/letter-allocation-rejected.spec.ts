@@ -169,7 +169,7 @@ test.describe("Allocator Rejected Allocation Tests", () => {
     test(testName, async () => {
       const domainId = `${fieldToUpdate}-${randomUUID()}`;
       const letterVariant = getVariantsForAllocation(8);
-      logger.info(`Testing volumeGroup with futureDate: ${domainId}`);
+      logger.info(`Testing volumeGroup with ${fieldToUpdate}: ${domainId}`);
 
       const { originalEndDate, originalStartDate } =
         await getVolumeGroupData(volumeGroupId);
@@ -177,7 +177,7 @@ test.describe("Allocator Rejected Allocation Tests", () => {
       const [futureStartDate] = new Date(Date.now() + 24 * 60 * 60 * 1000)
         .toISOString()
         .split("T"); // move start date to future
-      const [pastEndDate] = new Date(Date.now() - 24 * 60 * 60 * 1000)
+      const [pastEndDate] = new Date(Date.now() - 48 * 60 * 60 * 1000)
         .toISOString()
         .split("T"); // move end date to past
 
