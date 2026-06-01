@@ -103,7 +103,8 @@ data "aws_iam_policy_document" "supplier_mock_lambda" {
     ]
 
     resources = [
-      aws_ssm_parameter.supplier_mock_get_letters_limit.arn
+      aws_ssm_parameter.supplier_mock_get_letters_limit.arn,
+      aws_ssm_parameter.supplier_mock_supplier_id.arn
     ]
   }
 }
