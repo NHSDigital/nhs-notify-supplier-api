@@ -12,6 +12,7 @@ import {
   GET_LETTERS_MAX_RETRIES,
   LETTERQUEUE_TABLENAME,
   LETTERSTABLENAME,
+  MI_ENDPOINT,
   SUPPLIERTABLENAME,
   SUPPLIER_LETTERS,
   VISIBILITY_TIMEOUT_SECONDS,
@@ -23,6 +24,7 @@ import {
   GetLettersResponse,
   GetLettersResponseSchema,
 } from "../../lambdas/api-handler/src/contracts/letters";
+import { GetMIResponse, GetMIResponseSchema } from "../../lambdas/api-handler/src/contracts/mi";
 import { ErrorResponse } from "../../lambdas/api-handler/src/contracts/errors";
 
 const ddb = new DynamoDBClient({});
@@ -117,10 +119,26 @@ type FetchLettersWithRetryResult = {
   responseBody: GetLettersResponseBody;
 };
 
+type GetMIResponseBody =
+  | GetMIResponse
+  | ErrorResponse
+  | Record<string, unknown>;
+
+type FetchMiResult = {
+  statusCode: number;
+  responseBody: GetMIResponseBody;
+};
+
 export function isGetLettersResponse(
   responseBody: GetLettersResponseBody,
 ): responseBody is GetLettersResponse {
   return GetLettersResponseSchema.safeParse(responseBody).success;
+}
+
+export function isGetMIResponse(
+  responseBody: GetMIResponseBody,
+): responseBody is GetMIResponse {
+  return GetMIResponseSchema.safeParse(responseBody).success;
 }
 
 export function isErrorResponse(
@@ -142,6 +160,22 @@ function parseGetLettersResponseBody(
   }
 
   if (isErrorResponse(parsedBody as GetLettersResponseBody)) {
+    return parsedBody as ErrorResponse;
+  }
+
+  return parsedBody as Record<string, unknown>;
+}
+
+function parseGetMIResponseBody(
+  parsedBody: unknown,
+): GetMIResponseBody {
+  const parsedGetMIResponse =
+    GetMIResponseSchema.safeParse(parsedBody);
+  if (parsedGetMIResponse.success) {
+    return parsedGetMIResponse.data;
+  }
+
+  if (isErrorResponse(parsedBody as GetMIResponseBody)) {
     return parsedBody as ErrorResponse;
   }
 
@@ -206,6 +240,31 @@ export async function getLettersWithRetry(
 
   throw new Error("Unexpectedly exhausted GET /letters retries");
 }
+
+export async function getMI(
+  miId:    string,
+  request: APIRequestContext,
+  baseUrl: string,
+  headers: Record<string, string>,
+): Promise<FetchMiResult> { // change retrun type to FetchMiResult and create new type if the response body shape is different to the get letters response, currently reusing as the response shapes are the same and to avoid code duplication
+
+  const executeGetMiRequest =
+    () =>
+          request.get(`${baseUrl}/${MI_ENDPOINT}`, {
+            headers,
+            params: {
+              miId,
+            },
+          });
+
+  const response = await executeGetMiRequest();
+  const statusCode = response.status();
+
+  const parsedBody = (await response.json()) as unknown;
+  const responseBody = parseGetMIResponseBody(parsedBody);
+  return { statusCode, responseBody };
+}
+
 
 export async function waitForLetterStatus(
   supplierId: string,
