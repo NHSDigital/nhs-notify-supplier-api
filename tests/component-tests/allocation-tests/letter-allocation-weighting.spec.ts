@@ -4,6 +4,7 @@ import {
   SupplierFactorLog,
   getAllocationLog,
   getAllocationLogForDomainId,
+  getLetterVariantConfigFromDb,
   getOrSeedLetterDailyAllocationFromDb,
   getOrSeedOverallAllocationFromDb,
   getOverallAllocationFromDb,
@@ -24,49 +25,51 @@ test.describe("Allocator Weighting Tests", () => {
   test("Verify weighting and lowest weighting supplier selection for multiple suppliers", async () => {
     const testStartedAt = Date.now();
     const domainId = randomUUID();
-    const letterVariant = getVariantsForAllocation(2);
-    const volumeGroupId = "volumeGroup-test3";
+    const letterVariant = getVariantsForAllocation(4);
+    const letterVariantConfig =
+      await getLetterVariantConfigFromDb(letterVariant);
+    const volGroupId = letterVariantConfig.volumeGroupId;
     const targetPercentages = {
-      supplier1: 50,
-      supplier2: 50,
+      supplier3: 50,
+      supplier4: 50,
     };
 
     const dailyAllocation = await getOrSeedLetterDailyAllocationFromDb({
-      supplier1: 0,
-      supplier2: 0,
+      supplier3: 0,
+      supplier4: 0,
     });
     const overallAllocation = await getOrSeedOverallAllocationFromDb(
       {
-        supplier1: 0,
-        supplier2: 0,
+        supplier3: 0,
+        supplier4: 0,
       },
-      volumeGroupId,
+      volGroupId,
     );
 
-    const originalDailySupplier1 = dailyAllocation.allocations.supplier1 ?? 0;
-    const originalDailySupplier2 = dailyAllocation.allocations.supplier2 ?? 0;
-    const originalOverallSupplier1 =
-      overallAllocation.allocations.supplier1 ?? 0;
-    const originalOverallSupplier2 =
-      overallAllocation.allocations.supplier2 ?? 0;
+    const originalDailySupplier3 = dailyAllocation.allocations.supplier3 ?? 0;
+    const originalDailySupplier4 = dailyAllocation.allocations.supplier4 ?? 0;
+    const originalOverallSupplier3 =
+      overallAllocation.allocations.supplier3 ?? 0;
+    const originalOverallSupplier4 =
+      overallAllocation.allocations.supplier4 ?? 0;
 
     const seededOverall = {
-      supplier1: 900,
-      supplier2: 100,
+      supplier3: 900,
+      supplier4: 100,
     };
 
     try {
-      await updateSupplierDailyAllocation("supplier1", 0);
-      await updateSupplierDailyAllocation("supplier2", 0);
+      await updateSupplierDailyAllocation("supplier3", 0);
+      await updateSupplierDailyAllocation("supplier4", 0);
       await updateSupplierOverallAllocation(
-        "supplier1",
-        seededOverall.supplier1,
-        volumeGroupId,
+        "supplier3",
+        seededOverall.supplier3,
+        volGroupId,
       );
       await updateSupplierOverallAllocation(
-        "supplier2",
-        seededOverall.supplier2,
-        volumeGroupId,
+        "supplier4",
+        seededOverall.supplier4,
+        volGroupId,
       );
 
       const weightingSnapshot = buildWeightingSnapshot(
@@ -76,11 +79,11 @@ test.describe("Allocator Weighting Tests", () => {
       const lowestWeightingSupplier =
         getLowestWeightingSupplier(weightingSnapshot);
 
-      expect(weightingSnapshot.supplier1.allocatedVolume).toBe(900);
-      expect(weightingSnapshot.supplier2.allocatedVolume).toBe(100);
-      expect(weightingSnapshot.supplier1.allocatedPercentage).toBe(90);
-      expect(weightingSnapshot.supplier2.allocatedPercentage).toBe(10);
-      expect(lowestWeightingSupplier).toBe("supplier2");
+      expect(weightingSnapshot.supplier3.allocatedVolume).toBe(900);
+      expect(weightingSnapshot.supplier4.allocatedVolume).toBe(100);
+      expect(weightingSnapshot.supplier3.allocatedPercentage).toBe(90);
+      expect(weightingSnapshot.supplier4.allocatedPercentage).toBe(10);
+      expect(lowestWeightingSupplier).toBe("supplier4");
 
       const preparedEvent = createPreparedV1Event({
         domainId,
@@ -101,36 +104,36 @@ test.describe("Allocator Weighting Tests", () => {
         supplierAllocatorLog.msg?.allocationDetails?.supplierSpec?.supplierId;
 
       expect(selectedSupplierId).toBe(lowestWeightingSupplier);
-      expect(weightingSnapshot.supplier1.weighting).toBe(
+      expect(weightingSnapshot.supplier3.weighting).toBe(
         supplierFactorLog.supplierFactors?.find(
-          (factor) => factor.supplierId === "supplier1",
+          (factor) => factor.supplierId === "supplier3",
         )?.factor,
       );
-      expect(weightingSnapshot.supplier2.weighting).toBe(
+      expect(weightingSnapshot.supplier4.weighting).toBe(
         supplierFactorLog.supplierFactors?.find(
-          (factor) => factor.supplierId === "supplier2",
+          (factor) => factor.supplierId === "supplier4",
         )?.factor,
       );
 
       const updatedOverallAllocation =
-        await getOverallAllocationFromDb(volumeGroupId);
-      expect(updatedOverallAllocation.allocations.supplier1).toBe(900);
-      expect(updatedOverallAllocation.allocations.supplier2).toBe(101);
+        await getOverallAllocationFromDb(volGroupId);
+      expect(updatedOverallAllocation.allocations.supplier3).toBe(900);
+      expect(updatedOverallAllocation.allocations.supplier4).toBe(101);
       expect(supplierFactorLog.description).toBe(
         "Calculated supplier factors for allocation",
       );
     } finally {
-      await updateSupplierDailyAllocation("supplier1", originalDailySupplier1);
-      await updateSupplierDailyAllocation("supplier2", originalDailySupplier2);
+      await updateSupplierDailyAllocation("supplier3", originalDailySupplier3);
+      await updateSupplierDailyAllocation("supplier4", originalDailySupplier4);
       await updateSupplierOverallAllocation(
-        "supplier1",
-        originalOverallSupplier1,
-        volumeGroupId,
+        "supplier3",
+        originalOverallSupplier3,
+        volGroupId,
       );
       await updateSupplierOverallAllocation(
-        "supplier2",
-        originalOverallSupplier2,
-        volumeGroupId,
+        "supplier4",
+        originalOverallSupplier4,
+        volGroupId,
       );
     }
   });

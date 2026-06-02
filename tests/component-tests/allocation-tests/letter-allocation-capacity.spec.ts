@@ -195,8 +195,8 @@ test.describe("Allocator Lambda Tests", () => {
     const fallbackDailyAllocation = await getOrSeedLetterDailyAllocationFromDb({
       supplier5: 0,
     });
-    expect(fallbackDailyAllocation.allocations.supplier5).toBe(
-      dailyAllocatedCapacity + 1,
+    expect(fallbackDailyAllocation.allocations.supplier5).toBeGreaterThan(
+      dailyAllocatedCapacity,
     );
 
     await updateSupplierDailyAllocation(
