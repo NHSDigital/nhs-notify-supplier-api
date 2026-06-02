@@ -12,8 +12,8 @@ export async function pollForLetterStatus(
   const headers = createValidRequestHeaders(supplierId);
   let statusCode = 0;
   let letterStatus: string | undefined;
-  const RETRY_DELAY_MS = 10_000;
-  const MAX_ATTEMPTS = 6;
+  const RETRY_DELAY_MS = 15_000;
+  const MAX_ATTEMPTS = 5;
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     const getLetterResponse = await request.get(
