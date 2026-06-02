@@ -1,10 +1,10 @@
+import { Letter } from "@internal/datastore";
 import { RequestHeaders } from "../../../constants/request-headers";
 import { SUPPLIERID } from "../../../constants/api-constants";
 import {
   ErrorMessageBody,
   PostMessageRequestBody,
 } from "../../../helpers/common-types";
-import { SupplierApiLetters } from "../../../helpers/generate-fetch-test-data";
 
 export interface LetterUpdateAttributes {
   status: string;
@@ -43,7 +43,7 @@ export function postValidRequestBody(
 }
 
 export function postInvalidStatusRequestBody(
-  letters: SupplierApiLetters[],
+  letters: Letter[],
 ): PostMessageRequestBody {
   return {
     data: [
@@ -66,7 +66,7 @@ export function postInvalidStatusRequestBody(
 }
 
 export function postDuplicateIDRequestBody(
-  letters: SupplierApiLetters[],
+  letters: Letter[],
 ): PostMessageRequestBody {
   return {
     data: [

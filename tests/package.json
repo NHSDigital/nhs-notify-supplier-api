@@ -9,8 +9,8 @@
     "@aws-sdk/lib-dynamodb": "^3.1044.0",
     "@nhsdigital/nhs-notify-event-schemas-letter-rendering": "^2.0.2",
     "@nhsdigital/notify-digital-letters-consumer-contracts": "^1.0.1",
-    "@pact-foundation/pact": "^16.4.0",
-    "@pact-foundation/pact-core": "^17.1.0",
+    "@pact-foundation/pact": "^16.5.0",
+    "@pact-foundation/pact-core": "^19.2.0",
     "@playwright/test": "^1.57.0",
     "allure-js-commons": "^3.3.3",
     "dotenv": "^17.2.2",
@@ -31,7 +31,10 @@
   },
   "description": "",
   "devDependencies": {
-    "@aws-sdk/client-cloudwatch-logs": "^3.1003.0"
+    "@aws-sdk/client-cloudwatch-logs": "^3.1003.0",
+    "@babel/core": "^7.28.5",
+    "@babel/preset-env": "^7.28.5",
+    "babel-jest": "^30.2.0"
   },
   "keywords": [],
   "license": "ISC",
