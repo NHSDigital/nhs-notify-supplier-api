@@ -25,6 +25,8 @@ resource "aws_iam_role" "supplier_mock_scheduler" {
 }
 
 data "aws_iam_policy_document" "supplier_mock_scheduler_invoke_policy" {
+  count = var.deploy_supplier_mock_scheduler ? 1 : 0
+
   statement {
     sid    = "AllowInvokeSupplierMockLambda"
     effect = "Allow"
@@ -34,22 +36,25 @@ data "aws_iam_policy_document" "supplier_mock_scheduler_invoke_policy" {
     ]
 
     resources = [
-      module.supplier_mock.function_arn,
+      module.supplier_mock[0].function_arn,
     ]
   }
 }
 
 resource "aws_iam_policy" "supplier_mock_scheduler_invoke_policy" {
+  count  = var.deploy_supplier_mock_scheduler ? 1 : 0
   name   = "${local.csi}-supplier-mock-scheduler-invoke"
-  policy = data.aws_iam_policy_document.supplier_mock_scheduler_invoke_policy.json
+  policy = data.aws_iam_policy_document.supplier_mock_scheduler_invoke_policy[0].json
 }
 
 resource "aws_iam_role_policy_attachment" "supplier_mock_scheduler_invoke_policy" {
-  role       = aws_iam_role.supplier_mock_scheduler.name
-  policy_arn = aws_iam_policy.supplier_mock_scheduler_invoke_policy.arn
+  count      = var.deploy_supplier_mock_scheduler ? 1 : 0
+  role       = aws_iam_role.supplier_mock_scheduler[0].name
+  policy_arn = aws_iam_policy.supplier_mock_scheduler_invoke_policy[0].arn
 }
 
 resource "aws_scheduler_schedule" "supplier_mock" {
+  count       = var.deploy_supplier_mock_scheduler ? 1 : 0
   name        = "${local.csi}-supplier-mock"
   description = "Scheduled trigger for supplier mock lambda"
   state       = var.enable_supplier_mock_scheduler ? "ENABLED" : "DISABLED"
@@ -61,8 +66,8 @@ resource "aws_scheduler_schedule" "supplier_mock" {
   schedule_expression = var.supplier_mock_schedule_expression
 
   target {
-    arn      = module.supplier_mock.function_arn
-    role_arn = aws_iam_role.supplier_mock_scheduler.arn
+    arn      = module.supplier_mock[0].function_arn
+    role_arn = aws_iam_role.supplier_mock_scheduler[0].arn
     input = jsonencode({
       source = "eventbridge-scheduler"
     })
