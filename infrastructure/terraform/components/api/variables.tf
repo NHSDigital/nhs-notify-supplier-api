@@ -230,7 +230,7 @@ variable "enable_alarms" {
 variable "deploy_supplier_mock_scheduler" {
   type        = bool
   description = "Deploy EventBridge Scheduler trigger for supplier mock lambda"
-  default     = false
+  default     = true
 }
 
 variable "enable_supplier_mock_scheduler" {
