@@ -1,5 +1,6 @@
 module "supplier_mock" {
   source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip"
+  count  = var.deploy_supplier_mock_scheduler ? 1 : 0
 
   function_name = "supplier_mock"
   description   = "Mock the behaviour of a supplier"

@@ -18,6 +18,7 @@ No requirements.
 | <a name="input_csoc_destination_account"></a> [csoc\_destination\_account](#input\_csoc\_destination\_account) | value of the CSOC destination account, if applicable. If null, CSOC destination account will not be added as a resource in the logging policy | `string` | `"000000000000"` | no |
 | <a name="input_csoc_log_forwarding"></a> [csoc\_log\_forwarding](#input\_csoc\_log\_forwarding) | Enable forwarding of API Gateway logs to CSOC | `bool` | `true` | no |
 | <a name="input_default_tags"></a> [default\_tags](#input\_default\_tags) | A map of default tags to apply to all taggable resources within the component | `map(string)` | `{}` | no |
+| <a name="input_deploy_supplier_mock_scheduler"></a> [deploy\_supplier\_mock\_scheduler](#input\_deploy\_supplier\_mock\_scheduler) | Deploy EventBridge Scheduler trigger for supplier mock lambda | `bool` | `false` | no |
 | <a name="input_disable_gateway_execute_endpoint"></a> [disable\_gateway\_execute\_endpoint](#input\_disable\_gateway\_execute\_endpoint) | Disable the execution endpoint for the API Gateway | `bool` | `true` | no |
 | <a name="input_download_url_ttl_seconds"></a> [download\_url\_ttl\_seconds](#input\_download\_url\_ttl\_seconds) | TTL in seconds for generated download URLs | `number` | `60` | no |
 | <a name="input_enable_alarms"></a> [enable\_alarms](#input\_enable\_alarms) | Enable CloudWatch alarms for this deployed environment | `bool` | `true` | no |
