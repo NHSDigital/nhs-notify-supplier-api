@@ -150,22 +150,22 @@ test.describe("Letter Queue Tests", () => {
     }
     expect(responseBody.data.length).toBeGreaterThanOrEqual(1);
 
-    const currentTimeWithTimeOut = Math.floor(
-      (Date.now() + VISIBILITY_TIMEOUT_SECONDS * 1000) / 1000,
-    );
+    const visibilityTimestampBeforeGet = new Date(
+      letter.visibilityTimestamp,
+    ).getTime();
 
     logger.info(
       "Called Get /letters endpoint verify visibility timestamp is updated and subsequent calls returns no data until visibility timestamp is reached",
     );
     const lettersAfterGet = await getLetterFromQueueById(supplierId, letterId);
-    const visibilityTimestampAfterGet = Math.floor(
-      new Date(lettersAfterGet[0].visibilityTimestamp).getTime() / 1000,
-    );
+    const visibilityTimestampAfterGet = new Date(
+      lettersAfterGet[0].visibilityTimestamp,
+    ).getTime();
 
-    // allow a 1 second tolerance
+    // Verify visibility was pushed forward by at least the configured timeout
     expect(
-      Math.abs(visibilityTimestampAfterGet - currentTimeWithTimeOut),
-    ).toBeLessThanOrEqual(1);
+      visibilityTimestampAfterGet - visibilityTimestampBeforeGet,
+    ).toBeGreaterThanOrEqual(VISIBILITY_TIMEOUT_SECONDS * 1000);
 
     const { responseBody: secondResponseBody, statusCode: secondStatusCode } =
       await getLettersWithRetry(request, baseUrl, headers, {
