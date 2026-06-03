@@ -15,6 +15,14 @@ export interface RequestHeaders {
   [key: string]: string;
 }
 
+export const sandBoxHeaderWithHash: RequestSandBoxHeaders = {
+  "X-Request-ID": randomUUID(),
+  "NHSD-Supplier-ID": SUPPLIERID,
+  "Content-Type": "application/vnd.api+json",
+  "X-Correlation-ID": randomUUID(),
+  "x-amz-meta-sha256": "xyz123sha256hash",
+};
+
 export interface RequestSandBoxHeaders {
   "X-Request-ID": string;
   "Content-Type": string;

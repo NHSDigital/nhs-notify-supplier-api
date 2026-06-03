@@ -21,6 +21,7 @@ jest.mock("@aws-sdk/client-s3", () => {
   jest.requireActual("@aws-sdk/client-s3");
   return {
     GetObjectCommand: jest.fn().mockImplementation((input) => ({ input })),
+    HeadObjectCommand: jest.fn().mockImplementation((input) => ({ input })),
   };
 });
 
@@ -169,10 +170,14 @@ describe("getLetterDataUrl function", () => {
   };
   const deps: Deps = { s3Client, letterRepo, logger, env } as Deps;
 
-  it("should return pre signed url successfully", async () => {
+  it("should return pre signed url and sha256 metadata successfully", async () => {
     mockedGetSignedUrl.mockResolvedValue("https://somePreSignedUrl.com");
+    (s3Client.send as jest.Mock).mockResolvedValue({
+      Metadata: { sha256hash: "abc123sha256" },
+    });
 
     const result = await getLetterDataUrl("supplier1", "letter1", deps);
+    expect(s3Client.send).toHaveBeenCalledTimes(1);
 
     const expectedCommandInput = {
       Bucket: "letterDataBucket",
@@ -183,7 +188,24 @@ describe("getLetterDataUrl function", () => {
       { input: expectedCommandInput },
       { expiresIn: 60 },
     );
-    expect(result).toEqual("https://somePreSignedUrl.com");
+    expect(result).toEqual({
+      presignedUrl: "https://somePreSignedUrl.com",
+      sha256hash: "abc123sha256",
+    });
+  });
+
+  it("should return undefined sha256 when metadata is absent", async () => {
+    mockedGetSignedUrl.mockResolvedValue("https://somePreSignedUrl.com");
+    (s3Client.send as jest.Mock).mockResolvedValue({
+      Metadata: {},
+    });
+
+    const result = await getLetterDataUrl("supplier1", "letter1", deps);
+
+    expect(result).toEqual({
+      presignedUrl: "https://somePreSignedUrl.com",
+      sha256hash: undefined,
+    });
   });
 
   it("should throw notFoundError when letter does not exist", async () => {

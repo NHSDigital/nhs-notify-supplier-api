@@ -2,6 +2,10 @@ description: See Other
 headers:
   Location:
     $ref: "../responseHeaders/getDataLocation.yml"
+  X-Notify-File-Sha256:
+    description: SHA-256 hash of the file from S3 user metadata key sha256.
+    schema:
+      type: string
   X-Request-ID:
     $ref: "../responseHeaders/xRequestId.yml"
   X-Correlation-ID:

@@ -5,7 +5,11 @@ import {
   PendingLetterBase,
 } from "@internal/datastore";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import {
+  GetObjectCommand,
+  HeadObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
 import { SendMessageBatchCommand } from "@aws-sdk/client-sqs";
 import LetterNotFoundError from "@internal/datastore/src/errors/letter-not-found-error";
 import NotFoundError from "../errors/not-found-error";
@@ -13,21 +17,44 @@ import { UpdateLetterCommand } from "../contracts/letters";
 import { ApiErrorDetail } from "../contracts/errors";
 import { Deps } from "../config/deps";
 
-async function getDownloadUrl(
-  s3Uri: string,
-  s3Client: S3Client,
-  expiry: number,
-) {
+export type LetterDataDownloadDetails = {
+  presignedUrl: string;
+  sha256hash?: string;
+};
+
+function parseS3Uri(s3Uri: string) {
   const url = new URL(s3Uri); // works for s3:// URIs
   const bucket = url.hostname;
   const key = url.pathname.slice(1); // remove leading '/'
 
-  const command = new GetObjectCommand({
+  return { bucket, key };
+}
+
+async function getDownloadDetails(
+  s3Uri: string,
+  s3Client: S3Client,
+  expiry: number,
+): Promise<LetterDataDownloadDetails> {
+  const { bucket, key } = parseS3Uri(s3Uri);
+
+  const getObjectCommand = new GetObjectCommand({
+    Bucket: bucket,
+    Key: key,
+  });
+  const headObjectCommand = new HeadObjectCommand({
     Bucket: bucket,
     Key: key,
   });
 
-  return getSignedUrl(s3Client, command, { expiresIn: expiry });
+  const [presignedUrl, headObject] = await Promise.all([
+    getSignedUrl(s3Client, getObjectCommand, { expiresIn: expiry }),
+    s3Client.send(headObjectCommand),
+  ]);
+
+  return {
+    presignedUrl,
+    sha256hash: headObject.Metadata?.sha256hash,
+  };
 }
 
 function mapPendingLetterToLetterBase(pending: PendingLetterBase): LetterBase {
@@ -85,12 +112,12 @@ export const getLetterDataUrl = async (
   supplierId: string,
   letterId: string,
   deps: Deps,
-): Promise<string> => {
+): Promise<LetterDataDownloadDetails> => {
   let letter;
 
   try {
     letter = await deps.letterRepo.getLetterById(supplierId, letterId);
-    return await getDownloadUrl(
+    return await getDownloadDetails(
       letter.url,
       deps.s3Client,
       deps.env.DOWNLOAD_URL_TTL_SECONDS,

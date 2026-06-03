@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { createHash } from "node:crypto";
 import getRestApiGatewayBaseUrl from "../../helpers/aws-gateway-helper";
 import {
   createTestData,
@@ -39,8 +40,16 @@ test.describe("API Gateway Tests to Verify Get Letter PDF Endpoint", () => {
     );
 
     expect(response.status()).toBe(200);
-    const responseBody = await response.text();
-    expect(responseBody).toContain("PDF");
+    const responseMetadataSha256 = response.headers()["x-amz-meta-sha256"];
+    expect(responseMetadataSha256).toBeDefined();
+
+    const responseBodyBuffer = await response.body();
+    expect(responseBodyBuffer.toString("utf8")).toContain("PDF");
+
+    const downloadedPdfSha256 = createHash("sha256")
+      .update(responseBodyBuffer)
+      .digest("hex");
+    expect(downloadedPdfSha256).toBe(responseMetadataSha256);
 
     async function fetchUrl(url: string) {
       const res = await request.get(url, { headers });

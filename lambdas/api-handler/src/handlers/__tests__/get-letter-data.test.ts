@@ -46,9 +46,43 @@ describe("API Lambda handler", () => {
   it("returns 303 Found with a pre signed url", async () => {
     const mockedGetLetterDataUrlService =
       letterService.getLetterDataUrl as jest.Mock;
-    mockedGetLetterDataUrlService.mockResolvedValue(
-      "https://somePreSignedUrl.com",
-    );
+    mockedGetLetterDataUrlService.mockResolvedValue({
+      presignedUrl: "https://somePreSignedUrl.com",
+      sha256hash: "abc123sha256",
+    });
+
+    const event = makeApiGwEvent({
+      path: "/letters/letter1/data",
+      headers: {
+        "nhsd-supplier-id": "supplier1",
+        "nhsd-correlation-id": "correlationId",
+        "x-request-id": "requestId",
+      },
+      pathParameters: { id: "id1" },
+    });
+    const context = mockDeep<Context>();
+    const callback = jest.fn();
+
+    const getLetterDataHandler = createGetLetterDataHandler(mockedDeps);
+    const result = await getLetterDataHandler(event, context, callback);
+
+    expect(result).toEqual({
+      statusCode: 303,
+      headers: {
+        Location: "https://somePreSignedUrl.com",
+        "X-Notify-File-Sha256": "abc123sha256",
+      },
+      body: "",
+    });
+  });
+
+  it("returns 303 without sha256 header when metadata is absent", async () => {
+    const mockedGetLetterDataUrlService =
+      letterService.getLetterDataUrl as jest.Mock;
+    mockedGetLetterDataUrlService.mockResolvedValue({
+      presignedUrl: "https://somePreSignedUrl.com",
+      sha256hash: undefined,
+    });
 
     const event = makeApiGwEvent({
       path: "/letters/letter1/data",

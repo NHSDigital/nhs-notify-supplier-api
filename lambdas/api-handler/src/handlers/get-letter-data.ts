@@ -37,7 +37,11 @@ export default function createGetLetterDataHandler(
           ),
         );
 
-        const presignedUrl = await getLetterDataUrl(supplierId, letterId, deps);
+        const downloadDetails = await getLetterDataUrl(
+          supplierId,
+          letterId,
+          deps,
+        );
 
         deps.logger.info({
           description: "Generated presigned URL",
@@ -56,7 +60,10 @@ export default function createGetLetterDataHandler(
         return {
           statusCode: 303,
           headers: {
-            Location: presignedUrl,
+            Location: downloadDetails.presignedUrl,
+            ...(downloadDetails.sha256hash
+              ? { "X-Notify-File-Sha256": downloadDetails.sha256hash }
+              : {}),
           },
           body: "",
         };

@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { createHash } from "node:crypto";
 import {
   SUPPLIER_API_URL_SANDBOX,
   SUPPLIER_LETTERS,
@@ -6,6 +7,7 @@ import {
 import {
   RequestSandBoxHeaders,
   sandBoxHeader,
+  sandBoxHeaderWithHash,
 } from "../constants/request-headers";
 
 test.describe("Sandbox Tests To Get Letter Data", () => {
@@ -13,7 +15,7 @@ test.describe("Sandbox Tests To Get Letter Data", () => {
     request,
   }) => {
     const id = "2AL5eYSWGzCHlGmzNxuqVusPxDg";
-    const headers: RequestSandBoxHeaders = sandBoxHeader;
+    const headers: RequestSandBoxHeaders = sandBoxHeaderWithHash;
     const response = await request.get(
       `${SUPPLIER_API_URL_SANDBOX}/${SUPPLIER_LETTERS}/${id}/data`,
       {
@@ -23,6 +25,15 @@ test.describe("Sandbox Tests To Get Letter Data", () => {
 
     expect(response.status()).toBe(200);
     expect(response.headers()["content-type"]).toMatch("application/pdf");
+
+    const responseBodyBuffer = await response.body();
+    const computedSha256 = createHash("sha256")
+      .update(responseBodyBuffer)
+      .digest("hex");
+
+    const expectedSha256 = sandBoxHeaderWithHash["x-amz-meta-sha256"];
+    expect(expectedSha256).toBeDefined();
+    expect(computedSha256).toBe(expectedSha256); // Will need to change the header to include the actual hash of the sandbox pdf for this to work
   });
   test(`Get Letter Data endpoint returns 404 for invalid id`, async ({
     request,
