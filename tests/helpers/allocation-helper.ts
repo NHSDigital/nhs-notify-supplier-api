@@ -405,10 +405,7 @@ export async function updateVolumeGroupData(
   );
 }
 
-export async function getVolumeGroupData(volumeGroupId: string): Promise<{
-  originalStartDate: string;
-  originalEndDate: string;
-}> {
+export async function getVolumeGroupData(volumeGroupId: string): Promise<any> {
   const { Item } = await docClient.send(
     new GetCommand({
       TableName: getSupplierConfigTableName(),
@@ -425,10 +422,7 @@ export async function getVolumeGroupData(volumeGroupId: string): Promise<{
     );
   }
 
-  return {
-    originalEndDate: Item.endDate,
-    originalStartDate: Item.startDate,
-  };
+  return Item;
 }
 
 export async function updateSupplierAllocation(
@@ -460,7 +454,7 @@ export async function updateSupplierAllocation(
   );
 }
 
-export async function updateLetterVariantConfig(
+export async function updateLetterVariantPackSpecs(
   letterVariantId: string,
   packSpecificationIds: string[],
 ) {

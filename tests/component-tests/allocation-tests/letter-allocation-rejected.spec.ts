@@ -6,7 +6,7 @@ import {
   getAllocationLogForDomainId,
   getVariantsForAllocation,
   getVolumeGroupData,
-  updateLetterVariantConfig,
+  updateLetterVariantPackSpecs,
   updateVolumeGroupData,
 } from "tests/helpers/allocation-helper";
 import { createPreparedV1Event } from "tests/helpers/event-fixtures";
@@ -63,7 +63,7 @@ test.describe("Allocator Rejected Allocation Tests", () => {
       });
 
       if (letterVariantMapping === 7) {
-        await updateLetterVariantConfig(letterVariant, [""]);
+        await updateLetterVariantPackSpecs(letterVariant, [""]);
       }
 
       const response = await sendSnsEvent(preparedEvent);
@@ -104,7 +104,9 @@ test.describe("Allocator Rejected Allocation Tests", () => {
           expect(lettersInDb.reasonText).toContain(
             `No pack specification found for id`,
           );
-          await updateLetterVariantConfig(letterVariant, ["notify-c5-colour"]); // update back to valid config for other tests
+          await updateLetterVariantPackSpecs(letterVariant, [
+            "notify-c5-colour",
+          ]); // update back to valid config for other tests
           break;
         }
         default: {
@@ -133,8 +135,9 @@ test.describe("Allocator Rejected Allocation Tests", () => {
       const letterVariant = getVariantsForAllocation(8);
       logger.info(`Testing volumeGroup with ${fieldToUpdate}: ${domainId}`);
 
-      const { originalEndDate, originalStartDate } =
-        await getVolumeGroupData(volumeGroupId);
+      const volumeGroupData = await getVolumeGroupData(volumeGroupId);
+      const originalStartDate = volumeGroupData.startDate;
+      const originalEndDate = volumeGroupData.endDate;
 
       const [futureStartDate] = new Date(Date.now() + 24 * 60 * 60 * 1000)
         .toISOString()
