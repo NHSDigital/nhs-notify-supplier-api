@@ -65,8 +65,9 @@ describe("uploadFile", () => {
       Body: Buffer.from("fake-pdf-bytes"),
       ContentType: "application/pdf",
       Metadata: {
-        "sha256hash": "50af8d443ccf8b2777b72a9169cd0665ef4be5335b8f53543556fa0d320b135b",
-      }
+        sha256hash:
+          "50af8d443ccf8b2777b72a9169cd0665ef4be5335b8f53543556fa0d320b135b",
+      },
     });
   });
 
