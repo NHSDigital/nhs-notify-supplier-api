@@ -55,7 +55,6 @@ async function callPatchLetter(
                       specificationIdMapping,
                       letter.attributes?.specificationId,
                     ),
-                    specificationId: letter.attributes?.specificationId,
                   },
                 },
               }),
@@ -127,7 +126,7 @@ async function callGetLetters(
         Payload: Buffer.from(
           JSON.stringify({
             headers,
-            queryStringParameters: { limit: String(limitValue) },
+            queryStringParameters: { limit: limitValue },
             requestContext: {},
           }),
         ),
