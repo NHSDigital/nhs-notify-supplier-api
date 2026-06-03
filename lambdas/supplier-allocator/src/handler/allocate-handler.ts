@@ -268,8 +268,8 @@ async function saveAllocations(
 }
 
 type SupplierAllocationResult = {
-  supplier: string;
   priority: string;
+  supplier: string;
 };
 
 async function processSupplierAllocation(
@@ -331,13 +331,13 @@ async function processSupplierAllocation(
     }),
   );
   return {
-    supplier,
     priority,
+    supplier,
   };
 }
 
 export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
-  const getSupplierIdempotently = (
+  const createGetSupplierIdempotently = (
     perAllocationSuccess: AllocationMetrics,
     perAllocationFailure: AllocationMetrics,
     volumeGroupAllocations: VolumeGroupAllocation,
@@ -363,8 +363,8 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
     const perAllocationFailure: AllocationMetrics = new Map();
     const volumeGroupAllocations: VolumeGroupAllocation = new Map();
 
-    // create an idempotent function bound to this handler's batchItemFailures
-    const boundGetSupplierIdempotently = getSupplierIdempotently(
+    // create an idempotent function bound to this handler's global variables to track metrics and allocations
+    const getSupplierIdempotently = createGetSupplierIdempotently(
       perAllocationSuccess,
       perAllocationFailure,
       volumeGroupAllocations,
@@ -387,10 +387,9 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
         idempotencyConfig.registerLambdaContext(context);
 
         const supplierAllocationResult: SupplierAllocationResult =
-          await boundGetSupplierIdempotently(letterEvent, deps);
+          await getSupplierIdempotently(letterEvent, deps);
 
-        supplier = supplierAllocationResult.supplier;
-        priority = supplierAllocationResult.priority;
+        ({ priority, supplier } = supplierAllocationResult);
       } catch (error) {
         deps.logger.error({
           description: "Error processing allocation of record",

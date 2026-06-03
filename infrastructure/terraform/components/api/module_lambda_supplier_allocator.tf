@@ -106,7 +106,8 @@ data "aws_iam_policy_document" "supplier_allocator_lambda" {
       "dynamodb:GetItem",
       "dynamodb:Query",
       "dynamodb:PutItem",
-      "dynamodb:UpdateItem"
+      "dynamodb:UpdateItem",
+      "dynamodb:DeleteItem"
     ]
 
     resources = [

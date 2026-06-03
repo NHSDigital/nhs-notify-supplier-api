@@ -27,15 +27,15 @@ const localConfig: PlaywrightTestConfig = {
       dependencies: ["apiGateway-tests"],
     },
     {
+      name: "allocation-tests",
+      testDir: path.resolve(__dirname, "../component-tests/allocation-tests"),
+      testMatch: "**/*.spec.ts",
+    },
+    {
       name: "letterQueue-tests", // Needs to run last as tests visibility timeout and can impact other tests if run before them
       testDir: path.resolve(__dirname, "../component-tests/letterQueue-tests"),
       testMatch: "**/*.spec.ts",
       dependencies: ["events-tests"],
-    },
-    {
-      name: "allocation-tests",
-      testDir: path.resolve(__dirname, "../component-tests/allocation-tests"),
-      testMatch: "**/*.spec.ts",
     },
   ],
 };
