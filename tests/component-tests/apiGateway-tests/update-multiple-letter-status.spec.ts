@@ -13,7 +13,6 @@ import {
 } from "./testCases/update-multiple-letter-status";
 import {
   createTestData,
-  getLettersBySupplier,
   waitForLetterStatus,
 } from "../../helpers/generate-fetch-test-data";
 
@@ -27,24 +26,21 @@ test.describe("API Gateway Tests to Verify post Status Endpoint", () => {
   test(`post /letters returns 202 and status is updated for multiple letters`, async ({
     request,
   }) => {
-    await createTestData(SUPPLIERID, 4);
-    const letters = await getLettersBySupplier(SUPPLIERID, "PENDING", 4);
-
-    if (!letters?.length) {
-      test.fail(true, `No PENDING letters found for supplier ${SUPPLIERID}`);
-      return;
-    }
+    const letterIds: string[] = await createTestData(SUPPLIERID, 4);
+    const createdLetters = await Promise.all(
+      letterIds.map((id) => waitForLetterStatus(SUPPLIERID, id, "PENDING")),
+    );
 
     const headers = postLettersRequestHeaders();
     const updatesById = {
-      [letters[0].id]: { status: "ACCEPTED" },
-      [letters[1].id]: {
+      [createdLetters[0].id]: { status: "ACCEPTED" },
+      [createdLetters[1].id]: {
         status: "REJECTED",
         reasonCode: "R01",
         reasonText: "Test Reason",
       },
-      [letters[2].id]: { status: "PRINTED" },
-      [letters[3].id]: { status: "CANCELLED" },
+      [createdLetters[2].id]: { status: "PRINTED" },
+      [createdLetters[3].id]: { status: "CANCELLED" },
     };
 
     const body = postValidRequestBody(updatesById);
@@ -71,16 +67,13 @@ test.describe("API Gateway Tests to Verify post Status Endpoint", () => {
   test(`Post /letters returns 400 if request has invalid status`, async ({
     request,
   }) => {
-    await createTestData(SUPPLIERID, 2);
-    const letters = await getLettersBySupplier(SUPPLIERID, "PENDING", 2);
-
-    if (!letters?.length) {
-      test.fail(true, `No PENDING letters found for supplier ${SUPPLIERID}`);
-      return;
-    }
+    const letterIds: string[] = await createTestData(SUPPLIERID, 2);
+    const createdLetters = await Promise.all(
+      letterIds.map((id) => waitForLetterStatus(SUPPLIERID, id, "PENDING")),
+    );
 
     const headers = postLettersRequestHeaders();
-    const body = postInvalidStatusRequestBody(letters);
+    const body = postInvalidStatusRequestBody(createdLetters);
 
     const response = await request.post(`${baseUrl}/${SUPPLIER_LETTERS}`, {
       headers,
@@ -96,16 +89,13 @@ test.describe("API Gateway Tests to Verify post Status Endpoint", () => {
   test(`Post /letters returns 400 if request has duplicate id`, async ({
     request,
   }) => {
-    await createTestData(SUPPLIERID, 2);
-    const letters = await getLettersBySupplier(SUPPLIERID, "PENDING", 2);
-
-    if (!letters?.length) {
-      test.fail(true, `No PENDING letters found for supplier ${SUPPLIERID}`);
-      return;
-    }
+    const letterIds: string[] = await createTestData(SUPPLIERID, 2);
+    const createdLetters = await Promise.all(
+      letterIds.map((id) => waitForLetterStatus(SUPPLIERID, id, "PENDING")),
+    );
 
     const headers = postLettersRequestHeaders();
-    const body = postDuplicateIDRequestBody(letters);
+    const body = postDuplicateIDRequestBody(createdLetters);
 
     const response = await request.post(`${baseUrl}/${SUPPLIER_LETTERS}`, {
       headers,
@@ -121,24 +111,21 @@ test.describe("API Gateway Tests to Verify post Status Endpoint", () => {
   test(`Post /letters returns 500 if request has invalid header`, async ({
     request,
   }) => {
-    await createTestData(SUPPLIERID, 4);
-    const letters = await getLettersBySupplier(SUPPLIERID, "PENDING", 4);
-
-    if (!letters?.length) {
-      test.fail(true, `No PENDING letters found for supplier ${SUPPLIERID}`);
-      return;
-    }
+    const letterIds: string[] = await createTestData(SUPPLIERID, 4);
+    const createdLetters = await Promise.all(
+      letterIds.map((id) => waitForLetterStatus(SUPPLIERID, id, "PENDING")),
+    );
 
     const headers = postLettersInvalidRequestHeaders();
     const body = postValidRequestBody({
-      [letters[0].id]: { status: "ACCEPTED" },
-      [letters[1].id]: {
+      [createdLetters[0].id]: { status: "ACCEPTED" },
+      [createdLetters[1].id]: {
         status: "REJECTED",
         reasonCode: "R01",
         reasonText: "Test Reason",
       },
-      [letters[2].id]: { status: "PRINTED" },
-      [letters[3].id]: { status: "CANCELLED" },
+      [createdLetters[2].id]: { status: "PRINTED" },
+      [createdLetters[3].id]: { status: "CANCELLED" },
     });
 
     const response = await request.post(`${baseUrl}/${SUPPLIER_LETTERS}`, {
