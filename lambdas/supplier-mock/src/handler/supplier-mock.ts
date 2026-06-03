@@ -37,12 +37,6 @@ async function callPatchLetter(
 ): Promise<void> {
   for (const letter of letters) {
     let patchInvokeResponse;
-    // Remove this log before merging to main.
-    deps.logger.info({
-      letterId: letter.id,
-      letterStatus: letter.attributes?.status,
-      specificationId: letter.attributes?.specificationId,
-    });
     try {
       patchInvokeResponse = await deps.lambdaClient.send(
         new InvokeCommand({
