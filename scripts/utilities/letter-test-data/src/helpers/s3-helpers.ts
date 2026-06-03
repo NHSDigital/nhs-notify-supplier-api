@@ -13,7 +13,7 @@ export default async function uploadFile(
     const s3 = new S3Client();
     const filePath = path.join(__dirname, "..", "test-letters", sourceFilename);
     const fileContent = readFileSync(filePath);
-    const hash = createHash('sha256').update(fileContent).digest('hex');
+    const hash = createHash("sha256").update(fileContent).digest("hex");
 
     const uploadParams = {
       Bucket: bucketName,
