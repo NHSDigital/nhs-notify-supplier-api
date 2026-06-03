@@ -28,7 +28,7 @@ function makeDeps(
     logger: { error: jest.fn(), info: jest.fn() } as unknown as pino.Logger,
     lambdaClient: {
       send: jest.fn(),
-    } as unknown as jest.Mocket<LambdaClient>,
+    } as unknown as jest.Mocked<LambdaClient>,
     parameterStoreConfig,
   };
 }
@@ -96,7 +96,7 @@ describe("Supplier Mock Lambda", () => {
     const deps = makeDeps(
       Promise.resolve(
         configOutput(
-          '{"limit":"250","supplier_id":"SupplierA","specification_id_mapping":{"spec-1":"FAILED"}}',
+          '{"limit":"100","supplier_id":"SupplierA","specification_id_mapping":{"spec-1":"FAILED"}}',
         ),
       ),
     );
@@ -139,7 +139,7 @@ describe("Supplier Mock Lambda", () => {
     const deps = makeDeps(
       Promise.resolve(
         configOutput(
-          '{"limit":"250","supplier_id":"SupplierA","specification_id_mapping":{"spec-1":""}}',
+          '{"limit":"100","supplier_id":"SupplierA","specification_id_mapping":{"spec-1":""}}',
         ),
       ),
     );
@@ -182,7 +182,7 @@ describe("Supplier Mock Lambda", () => {
     const deps = makeDeps(
       Promise.resolve(
         configOutput(
-          '{"limit":"250","supplier_id":"SupplierA","specification_id_mapping":{"spec-1":123}}',
+          '{"limit":"100","supplier_id":"SupplierA","specification_id_mapping":{"spec-1":123}}',
         ),
       ),
     );
@@ -222,7 +222,13 @@ describe("Supplier Mock Lambda", () => {
   });
 
   it("throws when required env var is missing", async () => {
-    const deps = makeDeps();
+    const deps = makeDeps(
+      Promise.resolve(
+        configOutput(
+          '{"limit":"100","supplier_id":"SupplierA","specification_id_mapping":{"spec-1":123}}',
+        ),
+      ),
+    );
     deps.env.GET_LETTERS_FUNCTION_NAME = undefined;
 
     const handler = createHandler(deps);
@@ -232,7 +238,13 @@ describe("Supplier Mock Lambda", () => {
   });
 
   it("throws when patch letter function env var is missing", async () => {
-    const deps = makeDeps();
+    const deps = makeDeps(
+      Promise.resolve(
+        configOutput(
+          '{"limit":"100","supplier_id":"SupplierA","specification_id_mapping":{"spec-1":123}}',
+        ),
+      ),
+    );
     deps.env.PATCH_LETTER_FUNCTION_NAME = undefined;
 
     const handler = createHandler(deps);
@@ -242,7 +254,13 @@ describe("Supplier Mock Lambda", () => {
   });
 
   it("throws when config parameter env var is missing", async () => {
-    const deps = makeDeps();
+    const deps = makeDeps(
+      Promise.resolve(
+        configOutput(
+          '{"limit":"100","supplier_id":"SupplierA","specification_id_mapping":{"spec-1":123}}',
+        ),
+      ),
+    );
     deps.env.SUPPLIER_MOCK_CONFIG_PARAM_NAME = undefined;
 
     const handler = createHandler(deps);
