@@ -1,26 +1,30 @@
-import { GetParameterCommand } from "@aws-sdk/client-ssm";
 import { InvokeCommand } from "@aws-sdk/client-lambda";
 import { Deps } from "./deps";
+import { SupplierMockConfig } from "./types";
 
 export default function createHandler(deps: Deps) {
   return async () => {
     deps.logger.info("Starting supplier mock lambda");
     checkDepsAreSet(deps);
-    const limitValue = await parseLimitParameter(deps);
-    const supplierId = await parseSupplierId(deps);
+    const config = await parseSupplierMockConfig(deps);
     const headers = {
-      "nhsd-supplier-id": supplierId,
+      "nhsd-supplier-id": config.supplierId,
       "nhsd-correlation-id": "12345",
       "x-request-id": "requestId1",
     };
-    const letters = await callGetLetters(deps, headers, limitValue);
+    const letters = await callGetLetters(deps, headers, config.limit);
     deps.logger.info(
       {
         lettersCount: letters.length,
       },
       "Forwarding letters to patch_letter lambda",
     );
-    await callPatchLetter(deps, headers, letters);
+    await callPatchLetter(
+      deps,
+      headers,
+      letters,
+      config.specificationIdMapping,
+    );
     deps.logger.info("Finished supplier mock lambda");
   };
 }
@@ -29,9 +33,11 @@ async function callPatchLetter(
   deps: Deps,
   headers: Record<string, string>,
   letters: any[],
+  specificationIdMapping: Map<string, string>,
 ): Promise<void> {
   for (const letter of letters) {
     let patchInvokeResponse;
+    // Remove this log before merging to main.
     deps.logger.info({
       letterId: letter.id,
       letterStatus: letter.attributes?.status,
@@ -51,7 +57,11 @@ async function callPatchLetter(
                   id: letter.id,
                   type: "Letter",
                   attributes: {
-                    status: letter.attributes?.status,
+                    status: getUpdateStatus(
+                      specificationIdMapping,
+                      letter.attributes?.specificationId,
+                    ),
+                    specificationId: letter.attributes?.specificationId,
                   },
                 },
               }),
@@ -92,6 +102,18 @@ async function callPatchLetter(
       );
     }
   }
+}
+
+function getUpdateStatus(
+  specificationIdMapping: Map<string, string>,
+  specificationId: unknown,
+): string {
+  if (typeof specificationId !== "string") {
+    return "ACCEPTED";
+  }
+
+  const mappedStatus = specificationIdMapping.get(specificationId);
+  return mappedStatus || "ACCEPTED";
 }
 
 async function callGetLetters(
@@ -144,60 +166,70 @@ async function callGetLetters(
   return Array.isArray(getLettersBody?.data) ? getLettersBody.data : [];
 }
 
-async function parseSupplierId(deps: Deps): Promise<string> {
+async function parseSupplierMockConfig(
+  deps: Deps,
+): Promise<SupplierMockConfig> {
   try {
-    const supplierId = await deps.ssmClient.send(
-      new GetParameterCommand({
-        Name: deps.env.SUPPLIER_MOCK_SUPPLIER_ID,
-      }),
-    );
-    const supplierIdValue = supplierId.Parameter?.Value;
+    const configParameter = await deps.parameterStoreConfig;
+    const configValue = configParameter.Parameter?.Value;
+    const parsedConfig = configValue ? JSON.parse(configValue) : {};
+    const limit = getLimit(parsedConfig.limit);
+    const supplierId = getSupplierId(parsedConfig.supplier_id);
+
     deps.logger.info(
       {
-        supplierIdValue,
+        limit,
+        supplierId,
       },
-      "Parsed supplier id from Parameter Store",
+      "Parsed supplier mock config from Parameter Store",
     );
-    return supplierIdValue || "TestSupplier1";
+
+    return {
+      limit,
+      supplierId,
+      specificationIdMapping: getSpecificationIdMapping(
+        parsedConfig.specification_id_mapping,
+      ),
+    };
   } catch (error) {
     deps.logger.error(
       {
         error,
-        parameterName: deps.env.SUPPLIER_MOCK_SUPPLIER_ID,
+        parameterName: deps.env.SUPPLIER_MOCK_CONFIG_PARAM_NAME,
       },
-      "Failed to read supplier id from Parameter Store",
+      "Failed to read supplier mock config from Parameter Store",
     );
     throw error;
   }
 }
 
-async function parseLimitParameter(deps: Deps): Promise<string> {
-  try {
-    const limitParameter = await deps.ssmClient.send(
-      new GetParameterCommand({
-        Name: deps.env.SUPPLIER_MOCK_GET_LETTERS_LIMIT_PARAM_NAME,
-      }),
-    );
-    const limitValue = limitParameter.Parameter?.Value;
-    deps.logger.info(
-      {
-        limitValue,
-      },
-      "Parsed get letters limit from Parameter Store",
-    );
-    return limitValue && Number.parseInt(limitValue, 10) > 1
-      ? limitValue
-      : "100";
-  } catch (error) {
-    deps.logger.error(
-      {
-        error,
-        parameterName: deps.env.SUPPLIER_MOCK_GET_LETTERS_LIMIT_PARAM_NAME,
-      },
-      "Failed to read get letters limit from Parameter Store",
-    );
-    throw error;
+function getLimit(limitValue: unknown): string {
+  if (typeof limitValue !== "string") {
+    return "100";
   }
+
+  return Number.parseInt(limitValue, 10) > 1 ? limitValue : "100";
+}
+
+function getSupplierId(supplierIdValue: unknown): string {
+  return typeof supplierIdValue === "string" && supplierIdValue !== ""
+    ? supplierIdValue
+    : "TestSupplier1";
+}
+
+function getSpecificationIdMapping(mappingValue: unknown): Map<string, string> {
+  if (!mappingValue || typeof mappingValue !== "object") {
+    return new Map<string, string>();
+  }
+
+  const mapping = new Map<string, string>();
+  for (const [key, value] of Object.entries(mappingValue)) {
+    if (typeof key === "string" && typeof value === "string") {
+      mapping.set(key, value);
+    }
+  }
+
+  return mapping;
 }
 
 function checkDepsAreSet(deps: Deps) {
@@ -207,12 +239,7 @@ function checkDepsAreSet(deps: Deps) {
   if (!deps.env.PATCH_LETTER_FUNCTION_NAME) {
     throw new Error("PATCH_LETTER_FUNCTION_NAME is not configured");
   }
-  if (!deps.env.SUPPLIER_MOCK_GET_LETTERS_LIMIT_PARAM_NAME) {
-    throw new Error(
-      "SUPPLIER_MOCK_GET_LETTERS_LIMIT_PARAM_NAME is not configured",
-    );
-  }
-  if (!deps.env.SUPPLIER_MOCK_SUPPLIER_ID) {
-    throw new Error("SUPPLIER_MOCK_SUPPLIER_ID is not configured");
+  if (!deps.env.SUPPLIER_MOCK_CONFIG_PARAM_NAME) {
+    throw new Error("SUPPLIER_MOCK_CONFIG_PARAM_NAME is not configured");
   }
 }

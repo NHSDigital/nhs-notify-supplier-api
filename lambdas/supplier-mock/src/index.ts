@@ -1,5 +1,5 @@
-import { createDependenciesContainer } from "./deps";
-import createHandler from "./supplier-mock";
+import { createDependenciesContainer } from "./handler/deps";
+import createHandler from "./handler/supplier-mock";
 
 const containerPromise = createDependenciesContainer();
 

@@ -36,32 +36,25 @@ module "supplier_mock" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
-    ENVIRONMENT                                = var.environment
-    GET_LETTERS_FUNCTION_NAME                  = module.get_letters.function_name
-    PATCH_LETTER_FUNCTION_NAME                 = module.patch_letter.function_name
-    SUPPLIER_MOCK_GET_LETTERS_LIMIT_PARAM_NAME = aws_ssm_parameter.supplier_mock_get_letters_limit[0].name
-    SUPPLIER_MOCK_SUPPLIER_ID                  = aws_ssm_parameter.supplier_mock_supplier_id[0].name
+    ENVIRONMENT                     = var.environment
+    GET_LETTERS_FUNCTION_NAME       = module.get_letters.function_name
+    PATCH_LETTER_FUNCTION_NAME      = module.patch_letter.function_name
+    SUPPLIER_MOCK_CONFIG_PARAM_NAME = aws_ssm_parameter.supplier_mock_config[0].name
   })
 }
 
-resource "aws_ssm_parameter" "supplier_mock_get_letters_limit" {
+resource "aws_ssm_parameter" "supplier_mock_config" {
   count       = var.deploy_supplier_mock_scheduler ? 1 : 0
-  name        = format("/nhs/supapi/supplier-mock/%s/get-letters-limit", var.environment)
-  description = "Default get_letters limit for supplier mock lambda"
+  name        = format("/nhs/supapi/%s/supplier-mock/config", var.environment)
+  description = "JSON object containing supplier mock config for supplierID, getLetters limit, specificationId mapping, etc."
   type        = "String"
-  value       = "100"
-
-  lifecycle {
-    ignore_changes = [value]
-  }
-}
-
-resource "aws_ssm_parameter" "supplier_mock_supplier_id" {
-  count       = var.deploy_supplier_mock_scheduler ? 1 : 0
-  name        = format("/nhs/supapi/supplier-mock/%s/supplier-id", var.environment)
-  description = "Supplier ID to be used by the supplier mock lambda"
-  type        = "String"
-  value       = "TestSupplier1"
+  value = jsonencode({
+    limit       = "100"
+    supplier_id = "TestSupplier1"
+    specification_id_mapping = {
+      "test-specification-id-1" = "ACCEPTED"
+    }
+  })
 
   lifecycle {
     ignore_changes = [value]
@@ -98,7 +91,7 @@ data "aws_iam_policy_document" "supplier_mock_lambda" {
   }
 
   statement {
-    sid    = "AllowReadSupplierMockLimitParameter"
+    sid    = "AllowReadSupplierMockConfigParameter"
     effect = "Allow"
 
     actions = [
@@ -106,8 +99,7 @@ data "aws_iam_policy_document" "supplier_mock_lambda" {
     ]
 
     resources = [
-      aws_ssm_parameter.supplier_mock_get_letters_limit[0].arn,
-      aws_ssm_parameter.supplier_mock_supplier_id[0].arn
+      aws_ssm_parameter.supplier_mock_config[0].arn
     ]
   }
 }

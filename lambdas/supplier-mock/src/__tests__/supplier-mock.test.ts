@@ -1,32 +1,36 @@
-import { InvokeCommand } from "@aws-sdk/client-lambda";
-import { GetParameterCommand } from "@aws-sdk/client-ssm";
-import createHandler from "../supplier-mock";
-import { Deps } from "../deps";
+import { InvokeCommand, LambdaClient } from "@aws-sdk/client-lambda";
+import { GetParameterCommandOutput } from "@aws-sdk/client-ssm";
+import pino from "pino";
+import createHandler from "../handler/supplier-mock";
+import { Deps } from "../handler/deps";
 
-function makeDeps(): Deps {
+function configOutput(value?: string): GetParameterCommandOutput {
+  if (value === undefined) {
+    return { Parameter: {} } as GetParameterCommandOutput;
+  }
+
+  return {
+    Parameter: {
+      Value: value,
+    },
+  } as GetParameterCommandOutput;
+}
+
+function makeDeps(
+  parameterStoreConfig: Promise<GetParameterCommandOutput>,
+): Deps {
   return {
     env: {
       GET_LETTERS_FUNCTION_NAME: "get-letters-fn",
       PATCH_LETTER_FUNCTION_NAME: "patch-letter-fn",
-      SUPPLIER_MOCK_GET_LETTERS_LIMIT_PARAM_NAME:
-        "/supapi/supplier-mock/get-letters-limit",
-      SUPPLIER_MOCK_SUPPLIER_ID: "/supapi/supplier-mock/supplier-id",
+      SUPPLIER_MOCK_CONFIG_PARAM_NAME: "/supapi/supplier-mock/config",
     },
-    logger: {
-      info: jest.fn(),
-      error: jest.fn(),
-    } as unknown as Deps["logger"],
+    logger: { error: jest.fn(), info: jest.fn() } as unknown as pino.Logger,
     lambdaClient: {
       send: jest.fn(),
-    } as unknown as Deps["lambdaClient"],
-    ssmClient: {
-      send: jest.fn(),
-    } as unknown as Deps["ssmClient"],
+    } as unknown as jest.Mocket<LambdaClient>,
+    parameterStoreConfig,
   };
-}
-
-function getSsmSendMock(deps: Deps): jest.Mock {
-  return deps.ssmClient.send as unknown as jest.Mock;
 }
 
 function getLambdaSendMock(deps: Deps): jest.Mock {
@@ -43,10 +47,13 @@ describe("Supplier Mock Lambda", () => {
   });
 
   it("invokes get letters and patch letter successfully", async () => {
-    const deps = makeDeps();
-    const ssmSend = getSsmSendMock(deps)
-      .mockResolvedValueOnce({ Parameter: { Value: "250" } })
-      .mockResolvedValueOnce({ Parameter: { Value: "SupplierA" } });
+    const deps = makeDeps(
+      Promise.resolve(
+        configOutput(
+          '{"limit":"250","supplier_id":"SupplierA","specification_id_mapping":{}}',
+        ),
+      ),
+    );
 
     const lambdaSend = getLambdaSendMock(deps)
       .mockResolvedValueOnce({
@@ -64,7 +71,6 @@ describe("Supplier Mock Lambda", () => {
     const handler = createHandler(deps);
     await expect(handler()).resolves.toBeUndefined();
 
-    expect(ssmSend).toHaveBeenCalledTimes(2);
     expect(lambdaSend).toHaveBeenCalledTimes(2);
 
     const getLettersCommand = lambdaSend.mock.calls[0][0] as InvokeCommand;
@@ -82,7 +88,136 @@ describe("Supplier Mock Lambda", () => {
 
     expect(patchLetterPayload.pathParameters.id).toBe("letter-1");
     expect(JSON.parse(patchLetterPayload.body).data.attributes.status).toBe(
-      "PENDING",
+      "ACCEPTED",
+    );
+  });
+
+  it("uses mapped status when specification id is present in config", async () => {
+    const deps = makeDeps(
+      Promise.resolve(
+        configOutput(
+          '{"limit":"250","supplier_id":"SupplierA","specification_id_mapping":{"spec-1":"FAILED"}}',
+        ),
+      ),
+    );
+
+    const lambdaSend = getLambdaSendMock(deps)
+      .mockResolvedValueOnce({
+        Payload: Buffer.from(
+          JSON.stringify({
+            statusCode: 200,
+            body: JSON.stringify({
+              data: [
+                {
+                  id: "letter-1",
+                  attributes: {
+                    status: "PENDING",
+                    specificationId: "spec-1",
+                  },
+                },
+              ],
+            }),
+          }),
+        ),
+      })
+      .mockResolvedValueOnce({});
+
+    const handler = createHandler(deps);
+    await expect(handler()).resolves.toBeUndefined();
+
+    const patchLetterCommand = lambdaSend.mock.calls[1][0] as InvokeCommand;
+    const patchLetterPayload = JSON.parse(
+      Buffer.from((patchLetterCommand as any).input.Payload).toString("utf8"),
+    );
+
+    expect(JSON.parse(patchLetterPayload.body).data.attributes.status).toBe(
+      "FAILED",
+    );
+  });
+
+  it("falls back to ACCEPTED when mapped status is empty", async () => {
+    const deps = makeDeps(
+      Promise.resolve(
+        configOutput(
+          '{"limit":"250","supplier_id":"SupplierA","specification_id_mapping":{"spec-1":""}}',
+        ),
+      ),
+    );
+
+    const lambdaSend = getLambdaSendMock(deps)
+      .mockResolvedValueOnce({
+        Payload: Buffer.from(
+          JSON.stringify({
+            statusCode: 200,
+            body: JSON.stringify({
+              data: [
+                {
+                  id: "letter-1",
+                  attributes: {
+                    status: "",
+                    specificationId: "spec-1",
+                  },
+                },
+              ],
+            }),
+          }),
+        ),
+      })
+      .mockResolvedValueOnce({});
+
+    const handler = createHandler(deps);
+    await expect(handler()).resolves.toBeUndefined();
+
+    const patchLetterCommand = lambdaSend.mock.calls[1][0] as InvokeCommand;
+    const patchLetterPayload = JSON.parse(
+      Buffer.from((patchLetterCommand as any).input.Payload).toString("utf8"),
+    );
+
+    expect(JSON.parse(patchLetterPayload.body).data.attributes.status).toBe(
+      "ACCEPTED",
+    );
+  });
+
+  it("ignores non-string mapping values and falls back", async () => {
+    const deps = makeDeps(
+      Promise.resolve(
+        configOutput(
+          '{"limit":"250","supplier_id":"SupplierA","specification_id_mapping":{"spec-1":123}}',
+        ),
+      ),
+    );
+
+    const lambdaSend = getLambdaSendMock(deps)
+      .mockResolvedValueOnce({
+        Payload: Buffer.from(
+          JSON.stringify({
+            statusCode: 200,
+            body: JSON.stringify({
+              data: [
+                {
+                  id: "letter-1",
+                  attributes: {
+                    status: "PENDING",
+                    specificationId: "spec-1",
+                  },
+                },
+              ],
+            }),
+          }),
+        ),
+      })
+      .mockResolvedValueOnce({});
+
+    const handler = createHandler(deps);
+    await expect(handler()).resolves.toBeUndefined();
+
+    const patchLetterCommand = lambdaSend.mock.calls[1][0] as InvokeCommand;
+    const patchLetterPayload = JSON.parse(
+      Buffer.from((patchLetterCommand as any).input.Payload).toString("utf8"),
+    );
+
+    expect(JSON.parse(patchLetterPayload.body).data.attributes.status).toBe(
+      "ACCEPTED",
     );
   });
 
@@ -106,31 +241,20 @@ describe("Supplier Mock Lambda", () => {
     );
   });
 
-  it("throws when limit parameter env var is missing", async () => {
+  it("throws when config parameter env var is missing", async () => {
     const deps = makeDeps();
-    deps.env.SUPPLIER_MOCK_GET_LETTERS_LIMIT_PARAM_NAME = undefined;
+    deps.env.SUPPLIER_MOCK_CONFIG_PARAM_NAME = undefined;
 
     const handler = createHandler(deps);
     await expect(handler()).rejects.toThrow(
-      "SUPPLIER_MOCK_GET_LETTERS_LIMIT_PARAM_NAME is not configured",
+      "SUPPLIER_MOCK_CONFIG_PARAM_NAME is not configured",
     );
   });
 
-  it("throws when supplier id parameter env var is missing", async () => {
-    const deps = makeDeps();
-    deps.env.SUPPLIER_MOCK_SUPPLIER_ID = undefined;
-
-    const handler = createHandler(deps);
-    await expect(handler()).rejects.toThrow(
-      "SUPPLIER_MOCK_SUPPLIER_ID is not configured",
+  it("falls back to default limit and supplier id when config values are empty", async () => {
+    const deps = makeDeps(
+      Promise.resolve(configOutput('{"limit":"1","supplier_id":""}')),
     );
-  });
-
-  it("falls back to default limit and supplier id when parameter values are empty", async () => {
-    const deps = makeDeps();
-    const ssmSend = getSsmSendMock(deps)
-      .mockResolvedValueOnce({ Parameter: { Value: "1" } })
-      .mockResolvedValueOnce({ Parameter: { Value: "" } });
 
     const lambdaSend = getLambdaSendMock(deps).mockResolvedValueOnce({
       Payload: Buffer.from(
@@ -144,7 +268,6 @@ describe("Supplier Mock Lambda", () => {
     const handler = createHandler(deps);
     await expect(handler()).resolves.toBeUndefined();
 
-    expect(ssmSend).toHaveBeenCalledTimes(2);
     expect(lambdaSend).toHaveBeenCalledTimes(1);
 
     const getLettersCommand = lambdaSend.mock.calls[0][0] as InvokeCommand;
@@ -156,32 +279,28 @@ describe("Supplier Mock Lambda", () => {
     expect(getLettersPayload.queryStringParameters.limit).toBe("100");
   });
 
-  it("throws when reading limit parameter fails", async () => {
-    const deps = makeDeps();
-    const ssmError = new Error("SSM unavailable");
-    getSsmSendMock(deps).mockRejectedValueOnce(ssmError);
+  it("throws when reading supplier mock config fails", async () => {
+    const deps = makeDeps(Promise.reject(new Error("SSM unavailable")));
 
     const handler = createHandler(deps);
     await expect(handler()).rejects.toThrow("SSM unavailable");
     expect(getLogErrorMock(deps)).toHaveBeenCalled();
   });
 
-  it("throws when reading supplier id parameter fails", async () => {
-    const deps = makeDeps();
-    getSsmSendMock(deps)
-      .mockResolvedValueOnce({ Parameter: { Value: "250" } })
-      .mockRejectedValueOnce(new Error("Supplier parameter not found"));
+  it("throws when reading supplier mock config with invalid json", async () => {
+    const deps = makeDeps(Promise.resolve(configOutput("not-json")));
 
     const handler = createHandler(deps);
-    await expect(handler()).rejects.toThrow("Supplier parameter not found");
+    await expect(handler()).rejects.toThrow();
     expect(getLogErrorMock(deps)).toHaveBeenCalled();
   });
 
   it("throws when invoking get letters fails", async () => {
-    const deps = makeDeps();
-    getSsmSendMock(deps)
-      .mockResolvedValueOnce({ Parameter: { Value: "200" } })
-      .mockResolvedValueOnce({ Parameter: { Value: "SupplierA" } });
+    const deps = makeDeps(
+      Promise.resolve(
+        configOutput('{"limit":"200","supplier_id":"SupplierA"}'),
+      ),
+    );
 
     getLambdaSendMock(deps).mockRejectedValueOnce(new Error("Invoke failed"));
 
@@ -191,10 +310,11 @@ describe("Supplier Mock Lambda", () => {
   });
 
   it("throws when get letters lambda returns function error", async () => {
-    const deps = makeDeps();
-    getSsmSendMock(deps)
-      .mockResolvedValueOnce({ Parameter: { Value: "200" } })
-      .mockResolvedValueOnce({ Parameter: { Value: "SupplierA" } });
+    const deps = makeDeps(
+      Promise.resolve(
+        configOutput('{"limit":"200","supplier_id":"SupplierA"}'),
+      ),
+    );
 
     getLambdaSendMock(deps).mockResolvedValueOnce({
       FunctionError: "Unhandled",
@@ -208,10 +328,11 @@ describe("Supplier Mock Lambda", () => {
   });
 
   it("throws when get letters lambda returns non-200 status", async () => {
-    const deps = makeDeps();
-    getSsmSendMock(deps)
-      .mockResolvedValueOnce({ Parameter: { Value: "200" } })
-      .mockResolvedValueOnce({ Parameter: { Value: "SupplierA" } });
+    const deps = makeDeps(
+      Promise.resolve(
+        configOutput('{"limit":"200","supplier_id":"SupplierA"}'),
+      ),
+    );
 
     getLambdaSendMock(deps).mockResolvedValueOnce({
       Payload: Buffer.from(JSON.stringify({ statusCode: 500, body: "{}" })),
@@ -224,10 +345,11 @@ describe("Supplier Mock Lambda", () => {
   });
 
   it("throws when get letters lambda response has no payload", async () => {
-    const deps = makeDeps();
-    getSsmSendMock(deps)
-      .mockResolvedValueOnce({ Parameter: { Value: "200" } })
-      .mockResolvedValueOnce({ Parameter: { Value: "SupplierA" } });
+    const deps = makeDeps(
+      Promise.resolve(
+        configOutput('{"limit":"200","supplier_id":"SupplierA"}'),
+      ),
+    );
 
     getLambdaSendMock(deps).mockResolvedValueOnce({});
 
@@ -238,10 +360,11 @@ describe("Supplier Mock Lambda", () => {
   });
 
   it("throws when invoking patch letter fails", async () => {
-    const deps = makeDeps();
-    getSsmSendMock(deps)
-      .mockResolvedValueOnce({ Parameter: { Value: "200" } })
-      .mockResolvedValueOnce({ Parameter: { Value: "SupplierA" } });
+    const deps = makeDeps(
+      Promise.resolve(
+        configOutput('{"limit":"200","supplier_id":"SupplierA"}'),
+      ),
+    );
 
     getLambdaSendMock(deps)
       .mockResolvedValueOnce({
@@ -262,10 +385,11 @@ describe("Supplier Mock Lambda", () => {
   });
 
   it("throws when patch letter lambda returns function error", async () => {
-    const deps = makeDeps();
-    getSsmSendMock(deps)
-      .mockResolvedValueOnce({ Parameter: { Value: "200" } })
-      .mockResolvedValueOnce({ Parameter: { Value: "SupplierA" } });
+    const deps = makeDeps(
+      Promise.resolve(
+        configOutput('{"limit":"200","supplier_id":"SupplierA"}'),
+      ),
+    );
 
     getLambdaSendMock(deps)
       .mockResolvedValueOnce({
@@ -291,10 +415,11 @@ describe("Supplier Mock Lambda", () => {
   });
 
   it("throws when patch letter lambda returns function error without payload", async () => {
-    const deps = makeDeps();
-    getSsmSendMock(deps)
-      .mockResolvedValueOnce({ Parameter: { Value: "200" } })
-      .mockResolvedValueOnce({ Parameter: { Value: "SupplierA" } });
+    const deps = makeDeps(
+      Promise.resolve(
+        configOutput('{"limit":"200","supplier_id":"SupplierA"}'),
+      ),
+    );
 
     getLambdaSendMock(deps)
       .mockResolvedValueOnce({
@@ -319,10 +444,11 @@ describe("Supplier Mock Lambda", () => {
   });
 
   it("handles get letters response with no body by returning no letters", async () => {
-    const deps = makeDeps();
-    getSsmSendMock(deps)
-      .mockResolvedValueOnce({ Parameter: { Value: "200" } })
-      .mockResolvedValueOnce({ Parameter: { Value: "SupplierA" } });
+    const deps = makeDeps(
+      Promise.resolve(
+        configOutput('{"limit":"200","supplier_id":"SupplierA"}'),
+      ),
+    );
 
     const lambdaSend = getLambdaSendMock(deps).mockResolvedValueOnce({
       Payload: Buffer.from(JSON.stringify({ statusCode: 200 })),
@@ -333,13 +459,14 @@ describe("Supplier Mock Lambda", () => {
     expect(lambdaSend).toHaveBeenCalledTimes(1);
   });
 
-  it("sends the expected parameter names to SSM", async () => {
-    const deps = makeDeps();
-    const ssmSend = getSsmSendMock(deps)
-      .mockResolvedValueOnce({ Parameter: { Value: "200" } })
-      .mockResolvedValueOnce({ Parameter: { Value: "SupplierA" } });
+  it("uses the provided parameter store config promise", async () => {
+    const deps = makeDeps(
+      Promise.resolve(
+        configOutput('{"limit":"200","supplier_id":"SupplierB"}'),
+      ),
+    );
 
-    getLambdaSendMock(deps).mockResolvedValueOnce({
+    const lambdaSend = getLambdaSendMock(deps).mockResolvedValueOnce({
       Payload: Buffer.from(
         JSON.stringify({
           statusCode: 200,
@@ -351,14 +478,60 @@ describe("Supplier Mock Lambda", () => {
     const handler = createHandler(deps);
     await expect(handler()).resolves.toBeUndefined();
 
-    const firstParamCommand = ssmSend.mock.calls[0][0] as GetParameterCommand;
-    const secondParamCommand = ssmSend.mock.calls[1][0] as GetParameterCommand;
+    const getLettersCommand = lambdaSend.mock.calls[0][0] as InvokeCommand;
+    const getLettersPayload = JSON.parse(
+      Buffer.from((getLettersCommand as any).input.Payload).toString("utf8"),
+    );
 
-    expect((firstParamCommand as any).input.Name).toBe(
-      "/supapi/supplier-mock/get-letters-limit",
+    expect(getLettersPayload.headers["nhsd-supplier-id"]).toBe("SupplierB");
+  });
+
+  it("falls back to default limit when limit is not a string", async () => {
+    const deps = makeDeps(
+      Promise.resolve(configOutput('{"limit":200,"supplier_id":"SupplierA"}')),
     );
-    expect((secondParamCommand as any).input.Name).toBe(
-      "/supapi/supplier-mock/supplier-id",
+
+    const lambdaSend = getLambdaSendMock(deps).mockResolvedValueOnce({
+      Payload: Buffer.from(
+        JSON.stringify({
+          statusCode: 200,
+          body: JSON.stringify({ data: [] }),
+        }),
+      ),
+    });
+
+    const handler = createHandler(deps);
+    await expect(handler()).resolves.toBeUndefined();
+
+    const getLettersCommand = lambdaSend.mock.calls[0][0] as InvokeCommand;
+    const getLettersPayload = JSON.parse(
+      Buffer.from((getLettersCommand as any).input.Payload).toString("utf8"),
     );
+
+    expect(getLettersPayload.queryStringParameters.limit).toBe("100");
+  });
+
+  it("falls back to defaults when config parameter value is missing", async () => {
+    const deps = makeDeps(Promise.resolve(configOutput()));
+
+    const lambdaSend = getLambdaSendMock(deps).mockResolvedValueOnce({
+      Payload: Buffer.from(
+        JSON.stringify({
+          statusCode: 200,
+          body: JSON.stringify({ data: [] }),
+        }),
+      ),
+    });
+
+    const handler = createHandler(deps);
+    await expect(handler()).resolves.toBeUndefined();
+
+    const getLettersCommand = lambdaSend.mock.calls[0][0] as InvokeCommand;
+    const getLettersPayload = JSON.parse(
+      Buffer.from((getLettersCommand as any).input.Payload).toString("utf8"),
+    );
+
+    expect(getLettersPayload.headers["nhsd-supplier-id"]).toBe("TestSupplier1");
+    expect(getLettersPayload.queryStringParameters.limit).toBe("100");
   });
 });
