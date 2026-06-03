@@ -5,15 +5,26 @@ import {
   GetCommand,
   QueryCommand,
 } from "@aws-sdk/lib-dynamodb";
+import { APIRequestContext } from "@playwright/test";
 import z from "zod";
+import { Letter } from "@internal/datastore";
 import {
+  AWS_ACCOUNT_ID,
+  GET_LETTERS_MAX_RETRIES,
   LETTERQUEUE_TABLENAME,
   LETTERSTABLENAME,
   SUPPLIERTABLENAME,
+  SUPPLIER_LETTERS,
+  VISIBILITY_TIMEOUT_SECONDS,
   envName,
 } from "../constants/api-constants";
-import { createSupplierData, runCreateLetter } from "./pnpm-helpers";
+import { createSupplierData, runCreateLetter } from "./npm-helpers";
 import { logger } from "./pino-logger";
+import {
+  GetLettersResponse,
+  GetLettersResponseSchema,
+} from "../../lambdas/api-handler/src/contracts/letters";
+import { ErrorResponse } from "../../lambdas/api-handler/src/contracts/errors";
 
 const ddb = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(ddb);
@@ -28,32 +39,15 @@ export const PendingLetterSchema = z.object({
 });
 export type PendingLetter = z.infer<typeof PendingLetterSchema>;
 
-export interface SupplierApiLetters {
-  supplierId: string;
-  specificationId: string;
-  supplierStatus: string;
-  createdAt: string;
-  supplierStatusSk: string;
-  updatedAt: string;
-  groupId: string;
-  reasonCode: string;
-  id: string;
-  url: string;
-  ttl: string;
-  reasonText: string;
-  status: string;
-  source: string;
-}
-
 export async function createTestData(
   supplierId: string,
   count?: number,
-): Promise<void> {
-  await runCreateLetter({
+): Promise<string[]> {
+  return runCreateLetter({
     filter: "nhs-notify-supplier-api-letter-test-data-utility",
     supplierId,
     environment: envName,
-    awsAccountId: "820178564574",
+    awsAccountId: AWS_ACCOUNT_ID,
     groupId: "TestGroupID",
     specificationId: "TestSpecificationID",
     status: "PENDING",
@@ -72,8 +66,6 @@ export const getLettersBySupplier = async (
     TableName: LETTERSTABLENAME,
     IndexName: "supplierStatus-index",
     KeyConditionExpression: "supplierStatus = :supplierStatus",
-    ProjectionExpression:
-      "id, specificationId, groupId, reasonCode, reasonText",
     ExpressionAttributeValues: {
       ":supplierStatus": supplierStatus,
     },
@@ -84,13 +76,118 @@ export const getLettersBySupplier = async (
   if (!Items || Items.length === 0) {
     throw new Error(`Unexpectedly found no data found for ${supplierId}.`);
   }
-  return Items as SupplierApiLetters[];
+  return Items as Letter[];
 };
 
 const delay = (ms: number) =>
   new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
+
+type FetchLettersWithRetryOptions = {
+  lettersLimit?: string;
+  waitForVisibilityTimeout?: boolean;
+};
+
+type GetLettersResponseBody =
+  | GetLettersResponse
+  | ErrorResponse
+  | Record<string, unknown>;
+
+type FetchLettersWithRetryResult = {
+  statusCode: number;
+  responseBody: GetLettersResponseBody;
+};
+
+export function isGetLettersResponse(
+  responseBody: GetLettersResponseBody,
+): responseBody is GetLettersResponse {
+  return GetLettersResponseSchema.safeParse(responseBody).success;
+}
+
+export function isErrorResponse(
+  responseBody: GetLettersResponseBody,
+): responseBody is ErrorResponse {
+  return (
+    typeof responseBody === "object" &&
+    Array.isArray((responseBody as ErrorResponse).errors)
+  );
+}
+
+function parseGetLettersResponseBody(
+  parsedBody: unknown,
+): GetLettersResponseBody {
+  const parsedGetLettersResponse =
+    GetLettersResponseSchema.safeParse(parsedBody);
+  if (parsedGetLettersResponse.success) {
+    return parsedGetLettersResponse.data;
+  }
+
+  if (isErrorResponse(parsedBody as GetLettersResponseBody)) {
+    return parsedBody as ErrorResponse;
+  }
+
+  return parsedBody as Record<string, unknown>;
+}
+
+function shouldRetryGetLettersRequest(
+  waitForVisibilityTimeout: boolean,
+  statusCode: number,
+  responseBody: GetLettersResponseBody,
+): boolean {
+  const dataIsEmpty =
+    isGetLettersResponse(responseBody) &&
+    Array.isArray(responseBody.data) &&
+    responseBody.data.length === 0;
+
+  return waitForVisibilityTimeout && statusCode === 200 && dataIsEmpty;
+}
+
+export async function getLettersWithRetry(
+  request: APIRequestContext,
+  baseUrl: string,
+  headers: Record<string, string>,
+  options?: FetchLettersWithRetryOptions,
+): Promise<FetchLettersWithRetryResult> {
+  const limit = options?.lettersLimit;
+  const waitForVisibilityTimeout = options?.waitForVisibilityTimeout ?? true;
+
+  const executeGetLettersRequest =
+    limit === undefined
+      ? () =>
+          request.get(`${baseUrl}/${SUPPLIER_LETTERS}`, {
+            headers,
+          })
+      : () =>
+          request.get(`${baseUrl}/${SUPPLIER_LETTERS}`, {
+            headers,
+            params: {
+              limit,
+            },
+          });
+
+  for (let attempt = 0; attempt <= GET_LETTERS_MAX_RETRIES; attempt++) {
+    const response = await executeGetLettersRequest();
+    const statusCode = response.status();
+
+    const parsedBody = (await response.json()) as unknown;
+    const responseBody = parseGetLettersResponseBody(parsedBody);
+
+    const shouldRetry = shouldRetryGetLettersRequest(
+      waitForVisibilityTimeout,
+      statusCode,
+      responseBody,
+    );
+
+    if (!shouldRetry || attempt === GET_LETTERS_MAX_RETRIES) {
+      return { statusCode, responseBody };
+    }
+
+    await delay(VISIBILITY_TIMEOUT_SECONDS * 1000);
+  }
+
+  throw new Error("Unexpectedly exhausted GET /letters retries");
+}
 
 export async function waitForLetterStatus(
   supplierId: string,
@@ -100,7 +197,7 @@ export async function waitForLetterStatus(
     timeoutMs?: number;
     intervalMs?: number;
   },
-): Promise<SupplierApiLetters> {
+): Promise<Letter> {
   const timeoutMs = options?.timeoutMs ?? 60_000;
   const intervalMs = options?.intervalMs ?? 5000;
   const startedAt = Date.now();
@@ -110,14 +207,15 @@ export async function waitForLetterStatus(
       new GetCommand({
         TableName: LETTERSTABLENAME,
         Key: { id, supplierId },
-        ProjectionExpression: "id, #status, supplierId",
+        ProjectionExpression:
+          "id, #status, supplierId, specificationId, groupId, reasonCode, reasonText",
         ExpressionAttributeNames: {
           "#status": "status",
         },
       }),
     );
 
-    const letter = Item as SupplierApiLetters;
+    const letter = Item as Letter;
 
     if (letter && letter.status === status) {
       return letter;

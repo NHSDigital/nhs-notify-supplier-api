@@ -10,6 +10,11 @@ const localConfig: PlaywrightTestConfig = {
   reporter: getReporters("api-test"),
   projects: [
     {
+      name: "integration-tests",
+      testDir: path.resolve(__dirname, "../component-tests/integration-tests"),
+      testMatch: "**/*.spec.ts",
+    },
+    {
       name: "apiGateway-tests",
       testDir: path.resolve(__dirname, "../component-tests/apiGateway-tests"),
       testMatch: "**/*.spec.ts",
@@ -22,15 +27,10 @@ const localConfig: PlaywrightTestConfig = {
       dependencies: ["apiGateway-tests"],
     },
     {
-      name: "letterQueue-tests",
+      name: "letterQueue-tests", // Needs to run last as tests visibility timeout and can impact other tests if run before them
       testDir: path.resolve(__dirname, "../component-tests/letterQueue-tests"),
       testMatch: "**/*.spec.ts",
-      dependencies: ["apiGateway-tests"],
-    },
-    {
-      name: "integration-tests",
-      testDir: path.resolve(__dirname, "../component-tests/integration-tests"),
-      testMatch: "**/*.spec.ts",
+      dependencies: ["events-tests"],
     },
   ],
 };

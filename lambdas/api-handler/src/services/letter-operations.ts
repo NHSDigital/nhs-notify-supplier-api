@@ -41,7 +41,6 @@ function mapPendingLetterToLetterBase(pending: PendingLetterBase): LetterBase {
 
 export const getPendingLetters = async (
   supplierId: string,
-
   limit: number,
   letterQueueRepo: LetterQueueRepository,
   visibilityTimeout: number,

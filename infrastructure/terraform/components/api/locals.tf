@@ -23,15 +23,15 @@ locals {
 
   common_lambda_env_vars = {
     APIM_CORRELATION_HEADER         = "nhsd-correlation-id",
-    DOWNLOAD_URL_TTL_SECONDS        = 60
-    EVENT_SOURCE                    = "/data-plane/supplier-api/${var.group}/${var.environment}/letters"
-    LETTER_TTL_HOURS                = 12960, # 18 months * 30 days * 24 hours
+    DOWNLOAD_URL_TTL_SECONDS        = var.download_url_ttl_seconds,
+    EVENT_SOURCE                    = "/data-plane/supplier-api/${var.group}/${var.environment}/letters",
+    LETTER_TTL_HOURS                = var.letter_ttl_hours,
     LETTER_QUEUE_TABLE_NAME         = aws_dynamodb_table.letter_queue.name,
-    LETTER_QUEUE_TTL_HOURS          = 168  # 7 days * 24 hours
-    LETTER_QUEUE_VISIBILITY_TIMEOUT = 300, # 5 minutes * 60 seconds
+    LETTER_QUEUE_TTL_HOURS          = var.letter_queue_ttl_hours,
+    LETTER_QUEUE_VISIBILITY_TIMEOUT = var.letter_queue_visibility_timeout,
     LETTERS_TABLE_NAME              = aws_dynamodb_table.letters.name,
     MI_TABLE_NAME                   = aws_dynamodb_table.mi.name,
-    MI_TTL_HOURS                    = 2160 # 90 days * 24 hours
+    MI_TTL_HOURS                    = var.mi_ttl_hours,
     SNS_TOPIC_ARN                   = "${module.eventsub.sns_topic.arn}",
     SUPPLIER_CONFIG_TABLE_NAME      = aws_dynamodb_table.supplier-configuration.name,
     SUPPLIER_QUOTAS_TABLE_NAME      = aws_dynamodb_table.supplier-quotas.name,

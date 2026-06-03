@@ -72,19 +72,6 @@ runs:
           echo "TARGET_DOMAIN=suppliers.dev.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
         fi
 
-        if [ -z $PR_NUMBER ]
-        then
-          echo "INSTANCE=$PROXYGEN_API_NAME" >> $GITHUB_ENV
-          echo "TARGET=https://main.$TARGET_DOMAIN" >> $GITHUB_ENV
-          echo "SANDBOX_TAG=latest" >> $GITHUB_ENV
-          echo "MTLS_NAME=notify-supplier-mtls" >> $GITHUB_ENV
-        else
-          echo "TARGET=https://pr$PR_NUMBER.$TARGET_DOMAIN" >> $GITHUB_ENV
-          echo "INSTANCE=$PROXYGEN_API_NAME-PR-$PR_NUMBER" >> $GITHUB_ENV
-          echo "SANDBOX_TAG=pr$PR_NUMBER" >> $GITHUB_ENV
-          echo "MTLS_NAME=notify-supplier-mtls-pr$PR_NUMBER" >> $GITHUB_ENV
-        fi
-
     - name: Set APIM_ENV
       shell: bash
       run: |
