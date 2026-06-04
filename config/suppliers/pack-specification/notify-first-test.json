@@ -1,10 +1,7 @@
 {
   "assembly": {
     "duplex": true,
-    "envelopeId": "unbranded-economy-c5",
-    "features": [
-      "ADMAIL"
-    ],
+    "envelopeId": "first-c5",
     "paper": {
       "colour": "WHITE",
       "id": "paper-std-white-80",
@@ -13,21 +10,17 @@
       "size": "A4",
       "weightGSM": 80
     },
-    "printColour": "COLOUR"
+    "printColour": "BLACK"
   },
-  "billingId": "admail-economy-colour",
+  "billingId": "notify-first-test",
   "constraints": {
     "blackCoveragePercentage": {
       "operator": "LESS_THAN",
       "value": 20
     },
-    "colourCoveragePercentage": {
-      "operator": "LESS_THAN",
-      "value": 10
-    },
     "deliveryDays": {
       "operator": "LESS_THAN",
-      "value": 4
+      "value": 2
     },
     "sheets": {
       "operator": "LESS_THAN",
@@ -38,18 +31,18 @@
       "value": 10
     }
   },
-  "createdAt": "2026-04-14T00:00:00.000Z",
-  "description": "Unbranded Envelope, Admail",
-  "id": "client1-campaign2",
-  "name": "Client1 - CAMPAIGN2",
+  "createdAt": "2026-01-12T00:00:00.000Z",
+  "description": "First class postage tariff",
+  "id": "notify-first-test",
+  "name": "First class",
   "postage": {
-    "deliveryDays": 4,
-    "id": "admail-economy",
+    "deliveryDays": 2,
+    "id": "first-class",
     "maxThicknessMm": 5,
     "maxWeightGrams": 100,
     "size": "STANDARD"
   },
   "status": "PROD",
-  "updatedAt": "2026-04-14T00:00:00.000Z",
+  "updatedAt": "2026-01-12T00:00:00.000Z",
   "version": 1
 }

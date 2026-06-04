@@ -32,6 +32,11 @@ const localConfig: PlaywrightTestConfig = {
       testMatch: "**/*.spec.ts",
       dependencies: ["events-tests"],
     },
+    {
+      name: "allocation-tests",
+      testDir: path.resolve(__dirname, "../component-tests/allocation-tests"),
+      testMatch: "**/*.spec.ts",
+    },
   ],
 };
 

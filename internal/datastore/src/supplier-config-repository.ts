@@ -129,7 +129,6 @@ export class SupplierConfigRepository {
         },
       }),
     );
-
     return $SupplierPack.array().parse(result.Items);
   }
 
