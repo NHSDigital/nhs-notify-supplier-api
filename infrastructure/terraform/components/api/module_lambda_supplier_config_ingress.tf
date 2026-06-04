@@ -66,4 +66,17 @@ data "aws_iam_policy_document" "supplier_config_ingress_lambda" {
       module.sqs_supplier_config.sqs_queue_arn
     ]
   }
+
+  statement {
+    sid    = "AllowConfigDynamoDBWrite"
+    effect = "Allow"
+
+    actions = [
+      "dynamodb:UpdateItem",
+    ]
+
+    resources = [
+      aws_dynamodb_table.supplier-configuration.arn,
+    ]
+  }
 }
