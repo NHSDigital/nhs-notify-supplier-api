@@ -22,6 +22,7 @@ function letterToResourceResponse(letter: LetterBase) {
       groupId: letter.groupId,
       ...(letter.reasonCode != null && { reasonCode: letter.reasonCode }),
       ...(letter.reasonText != null && { reasonText: letter.reasonText }),
+      ...(letter.sha256Hash != null && { sha256Hash: letter.sha256Hash }),
     },
   };
 }

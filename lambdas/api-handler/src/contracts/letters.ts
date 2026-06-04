@@ -52,6 +52,7 @@ export const GetLetterResponseResourceSchema = z
         groupId: z.string().optional(),
         reasonCode: z.string().optional(),
         reasonText: z.string().optional(),
+        sha256Hash: z.string().optional(),
       })
       .strict(),
   })

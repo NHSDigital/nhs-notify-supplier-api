@@ -42,6 +42,7 @@ export const LetterSchemaBase = z.object({
   groupId: z.string(),
   reasonCode: z.string().optional(),
   reasonText: z.string().optional(),
+  sha256Hash: z.string().optional(),
 });
 
 export const LetterSchema = LetterSchemaBase.extend({
