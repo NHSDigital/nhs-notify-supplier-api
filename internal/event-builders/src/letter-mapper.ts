@@ -5,7 +5,7 @@ import { LetterStatusChangeEvent } from "@nhsdigital/nhs-notify-event-schemas-su
 
 // eslint-disable-next-line import-x/prefer-default-export
 export function mapLetterToCloudEvent(
-  letter: Letter,
+  letter: Omit<Letter, "sha256Hash">, // check to see if need to change schema outside of this repo
   source: string,
 ): LetterStatusChangeEvent {
   const eventId = randomUUID();
