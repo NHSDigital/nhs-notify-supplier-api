@@ -2,6 +2,7 @@ import {
   DynamoDBDocumentClient,
   GetCommand,
   QueryCommand,
+  UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 import {
   $LetterVariant,
@@ -17,10 +18,13 @@ import {
   SupplierPack,
   VolumeGroup,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-config";
+import { SupplierConfigEntity } from "./types";
 
 export type SupplierConfigRepositoryConfig = {
   supplierConfigTableName: string;
 };
+
+const reservedWords = new Set(["name", "type", "status", "constraints"]);
 
 export class SupplierConfigRepository {
   constructor(
@@ -139,5 +143,52 @@ export class SupplierConfigRepository {
       throw new Error(`No pack specification found for id ${packSpecId}`);
     }
     return $PackSpecification.parse(result.Item);
+  }
+
+  async upsertSupplierConfig(
+    entity: SupplierConfigEntity,
+    supplierConfig: { id: string },
+  ): Promise<"UPDATED" | "CREATED"> {
+    const updateExpression =
+      SupplierConfigRepository.buildUpdateExpression(supplierConfig);
+
+    const result = await this.ddbClient.send(
+      new UpdateCommand({
+        TableName: this.config.supplierConfigTableName,
+        Key: { pk: `ENTITY#${entity}`, sk: `ID#${supplierConfig.id}` },
+        ...updateExpression,
+        ReturnValues: "ALL_OLD",
+      }),
+    );
+    return result.Attributes?.pk ? "UPDATED" : "CREATED";
+  }
+
+  static escapeReservedWord(key: string) {
+    return reservedWords.has(key) ? `#${key}` : key;
+  }
+
+  static buildUpdateExpression(fieldsToUpdate: Record<string, any>) {
+    const expressionAttributeNames = Object.fromEntries(
+      Object.keys(fieldsToUpdate)
+        .filter((key) => reservedWords.has(key))
+        .map((key) => [`#${key}`, key]),
+    );
+
+    const expressionAttributeValues = Object.fromEntries(
+      Object.entries(fieldsToUpdate).map(([key, value]) => [`:${key}`, value]),
+    );
+
+    const updateExpression = `set ${Object.keys(fieldsToUpdate)
+      .map(
+        (key) =>
+          `${SupplierConfigRepository.escapeReservedWord(key)} = :${key}`,
+      )
+      .join(", ")}`;
+
+    return {
+      ExpressionAttributeNames: expressionAttributeNames,
+      ExpressionAttributeValues: expressionAttributeValues,
+      UpdateExpression: updateExpression,
+    };
   }
 }
