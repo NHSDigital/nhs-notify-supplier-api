@@ -120,6 +120,41 @@ describe("letter-mapper", () => {
     });
   });
 
+  it("maps an internal Letter to a GetLetterResponse with sha256Hash when present", () => {
+    const date = new Date().toISOString();
+    const letter: Letter = {
+      id: "abc123",
+      status: "PENDING",
+      supplierId: "supplier1",
+      specificationId: "spec123",
+      billingRef: "spec123",
+      groupId: "group123",
+      url: "https://example.com/letter/abc123",
+      createdAt: date,
+      updatedAt: date,
+      supplierStatus: "supplier1#PENDING",
+      supplierStatusSk: date,
+      ttl: 123,
+      source: "/data-plane/letter-rendering/pdf",
+      subject: "letter-rendering/source/letter/letter-id",
+      specificationBillingId: "billing123",
+    };
+
+    const result: GetLetterResponse = mapToGetLetterResponse(letter);
+
+    expect(result).toEqual({
+      data: {
+        id: "abc123",
+        type: "Letter",
+        attributes: {
+          specificationId: "spec123",
+          status: "PENDING",
+          groupId: "group123",
+        },
+      },
+    });
+  });
+
   it("maps an internal Letter to a GetLetterResponse with reasonCode and reasonText when present", () => {
     const date = new Date().toISOString();
     const letter: Letter = {
