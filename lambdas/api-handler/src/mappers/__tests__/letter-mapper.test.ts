@@ -135,6 +135,7 @@ describe("letter-mapper", () => {
       supplierStatus: "supplier1#PENDING",
       supplierStatusSk: date,
       ttl: 123,
+      sha256Hash: "abc123hash",
       source: "/data-plane/letter-rendering/pdf",
       subject: "letter-rendering/source/letter/letter-id",
       specificationBillingId: "billing123",
@@ -150,6 +151,7 @@ describe("letter-mapper", () => {
           specificationId: "spec123",
           status: "PENDING",
           groupId: "group123",
+          sha256Hash: "abc123hash",
         },
       },
     });
