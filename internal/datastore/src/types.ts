@@ -88,6 +88,7 @@ export const PendingLetterSchemaBase = z.object({
   letterId: idRef(LetterSchema, "id"),
   specificationId: z.string(),
   groupId: z.string(),
+  sha256Hash: z.string().optional(),
 });
 
 export const PendingLetterSchema = PendingLetterSchemaBase.extend({
