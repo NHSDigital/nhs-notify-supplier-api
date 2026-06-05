@@ -67,6 +67,7 @@ export const GetLettersResponseResourceSchema = z
         status: LetterStatusSchema,
         specificationId: z.string(),
         groupId: z.string().optional(),
+        sha256Hash: z.string().optional(),
       })
       .strict(),
   })

@@ -35,6 +35,7 @@ function letterToGetLettersResourceResponse(letter: LetterBase) {
       status: letter.status,
       specificationId: letter.specificationId,
       groupId: letter.groupId,
+      ...(letter.sha256Hash != null && { sha256Hash: letter.sha256Hash }),
     },
   };
 }
