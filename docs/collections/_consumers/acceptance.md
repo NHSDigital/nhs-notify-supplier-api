@@ -616,7 +616,7 @@ Once you pass this stage, we'll confirm your readiness for going live.
 ### Letter Status Definitions
 
 | Status | Description | Initiated By | Mandatory/Optional
-|---|---|---|---|
+| --- | --- | --- | --- |
 | PENDING | Initial state for all new letters. Indicates that the letter has been allocated to a supplier but not yet retrieved or accepted | NHS Notify | Mandatory Starting Status |
 | REJECTED | Used when a supplier determines a letter cannot be processed  Occurs immediately after PENDING , before any production begins | Supplier | Conditional |
 | ACCEPTED | Letter has passed validation checks and is ready for production | Supplier | Mandatory (core workflow transition) |
@@ -632,7 +632,7 @@ Once you pass this stage, we'll confirm your readiness for going live.
 ### Possible Scenarios and Applicable Letter Statuses
 
 | Scenario | Description | Typical Status flow |
-|---|---|---|
+| --- | --- | --- |
 | Standard print and delivery | Letter specification successfully provided, letter printed, dispatch and delivered to patient. | a) PENDING → ACCEPTED → PRINTED → ENCLOSED → DISPATCHED → DELIVERED<br>b) PENDING → ACCEPTED → PRINTED → DISPATCHED → DELIVERED<br>c) PENDING → ACCEPTED → ENCLOSED → DISPATCHED → DELIVERED<br>d) PENDING → ACCEPTED → DISPATCHED |
 | Letter rejected by letter Supplier | Letter fails validation before acceptance by the letter supplier. | PENDING → REJECTED |
 | Cancelled by client | Client cancels production before dispatched. | a) PENDING → ACCEPTED → CANCELLED<br>b) PENDING → ACCEPTED → PRINTED → CANCELLED<br>c) PENDING → ACCEPTED → PRINTED → ENCLOSED → CANCELLED |

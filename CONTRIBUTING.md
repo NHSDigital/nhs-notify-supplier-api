@@ -45,3 +45,9 @@ GitHooks **must** be configured and run on commits before pushing to remote. Ref
 ## Testing Your Branch
 
 You can test your branch in a dynamic environment prior to merging to `main`. These are created as part of the `cicd-1-pull-request.yaml` workflow, triggered when a PR is created or updated.
+
+## Function Documentation
+
+Each Lambda and internal package has a `README.md` alongside the source describing its purpose, flow, integration points, and peculiarities. These are bundled into the docs site via `docs/generate-includes.sh`.
+
+When making changes to a Lambda or internal package, check whether the corresponding README needs updating. Function documentation is not auto-generated and can become stale if not maintained alongside code changes.
