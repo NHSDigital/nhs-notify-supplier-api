@@ -75,11 +75,11 @@ export function createLetterDto(params: {
     billingId,
     groupId,
     letterId,
+    sha256Hash,
     specificationId,
     status,
     supplierId,
     url,
-    sha256Hash,
   } = params;
 
   const letter: Omit<Letter, "ttl" | "supplierStatus" | "supplierStatusSk"> = {
@@ -88,6 +88,7 @@ export function createLetterDto(params: {
     specificationId,
     groupId,
     url,
+    sha256Hash,
     status,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
