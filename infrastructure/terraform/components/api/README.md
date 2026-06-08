@@ -88,7 +88,7 @@ No requirements.
 | <a name="module_sqs_supplier_config"></a> [sqs\_supplier\_config](#module\_sqs\_supplier\_config) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.1.5/terraform-sqs.zip | n/a |
 | <a name="module_supplier_allocator"></a> [supplier\_allocator](#module\_supplier\_allocator) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.2/terraform-lambda.zip | n/a |
 | <a name="module_supplier_config_ingress"></a> [supplier\_config\_ingress](#module\_supplier\_config\_ingress) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip | n/a |
-| <a name="module_supplier_mock"></a> [supplier\_mock](#module\_supplier\_mock) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v4.0.5/terraform-lambda.zip | n/a |
+| <a name="module_supplier_mock"></a> [supplier\_mock](#module\_supplier\_mock) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.5/terraform-lambda.zip | n/a |
 | <a name="module_supplier_ssl"></a> [supplier\_ssl](#module\_supplier\_ssl) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-ssl.zip | n/a |
 | <a name="module_update_letter_queue"></a> [update\_letter\_queue](#module\_update\_letter\_queue) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.2/terraform-lambda.zip | n/a |
 | <a name="module_upsert_letter"></a> [upsert\_letter](#module\_upsert\_letter) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.2/terraform-lambda.zip | n/a |
