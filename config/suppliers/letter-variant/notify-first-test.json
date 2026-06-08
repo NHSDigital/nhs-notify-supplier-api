@@ -1,0 +1,30 @@
+{
+  "constraints": {
+    "blackCoveragePercentage": {
+      "operator": "LESS_THAN",
+      "value": 20
+    },
+    "deliveryDays": {
+      "operator": "LESS_THAN",
+      "value": 2
+    },
+    "sheets": {
+      "operator": "LESS_THAN",
+      "value": 5
+    },
+    "sides": {
+      "operator": "LESS_THAN",
+      "value": 10
+    }
+  },
+  "description": "Black printing, first class postage tariff",
+  "id": "notify-first-test",
+  "name": "First class letter",
+  "packSpecificationIds": [
+    "notify-first-test"
+  ],
+  "priority": 10,
+  "status": "PROD",
+  "type": "STANDARD",
+  "volumeGroupId": "volumeGroup-test5"
+}

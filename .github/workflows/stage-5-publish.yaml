@@ -48,57 +48,57 @@ jobs:
       - name: "Checkout code"
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: "Get the artefacts 1"
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: ./artifacts/jekyll-docs-${{ inputs.version }}
           name: jekyll-docs-${{ inputs.version }}
 
       - name: "Get the artefacts 2"
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: ./artifacts/sdk-html-docs-${{ inputs.version }}
           name: sdk-html-docs-${{ inputs.version }}
 
       - name: "Get the artefacts 3"
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: ./artifacts/sdk-swagger-docs-${{ inputs.version }}
           name: sdk-swagger-docs-${{ inputs.version }}
 
       - name: "Get the artefacts 4"
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: ./artifacts/sdk-html-${{ inputs.version }}
           name: sdk-html-${{ inputs.version }}
 
       - name: "Get the artefacts 5"
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: ./artifacts/sdk-ts-${{ inputs.version }}
           name: sdk-ts-${{ inputs.version }}
 
       - name: "Get the artefacts 6"
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: ./artifacts/sdk-python-${{ inputs.version }}
           name: sdk-python-${{ inputs.version }}
 
       - name: "Get the artefacts 7"
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: ./artifacts/sdk-csharp-${{ inputs.version }}
           name: sdk-csharp-${{ inputs.version }}
 
       # Take out for now - might add again in the future
       # - name: "Get the artefacts 9"
-      #   uses: actions/download-artifact@v8
+      #   uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
       #   with:
       #     path: ./artifacts/server-csharp-${{ inputs.version }}
       #     name: server-csharp-${{ inputs.version }}
 
       - name: "Create release"
         id: create_release
-        uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1
+        uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1.1.4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -110,7 +110,7 @@ jobs:
           prerelease: ${{ inputs.is_version_prerelease == 'true'}}
 
       - name: "Upload jekyll docs release asset"
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -120,7 +120,7 @@ jobs:
           asset_content_type: "application/gzip"
 
       - name: "Upload sdk html docs release asset"
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -130,7 +130,7 @@ jobs:
           asset_content_type: "application/gzip"
 
       - name: "Upload sdk swagger docs release asset"
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -146,7 +146,7 @@ jobs:
         shell: bash
 
       - name: "Upload sdk html release asset"
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -162,7 +162,7 @@ jobs:
         shell: bash
 
       - name: "Upload sdk ts release asset"
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -178,7 +178,7 @@ jobs:
         shell: bash
 
       - name: "Upload sdk python release asset"
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -194,7 +194,7 @@ jobs:
         shell: bash
 
       - name: "Upload sdk csharp release asset"
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -234,7 +234,7 @@ jobs:
         apimEnv: [internal-dev, int, ref, prod]
     steps:
       - name: "Download OAS spec artifact"
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: ./artifacts/api-oas-specification-${{ matrix.apimEnv }}-${{ inputs.version }}
           name: api-oas-specification-${{ matrix.apimEnv }}-${{ inputs.version }}
@@ -245,7 +245,7 @@ jobs:
         shell: bash
 
       - name: "Upload OAS specification release asset"
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1
+        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -265,12 +265,12 @@ jobs:
   #       contents: read
   #     steps:
   #       - name: "Get the artefacts csharp docker"
-  #         uses: actions/download-artifact@v8
+  #         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
   #         with:
   #           path: .
   #           name: server-csharp-docker-${{ inputs.version }}
   #       - name: "Get the artefacts csharp server"
-  #         uses: actions/download-artifact@v8
+  #         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
   #         with:
   #           path: ./csharp-server
   #           name: server-csharp-${{ inputs.version }}
@@ -292,7 +292,7 @@ jobs:
       contents: read
     steps:
       - name: "Get the artefacts"
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: .
           name: sdk-csharp-${{ inputs.version }}
@@ -348,11 +348,11 @@ jobs:
       contents: read
     steps:
       - name: "Get the artefacts"
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: .
           name: sdk-ts-${{ inputs.version }}
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: "24.3"
           registry-url: "https://npm.pkg.github.com"
@@ -396,7 +396,7 @@ jobs:
   #     contents: read
   #   steps:
   #     - name: "Get the artefacts"
-  #       uses: actions/download-artifact@v5
+  #       uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
   #       with:
   #         path: .
   #         name: libs-abstractions-${{ inputs.version }}
@@ -452,7 +452,7 @@ jobs:
   #     contents: read
   #   steps:
   #     - name: "Get the artefacts"
-  #       uses: actions/download-artifact@v8
+  #       uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
   #       with:
   #         path: .
   #         name: libs-letter-${{ inputs.version }}
@@ -508,7 +508,7 @@ jobs:
   #     contents: read
   #   steps:
   #     - name: "Get the artefacts"
-  #       uses: actions/download-artifact@v5
+  #       uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
   #       with:
   #         path: .
   #         name: libs-data-${{ inputs.version }}
@@ -564,7 +564,7 @@ jobs:
   #     contents: read
   #   steps:
   #     - name: "Get the artefacts"
-  #       uses: actions/download-artifact@v5
+  #       uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
   #       with:
   #         path: .
   #         name: libs-host-${{ inputs.version }}
@@ -620,7 +620,7 @@ jobs:
   #     contents: read
   #   steps:
   #     - name: "Get the artefacts"
-  #       uses: actions/download-artifact@v5
+  #       uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
   #       with:
   #         path: .
   #         name: libs-host-docker-${{ inputs.version }}
