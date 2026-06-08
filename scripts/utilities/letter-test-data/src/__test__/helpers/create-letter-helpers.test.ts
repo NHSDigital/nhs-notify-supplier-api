@@ -131,6 +131,7 @@ describe("Create letter helpers", () => {
       groupId: "testGroupId",
       status: "PENDING" as LetterStatusType,
       url: "s3://bucket/testSupplierId/testLetter.pdf",
+      sha256Hash: "testHash",
     };
 
     const result = createLetterDto(params);
@@ -148,6 +149,7 @@ describe("Create letter helpers", () => {
       subject: "supplier-api/letter-test-data/testLetterId",
       billingRef: "testSpecId",
       specificationBillingId: "testBillingId",
+      sha256Hash: "testHash",
     });
   });
 });

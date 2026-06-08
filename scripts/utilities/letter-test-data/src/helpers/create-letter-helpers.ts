@@ -17,6 +17,7 @@ export async function createLetter(params: {
   letterRepository: LetterRepository;
   testLetter: string;
 }) {
+  let hash: string | undefined = undefined;
   const {
     billingId,
     bucketName,
@@ -31,12 +32,13 @@ export async function createLetter(params: {
   } = params;
 
   if (testLetter !== "none") {
-    await uploadFile(
+    const result = await uploadFile(
       bucketName,
       supplierId,
       `${testLetter}.pdf`,
       targetFilename,
     );
+    hash = result.hash;
   }
 
   const letter: Omit<Letter, "ttl" | "supplierStatus" | "supplierStatusSk"> = {
@@ -52,6 +54,7 @@ export async function createLetter(params: {
     subject: `supplier-api/letter-test-data/${letterId}`,
     billingRef: specificationId,
     specificationBillingId: billingId,
+    sha256Hash: hash,
   };
 
   const letterRecord = await letterRepository.putLetter(letter);
@@ -66,6 +69,7 @@ export function createLetterDto(params: {
   groupId: string;
   status: LetterStatusType;
   url: string;
+  sha256Hash?: string;
 }) {
   const {
     billingId,
@@ -75,6 +79,7 @@ export function createLetterDto(params: {
     status,
     supplierId,
     url,
+    sha256Hash,
   } = params;
 
   const letter: Omit<Letter, "ttl" | "supplierStatus" | "supplierStatusSk"> = {
@@ -90,6 +95,7 @@ export function createLetterDto(params: {
     subject: `supplier-api/letter-test-data/${letterId}`,
     billingRef: specificationId,
     specificationBillingId: billingId,
+    sha256Hash,
   };
 
   return letter;
