@@ -6,7 +6,7 @@
 
 The supplier-mock lambda simulates the supplier's system behaviour so that downstream services can simulate supplier interaction without relying on a live supplier system.
 The mock simulates the journey of a letter with the Supplier. It utilises the api-handler and retrieves pending letters by calling the `getLetters` lambda directly and then provides status updates for each letter by calling the `patchLetter` lambda.
-Each time the mock is called it will call `getLetters` once with for the **supplierId** `TestSupplier1` and with a **limit** of `100` letters. These default values can be configured in the AWS Parameter Store as explained in [How to modify parameter store variables](#how-to-modify-default-variable-values-in-parameter-store) . It then loops through each retrieved letter and updates its status by calling `patchLetter`.
+Each time the mock is called it will call `getLetters` once with for the **supplierId** `TestSupplier1` and with a **limit** of `100` letters. These default values can be configured in the AWS Parameter Store as explained in [How to modify parameter store variables](#how-to-modify-default-variable-values-in-parameter-store) . It then loops through each retrieved letter and updates its status by calling `patchLetter` and using the **specification_id_mapping** map to determine its status. If the map doesn't return a value it will default to `ACCEPTED` status.
 
 ## How to deploy the supapi-supplier-mock schedule
 
@@ -20,11 +20,12 @@ The supplier-mock lambda can be activated by manually enabling the `{environment
 
 ## How to modify default variable values in parameter store
 
-As mentioned above the `limit` and `supplierId` default values are stored in the AWS Parameter Store and can be modified if needed by accessing the Parameter Store from the AWS Console. These store parameters are created in the **/infrastructure/terraform/components/api/module_lambda_supplier_mock.tf** module, but only if the `deploy_supplier_mock_scheduler` variable is set to `true`. The parameters are:
+As mentioned above the `limit`, `supplierId` and `specification_id_mapping` default values are stored in the AWS Parameter Store and can be modified if needed by accessing the Parameter Store from the AWS Console. These store parameters are created in the **/infrastructure/terraform/components/api/ssm_parameter.tf** file, but only if the `deploy_supplier_mock_scheduler` variable is set to `true`. We deploy a JSON parameter in the location `/nhs/supapi/{environment}/supplier-mock/config` with the following key/value pairs:
 
-| Parameter                                                 | default value |
-| --------------------------------------------------------- | ------------- |
-| /nhs/supapi/supplier-mock/{environment}/get-letters-limit | 100           |
-| /nhs/supapi/supplier-mock/{environment}/supplier-id       | TestSupplier1 |
+| key                      | type   | default value                           |
+| ------------------------ | ------ | --------------------------------------- |
+| limit                    | string | 100                                     |
+| supplier_id              | string | TestSupplier1                           |
+| specification_id_mapping | map    | {"test-specification-id-1 = "ACCEPTED"} |
 
 <!-- vale on -->
