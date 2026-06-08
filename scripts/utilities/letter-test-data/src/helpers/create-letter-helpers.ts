@@ -17,7 +17,7 @@ export async function createLetter(params: {
   letterRepository: LetterRepository;
   testLetter: string;
 }) {
-  let hash: string | undefined = undefined;
+  let hash: string | undefined;
   const {
     billingId,
     bucketName,
