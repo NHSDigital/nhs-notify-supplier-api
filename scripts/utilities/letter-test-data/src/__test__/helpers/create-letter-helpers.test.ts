@@ -33,6 +33,8 @@ describe("Create letter helpers", () => {
     const status = "PENDING" as LetterStatusType;
     const testLetter = "test-letter-standard";
 
+    (uploadFile as jest.Mock).mockResolvedValue({ hash: "abc123" });
+
     await createLetter({
       letterId,
       bucketName,
@@ -65,6 +67,7 @@ describe("Create letter helpers", () => {
       subject: "supplier-api/letter-test-data/letterId",
       billingRef: "specificationId",
       specificationBillingId: "billingId",
+      sha256Hash: "abc123",
     });
   });
 
@@ -116,6 +119,7 @@ describe("Create letter helpers", () => {
       source: "/data-plane/letter-rendering/letter-test-data",
       subject: "supplier-api/letter-test-data/letterId",
       specificationBillingId: "billingId",
+      sha256Hash: undefined,
     });
   });
 
@@ -131,7 +135,6 @@ describe("Create letter helpers", () => {
       groupId: "testGroupId",
       status: "PENDING" as LetterStatusType,
       url: "s3://bucket/testSupplierId/testLetter.pdf",
-      sha256Hash: "testHash",
     };
 
     const result = createLetterDto(params);
@@ -149,7 +152,6 @@ describe("Create letter helpers", () => {
       subject: "supplier-api/letter-test-data/testLetterId",
       billingRef: "testSpecId",
       specificationBillingId: "testBillingId",
-      sha256Hash: "testHash",
     });
   });
 });

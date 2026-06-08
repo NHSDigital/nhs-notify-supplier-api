@@ -69,7 +69,6 @@ export function createLetterDto(params: {
   groupId: string;
   status: LetterStatusType;
   url: string;
-  sha256Hash?: string;
 }) {
   const {
     billingId,
@@ -79,7 +78,6 @@ export function createLetterDto(params: {
     status,
     supplierId,
     url,
-    sha256Hash,
   } = params;
 
   const letter: Omit<Letter, "ttl" | "supplierStatus" | "supplierStatusSk"> = {
@@ -95,7 +93,6 @@ export function createLetterDto(params: {
     subject: `supplier-api/letter-test-data/${letterId}`,
     billingRef: specificationId,
     specificationBillingId: billingId,
-    sha256Hash,
   };
 
   return letter;
