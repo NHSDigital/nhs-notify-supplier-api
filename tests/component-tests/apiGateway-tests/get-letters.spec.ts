@@ -36,10 +36,10 @@ test.describe("API Gateway Tests To Get List Of Pending Letters", () => {
     }
     expect(responseBody.data.length).toBeGreaterThanOrEqual(1);
 
-    responseBody.data.forEach((letter) => {
+    for (const letter of responseBody.data) {
       expect(letter.attributes.sha256Hash).toBeDefined();
       expect(letter.attributes.sha256Hash).not.toBeNull();
-    });
+    }
   });
 
   test("GET /letters retrieve letter should match SHA256 from GET /letter{id} of the same letter", async ({ request }) => {
