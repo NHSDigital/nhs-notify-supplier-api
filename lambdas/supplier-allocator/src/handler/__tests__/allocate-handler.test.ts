@@ -7,10 +7,6 @@ import {
   $LetterStatusChangeEvent,
   LetterStatusChangeEvent,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
-import {
-  SupplierConfigRepository,
-  SupplierQuotasRepository,
-} from "@internal/datastore";
 import createSupplierAllocatorHandler from "../allocate-handler";
 import * as supplierConfig from "../../services/supplier-config";
 import * as supplierQuotas from "../../services/supplier-quotas";
@@ -187,32 +183,10 @@ function setupDefaultMocks() {
 describe("createSupplierAllocatorHandler", () => {
   let mockSqsClient: jest.Mocked<SQSClient>;
   let mockedDeps: jest.Mocked<Deps>;
-  let mockedSupplierConfigRepo: jest.Mocked<SupplierConfigRepository>;
-  let mockedSupplierQuotasRepo: jest.Mocked<SupplierQuotasRepository>;
   beforeEach(() => {
     mockSqsClient = {
       send: jest.fn(),
     } as unknown as jest.Mocked<SQSClient>;
-
-    mockedSupplierConfigRepo = {
-      ddbClient: {} as any,
-      config: {} as any,
-      getLetterVariant: jest.fn(),
-      getVolumeGroup: jest.fn(),
-      getSupplierAllocationsForVolumeGroup: jest.fn(),
-      getSuppliersDetails: jest.fn(),
-      getSupplierPacksForPackSpecification: jest.fn(),
-      getPackSpecification: jest.fn(),
-    };
-
-    mockedSupplierQuotasRepo = {
-      ddbClient: {} as any,
-      config: {} as any,
-      getOverallAllocation: jest.fn(),
-      updateOverallAllocation: jest.fn(),
-      getDailyAllocation: jest.fn(),
-      updateDailyAllocation: jest.fn(),
-    };
 
     mockedDeps = {
       logger: { error: jest.fn(), info: jest.fn() } as unknown as pino.Logger,
@@ -221,8 +195,8 @@ describe("createSupplierAllocatorHandler", () => {
         SUPPLIER_QUOTAS_TABLE_NAME: "SupplierQuotasTable",
       },
       sqsClient: mockSqsClient,
-      supplierConfigRepo: mockedSupplierConfigRepo,
-      supplierQuotasRepo: mockedSupplierQuotasRepo,
+      supplierConfigRepo: {} as unknown as Deps["supplierConfigRepo"],
+      supplierQuotasRepo: {} as unknown as Deps["supplierQuotasRepo"],
     };
     jest.clearAllMocks();
   });

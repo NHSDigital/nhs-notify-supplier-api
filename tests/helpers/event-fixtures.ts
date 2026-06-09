@@ -48,3 +48,28 @@ export function createPreparedEventBatchWithSameDomainId(
     createPreparedV1Event(overrides),
   ];
 }
+
+export function createEventRemoveFields(fieldToRemove: string) {
+  const event = createPreparedV1Event();
+  const eventData = event.data as Partial<typeof event.data>;
+
+  switch (fieldToRemove) {
+    case "pageCount": {
+      delete eventData.pageCount;
+      break;
+    }
+    case "domainId": {
+      delete eventData.domainId;
+      break;
+    }
+    case "url": {
+      delete eventData.url;
+      break;
+    }
+    default: {
+      break;
+    }
+  }
+
+  return event;
+}
