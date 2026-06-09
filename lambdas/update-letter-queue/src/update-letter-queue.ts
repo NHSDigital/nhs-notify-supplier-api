@@ -191,6 +191,7 @@ function mapLetterToPendingLetter(letter: Letter): InsertPendingLetter {
     specificationId: letter.specificationId,
     groupId: letter.groupId,
     priority: letter.priority,
+    sha256Hash: letter.sha256Hash,
   };
 }
 
