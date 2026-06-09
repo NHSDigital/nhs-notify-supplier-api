@@ -59,9 +59,12 @@ test.describe("API Gateway Tests To Get List Of Pending Letters", () => {
     }
     expect(responseBody.data.length).toBeGreaterThanOrEqual(1);
     const getLettersSha = responseBody.data[0].attributes.sha256Hash;
-    const response = await request.get(`${baseUrl}/${SUPPLIER_LETTERS}/${responseBody.data[0].id}`, {
-      headers,
-    });
+    const response = await request.get(
+      `${baseUrl}/${SUPPLIER_LETTERS}/${responseBody.data[0].id}`,
+      {
+        headers,
+      },
+    );
     const letterResponseBody = await response.json();
     expect(response.status()).toBe(200);
     expect(letterResponseBody.data.attributes.sha256Hash).toBe(getLettersSha);
