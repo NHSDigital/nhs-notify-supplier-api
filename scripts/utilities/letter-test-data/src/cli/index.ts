@@ -203,7 +203,7 @@ async function main() {
         if (testLetter !== "none") {
           const result = await uploadFile(
             bucketName,
-            supplierId,
+            folder,
             `${testLetter}.pdf`,
             targetFilename,
           );
