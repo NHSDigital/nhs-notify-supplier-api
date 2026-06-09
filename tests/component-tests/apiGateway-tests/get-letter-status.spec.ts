@@ -39,6 +39,7 @@ test.describe("API Gateway Tests to Verify Get Letter Status Endpoint", () => {
     expect(responseBody).toMatchObject({
       data: {
         attributes: {
+          sha256Hash: createdLetter.sha256Hash,
           status: "PENDING",
           specificationId: createdLetter.specificationId,
           groupId: createdLetter.groupId,
