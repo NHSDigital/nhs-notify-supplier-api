@@ -507,7 +507,7 @@ describe("supplier-config service", () => {
       );
       expect(deps.logger.info).toHaveBeenCalledWith({
         description:
-          "Pack specification spec1 filtered out based on pageCount constraints",
+          "Pack specification filtered out based on pageCount constraints",
         packSpecId: "spec1",
         pageCount: 3,
         violatedConstraints: expect.arrayContaining([
@@ -577,7 +577,7 @@ describe("supplier-config service", () => {
 
       expect(deps.logger.info).toHaveBeenCalledWith({
         description:
-          "Pack specification spec1 filtered out based on pageCount constraints",
+          "Pack specification filtered out based on pageCount constraints",
         packSpecId: "spec1",
         pageCount: 3,
         violatedConstraints: expect.arrayContaining([
@@ -617,7 +617,7 @@ describe("supplier-config service", () => {
 
       expect(deps.logger.info).toHaveBeenCalledWith({
         description:
-          "Pack specification spec1 filtered out based on pageCount constraints",
+          "Pack specification filtered out based on pageCount constraints",
         packSpecId: "spec1",
         pageCount: 3,
         violatedConstraints: expect.arrayContaining([
