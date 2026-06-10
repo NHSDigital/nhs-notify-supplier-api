@@ -212,88 +212,108 @@ function evaluateContraint(
 
 // This function is used to filter the pack specifications for a letter based on the letter data pages and pack specification constraints sheets
 
+type ConstraintName = "sheets" | "sides";
+
+type ViolatedConstraint = {
+  constraint: ConstraintName;
+  actualValue: number;
+  constraintValue: number;
+  operator: string;
+};
+
+function hasConstraint(constraint?: {
+  value?: number;
+  operator?: string;
+}): constraint is { value: number; operator: string } {
+  return constraint?.value !== undefined && constraint.operator !== undefined;
+}
+
+function getViolatedConstraints(
+  pageCount: number,
+  duplex: boolean | undefined,
+  constraints?: {
+    sheets?: { value?: number; operator?: string };
+    sides?: { value?: number; operator?: string };
+  },
+): ViolatedConstraint[] {
+  if (!constraints) {
+    return [];
+  }
+
+  const violations: ViolatedConstraint[] = [];
+
+  if (hasConstraint(constraints.sheets)) {
+    const sheetCount = duplex ? Math.ceil(pageCount / 2) : pageCount;
+    const passes = evaluateContraint(
+      sheetCount,
+      constraints.sheets.value,
+      constraints.sheets.operator,
+    );
+
+    if (!passes) {
+      violations.push({
+        constraint: "sheets",
+        actualValue: sheetCount,
+        constraintValue: constraints.sheets.value,
+        operator: constraints.sheets.operator,
+      });
+    }
+  }
+
+  if (hasConstraint(constraints.sides)) {
+    const passes = evaluateContraint(
+      pageCount,
+      constraints.sides.value,
+      constraints.sides.operator,
+    );
+
+    if (!passes) {
+      violations.push({
+        constraint: "sides",
+        actualValue: pageCount,
+        constraintValue: constraints.sides.value,
+        operator: constraints.sides.operator,
+      });
+    }
+  }
+
+  return violations;
+}
+
 export async function filterPacksForLetter(
   letterEvent: PreparedEvents,
   packSpecificationIds: string[],
   deps: Deps,
 ): Promise<string[]> {
-  const filteredPackIds: string[] = [];
+  const { pageCount } = letterEvent.data;
 
-  for (const packSpecId of packSpecificationIds) {
-    let isValid = true;
-    const violatedConstraints: Array<{
-      constraint: "sheets" | "sides";
-      actualValue: number;
-      constraintValue: number;
-      operator: string;
-    }> = [];
+  const evaluationResults = await Promise.all(
+    packSpecificationIds.map(async (packSpecId) => {
+      const packSpec =
+        await deps.supplierConfigRepo.getPackSpecification(packSpecId);
 
-    const packSpec =
-      await deps.supplierConfigRepo.getPackSpecification(packSpecId);
+      const violatedConstraints = getViolatedConstraints(
+        pageCount,
+        packSpec?.assembly?.duplex,
+        packSpec.constraints,
+      );
 
-    if (packSpec.constraints) {
-      // Evaluate sheets constraint if present
-      if (
-        packSpec.constraints.sheets &&
-        packSpec.constraints.sheets.value !== undefined &&
-        packSpec.constraints.sheets.operator
-      ) {
-        const sheetCount = packSpec?.assembly?.duplex
-          ? Math.ceil(letterEvent.data.pageCount / 2)
-          : letterEvent.data.pageCount;
-
-        const passesSheetsConstraint = evaluateContraint(
-          sheetCount,
-          packSpec.constraints.sheets.value,
-          packSpec.constraints.sheets.operator,
-        );
-
-        if (!passesSheetsConstraint) {
-          isValid = false;
-          violatedConstraints.push({
-            constraint: "sheets",
-            actualValue: sheetCount,
-            constraintValue: packSpec.constraints.sheets.value,
-            operator: packSpec.constraints.sheets.operator,
-          });
-        }
+      if (violatedConstraints.length > 0) {
+        deps.logger.info({
+          description: `Pack specification ${packSpecId} filtered out based on pageCount constraints`,
+          packSpecId,
+          pageCount,
+          violatedConstraints,
+        });
       }
 
-      // Evaluate sides constraint if present
-      if (
-        packSpec.constraints.sides &&
-        packSpec.constraints.sides.value !== undefined &&
-        packSpec.constraints.sides.operator
-      ) {
-        const passesSidesConstraint = evaluateContraint(
-          letterEvent.data.pageCount,
-          packSpec.constraints.sides.value,
-          packSpec.constraints.sides.operator,
-        );
+      return { packSpecId, isValid: violatedConstraints.length === 0 };
+    }),
+  );
 
-        if (!passesSidesConstraint) {
-          isValid = false;
-          violatedConstraints.push({
-            constraint: "sides",
-            actualValue: letterEvent.data.pageCount,
-            constraintValue: packSpec.constraints.sides.value,
-            operator: packSpec.constraints.sides.operator,
-          });
-        }
-      }
-    }
-
-    if (isValid) {
-      filteredPackIds.push(packSpecId);
-    } else {
-      deps.logger.info({
-        description: `Pack specification ${packSpecId} filtered out based on pageCount constraints`,
-        packSpecId,
-        pageCount: letterEvent.data.pageCount,
-        violatedConstraints,
-      });
-    }
-  }
+  const filteredPackIds = evaluationResults
+    .filter((result) => result.isValid)
+    .map((result) => result.packSpecId);
 
   if (filteredPackIds.length === 0) {
     deps.logger.error({
@@ -305,5 +325,6 @@ export async function filterPacksForLetter(
       `No eligible pack specifications found for letter variant id ${letterEvent.data.letterVariantId} and pack specification ids ${packSpecificationIds.join(", ")}`,
     );
   }
+
   return filteredPackIds;
 }

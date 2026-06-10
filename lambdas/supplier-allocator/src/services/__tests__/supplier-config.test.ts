@@ -506,15 +506,18 @@ describe("supplier-config service", () => {
         "No eligible pack specifications found for letter variant id undefined and pack specification ids spec1",
       );
       expect(deps.logger.info).toHaveBeenCalledWith({
-        description: "Pack specification spec1 filtered out based on pageCount constraints",
+        description:
+          "Pack specification spec1 filtered out based on pageCount constraints",
         packSpecId: "spec1",
         pageCount: 3,
-        violatedConstraints: expect.arrayContaining([expect.objectContaining({
-          actualValue: 3,
-          constraint: "sheets",
-          constraintValue: 2,
-          operator: "LESS_THAN",
-        })]),
+        violatedConstraints: expect.arrayContaining([
+          expect.objectContaining({
+            actualValue: 3,
+            constraint: "sheets",
+            constraintValue: 2,
+            operator: "LESS_THAN",
+          }),
+        ]),
       });
       expect(deps.logger.error).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -528,20 +531,20 @@ describe("supplier-config service", () => {
     it("does not filter pack specification when duplex reduces sheets and constraint is LESS_THAN_OR_EQUAL", async () => {
       const deps = makeDeps();
       deps.supplierConfigRepo.getPackSpecification = jest
-      .fn()
-      .mockResolvedValue({
-        id: "spec1",
-        assembly: { duplex: true },
-        constraints: {
-        sheets: { operator: "LESS_THAN_OR_EQUAL", value: 2 },
-        },
-      } as any);
+        .fn()
+        .mockResolvedValue({
+          id: "spec1",
+          assembly: { duplex: true },
+          constraints: {
+            sheets: { operator: "LESS_THAN_OR_EQUAL", value: 2 },
+          },
+        } as any);
 
       const letterEvent = {
-      data: {
-        pageCount: 3,
-        letterVariantId: "variant-1",
-      },
+        data: {
+          pageCount: 3,
+          letterVariantId: "variant-1",
+        },
       } as any;
 
       const result = await filterPacksForLetter(letterEvent, ["spec1"], deps);
@@ -552,12 +555,14 @@ describe("supplier-config service", () => {
 
     it("filters pack specification when sides fail LESS_THAN_OR_EQUAL", async () => {
       const deps = makeDeps();
-      deps.supplierConfigRepo.getPackSpecification = jest.fn().mockResolvedValue({
-        id: "spec1",
-        constraints: {
-          sides: { operator: "LESS_THAN_OR_EQUAL", value: 2 },
-        },
-      } as any);
+      deps.supplierConfigRepo.getPackSpecification = jest
+        .fn()
+        .mockResolvedValue({
+          id: "spec1",
+          constraints: {
+            sides: { operator: "LESS_THAN_OR_EQUAL", value: 2 },
+          },
+        } as any);
 
       const letterEvent = {
         data: {
@@ -588,14 +593,16 @@ describe("supplier-config service", () => {
 
     it("filters by sides using page count even when duplex is enabled", async () => {
       const deps = makeDeps();
-      deps.supplierConfigRepo.getPackSpecification = jest.fn().mockResolvedValue({
-        id: "spec1",
-        assembly: { duplex: true },
-        constraints: {
-          sheets: { operator: "LESS_THAN_OR_EQUAL", value: 2 },
-          sides: { operator: "LESS_THAN_OR_EQUAL", value: 2 },
-        },
-      } as any);
+      deps.supplierConfigRepo.getPackSpecification = jest
+        .fn()
+        .mockResolvedValue({
+          id: "spec1",
+          assembly: { duplex: true },
+          constraints: {
+            sheets: { operator: "LESS_THAN_OR_EQUAL", value: 2 },
+            sides: { operator: "LESS_THAN_OR_EQUAL", value: 2 },
+          },
+        } as any);
 
       const letterEvent = {
         data: {
@@ -627,20 +634,20 @@ describe("supplier-config service", () => {
     it("does not filter pack specification when sides is valid", async () => {
       const deps = makeDeps();
       deps.supplierConfigRepo.getPackSpecification = jest
-      .fn()
-      .mockResolvedValue({
-        id: "spec1",
-        assembly: { duplex: true },
-        constraints: {
-        sheets: { operator: "LESS_THAN_OR_EQUAL", value: 4 },
-        },
-      } as any);
+        .fn()
+        .mockResolvedValue({
+          id: "spec1",
+          assembly: { duplex: true },
+          constraints: {
+            sheets: { operator: "LESS_THAN_OR_EQUAL", value: 4 },
+          },
+        } as any);
 
       const letterEvent = {
-      data: {
-        pageCount: 3,
-        letterVariantId: "variant-1",
-      },
+        data: {
+          pageCount: 3,
+          letterVariantId: "variant-1",
+        },
       } as any;
 
       const result = await filterPacksForLetter(letterEvent, ["spec1"], deps);
@@ -673,8 +680,6 @@ describe("supplier-config service", () => {
       expect(deps.logger.info).not.toHaveBeenCalled();
       expect(deps.logger.error).not.toHaveBeenCalled();
     });
-
-
 
     it("returns eligible packs for all constraint types", async () => {
       const deps = makeDeps();
