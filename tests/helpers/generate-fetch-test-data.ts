@@ -39,6 +39,23 @@ export const PendingLetterSchema = z.object({
 });
 export type PendingLetter = z.infer<typeof PendingLetterSchema>;
 
+export interface SupplierApiLetters {
+  supplierId: string;
+  specificationId: string;
+  supplierStatus: string;
+  createdAt: string;
+  supplierStatusSk: string;
+  updatedAt: string;
+  groupId: string;
+  reasonCode: string;
+  id: string;
+  url: string;
+  ttl: string;
+  reasonText: string;
+  status: string;
+  source: string;
+}
+
 export async function createTestData(
   supplierId: string,
   count?: number,
@@ -403,4 +420,39 @@ export async function getLetterFromQueueById(
     logger.error({ supplierId, error }, "Letter queue query failed");
     return [];
   }
+}
+
+export async function getLettersFromSupplierTable(
+  supplierId: string,
+  id: string,
+  status: string,
+  options?: {
+    timeoutMs?: number;
+    intervalMs?: number;
+  },
+): Promise<SupplierApiLetters> {
+  const timeoutMs = options?.timeoutMs ?? 60_000;
+  const intervalMs = options?.intervalMs ?? 5000;
+  const startedAt = Date.now();
+
+  while (Date.now() - startedAt < timeoutMs) {
+    const { Item } = await docClient.send(
+      new GetCommand({
+        TableName: LETTERSTABLENAME,
+        Key: { id, supplierId },
+      }),
+    );
+
+    const letter = Item as SupplierApiLetters;
+
+    if (letter && letter.status === status) {
+      return letter;
+    }
+
+    await delay(intervalMs);
+  }
+
+  throw new Error(
+    `Timed out waiting for letter ${id} to reach status ${status} for supplier ${supplierId}.`,
+  );
 }

@@ -1,0 +1,7 @@
+{
+  "allocationPercentage": 50,
+  "id": "supplier3-volumeGroup-test4",
+  "status": "PROD",
+  "supplier": "supplier3",
+  "volumeGroup": "volumeGroup-test4"
+}

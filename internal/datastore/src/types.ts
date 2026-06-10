@@ -160,3 +160,14 @@ export const $DailyAllocation = z
   });
 
 export type DailyAllocation = z.infer<typeof $DailyAllocation>;
+
+export const $SupplierConfigEntity = z.enum([
+  "letter-variant",
+  "volume-group",
+  "supplier-allocation",
+  "supplier",
+  "pack-specification",
+  "supplier-pack",
+]);
+
+export type SupplierConfigEntity = z.infer<typeof $SupplierConfigEntity>;
