@@ -58,14 +58,14 @@ test.describe("Allocator Lambda Tests", () => {
     const preparedEvent = createPreparedV1Event({
       domainId,
       letterVariantId: letterVariant,
-      pageCount: 6, // pagecount that makes notify-c5 ineligible and notify-c4 eligible based on their pack configs
+      pageCount: 11, // pagecount that makes notify-c5 ineligible and notify-c4 eligible based on their pack configs (note packs are duplex)
     });
 
     const response = await sendSnsEvent(preparedEvent);
     expect(response.MessageId).toBeTruthy();
 
     const supplierAllocatorLog = await getAllocationLog(
-      "Pack specification filtered out based on constraints",
+      "Pack specification filtered out based on pageCount constraints",
     );
     const filteredPackSpecId = supplierAllocatorLog.packSpecId;
     logger.info(`Pack spec filtered out ${filteredPackSpecId}`);
