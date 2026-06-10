@@ -58,7 +58,7 @@ test.describe("Allocator Lambda Tests", () => {
     const preparedEvent = createPreparedV1Event({
       domainId,
       letterVariantId: letterVariant,
-      pageCount: 6, // pagecount that makes notify-c5 ineligible and notify-c4 eligible based on their pack configs
+      pageCount: 11, // pagecount that makes notify-c5 ineligible and notify-c4 eligible based on their pack configs (note packs are duplex)
     });
 
     const response = await sendSnsEvent(preparedEvent);
