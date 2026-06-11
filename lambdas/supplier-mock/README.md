@@ -2,9 +2,12 @@
 
 # Supplier Mock
 
-## What is does
+## Purpose
 
 The supplier-mock lambda simulates the supplier's system behaviour so that downstream services can simulate supplier interaction without relying on a live supplier system.
+
+### General Flow
+
 The mock simulates the journey of a letter with the Supplier. It utilises the api-handler and retrieves pending letters by calling the `getLetters` lambda directly and then provides status updates for each letter by calling the `patchLetter` lambda.
 Each time the mock is called it will call `getLetters` once with for the **supplierId** `TestSupplier1` and with a **limit** of `100` letters. These default values can be configured in the AWS Parameter Store as explained in [How to modify parameter store variables](#how-to-modify-default-variable-values-in-parameter-store) . It then loops through each retrieved letter and updates its status by calling `patchLetter` and using the **specification_id_mapping** map to determine its status. If the map doesn't return a value it will default to `ACCEPTED` status.
 
