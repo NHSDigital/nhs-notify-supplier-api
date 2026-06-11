@@ -212,41 +212,109 @@ function evaluateContraint(
 
 // This function is used to filter the pack specifications for a letter based on the letter data pages and pack specification constraints sheets
 
+type ConstraintName = "sheets" | "sides";
+
+type ViolatedConstraint = {
+  constraint: ConstraintName;
+  actualValue: number;
+  constraintValue: number;
+  operator: string;
+};
+
+function hasConstraint(constraint?: {
+  value?: number;
+  operator?: string;
+}): constraint is { value: number; operator: string } {
+  return constraint?.value !== undefined && constraint.operator !== undefined;
+}
+
+function getViolatedConstraints(
+  pageCount: number,
+  duplex: boolean | undefined,
+  constraints?: {
+    sheets?: { value?: number; operator?: string };
+    sides?: { value?: number; operator?: string };
+  },
+): ViolatedConstraint[] {
+  if (!constraints) {
+    return [];
+  }
+
+  const violations: ViolatedConstraint[] = [];
+
+  if (hasConstraint(constraints.sheets)) {
+    const sheetCount = duplex ? Math.ceil(pageCount / 2) : pageCount;
+    const passes = evaluateContraint(
+      sheetCount,
+      constraints.sheets.value,
+      constraints.sheets.operator,
+    );
+
+    if (!passes) {
+      violations.push({
+        constraint: "sheets",
+        actualValue: sheetCount,
+        constraintValue: constraints.sheets.value,
+        operator: constraints.sheets.operator,
+      });
+    }
+  }
+
+  if (hasConstraint(constraints.sides)) {
+    const passes = evaluateContraint(
+      pageCount,
+      constraints.sides.value,
+      constraints.sides.operator,
+    );
+
+    if (!passes) {
+      violations.push({
+        constraint: "sides",
+        actualValue: pageCount,
+        constraintValue: constraints.sides.value,
+        operator: constraints.sides.operator,
+      });
+    }
+  }
+
+  return violations;
+}
+
 export async function filterPacksForLetter(
   letterEvent: PreparedEvents,
   packSpecificationIds: string[],
   deps: Deps,
 ): Promise<string[]> {
-  const filteredPackIds: string[] = [];
-  for (const packSpecId of packSpecificationIds) {
-    const packSpec =
-      await deps.supplierConfigRepo.getPackSpecification(packSpecId);
-    if (
-      !packSpec.constraints ||
-      !packSpec.constraints.sheets ||
-      !packSpec.constraints.sheets.value ||
-      !packSpec.constraints.sheets.operator
-    ) {
-      filteredPackIds.push(packSpecId);
-    } else {
-      const isValid = evaluateContraint(
-        letterEvent.data.pageCount,
-        packSpec.constraints.sheets.value,
-        packSpec.constraints.sheets.operator,
+  const { pageCount } = letterEvent.data;
+
+  const evaluationResults = await Promise.all(
+    packSpecificationIds.map(async (packSpecId) => {
+      const packSpec =
+        await deps.supplierConfigRepo.getPackSpecification(packSpecId);
+
+      const violatedConstraints = getViolatedConstraints(
+        pageCount,
+        packSpec?.assembly?.duplex,
+        packSpec.constraints,
       );
-      if (isValid) {
-        filteredPackIds.push(packSpecId);
-      } else {
+
+      if (violatedConstraints.length > 0) {
         deps.logger.info({
-          description: "Pack specification filtered out based on constraints",
+          description: `Pack specification filtered out based on pageCount constraints`,
           packSpecId,
-          pageCount: letterEvent.data.pageCount,
-          constraintValue: packSpec.constraints.sheets.value,
-          constraintOperator: packSpec.constraints.sheets.operator,
+          pageCount,
+          violatedConstraints,
         });
       }
-    }
-  }
+
+      return { packSpecId, isValid: violatedConstraints.length === 0 };
+    }),
+  );
+
+  const filteredPackIds = evaluationResults
+    .filter((result) => result.isValid)
+    .map((result) => result.packSpecId);
+
   if (filteredPackIds.length === 0) {
     deps.logger.error({
       description: "No eligible pack specifications found for letter",
@@ -257,5 +325,6 @@ export async function filterPacksForLetter(
       `No eligible pack specifications found for letter variant id ${letterEvent.data.letterVariantId} and pack specification ids ${packSpecificationIds.join(", ")}`,
     );
   }
+
   return filteredPackIds;
 }

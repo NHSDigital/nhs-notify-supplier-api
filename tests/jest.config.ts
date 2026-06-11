@@ -10,6 +10,6 @@ export default {
     "^.+\\.(js|mjs)$": "babel-jest",
   },
   transformIgnorePatterns: [
-    "/node_modules/(?!(?:@pact-foundation|https-proxy-agent|agent-base)/)",
+    "/node_modules/(?!(?:@pact-foundation|https-proxy-agent|agent-base|proxy-agent-negotiate|proxy-from-env)/)",
   ],
 };

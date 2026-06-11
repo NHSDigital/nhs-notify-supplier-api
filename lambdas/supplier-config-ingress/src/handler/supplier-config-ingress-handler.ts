@@ -23,16 +23,12 @@ const $EventEnvelope = z.object({
 });
 
 const entitySchemas: Record<SupplierConfigEntity, z.ZodType<{ id: string }>> = {
-  "letter-variant": $LetterVariant as unknown as z.ZodType<{ id: string }>,
-  "volume-group": $VolumeGroup as unknown as z.ZodType<{ id: string }>,
-  "supplier-allocation": $SupplierAllocation as unknown as z.ZodType<{
-    id: string;
-  }>,
-  supplier: $Supplier as unknown as z.ZodType<{ id: string }>,
-  "pack-specification": $PackSpecification as unknown as z.ZodType<{
-    id: string;
-  }>,
-  "supplier-pack": $SupplierPack as unknown as z.ZodType<{ id: string }>,
+  "letter-variant": $LetterVariant,
+  "volume-group": $VolumeGroup,
+  "supplier-allocation": $SupplierAllocation,
+  supplier: $Supplier,
+  "pack-specification": $PackSpecification,
+  "supplier-pack": $SupplierPack,
 };
 
 type UpsertResult = Awaited<
