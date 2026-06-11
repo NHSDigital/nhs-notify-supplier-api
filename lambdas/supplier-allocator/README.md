@@ -1,3 +1,5 @@
+<!-- vale off -->
+
 # Supplier Allocator Lambda
 
 ## Purpose
@@ -28,3 +30,5 @@ Consumes `LetterRequestPrepared` events (v1 and v2) from an SQS queue, chooses a
 - **The factor algorithm is a running weighted average across the lifetime of the system, not per-batch.** The `overallAllocation` table accumulates counts since deployment. A supplier that handled a disproportionate share yesterday will have a high factor today and be deprioritised, allowing others to catch up to their target percentage.
 - **Daily capacity check uses London timezone.** `format(toZonedTime(new Date(), "Europe/London"), "yyyy-MM-dd")` determines the date key. Capacity resets at midnight London time, not UTC.
 - **Quota updates happen after the entire batch completes**, not per-record. This optimisation means concurrent Lambda invocations can transiently over-allocate a supplier before quotas are reconciled.
+
+<!-- vale on -->

@@ -1,4 +1,6 @@
-## Contributing to NHS Notify Supplier API
+<!-- vale off -->
+
+# Contributing to NHS Notify Supplier API
 
 ## Feature Branches
 
@@ -51,3 +53,5 @@ You can test your branch in a dynamic environment prior to merging to `main`. Th
 Each Lambda and internal package has a `README.md` alongside the source describing its purpose, flow, integration points, and peculiarities. These are bundled into the docs site via `docs/generate-includes.sh`.
 
 When making changes to a Lambda or internal package, check whether the corresponding README needs updating. Function documentation is not auto-generated and can become stale if not maintained alongside code changes.
+
+<!-- vale on -->

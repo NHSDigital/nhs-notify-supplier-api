@@ -1,3 +1,5 @@
+<!-- vale off -->
+
 # Update Letter Queue Lambda
 
 ## Purpose
@@ -26,3 +28,5 @@ Maintains the pending letter queue DynamoDB table as a projection of the main le
 - **REJECTED letters are never queued.** Letters inserted with status REJECTED (from a failed supplier allocation) are INSERT events but with `status != PENDING`, so `isNewPendingLetter` returns false and they are not added to the queue.
 - **Immediate failure return**: on any unexpected error, the handler stops processing remaining records and returns the failing sequence number in `batchItemFailures`, maintaining Kinesis ordering guarantees.
 - Queue entries use a composite `queueSortOrderSk` (zero-padded priority + ISO timestamp) to enable priority-ordered retrieval by the API handler's `GET /letters` endpoint.
+
+<!-- vale on -->

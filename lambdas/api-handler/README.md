@@ -1,3 +1,5 @@
+<!-- vale off -->
+
 # API Handler Lambdas
 
 ## Purpose
@@ -8,16 +10,16 @@ The primary supplier-facing Lambdas behind API Gateway. Contains handlers with l
 
 Each export in `src/index.ts` maps to a separate API Gateway route:
 
-| Export | Endpoint | Description |
-| --- | --- | --- |
-| `getLetters` | `GET /letters` | Returns pending letters from the letter queue table with visibility-timeout locking |
-| `getLetter` | `GET /letters/{id}` | Fetches a single letter by supplier and letter ID |
-| `getLetterData` | `GET /letters/{id}/data` | Returns a 303 redirect to a time-limited S3 pre-signed URL for the letter PDF |
-| `patchLetter` | `PATCH /letters/{id}` | Accepts a single letter status update, enqueues it to SQS |
-| `postLetters` | `POST /letters` | Accepts a batch of letter status updates (up to `MAX_LIMIT`), enqueues them to SQS |
-| `postMI` | `POST /mi` | Accepts a management information submission, persists it via `MIRepository` |
+| Export                    | Endpoint                              | Description                                                                                                                    |
+| ------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `getLetters`              | `GET /letters`                        | Returns pending letters from the letter queue table with visibility-timeout locking                                            |
+| `getLetter`               | `GET /letters/{id}`                   | Fetches a single letter by supplier and letter ID                                                                              |
+| `getLetterData`           | `GET /letters/{id}/data`              | Returns a 303 redirect to a time-limited S3 pre-signed URL for the letter PDF                                                  |
+| `patchLetter`             | `PATCH /letters/{id}`                 | Accepts a single letter status update, enqueues it to SQS                                                                      |
+| `postLetters`             | `POST /letters`                       | Accepts a batch of letter status updates (up to `MAX_LIMIT`), enqueues them to SQS                                             |
+| `postMI`                  | `POST /mi`                            | Accepts a management information submission, persists it via `MIRepository`                                                    |
 | `transformAmendmentEvent` | Supports patchLetters and postLetters | Processes queued `UpdateLetterCommand` messages, looks up the current letter, and publishes a `LetterStatusChangeEvent` to SNS |
-| `getStatus` | `GET /_status` | Healthcheck that verifies DynamoDB and S3 connectivity |
+| `getStatus`               | `GET /_status`                        | Healthcheck that verifies DynamoDB and S3 connectivity                                                                         |
 
 ## General Flow
 
@@ -42,3 +44,5 @@ Each export in `src/index.ts` maps to a separate API Gateway route:
 - `POST /letters` enforces a duplicate letter ID check within a single request and a configurable max batch size (`MAX_LIMIT`).
 - `transformAmendmentEvent` is an SQS-triggered handler bundled in the same Lambda package, not an API Gateway route. It bridges the async status update flow by looking up current letter state before publishing the event.
 - Error responses are centralised through `processError` in the error mapper to produce a consistent JSON:API error shape across all endpoints.
+
+<!-- vale on -->

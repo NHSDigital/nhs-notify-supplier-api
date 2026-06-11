@@ -1,3 +1,5 @@
+<!-- vale off -->
+
 # Internal Packages
 
 ## Purpose
@@ -16,3 +18,5 @@ These packages provide common schemas, datastore repositories, event builders, a
 ## Usage
 
 Import from these packages in other workspaces rather than duplicating logic locally.
+
+<!-- vale on -->

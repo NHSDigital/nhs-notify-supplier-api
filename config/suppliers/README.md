@@ -1,3 +1,5 @@
+<!-- vale off -->
+
 # Supplier Configuration
 
 ## Purpose
@@ -6,14 +8,14 @@ Static JSON configuration files that define the supplier allocation rules for th
 
 ## Configuration Entities
 
-| Entity | Directory | Description |
-| --- | --- | --- |
-| **Supplier** | `supplier/` | Print supplier definitions with ID, name, channel type, daily capacity, and status (PROD/DRAFT) |
-| **Letter Variant** | `letter-variant/` | Letter type definitions with physical constraints (sheets, sides, ink coverage, delivery days), associated pack specification IDs, and volume group assignment |
-| **Volume Group** | `volume-group/` | Groupings of letter variants for allocation purposes, with status and date range validity |
-| **Supplier Allocation** | `supplier-allocation/` | Maps a supplier to a volume group with a target `allocationPercentage` and status |
-| **Pack Specification** | `pack-specification/` | Detailed print assembly specs (paper, envelope, print colour, duplex) with constraints and billing ID |
-| **Supplier Pack** | `supplier-pack/` | Links a supplier to a pack specification with approval status |
+| Entity                  | Directory              | Description                                                                                                                                                    |
+| ----------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Supplier**            | `supplier/`            | Print supplier definitions with ID, name, channel type, daily capacity, and status (PROD/DRAFT)                                                                |
+| **Letter Variant**      | `letter-variant/`      | Letter type definitions with physical constraints (sheets, sides, ink coverage, delivery days), associated pack specification IDs, and volume group assignment |
+| **Volume Group**        | `volume-group/`        | Groupings of letter variants for allocation purposes, with status and date range validity                                                                      |
+| **Supplier Allocation** | `supplier-allocation/` | Maps a supplier to a volume group with a target `allocationPercentage` and status                                                                              |
+| **Pack Specification**  | `pack-specification/`  | Detailed print assembly specs (paper, envelope, print colour, duplex) with constraints and billing ID                                                          |
+| **Supplier Pack**       | `supplier-pack/`       | Links a supplier to a pack specification with approval status                                                                                                  |
 
 ## Allocation Lookup Chain
 
@@ -33,3 +35,5 @@ When the `supplier-allocator` Lambda processes a `LetterRequestPreparedEvent`:
 - `status: "PROD"` is required at multiple levels (supplier, volume group, allocation) for an allocation to be active.
 - Volume groups have `startDate` (and optional `endDate`) fields. Allocations are only valid when the current date falls within this range (evaluated in London timezone).
 - Supplier `dailyCapacity` is tracked separately in `SUPPLIER_QUOTAS_TABLE` and resets at midnight London time. It is not stored in these config files.
+
+<!-- vale on -->

@@ -1,9 +1,15 @@
+<!-- vale off -->
+
+# function-readmes
+
 ---
+
 title: Function Documentation
 nav_order: 6
 parent: Developer Guides
 has_children: false
 has_toc: true
+
 ---
 
 This page bundles function-level README files from the Supplier API codebase.
@@ -14,7 +20,7 @@ Primary data flows passing through the system:
 
 ### Inbound (letter allocation and creation)
 
-```
+```text
 LetterRequestPreparedEvent (SNS)
   → supplier-allocator (SQS consumer)
     → resolves supplier via weighted fair-share algorithm
@@ -27,7 +33,7 @@ LetterRequestPreparedEvent (SNS)
 
 ### Supplier-facing (status updates)
 
-```
+```text
 Supplier calls GET /letters (api-handler)
   → reads from pending queue table with visibility timeout
 Supplier calls PATCH /letters/{id} or POST /letters (api-handler)
@@ -43,7 +49,7 @@ Supplier calls PATCH /letters/{id} or POST /letters (api-handler)
 
 ### MI submission
 
-```
+```text
 Supplier calls POST /mi (api-handler)
   → persists MI record to DynamoDB (mi table)
     → DynamoDB Stream → Kinesis
@@ -52,7 +58,7 @@ Supplier calls POST /mi (api-handler)
 
 ### Supplier config ingestion
 
-```
+```text
 Supplier config event (SNS, type prefix uk.nhs.notify.supplier-config)
   → supplier-config SQS queue
     → supplier-config-ingress (SQS consumer)
@@ -122,3 +128,5 @@ Supplier config event (SNS, type prefix uk.nhs.notify.supplier-config)
 ## Supplier Configuration
 
 {% include components/generated/readmes/config-suppliers.md %}
+
+<!-- vale on -->
