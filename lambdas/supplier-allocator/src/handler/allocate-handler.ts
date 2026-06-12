@@ -276,6 +276,7 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
           description: "Extracted letter event",
           messageId: record.messageId,
         });
+        // NOTE TO SELF remove this comment create a PR and trigger a build
 
         const supplierDetails: SupplierDetails = await getSupplierFromConfig(
           letterEvent,
