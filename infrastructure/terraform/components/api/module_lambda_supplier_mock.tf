@@ -16,7 +16,7 @@ module "supplier_mock" {
   kms_key_arn           = module.kms.key_arn
 
   iam_policy_document = {
-    body = data.aws_iam_policy_document.supplier_mock_lambda.json
+    body = data.aws_iam_policy_document.supplier_mock_lambda[0].json
   }
 
   function_s3_bucket      = local.acct.s3_buckets["lambda_function_artefacts"]["id"]
@@ -44,6 +44,8 @@ module "supplier_mock" {
 }
 
 data "aws_iam_policy_document" "supplier_mock_lambda" {
+  count = var.deploy_supplier_mock_scheduler ? 1 : 0
+
   statement {
     sid    = "KMSPermissions"
     effect = "Allow"
