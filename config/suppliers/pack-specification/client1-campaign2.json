@@ -49,7 +49,7 @@
     "maxWeightGrams": 100,
     "size": "STANDARD"
   },
-  "status": "INT",
+  "status": "PROD",
   "updatedAt": "2026-04-14T00:00:00.000Z",
   "version": 1
 }

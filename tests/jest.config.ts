@@ -1,5 +1,6 @@
 export default {
   preset: "ts-jest",
+  extensionsToTreatAsEsm: [".ts"],
   testEnvironment: "node",
   testMatch: ["**/*.test.ts"],
   coveragePathIgnorePatterns: ["/node_modules/", "__tests__"],
@@ -9,6 +10,6 @@ export default {
     "^.+\\.(js|mjs)$": "babel-jest",
   },
   transformIgnorePatterns: [
-    "/node_modules/(?!(?:@pact-foundation|https-proxy-agent|agent-base)/)",
+    "/node_modules/(?!(?:@pact-foundation|https-proxy-agent|agent-base|proxy-agent-negotiate|proxy-from-env)/)",
   ],
 };

@@ -18,6 +18,7 @@ No requirements.
 | <a name="input_csoc_destination_account"></a> [csoc\_destination\_account](#input\_csoc\_destination\_account) | value of the CSOC destination account, if applicable. If null, CSOC destination account will not be added as a resource in the logging policy | `string` | `"000000000000"` | no |
 | <a name="input_csoc_log_forwarding"></a> [csoc\_log\_forwarding](#input\_csoc\_log\_forwarding) | Enable forwarding of API Gateway logs to CSOC | `bool` | `true` | no |
 | <a name="input_default_tags"></a> [default\_tags](#input\_default\_tags) | A map of default tags to apply to all taggable resources within the component | `map(string)` | `{}` | no |
+| <a name="input_deploy_supplier_mock_scheduler"></a> [deploy\_supplier\_mock\_scheduler](#input\_deploy\_supplier\_mock\_scheduler) | Deploy EventBridge Scheduler trigger for supplier mock lambda | `bool` | `false` | no |
 | <a name="input_disable_gateway_execute_endpoint"></a> [disable\_gateway\_execute\_endpoint](#input\_disable\_gateway\_execute\_endpoint) | Disable the execution endpoint for the API Gateway | `bool` | `true` | no |
 | <a name="input_download_url_ttl_seconds"></a> [download\_url\_ttl\_seconds](#input\_download\_url\_ttl\_seconds) | TTL in seconds for generated download URLs | `number` | `60` | no |
 | <a name="input_enable_alarms"></a> [enable\_alarms](#input\_enable\_alarms) | Enable CloudWatch alarms for this deployed environment | `bool` | `true` | no |
@@ -26,6 +27,7 @@ No requirements.
 | <a name="input_enable_event_anomaly_detection"></a> [enable\_event\_anomaly\_detection](#input\_enable\_event\_anomaly\_detection) | Enable CloudWatch anomaly detection alarm for SNS message  Detects abnormal drops or spikes in event publishing volume. | `bool` | `true` | no |
 | <a name="input_enable_event_cache"></a> [enable\_event\_cache](#input\_enable\_event\_cache) | Enable caching of events to an S3 bucket | `bool` | `true` | no |
 | <a name="input_enable_sns_delivery_logging"></a> [enable\_sns\_delivery\_logging](#input\_enable\_sns\_delivery\_logging) | Enable SNS Delivery Failure Notifications | `bool` | `true` | no |
+| <a name="input_enable_supplier_mock_scheduler"></a> [enable\_supplier\_mock\_scheduler](#input\_enable\_supplier\_mock\_scheduler) | Enable EventBridge Scheduler trigger for supplier mock lambda | `bool` | `false` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | The name of the tfscaffold environment | `string` | n/a | yes |
 | <a name="input_event_anomaly_band_width"></a> [event\_anomaly\_band\_width](#input\_event\_anomaly\_band\_width) | The width of the anomaly detection band. Higher values (e.g. 4-6) reduce sensitivity and noise, lower values (e.g. 2-3) increase sensitivity. Recommended: 2-4. | `number` | `4` | no |
 | <a name="input_event_anomaly_evaluation_periods"></a> [event\_anomaly\_evaluation\_periods](#input\_event\_anomaly\_evaluation\_periods) | Number of evaluation periods for the anomaly alarm. Each period is defined by event\_anomaly\_period. | `number` | `3` | no |
@@ -51,6 +53,7 @@ No requirements.
 | <a name="input_region"></a> [region](#input\_region) | The AWS Region | `string` | n/a | yes |
 | <a name="input_shared_infra_account_id"></a> [shared\_infra\_account\_id](#input\_shared\_infra\_account\_id) | The AWS Account ID of the shared infrastructure account | `string` | `"000000000000"` | no |
 | <a name="input_sns_success_logging_sample_percent"></a> [sns\_success\_logging\_sample\_percent](#input\_sns\_success\_logging\_sample\_percent) | Enable SNS Delivery Successful Sample Percentage | `number` | `0` | no |
+| <a name="input_supplier_mock_schedule_expression"></a> [supplier\_mock\_schedule\_expression](#input\_supplier\_mock\_schedule\_expression) | Schedule expression for supplier mock scheduler | `string` | `"rate(1 minute)"` | no |
 ## Modules
 
 | Name | Source | Version |
@@ -83,7 +86,10 @@ No requirements.
 | <a name="module_sqs_alarms"></a> [sqs\_alarms](#module\_sqs\_alarms) | ../../modules/alarms-sqs | n/a |
 | <a name="module_sqs_letter_updates"></a> [sqs\_letter\_updates](#module\_sqs\_letter\_updates) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.1.5/terraform-sqs.zip | n/a |
 | <a name="module_sqs_supplier_allocator"></a> [sqs\_supplier\_allocator](#module\_sqs\_supplier\_allocator) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.1.5/terraform-sqs.zip | n/a |
+| <a name="module_sqs_supplier_config"></a> [sqs\_supplier\_config](#module\_sqs\_supplier\_config) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.1.5/terraform-sqs.zip | n/a |
 | <a name="module_supplier_allocator"></a> [supplier\_allocator](#module\_supplier\_allocator) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.2/terraform-lambda.zip | n/a |
+| <a name="module_supplier_config_ingress"></a> [supplier\_config\_ingress](#module\_supplier\_config\_ingress) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip | n/a |
+| <a name="module_supplier_mock"></a> [supplier\_mock](#module\_supplier\_mock) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.5/terraform-lambda.zip | n/a |
 | <a name="module_supplier_ssl"></a> [supplier\_ssl](#module\_supplier\_ssl) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-ssl.zip | n/a |
 | <a name="module_update_letter_queue"></a> [update\_letter\_queue](#module\_update\_letter\_queue) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.2/terraform-lambda.zip | n/a |
 | <a name="module_upsert_letter"></a> [upsert\_letter](#module\_upsert\_letter) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.2/terraform-lambda.zip | n/a |

@@ -13,6 +13,7 @@ version.json
 # Please, add your custom content below!
 .idea
 .env
+.devcontainer/devcontainer-lock.json
 
 # dependencies
 node_modules

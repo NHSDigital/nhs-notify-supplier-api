@@ -22,6 +22,7 @@ locals {
     letter_updates_transformer  = module.letter_updates_transformer.function_name
     mi_updates_transformer      = module.mi_updates_transformer.function_name
     supplier_allocator          = module.supplier_allocator.function_name
+    supplier_config_ingress     = module.supplier_config_ingress.function_name
   }
 
   sqs_alarm_targets = {
@@ -29,5 +30,6 @@ locals {
     amendments_queue            = module.amendments_queue.sqs_queue_name
     letter_status_updates_queue = module.letter_status_updates_queue.sqs_queue_name
     sqs_supplier_allocator      = module.sqs_supplier_allocator.sqs_queue_name
+    sqs_supplier_config         = module.sqs_supplier_config.sqs_queue_name
   }
 }
