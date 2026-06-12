@@ -120,7 +120,7 @@ describe("API Lambda handler", () => {
   it("returns 404 Not Found when letter matching id is not found", async () => {
     const mockedGetLetterById = letterService.getLetterById as jest.Mock;
     mockedGetLetterById.mockImplementation(() => {
-      throw new NotFoundError(ApiErrorDetail.NotFoundLetterId);
+      throw new NotFoundError(ApiErrorDetail.NotFoundId);
     });
 
     const event = makeApiGwEvent({

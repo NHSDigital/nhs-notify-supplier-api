@@ -34,7 +34,7 @@ export function error404ResponseBody(): ErrorMessageBody {
     errors: [
       {
         id: "12345",
-        code: "NOTIFY_LETTER_NOT_FOUND",
+        code: "NOTIFY_NOT_FOUND",
         links: {
           about:
             "https://digital.nhs.uk/developer/api-catalogue/nhs-notify-supplier",

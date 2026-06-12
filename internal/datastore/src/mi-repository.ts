@@ -1,7 +1,12 @@
-import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
+import {
+  DynamoDBDocumentClient,
+  GetCommand,
+  PutCommand,
+} from "@aws-sdk/lib-dynamodb";
 import { Logger } from "pino";
 import { randomUUID } from "node:crypto";
 import { MI, MISchema } from "./types";
+import MiNotFoundError from "./errors/mi-not-found-error";
 
 export type MIRepositoryConfig = {
   miTableName: string;
@@ -35,5 +40,23 @@ export class MIRepository {
     );
 
     return MISchema.parse(miDb);
+  }
+
+  async getMI(miId: string, supplierId: string): Promise<MI> {
+    const result = await this.ddbClient.send(
+      new GetCommand({
+        TableName: this.config.miTableName,
+        Key: {
+          id: miId,
+          supplierId,
+        },
+      }),
+    );
+
+    if (!result.Item) {
+      throw new MiNotFoundError(supplierId, miId);
+    }
+
+    return MISchema.parse(result.Item);
   }
 }
