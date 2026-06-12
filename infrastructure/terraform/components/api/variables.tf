@@ -226,11 +226,10 @@ variable "enable_alarms" {
   description = "Enable CloudWatch alarms for this deployed environment"
   default     = true
 }
-# Set value back to false before merging to main.
 variable "deploy_supplier_mock_scheduler" {
   type        = bool
   description = "Deploy EventBridge Scheduler trigger for supplier mock lambda"
-  default     = true
+  default     = false
 }
 
 variable "enable_supplier_mock_scheduler" {
