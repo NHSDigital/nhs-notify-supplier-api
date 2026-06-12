@@ -19,7 +19,6 @@ export function mapLetterToCloudEvent(
     dataschemaversion,
     source,
     subject: `letter-origin/letter-rendering/letter/${letter.id}`,
-
     data: {
       domainId: letter.id as LetterStatusChangeEvent["data"]["domainId"],
       status: letter.status,

@@ -21,6 +21,7 @@ function createLetter(
     specificationId: "specification1",
     groupId: "group1",
     priority: 10,
+    sha256Hash: "hash1",
     ...overrides,
   };
 }

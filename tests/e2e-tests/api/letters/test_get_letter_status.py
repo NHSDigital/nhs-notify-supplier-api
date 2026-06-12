@@ -1,3 +1,4 @@
+import hashlib
 import requests
 import pytest
 from lib.fixtures import *  # NOSONAR

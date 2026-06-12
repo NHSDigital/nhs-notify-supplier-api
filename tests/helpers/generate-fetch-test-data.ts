@@ -225,7 +225,7 @@ export async function waitForLetterStatus(
         TableName: LETTERSTABLENAME,
         Key: { id, supplierId },
         ProjectionExpression:
-          "id, #status, supplierId, specificationId, groupId, reasonCode, reasonText",
+          "id, #status, supplierId, specificationId, groupId, reasonCode, reasonText, sha256Hash",
         ExpressionAttributeNames: {
           "#status": "status",
         },

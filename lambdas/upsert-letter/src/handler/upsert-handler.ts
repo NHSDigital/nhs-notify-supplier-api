@@ -132,6 +132,7 @@ function mapToInsertLetter(
       upsertRequest.data.templateId,
     ),
     url: upsertRequest.data.url,
+    sha256Hash: upsertRequest.data.sha256Hash,
     source: upsertRequest.source,
     subject: upsertRequest.subject,
     createdAt: now,

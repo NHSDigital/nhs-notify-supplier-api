@@ -36,6 +36,7 @@ function mapPendingLetterToLetterBase(pending: PendingLetterBase): LetterBase {
     status: "PENDING",
     specificationId: pending.specificationId,
     groupId: pending.groupId,
+    sha256Hash: pending.sha256Hash,
   };
 }
 
