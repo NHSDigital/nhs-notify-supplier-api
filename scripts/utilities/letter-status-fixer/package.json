@@ -1,0 +1,21 @@
+{
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.984.0",
+    "@aws-sdk/lib-dynamodb": "^3.1008.0",
+    "@jest/globals": "^30.2.0",
+    "pino": "^10.3.0",
+    "yargs": "^17.7.2"
+  },
+  "main": "src/cli/index.ts",
+  "name": "letter-status-fixer",
+  "private": true,
+  "scripts": {
+    "fix-status": "tsx src/cli/index.ts fix-status",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test:unit": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "type": "module",
+  "version": "0.1.0"
+}
