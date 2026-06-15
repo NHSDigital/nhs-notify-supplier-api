@@ -226,6 +226,23 @@ variable "enable_alarms" {
   description = "Enable CloudWatch alarms for this deployed environment"
   default     = true
 }
+variable "deploy_supplier_mock_scheduler" {
+  type        = bool
+  description = "Deploy EventBridge Scheduler trigger for supplier mock lambda"
+  default     = false
+}
+
+variable "enable_supplier_mock_scheduler" {
+  type        = bool
+  description = "Enable EventBridge Scheduler trigger for supplier mock lambda"
+  default     = false
+}
+
+variable "supplier_mock_schedule_expression" {
+  type        = string
+  description = "Schedule expression for supplier mock scheduler"
+  default     = "rate(1 minute)"
+}
 
 variable "enable_event_anomaly_detection" {
   type        = bool

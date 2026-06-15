@@ -1,5 +1,6 @@
 export default {
   preset: "ts-jest",
+  extensionsToTreatAsEsm: [".ts"],
   testEnvironment: "node",
   testMatch: ["**/*.test.ts"],
   coveragePathIgnorePatterns: ["/node_modules/", "__tests__"],
