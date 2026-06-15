@@ -98,10 +98,9 @@ jobs:
 
       - name: "Create release"
         id: create_release
-        uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1.1.4
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/create-github-release@PLACEHOLDER # 4.0.8 - TODO: replace PLACEHOLDER with actual tag SHA once shared-modules 4.0.8 is released
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ inputs.version }}
           release_name: ${{ inputs.version }}
           body: |
