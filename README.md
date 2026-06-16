@@ -24,7 +24,6 @@ This repository documents the Supplier API specification and provides an SDK wit
     - [Packages](#packages)
     - [Documentation](#documentation)
     - [SDK Assets](#sdk-assets)
-    - [Examples](#examples)
   - [API Developers](#api-developers)
     - [Setup](#setup)
       - [Prerequisites and Configuration](#prerequisites-and-configuration)
@@ -63,10 +62,6 @@ If packages are unavailable the latest SDKs can be downloaded directly from:
   - Python `sdk-python-[Version].zip`
   - TypeScript `sdk-ts-[Version].zip`
   - CSharp `sdk-csharp-[Version].zip`
-
-### Examples
-
-TODO:CCM-11209 Links to example clients.
 
 ## API Developers
 
@@ -152,6 +147,14 @@ make serve
 by default they will be available at [http://localhost:3050](http://localhost:3050)
 
 These are generated using [https://hub.docker.com/r/openapitools/openapi-generator-cli](https://hub.docker.com/r/openapitools/openapi-generator-cli)
+
+### Unit Testing
+
+Run unit tests from the repository root:
+
+```bash
+npm run test:unit
+```
 
 ### Documentation
 

@@ -22,7 +22,11 @@ const $EventEnvelope = z.object({
   data: z.looseObject({ id: z.string() }),
 });
 
-const entitySchemas: Record<SupplierConfigEntity, z.ZodType<{ id: string }>> = {
+type IdSchema = {
+  parse: (input: unknown) => { id: string };
+};
+
+const entitySchemas: Record<SupplierConfigEntity, IdSchema> = {
   "letter-variant": $LetterVariant,
   "volume-group": $VolumeGroup,
   "supplier-allocation": $SupplierAllocation,

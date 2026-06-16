@@ -189,7 +189,6 @@ jobs:
             --terraformAction "apply" \
             --overrideProjectName "nhs" \
             --overrideRoleName "nhs-main-acct-supplier-api-github-deploy"
-
   populate-config:
     name: "Populate Supplier Config"
     runs-on: ubuntu-latest
