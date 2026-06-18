@@ -192,21 +192,22 @@ async function main() {
         const letterRepository = createLetterRepository(environment, ttlHours);
         const { count } = argv;
         const { testLetter } = argv;
-
         // Setup file attributes
         const bucketName = `nhs-${argv.awsAccountId}-eu-west-2-${argv.environment}-supapi-test-letters`;
         const targetFilename = `${batchId}-${status}.pdf`;
         const folder = `${supplierId}/${batchId}`;
         const url = `s3://${bucketName}/${folder}/${targetFilename}`;
+        let hash: string | undefined;
 
         // Upload a test file for this batch if it is not an 'none' batch
         if (testLetter !== "none") {
-          await uploadFile(
+          const result = await uploadFile(
             bucketName,
             folder,
             `${testLetter}.pdf`,
             targetFilename,
           );
+          hash = result.hash;
         }
 
         // Create letter DTOs
@@ -221,6 +222,7 @@ async function main() {
               billingId,
               status: status as LetterStatusType,
               url,
+              sha256Hash: hash,
             }),
           );
         }

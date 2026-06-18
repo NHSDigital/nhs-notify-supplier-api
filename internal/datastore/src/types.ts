@@ -42,6 +42,7 @@ export const LetterSchemaBase = z.object({
   groupId: z.string(),
   reasonCode: z.string().optional(),
   reasonText: z.string().optional(),
+  sha256Hash: z.string().optional(),
 });
 
 export const LetterSchema = LetterSchemaBase.extend({
@@ -87,6 +88,7 @@ export const PendingLetterSchemaBase = z.object({
   letterId: idRef(LetterSchema, "id"),
   specificationId: z.string(),
   groupId: z.string(),
+  sha256Hash: z.string().optional(),
 });
 
 export const PendingLetterSchema = PendingLetterSchemaBase.extend({

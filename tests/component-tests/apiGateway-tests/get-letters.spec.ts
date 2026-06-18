@@ -10,6 +10,7 @@ import {
   isErrorResponse,
   isGetLettersResponse,
 } from "../../helpers/generate-fetch-test-data";
+import { SUPPLIER_LETTERS } from "../../constants/api-constants";
 
 let baseUrl: string;
 
@@ -34,6 +35,39 @@ test.describe("API Gateway Tests To Get List Of Pending Letters", () => {
       throw new Error("Expected GetLettersResponse body for 200 status");
     }
     expect(responseBody.data.length).toBeGreaterThanOrEqual(1);
+
+    for (const letter of responseBody.data) {
+      expect(letter.attributes.sha256Hash).toBeDefined();
+      expect(letter.attributes.sha256Hash).not.toBeNull();
+    }
+  });
+
+  test("GET /letters and GET /letter{id} sha256 match", async ({ request }) => {
+    const headers = createValidRequestHeaders();
+    const { responseBody, statusCode } = await getLettersWithRetry(
+      request,
+      baseUrl,
+      headers,
+      {
+        lettersLimit: "2",
+      },
+    );
+
+    expect(statusCode).toBe(200);
+    if (!isGetLettersResponse(responseBody)) {
+      throw new Error("Expected GetLettersResponse body for 200 status");
+    }
+    expect(responseBody.data.length).toBeGreaterThanOrEqual(1);
+    const getLettersSha = responseBody.data[0].attributes.sha256Hash;
+    const response = await request.get(
+      `${baseUrl}/${SUPPLIER_LETTERS}/${responseBody.data[0].id}`,
+      {
+        headers,
+      },
+    );
+    const letterResponseBody = await response.json();
+    expect(response.status()).toBe(200);
+    expect(letterResponseBody.data.attributes.sha256Hash).toBe(getLettersSha);
   });
 
   test("GET /letters with invalid authentication should return 403", async ({

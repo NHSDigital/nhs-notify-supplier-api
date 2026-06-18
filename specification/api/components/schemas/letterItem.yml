@@ -24,3 +24,5 @@ properties:
         $ref: "./reasonCode.yml"
       reasonText:
         $ref: "./reasonText.yml"
+      sha256Hash:
+        $ref: "./sha256Hash.yml"
