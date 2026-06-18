@@ -1,11 +1,12 @@
 import { expect, test } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 import {
-  createPreparedEventBatchWithSameDomainId,
+  createPendingEventBatchWithSameDomainId,
   createPreparedV1Event,
 } from "tests/helpers/event-fixtures";
 import { logger } from "tests/helpers/pino-logger";
-import { sendSnsBatchEvent, sendSnsEvent } from "tests/helpers/send-sns-event";
+import { sendSnsEvent } from "tests/helpers/send-sns-event";
+import { sendSqsEventBatch } from "tests/helpers/send-sqs-event";
 import {
   pollUpsertLetterLogForWarning,
   supplierIdFromSupplierAllocatorLog,
@@ -85,27 +86,19 @@ test.describe("Letter Queue Tests", () => {
 
   test("Verify if the only one entry is inserted in the letter queue table for a batch of events with the same letterId", async () => {
     const letterId = randomUUID();
-    const eventBatch = createPreparedEventBatchWithSameDomainId({
+    const eventBatch = createPendingEventBatchWithSameDomainId({
       domainId: letterId,
     });
     logger.info(
       `Sending batch event with ${eventBatch.length} events ${letterId}`,
     );
-    const response = await sendSnsBatchEvent(
-      eventBatch.map((event) => ({
-        id: event.id,
-        message: event,
-      })),
-    );
-    expect(response.Successful).toHaveLength(eventBatch.length);
-
-    const supplierId = await supplierIdFromSupplierAllocatorLog(letterId);
+    await sendSqsEventBatch(eventBatch.map((event) => JSON.stringify(event)));
 
     logger.info(
       `Verifying duplicate queue inserts are ignored for the batch of events with same letterId ${letterId}`,
     );
     const [letterExists, itemCount] = await checkLetterQueueTable(
-      supplierId,
+      "supplier1",
       letterId,
     );
     expect(letterExists).toBe(true);

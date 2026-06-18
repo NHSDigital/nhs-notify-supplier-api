@@ -16,12 +16,14 @@ describe("lambdaEnv", () => {
   it("should load all environment variables successfully", () => {
     process.env.SUPPLIER_CONFIG_TABLE_NAME = "SupplierConfigTable";
     process.env.SUPPLIER_QUOTAS_TABLE_NAME = "SupplierQuotasTable";
+    process.env.IDEMPOTENCY_TABLE_NAME = "IdempotencyTable";
 
     const { envVars } = require("../env");
 
     expect(envVars).toEqual({
       SUPPLIER_CONFIG_TABLE_NAME: "SupplierConfigTable",
       SUPPLIER_QUOTAS_TABLE_NAME: "SupplierQuotasTable",
+      IDEMPOTENCY_TABLE_NAME: "IdempotencyTable",
     });
   });
 });

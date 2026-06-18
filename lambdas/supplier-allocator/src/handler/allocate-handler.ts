@@ -1,4 +1,4 @@
-import { SQSBatchItemFailure, SQSEvent, SQSHandler } from "aws-lambda";
+import { Context, SQSBatchItemFailure, SQSEvent, SQSHandler } from "aws-lambda";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import {
   LetterVariant,
@@ -14,6 +14,10 @@ import {
   formatGroupId,
 } from "@internal/helpers";
 import {
+  IdempotencyConfig,
+  makeIdempotent,
+} from "@aws-lambda-powertools/idempotency";
+import {
   getVariantDetails,
   getVolumeGroupDetails,
 } from "../services/supplier-config";
@@ -28,6 +32,10 @@ import {
 
 import { Deps } from "../config/deps";
 import { PreparedEventSchema, PreparedEvents, SupplierDetails } from "./types";
+
+const idempotencyConfig = new IdempotencyConfig({
+  eventKeyJmesPath: "data.domainId",
+});
 
 function parseQueueMessage(queueMessage: string): PreparedEvents {
   const result = PreparedEventSchema.safeParse(queueMessage);
@@ -225,20 +233,21 @@ function emitDataMetrics(
 }
 
 function incrementAllocation(
-  volumeGroupAllocation: VolumeGroupAllocation,
+  volumeGroupAllocations: VolumeGroupAllocation,
   volumeGroupId: string,
   supplierId: string,
   allocation: number,
   deps: Deps,
 ) {
-  const groupAllocations = volumeGroupAllocation.get(volumeGroupId) ?? {};
+  const groupAllocations = volumeGroupAllocations.get(volumeGroupId) ?? {};
   groupAllocations[supplierId] =
     (groupAllocations[supplierId] ?? 0) + allocation;
-  volumeGroupAllocation.set(volumeGroupId, groupAllocations);
+  volumeGroupAllocations.set(volumeGroupId, groupAllocations);
   deps.logger.info({
     description: "Updated allocations for volume group and supplier",
     volumeGroupId,
     groupAllocations,
+    setVolumeGroupAllocations: volumeGroupAllocations.get(volumeGroupId),
   });
 }
 
@@ -258,12 +267,108 @@ async function saveAllocations(
   }
 }
 
+type SupplierAllocationResult = {
+  priority: string;
+  supplier: string;
+};
+
+async function processSupplierAllocation(
+  letterEvent: PreparedEvents,
+  deps: Deps,
+  perAllocationSuccess: AllocationMetrics,
+  perAllocationFailure: AllocationMetrics,
+  volumeGroupAllocations: VolumeGroupAllocation,
+): Promise<SupplierAllocationResult> {
+  const supplierDetails: SupplierDetails = await getSupplierFromConfig(
+    letterEvent,
+    deps,
+  );
+  deps.logger.info({
+    description: "Resolved supplier details from config",
+    supplierDetails,
+  });
+  const supplierSpec = supplierDetails?.allocationDetails?.supplierSpec;
+
+  const supplier = supplierSpec.supplierId;
+  const priority = String(supplierSpec.priority);
+
+  if (supplierDetails.allocationDetails.allocationStatus.status === "PENDING") {
+    incrementMetric(perAllocationSuccess, supplier, priority);
+    emitDataMetrics(letterEvent, supplier, "extra_data_dimensions", deps);
+
+    incrementAllocation(
+      volumeGroupAllocations,
+      supplierDetails.volumeGroupId,
+      supplier,
+      1,
+      deps,
+    );
+  } else {
+    incrementMetric(perAllocationFailure, supplier, priority);
+  }
+
+  // Send to allocated letters queue
+  const queueUrl = process.env.UPSERT_LETTERS_QUEUE_URL;
+  if (!queueUrl) {
+    throw new Error("UPSERT_LETTERS_QUEUE_URL not configured");
+  }
+
+  const queueMessage = {
+    letterEvent,
+    allocationDetails: supplierDetails.allocationDetails,
+  };
+
+  deps.logger.info({
+    description: "Sending message to upsert letter queue",
+    msg: queueMessage,
+    url: queueUrl,
+  });
+
+  await deps.sqsClient.send(
+    new SendMessageCommand({
+      QueueUrl: queueUrl,
+      MessageBody: JSON.stringify(queueMessage),
+    }),
+  );
+  return {
+    priority,
+    supplier,
+  };
+}
+
 export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
-  return async (event: SQSEvent) => {
+  const createGetSupplierIdempotently = (
+    perAllocationSuccess: AllocationMetrics,
+    perAllocationFailure: AllocationMetrics,
+    volumeGroupAllocations: VolumeGroupAllocation,
+  ) => {
+    return makeIdempotent(
+      (letterEvent: PreparedEvents, depsInner: Deps) =>
+        processSupplierAllocation(
+          letterEvent,
+          depsInner,
+          perAllocationSuccess,
+          perAllocationFailure,
+          volumeGroupAllocations,
+        ),
+      {
+        persistenceStore: deps.idempotencyLayer,
+        config: idempotencyConfig,
+      },
+    );
+  };
+  return async (event: SQSEvent, context: Context) => {
     const batchItemFailures: SQSBatchItemFailure[] = [];
     const perAllocationSuccess: AllocationMetrics = new Map();
     const perAllocationFailure: AllocationMetrics = new Map();
     const volumeGroupAllocations: VolumeGroupAllocation = new Map();
+
+    // create an idempotent function bound to this handler's global variables to track metrics and allocations
+    const getSupplierIdempotently = createGetSupplierIdempotently(
+      perAllocationSuccess,
+      perAllocationFailure,
+      volumeGroupAllocations,
+    );
 
     const tasks = event.Records.map(async (record) => {
       let supplier = "unknown";
@@ -275,65 +380,16 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
         deps.logger.info({
           description: "Extracted letter event",
           messageId: record.messageId,
+          domainId: letterEvent.data.domainId,
+          letterVariantId: letterEvent.data.letterVariantId,
         });
 
-        const supplierDetails: SupplierDetails = await getSupplierFromConfig(
-          letterEvent,
-          deps,
-        );
+        idempotencyConfig.registerLambdaContext(context);
 
-        deps.logger.info({
-          description: "Resolved supplier details from config",
-          supplierDetails,
-        });
-        const supplierSpec = supplierDetails?.allocationDetails?.supplierSpec;
+        const supplierAllocationResult: SupplierAllocationResult =
+          await getSupplierIdempotently(letterEvent, deps);
 
-        supplier = supplierSpec.supplierId;
-        priority = String(supplierSpec.priority);
-
-        if (
-          supplierDetails.allocationDetails.allocationStatus.status ===
-          "PENDING"
-        ) {
-          incrementMetric(perAllocationSuccess, supplier, priority);
-
-          incrementAllocation(
-            volumeGroupAllocations,
-            supplierDetails.volumeGroupId,
-            supplier,
-            1,
-            deps,
-          );
-        } else {
-          incrementMetric(perAllocationFailure, supplier, priority);
-        }
-
-        // Send to allocated letters queue
-        const queueUrl = process.env.UPSERT_LETTERS_QUEUE_URL;
-        if (!queueUrl) {
-          throw new Error("UPSERT_LETTERS_QUEUE_URL not configured");
-        }
-
-        const queueMessage = {
-          letterEvent,
-          allocationDetails: supplierDetails.allocationDetails,
-        };
-
-        deps.logger.info({
-          description: "Sending message to upsert letter queue",
-          msg: queueMessage,
-          url: queueUrl,
-        });
-
-        await deps.sqsClient.send(
-          new SendMessageCommand({
-            QueueUrl: queueUrl,
-            MessageBody: JSON.stringify(queueMessage),
-          }),
-        );
-
-        incrementMetric(perAllocationSuccess, supplier, priority);
-        emitDataMetrics(letterEvent, supplier, "extra_data_dimensions", deps);
+        ({ priority, supplier } = supplierAllocationResult);
       } catch (error) {
         deps.logger.error({
           description: "Error processing allocation of record",

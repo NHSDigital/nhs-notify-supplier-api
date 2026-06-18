@@ -99,12 +99,10 @@ export async function pollUpsertLetterLogForWarning(
 export async function supplierIdFromSupplierAllocatorLog(
   domainId: string,
 ): Promise<string> {
-  const message = await pollSupplierAllocatorLogForResolvedSpec(domainId);
-  const supplierAllocatorLog = JSON.parse(message) as {
-    msg?: { allocationDetails?: { supplierSpec?: { supplierId?: string } } };
-  };
-  const supplierId =
-    supplierAllocatorLog.msg?.allocationDetails?.supplierSpec?.supplierId;
+  const allocationDetails =
+    await pollSupplierAllocatorForAllocationDetails(domainId);
+
+  const supplierId = allocationDetails?.supplierSpec?.supplierId;
 
   logger.info(
     `Supplier ${supplierId} allocated to letter ${domainId} in supplier allocator lambda`,
@@ -114,6 +112,21 @@ export async function supplierIdFromSupplierAllocatorLog(
     throw new Error("supplierId was not found in supplier allocator log");
   }
   return supplierId;
+}
+
+export async function pollSupplierAllocatorForAllocationDetails(
+  domainId: string,
+) {
+  const message = await pollSupplierAllocatorLogForResolvedSpec(domainId);
+  const supplierAllocatorLog = JSON.parse(message) as {
+    msg?: {
+      allocationDetails?: {
+        supplierSpec?: { supplierId?: string };
+        allocationStatus?: { status?: string };
+      };
+    };
+  };
+  return supplierAllocatorLog.msg?.allocationDetails;
 }
 
 export async function pollAllocatorLog(description: string): Promise<string> {

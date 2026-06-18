@@ -1,6 +1,6 @@
 import { MIBase } from "@internal/datastore/src";
 import { IncomingMI, PostMIRequest } from "../../contracts/mi";
-import { mapToMI, mapToPostMIResponse } from "../mi-mapper";
+import { mapToGetMIResponse, mapToMI, mapToPostMIResponse } from "../mi-mapper";
 
 describe("mi-mapper", () => {
   it("maps a PostMIRequest to an IncomingMI object", async () => {
@@ -43,6 +43,35 @@ describe("mi-mapper", () => {
     };
 
     const result = mapToPostMIResponse(mi);
+
+    expect(result).toEqual({
+      data: {
+        id: "id1",
+        type: "ManagementInformation",
+        attributes: {
+          lineItem: "envelope-business-standard",
+          timestamp: "2023-11-17T14:27:51.413Z",
+          quantity: 22,
+          specificationId: "spec1",
+          groupId: "group1",
+          stockRemaining: 20_000,
+        },
+      },
+    });
+  });
+
+  it("maps an internal MIBase object to a GetMIResponse", async () => {
+    const mi: MIBase = {
+      id: "id1",
+      lineItem: "envelope-business-standard",
+      timestamp: "2023-11-17T14:27:51.413Z",
+      quantity: 22,
+      specificationId: "spec1",
+      groupId: "group1",
+      stockRemaining: 20_000,
+    };
+
+    const result = mapToGetMIResponse(mi);
 
     expect(result).toEqual({
       data: {

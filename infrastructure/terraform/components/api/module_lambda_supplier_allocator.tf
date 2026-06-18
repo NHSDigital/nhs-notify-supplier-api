@@ -35,7 +35,8 @@ module "supplier_allocator" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
-    UPSERT_LETTERS_QUEUE_URL = module.sqs_letter_updates.sqs_queue_url
+    UPSERT_LETTERS_QUEUE_URL = module.sqs_letter_updates.sqs_queue_url,
+    IDEMPOTENCY_TABLE_NAME   = aws_dynamodb_table.idempotency.name
   })
 }
 
@@ -105,11 +106,13 @@ data "aws_iam_policy_document" "supplier_allocator_lambda" {
       "dynamodb:GetItem",
       "dynamodb:Query",
       "dynamodb:PutItem",
-      "dynamodb:UpdateItem"
+      "dynamodb:UpdateItem",
+      "dynamodb:DeleteItem"
     ]
 
     resources = [
       aws_dynamodb_table.supplier-quotas.arn,
+      aws_dynamodb_table.idempotency.arn,
       "${aws_dynamodb_table.supplier-quotas.arn}/index/*"
     ]
   }
