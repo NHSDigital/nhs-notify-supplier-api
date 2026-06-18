@@ -39,14 +39,36 @@ export function createPreparedV1Event(overrides: Record<string, unknown> = {}) {
   };
 }
 
-export function createPreparedEventBatchWithSameDomainId(
+export function createPendingEventBatchWithSameDomainId(
   overrides: Record<string, unknown> = {},
 ) {
   return [
-    createPreparedV1Event(overrides),
-    createPreparedV1Event(overrides),
-    createPreparedV1Event(overrides),
+    createPendingAllocatedEvent(overrides),
+    createPendingAllocatedEvent(overrides),
+    createPendingAllocatedEvent(overrides),
   ];
+}
+
+export function createPendingAllocatedEvent(
+  overrides: Record<string, unknown> = {},
+) {
+  const letterEvent = createPreparedV1Event(overrides);
+  const allocationDetails = {
+    supplierSpec: {
+      supplierId: "supplier1",
+      specId: "spec1",
+      priority: 1,
+      billingId: "billing1",
+    },
+    allocationStatus: {
+      status: "PENDING",
+    },
+  };
+
+  return {
+    letterEvent,
+    allocationDetails,
+  };
 }
 
 export function createEventRemoveFields(fieldToRemove: string) {

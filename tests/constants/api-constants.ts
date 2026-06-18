@@ -52,3 +52,5 @@ export const VISIBILITY_TIMEOUT_SECONDS =
   TARGET_ACCOUNT_GROUP === DEFAULT_TARGET_ACCOUNT_GROUP
     ? DEV_VISIBILITY_TIMEOUT_SECONDS
     : DEFAULT_VISIBILITY_TIMEOUT_SECONDS;
+export const SUPPLIER_QUOTAS_TABLENAME = `nhs-${envName}-supapi-supplier-quotas`;
+export const UPSERT_LETTERS_QUEUE_URL = `https://sqs.${AWS_REGION}.amazonaws.com/${AWS_ACCOUNT_ID}/nhs-${envName}-supapi-letter-updates-queue`;
