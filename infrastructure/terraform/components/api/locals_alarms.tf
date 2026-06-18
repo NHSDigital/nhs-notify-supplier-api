@@ -11,6 +11,7 @@ locals {
     get_letter                  = module.get_letter.function_name
     get_letters                 = module.get_letters.function_name
     get_letter_data             = module.get_letter_data.function_name
+    get_mi                      = module.get_mi.function_name
     get_status                  = module.get_status.function_name
     patch_letter                = module.patch_letter.function_name
     post_letters                = module.post_letters.function_name

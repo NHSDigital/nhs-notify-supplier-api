@@ -4,14 +4,12 @@ import pathlib
 import time
 import json
 import requests
-from lib.constants import resolve_aws_account_id
+from lib.constants import SUPPLIER, resolve_aws_account_id
 from lib.errorhandler import ErrorHandler
 
 
 _REPO_ROOT = pathlib.Path(__file__).resolve().parents[3]
 _CLI_WORKSPACE = "nhs-notify-supplier-api-letter-test-data-utility"
-_SUPPLIER_ID = "supplier1" # This should be the same id registered in the Apigee App to which the proxy will be associated
-
 
 def create_test_data(count: int = 10) -> list[str]:
     """Seed PENDING letters by delegating to the shared letter-test-data CLI.
@@ -32,7 +30,7 @@ def create_test_data(count: int = 10) -> list[str]:
         "cli",
         "--",
         "create-letter-batch",
-        "--supplier-id", _SUPPLIER_ID,
+        "--supplier-id", SUPPLIER,
         "--environment", environment,
         "--awsAccountId", aws_account_id,
         "--group-id", "TestGroupID",

@@ -1,6 +1,7 @@
 import pytest
 import os
 import re
+from .constants import SUPPLIER, SECONDARY_SUPPLIER
 from .authentication import AuthenticationCache
 
 # for now this is the same as PROXY_NAME
@@ -54,7 +55,7 @@ def authentication_cache():
 @pytest.fixture()
 def authentication_secret(url, authentication_cache):
     environment = os.environ['API_ENVIRONMENT']
-    return authentication_cache.generate_authentication(environment, url, "/letters")
+    return authentication_cache.generate_authentication(environment, url, "/", SUPPLIER)
 
 @pytest.fixture()
 def status_authentication_secret(url, authentication_cache):
@@ -64,3 +65,8 @@ def status_authentication_secret(url, authentication_cache):
 @pytest.fixture(scope='session')
 def status_endpoint_api_key():
     return os.environ["STATUS_ENDPOINT_API_KEY"]
+
+@pytest.fixture()
+def secondary_supplier_authentication_secret(url, authentication_cache):
+    environment = os.environ['API_ENVIRONMENT']
+    return authentication_cache.generate_authentication(environment, url, "/", SECONDARY_SUPPLIER)

@@ -5,6 +5,8 @@ METHODS = ["get", "post"]
 DEFAULT_CONTENT_TYPE = "application/vnd.api+json"
 LETTERS_ENDPOINT = "/letters"
 MI_ENDPOINT = "/mi"
+SUPPLIER = "supplier1"
+SECONDARY_SUPPLIER = "TestSupplier1"
 
 DEFAULT_TARGET_ACCOUNT_GROUP = "nhs-notify-supplier-api-dev"
 PROD_TARGET_ACCOUNT_GROUP = "nhs-notify-supplier-api-prod"

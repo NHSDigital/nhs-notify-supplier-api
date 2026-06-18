@@ -25,7 +25,7 @@ test.beforeAll(async () => {
   baseUrl = await getRestApiGatewayBaseUrl();
 });
 
-test.describe("API Gateway Tests to Verify Mi Endpoint", () => {
+test.describe("API Gateway Tests to Verify create MI Endpoint", () => {
   test(`Post /mi returns 200 when a valid request is passed`, async ({
     request,
   }) => {
