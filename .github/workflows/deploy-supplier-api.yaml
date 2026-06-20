@@ -71,6 +71,7 @@ jobs:
           source_value="${{ inputs.source_value }}"
           deploy_backend="${{ inputs.deploy_backend }}"
           deploy_proxy="${{ inputs.deploy_proxy }}"
+          build_sandbox="${{ inputs.build_sandbox }}"
 
           # --- Shared source validation ---
 
@@ -117,10 +118,10 @@ jobs:
 
           if [[ "$deploy_backend" == "true" && "$deploy_proxy" == "true" ]]; then
             case "${backend_account_group}:${apim_environment}" in
-              dev:internal-dev|nonprod:int|prod:prod) ;;
+              dev:internal-dev|dev:internal-dev-sandbox|nonprod:int|prod:prod) ;;
               *)
                 echo "[ERROR] Mismatched backend/APIM pair: '${backend_account_group}' and '${apim_environment}'."
-                echo "[ERROR] Valid combinations: dev/internal-dev, nonprod/int, prod/prod."
+                echo "[ERROR] Valid combinations: dev/internal-dev, dev/internal-dev-sandbox, nonprod/int, prod/prod."
                 exit 1
                 ;;
             esac
@@ -164,6 +165,11 @@ jobs:
           if [[ "$deploy_proxy" == "true" ]]; then
             if [[ -z "$apim_environment" ]]; then
               echo "[ERROR] apim_environment is required when deploy_proxy is true."
+              exit 1
+            fi
+
+            if [[ "$apim_environment" == "internal-dev-sandbox" && "$build_sandbox" != "true" ]]; then
+              echo "[ERROR] build_sandbox must be true when apim_environment is internal-dev-sandbox."
               exit 1
             fi
 
