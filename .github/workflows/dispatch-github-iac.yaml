@@ -1,0 +1,62 @@
+name: "GitHub Repository Management"
+run-name: "GitHub IAC ${{ github.ref_name }} ${{ inputs.terraformAction }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      terraformAction:
+        description: "Apply or Destroy"
+        required: true
+        default: plan
+        type: choice
+        options:
+          - plan
+          - apply
+
+      overrides:
+        description: "Comma separated list of pipeline overrides in OVR_XXX=YYYY format"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+  packages: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-github
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    name: "Dispatch GitHub IAC workflow"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: "Setup GitHub CLI"
+        shell: bash
+        run: |
+          if ! command -v gh &> /dev/null; then
+            echo "GitHub CLI not available"
+            exit 1
+          fi
+
+      - name: "Dispatch to nhs-notify-internal"
+        env:
+          GH_TOKEN: ${{ secrets.GH_MAINT_IAC_PAT }}
+        shell: bash
+        run: |
+          gh workflow run dispatch-deploy-github.yaml \
+            --repo NHSDigital/nhs-notify-internal \
+            --ref main \
+            -f terraformAction="${{ inputs.terraformAction }}" \
+            -f overrides="${{ inputs.overrides }}"
+
+          echo "Workflow dispatch triggered for nhs-notify-supplier-api GitHub IAC"
