@@ -11,9 +11,8 @@ The workflow is triggered manually via GitHub's workflow dispatch interface and 
 ### Inputs
 
 - **terraformAction** (required): Choose between `plan` or `apply`
-  - `plan`: Shows what changes would be made without applying them
-  - `apply`: Applies the infrastructure changes
   
+### Execution Model
 - **overrides** (optional): Comma-separated list of pipeline overrides in `OVR_XXX=YYYY` format
   - Used for dynamic configuration of terraform variables
   - Example: `OVR_ENVIRONMENT=staging,OVR_REGION=eu-west-2`
@@ -23,9 +22,6 @@ The workflow is triggered manually via GitHub's workflow dispatch interface and 
 1. Go to [GitHub Actions](https://github.com/NHSDigital/nhs-notify-supplier-api/actions)
 2. Select **"GitHub Repository Management"** workflow
 3. Click **"Run workflow"**
-4. Choose your terraform action (`plan` or `apply`)
-5. (Optional) Add override parameters
-6. Click **"Run workflow"**
 
 ### Process
 

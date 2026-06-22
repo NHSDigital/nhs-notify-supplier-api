@@ -20,9 +20,7 @@ on:
         type: string
 
 permissions:
-  id-token: write
   contents: read
-  packages: read
 
 defaults:
   run:
