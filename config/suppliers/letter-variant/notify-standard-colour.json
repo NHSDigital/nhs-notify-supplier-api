@@ -29,6 +29,7 @@
   ],
   "priority": 99,
   "status": "INT",
+  "supplierId": "supplier1",
   "type": "STANDARD",
-  "volumeGroupId": "volumeGroup-test3"
+  "volumeGroupId": "volumeGroup-test1"
 }
