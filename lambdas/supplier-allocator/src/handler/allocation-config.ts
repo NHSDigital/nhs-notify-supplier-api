@@ -23,6 +23,7 @@ import { PreparedEvents } from "./types";
 export async function eligibleSuppliers(
   volumeGroup: VolumeGroup,
   deps: Deps,
+  letterVariantSupplierId?: string,
 ): Promise<{
   supplierAllocations: SupplierAllocation[];
   suppliers: Supplier[];
@@ -31,6 +32,32 @@ export async function eligibleSuppliers(
     volumeGroup.id,
     deps,
   );
+  if (letterVariantSupplierId) {
+    deps.logger.info({
+      description: "Filtering allocations for letter variant supplier",
+      volumeGroupId: volumeGroup.id,
+      letterVariantSupplierId,
+    });
+    const filteredAllocations = supplierAllocations.filter(
+      (alloc) => alloc.supplier === letterVariantSupplierId,
+    );
+    if (filteredAllocations.length === 0) {
+      deps.logger.warn({
+        description:
+          "No allocations found for specified letter variant supplier",
+        volumeGroupId: volumeGroup.id,
+        letterVariantSupplierId,
+      });
+    }
+    return {
+      supplierAllocations: filteredAllocations,
+      suppliers: await getSupplierDetails(
+        filteredAllocations.map((alloc) => alloc.supplier),
+        deps,
+      ),
+    };
+  }
+
   const allocationPercentageSum = supplierAllocations.reduce(
     (sum, alloc) => sum + alloc.allocationPercentage,
     0,
