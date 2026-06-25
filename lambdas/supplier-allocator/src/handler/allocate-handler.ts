@@ -94,7 +94,7 @@ async function getSupplierFromConfig(
     );
 
     const { supplierAllocations, suppliers: allocatedSuppliers } =
-      await eligibleSuppliers(volumeGroup, deps);
+      await eligibleSuppliers(volumeGroup, deps, letterVariant.supplierId);
 
     const preferredPack: PackSpecification = await preferredSupplierPack(
       letterEvent,
@@ -391,6 +391,9 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
 
         ({ priority, supplier } = supplierAllocationResult);
       } catch (error) {
+        console.log(
+          `Error processing allocation of record ${record.messageId}: ${error}`,
+        );
         deps.logger.error({
           description: "Error processing allocation of record",
           err: error,
