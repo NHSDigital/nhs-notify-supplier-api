@@ -196,6 +196,37 @@ describe("eligibleSuppliers", () => {
       "Supplier service error",
     );
   });
+  it("should filter allocations by letterVariantSupplierId if provided", async () => {
+    (
+      supplierConfigService.getSupplierAllocationsForVolumeGroup as jest.Mock
+    ).mockResolvedValue(mockSupplierAllocations);
+    (supplierConfigService.getSupplierDetails as jest.Mock).mockResolvedValue(
+      mockSuppliers,
+    );
+
+    const letterVariantSupplierId = "supplier-1";
+    await eligibleSuppliers(mockVolumeGroup, mockDeps, letterVariantSupplierId);
+    expect(supplierConfigService.getSupplierDetails).toHaveBeenCalledWith(
+      ["supplier-1"],
+      mockDeps,
+    );
+  });
+  it("should log a warning if no allocations found for specified letter variant supplier", async () => {
+    (
+      supplierConfigService.getSupplierAllocationsForVolumeGroup as jest.Mock
+    ).mockResolvedValue([]);
+    (supplierConfigService.getSupplierDetails as jest.Mock).mockResolvedValue(
+      [],
+    );
+
+    const letterVariantSupplierId = "supplier-1";
+    await eligibleSuppliers(mockVolumeGroup, mockDeps, letterVariantSupplierId);
+    expect(mockDeps.logger.warn).toHaveBeenCalledWith({
+      description: "No allocations found for specified letter variant supplier",
+      volumeGroupId: mockVolumeGroup.id,
+      letterVariantSupplierId,
+    });
+  });
 });
 
 describe("preferredSupplierPack", () => {
