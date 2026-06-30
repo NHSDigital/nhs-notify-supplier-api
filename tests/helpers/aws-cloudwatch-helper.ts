@@ -60,6 +60,16 @@ export async function pollSupplierAllocatorLogForResolvedSpec(
     `"${domainId}"`,
   ]);
 }
+
+export async function pollSupplierAllocatorLogForAllocationDetails(
+  domainId: string,
+): Promise<string> {
+  return pollLambdaLog("supplier-allocator", [
+    '"Fetched supplier details for supplier allocations"',
+    `"${domainId}"`,
+  ]);
+}
+
 export async function pollSupplierAllocatorLogForError(
   msgToCheck: string,
   domainId?: string,
