@@ -29,7 +29,6 @@ import {
   selectSupplierByFactor,
   suppliersWithValidPack,
 } from "./allocation-config";
-
 import { Deps } from "../config/deps";
 import { PreparedEventSchema, PreparedEvents, SupplierDetails } from "./types";
 
@@ -136,6 +135,7 @@ async function getSupplierFromConfig(
 
     deps.logger.info({
       description: "Fetched supplier details for supplier allocations",
+      domainId: letterEvent.data.domainId,
       variantId: letterEvent.data.letterVariantId,
       volumeGroupId: volumeGroup.id,
       supplierAllocationIds: supplierAllocations.map((a) => a.id),
