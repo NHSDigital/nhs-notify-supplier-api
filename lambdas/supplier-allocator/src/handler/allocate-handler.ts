@@ -124,12 +124,14 @@ async function getSupplierFromConfig(
         ? await selectSupplierByFactor(
             suppliersForPackWithCapacity,
             supplierAllocations,
+            letterEvent.data.domainId,
             deps,
           )
         : undefined) ??
       (await selectSupplierByFactor(
         allSuppliersForPack,
         supplierAllocations,
+        letterEvent.data.domainId,
         deps,
       ));
 

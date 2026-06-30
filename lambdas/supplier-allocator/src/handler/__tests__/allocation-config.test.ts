@@ -875,6 +875,7 @@ describe("selectSupplierByFactor", () => {
     const result = await selectSupplierByFactor(
       mockSuppliers,
       mockSupplierAllocations,
+      "domainId",
       mockDeps,
     );
 
@@ -906,6 +907,7 @@ describe("selectSupplierByFactor", () => {
     const result = await selectSupplierByFactor(
       mockSuppliers,
       allocationsWithMissingSupplier,
+      "domainId",
       mockDeps,
     );
 
@@ -937,6 +939,7 @@ describe("selectSupplierByFactor", () => {
     const result = await selectSupplierByFactor(
       mockSuppliers,
       allocationsWithZeroPercentage,
+      "domainId",
       mockDeps,
     );
 
@@ -967,7 +970,12 @@ describe("selectSupplierByFactor", () => {
     ];
 
     await expect(
-      selectSupplierByFactor(mockSuppliers, zeroAllocations, mockDeps),
+      selectSupplierByFactor(
+        mockSuppliers,
+        zeroAllocations,
+        "domainId",
+        mockDeps,
+      ),
     ).rejects.toThrow(
       "No valid supplier allocations found for suppliers with valid pack",
     );
@@ -987,6 +995,7 @@ describe("selectSupplierByFactor", () => {
     const result = await selectSupplierByFactor(
       mockSuppliers,
       mockSupplierAllocations,
+      "domainId",
       mockDeps,
     );
 
@@ -1006,6 +1015,7 @@ describe("selectSupplierByFactor", () => {
     const result = await selectSupplierByFactor(
       singleSupplier,
       singleAllocation,
+      "domainId",
       mockDeps,
     );
 
@@ -1026,6 +1036,7 @@ describe("selectSupplierByFactor", () => {
     const result = await selectSupplierByFactor(
       mockSuppliers,
       mockSupplierAllocations,
+      "domainId",
       mockDeps,
     );
 
@@ -1046,6 +1057,7 @@ describe("selectSupplierByFactor", () => {
     const result = await selectSupplierByFactor(
       mockSuppliers,
       mockSupplierAllocations,
+      "domainId",
       mockDeps,
     );
 
@@ -1059,7 +1071,12 @@ describe("selectSupplierByFactor", () => {
     ).mockRejectedValue(error);
 
     await expect(
-      selectSupplierByFactor(mockSuppliers, mockSupplierAllocations, mockDeps),
+      selectSupplierByFactor(
+        mockSuppliers,
+        mockSupplierAllocations,
+        "domainId",
+        mockDeps,
+      ),
     ).rejects.toThrow("Factor calculation error");
   });
 
@@ -1084,6 +1101,7 @@ describe("selectSupplierByFactor", () => {
     const result = await selectSupplierByFactor(
       mockSuppliers,
       allocationsWithUnrelatedSupplier,
+      "domainId",
       mockDeps,
     );
 
@@ -1124,6 +1142,7 @@ describe("selectSupplierByFactor", () => {
     const result = await selectSupplierByFactor(
       manySuppliers,
       manyAllocations,
+      "domainId",
       mockDeps,
     );
 
@@ -1136,7 +1155,12 @@ describe("selectSupplierByFactor", () => {
     ).mockResolvedValue([]);
 
     await expect(
-      selectSupplierByFactor(mockSuppliers, mockSupplierAllocations, mockDeps),
+      selectSupplierByFactor(
+        mockSuppliers,
+        mockSupplierAllocations,
+        "domainId",
+        mockDeps,
+      ),
     ).rejects.toThrow("No supplier factors could be calculated for allocation");
   });
 });

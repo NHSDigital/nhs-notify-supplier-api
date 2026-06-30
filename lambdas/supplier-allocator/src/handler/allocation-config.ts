@@ -148,6 +148,7 @@ export async function filterSuppliersWithCapacity(
 export async function selectSupplierByFactor(
   suppliers: Supplier[],
   supplierAllocations: SupplierAllocation[],
+  domainId: string,
   deps: Deps,
 ): Promise<string> {
   const supplierAllocationsForPack = supplierAllocations.filter((alloc) => {
@@ -175,6 +176,7 @@ export async function selectSupplierByFactor(
 
   deps.logger.info({
     description: "Calculated supplier factors for allocation",
+    domainId,
     supplierFactors,
   });
   let selectedSupplierId = supplierFactors[0].supplierId;
