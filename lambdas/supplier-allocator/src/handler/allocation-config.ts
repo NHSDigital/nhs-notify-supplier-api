@@ -38,10 +38,10 @@ export async function eligibleSuppliers(
       volumeGroupId: volumeGroup.id,
       letterVariantSupplierId,
     });
-    const filteredAllocations = supplierAllocations.filter(
+    const filteredAllocations = supplierAllocations.find(
       (alloc) => alloc.supplier === letterVariantSupplierId,
     );
-    if (filteredAllocations.length === 0) {
+    if (!filteredAllocations) {
       deps.logger.warn({
         description:
           "No allocations found for specified letter variant supplier",
@@ -50,9 +50,9 @@ export async function eligibleSuppliers(
       });
     }
     return {
-      supplierAllocations: filteredAllocations,
+      supplierAllocations: filteredAllocations ? [filteredAllocations] : [],
       suppliers: await getSupplierDetails(
-        filteredAllocations.map((alloc) => alloc.supplier),
+        filteredAllocations ? [filteredAllocations.supplier] : [],
         deps,
       ),
     };

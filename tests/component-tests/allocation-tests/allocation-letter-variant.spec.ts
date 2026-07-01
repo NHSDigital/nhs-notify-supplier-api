@@ -12,7 +12,7 @@ import { sendSnsEvent } from "tests/helpers/send-sns-event";
 test.describe("Letter Variant Tests", () => {
   test.setTimeout(180_000); // 3 minutes for long running polling
 
-  test("Verify that supplierId on letter variant takes pecedence over volume group", async () => {
+  test("Verify that supplierId on letter variant takes precedence over volume group", async () => {
     const letterVariant = getVariantsForAllocation(3);
     const domainId = randomUUID();
     const preparedEvent = createPreparedV1Event({
