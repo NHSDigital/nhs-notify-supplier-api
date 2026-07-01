@@ -810,6 +810,7 @@ describe("selectSupplierByFactor", () => {
   let mockDeps: jest.Mocked<Deps>;
   let mockSuppliers: Supplier[];
   let mockSupplierAllocations: SupplierAllocation[];
+  const domainId = "test-domain-id";
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -875,7 +876,7 @@ describe("selectSupplierByFactor", () => {
     const result = await selectSupplierByFactor(
       mockSuppliers,
       mockSupplierAllocations,
-      "domainId",
+      domainId,
       mockDeps,
     );
 
@@ -907,7 +908,7 @@ describe("selectSupplierByFactor", () => {
     const result = await selectSupplierByFactor(
       mockSuppliers,
       allocationsWithMissingSupplier,
-      "domainId",
+      domainId,
       mockDeps,
     );
 
@@ -939,7 +940,7 @@ describe("selectSupplierByFactor", () => {
     const result = await selectSupplierByFactor(
       mockSuppliers,
       allocationsWithZeroPercentage,
-      "domainId",
+      domainId,
       mockDeps,
     );
 
@@ -973,7 +974,7 @@ describe("selectSupplierByFactor", () => {
       selectSupplierByFactor(
         mockSuppliers,
         zeroAllocations,
-        "domainId",
+        domainId,
         mockDeps,
       ),
     ).rejects.toThrow(
@@ -995,7 +996,7 @@ describe("selectSupplierByFactor", () => {
     const result = await selectSupplierByFactor(
       mockSuppliers,
       mockSupplierAllocations,
-      "domainId",
+      domainId,
       mockDeps,
     );
 
@@ -1015,7 +1016,7 @@ describe("selectSupplierByFactor", () => {
     const result = await selectSupplierByFactor(
       singleSupplier,
       singleAllocation,
-      "domainId",
+      domainId,
       mockDeps,
     );
 
@@ -1036,7 +1037,7 @@ describe("selectSupplierByFactor", () => {
     const result = await selectSupplierByFactor(
       mockSuppliers,
       mockSupplierAllocations,
-      "domainId",
+      domainId,
       mockDeps,
     );
 
@@ -1057,7 +1058,7 @@ describe("selectSupplierByFactor", () => {
     const result = await selectSupplierByFactor(
       mockSuppliers,
       mockSupplierAllocations,
-      "domainId",
+      domainId,
       mockDeps,
     );
 
@@ -1074,7 +1075,7 @@ describe("selectSupplierByFactor", () => {
       selectSupplierByFactor(
         mockSuppliers,
         mockSupplierAllocations,
-        "domainId",
+        domainId,
         mockDeps,
       ),
     ).rejects.toThrow("Factor calculation error");
@@ -1101,7 +1102,7 @@ describe("selectSupplierByFactor", () => {
     const result = await selectSupplierByFactor(
       mockSuppliers,
       allocationsWithUnrelatedSupplier,
-      "domainId",
+      domainId,
       mockDeps,
     );
 
@@ -1142,7 +1143,7 @@ describe("selectSupplierByFactor", () => {
     const result = await selectSupplierByFactor(
       manySuppliers,
       manyAllocations,
-      "domainId",
+      domainId,
       mockDeps,
     );
 
@@ -1158,7 +1159,7 @@ describe("selectSupplierByFactor", () => {
       selectSupplierByFactor(
         mockSuppliers,
         mockSupplierAllocations,
-        "domainId",
+        domainId,
         mockDeps,
       ),
     ).rejects.toThrow("No supplier factors could be calculated for allocation");

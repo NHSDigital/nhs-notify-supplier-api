@@ -393,9 +393,6 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
 
         ({ priority, supplier } = supplierAllocationResult);
       } catch (error) {
-        console.log(
-          `Error processing allocation of record ${record.messageId}: ${error}`,
-        );
         deps.logger.error({
           description: "Error processing allocation of record",
           err: error,
