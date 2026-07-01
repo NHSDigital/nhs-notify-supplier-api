@@ -23,6 +23,7 @@ import { PreparedEvents } from "./types";
 export async function eligibleSuppliers(
   volumeGroup: VolumeGroup,
   deps: Deps,
+  letterVariantSupplierId?: string,
 ): Promise<{
   supplierAllocations: SupplierAllocation[];
   suppliers: Supplier[];
@@ -31,6 +32,32 @@ export async function eligibleSuppliers(
     volumeGroup.id,
     deps,
   );
+  if (letterVariantSupplierId) {
+    deps.logger.info({
+      description: "Filtering allocations for letter variant supplier",
+      volumeGroupId: volumeGroup.id,
+      letterVariantSupplierId,
+    });
+    const filteredAllocations = supplierAllocations.find(
+      (alloc) => alloc.supplier === letterVariantSupplierId,
+    );
+    if (!filteredAllocations) {
+      deps.logger.warn({
+        description:
+          "No allocations found for specified letter variant supplier",
+        volumeGroupId: volumeGroup.id,
+        letterVariantSupplierId,
+      });
+    }
+    return {
+      supplierAllocations: filteredAllocations ? [filteredAllocations] : [],
+      suppliers: await getSupplierDetails(
+        filteredAllocations ? [filteredAllocations.supplier] : [],
+        deps,
+      ),
+    };
+  }
+
   const allocationPercentageSum = supplierAllocations.reduce(
     (sum, alloc) => sum + alloc.allocationPercentage,
     0,
@@ -121,6 +148,7 @@ export async function filterSuppliersWithCapacity(
 export async function selectSupplierByFactor(
   suppliers: Supplier[],
   supplierAllocations: SupplierAllocation[],
+  domainId: string,
   deps: Deps,
 ): Promise<string> {
   const supplierAllocationsForPack = supplierAllocations.filter((alloc) => {
@@ -148,6 +176,7 @@ export async function selectSupplierByFactor(
 
   deps.logger.info({
     description: "Calculated supplier factors for allocation",
+    domainId,
     supplierFactors,
   });
   let selectedSupplierId = supplierFactors[0].supplierId;

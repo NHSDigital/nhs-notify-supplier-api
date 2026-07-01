@@ -29,7 +29,6 @@ import {
   selectSupplierByFactor,
   suppliersWithValidPack,
 } from "./allocation-config";
-
 import { Deps } from "../config/deps";
 import { PreparedEventSchema, PreparedEvents, SupplierDetails } from "./types";
 
@@ -94,7 +93,7 @@ async function getSupplierFromConfig(
     );
 
     const { supplierAllocations, suppliers: allocatedSuppliers } =
-      await eligibleSuppliers(volumeGroup, deps);
+      await eligibleSuppliers(volumeGroup, deps, letterVariant.supplierId);
 
     const preferredPack: PackSpecification = await preferredSupplierPack(
       letterEvent,
@@ -125,17 +124,20 @@ async function getSupplierFromConfig(
         ? await selectSupplierByFactor(
             suppliersForPackWithCapacity,
             supplierAllocations,
+            letterEvent.data.domainId,
             deps,
           )
         : undefined) ??
       (await selectSupplierByFactor(
         allSuppliersForPack,
         supplierAllocations,
+        letterEvent.data.domainId,
         deps,
       ));
 
     deps.logger.info({
       description: "Fetched supplier details for supplier allocations",
+      domainId: letterEvent.data.domainId,
       variantId: letterEvent.data.letterVariantId,
       volumeGroupId: volumeGroup.id,
       supplierAllocationIds: supplierAllocations.map((a) => a.id),
@@ -391,6 +393,9 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
 
         ({ priority, supplier } = supplierAllocationResult);
       } catch (error) {
+        console.log(
+          `Error processing allocation of record ${record.messageId}: ${error}`,
+        );
         deps.logger.error({
           description: "Error processing allocation of record",
           err: error,

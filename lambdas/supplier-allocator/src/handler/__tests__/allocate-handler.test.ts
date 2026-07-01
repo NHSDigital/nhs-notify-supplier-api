@@ -744,6 +744,7 @@ describe("createSupplierAllocatorHandler", () => {
     expect(allocationConfig.selectSupplierByFactor).toHaveBeenCalledWith(
       expect.any(Array),
       expect.any(Array),
+      "letter1",
       mockedDeps,
     );
   });

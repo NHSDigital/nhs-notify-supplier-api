@@ -97,6 +97,7 @@ test.describe("Allocator Weighting Tests", () => {
         "Calculated supplier factors for allocation",
         {
           startTimeMs: testStartedAt,
+          extraPatterns: [domainId],
         },
       );
 
