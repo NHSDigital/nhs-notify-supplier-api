@@ -1,5 +1,6 @@
 # syntax=docker/dockerfile:1
-FROM mcr.microsoft.com/devcontainers/base:ubuntu
+# Pin to a supported Ubuntu release; floating :ubuntu can move to unsupported codenames.
+FROM mcr.microsoft.com/devcontainers/base:ubuntu-24.04
 
 # Copy CA certs and install Ruby and Go via Ubuntu packages (much faster than building from source)
 # Also install development libraries needed for Python compilation via asdf

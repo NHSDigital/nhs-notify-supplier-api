@@ -61,4 +61,8 @@ resource "aws_api_gateway_stage" "main" {
       "status" : "$context.status"
     })
   }
+
+  lifecycle {
+    replace_triggered_by = [aws_api_gateway_rest_api.main]
+  }
 }
