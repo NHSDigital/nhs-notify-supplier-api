@@ -35,6 +35,7 @@ repos:
         args: [check=staged-changes]
       - id: check-file-format
         args: [check=branch]
+        stages: [manual]  # TODO: CCM-18685 - Disabled; upstream hook forces --platform linux/amd64 causing crashes on arm64
       - id: check-markdown-format
         args: [check=branch]
       - id: check-english-usage
