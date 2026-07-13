@@ -13,4 +13,8 @@ resource "aws_api_gateway_rest_api" "main" {
   description                  = "Suppliers API"
   disable_execute_api_endpoint = var.disable_gateway_execute_endpoint
   security_policy              = local.rest_api_security_policy
+
+  lifecycle {
+    replace_triggered_by = [terraform_data.rest_api_security_policy]
+  }
 }
