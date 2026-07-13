@@ -3,6 +3,5 @@ resource "aws_api_gateway_rest_api" "main" {
   body                         = local.openapi_spec
   description                  = "Suppliers API"
   disable_execute_api_endpoint = var.disable_gateway_execute_endpoint
-  security_policy              = "SecurityPolicy_TLS12_PFS_2025_EDGE"
-  endpoint_access_mode         = "STRICT"
+  security_policy              = "TLS_1_2"
 }
