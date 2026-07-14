@@ -1,6 +1,13 @@
 
+resource "terraform_data" "api_gateway_endpoint_settings" {
+  input = {
+    endpoint_access_mode = local.api_gateway_endpoint_access_mode
+    endpoint_type        = local.api_gateway_endpoint_type
+  }
+}
+
 resource "aws_api_gateway_rest_api" "main" {
-  name                         = "${local.csi}-${local.api_gateway_endpoint_replacement_suffix}"
+  name                         = local.csi
   body                         = local.openapi_spec
   description                  = "Suppliers API"
   disable_execute_api_endpoint = var.disable_gateway_execute_endpoint
@@ -13,5 +20,6 @@ resource "aws_api_gateway_rest_api" "main" {
 
   lifecycle {
     create_before_destroy = true
+    replace_triggered_by  = [terraform_data.api_gateway_endpoint_settings]
   }
 }
