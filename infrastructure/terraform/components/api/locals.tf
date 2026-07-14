@@ -47,4 +47,13 @@ locals {
     var.region,
     var.csoc_destination_account
   )
+
+  api_gateway_endpoint_access_mode = "BASIC"
+  api_gateway_endpoint_type        = "REGIONAL"
+  # Force replacement when endpoint settings change, since AWS rejects updating
+  # endpoint type and endpoint access mode together in a single in-place update.
+  api_gateway_endpoint_replacement_suffix = substr(md5(jsonencode({
+    access_mode = local.api_gateway_endpoint_access_mode
+    type        = local.api_gateway_endpoint_type
+  })), 0, 8)
 }
