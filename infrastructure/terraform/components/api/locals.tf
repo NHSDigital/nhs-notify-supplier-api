@@ -48,6 +48,6 @@ locals {
     var.csoc_destination_account
   )
 
-  api_gateway_endpoint_access_mode = "BASIC"
-  api_gateway_endpoint_type        = "REGIONAL"
+  api_gateway_endpoint_access_mode = "STRICT"
+  api_gateway_endpoint_type        = "EDGE"
 }
