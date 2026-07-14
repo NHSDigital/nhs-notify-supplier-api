@@ -59,8 +59,7 @@ jobs:
           --targetWorkflow "proxy-destroy.yaml" \
           --targetEnvironment "pr${{ github.event.number }}" \
           --apimEnvironment "internal-dev-sandbox" \
-          --boundedContext "notify-supplier" \
-          --internalRef "feature/CCM-18685"
+          --boundedContext "notify-supplier"
 
       - name: Trigger PR proxy destruction
         env:
@@ -75,5 +74,4 @@ jobs:
           --targetWorkflow "proxy-destroy.yaml" \
           --targetEnvironment "pr${{ github.event.number }}" \
           --apimEnvironment "internal-dev" \
-          --boundedContext "notify-supplier" \
-          --internalRef "feature/CCM-18685"
+          --boundedContext "notify-supplier"
