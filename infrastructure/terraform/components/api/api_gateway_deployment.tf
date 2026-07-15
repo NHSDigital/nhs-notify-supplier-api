@@ -10,6 +10,10 @@ resource "aws_api_gateway_deployment" "main" {
     deployed_at = timestamp()
   }
 
+  depends_on = [
+    aws_api_gateway_rest_api.main
+  ]
+
   lifecycle {
     create_before_destroy = true
   }
