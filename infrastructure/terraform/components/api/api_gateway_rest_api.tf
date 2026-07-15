@@ -3,8 +3,6 @@ resource "aws_api_gateway_rest_api" "main" {
   body                         = local.openapi_spec
   description                  = "Suppliers API"
   disable_execute_api_endpoint = var.disable_gateway_execute_endpoint
-
-  lifecycle {
-    replace_triggered_by = [terraform_data.rest_api_security_policy]
-  }
+  security_policy              = "SecurityPolicy_TLS12_PFS_2025_EDGE"
+  endpoint_access_mode         = "STRICT"
 }
