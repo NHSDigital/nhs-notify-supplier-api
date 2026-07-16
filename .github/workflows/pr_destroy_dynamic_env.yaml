@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [closed]
     branches:
-      - '*'
+      - "*"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -46,7 +46,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Trigger dynamic proxy destruction
+      - name: Trigger PR sandbox proxy destruction
         env:
           APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
           APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
@@ -59,4 +59,19 @@ jobs:
           --targetWorkflow "proxy-destroy.yaml" \
           --targetEnvironment "pr${{ github.event.number }}" \
           --apimEnvironment "internal-dev-sandbox" \
+          --boundedContext "notify-supplier"
+
+      - name: Trigger PR proxy destruction
+        env:
+          APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
+          APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
+        shell: bash
+        run: |
+          .github/scripts/dispatch_internal_repo_workflow.sh \
+          --infraRepoName "nhs-notify-supplier-api" \
+          --releaseVersion "main" \
+          --targetComponent "api" \
+          --targetWorkflow "proxy-destroy.yaml" \
+          --targetEnvironment "pr${{ github.event.number }}" \
+          --apimEnvironment "internal-dev" \
           --boundedContext "notify-supplier"

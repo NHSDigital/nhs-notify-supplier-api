@@ -16,7 +16,11 @@ inputs:
     description: "Deployment environment"
     required: true
   apimEnv:
-    description: "APIM environment"
+    description: |
+      OAS build configuration name (e.g. internal-dev-pr, internal-dev, int, prod).
+      Must match the apimEnv used to build the OAS artifact this action downloads.
+      The '-pr' suffix is stripped before dispatching to proxygen, which only knows
+      real APIM environments (internal-dev, internal-dev-sandbox, int, ref, prod).
     required: true
   runId:
     description: "GitHub Actions run ID to fetch the OAS artifact from"
@@ -60,19 +64,26 @@ runs:
     - name: Setup Proxy Name and target
       shell: bash
       run: |
+        set -euo pipefail
 
         ENV="${{ inputs.apimEnv }}"
-        if [[ "$ENV" == "internal-dev" || "$ENV" == *pr ]]; then
+        if [[ "$ENV" == "internal-dev" || "$ENV" == "internal-dev-pr" || "$ENV" == "internal-dev-sandbox" ]]; then
           echo "TARGET_DOMAIN=suppliers.dev.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
-        elif [[ "$ENV" == "int" ]]; then
+        elif [[ "$ENV" == "int" || "$ENV" == "ref" ]]; then
           echo "TARGET_DOMAIN=suppliers.nonprod.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
         elif [[ "$ENV" == "prod" ]]; then
           echo "TARGET_DOMAIN=suppliers.prod.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
         else
-          echo "TARGET_DOMAIN=suppliers.dev.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
+          echo "[ERROR] Unsupported apimEnv '$ENV'."
+          exit 1
         fi
 
     - name: Set APIM_ENV
+      # apimEnv carries the OAS build configuration name (e.g. "internal-dev-pr")
+      # which determines auth level, target secrets, and artifact naming.
+      # Proxygen and the internal proxy-deploy/proxy-destroy workflows only know
+      # real APIM environments, so we strip the "-pr" suffix here - this is the
+      # single translation boundary between OAS build config and APIM deployment.
       shell: bash
       run: |
         APIM_ENV="${{ inputs.apimEnv }}"

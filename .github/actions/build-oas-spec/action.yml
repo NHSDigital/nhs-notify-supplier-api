@@ -6,7 +6,11 @@ inputs:
     description: "Version number"
     required: true
   apimEnv:
-    description: "APIM environment"
+    description: |
+      OAS build configuration name. Selects environment-specific templates from
+      specification/api/components/environments/<apimEnv>/ (e.g. auth level, target secrets,
+      monitoring flags). Valid values: internal-dev, internal-dev-pr, int, ref, prod.
+      Note: 'internal-dev-pr' is a build config only - there is no corresponding APIM environment.
     required: true
   buildSandbox:
     description: "Whether to build the sandbox OAS spec"

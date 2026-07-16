@@ -67,7 +67,7 @@ jobs:
     timeout-minutes: 10
     strategy:
       matrix:
-        apimEnv: [internal-dev-pr, internal-dev, int, ref, prod]
+        apimEnv: [internal-dev, int, ref, prod]
     steps:
       - name: "Checkout code"
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -161,7 +161,7 @@ jobs:
   #       uses: ./.github/actions/build-libraries
   #       with:
   #         version: "${{ inputs.version }}"
-  pr-create-dynamic-environment:
+  create-dynamic-environment:
     name: Create Dynamic Environment
     runs-on: ubuntu-latest
     outputs:
@@ -192,7 +192,7 @@ jobs:
   populate-config:
     name: "Populate Supplier Config"
     runs-on: ubuntu-latest
-    needs: [pr-create-dynamic-environment]
+    needs: [create-dynamic-environment]
     timeout-minutes: 10
 
     steps:
@@ -221,7 +221,7 @@ jobs:
     name: "Build proxies"
     runs-on: ubuntu-latest
     if: always() && !failure() && inputs.deploy_proxy == 'true'
-    needs: [artefact-oas-spec, pr-create-dynamic-environment]
+    needs: [artefact-oas-spec, create-dynamic-environment]
     timeout-minutes: 10
     env:
       PROXYGEN_API_NAME: nhs-notify-supplier
@@ -234,7 +234,7 @@ jobs:
         uses: ./.github/actions/build-proxies
         with:
           version: "${{ inputs.version }}"
-          environment: ${{ needs.pr-create-dynamic-environment.outputs.environment_name }}
+          environment: ${{ needs.create-dynamic-environment.outputs.environment_name }}
           apimEnv: "${{ inputs.pr_number == '' && 'internal-dev' || 'internal-dev-pr' }}"
           runId: "${{ github.run_id }}"
           buildSandbox: true

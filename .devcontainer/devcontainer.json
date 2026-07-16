@@ -74,7 +74,7 @@
       "dockerDashComposeVersion": "v2",
       "installDockerBuildx": true,
       "installDockerComposeSwitch": true,
-      "moby": true,
+      "moby": false,
       "version": "latest"
     },
     "ghcr.io/devcontainers/features/dotnet:2.4.0": {
