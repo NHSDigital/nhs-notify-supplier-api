@@ -96,6 +96,9 @@
     "mocha": {
       "serialize-javascript": "^7.0.3"
     },
+    "@pact-foundation/pact": {
+      "https-proxy-agent": "7.0.6"
+    },
     "@pact-foundation/pact-core": {
       "underscore": "^1.13.8"
     }
