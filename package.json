@@ -6,7 +6,7 @@
     "@aws-sdk/client-sns": "^3.1044.0",
     "@openapitools/openapi-generator-cli": "^2.21.4",
     "@playwright/test": "^1.57.0",
-    "@redocly/cli": "1.31.0",
+    "@redocly/cli": "2.32.2",
     "@stoplight/spectral-cli": "^6.15.0",
     "@stylistic/eslint-plugin": "^5.9.0",
     "@tsconfig/node22": "^22.0.2",
