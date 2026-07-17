@@ -20,7 +20,7 @@
     "allure-playwright": "^3.4.3",
     "aws-lambda": "1.0.7",
     "chai": "^4.2.0",
-    "chai-as-promised": "^7.1.1",
+    "chai-as-promised": "^8.0.2",
     "esbuild": "0.27.2",
     "eslint": "^9.27.0",
     "eslint-config-airbnb-extended": "^3.0.1",
