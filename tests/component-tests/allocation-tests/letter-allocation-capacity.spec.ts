@@ -67,7 +67,6 @@ test.describe("Allocator Lambda Tests", () => {
     const supplierAllocatorLog = await getAllocationLog(
       "Pack specification filtered out based on pageCount constraints",
     );
-    logger.info(`Log found: ${JSON.stringify(supplierAllocatorLog)}`);
     const filteredPackSpecId = supplierAllocatorLog.packSpecId;
     logger.info(`Pack spec filtered out ${filteredPackSpecId}`);
     expect(filteredPackSpecId).toBe("notify-c5");
