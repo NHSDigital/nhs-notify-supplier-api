@@ -6,6 +6,7 @@ import {
   QueryCommand,
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
+import { logger } from "tests/helpers/pino-logger";
 import { envName } from "tests/constants/api-constants";
 import {
   pollAllocatorLogWithOptions,
@@ -142,6 +143,7 @@ export async function getAllocationLog<
 >(description: string, options?: AllocationLogOptions): Promise<TLog> {
   const message = await pollAllocatorLogWithOptions(description, options);
   const allocationLog = JSON.parse(message) as TLog;
+  logger.info(`Log found: ${JSON.stringify(allocationLog)}`);
   return allocationLog;
 }
 
