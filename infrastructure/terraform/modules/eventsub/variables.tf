@@ -86,7 +86,7 @@ variable "sns_success_logging_sample_percent" {
 variable "enable_event_anomaly_detection" {
   type        = bool
   description = "Enable CloudWatch anomaly detection alarm for SNS topic message publishing"
-  default     = true
+  default     = false
 }
 
 variable "event_anomaly_evaluation_periods" {
