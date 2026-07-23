@@ -47,4 +47,5 @@ locals {
     var.region,
     var.csoc_destination_account
   )
+  enable_alarms = true
 }
