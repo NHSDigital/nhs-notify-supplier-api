@@ -10,6 +10,7 @@ import { logger } from "tests/helpers/pino-logger";
 import { envName } from "tests/constants/api-constants";
 import {
   pollAllocatorLogWithOptions,
+  pollSupplierAllocatorLogForAllocationDetails,
   pollSupplierAllocatorLogForExceededDailyCapacity,
   pollSupplierAllocatorLogForResolvedSpec,
 } from "./aws-cloudwatch-helper";
@@ -84,6 +85,22 @@ export type AllocationLogOptions = {
   extraPatterns?: string[];
 };
 
+export type AllocatedSuppliersLogEntry = {
+  id: string;
+  name: string;
+  channelType: string;
+  dailyCapacity: number;
+  status: string;
+};
+
+export type FetchedSupplierLog = {
+  supplierAllocationIds?: string[];
+  allocatedSuppliers?: AllocatedSuppliersLogEntry[];
+  allSuppliersForPack?: string[];
+  supplierForPackWithCapacity?: string[];
+  selectedSupplierId?: string;
+};
+
 type LetterVariantConfig = {
   id: string;
   packSpecificationIds: string[];
@@ -136,6 +153,15 @@ export async function getAllocationLogForDomainId(
   const supplierAllocatorLog = JSON.parse(message) as SupplierAllocatorLog;
 
   return supplierAllocatorLog;
+}
+
+export async function getAllocationDetailsForDomainId(
+  domainId: string,
+): Promise<FetchedSupplierLog> {
+  const message = await pollSupplierAllocatorLogForAllocationDetails(domainId);
+  const fetchedSupplierLog = JSON.parse(message) as FetchedSupplierLog;
+
+  return fetchedSupplierLog;
 }
 
 export async function getAllocationLog<

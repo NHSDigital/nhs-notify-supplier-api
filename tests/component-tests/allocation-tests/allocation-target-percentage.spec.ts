@@ -6,6 +6,7 @@ import {
   getSupplierFromSupplierPack,
   getVariantsForAllocation,
   updateSupplierAllocation,
+  updateVolumeGroupData,
 } from "tests/helpers/allocation-helper";
 import { createPreparedV1Event } from "tests/helpers/event-fixtures";
 import { getLettersFromSupplierTable } from "tests/helpers/generate-fetch-test-data";
@@ -16,10 +17,22 @@ test.describe("Allocation Target Percentage Tests", () => {
   test("Verify that supplier with zero target percentage is handled correctly", async () => {
     const letterVariant = getVariantsForAllocation(8);
     const domainId = `Zero-Percentage-${randomUUID()}`;
-
     const letterVariantConfig =
       await getLetterVariantConfigFromDb(letterVariant);
     const volGroupId = letterVariantConfig.volumeGroupId;
+
+    // ensure volume group is valid.
+    const [pastStartDate] = new Date(Date.now() - 1000 * 60 * 60 * 24)
+      .toISOString()
+      .split("T");
+
+    await updateVolumeGroupData(volGroupId, pastStartDate, "startDate");
+
+    const [futureEnd] = new Date(Date.now() + 1000 * 60 * 60 * 24)
+      .toISOString()
+      .split("T");
+
+    await updateVolumeGroupData(volGroupId, futureEnd, "endDate");
 
     // update target percentage
     await updateSupplierAllocation("supplier1", volGroupId, 0);

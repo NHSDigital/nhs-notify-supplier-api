@@ -67,8 +67,23 @@ data "aws_iam_policy_document" "upsert_letter_lambda" {
 
     resources = [
       aws_dynamodb_table.letters.arn,
-      aws_dynamodb_table.idempotency.arn,
       "${aws_dynamodb_table.letters.arn}/index/supplierStatus-index"
+    ]
+  }
+
+  statement {
+    sid    = "AllowIdempotencyTableWrite"
+    effect = "Allow"
+
+    actions = [
+      "dynamodb:PutItem",
+      "dynamodb:GetItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:DeleteItem"
+    ]
+
+    resources = [
+      aws_dynamodb_table.idempotency.arn,
     ]
   }
 
