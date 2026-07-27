@@ -22,6 +22,7 @@ type ApiData = {
   attributes: {
     specificationId: string;
     groupId: string;
+    sha256Hash: string;
     status: string;
   };
 };
@@ -59,6 +60,8 @@ export const apiSandboxGetLettersRequestTestData: ApiSandboxGetLettersRequestTes
             attributes: {
               specificationId: "2WL5eYSWGzCHlGmzNxuqVusPxDg",
               groupId: "c5d93f917f5546d08beccf770a915d96",
+              sha256Hash:
+                "3a7bd3e2360a3d29eea436fcfb7e44c735d117c8f2f1d2d1e4f6e8f7e6e8f7e6",
               status: "PENDING",
             },
           },
