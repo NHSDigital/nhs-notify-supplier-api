@@ -44,5 +44,6 @@ runs:
       env:
         TARGET_ENVIRONMENT: ${{ inputs.targetEnvironment }}
         TARGET_ACCOUNT_GROUP: ${{ inputs.targetAccountGroup }}
+        SUPPLIER_API_URL_SANDBOX: https://internal-dev-sandbox.api.service.nhs.uk/nhs-notify-supplier
       run: |
         make test-${{ inputs.testType }}

@@ -1,4 +1,5 @@
 export const SUPPLIER_LETTERS = "letters";
+// previous   "https://internal-dev-sandbox.api.service.nhs.uk/nhs-notify-supplier";
 const DEFAULT_SUPPLIER_API_URL_SANDBOX = "http://127.0.0.1:9000";
 export const SUPPLIER_API_URL_SANDBOX =
   process.env.SUPPLIER_API_URL_SANDBOX ?? DEFAULT_SUPPLIER_API_URL_SANDBOX;
