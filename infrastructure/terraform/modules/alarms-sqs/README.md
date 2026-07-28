@@ -12,9 +12,9 @@
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_age_anomaly_datapoints_to_alarm"></a> [age\_anomaly\_datapoints\_to\_alarm](#input\_age\_anomaly\_datapoints\_to\_alarm) | n/a | `number` | `3` | no |
-| <a name="input_age_anomaly_evaluation_periods"></a> [age\_anomaly\_evaluation\_periods](#input\_age\_anomaly\_evaluation\_periods) | n/a | `number` | `5` | no |
-| <a name="input_age_anomaly_sensitivity"></a> [age\_anomaly\_sensitivity](#input\_age\_anomaly\_sensitivity) | n/a | `number` | `30` | no |
-| <a name="input_age_period_seconds"></a> [age\_period\_seconds](#input\_age\_period\_seconds) | n/a | `number` | `900` | no |
+| <a name="input_age_anomaly_evaluation_periods"></a> [age\_anomaly\_evaluation\_periods](#input\_age\_anomaly\_evaluation\_periods) | n/a | `number` | `3` | no |
+| <a name="input_age_period_seconds"></a> [age\_period\_seconds](#input\_age\_period\_seconds) | n/a | `number` | `300` | no |
+| <a name="input_age_threshold_seconds"></a> [age\_threshold\_seconds](#input\_age\_threshold\_seconds) | n/a | `number` | `30` | no |
 | <a name="input_alarm_prefix"></a> [alarm\_prefix](#input\_alarm\_prefix) | n/a | `string` | n/a | yes |
 | <a name="input_queue_name"></a> [queue\_name](#input\_queue\_name) | n/a | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | n/a | `map(string)` | `{}` | no |

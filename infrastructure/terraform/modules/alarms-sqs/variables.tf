@@ -13,17 +13,17 @@ variable "tags" {
 
 variable "age_period_seconds" {
   type    = number
-  default = 900
+  default = 300
 }
 
-variable "age_anomaly_sensitivity" {
+variable "age_threshold_seconds" {
   type    = number
   default = 30
 }
 
 variable "age_anomaly_evaluation_periods" {
   type    = number
-  default = 5
+  default = 3
 }
 
 variable "age_anomaly_datapoints_to_alarm" {
