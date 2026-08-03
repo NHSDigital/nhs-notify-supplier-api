@@ -40,6 +40,8 @@ jobs:
     name: "Publish packages"
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: write
     outputs:
       release_id: ${{ steps.create_release.outputs.id }}
       upload_url: ${{ steps.create_release.outputs.upload_url }}
@@ -96,64 +98,11 @@ jobs:
       #     path: ./artifacts/server-csharp-${{ inputs.version }}
       #     name: server-csharp-${{ inputs.version }}
 
-      - name: "Create release"
-        id: create_release
-        uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1.1.4
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ inputs.version }}
-          release_name: ${{ inputs.version }}
-          body: |
-            Release of ${{ inputs.version }}
-          draft: false
-          prerelease: ${{ inputs.is_version_prerelease == 'true'}}
-
-      - name: "Upload jekyll docs release asset"
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: "${{ steps.create_release.outputs.upload_url }}"
-          asset_path: ./artifacts/jekyll-docs-${{ inputs.version }}/artifact.tar
-          asset_name: jekyll-docs-${{ inputs.version }}.tar
-          asset_content_type: "application/gzip"
-
-      - name: "Upload sdk html docs release asset"
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: "${{ steps.create_release.outputs.upload_url }}"
-          asset_path: ./artifacts/sdk-html-docs-${{ inputs.version }}/artifact.tar
-          asset_name: sdk-html-docs-${{ inputs.version }}.tar
-          asset_content_type: "application/gzip"
-
-      - name: "Upload sdk swagger docs release asset"
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: "${{ steps.create_release.outputs.upload_url }}"
-          asset_path: ./artifacts/sdk-swagger-docs-${{ inputs.version }}/artifact.tar
-          asset_name: sdk-swagger-docs-${{ inputs.version }}.tar
-          asset_content_type: "application/gzip"
-
       - name: "zip html release asset"
         # GitHub pages needs a single tar called artifact inside the zip.
         working-directory: ./artifacts/sdk-html-${{ inputs.version }}
         run: zip -r ../sdk-html-${{ inputs.version }}.zip .
         shell: bash
-
-      - name: "Upload sdk html release asset"
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: "${{ steps.create_release.outputs.upload_url }}"
-          asset_path: ./artifacts/sdk-html-${{ inputs.version }}.zip
-          asset_name: sdk-html-${{ inputs.version }}.zip
-          asset_content_type: "application/gzip"
 
       - name: "zip sdk ts release asset"
         # GitHub pages needs a single tar called artifact inside the zip.
@@ -161,31 +110,11 @@ jobs:
         run: zip -r ../sdk-ts-${{ inputs.version }}.zip .
         shell: bash
 
-      - name: "Upload sdk ts release asset"
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: "${{ steps.create_release.outputs.upload_url }}"
-          asset_path: ./artifacts/sdk-ts-${{ inputs.version }}.zip
-          asset_name: sdk-ts-${{ inputs.version }}.zip
-          asset_content_type: "application/gzip"
-
       - name: "zip sdk python release asset"
         # GitHub pages needs a single tar called artifact inside the zip.
         working-directory: ./artifacts/sdk-python-${{ inputs.version }}
         run: zip -r ../sdk-python-${{ inputs.version }}.zip .
         shell: bash
-
-      - name: "Upload sdk python release asset"
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: "${{ steps.create_release.outputs.upload_url }}"
-          asset_path: ./artifacts/sdk-python-${{ inputs.version }}.zip
-          asset_name: sdk-python-${{ inputs.version }}.zip
-          asset_content_type: "application/gzip"
 
       - name: "zip sdk csharp release asset"
         # GitHub pages needs a single tar called artifact inside the zip.
@@ -193,15 +122,24 @@ jobs:
         run: zip -r ../sdk-csharp-${{ inputs.version }}.zip .
         shell: bash
 
-      - name: "Upload sdk csharp release asset"
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: "Create release and upload assets"
+        id: create_release
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
-          upload_url: "${{ steps.create_release.outputs.upload_url }}"
-          asset_path: ./artifacts/sdk-csharp-${{ inputs.version }}.zip
-          asset_name: sdk-csharp-${{ inputs.version }}.zip
-          asset_content_type: "application/gzip"
+          tag_name: ${{ inputs.version }}
+          name: ${{ inputs.version }}
+          body: |
+            Release of ${{ inputs.version }}
+          draft: false
+          prerelease: ${{ inputs.is_version_prerelease == 'true' }}
+          files: |
+            ./artifacts/jekyll-docs-${{ inputs.version }}/artifact.tar
+            ./artifacts/sdk-html-docs-${{ inputs.version }}/artifact.tar
+            ./artifacts/sdk-swagger-docs-${{ inputs.version }}/artifact.tar
+            ./artifacts/sdk-html-${{ inputs.version }}.zip
+            ./artifacts/sdk-ts-${{ inputs.version }}.zip
+            ./artifacts/sdk-python-${{ inputs.version }}.zip
+            ./artifacts/sdk-csharp-${{ inputs.version }}.zip
 
       # Take out for now - might add again in the future
       # - name: "zip csharp server release asset"
@@ -245,14 +183,10 @@ jobs:
         shell: bash
 
       - name: "Upload OAS specification release asset"
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
-          upload_url: ${{ needs.publish.outputs.upload_url }}
-          asset_path: ./artifacts/api-oas-specification-${{ matrix.apimEnv }}-${{ inputs.version }}.zip
-          asset_name: api-oas-specification-${{ matrix.apimEnv }}-${{ inputs.version }}.zip
-          asset_content_type: "application/zip"
+          tag_name: ${{ inputs.version }}
+          files: ./artifacts/api-oas-specification-${{ matrix.apimEnv }}-${{ inputs.version }}.zip
 
   # Take out for now - might add again in the future
   # ### PUBLISH DOCKER  - THIS NEEDS CHANGING TO DO THE DOCKER BUILD IN THE BUILD STAGE AND ARTIFACT IT. SEE publishlibhostdocker below how how and the buildlibs action.
