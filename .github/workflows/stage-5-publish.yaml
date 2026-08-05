@@ -122,6 +122,13 @@ jobs:
         run: zip -r ../sdk-csharp-${{ inputs.version }}.zip .
         shell: bash
 
+      - name: "prepare named tar release assets"
+        run: |
+          cp ./artifacts/jekyll-docs-${{ inputs.version }}/artifact.tar ./artifacts/jekyll-docs-${{ inputs.version }}.tar
+          cp ./artifacts/sdk-html-docs-${{ inputs.version }}/artifact.tar ./artifacts/sdk-html-docs-${{ inputs.version }}.tar
+          cp ./artifacts/sdk-swagger-docs-${{ inputs.version }}/artifact.tar ./artifacts/sdk-swagger-docs-${{ inputs.version }}.tar
+        shell: bash
+
       - name: "Create release and upload assets"
         id: create_release
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
@@ -133,9 +140,9 @@ jobs:
           draft: false
           prerelease: ${{ inputs.is_version_prerelease == 'true' }}
           files: |
-            ./artifacts/jekyll-docs-${{ inputs.version }}/artifact.tar
-            ./artifacts/sdk-html-docs-${{ inputs.version }}/artifact.tar
-            ./artifacts/sdk-swagger-docs-${{ inputs.version }}/artifact.tar
+            ./artifacts/jekyll-docs-${{ inputs.version }}.tar
+            ./artifacts/sdk-html-docs-${{ inputs.version }}.tar
+            ./artifacts/sdk-swagger-docs-${{ inputs.version }}.tar
             ./artifacts/sdk-html-${{ inputs.version }}.zip
             ./artifacts/sdk-ts-${{ inputs.version }}.zip
             ./artifacts/sdk-python-${{ inputs.version }}.zip
