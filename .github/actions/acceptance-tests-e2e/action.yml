@@ -25,7 +25,7 @@ runs:
         else
           echo "pr_number=$env" >> $GITHUB_OUTPUT
         fi
-
+    # mimic this for the sandbox test. I only want to run them when proxy is deployed
     - name: Determine if proxy has been deployed
       id: check_proxy_deployed
       env:

@@ -1,4 +1,5 @@
 <!-- vale off -->
+
 # NHS Notify Supplier API
 
 [![1. CI/CD pull request](https://github.com/NHSDigital/nhs-notify-supplier-api/actions/workflows/cicd-1-pull-request.yaml/badge.svg)](https://github.com/NHSDigital/nhs-notify-supplier-api/actions/workflows/cicd-1-pull-request.yaml)
@@ -29,6 +30,7 @@ This repository documents the Supplier API specification and provides an SDK wit
       - [Prerequisites and Configuration](#prerequisites-and-configuration)
         - [SDKs](#sdks)
     - [Build](#build)
+    - [Unit Testing](#unit-testing)
     - [Documentation](#documentation-1)
     - [GitHub Actions CI/CD](#github-actions-cicd)
       - [CI (Automatic)](#ci-automatic)
@@ -99,14 +101,14 @@ New developers of the NHS Notify Supplier API should understand the below.
 - In the project's root directory create an `.env` file based on the `.env.template` file and fill variables as needed.
 - Create the file `~/.npmrc` with the contents:
 
-   ```dsconfig
-    # Authenticate to GitHub Packages for github.com
-    //npm.pkg.github.com/:_authToken=<Insert your Github PAT (Personal Access Token)>
+  ```dsconfig
+   # Authenticate to GitHub Packages for github.com
+   //npm.pkg.github.com/:_authToken=<Insert your Github PAT (Personal Access Token)>
 
 
-    # Package is scoped under @org, set registry for that scope
-    @nhsdigital:registry=https://npm.pkg.github.com
-   ```
+   # Package is scoped under @org, set registry for that scope
+   @nhsdigital:registry=https://npm.pkg.github.com
+  ```
 
 - Install `node` (to run `npm install` and build the project)
 - Install `aws cli` to be able to connect to AWS (needed for some tests)
