@@ -281,20 +281,17 @@ async function processSupplierAllocation(
   const supplier = supplierSpec.supplierId;
   const priority = String(supplierSpec.priority);
 
-  if (supplierDetails.allocationDetails.allocationStatus.status === "PENDING") {
-    incrementMetric(perAllocationSuccess, supplier, priority);
-    emitDataMetrics(letterEvent, supplier, "extra_data_dimensions", deps);
+  incrementMetric(perAllocationSuccess, supplier, priority);
+  emitDataMetrics(letterEvent, supplier, "extra_data_dimensions", deps);
 
-    incrementAllocation(
-      volumeGroupAllocations,
-      supplierDetails.volumeGroupId,
-      supplier,
-      1,
-      deps,
-    );
-  } else {
-    incrementMetric(perAllocationFailure, supplier, priority);
-  }
+  incrementAllocation(
+    volumeGroupAllocations,
+    supplierDetails.volumeGroupId,
+    supplier,
+    1,
+    deps,
+  );
+}
 
   // Send to allocated letters queue
   const queueUrl = process.env.UPSERT_LETTERS_QUEUE_URL;
@@ -327,9 +324,6 @@ async function processSupplierAllocation(
 
 async function placeOnDeadLetterQueue(record: SQSRecord, deps: Deps) {
   const deadLetterQueueUrl = process.env.SUPPLIER_ALLOCATOR_DLQ_URL;
-  if (!deadLetterQueueUrl) {
-    throw new Error("SUPPLIER_ALLOCATOR_DLQ_URL not configured");
-  }
 
   deps.logger.info({
     description: "Sending record to supplier allocator DLQ",
