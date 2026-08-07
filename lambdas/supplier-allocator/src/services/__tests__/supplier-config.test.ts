@@ -31,6 +31,16 @@ function makeDeps(overrides: Partial<Deps> = {}): Deps {
   return { ...(base as Deps), ...overrides };
 }
 
+async function expectSupplierConfigError(
+  promise: Promise<unknown>,
+  message: string | RegExp,
+): Promise<void> {
+  await expect(promise).rejects.toThrow(message);
+  await expect(promise).rejects.toMatchObject({
+    name: "SupplierConfigError",
+  });
+}
+
 describe("supplier-config service", () => {
   afterEach(() => jest.resetAllMocks());
 
@@ -88,7 +98,8 @@ describe("supplier-config service", () => {
         .fn()
         .mockResolvedValue(group);
 
-      await expect(getVolumeGroupDetails("g2", deps)).rejects.toThrow(
+      await expectSupplierConfigError(
+        getVolumeGroupDetails("g2", deps),
         /not active/,
       );
       expect(deps.logger.error).toHaveBeenCalled();
@@ -102,7 +113,8 @@ describe("supplier-config service", () => {
         .fn()
         .mockResolvedValue(group);
 
-      await expect(getVolumeGroupDetails("g3", deps)).rejects.toThrow(
+      await expectSupplierConfigError(
+        getVolumeGroupDetails("g3", deps),
         /not active/,
       );
       expect(deps.logger.error).toHaveBeenCalled();
@@ -121,7 +133,8 @@ describe("supplier-config service", () => {
         .fn()
         .mockResolvedValue(group);
 
-      await expect(getVolumeGroupDetails("g3", deps)).rejects.toThrow(
+      await expectSupplierConfigError(
+        getVolumeGroupDetails("g3", deps),
         /not active/,
       );
       expect(deps.logger.error).toHaveBeenCalled();
@@ -183,9 +196,10 @@ describe("supplier-config service", () => {
         .fn()
         .mockResolvedValue(allocations);
 
-      await expect(
+      await expectSupplierConfigError(
         getSupplierAllocationsForVolumeGroup("g1", deps, "missing"),
-      ).rejects.toThrow(/No supplier allocations found/);
+        /No supplier allocations found/,
+      );
       expect(deps.logger.error).toHaveBeenCalled();
     });
   });
@@ -218,7 +232,8 @@ describe("supplier-config service", () => {
         .fn()
         .mockResolvedValue([]);
 
-      await expect(getSupplierDetails(supplierIds, deps)).rejects.toThrow(
+      await expectSupplierConfigError(
+        getSupplierDetails(supplierIds, deps),
         /No supplier details found/,
       );
     });
@@ -293,7 +308,8 @@ describe("supplier-config service", () => {
         .fn()
         .mockResolvedValue(suppliers);
 
-      await expect(getSupplierDetails(supplierIds, deps)).rejects.toThrow(
+      await expectSupplierConfigError(
+        getSupplierDetails(supplierIds, deps),
         /No active suppliers found/,
       );
       expect(deps.logger.error).toHaveBeenCalledWith(
@@ -360,9 +376,10 @@ describe("supplier-config service", () => {
         .fn()
         .mockResolvedValue([]);
 
-      await expect(
+      await expectSupplierConfigError(
         getPreferredSupplierPacks(["spec1"], suppliers, deps),
-      ).rejects.toThrow(/No preferred supplier packs found/);
+        /No preferred supplier packs found/,
+      );
       expect(deps.logger.error).toHaveBeenCalledWith(
         expect.objectContaining({
           description:
@@ -409,9 +426,10 @@ describe("supplier-config service", () => {
         .fn()
         .mockResolvedValue(supplierPacks);
 
-      await expect(
+      await expectSupplierConfigError(
         getPreferredSupplierPacks(["spec1"], suppliers, deps),
-      ).rejects.toThrow(/No preferred supplier packs found/);
+        /No preferred supplier packs found/,
+      );
       expect(deps.logger.error).toHaveBeenCalledWith(
         expect.objectContaining({
           description:
@@ -449,7 +467,8 @@ describe("supplier-config service", () => {
         .fn()
         .mockResolvedValue(packSpec);
 
-      await expect(getPackSpecification("spec2", deps)).rejects.toThrow(
+      await expectSupplierConfigError(
+        getPackSpecification("spec2", deps),
         /not active/,
       );
       expect(deps.logger.error).toHaveBeenCalledWith(
@@ -500,9 +519,8 @@ describe("supplier-config service", () => {
         },
       } as any;
 
-      await expect(
+      await expectSupplierConfigError(
         filterPacksForLetter(letterEvent, ["spec1"], deps),
-      ).rejects.toThrow(
         "No eligible pack specifications found for letter variant id undefined and pack specification ids spec1",
       );
       expect(deps.logger.info).toHaveBeenCalledWith({
@@ -571,9 +589,10 @@ describe("supplier-config service", () => {
         },
       } as any;
 
-      await expect(
+      await expectSupplierConfigError(
         filterPacksForLetter(letterEvent, ["spec1"], deps),
-      ).rejects.toThrow(/No eligible pack specifications found/);
+        /No eligible pack specifications found/,
+      );
 
       expect(deps.logger.info).toHaveBeenCalledWith({
         description:
@@ -611,9 +630,10 @@ describe("supplier-config service", () => {
         },
       } as any;
 
-      await expect(
+      await expectSupplierConfigError(
         filterPacksForLetter(letterEvent, ["spec1"], deps),
-      ).rejects.toThrow(/No eligible pack specifications found/);
+        /No eligible pack specifications found/,
+      );
 
       expect(deps.logger.info).toHaveBeenCalledWith({
         description:
@@ -731,9 +751,8 @@ describe("supplier-config service", () => {
         },
       } as any;
 
-      await expect(
+      await expectSupplierConfigError(
         filterPacksForLetter(letterEvent, ["spec1"], deps),
-      ).rejects.toThrow(
         "Unsupported operator UNSUPPORTED_OP in pack specification constraints",
       );
     });

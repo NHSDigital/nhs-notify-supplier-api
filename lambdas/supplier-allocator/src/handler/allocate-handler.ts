@@ -1,4 +1,10 @@
-import { Context, SQSBatchItemFailure, SQSEvent, SQSHandler } from "aws-lambda";
+import {
+  Context,
+  SQSBatchItemFailure,
+  SQSEvent,
+  SQSHandler,
+  SQSRecord,
+} from "aws-lambda";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import {
   LetterVariant,
@@ -31,6 +37,7 @@ import {
 } from "./allocation-config";
 import { Deps } from "../config/deps";
 import { PreparedEventSchema, PreparedEvents, SupplierDetails } from "./types";
+import SupplierConfigError from "../errors/supplier-config-error";
 
 const idempotencyConfig = new IdempotencyConfig({
   eventKeyJmesPath: "data.domainId",
@@ -81,99 +88,79 @@ async function getSupplierFromConfig(
   letterEvent: PreparedEvents,
   deps: Deps,
 ): Promise<SupplierDetails> {
-  try {
-    const letterVariant: LetterVariant = await getVariantDetails(
-      letterEvent.data.letterVariantId,
-      deps,
-    );
+  const letterVariant: LetterVariant = await getVariantDetails(
+    letterEvent.data.letterVariantId,
+    deps,
+  );
 
-    const volumeGroup: VolumeGroup = await getVolumeGroupDetails(
-      letterVariant.volumeGroupId,
-      deps,
-    );
+  const volumeGroup: VolumeGroup = await getVolumeGroupDetails(
+    letterVariant.volumeGroupId,
+    deps,
+  );
 
-    const { supplierAllocations, suppliers: allocatedSuppliers } =
-      await eligibleSuppliers(volumeGroup, deps, letterVariant.supplierId);
+  const { supplierAllocations, suppliers: allocatedSuppliers } =
+    await eligibleSuppliers(volumeGroup, deps, letterVariant.supplierId);
 
-    const preferredPack: PackSpecification = await preferredSupplierPack(
-      letterEvent,
-      allocatedSuppliers,
-      letterVariant.packSpecificationIds,
-      deps,
-    );
+  const preferredPack: PackSpecification = await preferredSupplierPack(
+    letterEvent,
+    allocatedSuppliers,
+    letterVariant.packSpecificationIds,
+    deps,
+  );
 
-    const allSuppliersForPack: Supplier[] = await suppliersWithValidPack(
-      allocatedSuppliers,
-      preferredPack.id,
-      deps,
-    );
+  const allSuppliersForPack: Supplier[] = await suppliersWithValidPack(
+    allocatedSuppliers,
+    preferredPack.id,
+    deps,
+  );
 
-    if (allSuppliersForPack.length === 0) {
-      throw new Error(
-        `No suppliers found for pack specification ${preferredPack.id}`,
-      );
-    }
-
-    const suppliersForPackWithCapacity: Supplier[] =
-      await filterSuppliersWithCapacity(allSuppliersForPack, deps);
-
-    // selected supplier id is determined by first calling selectSupplierByFactor for suppliers with capacity
-    // and if that returns nothing, try again with all suppliers for the pack
-    const selectedSupplierId =
-      (suppliersForPackWithCapacity.length > 0
-        ? await selectSupplierByFactor(
-            suppliersForPackWithCapacity,
-            supplierAllocations,
-            letterEvent.data.domainId,
-            deps,
-          )
-        : undefined) ??
-      (await selectSupplierByFactor(
-        allSuppliersForPack,
-        supplierAllocations,
-        letterEvent.data.domainId,
-        deps,
-      ));
-
-    deps.logger.info({
-      description: "Fetched supplier details for supplier allocations",
-      domainId: letterEvent.data.domainId,
-      variantId: letterEvent.data.letterVariantId,
-      volumeGroupId: volumeGroup.id,
-      supplierAllocationIds: supplierAllocations.map((a) => a.id),
-      allocatedSuppliers,
-      allSuppliersForPack: allSuppliersForPack.map((s) => s.id),
-      suppliersForPackWithCapacity: suppliersForPackWithCapacity.map(
-        (s) => s.id,
-      ),
-      selectedSupplierId,
-    });
-
-    return buildSupplierDetails(
-      selectedSupplierId,
-      preferredPack.id,
-      preferredPack.billingId,
-      letterVariant.priority,
-      "PENDING",
-      volumeGroup.id,
-    );
-  } catch (error) {
-    deps.logger.error({
-      description: "Error fetching supplier from config",
-      err: error,
-      variantId: letterEvent.data.letterVariantId,
-    });
-    return buildSupplierDetails(
-      "unknown",
-      "unknown",
-      "unknown",
-      0,
-      "REJECTED",
-      "unknown",
-      "NO_SUPPLIERS_AVAILABLE",
-      error instanceof Error ? error.message : "Unknown error",
+  if (allSuppliersForPack.length === 0) {
+    throw new SupplierConfigError(
+      `No suppliers found for pack specification ${preferredPack.id}`,
     );
   }
+
+  const suppliersForPackWithCapacity: Supplier[] =
+    await filterSuppliersWithCapacity(allSuppliersForPack, deps);
+
+  // selected supplier id is determined by first calling selectSupplierByFactor for suppliers with capacity
+  // and if that returns nothing, try again with all suppliers for the pack
+  const selectedSupplierId =
+    (suppliersForPackWithCapacity.length > 0
+      ? await selectSupplierByFactor(
+          suppliersForPackWithCapacity,
+          supplierAllocations,
+          letterEvent.data.domainId,
+          deps,
+        )
+      : undefined) ??
+    (await selectSupplierByFactor(
+      allSuppliersForPack,
+      supplierAllocations,
+      letterEvent.data.domainId,
+      deps,
+    ));
+
+  deps.logger.info({
+    description: "Fetched supplier details for supplier allocations",
+    domainId: letterEvent.data.domainId,
+    variantId: letterEvent.data.letterVariantId,
+    volumeGroupId: volumeGroup.id,
+    supplierAllocationIds: supplierAllocations.map((a) => a.id),
+    allocatedSuppliers,
+    allSuppliersForPack: allSuppliersForPack.map((s) => s.id),
+    suppliersForPackWithCapacity: suppliersForPackWithCapacity.map((s) => s.id),
+    selectedSupplierId,
+  });
+
+  return buildSupplierDetails(
+    selectedSupplierId,
+    preferredPack.id,
+    preferredPack.billingId,
+    letterVariant.priority,
+    "PENDING",
+    volumeGroup.id,
+  );
 }
 
 type AllocationMetrics = Map<string, Map<string, number>>;
@@ -294,20 +281,17 @@ async function processSupplierAllocation(
   const supplier = supplierSpec.supplierId;
   const priority = String(supplierSpec.priority);
 
-  if (supplierDetails.allocationDetails.allocationStatus.status === "PENDING") {
-    incrementMetric(perAllocationSuccess, supplier, priority);
-    emitDataMetrics(letterEvent, supplier, "extra_data_dimensions", deps);
+  incrementMetric(perAllocationSuccess, supplier, priority);
+  emitDataMetrics(letterEvent, supplier, "extra_data_dimensions", deps);
 
-    incrementAllocation(
-      volumeGroupAllocations,
-      supplierDetails.volumeGroupId,
-      supplier,
-      1,
-      deps,
-    );
-  } else {
-    incrementMetric(perAllocationFailure, supplier, priority);
-  }
+  incrementAllocation(
+    volumeGroupAllocations,
+    supplierDetails.volumeGroupId,
+    supplier,
+    1,
+    deps,
+  );
+}
 
   // Send to allocated letters queue
   const queueUrl = process.env.UPSERT_LETTERS_QUEUE_URL;
@@ -336,6 +320,23 @@ async function processSupplierAllocation(
     priority,
     supplier,
   };
+}
+
+async function placeOnDeadLetterQueue(record: SQSRecord, deps: Deps) {
+  const deadLetterQueueUrl = process.env.SUPPLIER_ALLOCATOR_DLQ_URL;
+
+  deps.logger.info({
+    description: "Sending record to supplier allocator DLQ",
+    messageId: record.messageId,
+    deadLetterQueueUrl,
+  });
+
+  await deps.sqsClient.send(
+    new SendMessageCommand({
+      QueueUrl: deadLetterQueueUrl,
+      MessageBody: record.body,
+    }),
+  );
 }
 
 export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
@@ -400,7 +401,21 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
           message: record.body,
         });
         incrementMetric(perAllocationFailure, supplier, priority);
-        batchItemFailures.push({ itemIdentifier: record.messageId });
+        if (error instanceof SupplierConfigError) {
+          try {
+            await placeOnDeadLetterQueue(record, deps);
+          } catch (dlqError) {
+            deps.logger.error({
+              description: "Failed to send record to supplier allocator DLQ",
+              err: dlqError,
+              messageId: record.messageId,
+              message: record.body,
+            });
+            batchItemFailures.push({ itemIdentifier: record.messageId });
+          }
+        } else {
+          batchItemFailures.push({ itemIdentifier: record.messageId });
+        }
       }
     });
 

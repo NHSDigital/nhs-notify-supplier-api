@@ -21,6 +21,15 @@ import * as supplierQuotasService from "../../services/supplier-quotas";
 jest.mock("../../services/supplier-config");
 jest.mock("../../services/supplier-quotas");
 
+async function expectSupplierConfigError(
+  promise: Promise<unknown>,
+  message: string | RegExp,
+): Promise<void> {
+  await expect(promise).rejects.toThrow(message);
+  await expect(promise).rejects.toMatchObject({
+    name: "SupplierConfigError",
+  });
+}
 describe("eligibleSuppliers", () => {
   let mockDeps: jest.Mocked<Deps>;
   let mockVolumeGroup: VolumeGroup;
@@ -970,14 +979,14 @@ describe("selectSupplierByFactor", () => {
       } as SupplierAllocation,
     ];
 
-    await expect(
+    await expectSupplierConfigError(
       selectSupplierByFactor(
         mockSuppliers,
         zeroAllocations,
         domainId,
         mockDeps,
       ),
-    ).rejects.toThrow(
+
       "No valid supplier allocations found for suppliers with valid pack",
     );
   });
@@ -1155,13 +1164,14 @@ describe("selectSupplierByFactor", () => {
       supplierQuotasService.calculateSupplierAllocatedFactor as jest.Mock
     ).mockResolvedValue([]);
 
-    await expect(
+    await expectSupplierConfigError(
       selectSupplierByFactor(
         mockSuppliers,
         mockSupplierAllocations,
         domainId,
         mockDeps,
       ),
-    ).rejects.toThrow("No supplier factors could be calculated for allocation");
+      "No supplier factors could be calculated for allocation",
+    );
   });
 });
