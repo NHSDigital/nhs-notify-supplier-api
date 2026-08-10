@@ -9,8 +9,8 @@ import {
   updateLetterVariantPackSpecs,
   updateVolumeGroupData,
 } from "tests/helpers/allocation-helper";
+import { pollQueueForLetterEvent } from "tests/helpers/aws-queue-helper";
 import { createPreparedV1Event } from "tests/helpers/event-fixtures";
-import { getLettersFromSupplierTable } from "tests/helpers/generate-fetch-test-data";
 import { logger } from "tests/helpers/pino-logger";
 import { sendSnsEvent } from "tests/helpers/send-sns-event";
 
@@ -27,7 +27,7 @@ test.describe("Allocator Rejected Allocation Tests", () => {
     {
       testCase: 1,
       testName:
-        "Verify that the letters are REJECTED when no pack specification is eligible",
+        "Verify that the letters are placed on a DLQ when no pack specification is eligible",
       letterVariantMapping: 1,
       domainIdName: "NoEligiblePackSpecs",
       pageCount: 100, // high page count to ensure pack specifications are filtered out based on constraints
@@ -36,7 +36,7 @@ test.describe("Allocator Rejected Allocation Tests", () => {
     {
       testCase: 2,
       testName:
-        "Verify that the letters are REJECTED when no supplier pack are found for selected pack",
+        "Verify that the letters are placed on a DLQ when no supplier pack are found for selected pack",
       letterVariantMapping: 6,
       domainIdName: "NoSupplierPacksFound",
       pageCount: 2,
@@ -46,7 +46,7 @@ test.describe("Allocator Rejected Allocation Tests", () => {
     {
       testCase: 3,
       testName:
-        "Verify that the letters are REJECTED when no pack specification found for letter variant",
+        "Verify that the letters are placed on a DLQ when no pack specification found for letter variant",
       letterVariantMapping: 7,
       domainIdName: "NoPackSpecificationFound",
       pageCount: 2,
@@ -72,38 +72,17 @@ test.describe("Allocator Rejected Allocation Tests", () => {
       const supplierAllocatorLog =
         await getAllocationLog<PackErrorLog>(expectedError);
 
-      const allocationLog = await getAllocationLogForDomainId(domainId);
-      const lettersInDb = await getLettersFromSupplierTable(
-        "unknown",
-        domainId,
-        "REJECTED",
-      );
+      await pollQueueForLetterEvent("supplier-allocator-dlq", domainId);
 
-      expect(lettersInDb.status).toBe("REJECTED");
-      expect(lettersInDb.supplierId).toBe(
-        allocationLog.msg?.allocationDetails?.supplierSpec?.supplierId,
-      );
       switch (testCase) {
-        case 1: {
-          const { packSpecificationIds } = supplierAllocatorLog;
-          expect(packSpecificationIds).toBeTruthy();
-          expect(lettersInDb.reasonText).toBe(
-            `No eligible pack specifications found for letter variant id ${letterVariant} and pack specification ids ${packSpecificationIds?.join(", ")}`,
-          );
-          break;
-        }
+        case 1:
         case 2: {
           const { packSpecificationIds } = supplierAllocatorLog;
           expect(packSpecificationIds).toBeTruthy();
-          expect(lettersInDb.reasonText).toContain(
-            `No preferred supplier packs found for pack specification ids ${packSpecificationIds?.join(", ")} and suppliers`,
-          );
           break;
         }
+
         case 3: {
-          expect(lettersInDb.reasonText).toContain(
-            `No pack specification found for id`,
-          );
           await updateLetterVariantPackSpecs(letterVariant, [
             "notify-c5-colour",
           ]); // update back to valid config for other tests
@@ -119,13 +98,13 @@ test.describe("Allocator Rejected Allocation Tests", () => {
   for (const { fieldToUpdate, testName, volumeGroupId } of [
     {
       testName:
-        "Verify that letters are rejected when volumeGroup is not active",
+        "Verify that letters are placed on a DLQ when volumeGroup is not active",
       volumeGroupId: "volumeGroup-test2",
       fieldToUpdate: "startDate",
     },
     {
       testName:
-        "Verify that letters are rejected when volumeGroup is no longer active",
+        "Verify that letters are placed on a DLQ when volumeGroup is no longer active",
       volumeGroupId: "volumeGroup-test2",
       fieldToUpdate: "endDate",
     },
@@ -163,20 +142,7 @@ test.describe("Allocator Rejected Allocation Tests", () => {
       const response = await sendSnsEvent(preparedEvent);
       expect(response.MessageId).toBeTruthy();
 
-      const allocationLog = await getAllocationLogForDomainId(domainId);
-      const lettersInDb = await getLettersFromSupplierTable(
-        "unknown",
-        domainId,
-        "REJECTED",
-      );
-
-      expect(lettersInDb.status).toBe("REJECTED");
-      expect(lettersInDb.supplierId).toBe(
-        allocationLog.msg?.allocationDetails?.supplierSpec?.supplierId,
-      );
-      expect(lettersInDb.reasonText).toContain(
-        `Volume group with id ${volumeGroupId} is not active`,
-      );
+      await pollQueueForLetterEvent("supplier-allocator-dlq", domainId);
 
       const resolvedOriginalEndDate =
         originalEndDate ??
