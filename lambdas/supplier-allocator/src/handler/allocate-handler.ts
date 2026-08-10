@@ -291,7 +291,6 @@ async function processSupplierAllocation(
     1,
     deps,
   );
-}
 
   // Send to allocated letters queue
   const queueUrl = process.env.UPSERT_LETTERS_QUEUE_URL;
@@ -324,6 +323,9 @@ async function processSupplierAllocation(
 
 async function placeOnDeadLetterQueue(record: SQSRecord, deps: Deps) {
   const deadLetterQueueUrl = process.env.SUPPLIER_ALLOCATOR_DLQ_URL;
+  if (!deadLetterQueueUrl) {
+    throw new Error("SUPPLIER_ALLOCATOR_DLQ_URL not configured");
+  }
 
   deps.logger.info({
     description: "Sending record to supplier allocator DLQ",

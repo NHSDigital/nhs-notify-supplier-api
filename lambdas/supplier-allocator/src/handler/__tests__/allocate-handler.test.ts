@@ -219,6 +219,9 @@ describe("createSupplierAllocatorHandler", () => {
   } as unknown as Deps;
 
   beforeEach(() => {
+    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
+    process.env.SUPPLIER_ALLOCATOR_DLQ_URL =
+      "https://sqs.test.queue/supplier-allocator-dlq";
     jest.clearAllMocks();
   });
 
@@ -229,7 +232,6 @@ describe("createSupplierAllocatorHandler", () => {
     ]);
 
     setupDefaultMocks();
-    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
     const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
@@ -266,7 +268,6 @@ describe("createSupplierAllocatorHandler", () => {
     ]);
 
     setupDefaultMocks();
-    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
     const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
@@ -300,7 +301,6 @@ describe("createSupplierAllocatorHandler", () => {
       createSqsRecord("msg1", JSON.stringify(preparedEvent)),
     ]);
 
-    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
     setupDefaultMocks();
     const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
@@ -331,8 +331,6 @@ describe("createSupplierAllocatorHandler", () => {
       createSqsRecord("invalid-event", JSON.stringify(preparedEvent)),
     ]);
 
-    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
-
     const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
 
@@ -351,8 +349,6 @@ describe("createSupplierAllocatorHandler", () => {
       createSqsRecord("msg1", JSON.stringify(preparedEvent)),
     ]);
 
-    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
-
     const handler = createSupplierAllocatorHandler(mockedDeps);
     await handler(evt, {} as any, {} as any);
 
@@ -370,8 +366,6 @@ describe("createSupplierAllocatorHandler", () => {
     const evt: SQSEvent = createSQSEvent([
       createSqsRecord("msg1", JSON.stringify(preparedEvent)),
     ]);
-
-    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
     const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
@@ -396,8 +390,6 @@ describe("createSupplierAllocatorHandler", () => {
       ),
     ]);
 
-    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
-
     const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
 
@@ -412,8 +404,6 @@ describe("createSupplierAllocatorHandler", () => {
     const evt: SQSEvent = createSQSEvent([
       createSqsRecord("bad-json", "this-is-not-json"),
     ]);
-
-    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
     const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
@@ -433,8 +423,6 @@ describe("createSupplierAllocatorHandler", () => {
       createSqsRecord("no-type", JSON.stringify(event)),
     ]);
 
-    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
-
     const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
     if (!result) throw new Error("expected BatchResponse, got void");
@@ -450,6 +438,7 @@ describe("createSupplierAllocatorHandler", () => {
       createSqsRecord("msg1", JSON.stringify(preparedEvent)),
     ]);
 
+    setupDefaultMocks();
     delete process.env.UPSERT_LETTERS_QUEUE_URL;
 
     const handler = createSupplierAllocatorHandler(mockedDeps);
@@ -471,8 +460,6 @@ describe("createSupplierAllocatorHandler", () => {
     const evt: SQSEvent = createSQSEvent([
       createSqsRecord("msg1", JSON.stringify(preparedEvent)),
     ]);
-
-    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
     const sqsError = new Error("SQS send failed");
     (mockedDeps.sqsClient.send as jest.Mock).mockRejectedValueOnce(sqsError);
@@ -498,8 +485,6 @@ describe("createSupplierAllocatorHandler", () => {
         JSON.stringify(createPreparedV2Event({ domainId: "letter2" })),
       ),
     ]);
-
-    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
     const handler = createSupplierAllocatorHandler(mockedDeps);
     const result = await handler(evt, {} as any, {} as any);
@@ -605,9 +590,6 @@ describe("createSupplierAllocatorHandler", () => {
         createSqsRecord("msg1", JSON.stringify(preparedEvent)),
       ]);
 
-      process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
-      process.env.SUPPLIER_ALLOCATOR_DLQ_URL =
-        "https://sqs.test.queue/supplier-allocator-dlq";
       setup();
 
       const handler = createSupplierAllocatorHandler(mockedDeps);
@@ -634,10 +616,6 @@ describe("createSupplierAllocatorHandler", () => {
       const evt: SQSEvent = createSQSEvent([
         createSqsRecord("msg1", JSON.stringify(preparedEvent)),
       ]);
-
-      process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
-      process.env.SUPPLIER_ALLOCATOR_DLQ_URL =
-        "https://sqs.test.queue/supplier-allocator-dlq";
 
       setupDefaultMocks();
       (allocationConfig.suppliersWithValidPack as jest.Mock).mockResolvedValue(
@@ -674,9 +652,6 @@ describe("createSupplierAllocatorHandler", () => {
         createSqsRecord("msg1", JSON.stringify(preparedEvent)),
       ]);
 
-      process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
-      process.env.SUPPLIER_ALLOCATOR_DLQ_URL =
-        "https://sqs.test.queue/supplier-allocator-dlq";
       const configError = new SupplierConfigError(
         "Failed to retrieve supplier config",
       );
@@ -704,15 +679,36 @@ describe("createSupplierAllocatorHandler", () => {
       expect(sendCall.input.MessageBody).toBe(JSON.stringify(preparedEvent));
     });
 
-    it("returns batch failure when sending to DLQ fails", async () => {
+    it("returns batch failure when DLQ not configured", async () => {
       const preparedEvent = createPreparedV2Event();
       const evt: SQSEvent = createSQSEvent([
         createSqsRecord("msg1", JSON.stringify(preparedEvent)),
       ]);
 
-      process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
-      process.env.SUPPLIER_ALLOCATOR_DLQ_URL =
-        "https://sqs.test.queue/supplier-allocator-dlq";
+      const configError = new SupplierConfigError(
+        "Failed to retrieve supplier config",
+      );
+      (supplierConfig.getVariantDetails as jest.Mock).mockRejectedValueOnce(
+        configError,
+      );
+
+      setupDefaultMocks();
+      delete process.env.SUPPLIER_ALLOCATOR_DLQ_URL;
+
+      const handler = createSupplierAllocatorHandler(mockedDeps);
+      const result = await handler(evt, {} as any, {} as any);
+      if (!result) throw new Error("expected BatchResponse, got void");
+
+      expect(result.batchItemFailures).toHaveLength(1);
+      expect(result.batchItemFailures[0].itemIdentifier).toBe("msg1");
+      expect((mockedDeps.logger.error as jest.Mock).mock.calls).toHaveLength(2);
+    });
+
+    it("returns batch failure when sending to DLQ fails", async () => {
+      const preparedEvent = createPreparedV2Event();
+      const evt: SQSEvent = createSQSEvent([
+        createSqsRecord("msg1", JSON.stringify(preparedEvent)),
+      ]);
 
       setupDefaultMocks();
       (allocationConfig.suppliersWithValidPack as jest.Mock).mockResolvedValue(
@@ -737,7 +733,6 @@ describe("createSupplierAllocatorHandler", () => {
     (
       allocationConfig.filterSuppliersWithCapacity as jest.Mock
     ).mockResolvedValue([]);
-    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
     const evt: SQSEvent = createSQSEvent([
       createSqsRecord("msg1", JSON.stringify(createPreparedV2Event())),
@@ -761,7 +756,6 @@ describe("createSupplierAllocatorHandler", () => {
     (allocationConfig.selectSupplierByFactor as jest.Mock)
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce("supplier1");
-    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
     const evt: SQSEvent = createSQSEvent([
       createSqsRecord("msg1", JSON.stringify(createPreparedV2Event())),
@@ -780,8 +774,6 @@ describe("createSupplierAllocatorHandler", () => {
     const evt: SQSEvent = createSQSEvent([
       createSqsRecord("msg1", JSON.stringify(preparedEvent)),
     ]);
-
-    process.env.UPSERT_LETTERS_QUEUE_URL = "https://sqs.test.queue";
 
     setupDefaultMocks();
     (makeIdempotent as jest.Mock).mockImplementationOnce((_fn) => "supplier1");
