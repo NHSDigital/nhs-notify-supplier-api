@@ -3,7 +3,6 @@ import test, { expect } from "playwright/test";
 import {
   PackErrorLog,
   getAllocationLog,
-  getAllocationLogForDomainId,
   getVariantsForAllocation,
   getVolumeGroupData,
   updateLetterVariantPackSpecs,
