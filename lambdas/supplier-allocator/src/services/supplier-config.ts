@@ -9,7 +9,7 @@ import {
 
 import { Deps } from "../config/deps";
 import { PreparedEvents } from "../handler/types";
-import SupplierConfigError from "../errors/supplier-config-error";
+import SupplierConfigValidationError from "../errors/supplier-config-validation-error";
 
 export async function getVariantDetails(
   variantId: string,
@@ -47,7 +47,7 @@ export async function getVolumeGroupDetails(
     startDate: groupDetails.startDate,
     endDate: groupDetails.endDate,
   });
-  throw new SupplierConfigError(
+  throw new SupplierConfigValidationError(
     `Volume group with id ${groupId} is not active`,
   );
 }
@@ -71,7 +71,7 @@ export async function getSupplierAllocationsForVolumeGroup(
         groupId,
         supplierId,
       });
-      throw new SupplierConfigError(
+      throw new SupplierConfigValidationError(
         `No supplier allocations found for variant supplier id ${supplierId} in volume group ${groupId}`,
       );
     }
@@ -93,7 +93,7 @@ export async function getSupplierDetails(
       description: "No supplier details found for supplier allocations",
       supplierIds,
     });
-    throw new SupplierConfigError(
+    throw new SupplierConfigValidationError(
       `No supplier details found for supplier ids ${supplierIds.join(", ")}`,
     );
   }
@@ -116,7 +116,7 @@ export async function getSupplierDetails(
       description: "No active suppliers found for supplier allocations",
       supplierIds,
     });
-    throw new SupplierConfigError(
+    throw new SupplierConfigValidationError(
       `No active suppliers found for supplier ids ${supplierIds.join(", ")}`,
     );
   }
@@ -148,7 +148,7 @@ export async function getPreferredSupplierPacks(
     packSpecificationIds,
     supplierIds: suppliers.map((s) => s.id),
   });
-  throw new SupplierConfigError(
+  throw new SupplierConfigValidationError(
     `No preferred supplier packs found for pack specification ids ${packSpecificationIds.join(", ")} and suppliers ${suppliers.map((s) => s.id).join(", ")}`,
   );
 }
@@ -165,7 +165,7 @@ export async function getPackSpecification(
       packSpecId,
       status: packSpec.status,
     });
-    throw new SupplierConfigError(
+    throw new SupplierConfigValidationError(
       `Pack specification with id ${packSpecId} is not active`,
     );
   }
@@ -208,7 +208,7 @@ function evaluateContraint(
       return actualValue <= constraintValue;
     }
     default: {
-      throw new SupplierConfigError(
+      throw new SupplierConfigValidationError(
         `Unsupported operator ${operator} in pack specification constraints`,
       );
     }
@@ -327,7 +327,7 @@ export async function filterPacksForLetter(
       letterVariantId: letterEvent.data.letterVariantId,
       packSpecificationIds,
     });
-    throw new SupplierConfigError(
+    throw new SupplierConfigValidationError(
       `No eligible pack specifications found for letter variant id ${letterEvent.data.letterVariantId} and pack specification ids ${packSpecificationIds.join(", ")}`,
     );
   }

@@ -8,12 +8,13 @@ import {
   LetterStatusChangeEvent,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
 import { makeIdempotent } from "@aws-lambda-powertools/idempotency";
+import { MissingSupplierConfigError } from "@internal/datastore";
 import createSupplierAllocatorHandler from "../allocate-handler";
 import * as supplierConfig from "../../services/supplier-config";
 import * as supplierQuotas from "../../services/supplier-quotas";
 import * as allocationConfig from "../allocation-config";
 import { Deps } from "../../config/deps";
-import SupplierConfigError from "../../errors/supplier-config-error";
+import SupplierConfigValidationError from "../../errors/supplier-config-validation-error";
 import packageJson from "../../../package.json";
 
 const renderingSchemaVersion: string =
@@ -519,7 +520,7 @@ describe("createSupplierAllocatorHandler", () => {
   const throwAny = (mock: jest.Mock) =>
     mock.mockRejectedValueOnce("anything that is not an Error");
 
-  const nonSupplierConfigErrorCases = [
+  const nonSupplierConfigValidationErrorCases = [
     {
       name: "getVolumeGroupDetails",
       errorMessage: "Volume group retrieval failed",
@@ -582,8 +583,8 @@ describe("createSupplierAllocatorHandler", () => {
     },
   ];
 
-  test.each(nonSupplierConfigErrorCases)(
-    "returns batch failure when %s rejects with a non-SupplierConfigError",
+  test.each(nonSupplierConfigValidationErrorCases)(
+    "returns batch failure when %s rejects with a non-SupplierConfigValidationError",
     async ({ errorMessage, setup }) => {
       const preparedEvent = createPreparedV2Event();
       const evt: SQSEvent = createSQSEvent([
@@ -645,39 +646,44 @@ describe("createSupplierAllocatorHandler", () => {
       expect(sendCall.input.MessageBody).toBe(JSON.stringify(preparedEvent));
     });
 
-    it("places the record on the DLQ when supplier config retrieval fails", async () => {
-      const preparedEvent = createPreparedV2Event();
+    test.each([
+      new SupplierConfigValidationError("Failed to retrieve supplier config"),
+      new MissingSupplierConfigError("Failed to retrieve supplier config"),
+    ])(
+      "places the record on the DLQ when supplier config retrieval fails",
+      async (configError: Error) => {
+        const preparedEvent = createPreparedV2Event();
 
-      const evt: SQSEvent = createSQSEvent([
-        createSqsRecord("msg1", JSON.stringify(preparedEvent)),
-      ]);
+        const evt: SQSEvent = createSQSEvent([
+          createSqsRecord("msg1", JSON.stringify(preparedEvent)),
+        ]);
 
-      const configError = new SupplierConfigError(
-        "Failed to retrieve supplier config",
-      );
-      (supplierConfig.getVariantDetails as jest.Mock).mockRejectedValueOnce(
-        configError,
-      );
+        (supplierConfig.getVariantDetails as jest.Mock).mockRejectedValueOnce(
+          configError,
+        );
 
-      const handler = createSupplierAllocatorHandler(mockedDeps);
-      const result = await handler(evt, {} as any, {} as any);
-      if (!result) throw new Error("expected BatchResponse, got void");
-      expect((mockedDeps.logger.error as jest.Mock).mock.calls).toHaveLength(1);
-      expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][0]).toEqual(
-        expect.objectContaining({
-          description: "Error processing allocation of record",
-          err: configError,
-        }),
-      );
-      expect(result.batchItemFailures).toHaveLength(0);
-      expect(mockedDeps.sqsClient.send).toHaveBeenCalledTimes(1);
-      const sendCall = (mockedDeps.sqsClient.send as jest.Mock).mock
-        .calls[0][0];
-      expect(sendCall.input.QueueUrl).toBe(
-        "https://sqs.test.queue/supplier-allocator-dlq",
-      );
-      expect(sendCall.input.MessageBody).toBe(JSON.stringify(preparedEvent));
-    });
+        const handler = createSupplierAllocatorHandler(mockedDeps);
+        const result = await handler(evt, {} as any, {} as any);
+        if (!result) throw new Error("expected BatchResponse, got void");
+        expect((mockedDeps.logger.error as jest.Mock).mock.calls).toHaveLength(
+          1,
+        );
+        expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][0]).toEqual(
+          expect.objectContaining({
+            description: "Error processing allocation of record",
+            err: configError,
+          }),
+        );
+        expect(result.batchItemFailures).toHaveLength(0);
+        expect(mockedDeps.sqsClient.send).toHaveBeenCalledTimes(1);
+        const sendCall = (mockedDeps.sqsClient.send as jest.Mock).mock
+          .calls[0][0];
+        expect(sendCall.input.QueueUrl).toBe(
+          "https://sqs.test.queue/supplier-allocator-dlq",
+        );
+        expect(sendCall.input.MessageBody).toBe(JSON.stringify(preparedEvent));
+      },
+    );
 
     it("returns batch failure when DLQ not configured", async () => {
       const preparedEvent = createPreparedV2Event();
@@ -685,7 +691,7 @@ describe("createSupplierAllocatorHandler", () => {
         createSqsRecord("msg1", JSON.stringify(preparedEvent)),
       ]);
 
-      const configError = new SupplierConfigError(
+      const configError = new SupplierConfigValidationError(
         "Failed to retrieve supplier config",
       );
       (supplierConfig.getVariantDetails as jest.Mock).mockRejectedValueOnce(

@@ -31,13 +31,13 @@ function makeDeps(overrides: Partial<Deps> = {}): Deps {
   return { ...(base as Deps), ...overrides };
 }
 
-async function expectSupplierConfigError(
+async function expectSupplierConfigValidationError(
   promise: Promise<unknown>,
   message: string | RegExp,
 ): Promise<void> {
   await expect(promise).rejects.toThrow(message);
   await expect(promise).rejects.toMatchObject({
-    name: "SupplierConfigError",
+    name: "SupplierConfigValidationError",
   });
 }
 
@@ -98,7 +98,7 @@ describe("supplier-config service", () => {
         .fn()
         .mockResolvedValue(group);
 
-      await expectSupplierConfigError(
+      await expectSupplierConfigValidationError(
         getVolumeGroupDetails("g2", deps),
         /not active/,
       );
@@ -113,7 +113,7 @@ describe("supplier-config service", () => {
         .fn()
         .mockResolvedValue(group);
 
-      await expectSupplierConfigError(
+      await expectSupplierConfigValidationError(
         getVolumeGroupDetails("g3", deps),
         /not active/,
       );
@@ -133,7 +133,7 @@ describe("supplier-config service", () => {
         .fn()
         .mockResolvedValue(group);
 
-      await expectSupplierConfigError(
+      await expectSupplierConfigValidationError(
         getVolumeGroupDetails("g3", deps),
         /not active/,
       );
@@ -196,7 +196,7 @@ describe("supplier-config service", () => {
         .fn()
         .mockResolvedValue(allocations);
 
-      await expectSupplierConfigError(
+      await expectSupplierConfigValidationError(
         getSupplierAllocationsForVolumeGroup("g1", deps, "missing"),
         /No supplier allocations found/,
       );
@@ -232,7 +232,7 @@ describe("supplier-config service", () => {
         .fn()
         .mockResolvedValue([]);
 
-      await expectSupplierConfigError(
+      await expectSupplierConfigValidationError(
         getSupplierDetails(supplierIds, deps),
         /No supplier details found/,
       );
@@ -308,7 +308,7 @@ describe("supplier-config service", () => {
         .fn()
         .mockResolvedValue(suppliers);
 
-      await expectSupplierConfigError(
+      await expectSupplierConfigValidationError(
         getSupplierDetails(supplierIds, deps),
         /No active suppliers found/,
       );
@@ -376,7 +376,7 @@ describe("supplier-config service", () => {
         .fn()
         .mockResolvedValue([]);
 
-      await expectSupplierConfigError(
+      await expectSupplierConfigValidationError(
         getPreferredSupplierPacks(["spec1"], suppliers, deps),
         /No preferred supplier packs found/,
       );
@@ -426,7 +426,7 @@ describe("supplier-config service", () => {
         .fn()
         .mockResolvedValue(supplierPacks);
 
-      await expectSupplierConfigError(
+      await expectSupplierConfigValidationError(
         getPreferredSupplierPacks(["spec1"], suppliers, deps),
         /No preferred supplier packs found/,
       );
@@ -467,7 +467,7 @@ describe("supplier-config service", () => {
         .fn()
         .mockResolvedValue(packSpec);
 
-      await expectSupplierConfigError(
+      await expectSupplierConfigValidationError(
         getPackSpecification("spec2", deps),
         /not active/,
       );
@@ -519,7 +519,7 @@ describe("supplier-config service", () => {
         },
       } as any;
 
-      await expectSupplierConfigError(
+      await expectSupplierConfigValidationError(
         filterPacksForLetter(letterEvent, ["spec1"], deps),
         "No eligible pack specifications found for letter variant id undefined and pack specification ids spec1",
       );
@@ -589,7 +589,7 @@ describe("supplier-config service", () => {
         },
       } as any;
 
-      await expectSupplierConfigError(
+      await expectSupplierConfigValidationError(
         filterPacksForLetter(letterEvent, ["spec1"], deps),
         /No eligible pack specifications found/,
       );
@@ -630,7 +630,7 @@ describe("supplier-config service", () => {
         },
       } as any;
 
-      await expectSupplierConfigError(
+      await expectSupplierConfigValidationError(
         filterPacksForLetter(letterEvent, ["spec1"], deps),
         /No eligible pack specifications found/,
       );
@@ -751,7 +751,7 @@ describe("supplier-config service", () => {
         },
       } as any;
 
-      await expectSupplierConfigError(
+      await expectSupplierConfigValidationError(
         filterPacksForLetter(letterEvent, ["spec1"], deps),
         "Unsupported operator UNSUPPORTED_OP in pack specification constraints",
       );

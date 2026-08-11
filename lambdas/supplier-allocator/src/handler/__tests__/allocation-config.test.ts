@@ -21,13 +21,13 @@ import * as supplierQuotasService from "../../services/supplier-quotas";
 jest.mock("../../services/supplier-config");
 jest.mock("../../services/supplier-quotas");
 
-async function expectSupplierConfigError(
+async function expectSupplierConfigValidationError(
   promise: Promise<unknown>,
   message: string | RegExp,
 ): Promise<void> {
   await expect(promise).rejects.toThrow(message);
   await expect(promise).rejects.toMatchObject({
-    name: "SupplierConfigError",
+    name: "SupplierConfigValidationError",
   });
 }
 describe("eligibleSuppliers", () => {
@@ -979,7 +979,7 @@ describe("selectSupplierByFactor", () => {
       } as SupplierAllocation,
     ];
 
-    await expectSupplierConfigError(
+    await expectSupplierConfigValidationError(
       selectSupplierByFactor(
         mockSuppliers,
         zeroAllocations,
@@ -1164,7 +1164,7 @@ describe("selectSupplierByFactor", () => {
       supplierQuotasService.calculateSupplierAllocatedFactor as jest.Mock
     ).mockResolvedValue([]);
 
-    await expectSupplierConfigError(
+    await expectSupplierConfigValidationError(
       selectSupplierByFactor(
         mockSuppliers,
         mockSupplierAllocations,

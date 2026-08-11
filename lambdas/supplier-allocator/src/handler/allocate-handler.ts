@@ -23,6 +23,7 @@ import {
   IdempotencyConfig,
   makeIdempotent,
 } from "@aws-lambda-powertools/idempotency";
+import MissingSupplierConfigError from "@internal/datastore/src/errors/missing-supplier-config-error";
 import {
   getVariantDetails,
   getVolumeGroupDetails,
@@ -37,7 +38,7 @@ import {
 } from "./allocation-config";
 import { Deps } from "../config/deps";
 import { PreparedEventSchema, PreparedEvents, SupplierDetails } from "./types";
-import SupplierConfigError from "../errors/supplier-config-error";
+import SupplierConfigValidationError from "../errors/supplier-config-validation-error";
 
 const idempotencyConfig = new IdempotencyConfig({
   eventKeyJmesPath: "data.domainId",
@@ -115,7 +116,7 @@ async function getSupplierFromConfig(
   );
 
   if (allSuppliersForPack.length === 0) {
-    throw new SupplierConfigError(
+    throw new SupplierConfigValidationError(
       `No suppliers found for pack specification ${preferredPack.id}`,
     );
   }
@@ -265,7 +266,6 @@ async function processSupplierAllocation(
   letterEvent: PreparedEvents,
   deps: Deps,
   perAllocationSuccess: AllocationMetrics,
-  perAllocationFailure: AllocationMetrics,
   volumeGroupAllocations: VolumeGroupAllocation,
 ): Promise<SupplierAllocationResult> {
   const supplierDetails: SupplierDetails = await getSupplierFromConfig(
@@ -353,7 +353,6 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
           letterEvent,
           depsInner,
           perAllocationSuccess,
-          perAllocationFailure,
           volumeGroupAllocations,
         ),
       {
@@ -403,7 +402,10 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
           message: record.body,
         });
         incrementMetric(perAllocationFailure, supplier, priority);
-        if (error instanceof SupplierConfigError) {
+        if (
+          error instanceof SupplierConfigValidationError ||
+          error instanceof MissingSupplierConfigError
+        ) {
           try {
             await placeOnDeadLetterQueue(record, deps);
           } catch (dlqError) {
