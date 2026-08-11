@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "@nhsdigital/nhs-notify-event-schemas-supplier-api": "*",
-    "@pact-foundation/pact": "^16.0.4"
+    "@pact-foundation/pact": "^16.5.0"
   },
   "name": "@sap/contracts-provider",
   "private": true,
