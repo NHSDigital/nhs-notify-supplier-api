@@ -13,8 +13,16 @@ import {
 import { setTimeout } from "node:timers/promises";
 
 function messageMatchesDomainId(message: Message, domainId: string): boolean {
-  const result = PreparedEventSchema.safeParse(JSON.parse(message.Body!));
-  return result.success && result.data.data.domainId === domainId;
+  if (!message.Body) {
+    return false;
+  }
+  try {
+    const letterEvent = PreparedEventSchema.parse(JSON.parse(message.Body));
+    return letterEvent.data.domainId === domainId;
+  } catch {
+    // Allow for (and ignore) malformed messages on DLQ
+    return false;
+  }
 }
 
 async function doPoll(

@@ -23,7 +23,7 @@ import {
   IdempotencyConfig,
   makeIdempotent,
 } from "@aws-lambda-powertools/idempotency";
-import MissingSupplierConfigError from "@internal/datastore/src/errors/missing-supplier-config-error";
+import { MissingSupplierConfigError } from "@internal/datastore";
 import {
   getVariantDetails,
   getVolumeGroupDetails,
@@ -344,7 +344,6 @@ async function placeOnDeadLetterQueue(record: SQSRecord, deps: Deps) {
 export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
   const createGetSupplierIdempotently = (
     perAllocationSuccess: AllocationMetrics,
-    perAllocationFailure: AllocationMetrics,
     volumeGroupAllocations: VolumeGroupAllocation,
   ) => {
     return makeIdempotent(
@@ -370,7 +369,6 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
     // create an idempotent function bound to this handler's global variables to track metrics and allocations
     const getSupplierIdempotently = createGetSupplierIdempotently(
       perAllocationSuccess,
-      perAllocationFailure,
       volumeGroupAllocations,
     );
 
