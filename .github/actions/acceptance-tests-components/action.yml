@@ -44,8 +44,8 @@ runs:
       env:
         TARGET_ENVIRONMENT: ${{ inputs.targetEnvironment }}
         TARGET_ACCOUNT_GROUP: ${{ inputs.targetAccountGroup }}
-        # build the ULR. nhs-notify-supplier for main and -PR-<NUMBER> for PRs
-        # calculate it dynamically
+        # TODO: build the ULR. nhs-notify-supplier for main and -PR-<NUMBER> for PRs
+        # TODO: calculate it dynamically
         SUPPLIER_API_URL_SANDBOX: https://internal-dev-sandbox.api.service.nhs.uk/nhs-notify-supplier-PR-659
       run: |
         make test-${{ inputs.testType }}
