@@ -3,6 +3,7 @@ import test, { expect } from "playwright/test";
 import {
   PackErrorLog,
   getAllocationLog,
+  getAllocationLogForDomainId,
   getVariantsForAllocation,
   getVolumeGroupData,
   updateLetterVariantPackSpecs,
@@ -10,89 +11,88 @@ import {
 } from "tests/helpers/allocation-helper";
 import { pollQueueForLetterEvent } from "tests/helpers/aws-queue-helper";
 import { createPreparedV1Event } from "tests/helpers/event-fixtures";
+import { getLettersFromSupplierTable } from "tests/helpers/generate-fetch-test-data";
 import { logger } from "tests/helpers/pino-logger";
 import { sendSnsEvent } from "tests/helpers/send-sns-event";
 
 test.describe("Allocator Rejected Allocation Tests", () => {
   test.setTimeout(180_000); // 3 minutes for long running polling
-  for (const {
-    domainIdName,
-    expectedError,
-    letterVariantMapping,
-    pageCount,
-    testCase,
-    testName,
-  } of [
-    {
-      testCase: 1,
-      testName:
-        "Verify that the letters are placed on a DLQ when no pack specification is eligible",
-      letterVariantMapping: 1,
-      domainIdName: "NoEligiblePackSpecs",
+
+  test("Verify that the letters are REJECTED when no pack specification is eligible", async () => {
+    const letterVariant = getVariantsForAllocation(1);
+    const domainId = `NoEligiblePackSpecs-${randomUUID()}`;
+    const preparedEvent = createPreparedV1Event({
+      domainId,
+      letterVariantId: letterVariant,
       pageCount: 100, // high page count to ensure pack specifications are filtered out based on constraints
-      expectedError: "No eligible pack specifications found for letter",
-    },
-    {
-      testCase: 2,
-      testName:
-        "Verify that the letters are placed on a DLQ when no supplier pack are found for selected pack",
-      letterVariantMapping: 6,
-      domainIdName: "NoSupplierPacksFound",
-      pageCount: 2,
-      expectedError:
-        "No preferred supplier packs found for pack specification ids and suppliers",
-    },
-    {
-      testCase: 3,
-      testName:
-        "Verify that the letters are placed on a DLQ when no pack specification found for letter variant",
-      letterVariantMapping: 7,
-      domainIdName: "NoPackSpecificationFound",
-      pageCount: 2,
-      expectedError: "No pack specification found for id",
-    },
-  ]) {
-    test(testName, async () => {
-      const letterVariant = getVariantsForAllocation(letterVariantMapping);
-      const domainId = `${domainIdName}-${randomUUID()}`;
-      const preparedEvent = createPreparedV1Event({
-        domainId,
-        letterVariantId: letterVariant,
-        pageCount,
-      });
-
-      if (letterVariantMapping === 7) {
-        await updateLetterVariantPackSpecs(letterVariant, [""]);
-      }
-
-      const response = await sendSnsEvent(preparedEvent);
-      expect(response.MessageId).toBeTruthy();
-
-      const supplierAllocatorLog =
-        await getAllocationLog<PackErrorLog>(expectedError);
-
-      await pollQueueForLetterEvent("supplier-allocator-dlq", domainId);
-
-      switch (testCase) {
-        case 1:
-        case 2: {
-          const { packSpecificationIds } = supplierAllocatorLog;
-          expect(packSpecificationIds).toBeTruthy();
-          break;
-        }
-
-        case 3: {
-          await updateLetterVariantPackSpecs(letterVariant, [
-            "notify-c5-colour",
-          ]); // update back to valid config for other tests
-          break;
-        }
-        default: {
-          throw new Error(`Unexpected test case ${testCase}`);
-        }
-      }
     });
-  }
+
+    const response = await sendSnsEvent(preparedEvent);
+    expect(response.MessageId).toBeTruthy();
+
+    const supplierAllocatorLog = await getAllocationLog<PackErrorLog>(
+      "No eligible pack specifications found for letter",
+    );
+
+    const allocationLog = await getAllocationLogForDomainId(domainId);
+    const lettersInDb = await getLettersFromSupplierTable(
+      "unknown",
+      domainId,
+      "REJECTED",
+    );
+
+    expect(lettersInDb.status).toBe("REJECTED");
+    expect(lettersInDb.supplierId).toBe(
+      allocationLog.msg?.allocationDetails?.supplierSpec?.supplierId,
+    );
+
+    const { packSpecificationIds } = supplierAllocatorLog;
+    expect(packSpecificationIds).toBeTruthy();
+  });
+
+  test("Verify that the letters are placed on a DLQ when no supplier packs are found", async () => {
+    const letterVariant = getVariantsForAllocation(6);
+    const domainId = `NoSupplierPacksFound-${randomUUID()}`;
+    const preparedEvent = createPreparedV1Event({
+      domainId,
+      letterVariantId: letterVariant,
+      pageCount: 2,
+    });
+
+    const response = await sendSnsEvent(preparedEvent);
+    expect(response.MessageId).toBeTruthy();
+
+    const supplierAllocatorLog = await getAllocationLog<PackErrorLog>(
+      "No preferred supplier packs found for pack specification ids and suppliers",
+    );
+
+    await pollQueueForLetterEvent("supplier-allocator-dlq", domainId);
+
+    const { packSpecificationIds } = supplierAllocatorLog;
+    expect(packSpecificationIds).toBeTruthy();
+  });
+
+  test("Verify that the letters are placed on a DLQ when no pack specification found for letter variant", async () => {
+    const letterVariant = getVariantsForAllocation(7);
+    const domainId = `NoPackSpecificationFound-${randomUUID()}`;
+
+    await updateLetterVariantPackSpecs(letterVariant, [""]);
+
+    const preparedEvent = createPreparedV1Event({
+      domainId,
+      letterVariantId: letterVariant,
+      pageCount: 2,
+    });
+
+    const response = await sendSnsEvent(preparedEvent);
+    expect(response.MessageId).toBeTruthy();
+
+    await getAllocationLog<PackErrorLog>("No pack specification found for id");
+
+    await pollQueueForLetterEvent("supplier-allocator-dlq", domainId);
+
+    await updateLetterVariantPackSpecs(letterVariant, ["notify-c5-colour"]); // update back to valid config for other tests
+  });
 
   for (const { fieldToUpdate, testName, volumeGroupId } of [
     {
