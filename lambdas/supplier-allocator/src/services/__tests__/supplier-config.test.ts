@@ -41,6 +41,16 @@ async function expectSupplierConfigValidationError(
   });
 }
 
+async function expectRejectedError(
+  promise: Promise<unknown>,
+  message: string | RegExp,
+): Promise<void> {
+  await expect(promise).rejects.toThrow(message);
+  await expect(promise).rejects.toMatchObject({
+    name: "RejectedError",
+  });
+}
+
 describe("supplier-config service", () => {
   afterEach(() => jest.resetAllMocks());
 
@@ -519,7 +529,7 @@ describe("supplier-config service", () => {
         },
       } as any;
 
-      await expectSupplierConfigValidationError(
+      await expectRejectedError(
         filterPacksForLetter(letterEvent, ["spec1"], deps),
         "No eligible pack specifications found for letter variant id undefined and pack specification ids spec1",
       );
@@ -589,7 +599,7 @@ describe("supplier-config service", () => {
         },
       } as any;
 
-      await expectSupplierConfigValidationError(
+      await expectRejectedError(
         filterPacksForLetter(letterEvent, ["spec1"], deps),
         /No eligible pack specifications found/,
       );
@@ -630,7 +640,7 @@ describe("supplier-config service", () => {
         },
       } as any;
 
-      await expectSupplierConfigValidationError(
+      await expectRejectedError(
         filterPacksForLetter(letterEvent, ["spec1"], deps),
         /No eligible pack specifications found/,
       );

@@ -39,6 +39,7 @@ import {
 import { Deps } from "../config/deps";
 import { PreparedEventSchema, PreparedEvents, SupplierDetails } from "./types";
 import SupplierConfigValidationError from "../errors/supplier-config-validation-error";
+import RejectedError from "../errors/rejected-error";
 
 const idempotencyConfig = new IdempotencyConfig({
   eventKeyJmesPath: "data.domainId",
@@ -102,66 +103,89 @@ async function getSupplierFromConfig(
   const { supplierAllocations, suppliers: allocatedSuppliers } =
     await eligibleSuppliers(volumeGroup, deps, letterVariant.supplierId);
 
-  const preferredPack: PackSpecification = await preferredSupplierPack(
-    letterEvent,
-    allocatedSuppliers,
-    letterVariant.packSpecificationIds,
-    deps,
-  );
-
-  const allSuppliersForPack: Supplier[] = await suppliersWithValidPack(
-    allocatedSuppliers,
-    preferredPack.id,
-    deps,
-  );
-
-  if (allSuppliersForPack.length === 0) {
-    throw new SupplierConfigValidationError(
-      `No suppliers found for pack specification ${preferredPack.id}`,
-    );
-  }
-
-  const suppliersForPackWithCapacity: Supplier[] =
-    await filterSuppliersWithCapacity(allSuppliersForPack, deps);
-
-  // selected supplier id is determined by first calling selectSupplierByFactor for suppliers with capacity
-  // and if that returns nothing, try again with all suppliers for the pack
-  const selectedSupplierId =
-    (suppliersForPackWithCapacity.length > 0
-      ? await selectSupplierByFactor(
-          suppliersForPackWithCapacity,
-          supplierAllocations,
-          letterEvent.data.domainId,
-          deps,
-        )
-      : undefined) ??
-    (await selectSupplierByFactor(
-      allSuppliersForPack,
-      supplierAllocations,
-      letterEvent.data.domainId,
+  try {
+    const preferredPack: PackSpecification = await preferredSupplierPack(
+      letterEvent,
+      allocatedSuppliers,
+      letterVariant.packSpecificationIds,
       deps,
-    ));
+    );
 
-  deps.logger.info({
-    description: "Fetched supplier details for supplier allocations",
-    domainId: letterEvent.data.domainId,
-    variantId: letterEvent.data.letterVariantId,
-    volumeGroupId: volumeGroup.id,
-    supplierAllocationIds: supplierAllocations.map((a) => a.id),
-    allocatedSuppliers,
-    allSuppliersForPack: allSuppliersForPack.map((s) => s.id),
-    suppliersForPackWithCapacity: suppliersForPackWithCapacity.map((s) => s.id),
-    selectedSupplierId,
-  });
+    const allSuppliersForPack: Supplier[] = await suppliersWithValidPack(
+      allocatedSuppliers,
+      preferredPack.id,
+      deps,
+    );
 
-  return buildSupplierDetails(
-    selectedSupplierId,
-    preferredPack.id,
-    preferredPack.billingId,
-    letterVariant.priority,
-    "PENDING",
-    volumeGroup.id,
-  );
+    if (allSuppliersForPack.length === 0) {
+      throw new SupplierConfigValidationError(
+        `No suppliers found for pack specification ${preferredPack.id}`,
+      );
+    }
+
+    const suppliersForPackWithCapacity: Supplier[] =
+      await filterSuppliersWithCapacity(allSuppliersForPack, deps);
+
+    // selected supplier id is determined by first calling selectSupplierByFactor for suppliers with capacity
+    // and if that returns nothing, try again with all suppliers for the pack
+    const selectedSupplierId =
+      (suppliersForPackWithCapacity.length > 0
+        ? await selectSupplierByFactor(
+            suppliersForPackWithCapacity,
+            supplierAllocations,
+            letterEvent.data.domainId,
+            deps,
+          )
+        : undefined) ??
+      (await selectSupplierByFactor(
+        allSuppliersForPack,
+        supplierAllocations,
+        letterEvent.data.domainId,
+        deps,
+      ));
+
+    deps.logger.info({
+      description: "Fetched supplier details for supplier allocations",
+      domainId: letterEvent.data.domainId,
+      variantId: letterEvent.data.letterVariantId,
+      volumeGroupId: volumeGroup.id,
+      supplierAllocationIds: supplierAllocations.map((a) => a.id),
+      allocatedSuppliers,
+      allSuppliersForPack: allSuppliersForPack.map((s) => s.id),
+      suppliersForPackWithCapacity: suppliersForPackWithCapacity.map(
+        (s) => s.id,
+      ),
+      selectedSupplierId,
+    });
+
+    return buildSupplierDetails(
+      selectedSupplierId,
+      preferredPack.id,
+      preferredPack.billingId,
+      letterVariant.priority,
+      "PENDING",
+      volumeGroup.id,
+    );
+  } catch (error) {
+    if (error instanceof RejectedError) {
+      deps.logger.error({
+        description: "Letter request rejected",
+        err: error,
+        variantId: letterEvent.data.letterVariantId,
+      });
+      return buildSupplierDetails(
+        "unknown",
+        "unknown",
+        "unknown",
+        0,
+        "REJECTED",
+        "unknown",
+        "NO_SUPPLIERS_AVAILABLE",
+        error.message,
+      );
+    }
+    throw error;
+  }
 }
 
 type AllocationMetrics = Map<string, Map<string, number>>;

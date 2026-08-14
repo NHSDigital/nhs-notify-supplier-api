@@ -10,6 +10,7 @@ import {
 import { Deps } from "../config/deps";
 import { PreparedEvents } from "../handler/types";
 import SupplierConfigValidationError from "../errors/supplier-config-validation-error";
+import RejectedError from "../errors/rejected-error";
 
 export async function getVariantDetails(
   variantId: string,
@@ -327,7 +328,7 @@ export async function filterPacksForLetter(
       letterVariantId: letterEvent.data.letterVariantId,
       packSpecificationIds,
     });
-    throw new SupplierConfigValidationError(
+    throw new RejectedError(
       `No eligible pack specifications found for letter variant id ${letterEvent.data.letterVariantId} and pack specification ids ${packSpecificationIds.join(", ")}`,
     );
   }

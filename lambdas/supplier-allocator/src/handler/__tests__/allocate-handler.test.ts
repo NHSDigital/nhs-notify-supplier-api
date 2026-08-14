@@ -16,6 +16,7 @@ import * as allocationConfig from "../allocation-config";
 import { Deps } from "../../config/deps";
 import SupplierConfigValidationError from "../../errors/supplier-config-validation-error";
 import packageJson from "../../../package.json";
+import RejectedError from "../../errors/rejected-error";
 
 const renderingSchemaVersion: string =
   packageJson.dependencies[
@@ -610,6 +611,46 @@ describe("createSupplierAllocatorHandler", () => {
       expect(errorMessage).toBeDefined();
     },
   );
+
+  it("rejects the letter when a RejectedError is thrown", async () => {
+    const preparedEvent = createPreparedV2Event();
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("msg1", JSON.stringify(preparedEvent)),
+    ]);
+
+    setupDefaultMocks();
+    (allocationConfig.preferredSupplierPack as jest.Mock).mockRejectedValueOnce(
+      new RejectedError("No eligible packs found"),
+    );
+
+    const handler = createSupplierAllocatorHandler(mockedDeps);
+    const result = await handler(evt, {} as any, {} as any);
+    if (!result) throw new Error("expected BatchResponse, got void");
+
+    expect((mockedDeps.logger.error as jest.Mock).mock.calls).toHaveLength(1);
+    expect((mockedDeps.logger.error as jest.Mock).mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        description: "Letter request rejected",
+      }),
+    );
+    expect(mockedDeps.sqsClient.send).toHaveBeenCalledTimes(1);
+    const sendCall = (mockedDeps.sqsClient.send as jest.Mock).mock.calls[0][0];
+    expect(sendCall).toBeInstanceOf(SendMessageCommand);
+
+    const messageBody = JSON.parse(sendCall.input.MessageBody);
+    expect(messageBody.letterEvent).toEqual(preparedEvent);
+    expect(messageBody.allocationDetails.supplierSpec).toEqual({
+      supplierId: "unknown",
+      specId: "unknown",
+      priority: 0,
+      billingId: "unknown",
+    });
+    expect(messageBody.allocationDetails.allocationStatus).toEqual({
+      status: "REJECTED",
+      reasonCode: "NO_SUPPLIERS_AVAILABLE",
+      reasonText: "No eligible packs found",
+    });
+  });
 
   describe("Dead letter queue", () => {
     it("places the record on the DLQ when no suppliers are found for pack specification", async () => {
