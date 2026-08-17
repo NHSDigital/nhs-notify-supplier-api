@@ -56,6 +56,8 @@ function getOperationFromType(type: string): UpsertOperation {
             eventId: preparedRequest.id,
             letterId: letterToInsert.id,
             supplierId: letterToInsert.supplierId,
+            letterInsertRequest: request,
+            letterToInsert: letterToInsert,
           });
           // emit success metric
           emitIndividualMetric(
@@ -99,6 +101,8 @@ function getOperationFromType(type: string): UpsertOperation {
         eventId: supplierEvent.id,
         letterId: letterToUpdate.id,
         supplierId: letterToUpdate.supplierId,
+        letterUpdateRequest: request,
+        letterToUpdate: letterToUpdate,
       });
       emitIndividualMetric(
         deps.logger,
