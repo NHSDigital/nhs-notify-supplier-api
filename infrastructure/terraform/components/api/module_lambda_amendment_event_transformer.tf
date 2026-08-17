@@ -35,7 +35,9 @@ module "amendment_event_transformer" {
   odin_log_destination_arn  = local.odin_destination_arn
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
-  lambda_env_vars = merge(local.common_lambda_env_vars, {})
+  lambda_env_vars = merge(local.common_lambda_env_vars, {
+    LOG_REFERENCE = "AMENDMENT_EVENT_TRANSFORMER"
+  })
 }
 
 data "aws_iam_policy_document" "amendment_event_transformer" {
