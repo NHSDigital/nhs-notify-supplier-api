@@ -39,6 +39,7 @@ module "authorizer_lambda" {
     CLIENT_CERTIFICATE_EXPIRATION_ALERT_DAYS = 30,
     APIM_SUPPLIER_ID_HEADER                  = "NHSD-Supplier-ID",
     SUPPLIERS_TABLE_NAME                     = aws_dynamodb_table.suppliers.name
+    LOG_REFERENCE                            = "AUTHORIZER"
   }
 }
 

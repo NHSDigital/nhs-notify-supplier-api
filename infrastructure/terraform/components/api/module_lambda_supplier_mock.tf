@@ -40,6 +40,7 @@ module "supplier_mock" {
     GET_LETTERS_FUNCTION_NAME       = module.get_letters.function_name
     PATCH_LETTER_FUNCTION_NAME      = module.patch_letter.function_name
     SUPPLIER_MOCK_CONFIG_PARAM_NAME = aws_ssm_parameter.supplier_mock_config[0].name
+    LOG_REFERENCE                   = "SUPPLIER_MOCK"
   })
 }
 

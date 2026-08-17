@@ -34,7 +34,9 @@ module "supplier_config_ingress" {
   log_destination_arn       = local.destination_arn
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
-  lambda_env_vars = merge(local.common_lambda_env_vars, {})
+  lambda_env_vars = merge(local.common_lambda_env_vars, {
+    LOG_REFERENCE = "SUPPLIER_CONFIG_INGRESS"
+  })
 }
 
 data "aws_iam_policy_document" "supplier_config_ingress_lambda" {

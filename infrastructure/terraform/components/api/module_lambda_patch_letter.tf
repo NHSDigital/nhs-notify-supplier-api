@@ -35,7 +35,8 @@ module "patch_letter" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
-    QUEUE_URL = module.amendments_queue.sqs_queue_url
+    QUEUE_URL     = module.amendments_queue.sqs_queue_url
+    LOG_REFERENCE = "PATCH_LETTERS"
   })
 }
 
