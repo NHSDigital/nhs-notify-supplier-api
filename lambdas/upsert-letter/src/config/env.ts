@@ -5,6 +5,7 @@ const EnvVarsSchema = z.object({
   LETTER_TTL_HOURS: z.coerce.number().int(),
   PINO_LOG_LEVEL: z.coerce.string().optional(),
   IDEMPOTENCY_TABLE_NAME: z.string(),
+  LOG_REFERENCE: z.string().optional(),
 });
 
 export type EnvVars = z.infer<typeof EnvVarsSchema>;

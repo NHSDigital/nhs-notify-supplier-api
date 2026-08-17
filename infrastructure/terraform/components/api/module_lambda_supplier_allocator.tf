@@ -37,6 +37,7 @@ module "supplier_allocator" {
   lambda_env_vars = merge(local.common_lambda_env_vars, {
     UPSERT_LETTERS_QUEUE_URL = module.sqs_letter_updates.sqs_queue_url,
     IDEMPOTENCY_TABLE_NAME   = aws_dynamodb_table.idempotency.name
+    LOG_REFERENCE            = "SUPPLIER_ALLOCATOR"
   })
 }
 

@@ -37,6 +37,7 @@ module "mi_updates_transformer" {
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
     EVENTPUB_SNS_TOPIC_ARN = "${module.eventpub.sns_topic.arn}"
+    LOG_REFERENCE          = "MI_UPDATES_TRANSFORMER"
   })
 }
 

@@ -4,6 +4,7 @@ const EnvVarsSchema = z.object({
   EVENTPUB_SNS_TOPIC_ARN: z.string(),
   EVENT_SOURCE: z.string(),
   PINO_LOG_LEVEL: z.coerce.string().optional(),
+  LOG_REFERENCE: z.string().optional(),
 });
 
 export type EnvVars = z.infer<typeof EnvVarsSchema>;
