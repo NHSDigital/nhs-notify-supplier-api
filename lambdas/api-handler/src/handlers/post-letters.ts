@@ -97,7 +97,10 @@ export default function createPostLettersHandler(
       deps.logger.info({
         description: "Received post letters request",
         supplierId: commonIds.value.supplierId,
-        newAttributes: postLettersRequest.data.map((request) => ({ id: request.id, attributes: request.attributes })),
+        newAttributes: postLettersRequest.data.map((request) => ({
+          id: request.id,
+          attributes: request.attributes,
+        })),
         correlationId: commonIds.value.correlationId,
       });
 
