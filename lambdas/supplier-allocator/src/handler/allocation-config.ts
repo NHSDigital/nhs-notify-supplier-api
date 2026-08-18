@@ -81,16 +81,11 @@ export async function preferredSupplierPack(
   packSpecificationIds: string[],
   deps: Deps,
 ): Promise<PackSpecification> {
-  // Constraints
   const eligiblePacks: string[] = await filterPacksForLetter(
     letterEvent,
     packSpecificationIds,
     deps,
   );
-
-  // No eligible packs -> REJECTED
-
-  // Check can a supplier fulfil the pack
   const preferredSupplierPacks: SupplierPack[] =
     await getPreferredSupplierPacks(eligiblePacks, suppliers, deps);
   const preferredPack: PackSpecification = await getPackSpecification(
