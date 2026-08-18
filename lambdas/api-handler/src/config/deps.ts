@@ -73,7 +73,10 @@ function createMIRepository(log: Logger, environment: EnvVars): MIRepository {
 }
 
 export function createDependenciesContainer(): Deps {
-  const log = createLogger({ logLevel: envVars.PINO_LOG_LEVEL });
+  const log = createLogger({
+    logLevel: envVars.PINO_LOG_LEVEL,
+    logReference: envVars.LOG_REFERENCE,
+  });
 
   return {
     s3Client: new S3Client(),

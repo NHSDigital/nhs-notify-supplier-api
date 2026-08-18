@@ -34,7 +34,9 @@ module "post_mi" {
   log_destination_arn       = local.destination_arn
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
-  lambda_env_vars = merge(local.common_lambda_env_vars, {})
+  lambda_env_vars = merge(local.common_lambda_env_vars, {
+    LOG_REFERENCE = "POST_MI"
+  })
 }
 
 data "aws_iam_policy_document" "post_mi_lambda" {

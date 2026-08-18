@@ -36,6 +36,7 @@ module "upsert_letter" {
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
     IDEMPOTENCY_TABLE_NAME = aws_dynamodb_table.idempotency.name
+    LOG_REFERENCE          = "UPSERT_LETTER"
   })
 }
 
