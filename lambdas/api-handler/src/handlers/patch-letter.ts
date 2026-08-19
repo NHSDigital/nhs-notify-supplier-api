@@ -70,7 +70,7 @@ export default function createPatchLetterHandler(
           description: "Received patch letter request",
           supplierId: commonIds.value.supplierId,
           letterId,
-          newStatus: patchLetterRequest.data.attributes.status,
+          attributes: patchLetterRequest.data.attributes,
           correlationId: commonIds.value.correlationId,
         });
 
