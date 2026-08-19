@@ -19,6 +19,7 @@ import {
   VolumeGroup,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-config";
 import { SupplierConfigEntity } from "./types";
+import MissingSupplierConfigError from "./errors/missing-supplier-config-error";
 
 export type SupplierConfigRepositoryConfig = {
   supplierConfigTableName: string;
@@ -40,7 +41,9 @@ export class SupplierConfigRepository {
       }),
     );
     if (!result.Item) {
-      throw new Error(`No letter variant details found for id ${variantId}`);
+      throw new MissingSupplierConfigError(
+        `No letter variant details found for id ${variantId}`,
+      );
     }
 
     return $LetterVariant.parse(result.Item);
@@ -54,7 +57,9 @@ export class SupplierConfigRepository {
       }),
     );
     if (!result.Item) {
-      throw new Error(`No volume group details found for id ${groupId}`);
+      throw new MissingSupplierConfigError(
+        `No volume group details found for id ${groupId}`,
+      );
     }
     return $VolumeGroup.parse(result.Item);
   }
@@ -81,7 +86,7 @@ export class SupplierConfigRepository {
       }),
     );
     if (!result.Items || result.Items.length === 0) {
-      throw new Error(
+      throw new MissingSupplierConfigError(
         `No active supplier allocations found for volume group id ${groupId}`,
       );
     }
@@ -99,7 +104,9 @@ export class SupplierConfigRepository {
         }),
       );
       if (!result.Item) {
-        throw new Error(`Supplier with id ${supplierId} not found`);
+        throw new MissingSupplierConfigError(
+          `Supplier with id ${supplierId} not found`,
+        );
       }
       suppliers.push($Supplier.parse(result.Item));
     }
@@ -140,7 +147,9 @@ export class SupplierConfigRepository {
       }),
     );
     if (!result.Item) {
-      throw new Error(`No pack specification found for id ${packSpecId}`);
+      throw new MissingSupplierConfigError(
+        `No pack specification found for id ${packSpecId}`,
+      );
     }
     return $PackSpecification.parse(result.Item);
   }

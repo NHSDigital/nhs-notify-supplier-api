@@ -13,6 +13,7 @@ import { toZonedTime } from "date-fns-tz";
 import { randomUUID } from "node:crypto";
 import { createPreparedV1Event } from "tests/helpers/event-fixtures";
 import { sendSnsBatchEvent } from "tests/helpers/send-sns-event";
+import { pollQueueForLetterEvent } from "tests/helpers/aws-queue-helper";
 
 test.describe("Supplier Allocation Tests", () => {
   test("Verify that successful supplier allocation emits a PENDING event for the allocated supplier", async () => {
@@ -41,7 +42,7 @@ test.describe("Supplier Allocation Tests", () => {
     );
   });
 
-  test("Verify that supplier allocator emits a rejected request for an unknown letter variant", async () => {
+  test("Verify that supplier allocator places the event on a DLQ for an unknown letter variant", async () => {
     test.setTimeout(180_000); // 3 minutes for long running polling
     const domainId = randomUUID();
     logger.info(
@@ -55,15 +56,8 @@ test.describe("Supplier Allocation Tests", () => {
       { id: preparedEvent.id, message: preparedEvent },
     ]);
     expect(response.Successful).toHaveLength(1);
-    const allocationDetails =
-      await pollSupplierAllocatorForAllocationDetails(domainId);
 
-    const supplierId = allocationDetails?.supplierSpec?.supplierId;
-
-    const status = allocationDetails?.allocationStatus?.status;
-
-    expect(supplierId).toBe("unknown");
-    expect(status).toBe("REJECTED");
+    await pollQueueForLetterEvent("supplier-allocator-dlq", domainId);
   });
 
   test("Verify that supplier allocations are correctly updated only once for a volume group for multiple messages", async () => {

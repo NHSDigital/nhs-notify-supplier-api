@@ -8,6 +8,7 @@ import {
   updateSupplierAllocation,
   updateVolumeGroupData,
 } from "tests/helpers/allocation-helper";
+import { pollQueueForLetterEvent } from "tests/helpers/aws-queue-helper";
 import { createPreparedV1Event } from "tests/helpers/event-fixtures";
 import { getLettersFromSupplierTable } from "tests/helpers/generate-fetch-test-data";
 import { sendSnsEvent } from "tests/helpers/send-sns-event";
@@ -44,21 +45,7 @@ test.describe("Allocation Target Percentage Tests", () => {
     const response = await sendSnsEvent(preparedEvent);
     expect(response.MessageId).toBeTruthy();
 
-    const allocationLog = await getAllocationLogForDomainId(domainId);
-    const lettersInDb = await getLettersFromSupplierTable(
-      "unknown",
-      domainId,
-      "REJECTED",
-    );
-
-    expect(lettersInDb.status).toBe("REJECTED");
-    expect(lettersInDb.supplierId).toBe(
-      allocationLog.msg?.allocationDetails?.supplierSpec?.supplierId,
-    );
-    expect(lettersInDb.reasonCode).toBe("NO_SUPPLIERS_AVAILABLE");
-    expect(lettersInDb.reasonText).toBe(
-      `No valid supplier allocations found for suppliers with valid pack`,
-    );
+    await pollQueueForLetterEvent("supplier-allocator-dlq", domainId);
   });
 
   test("Verify that supplier with less than 100 target percentage is handled correctly", async () => {
