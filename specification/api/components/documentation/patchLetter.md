@@ -23,11 +23,19 @@ Allowed `status` values that can be used to are:
 
 It is not possible to update a letter to status of `PENDING`.
 
+### Reason Codes
+
 Optionally a `reasonCode` and `reasonText` explaining the status (for example, validation failures) can be included in the request body.
 
-### Example Error Codes
+With the exception of the `RETURNED` status, `reasonCode` and `reasonText` can be agreed on an individual basis
 
-Examples of reason codes and text that may be returned include (but are not limited to)
+#### RETURNED Updates
+
+NHS Notify uses a standardised set of reasons for the `RETURNED` status.
+
+Both a `reasonCode` and `reasonText` <b>must</b> be provided for a `RETURNED` status update.
+
+The reason codes and expected text for the `RETURNED` status are as follows:
 
 | Reason Code | Reason Text                |
 |-------------|----------------------------|
