@@ -1,6 +1,0 @@
-{
-  "MD041": {
-    "level": 2
-  },
-  "extends": "../.markdownlint.jsonc"
-}

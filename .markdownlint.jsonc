@@ -7,5 +7,6 @@
     "siblings_only": true
   },
   // https://github.com/DavidAnson/markdownlint/blob/main/doc/md033.md
-  "MD033": false
+  "MD033": false,
+  "MD041": false
 }
