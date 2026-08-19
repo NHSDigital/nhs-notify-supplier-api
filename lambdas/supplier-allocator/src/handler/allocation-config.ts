@@ -19,6 +19,7 @@ import { calculateSupplierAllocatedFactor } from "../services/supplier-quotas";
 
 import { Deps } from "../config/deps";
 import { PreparedEvents } from "./types";
+import SupplierConfigValidationError from "../errors/supplier-config-validation-error";
 
 export async function eligibleSuppliers(
   volumeGroup: VolumeGroup,
@@ -163,7 +164,7 @@ export async function selectSupplierByFactor(
     return suppliers.some((supplier) => supplier.id === alloc.supplier);
   });
   if (supplierAllocationsForPack.length === 0) {
-    throw new Error(
+    throw new SupplierConfigValidationError(
       "No valid supplier allocations found for suppliers with valid pack",
     );
   }
@@ -171,7 +172,9 @@ export async function selectSupplierByFactor(
     await calculateSupplierAllocatedFactor(supplierAllocationsForPack, deps);
 
   if (supplierFactors.length === 0) {
-    throw new Error("No supplier factors could be calculated for allocation");
+    throw new SupplierConfigValidationError(
+      "No supplier factors could be calculated for allocation",
+    );
   }
 
   deps.logger.info({
