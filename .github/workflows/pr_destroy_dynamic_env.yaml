@@ -36,7 +36,6 @@ jobs:
             --targetComponent "api" \
             --targetAccountGroup "nhs-notify-supplier-api-dev" \
             --terraformAction "destroy" \
-            --overrideProjectName "nhs" \
             --overrideRoleName "nhs-main-acct-supplier-api-github-deploy"
 
   destroy-dynamic-proxy:
