@@ -13,7 +13,6 @@
 #     --terraformAction <action> \
 #     --internalRef <ref> \
 #     --overrides <overrides> \
-#     --overrideProjectName <name> \
 #     --overrideRoleName <name>
 
 #
@@ -33,7 +32,6 @@
 #     --terraformAction "apply" \
 #     --internalRef "main" \
 #     --overrides "tf_var=someString" \
-#     --overrideProjectName nhs \
 #     --overrideRoleName nhs-service-iam-role \
 #     --extraSecretNames '["MY_API_KEY"]'
 
@@ -80,10 +78,6 @@ while [[ $# -gt 0 ]]; do
       ;;
     --overrides) # Terraform overrides for passing in extra variables (optional)
       overrides="$2"
-      shift 2
-      ;;
-    --overrideProjectName) # Override the project name (optional)
-      overrideProjectName="$2"
       shift 2
       ;;
     --overrideRoleName) # Override the role name (optional)
@@ -242,9 +236,7 @@ echo "  targetAccountGroup: $targetAccountGroup"
 echo "  terraformAction:    $terraformAction"
 echo "  internalRef:        $internalRef"
 echo "  overrides:          $overrides"
-echo "  overrideProjectName: $overrideProjectName"
 echo "  overrideRoleName:   $overrideRoleName"
-echo "  targetProject:      $targetProject"
 echo "  runId:              $runId"
 echo "  buildSandbox:        $buildSandbox"
 echo "  apimEnvironment:     $apimEnvironment"
@@ -263,9 +255,7 @@ DISPATCH_EVENT=$(jq -ncM \
   --arg terraformAction "$terraformAction" \
   --arg targetWorkflow "$targetWorkflow" \
   --arg overrides "$overrides" \
-  --arg overrideProjectName "$overrideProjectName" \
   --arg overrideRoleName "$overrideRoleName" \
-  --arg targetProject "$targetProject" \
   --arg runId "$runId" \
   --arg buildSandbox "$buildSandbox" \
   --arg apimEnvironment "$apimEnvironment" \
@@ -280,9 +270,7 @@ DISPATCH_EVENT=$(jq -ncM \
     "inputs": (
       (if $infraRepoName != "" then { "infraRepoName": $infraRepoName } else {} end) +
       (if $terraformAction != "" then { "terraformAction": $terraformAction } else {} end) +
-      (if $overrideProjectName != "" then { "overrideProjectName": $overrideProjectName } else {} end) +
       (if $overrideRoleName != "" then { "overrideRoleName": $overrideRoleName } else {} end) +
-      (if $targetProject != "" then { "targetProject": $targetProject } else {} end) +
       (if $overrides != "" then { "overrides": $overrides } else {} end) +
       (if $runId != "" then { "runId": $runId } else {} end) +
       (if $buildSandbox != "" then { "buildSandbox": $buildSandbox } else {} end) +

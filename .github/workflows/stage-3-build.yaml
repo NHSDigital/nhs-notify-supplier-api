@@ -187,7 +187,6 @@ jobs:
             --targetComponent "api" \
             --targetAccountGroup "nhs-notify-supplier-api-dev" \
             --terraformAction "apply" \
-            --overrideProjectName "nhs" \
             --overrideRoleName "nhs-main-acct-supplier-api-github-deploy"
   populate-config:
     name: "Populate Supplier Config"
