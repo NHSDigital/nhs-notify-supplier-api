@@ -39,45 +39,45 @@ runs:
       run: |
         echo "nodejs_version=$(grep "^nodejs\s" .tool-versions | cut -f2 -d' ')" >> $GITHUB_OUTPUT
 
-    - name: Start sandbox container if needed
-      if: ${{ inputs.testType == 'sandbox' }}
-      shell: bash
-      run: |
-        SANDBOX_CONTAINER_NAME="supplier-api-sandbox"
-        SANDBOX_IMAGE_TAG="latest"
-        if [[ "${{ inputs.targetEnvironment }}" =~ ^pr[0-9]+$ ]]; then
-          SANDBOX_IMAGE_TAG="${{ inputs.targetEnvironment }}"
-        elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-          SANDBOX_IMAGE_TAG="pr${{ github.event.pull_request.number }}"
-        fi
+    # - name: Start sandbox container if needed
+    #   if: ${{ inputs.testType == 'sandbox' }}
+    #   shell: bash
+    #   run: |
+    #     SANDBOX_CONTAINER_NAME="supplier-api-sandbox"
+    #     SANDBOX_IMAGE_TAG="latest"
+    #     if [[ "${{ inputs.targetEnvironment }}" =~ ^pr[0-9]+$ ]]; then
+    #       SANDBOX_IMAGE_TAG="${{ inputs.targetEnvironment }}"
+    #     elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+    #       SANDBOX_IMAGE_TAG="pr${{ github.event.pull_request.number }}"
+    #     fi
 
-        SANDBOX_IMAGE="nhs-notify-supplier:${SANDBOX_IMAGE_TAG}"
+    #     SANDBOX_IMAGE="nhs-notify-supplier:${SANDBOX_IMAGE_TAG}"
 
-        if docker image inspect "$SANDBOX_IMAGE" >/dev/null 2>&1; then
-          echo "Using sandbox image: $SANDBOX_IMAGE"
-        elif docker image inspect "supplier-api-sandbox" >/dev/null 2>&1; then
-          SANDBOX_IMAGE="supplier-api-sandbox"
-          echo "Using fallback sandbox image: $SANDBOX_IMAGE"
-        else
-          echo "Sandbox image not found. Tried: nhs-notify-supplier:${SANDBOX_IMAGE_TAG}, supplier-api-sandbox"
-          echo "Available images:"
-          docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'nhs-notify-supplier|supplier-api-sandbox' || true
-          exit 1
-        fi
+    #     if docker image inspect "$SANDBOX_IMAGE" >/dev/null 2>&1; then
+    #       echo "Using sandbox image: $SANDBOX_IMAGE"
+    #     elif docker image inspect "supplier-api-sandbox" >/dev/null 2>&1; then
+    #       SANDBOX_IMAGE="supplier-api-sandbox"
+    #       echo "Using fallback sandbox image: $SANDBOX_IMAGE"
+    #     else
+    #       echo "Sandbox image not found. Tried: nhs-notify-supplier:${SANDBOX_IMAGE_TAG}, supplier-api-sandbox"
+    #       echo "Available images:"
+    #       docker images --format '{{.Repository}}:{{.Tag}}' | grep -E 'nhs-notify-supplier|supplier-api-sandbox' || true
+    #       exit 1
+    #     fi
 
-        docker rm -f "$SANDBOX_CONTAINER_NAME" 2>/dev/null || true
-        docker run -d --name "$SANDBOX_CONTAINER_NAME" -p 9000:9000 "$SANDBOX_IMAGE"
+    #     docker rm -f "$SANDBOX_CONTAINER_NAME" 2>/dev/null || true
+    #     docker run -d --name "$SANDBOX_CONTAINER_NAME" -p 9000:9000 "$SANDBOX_IMAGE"
 
-        for _ in {1..30}; do
-          if curl --silent --fail http://127.0.0.1:9000/_status >/dev/null; then
-            exit 0
-          fi
-          sleep 1
-        done
+    #     for _ in {1..30}; do
+    #       if curl --silent --fail http://127.0.0.1:9000/_status >/dev/null; then
+    #         exit 0
+    #       fi
+    #       sleep 1
+    #     done
 
-        echo "Sandbox container did not become healthy in time"
-        docker logs "$SANDBOX_CONTAINER_NAME" || true
-        exit 1
+    #     echo "Sandbox container did not become healthy in time"
+    #     docker logs "$SANDBOX_CONTAINER_NAME" || true
+    #     exit 1
 
     - name: Run test - ${{ inputs.testType }}
       shell: bash
