@@ -7,7 +7,8 @@ resource "aws_cloudwatch_metric_alarm" "write_throttle" {
   statistic   = "Sum"
   period      = var.period_seconds
 
-  evaluation_periods  = var.evaluation_periods
+  evaluation_periods  = var.write_throttle_evaluation_periods
+  datapoints_to_alarm = var.write_throttle_datapoints_to_alarm
   threshold           = var.write_throttle_threshold
   comparison_operator = "GreaterThanThreshold"
   treat_missing_data  = "notBreaching"

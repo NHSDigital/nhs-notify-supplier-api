@@ -18,7 +18,17 @@ variable "period_seconds" {
 
 variable "evaluation_periods" {
   type    = number
-  default = 2
+  default = 1
+}
+
+variable "write_throttle_evaluation_periods" {
+  type    = number
+  default = 1
+}
+
+variable "write_throttle_datapoints_to_alarm" {
+  type    = number
+  default = 1
 }
 
 variable "read_throttle_threshold" {
