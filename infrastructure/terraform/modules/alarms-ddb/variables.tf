@@ -18,7 +18,7 @@ variable "period_seconds" {
 
 variable "evaluation_periods" {
   type    = number
-  default = 1
+  default = 2
 }
 
 variable "read_throttle_threshold" {
@@ -29,4 +29,9 @@ variable "read_throttle_threshold" {
 variable "write_throttle_threshold" {
   type    = number
   default = 0
+}
+
+variable "write_capacity_threshold" {
+  type    = number
+  default = 1000 # temporary value restore to 48000  80% of 60k/min DynamoDB limit
 }
