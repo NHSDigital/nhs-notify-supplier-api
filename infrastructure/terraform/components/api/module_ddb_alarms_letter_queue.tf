@@ -5,6 +5,6 @@ module "ddb_alarms_letter_queue" {
   table_name   = aws_dynamodb_table.letter_queue.name
   tags         = local.default_tags
 
-  write_throttle_evaluation_periods  = 5
-  write_throttle_datapoints_to_alarm = 3
+  write_throttle_evaluation_periods  = 1 # should be 5
+  write_throttle_datapoints_to_alarm = 1 # should be 3
 }
