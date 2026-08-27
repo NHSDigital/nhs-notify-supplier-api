@@ -54,7 +54,6 @@ No requirements.
 | <a name="input_shared_infra_account_id"></a> [shared\_infra\_account\_id](#input\_shared\_infra\_account\_id) | The AWS Account ID of the shared infrastructure account | `string` | `"000000000000"` | no |
 | <a name="input_sns_success_logging_sample_percent"></a> [sns\_success\_logging\_sample\_percent](#input\_sns\_success\_logging\_sample\_percent) | Enable SNS Delivery Successful Sample Percentage | `number` | `0` | no |
 | <a name="input_supplier_mock_schedule_expression"></a> [supplier\_mock\_schedule\_expression](#input\_supplier\_mock\_schedule\_expression) | Schedule expression for supplier mock scheduler | `string` | `"rate(1 minute)"` | no |
-| <a name="input_test_alarms_enabled"></a> [test\_alarms\_enabled](#input\_test\_alarms\_enabled) | Enable letter queue alarms for testing when account-wide alarms are disabled | `bool` | `true` | no |
 ## Modules
 
 | Name | Source | Version |

@@ -43,5 +43,5 @@ variable "write_throttle_threshold" {
 
 variable "write_capacity_threshold" {
   type    = number
-  default = 1000 # temporary value restore to 48000  80% of 60k/min DynamoDB limit
+  default = 48000 # 80% of 60k/min DynamoDB limit
 }
