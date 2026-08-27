@@ -84,7 +84,7 @@ New developers of the NHS Notify Supplier API should understand the below.
   sso_start_url = https://d-9c67018f89.awsapps.com/start#/
   sso_region = eu-west-2
   sso_account_id = 820178564574
-  sso_role_name = nhs-notify-bc-developer
+  sso_role_name = nhs-notify-developer
   region = eu-west-2
   output = json
 
@@ -92,7 +92,7 @@ New developers of the NHS Notify Supplier API should understand the below.
   sso_start_url = https://d-9c67018f89.awsapps.com/start#/
   sso_region = eu-west-2
   sso_account_id = 885964308133
-  sso_role_name = nhs-notify-bc-developer
+  sso_role_name = nhs-notify-developer
   region = eu-west-2
   output = json
   ```

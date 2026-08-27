@@ -247,7 +247,7 @@ variable "supplier_mock_schedule_expression" {
 variable "enable_event_anomaly_detection" {
   type        = bool
   description = "Enable CloudWatch anomaly detection alarm for SNS message  Detects abnormal drops or spikes in event publishing volume."
-  default     = true
+  default     = false
 }
 
 variable "event_anomaly_evaluation_periods" {

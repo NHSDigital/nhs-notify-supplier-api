@@ -1,4 +1,10 @@
-import { Context, SQSBatchItemFailure, SQSEvent, SQSHandler } from "aws-lambda";
+import {
+  Context,
+  SQSBatchItemFailure,
+  SQSEvent,
+  SQSHandler,
+  SQSRecord,
+} from "aws-lambda";
 import { SendMessageCommand } from "@aws-sdk/client-sqs";
 import {
   LetterVariant,
@@ -17,6 +23,7 @@ import {
   IdempotencyConfig,
   makeIdempotent,
 } from "@aws-lambda-powertools/idempotency";
+import { MissingSupplierConfigError } from "@internal/datastore";
 import {
   getVariantDetails,
   getVolumeGroupDetails,
@@ -31,6 +38,8 @@ import {
 } from "./allocation-config";
 import { Deps } from "../config/deps";
 import { PreparedEventSchema, PreparedEvents, SupplierDetails } from "./types";
+import SupplierConfigValidationError from "../errors/supplier-config-validation-error";
+import RejectedError from "../errors/rejected-error";
 
 const idempotencyConfig = new IdempotencyConfig({
   eventKeyJmesPath: "data.domainId",
@@ -81,20 +90,20 @@ async function getSupplierFromConfig(
   letterEvent: PreparedEvents,
   deps: Deps,
 ): Promise<SupplierDetails> {
+  const letterVariant: LetterVariant = await getVariantDetails(
+    letterEvent.data.letterVariantId,
+    deps,
+  );
+
+  const volumeGroup: VolumeGroup = await getVolumeGroupDetails(
+    letterVariant.volumeGroupId,
+    deps,
+  );
+
+  const { supplierAllocations, suppliers: allocatedSuppliers } =
+    await eligibleSuppliers(volumeGroup, deps, letterVariant.supplierId);
+
   try {
-    const letterVariant: LetterVariant = await getVariantDetails(
-      letterEvent.data.letterVariantId,
-      deps,
-    );
-
-    const volumeGroup: VolumeGroup = await getVolumeGroupDetails(
-      letterVariant.volumeGroupId,
-      deps,
-    );
-
-    const { supplierAllocations, suppliers: allocatedSuppliers } =
-      await eligibleSuppliers(volumeGroup, deps, letterVariant.supplierId);
-
     const preferredPack: PackSpecification = await preferredSupplierPack(
       letterEvent,
       allocatedSuppliers,
@@ -109,7 +118,7 @@ async function getSupplierFromConfig(
     );
 
     if (allSuppliersForPack.length === 0) {
-      throw new Error(
+      throw new SupplierConfigValidationError(
         `No suppliers found for pack specification ${preferredPack.id}`,
       );
     }
@@ -158,21 +167,24 @@ async function getSupplierFromConfig(
       volumeGroup.id,
     );
   } catch (error) {
-    deps.logger.error({
-      description: "Error fetching supplier from config",
-      err: error,
-      variantId: letterEvent.data.letterVariantId,
-    });
-    return buildSupplierDetails(
-      "unknown",
-      "unknown",
-      "unknown",
-      0,
-      "REJECTED",
-      "unknown",
-      "NO_SUPPLIERS_AVAILABLE",
-      error instanceof Error ? error.message : "Unknown error",
-    );
+    if (error instanceof RejectedError) {
+      deps.logger.error({
+        description: "Letter request rejected",
+        err: error,
+        variantId: letterEvent.data.letterVariantId,
+      });
+      return buildSupplierDetails(
+        "unknown",
+        "unknown",
+        "unknown",
+        0,
+        "REJECTED",
+        "unknown",
+        "NO_SUPPLIERS_AVAILABLE",
+        error.message,
+      );
+    }
+    throw error;
   }
 }
 
@@ -278,7 +290,6 @@ async function processSupplierAllocation(
   letterEvent: PreparedEvents,
   deps: Deps,
   perAllocationSuccess: AllocationMetrics,
-  perAllocationFailure: AllocationMetrics,
   volumeGroupAllocations: VolumeGroupAllocation,
 ): Promise<SupplierAllocationResult> {
   const supplierDetails: SupplierDetails = await getSupplierFromConfig(
@@ -294,20 +305,16 @@ async function processSupplierAllocation(
   const supplier = supplierSpec.supplierId;
   const priority = String(supplierSpec.priority);
 
-  if (supplierDetails.allocationDetails.allocationStatus.status === "PENDING") {
-    incrementMetric(perAllocationSuccess, supplier, priority);
-    emitDataMetrics(letterEvent, supplier, "extra_data_dimensions", deps);
+  incrementMetric(perAllocationSuccess, supplier, priority);
+  emitDataMetrics(letterEvent, supplier, "extra_data_dimensions", deps);
 
-    incrementAllocation(
-      volumeGroupAllocations,
-      supplierDetails.volumeGroupId,
-      supplier,
-      1,
-      deps,
-    );
-  } else {
-    incrementMetric(perAllocationFailure, supplier, priority);
-  }
+  incrementAllocation(
+    volumeGroupAllocations,
+    supplierDetails.volumeGroupId,
+    supplier,
+    1,
+    deps,
+  );
 
   // Send to allocated letters queue
   const queueUrl = process.env.UPSERT_LETTERS_QUEUE_URL;
@@ -338,10 +345,29 @@ async function processSupplierAllocation(
   };
 }
 
+async function placeOnDeadLetterQueue(record: SQSRecord, deps: Deps) {
+  const deadLetterQueueUrl = process.env.SUPPLIER_ALLOCATOR_DLQ_URL;
+  if (!deadLetterQueueUrl) {
+    throw new Error("SUPPLIER_ALLOCATOR_DLQ_URL not configured");
+  }
+
+  deps.logger.info({
+    description: "Sending record to supplier allocator DLQ",
+    messageId: record.messageId,
+    deadLetterQueueUrl,
+  });
+
+  await deps.sqsClient.send(
+    new SendMessageCommand({
+      QueueUrl: deadLetterQueueUrl,
+      MessageBody: record.body,
+    }),
+  );
+}
+
 export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
   const createGetSupplierIdempotently = (
     perAllocationSuccess: AllocationMetrics,
-    perAllocationFailure: AllocationMetrics,
     volumeGroupAllocations: VolumeGroupAllocation,
   ) => {
     return makeIdempotent(
@@ -350,7 +376,6 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
           letterEvent,
           depsInner,
           perAllocationSuccess,
-          perAllocationFailure,
           volumeGroupAllocations,
         ),
       {
@@ -368,7 +393,6 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
     // create an idempotent function bound to this handler's global variables to track metrics and allocations
     const getSupplierIdempotently = createGetSupplierIdempotently(
       perAllocationSuccess,
-      perAllocationFailure,
       volumeGroupAllocations,
     );
 
@@ -400,7 +424,24 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
           message: record.body,
         });
         incrementMetric(perAllocationFailure, supplier, priority);
-        batchItemFailures.push({ itemIdentifier: record.messageId });
+        if (
+          error instanceof SupplierConfigValidationError ||
+          error instanceof MissingSupplierConfigError
+        ) {
+          try {
+            await placeOnDeadLetterQueue(record, deps);
+          } catch (dlqError) {
+            deps.logger.error({
+              description: "Failed to send record to supplier allocator DLQ",
+              err: dlqError,
+              messageId: record.messageId,
+              message: record.body,
+            });
+            batchItemFailures.push({ itemIdentifier: record.messageId });
+          }
+        } else {
+          batchItemFailures.push({ itemIdentifier: record.messageId });
+        }
       }
     });
 

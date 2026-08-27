@@ -77,7 +77,6 @@ jobs:
             --targetWorkflow "dispatch-contextual-tests-dynamic-env.yaml" \
             --infraRepoName "nhs-notify-supplier-api" \
             --releaseVersion "${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" \
-            --overrideProjectName "nhs" \
             --targetEnvironment "$ENVIRONMENT" \
             --targetAccountGroup "nhs-notify-supplier-api-dev" \
             --targetComponent "api" \
