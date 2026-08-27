@@ -44,6 +44,6 @@ runs:
       env:
         TARGET_ENVIRONMENT: ${{ inputs.targetEnvironment }}
         TARGET_ACCOUNT_GROUP: ${{ inputs.targetAccountGroup }}
-        SUPPLIER_API_URL_SANDBOX: ${{ inputs.testType == 'sandbox' && 'http://127.0.0.1:9000' || github.event_name == 'pull_request' && format('https://internal-dev-sandbox.api.service.nhs.uk/nhs-notify-supplier-PR-{0}', github.event.pull_request.number) || 'https://internal-dev-sandbox.api.service.nhs.uk/nhs-notify-supplier' }}
+        SUPPLIER_API_URL_SANDBOX: ${{ github.event_name == 'pull_request' && inputs.testType == 'sandbox' && format('https://internal-dev-sandbox.api.service.nhs.uk/nhs-notify-supplier-PR-{0}', github.event.pull_request.number) || inputs.testType == 'sandbox' && 'http://127.0.0.1:9000' || 'https://internal-dev-sandbox.api.service.nhs.uk/nhs-notify-supplier' }}
       run: |
         make test-${{ inputs.testType }}
