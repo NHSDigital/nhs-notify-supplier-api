@@ -24,7 +24,12 @@ Test suites that validate the supplier API beyond individual package unit tests.
   2. In the root level create an `.env` file and setup the `GITHUB_TOKEN` and `TARGET_ENVIRONMENT` variables (use `.env.template` as a guide)
   3. Source the env file by running `set -a` -> `source .env` -> `set +a`
   4. Login to your AWS account by running `aws sso login` in the terminal
-- **Sandbox tests** require a sandbox server.
+- **Sandbox tests**: We need to start the sandbox server from the `/sandbox` folder in the root directory (read /sandbox/README.md for more information).
+  - Run locally:
+    1. from project's root directory `cd sandbox && npm install && npm start`
+    2. from project's root directory `make test-sandbox` or `cd tests && npm install && npm run test:sandbox`
+  - Run in Pipeline:
+    1. You need to deploy the proxies in your Pull Request with the label `deploy-proxy`. This should then build the sandbox server, deploy the artifact and deploy the sandbox proxy via proxygen (you might need to re-run the acceptance tests stage in the pipeline, as the server might take some time to deploy and be unreachable from the tests).
 - **Performance and E2E tests** require AWS credentials, deployed infrastructure, and seeded test data. See `scripts/test-data/` for test data generation and `tests/e2e-tests/README.md` for environment-specific setup.
   1. Deploy a dynamic environment (can be achieved by creating a Pull Request). Take a note of the environment e.g. pr1234.
   2. Build proxies in the dynamic environment by setting the label `deploy_proxy` (ask a member of the team if you need help)

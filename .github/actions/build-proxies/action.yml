@@ -114,6 +114,7 @@ runs:
         name: ${{ env.APIM_ENV }}-build-output-sandbox
         path: ./build-sandbox
 
+    # NOTE TO SELF: remove --internalRef after internal is merged into main
     - name: Trigger deploy proxy
       env:
         APP_CLIENT_ID: ${{ env.APP_CLIENT_ID }}

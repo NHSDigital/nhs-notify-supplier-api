@@ -66,6 +66,7 @@ jobs:
             echo "ENVIRONMENT=main" >> $GITHUB_ENV
           fi
 
+        # NOTE TO SELF: Remove --internalRef after internal is merged into main
       - name: Trigger Acceptance Tests
         shell: bash
         env:

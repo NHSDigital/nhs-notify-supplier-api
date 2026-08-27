@@ -53,7 +53,7 @@
     "test:component": "playwright test --config=config/main.config.ts --max-failures=10",
     "test:pact": "./pact-tests/run-pact-tests.sh",
     "test:performance": "playwright test --config=config/performance/performance.config.ts --max-failures=10 --project=performance",
-    "test:sandbox": "playwright test --config=config/sandbox.config.ts --max-failures=9 --project=sandbox",
+    "test:sandbox": "playwright test --config=config/sandbox.config.ts --max-failures=10 --project=sandbox",
     "test:unit": "echo \"No unit tests for tests package\"",
     "typecheck": "tsc --noEmit"
   },

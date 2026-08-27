@@ -98,7 +98,6 @@ jobs:
           nodejs_version: ${{ inputs.nodejs_version }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # VLASIS - sandbox spec is being built
   artefact-oas-spec-sandbox:
     name: "Build OAS spec for sandbox"
     runs-on: ubuntu-latest
