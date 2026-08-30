@@ -41,6 +41,7 @@ on:
         default: internal-dev
         options:
           - internal-dev
+          - internal-dev-sandbox
           - int
           - prod
       build_sandbox:
