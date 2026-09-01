@@ -236,5 +236,12 @@ jobs:
           environment: ${{ needs.create-dynamic-environment.outputs.environment_name }}
           apimEnv: "${{ inputs.pr_number == '' && 'internal-dev' || 'internal-dev-pr' }}"
           runId: "${{ github.run_id }}"
-          buildSandbox: true
+          releaseVersion: ${{ github.head_ref || github.ref_name }}
+      - name: "Build sandbox"
+        uses: ./.github/actions/build-sandbox
+        with:
+          version: "${{ inputs.version }}"
+          environment: ${{ needs.create-dynamic-environment.outputs.environment_name }}
+          apimEnv: "internal-dev-sandbox"
+          runId: "${{ github.run_id }}"
           releaseVersion: ${{ github.head_ref || github.ref_name }}

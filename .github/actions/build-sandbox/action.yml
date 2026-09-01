@@ -3,61 +3,100 @@ description: "Build Sandbox"
 inputs:
   version:
     description: "Version number"
+    required: false
+  releaseVersion:
+    description: "Release, tag, branch, or commit ID to be used for deployment"
     required: true
+  isRelease:
+    description: "True if releaseVersion is a release tag (if set, downloads from release assets instead of workflow artifacts)"
+    required: false
+    default: false
+  environment:
+    description: "Deployment environment"
+    required: true
+  apimEnv:
+    description: |
+      OAS build configuration name (e.g. internal-dev-pr, internal-dev, int, prod).
+      Must match the apimEnv used to build the OAS artifact this action downloads.
+      The '-pr' suffix is stripped before dispatching to proxygen, which only knows
+      real APIM environments (internal-dev, internal-dev-sandbox, int, ref, prod).
+    required: true
+  runId:
+    description: "GitHub Actions run ID to fetch the OAS artifact from"
+    required: true
+  buildSandbox:
+    description: "Whether to build the sandbox OAS spec"
+    required: false
+    default: false
+  targetComponent:
+    description: "Name of the Component to deploy"
+    required: true
+    default: 'api'
 
-  NODE_AUTH_TOKEN:
-    description: "Token for access to github package registry"
-    required: true
 runs:
   using: composite
 
   steps:
-    - name: Checkout
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-    - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+    - name: Download Sandbox OAS Spec artifact from workflow
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
       with:
-        node-version: 22
-        registry-url: 'https://npm.pkg.github.com'
+        name: api-oas-specification-internal-dev-sandbox${{ inputs.version != '' && format('-{0}', inputs.version) || '' }}
+        path: ./build-sandbox
 
-    - name: Npm install
-      working-directory: .
-      env:
-        NODE_AUTH_TOKEN: ${{ inputs.NODE_AUTH_TOKEN }}
-      run: npm ci
-      shell: bash
-
-    - name: Install Proxygen client
+    - name: Setup Proxy Name and target
       shell: bash
       run: |
-        # Install proxygen cli
-        pip install pipx
-        pipx install proxygen-cli
+        set -euo pipefail
 
-        # Setup proxygen auth and settings
-        mkdir -p ${HOME}/.proxygen
-        echo -n $PROXYGEN_PRIVATE_KEY | base64 --decode > ${HOME}/.proxygen/key
-        envsubst < ./.github/proxygen-credentials-template.yaml > ${HOME}/.proxygen/credentials.yaml
-        envsubst < ./.github/proxygen-credentials-template.yaml | cat
-        envsubst < ./.github/proxygen-settings.yaml > ${HOME}/.proxygen/settings.yaml
-        envsubst < ./.github/proxygen-settings.yaml | cat
-
-    - name: Setup Sandbox tag
-      shell: bash
-      run: |
-        if [ -z $PR_NUMBER ]
-        then
-          echo "SANDBOX_TAG=latest" >> $GITHUB_ENV
+        ENV="${{ inputs.apimEnv }}"
+        if [[ "$ENV" == "internal-dev-sandbox" ]]; then
+          echo "TARGET_DOMAIN=suppliers.dev.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
+        elif [[ "$ENV" == "int" || "$ENV" == "ref" ]]; then
+          echo "TARGET_DOMAIN=suppliers.nonprod.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
+        elif [[ "$ENV" == "prod" ]]; then
+          echo "TARGET_DOMAIN=suppliers.prod.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
         else
-          echo "SANDBOX_TAG=pr$PR_NUMBER" >> $GITHUB_ENV
+          echo "[ERROR] Unsupported apimEnv '$ENV'."
+          exit 1
         fi
 
-    - name: Build and publish sandbox Docker image
+    - name: Set APIM_ENV
+      # apimEnv carries the OAS build configuration name (e.g. "internal-dev-pr")
+      # which determines auth level, target secrets, and artifact naming.
+      # Proxygen and the internal proxy-deploy/proxy-destroy workflows only know
+      # real APIM environments, so we strip the "-pr" suffix here - this is the
+      # single translation boundary between OAS build config and APIM deployment.
       shell: bash
-      working-directory: ./sandbox
       run: |
-          proxygen docker get-login | bash
-          docker build -t nhs-notify-supplier:$SANDBOX_TAG .
-          DOCKER_REGISTRY=$(proxygen docker registry | tail -1)
-          IMAGE_ID=$(docker images -q nhs-notify-supplier:$SANDBOX_TAG)
-          docker tag $IMAGE_ID $DOCKER_REGISTRY/nhs-notify-supplier:$SANDBOX_TAG
-          docker push $DOCKER_REGISTRY/nhs-notify-supplier:$SANDBOX_TAG
+        APIM_ENV="${{ inputs.apimEnv }}"
+        if [[ $APIM_ENV == *-pr ]]; then
+          echo "Removing pr suffix from APIM_ENV after building OAS and calling proxygen"
+          APIM_ENV=$(echo "$APIM_ENV" | sed 's/-pr$//')
+        fi
+        echo "APIM_ENV=$APIM_ENV" >> $GITHUB_ENV
+
+    - name: Upload Sandbox OAS Spec
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: ${{ env.APIM_ENV }}-build-output-sandbox
+        path: ./build-sandbox
+
+    # NOTE TO SELF: remove --internalRef after internal is merged into main
+    - name: Trigger deploy sandbox
+      env:
+        APP_CLIENT_ID: ${{ env.APP_CLIENT_ID }}
+        APP_PEM_FILE: ${{ env.APP_PEM_FILE }}
+      shell: bash
+      run: |
+        .github/scripts/dispatch_internal_repo_workflow.sh \
+          --infraRepoName "nhs-notify-supplier-api" \
+          --releaseVersion "${{ inputs.releaseVersion }}" \
+          --targetComponent "${{ inputs.targetComponent }}" \
+          --targetWorkflow "sandbox-deploy.yaml" \
+          --targetEnvironment "${{ inputs.environment }}" \
+          --runId "${{ inputs.runId }}" \
+          --apimEnvironment "${{ env.APIM_ENV }}" \
+          --boundedContext "notify-supplier" \
+          --targetDomain "$TARGET_DOMAIN" \
+          --version "${{ inputs.version }}" \
+          --internalRef "fix/CCM-22538_deploy_sandbox_server"
