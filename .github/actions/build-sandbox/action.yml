@@ -92,7 +92,7 @@ runs:
           --infraRepoName "nhs-notify-supplier-api" \
           --releaseVersion "${{ inputs.releaseVersion }}" \
           --targetComponent "${{ inputs.targetComponent }}" \
-          --targetWorkflow "sandbox-deploy.yaml" \
+          --targetWorkflow "proxy-sandbox-deploy.yaml" \
           --targetEnvironment "${{ inputs.environment }}" \
           --runId "${{ inputs.runId }}" \
           --apimEnvironment "${{ env.APIM_ENV }}" \
