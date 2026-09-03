@@ -74,7 +74,8 @@ data "aws_iam_policy_document" "get_letter_data_lambda" {
     ]
     resources = [
       module.s3bucket_test_letters.arn,
-      local.core_pdf_bucket_arn
+      local.core_pdf_bucket_arn,
+      local.digital_letters_pdf_bucket_arn,
     ]
   }
 
@@ -87,6 +88,7 @@ data "aws_iam_policy_document" "get_letter_data_lambda" {
     resources = [
       "${module.s3bucket_test_letters.arn}/*",
       "${local.core_pdf_bucket_arn}/*",
+      "${local.digital_letters_pdf_bucket_arn}/*",
     ]
   }
 
