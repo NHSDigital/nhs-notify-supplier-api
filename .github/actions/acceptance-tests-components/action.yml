@@ -56,6 +56,5 @@ runs:
       env:
         TARGET_ENVIRONMENT: ${{ inputs.targetEnvironment }}
         TARGET_ACCOUNT_GROUP: ${{ inputs.targetAccountGroup }}
-        SUPPLIER_API_URL_SANDBOX: ${{ inputs.targetEnvironment == 'pr*' && inputs.testType == 'sandbox' && format('https://internal-dev-sandbox.api.service.nhs.uk/nhs-notify-supplier-PR-{0}', github.event.pull_request.number) || 'https://internal-dev-sandbox.api.service.nhs.uk/nhs-notify-supplier' }}
       run: |
         make test-${{ inputs.testType }}
