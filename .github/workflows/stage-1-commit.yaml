@@ -26,11 +26,6 @@ on:
         description: "Python version, set by the CI/CD pipeline workflow"
         required: true
         type: string
-      # TODO - Re-visit Trivy usage https://nhsd-jira.digital.nhs.uk/browse/CCM-15549
-      # skip_trivy_package:
-      #   description: "Skip Trivy package scan when true"
-      #   type: boolean
-      #   default: false
       terraform_version:
         description: "Terraform version, set by the CI/CD pipeline workflow"
         required: true
@@ -51,7 +46,16 @@ jobs:
         with:
           fetch-depth: 0 # Full history is needed to scan all commits
       - name: "Scan secrets"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/scan-secrets@5.0.1
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/scan-secrets@5.1.3 # NOSONAR - githubactions:S7637 - internally controlled repo, pinned by tag
+  validate-action-pins:
+    name: "Validate action SHA pins"
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: "Validate action SHA pins"
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/validate-action-pins@5.1.3 # NOSONAR - githubactions:S7637 - internally controlled repo, pinned by tag
   check-file-format:
     name: "Check file format"
     runs-on: ubuntu-latest
@@ -62,7 +66,7 @@ jobs:
         with:
           fetch-depth: 0 # Full history is needed to compare branches
       - name: "Check file format"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-file-format@5.0.1
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-file-format@5.1.3 # NOSONAR - githubactions:S7637 - internally controlled repo, pinned by tag
   check-markdown-format:
     name: "Check Markdown format"
     runs-on: ubuntu-latest
@@ -73,7 +77,7 @@ jobs:
         with:
           fetch-depth: 0 # Full history is needed to compare branches
       - name: "Check Markdown format"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-markdown-format@5.0.1
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-markdown-format@5.1.3 # NOSONAR - githubactions:S7637 - internally controlled repo, pinned by tag
   terraform-docs:
     name: "Run terraform-docs"
     runs-on: ubuntu-latest
@@ -108,7 +112,7 @@ jobs:
         with:
           fetch-depth: 0 # Full history is needed to compare branches
       - name: "Check English usage"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-english-usage@5.0.1
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-english-usage@5.1.3 # NOSONAR - githubactions:S7637 - internally controlled repo, pinned by tag
   check-todo-usage:
     name: "Check TODO usage"
     runs-on: ubuntu-latest
@@ -119,7 +123,7 @@ jobs:
         with:
           fetch-depth: 0 # Full history is needed to compare branches
       - name: "Check TODO usage"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-todo-usage@5.0.1
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-todo-usage@5.1.3 # NOSONAR - githubactions:S7637 - internally controlled repo, pinned by tag
   detect-terraform-changes:
     name: "Detect Terraform Changes"
     runs-on: ubuntu-latest
@@ -154,41 +158,7 @@ jobs:
       - name: "Setup ASDF"
         uses: asdf-vm/actions/setup@b7bcd026f18772e44fe1026d729e1611cc435d47 # v4.0.1
       - name: "Lint Terraform"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/lint-terraform@5.0.1
-  # TODO - Re-visit Trivy usage https://nhsd-jira.digital.nhs.uk/browse/CCM-15549
-  # trivy-iac:
-  #   name: "Trivy IaC Scan"
-  #   permissions:
-  #     contents: read
-  #     packages: read
-  #   runs-on: ubuntu-latest
-  #   timeout-minutes: 10
-  #   needs: detect-terraform-changes
-  #   if: needs.detect-terraform-changes.outputs.terraform_changed == 'true'
-  #   env:
-  #     NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #   steps:
-  #     - name: "Checkout code"
-  #       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-  #     - name: "Setup ASDF"
-  #       uses: asdf-vm/actions/setup@b7bcd026f18772e44fe1026d729e1611cc435d47 # v4.0.1
-  #     - name: "Trivy IaC Scan"
-  #       uses: ./.github/actions/trivy-iac
-  # trivy-package:
-  #   if: ${{ !inputs.skip_trivy_package }}
-  #   name: "Trivy Package Scan"
-  #   permissions:
-  #     contents: read
-  #     packages: read
-  #   runs-on: ubuntu-latest
-  #   timeout-minutes: 10
-  #   steps:
-  #     - name: "Checkout code"
-  #       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-  #     - name: "Setup ASDF"
-  #       uses: asdf-vm/actions/setup@b7bcd026f18772e44fe1026d729e1611cc435d47 # v4.0.1
-  #     - name: "Trivy Package Scan"
-  #       uses: ./.github/actions/trivy-package
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/lint-terraform@5.1.3 # NOSONAR - githubactions:S7637 - internally controlled repo, pinned by tag
   count-lines-of-code:
     name: "Count lines of code"
     runs-on: ubuntu-latest
@@ -200,7 +170,7 @@ jobs:
       - name: "Checkout code"
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: "Count lines of code"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/create-lines-of-code-report@5.0.1
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/create-lines-of-code-report@5.1.3 # NOSONAR - githubactions:S7637 - internally controlled repo, pinned by tag
         with:
           build_datetime: "${{ inputs.build_datetime }}"
           build_timestamp: "${{ inputs.build_timestamp }}"
@@ -219,7 +189,7 @@ jobs:
       - name: "Checkout code"
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: "Scan dependencies"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/scan-dependencies@4.0.5
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/scan-dependencies@4.0.5 # NOSONAR - githubactions:S7637 - internally controlled repo, pinned by tag
         with:
           build_datetime: "${{ inputs.build_datetime }}"
           build_timestamp: "${{ inputs.build_timestamp }}"

@@ -164,6 +164,7 @@ jobs:
   create-dynamic-environment:
     name: Create Dynamic Environment
     runs-on: ubuntu-latest
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     outputs:
       environment_name: ${{ steps.set-environment.outputs.environment_name }}
     steps:
