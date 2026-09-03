@@ -17,6 +17,9 @@
 | <a name="input_read_throttle_threshold"></a> [read\_throttle\_threshold](#input\_read\_throttle\_threshold) | n/a | `number` | `0` | no |
 | <a name="input_table_name"></a> [table\_name](#input\_table\_name) | n/a | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | n/a | `map(string)` | `{}` | no |
+| <a name="input_write_capacity_threshold"></a> [write\_capacity\_threshold](#input\_write\_capacity\_threshold) | n/a | `number` | `48000` | no |
+| <a name="input_write_throttle_datapoints_to_alarm"></a> [write\_throttle\_datapoints\_to\_alarm](#input\_write\_throttle\_datapoints\_to\_alarm) | n/a | `number` | `1` | no |
+| <a name="input_write_throttle_evaluation_periods"></a> [write\_throttle\_evaluation\_periods](#input\_write\_throttle\_evaluation\_periods) | n/a | `number` | `1` | no |
 | <a name="input_write_throttle_threshold"></a> [write\_throttle\_threshold](#input\_write\_throttle\_threshold) | n/a | `number` | `0` | no |
 ## Modules
 

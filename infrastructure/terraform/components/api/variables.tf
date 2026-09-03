@@ -237,6 +237,7 @@ variable "enable_alarms" {
   description = "Enable CloudWatch alarms for this deployed environment"
   default     = true
 }
+
 variable "deploy_supplier_mock_scheduler" {
   type        = bool
   description = "Deploy EventBridge Scheduler trigger for supplier mock lambda"
