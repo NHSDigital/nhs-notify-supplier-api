@@ -16,7 +16,7 @@ inputs:
     required: true
   apimEnv:
     description: |
-      OAS build configuration name (e.g. internal-dev-pr, internal-dev, int, prod).
+      OAS build configuration name (e.g. internal-dev-sandbox, int, prod).
       Must match the apimEnv used to build the OAS artifact this action downloads.
       The '-pr' suffix is stripped before dispatching to proxygen, which only knows
       real APIM environments (internal-dev, internal-dev-sandbox, int, ref, prod).
@@ -61,19 +61,9 @@ runs:
         fi
 
     - name: Set APIM_ENV
-      # apimEnv carries the OAS build configuration name (e.g. "internal-dev-pr")
-      # which determines auth level, target secrets, and artifact naming.
-      # Proxygen and the internal proxy-deploy/proxy-destroy workflows only know
-      # real APIM environments, so we strip the "-pr" suffix here - this is the
-      # single translation boundary between OAS build config and APIM deployment.
       shell: bash
       run: |
-        APIM_ENV="${{ inputs.apimEnv }}"
-        if [[ $APIM_ENV == *-pr ]]; then
-          echo "Removing pr suffix from APIM_ENV after building OAS and calling proxygen"
-          APIM_ENV=$(echo "$APIM_ENV" | sed 's/-pr$//')
-        fi
-        echo "APIM_ENV=$APIM_ENV" >> $GITHUB_ENV
+        echo "APIM_ENV=${{ inputs.apimEnv }}" >> "$GITHUB_ENV"
 
     - name: Upload Sandbox OAS Spec
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
