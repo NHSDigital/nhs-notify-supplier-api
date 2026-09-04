@@ -74,19 +74,20 @@ data "aws_iam_policy_document" "get_letter_data_lambda" {
     ]
     resources = [
       module.s3bucket_test_letters.arn,
-      local.core_pdf_bucket_arn
+      local.core_pdf_bucket_arn,
+      local.digital_letters_pdf_bucket_arn,
     ]
   }
 
   statement {
     sid = "S3GetObjectForPresign"
     actions = [
-      "s3:GetObject",
-      "s3:PutObject",
+      "s3:GetObject"
     ] # allows 404 response instead of 403 if object missing
     resources = [
       "${module.s3bucket_test_letters.arn}/*",
       "${local.core_pdf_bucket_arn}/*",
+      "${local.digital_letters_pdf_bucket_arn}/*",
     ]
   }
 
@@ -104,6 +105,23 @@ data "aws_iam_policy_document" "get_letter_data_lambda" {
       test     = "ForAnyValue:StringEquals"
       variable = "kms:ResourceAliases"
       values   = [local.core_s3_kms_key_alias_name]
+    }
+  }
+
+  statement {
+    sid = "KMSForDigitalLettersS3Access"
+    actions = [
+      "kms:Decrypt",
+      "kms:GenerateDataKey",
+      "kms:DescribeKey"
+    ]
+    resources = [
+      "arn:aws:kms:${var.region}:${var.digital_letters_account_id}:key/*"
+    ]
+    condition {
+      test     = "ForAnyValue:StringEquals"
+      variable = "kms:ResourceAliases"
+      values   = [local.digital_letters_s3_kms_key_alias_name]
     }
   }
 }

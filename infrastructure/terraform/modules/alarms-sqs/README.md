@@ -5,12 +5,12 @@
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.9.0 |
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_age_anomaly_datapoints_to_alarm"></a> [age\_anomaly\_datapoints\_to\_alarm](#input\_age\_anomaly\_datapoints\_to\_alarm) | n/a | `number` | `3` | no |
 | <a name="input_age_anomaly_evaluation_periods"></a> [age\_anomaly\_evaluation\_periods](#input\_age\_anomaly\_evaluation\_periods) | n/a | `number` | `3` | no |
 | <a name="input_age_period_seconds"></a> [age\_period\_seconds](#input\_age\_period\_seconds) | n/a | `number` | `300` | no |
