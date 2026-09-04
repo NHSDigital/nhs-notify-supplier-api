@@ -107,4 +107,21 @@ data "aws_iam_policy_document" "get_letter_data_lambda" {
       values   = [local.core_s3_kms_key_alias_name]
     }
   }
+
+  statement {
+    sid = "KMSForDigitalLettersS3Access"
+    actions = [
+      "kms:Decrypt",
+      "kms:GenerateDataKey",
+      "kms:DescribeKey"
+    ]
+    resources = [
+      "arn:aws:kms:${var.region}:${var.digital_letters_account_id}:key/*"
+    ]
+    condition {
+      test     = "ForAnyValue:StringEquals"
+      variable = "kms:ResourceAliases"
+      values   = [local.digital_letters_s3_kms_key_alias_name]
+    }
+  }
 }
