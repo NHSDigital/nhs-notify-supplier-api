@@ -25,10 +25,6 @@ inputs:
   runId:
     description: "GitHub Actions run ID to fetch the OAS artifact from"
     required: true
-  buildSandbox:
-    description: "Whether to build the sandbox OAS spec"
-    required: false
-    default: false
   targetComponent:
     description: "Name of the Component to deploy"
     required: true
@@ -67,7 +63,7 @@ runs:
         set -euo pipefail
 
         ENV="${{ inputs.apimEnv }}"
-        if [[ "$ENV" == "internal-dev" || "$ENV" == "internal-dev-pr" || "$ENV" == "internal-dev-sandbox" ]]; then
+        if [[ "$ENV" == "internal-dev" || "$ENV" == "internal-dev-pr" ]]; then
           echo "TARGET_DOMAIN=suppliers.dev.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
         elif [[ "$ENV" == "int" || "$ENV" == "ref" ]]; then
           echo "TARGET_DOMAIN=suppliers.nonprod.nhsnotify.national.nhs.uk" >> $GITHUB_ENV
@@ -99,6 +95,7 @@ runs:
         name: ${{ env.APIM_ENV }}-build-output
         path: ./build
 
+    # NOTE TO SELF: remove --internalRef after internal is merged into main
     - name: Trigger deploy proxy
       env:
         APP_CLIENT_ID: ${{ env.APP_CLIENT_ID }}
@@ -112,8 +109,8 @@ runs:
           --targetWorkflow "proxy-deploy.yaml" \
           --targetEnvironment "${{ inputs.environment }}" \
           --runId "${{ inputs.runId }}" \
-          --buildSandbox ${{ inputs.buildSandbox }} \
           --apimEnvironment "${{ env.APIM_ENV }}" \
           --boundedContext "notify-supplier" \
           --targetDomain "$TARGET_DOMAIN" \
-          --version "${{ inputs.version }}"
+          --version "${{ inputs.version }}" \
+          --internalRef "fix/CCM-22538_deploy_sandbox_server"

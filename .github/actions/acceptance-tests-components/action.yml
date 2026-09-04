@@ -39,6 +39,18 @@ runs:
       run: |
         echo "nodejs_version=$(grep "^nodejs\s" .tool-versions | cut -f2 -d' ')" >> $GITHUB_OUTPUT
 
+    - name: Set sandbox URL
+      if: ${{ inputs.testType == 'sandbox' }}
+      shell: bash
+      env:
+        TARGET_ENVIRONMENT: ${{ inputs.targetEnvironment }}
+      run: |
+        if [[ "$TARGET_ENVIRONMENT" == pr* ]]; then
+          echo "SUPPLIER_API_URL_SANDBOX=https://internal-dev-sandbox.api.service.nhs.uk/nhs-notify-supplier-PR-${TARGET_ENVIRONMENT#pr}" >> "$GITHUB_ENV"
+        else
+          echo "SUPPLIER_API_URL_SANDBOX=https://internal-dev-sandbox.api.service.nhs.uk/nhs-notify-supplier" >> "$GITHUB_ENV"
+        fi
+
     - name: Run test - ${{ inputs.testType }}
       shell: bash
       env:

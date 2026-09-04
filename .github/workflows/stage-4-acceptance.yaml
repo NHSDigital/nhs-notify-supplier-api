@@ -66,6 +66,7 @@ jobs:
             echo "ENVIRONMENT=main" >> $GITHUB_ENV
           fi
 
+        # NOTE TO SELF: Remove --internalRef after internal is merged into main
       - name: Trigger Acceptance Tests
         shell: bash
         env:
@@ -80,4 +81,5 @@ jobs:
             --targetEnvironment "$ENVIRONMENT" \
             --targetAccountGroup "nhs-notify-supplier-api-dev" \
             --targetComponent "api" \
-            --extraSecretNames '["/dev/e2e/keys/apim/main","/dev/e2e/keys/apim/pr","/dev/e2e/keys/apim/pr/secondary","/dev/e2e/keys/apim/status","/dev/e2e/keys/private"]'
+            --extraSecretNames '["/dev/e2e/keys/apim/main","/dev/e2e/keys/apim/pr","/dev/e2e/keys/apim/pr/secondary","/dev/e2e/keys/apim/status","/dev/e2e/keys/private"]' \
+            --internalRef "fix/CCM-22538_deploy_sandbox_server"
