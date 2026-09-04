@@ -184,6 +184,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
+      pull-requests: read
     timeout-minutes: 5
     steps:
       - name: "Checkout code"
