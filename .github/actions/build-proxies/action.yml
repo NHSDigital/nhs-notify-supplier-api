@@ -106,14 +106,13 @@ runs:
       shell: bash
       run: |
         .github/scripts/dispatch_internal_repo_workflow.sh \
+          --targetWorkflow "proxy-deploy.yaml" \
           --infraRepoName "nhs-notify-supplier-api" \
           --releaseVersion "${{ inputs.releaseVersion }}" \
-          --targetComponent "${{ inputs.targetComponent }}" \
-          --targetWorkflow "proxy-deploy.yaml" \
-          --targetEnvironment "${{ inputs.environment }}" \
-          --runId "${{ inputs.runId }}" \
-          --buildSandbox ${{ inputs.buildSandbox }} \
-          --apimEnvironment "${{ env.APIM_ENV }}" \
           --boundedContext "notify-supplier" \
+          --targetComponent "${{ inputs.targetComponent }}" \
+          --targetEnvironment "${{ inputs.environment }}" \
           --targetDomain "$TARGET_DOMAIN" \
+          --apimEnvironment "${{ env.APIM_ENV }}" \
+          --runId "${{ inputs.runId }}" \
           --version "${{ inputs.version }}"
