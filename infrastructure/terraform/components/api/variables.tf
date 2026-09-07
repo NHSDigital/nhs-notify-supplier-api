@@ -181,7 +181,18 @@ variable "core_environment" {
   type        = string
   description = "Environment of Core"
   default     = "prod"
+}
 
+variable "digital_letters_account_id" {
+  type        = string
+  description = "AWS Account ID for Digital Letters"
+  default     = "000000000000"
+}
+
+variable "digital_letters_environment" {
+  type        = string
+  description = "Environment of Digital Letters"
+  default     = "main"
 }
 
 variable "enable_backups" {

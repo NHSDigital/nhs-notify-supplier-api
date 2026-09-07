@@ -5,12 +5,12 @@
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.9.0 |
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_alarm_prefix"></a> [alarm\_prefix](#input\_alarm\_prefix) | n/a | `string` | n/a | yes |
 | <a name="input_enable_error_log_metric"></a> [enable\_error\_log\_metric](#input\_enable\_error\_log\_metric) | n/a | `bool` | `true` | no |
 | <a name="input_error_log_evaluation_periods"></a> [error\_log\_evaluation\_periods](#input\_error\_log\_evaluation\_periods) | n/a | `number` | `1` | no |

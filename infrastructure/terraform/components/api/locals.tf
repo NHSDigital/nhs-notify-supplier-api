@@ -40,6 +40,10 @@ locals {
   core_pdf_bucket_arn        = "arn:aws:s3:::comms-${var.core_account_id}-eu-west-2-${var.core_environment}-api-stg-pdf-pipeline"
   core_s3_kms_key_alias_name = "alias/comms-${var.core_environment}-api-s3"
 
+  digital_letters_pdf_bucket_arn        = "arn:aws:s3:::nhs-${var.digital_letters_account_id}-eu-west-2-${var.digital_letters_environment}-dl-file-safe"
+  digital_letters_s3_kms_key_alias_name = "alias/nhs-${var.digital_letters_environment}-dl"
+
+
   event_cache_bucket_name          = lookup(module.eventpub.s3_bucket_event_cache, "bucket", null)
   eventsub_event_cache_bucket_name = lookup(module.eventsub.s3_bucket_event_cache, "bucket", null)
 
