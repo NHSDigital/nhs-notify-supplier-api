@@ -89,4 +89,3 @@ runs:
           --boundedContext "notify-supplier" \
           --targetDomain "$TARGET_DOMAIN" \
           --version "${{ inputs.version }}" \
-          --internalRef "fix/CCM-22538_deploy_sandbox_server"
