@@ -45,7 +45,7 @@ jobs:
   check-generated-dependencies:
     name: "Check generated dependencies"
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - name: "Checkout code"
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -65,7 +65,6 @@ jobs:
       - name: "Repo setup"
         uses: ./.github/actions/node-install
         with:
-          node-version: ${{ inputs.nodejs_version }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Generate dependencies"
         run: |
@@ -74,7 +73,7 @@ jobs:
   test-unit:
     name: "Unit tests"
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -96,7 +95,6 @@ jobs:
       - name: "Repo setup"
         uses: ./.github/actions/node-install
         with:
-          node-version: ${{ inputs.nodejs_version }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Generate dependencies"
         run: |
@@ -119,7 +117,7 @@ jobs:
   test-pact:
     name: "Pact tests"
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     permissions:
@@ -139,7 +137,6 @@ jobs:
       - name: "Repo setup"
         uses: ./.github/actions/node-install
         with:
-          node-version: ${{ inputs.nodejs_version }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Generate dependencies"
         run: npm run generate-dependencies --workspaces --if-present
@@ -150,7 +147,7 @@ jobs:
   test-lint:
     name: "Linting"
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -172,7 +169,6 @@ jobs:
       - name: "Repo setup"
         uses: ./.github/actions/node-install
         with:
-          node-version: ${{ inputs.nodejs_version }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Generate dependencies"
         run: |
@@ -183,7 +179,7 @@ jobs:
   test-typecheck:
     name: "Typecheck"
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -205,7 +201,6 @@ jobs:
       - name: "Repo setup"
         uses: ./.github/actions/node-install
         with:
-          node-version: ${{ inputs.nodejs_version }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Generate dependencies"
         run: |
