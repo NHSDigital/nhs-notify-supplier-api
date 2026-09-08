@@ -66,19 +66,6 @@ jobs:
             echo "ENVIRONMENT=main" >> $GITHUB_ENV
           fi
 
-      - name: "Set acceptance test types"
-        shell: bash
-        env:
-          PROXY_DEPLOYED: ${{ inputs.proxy_deployed }}
-        run: |
-          if [[ "$PROXY_DEPLOYED" == "true" ]]; then
-            printf '[\n  "component",\n  "e2e",\n  "sandbox"\n]\n' > .github/actions/test-types.json
-          else
-            printf '[\n  "component",\n  "e2e"\n]\n' > .github/actions/test-types.json
-          fi
-
-          cat .github/actions/test-types.json
-
       - name: Trigger Acceptance Tests
         shell: bash
         env:
