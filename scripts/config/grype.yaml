@@ -2,6 +2,21 @@
 add-cpes-if-none: true
 
 ignore:
+  - vulnerability: GHSA-2883-xcg3-v3hh # TODO: CCM-23605
+  - vulnerability: GHSA-537c-gmf6-5ccf # TODO: CCM-23605
+  - vulnerability: GHSA-5jgf-p345-68v8 # TODO: CCM-23605
+  - vulnerability: GHSA-73wf-gq98-2v4g # TODO: CCM-23605
+  - vulnerability: GHSA-c4rq-3m3g-8wgx # TODO: CCM-23605
+  - vulnerability: GHSA-c83g-rgw3-j3cx # TODO: CCM-23605
+  - vulnerability: GHSA-f65p-4m7j-42xc # TODO: CCM-23605
+  - vulnerability: GHSA-fph4-wmhf-6fwf # TODO: CCM-23605
+  - vulnerability: GHSA-g6cj-pr64-35w5 # TODO: CCM-23605
+  - vulnerability: GHSA-h8w8-99g7-qmvj # TODO: CCM-23605
+  - vulnerability: GHSA-jqff-g426-hqxp # TODO: CCM-23605
+  - vulnerability: GHSA-jwv3-5hgf-82ww # TODO: CCM-23605
+  - vulnerability: GHSA-vfmq-68hx-4jfw # TODO: CCM-23605
+  - vulnerability: GHSA-xgmm-8j9v-c9wx # TODO: CCM-23605
+
 #   # This is the full set of supported rule fields:
 #   - vulnerability: CVE-2008-4318
 #     fix-state: unknown
@@ -17,61 +32,3 @@ ignore:
 #   # ...or just by a single package field:
 #   - package:
 #       type: gem
-
-# CCM-23605: remediation tracked separately, exceptions granted in the interim
-  - vulnerability: GHSA-2883-xcg3-v3hh
-    package:
-      name: js-yaml
-      type: npm
-  - vulnerability: GHSA-537c-gmf6-5ccf
-    package:
-      name: cryptography
-      type: python
-  - vulnerability: GHSA-5jgf-p345-68v8
-    package:
-      name: fast-uri
-      type: npm
-  - vulnerability: GHSA-73wf-gq98-2v4g
-    package:
-      name: browserslist
-      type: npm
-  - vulnerability: GHSA-c4rq-3m3g-8wgx
-    package:
-      name: nokogiri
-      type: gem
-  - vulnerability: GHSA-c83g-rgw3-j3cx
-    package:
-      name: browserslist
-      type: npm
-  - vulnerability: GHSA-f65p-4m7j-42xc
-    package:
-      name: fast-uri
-      type: npm
-  - vulnerability: GHSA-fph4-wmhf-6fwf
-    package:
-      name: fast-uri
-      type: npm
-  - vulnerability: GHSA-g6cj-pr64-35w5
-    package:
-      name: cryptography
-      type: python
-  - vulnerability: GHSA-h8w8-99g7-qmvj
-    package:
-      name: concurrent-ruby
-      type: gem
-  - vulnerability: GHSA-jqff-g426-hqxp
-    package:
-      name: fast-uri
-      type: npm
-  - vulnerability: GHSA-jwv3-5hgf-82ww
-    package:
-      name: cryptography
-      type: python
-  - vulnerability: GHSA-vfmq-68hx-4jfw
-    package:
-      name: lxml
-      type: python
-  - vulnerability: GHSA-xgmm-8j9v-c9wx
-    package:
-      name: pyjwt
-      type: python
