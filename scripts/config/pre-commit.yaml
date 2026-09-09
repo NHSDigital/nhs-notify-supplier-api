@@ -28,7 +28,7 @@ repos:
             )$
 
   - repo: https://github.com/NHSDigital/nhs-notify-shared-modules
-    rev: 5.0.3
+    rev: 6.0.0
     hooks:
       - id: sort-dictionary
       - id: scan-secrets
@@ -43,3 +43,5 @@ repos:
       - id: generate-terraform-docs
       - id: check-todo-usage
         args: [check=branch]
+      - id: scan-dependencies # make githooks-dependencies
+        stages: [manual]

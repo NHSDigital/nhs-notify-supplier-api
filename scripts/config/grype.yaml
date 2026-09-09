@@ -1,7 +1,22 @@
 # If using SBOM input, automatically generate CPEs when packages have none
 add-cpes-if-none: true
 
-# ignore:
+ignore:
+  - vulnerability: GHSA-2883-xcg3-v3hh # TODO: CCM-23605
+  - vulnerability: GHSA-537c-gmf6-5ccf # TODO: CCM-23605
+  - vulnerability: GHSA-5jgf-p345-68v8 # TODO: CCM-23605
+  - vulnerability: GHSA-73wf-gq98-2v4g # TODO: CCM-23605
+  - vulnerability: GHSA-c4rq-3m3g-8wgx # TODO: CCM-23605
+  - vulnerability: GHSA-c83g-rgw3-j3cx # TODO: CCM-23605
+  - vulnerability: GHSA-f65p-4m7j-42xc # TODO: CCM-23605
+  - vulnerability: GHSA-fph4-wmhf-6fwf # TODO: CCM-23605
+  - vulnerability: GHSA-g6cj-pr64-35w5 # TODO: CCM-23605
+  - vulnerability: GHSA-h8w8-99g7-qmvj # TODO: CCM-23605
+  - vulnerability: GHSA-jqff-g426-hqxp # TODO: CCM-23605
+  - vulnerability: GHSA-jwv3-5hgf-82ww # TODO: CCM-23605
+  - vulnerability: GHSA-vfmq-68hx-4jfw # TODO: CCM-23605
+  - vulnerability: GHSA-xgmm-8j9v-c9wx # TODO: CCM-23605
+
 #   # This is the full set of supported rule fields:
 #   - vulnerability: CVE-2008-4318
 #     fix-state: unknown

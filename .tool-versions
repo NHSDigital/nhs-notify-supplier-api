@@ -6,6 +6,8 @@ pre-commit 4.5.1
 python 3.12.11
 terraform 1.14.8
 terraform-docs 0.24.0
+syft 1.39.0
+grype 0.104.3
 vale 3.14.1
 poetry 2.3.2
 java openjdk-25.0.1
