@@ -57,8 +57,10 @@ runs:
         echo "Labels on PR #$PR_NUMBER: $labels"
 
         if echo "$labels" | grep -Fxq 'deploy-proxy'; then
+          echo "setting proxy_deployed to true"
           echo "proxy_deployed=true" >> "$GITHUB_OUTPUT"
         else
+        echo "setting proxy_deployed to false"
           echo "proxy_deployed=false" >> "$GITHUB_OUTPUT"
         fi
 
