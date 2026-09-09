@@ -25,8 +25,7 @@ test.describe("Sandbox Tests To Get Letter Status", () => {
 
       expect(response.status()).toBe(expectedStatus);
       const res = await response.json();
-      // expect(res).toMatchObject(expectedResponse!);
-      expect(res).toEqual(expectedResponse!);
+      expect(res).toEqual(expectedResponse);
     });
   }
 });

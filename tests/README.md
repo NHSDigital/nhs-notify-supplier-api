@@ -68,6 +68,4 @@ E2E tests (require AWS credentials and environment configuration):
 make .internal-dev-test (from root level Makefile)
 ```
 
-<!-- trigger a build -->
-
 <!-- vale on -->

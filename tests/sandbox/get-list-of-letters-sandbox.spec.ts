@@ -26,7 +26,7 @@ test.describe("Sandbox Tests To Get List Of Pending Letters ", () => {
 
       const res = await response.json();
       await expect(response.status()).toBe(expectedStatus);
-      expect(res).toMatchObject(expectedResponse!);
+      expect(res).toEqual(expectedResponse);
       if (response.status() === 200) {
         expect(res.data.length.toString()).toEqual(limit);
       }
