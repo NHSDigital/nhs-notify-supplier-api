@@ -37,6 +37,7 @@ import {
   suppliersWithValidPack,
 } from "./allocation-config";
 import { Deps } from "../config/deps";
+import LogRefs from "../config/log-references";
 import { PreparedEventSchema, PreparedEvents, SupplierDetails } from "./types";
 import SupplierConfigValidationError from "../errors/supplier-config-validation-error";
 import RejectedError from "../errors/rejected-error";
@@ -297,7 +298,8 @@ async function processSupplierAllocation(
     deps,
   );
   deps.logger.info({
-    description: "Resolved supplier details from config",
+    logRef: LogRefs.RESOLVED_SUPPLIER.code,
+    description: LogRefs.RESOLVED_SUPPLIER.description,
     supplierDetails,
   });
   const supplierSpec = supplierDetails?.allocationDetails?.supplierSpec;
@@ -404,7 +406,8 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
 
         const letterEvent: PreparedEvents = parseQueueMessage(sqsMessage);
         deps.logger.info({
-          description: "Extracted letter event",
+          logRef: LogRefs.EXTRACT_EVENT.code,
+          description: LogRefs.EXTRACT_EVENT.description,
           messageId: record.messageId,
           domainId: letterEvent.data.domainId,
           letterVariantId: letterEvent.data.letterVariantId,
