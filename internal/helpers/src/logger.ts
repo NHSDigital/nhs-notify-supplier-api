@@ -18,7 +18,20 @@ export function createLogger(options: LoggerOptions = {}): Logger {
 
   return pino({
     level: logLevel,
-    mixin: () => {
+    redact: {
+      paths: ["logRef"],
+      remove: true,
+    },
+    mixin: (context) => {
+      const messageLogReference =
+        "logRef" in context && typeof context.logRef === "string"
+          ? context.logRef
+          : undefined;
+
+      if (logReference && messageLogReference) {
+        return { log_reference: `${logReference} - ${messageLogReference}` };
+      }
+
       return logReference ? { log_reference: logReference } : {};
     },
     formatters: {
