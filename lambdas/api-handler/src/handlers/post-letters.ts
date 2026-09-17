@@ -15,6 +15,7 @@ import { mapToUpdateCommands } from "../mappers/letter-mapper";
 import { enqueueLetterUpdateRequests } from "../services/letter-operations";
 import { extractCommonIds } from "../utils/common-ids";
 import { assertNotEmpty, requireEnvVar } from "../utils/validation";
+import LogRefs from "../config/log-references";
 
 function duplicateIdsExist(postLettersRequest: PostLettersRequest) {
   const ids = postLettersRequest.data.map((item) => item.id);
@@ -40,7 +41,7 @@ function emitSuccessMetrics(
       unit: Unit.Count,
     };
     const emf = buildEMFObject("postLetters", dimensions, metric);
-    logger.info(emf);
+    logger.info({ ...emf, logRef: LogRefs.METRIC.code });
   }
 }
 
@@ -95,7 +96,8 @@ export default function createPostLettersHandler(
       }
 
       deps.logger.info({
-        description: "Received post letters request",
+        logRef: LogRefs.POST_LETTERS_RECEIVED.code,
+        description: LogRefs.POST_LETTERS_RECEIVED.description,
         supplierId: commonIds.value.supplierId,
         newAttributes: postLettersRequest.data.map((request) => ({
           id: request.id,
@@ -150,5 +152,5 @@ function emitErrorMetrics(supplierId: string, logger: pino.Logger) {
     unit: Unit.Count,
   };
   const emf = buildEMFObject("postLetters", dimensions, metric);
-  logger.info(emf);
+  logger.info({ ...emf, logRef: LogRefs.ERR_METRIC.code });
 }
