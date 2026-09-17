@@ -9,19 +9,21 @@ import { LetterRepository } from "../letter-repository";
 import { InsertLetter, Letter, UpdateLetter } from "../types";
 import { createTestLogger } from "./logs";
 import LetterAlreadyExistsError from "../errors/letter-already-exists-error";
+import LetterNotFoundError from "../errors/letter-not-found-error";
 
 function createLetter(
   supplierId: string,
   letterId: string,
   status: Letter["status"] = "PENDING",
   eventId?: string,
+  specificationId = "specification1",
 ): InsertLetter {
   const now = new Date().toISOString();
   return {
     id: letterId,
     eventId,
     supplierId,
-    specificationId: "specification1",
+    specificationId,
     groupId: "group1",
     url: `s3://bucket/${letterId}.pdf`,
     status,
@@ -37,6 +39,14 @@ function createLetter(
 function assertDateBetween(date: number, before: number, after: number) {
   expect(date).toBeGreaterThanOrEqual(before);
   expect(date).toBeLessThanOrEqual(after);
+}
+
+async function collect(generator: AsyncGenerator<Letter>): Promise<Letter[]> {
+  const results: Letter[] = [];
+  for await (const letter of generator) {
+    results.push(letter);
+  }
+  return results;
 }
 
 // Database tests can take longer, especially with setup and teardown
@@ -366,5 +376,292 @@ describe("LetterRepository", () => {
         createLetter("supplier1", "letter1"),
       ]),
     ).rejects.toThrow("Cannot do operations on a non-existent table");
+  });
+
+  describe("queryLettersBySupplierStatus", () => {
+    test("returns letters within the supplierStatusSk range and matching specificationId", async () => {
+      jest.useFakeTimers();
+
+      jest.setSystemTime(new Date("2026-09-01T00:00:00.000Z"));
+      await letterRepository.putLetter(
+        createLetter(
+          "xerox",
+          "before-range",
+          "PENDING",
+          undefined,
+          "digitrials-ofh",
+        ),
+      );
+
+      jest.setSystemTime(new Date("2026-09-03T00:00:00.000Z"));
+      await letterRepository.putLetter(
+        createLetter(
+          "xerox",
+          "in-range",
+          "PENDING",
+          undefined,
+          "digitrials-ofh",
+        ),
+      );
+      jest.setSystemTime(new Date("2026-09-04T00:00:00.000Z"));
+      await letterRepository.putLetter(
+        createLetter(
+          "xerox",
+          "in-range2",
+          "PENDING",
+          undefined,
+          "digitrials-ofh",
+        ),
+      );
+      await letterRepository.putLetter(
+        createLetter(
+          "xerox",
+          "in-range-wrong-spec",
+          "PENDING",
+          undefined,
+          "other-spec",
+        ),
+      );
+      await letterRepository.putLetter(
+        createLetter(
+          "other-supplier",
+          "in-range-wrong-supplier",
+          "PENDING",
+          undefined,
+          "digitrials-ofh",
+        ),
+      );
+      await letterRepository.putLetter(
+        createLetter(
+          "xerox",
+          "in-range-wrong-status",
+          "ACCEPTED",
+          undefined,
+          "digitrials-ofh",
+        ),
+      );
+
+      jest.setSystemTime(new Date("2026-09-06T00:00:00.000Z"));
+      await letterRepository.putLetter(
+        createLetter(
+          "xerox",
+          "after-range",
+          "PENDING",
+          undefined,
+          "digitrials-ofh",
+        ),
+      );
+
+      const results = await collect(
+        letterRepository.queryLettersBySupplierStatus(
+          "xerox",
+          "PENDING",
+          "2026-09-02",
+          "2026-09-05",
+          "digitrials-ofh",
+        ),
+      );
+
+      expect(results.map((letter) => letter.id)).toEqual([
+        "in-range",
+        "in-range2",
+      ]);
+    });
+
+    test("treats an undefined result.Items as no matches, without throwing", async () => {
+      (jest.spyOn(db.docClient, "send") as jest.Mock).mockResolvedValueOnce({
+        $metadata: {},
+        Items: undefined,
+      });
+
+      const results = await collect(
+        letterRepository.queryLettersBySupplierStatus(
+          "xerox",
+          "PENDING",
+          "2026-09-02",
+          "2026-09-05",
+          "digitrials-ofh",
+        ),
+      );
+
+      expect(results).toEqual([]);
+    });
+
+    test("includes a letter whose supplierStatusSk exactly equals startDate", async () => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date("2026-01-01T00:00:00.000Z"));
+      await letterRepository.putLetter(
+        createLetter(
+          "xerox",
+          "at-start",
+          "PENDING",
+          undefined,
+          "digitrials-ofh",
+        ),
+      );
+
+      const results = await collect(
+        letterRepository.queryLettersBySupplierStatus(
+          "xerox",
+          "PENDING",
+          "2026-01-01T00:00:00.000Z",
+          "2026-01-05T00:00:00.000Z",
+          "digitrials-ofh",
+        ),
+      );
+
+      expect(results.map((letter) => letter.id)).toEqual(["at-start"]);
+    });
+
+    test("includes a letter whose supplierStatusSk exactly equals endDate", async () => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date("2026-01-05T00:00:00.000Z"));
+      await letterRepository.putLetter(
+        createLetter("xerox", "at-end", "PENDING", undefined, "digitrials-ofh"),
+      );
+
+      const results = await collect(
+        letterRepository.queryLettersBySupplierStatus(
+          "xerox",
+          "PENDING",
+          "2026-01-01T00:00:00.000Z",
+          "2026-01-05T00:00:00.000Z",
+          "digitrials-ofh",
+        ),
+      );
+
+      expect(results.map((letter) => letter.id)).toEqual(["at-end"]);
+    });
+
+    test("excludes a letter one millisecond before startDate", async () => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date("2026-01-01T00:00:00.000Z"));
+      await letterRepository.putLetter(
+        createLetter(
+          "xerox",
+          "just-before-start",
+          "PENDING",
+          undefined,
+          "digitrials-ofh",
+        ),
+      );
+
+      const results = await collect(
+        letterRepository.queryLettersBySupplierStatus(
+          "xerox",
+          "PENDING",
+          "2026-01-01T00:00:00.001Z",
+          "2026-01-05T00:00:00.000Z",
+          "digitrials-ofh",
+        ),
+      );
+
+      expect(results).toEqual([]);
+    });
+
+    test("excludes a letter one millisecond after endDate", async () => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date("2026-01-05T00:00:00.001Z"));
+      await letterRepository.putLetter(
+        createLetter(
+          "xerox",
+          "just-after-end",
+          "PENDING",
+          undefined,
+          "digitrials-ofh",
+        ),
+      );
+
+      const results = await collect(
+        letterRepository.queryLettersBySupplierStatus(
+          "xerox",
+          "PENDING",
+          "2026-01-01T00:00:00.000Z",
+          "2026-01-05T00:00:00.000Z",
+          "digitrials-ofh",
+        ),
+      );
+
+      expect(results).toEqual([]);
+    });
+
+    test("paginates across multiple pages", async () => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date("2026-09-03T00:00:00.000Z"));
+
+      for (let i = 0; i < 5; i++) {
+        await letterRepository.putLetter(
+          createLetter(
+            "xerox",
+            `letter${i}`,
+            "PENDING",
+            undefined,
+            "digitrials-ofh",
+          ),
+        );
+      }
+
+      const pagedRepository = new LetterRepository(db.docClient, logger, {
+        ...db.config,
+        queryPageSize: 2,
+      });
+
+      const results = await collect(
+        pagedRepository.queryLettersBySupplierStatus(
+          "xerox",
+          "PENDING",
+          "2026-09-02",
+          "2026-09-05",
+          "digitrials-ofh",
+        ),
+      );
+
+      expect(results).toHaveLength(5);
+    });
+  });
+
+  describe("touchLetter", () => {
+    test("updates only the updatedAt field", async () => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date("2026-09-01T00:00:00.000Z"));
+      await letterRepository.putLetter(createLetter("supplier1", "letter1"));
+      const original = await letterRepository.getLetterById(
+        "supplier1",
+        "letter1",
+      );
+
+      jest.setSystemTime(new Date("2026-09-02T00:00:00.000Z"));
+      await letterRepository.touchLetter("supplier1", "letter1");
+
+      const touched = await letterRepository.getLetterById(
+        "supplier1",
+        "letter1",
+      );
+      expect(touched.updatedAt).toBe("2026-09-02T00:00:00.000Z");
+      expect(touched.status).toBe(original.status);
+      expect(touched.ttl).toBe(original.ttl);
+      expect(touched.supplierStatus).toBe(original.supplierStatus);
+      expect(touched.supplierStatusSk).toBe(original.supplierStatusSk);
+    });
+
+    test("throws LetterNotFoundError when the letter does not exist", async () => {
+      await expect(
+        letterRepository.touchLetter("supplier1", "missing-letter"),
+      ).rejects.toThrow(LetterNotFoundError);
+    });
+
+    test("rethrows errors from DynamoDB", async () => {
+      const misconfiguredRepository = new LetterRepository(
+        db.docClient,
+        logger,
+        {
+          ...db.config,
+          lettersTableName: "nonexistent-table",
+        },
+      );
+      await expect(
+        misconfiguredRepository.touchLetter("supplier1", "letter1"),
+      ).rejects.toThrow("Cannot do operations on a non-existent table");
+    });
   });
 });
