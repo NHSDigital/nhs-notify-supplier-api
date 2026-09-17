@@ -22,10 +22,17 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
+      - name: "Generate GitHub App token for nhs-notify-internal access"
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          repositories: nhs-notify-internal
+          client-id: ${{ secrets.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PEM_FILE }}
+
       - name: Trigger dynamic environment destruction
         env:
-          APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
-          APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         shell: bash
         run: |
           .github/scripts/dispatch_internal_repo_workflow.sh \
@@ -45,10 +52,17 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
+      - name: "Generate GitHub App token for nhs-notify-internal access"
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          repositories: nhs-notify-internal
+          client-id: ${{ secrets.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PEM_FILE }}
+
       - name: Trigger PR sandbox proxy destruction
         env:
-          APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
-          APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         shell: bash
         run: |
           .github/scripts/dispatch_internal_repo_workflow.sh \
@@ -62,8 +76,7 @@ jobs:
 
       - name: Trigger PR proxy destruction
         env:
-          APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
-          APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         shell: bash
         run: |
           .github/scripts/dispatch_internal_repo_workflow.sh \

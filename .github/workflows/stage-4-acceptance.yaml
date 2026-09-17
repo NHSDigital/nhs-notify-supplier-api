@@ -66,11 +66,18 @@ jobs:
             echo "ENVIRONMENT=main" >> $GITHUB_ENV
           fi
 
+      - name: "Generate GitHub App token for nhs-notify-internal access"
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          repositories: nhs-notify-internal
+          client-id: ${{ secrets.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PEM_FILE }}
+
       - name: Trigger Acceptance Tests
         shell: bash
         env:
-          APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
-          APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           .github/scripts/dispatch_internal_repo_workflow.sh \

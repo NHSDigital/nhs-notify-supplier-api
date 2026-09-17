@@ -73,8 +73,7 @@ runs:
 
     - name: Trigger deploy sandbox
       env:
-        APP_CLIENT_ID: ${{ env.APP_CLIENT_ID }}
-        APP_PEM_FILE: ${{ env.APP_PEM_FILE }}
+        GH_TOKEN: ${{ env.GH_TOKEN }}
       shell: bash
       run: |
         .github/scripts/dispatch_internal_repo_workflow.sh \

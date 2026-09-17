@@ -172,10 +172,16 @@ jobs:
       - name: Set environment name
         id: set-environment
         run: echo "environment_name=${{ inputs.pr_number != '' && format('pr{0}', inputs.pr_number) || 'main' }}" >> $GITHUB_OUTPUT
+      - name: "Generate GitHub App token for nhs-notify-internal access"
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          repositories: nhs-notify-internal
+          client-id: ${{ secrets.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PEM_FILE }}
       - name: Trigger dynamic environment creation
         env:
-          APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
-          APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
           PR_NUMBER: ${{ inputs.pr_number }}
 
         shell: bash
@@ -201,10 +207,16 @@ jobs:
       - name: Set Environment Name
         id: set-environment
         run: echo "environment_name=${{ inputs.pr_number != '' && format('pr{0}', inputs.pr_number) || 'main' }}" >> $GITHUB_OUTPUT
+      - name: "Generate GitHub App token for nhs-notify-internal access"
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          repositories: nhs-notify-internal
+          client-id: ${{ secrets.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PEM_FILE }}
       - name: "Trigger populate config workflow in internal repo"
         env:
-          APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
-          APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
           PR_NUMBER: ${{ inputs.pr_number }}
         shell: bash
         run: |
@@ -225,12 +237,19 @@ jobs:
     timeout-minutes: 10
     env:
       PROXYGEN_API_NAME: nhs-notify-supplier
-      APP_CLIENT_ID: ${{ secrets.APP_CLIENT_ID }}
-      APP_PEM_FILE: ${{ secrets.APP_PEM_FILE }}
     steps:
       - name: "Checkout code"
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: "Generate GitHub App token for nhs-notify-internal access"
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          repositories: nhs-notify-internal
+          client-id: ${{ secrets.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PEM_FILE }}
       - name: "Build proxies"
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         uses: ./.github/actions/build-proxies
         with:
           version: "${{ inputs.version }}"
@@ -239,6 +258,8 @@ jobs:
           runId: "${{ github.run_id }}"
           releaseVersion: ${{ github.head_ref || github.ref_name }}
       - name: "Build sandbox"
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         uses: ./.github/actions/build-sandbox
         with:
           version: "${{ inputs.version }}"
