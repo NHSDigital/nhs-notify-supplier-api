@@ -175,6 +175,7 @@ describe("eligibleSuppliers", () => {
     );
     await eligibleSuppliers(mockVolumeGroup, mockDeps);
     expect(mockDeps.logger.warn).toHaveBeenCalledWith({
+      logRef: "014-SUM-NOT-100",
       description: "Supplier allocations do not sum to 100%",
       volumeGroupId: "volume-group-1",
       allocationPercentageSum: 70,
@@ -231,6 +232,7 @@ describe("eligibleSuppliers", () => {
     const letterVariantSupplierId = "supplier-1";
     await eligibleSuppliers(mockVolumeGroup, mockDeps, letterVariantSupplierId);
     expect(mockDeps.logger.warn).toHaveBeenCalledWith({
+      logRef: "013-NO-ALLOCATIONS",
       description: "No allocations found for specified letter variant supplier",
       volumeGroupId: mockVolumeGroup.id,
       letterVariantSupplierId,
@@ -663,6 +665,7 @@ describe("filterSuppliersWithCapacity", () => {
     expect(result).toEqual([mockSuppliers[0], mockSuppliers[2]]);
     expect(mockDeps.logger.info).toHaveBeenCalledTimes(1);
     expect(mockDeps.logger.info).toHaveBeenCalledWith({
+      logRef: "004-CAPACITY",
       description: "Supplier has exceeded daily capacity",
       supplierId: "supplier-2",
       allocated: 600,
@@ -954,6 +957,7 @@ describe("selectSupplierByFactor", () => {
     );
 
     expect(mockDeps.logger.error).toHaveBeenCalledWith({
+      logRef: "019-ZERO-ALLOCATION",
       description: "Supplier allocation has zero percentage",
       supplierId: "supplier-2",
       allocationPercentage: 0,
