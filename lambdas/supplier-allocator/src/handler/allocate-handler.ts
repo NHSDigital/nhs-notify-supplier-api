@@ -146,6 +146,7 @@ async function getSupplierFromConfig(
       ));
 
     deps.logger.info({
+      logRef: LogRefs.FETCHED_SUPPLIER_DETAILS.code,
       description: "Fetched supplier details for supplier allocations",
       domainId: letterEvent.data.domainId,
       variantId: letterEvent.data.letterVariantId,
@@ -170,7 +171,8 @@ async function getSupplierFromConfig(
   } catch (error) {
     if (error instanceof RejectedError) {
       deps.logger.error({
-        description: "Letter request rejected",
+        logRef: LogRefs.LETTER_REQUEST_REJECTED.code,
+        description: LogRefs.LETTER_REQUEST_REJECTED.description,
         err: error,
         variantId: letterEvent.data.letterVariantId,
       });
@@ -219,7 +221,10 @@ function emitMetrics(
         value: count,
         unit: Unit.Count,
       };
-      deps.logger.info(buildEMFObject(namespace, dimensions, metric));
+      deps.logger.info({
+        ...buildEMFObject(namespace, dimensions, metric),
+        logRef: LogRefs.ALLOCATION_METRIC.code,
+      });
     }
   }
 }
@@ -244,7 +249,10 @@ function emitDataMetrics(
     value: 1,
     unit: Unit.Count,
   };
-  deps.logger.info(buildEMFObject(namespace, dimensions, metric));
+  deps.logger.info({
+    ...buildEMFObject(namespace, dimensions, metric),
+    logRef: LogRefs.DATA_METRIC.code,
+  });
 }
 
 function incrementAllocation(
@@ -259,6 +267,7 @@ function incrementAllocation(
     (groupAllocations[supplierId] ?? 0) + allocation;
   volumeGroupAllocations.set(volumeGroupId, groupAllocations);
   deps.logger.info({
+    logRef: LogRefs.UPDATED_ALLOCATIONS.code,
     description: "Updated allocations for volume group and supplier",
     volumeGroupId,
     groupAllocations,
@@ -330,6 +339,7 @@ async function processSupplierAllocation(
   };
 
   deps.logger.info({
+    logRef: LogRefs.SENDING_UPSERT_MESSAGE.code,
     description: "Sending message to upsert letter queue",
     msg: queueMessage,
     url: queueUrl,
@@ -354,6 +364,7 @@ async function placeOnDeadLetterQueue(record: SQSRecord, deps: Deps) {
   }
 
   deps.logger.info({
+    logRef: LogRefs.SENDING_DLQ_MESSAGE.code,
     description: "Sending record to supplier allocator DLQ",
     messageId: record.messageId,
     deadLetterQueueUrl,
@@ -421,7 +432,8 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
         ({ priority, supplier } = supplierAllocationResult);
       } catch (error) {
         deps.logger.error({
-          description: "Error processing allocation of record",
+          logRef: LogRefs.ERROR_PROCESSING_ALLOCATION.code,
+          description: LogRefs.ERROR_PROCESSING_ALLOCATION.description,
           err: error,
           messageId: record.messageId,
           message: record.body,
@@ -435,7 +447,8 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
             await placeOnDeadLetterQueue(record, deps);
           } catch (dlqError) {
             deps.logger.error({
-              description: "Failed to send record to supplier allocator DLQ",
+              logRef: LogRefs.FAILED_TO_SEND_DLQ.code,
+              description: LogRefs.FAILED_TO_SEND_DLQ.description,
               err: dlqError,
               messageId: record.messageId,
               message: record.body,
