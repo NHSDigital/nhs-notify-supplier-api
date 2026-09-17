@@ -35,7 +35,7 @@ module "post_mi" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
-    LOG_REFERENCE = "POST_MI"
+    LOG_REFERENCE = "PST_MI"
   })
 }
 

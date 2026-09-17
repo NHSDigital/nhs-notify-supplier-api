@@ -37,7 +37,7 @@ module "post_letters" {
   lambda_env_vars = merge(local.common_lambda_env_vars, {
     QUEUE_URL     = module.amendments_queue.sqs_queue_url,
     MAX_LIMIT     = var.max_get_limit
-    LOG_REFERENCE = "POST_LETTERS"
+    LOG_REFERENCE = "PST_LTRS"
   })
 }
 

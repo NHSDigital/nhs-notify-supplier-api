@@ -36,7 +36,7 @@ module "get_letters" {
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
     MAX_LIMIT     = var.max_get_limit
-    LOG_REFERENCE = "GET_LETTERS"
+    LOG_REFERENCE = "GET_LTRS"
   })
 }
 

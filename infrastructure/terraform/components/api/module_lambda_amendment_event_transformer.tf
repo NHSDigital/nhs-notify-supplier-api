@@ -35,7 +35,7 @@ module "amendment_event_transformer" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
-    LOG_REFERENCE = "AMENDMENT_EVENT_TRANSFORMER"
+    LOG_REFERENCE = "AMD_EVT_TRM"
   })
 }
 

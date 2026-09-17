@@ -35,7 +35,7 @@ module "get_letter_data" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
-    LOG_REFERENCE = "GET_LETTER_DATA"
+    LOG_REFERENCE = "GET_LTR_DATA"
   })
 }
 

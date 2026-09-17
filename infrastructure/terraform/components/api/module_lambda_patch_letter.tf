@@ -36,7 +36,7 @@ module "patch_letter" {
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
     QUEUE_URL     = module.amendments_queue.sqs_queue_url
-    LOG_REFERENCE = "PATCH_LETTERS"
+    LOG_REFERENCE = "PTCH_LTRS"
   })
 }
 
