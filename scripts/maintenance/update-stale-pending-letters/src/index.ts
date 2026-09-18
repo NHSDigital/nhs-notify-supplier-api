@@ -9,11 +9,11 @@ import { LetterRepository } from "@internal/datastore";
 
 // --- Hardcoded parameters for this one-off run: change these values directly rather than passing them as args ---
 const TABLE_NAME = "nhs-main-supapi-letters";
-const SUPPLIER_ID = "xerox";
+const SUPPLIER_ID = "supplier-placeholder";
 const STATUS = "PENDING";
 const START_DATE = "2026-09-02";
 const END_DATE = "2026-09-05";
-const SPECIFICATION_ID = "digitrials-ofh";
+const SPECIFICATION_ID = "specification-placeholder";
 const CONCURRENCY = 5;
 const LETTERS_TTL_HOURS = 12_960; // unused by touchLetter, required by LetterRepositoryConfig
 

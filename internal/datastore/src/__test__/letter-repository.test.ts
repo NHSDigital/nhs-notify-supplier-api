@@ -385,37 +385,37 @@ describe("LetterRepository", () => {
       jest.setSystemTime(new Date("2026-09-01T00:00:00.000Z"));
       await letterRepository.putLetter(
         createLetter(
-          "xerox",
+          "supplier",
           "before-range",
           "PENDING",
           undefined,
-          "digitrials-ofh",
+          "specification",
         ),
       );
 
       jest.setSystemTime(new Date("2026-09-03T00:00:00.000Z"));
       await letterRepository.putLetter(
         createLetter(
-          "xerox",
+          "supplier",
           "in-range",
           "PENDING",
           undefined,
-          "digitrials-ofh",
+          "specification",
         ),
       );
       jest.setSystemTime(new Date("2026-09-04T00:00:00.000Z"));
       await letterRepository.putLetter(
         createLetter(
-          "xerox",
+          "supplier",
           "in-range2",
           "PENDING",
           undefined,
-          "digitrials-ofh",
+          "specification",
         ),
       );
       await letterRepository.putLetter(
         createLetter(
-          "xerox",
+          "supplier",
           "in-range-wrong-spec",
           "PENDING",
           undefined,
@@ -428,37 +428,37 @@ describe("LetterRepository", () => {
           "in-range-wrong-supplier",
           "PENDING",
           undefined,
-          "digitrials-ofh",
+          "specification",
         ),
       );
       await letterRepository.putLetter(
         createLetter(
-          "xerox",
+          "supplier",
           "in-range-wrong-status",
           "ACCEPTED",
           undefined,
-          "digitrials-ofh",
+          "specification",
         ),
       );
 
       jest.setSystemTime(new Date("2026-09-06T00:00:00.000Z"));
       await letterRepository.putLetter(
         createLetter(
-          "xerox",
+          "supplier",
           "after-range",
           "PENDING",
           undefined,
-          "digitrials-ofh",
+          "specification",
         ),
       );
 
       const results = await collect(
         letterRepository.queryLettersBySupplierStatus(
-          "xerox",
+          "supplier",
           "PENDING",
           "2026-09-02",
           "2026-09-05",
-          "digitrials-ofh",
+          "specification",
         ),
       );
 
@@ -476,11 +476,11 @@ describe("LetterRepository", () => {
 
       const results = await collect(
         letterRepository.queryLettersBySupplierStatus(
-          "xerox",
+          "supplier",
           "PENDING",
           "2026-09-02",
           "2026-09-05",
-          "digitrials-ofh",
+          "specification",
         ),
       );
 
@@ -492,21 +492,21 @@ describe("LetterRepository", () => {
       jest.setSystemTime(new Date("2026-01-01T00:00:00.000Z"));
       await letterRepository.putLetter(
         createLetter(
-          "xerox",
+          "supplier",
           "at-start",
           "PENDING",
           undefined,
-          "digitrials-ofh",
+          "specification",
         ),
       );
 
       const results = await collect(
         letterRepository.queryLettersBySupplierStatus(
-          "xerox",
+          "supplier",
           "PENDING",
           "2026-01-01T00:00:00.000Z",
           "2026-01-05T00:00:00.000Z",
-          "digitrials-ofh",
+          "specification",
         ),
       );
 
@@ -517,16 +517,22 @@ describe("LetterRepository", () => {
       jest.useFakeTimers();
       jest.setSystemTime(new Date("2026-01-05T00:00:00.000Z"));
       await letterRepository.putLetter(
-        createLetter("xerox", "at-end", "PENDING", undefined, "digitrials-ofh"),
+        createLetter(
+          "supplier",
+          "at-end",
+          "PENDING",
+          undefined,
+          "specification",
+        ),
       );
 
       const results = await collect(
         letterRepository.queryLettersBySupplierStatus(
-          "xerox",
+          "supplier",
           "PENDING",
           "2026-01-01T00:00:00.000Z",
           "2026-01-05T00:00:00.000Z",
-          "digitrials-ofh",
+          "specification",
         ),
       );
 
@@ -538,21 +544,21 @@ describe("LetterRepository", () => {
       jest.setSystemTime(new Date("2026-01-01T00:00:00.000Z"));
       await letterRepository.putLetter(
         createLetter(
-          "xerox",
+          "supplier",
           "just-before-start",
           "PENDING",
           undefined,
-          "digitrials-ofh",
+          "specification",
         ),
       );
 
       const results = await collect(
         letterRepository.queryLettersBySupplierStatus(
-          "xerox",
+          "supplier",
           "PENDING",
           "2026-01-01T00:00:00.001Z",
           "2026-01-05T00:00:00.000Z",
-          "digitrials-ofh",
+          "specification",
         ),
       );
 
@@ -564,21 +570,21 @@ describe("LetterRepository", () => {
       jest.setSystemTime(new Date("2026-01-05T00:00:00.001Z"));
       await letterRepository.putLetter(
         createLetter(
-          "xerox",
+          "supplier",
           "just-after-end",
           "PENDING",
           undefined,
-          "digitrials-ofh",
+          "specification",
         ),
       );
 
       const results = await collect(
         letterRepository.queryLettersBySupplierStatus(
-          "xerox",
+          "supplier",
           "PENDING",
           "2026-01-01T00:00:00.000Z",
           "2026-01-05T00:00:00.000Z",
-          "digitrials-ofh",
+          "specification",
         ),
       );
 
@@ -592,11 +598,11 @@ describe("LetterRepository", () => {
       for (let i = 0; i < 5; i++) {
         await letterRepository.putLetter(
           createLetter(
-            "xerox",
+            "supplier",
             `letter${i}`,
             "PENDING",
             undefined,
-            "digitrials-ofh",
+            "specification",
           ),
         );
       }
@@ -608,11 +614,11 @@ describe("LetterRepository", () => {
 
       const results = await collect(
         pagedRepository.queryLettersBySupplierStatus(
-          "xerox",
+          "supplier",
           "PENDING",
           "2026-09-02",
           "2026-09-05",
-          "digitrials-ofh",
+          "specification",
         ),
       );
 
