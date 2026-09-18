@@ -1,3 +1,6 @@
+import { WriteStream, createWriteStream, mkdirSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { GetCallerIdentityCommand, STSClient } from "@aws-sdk/client-sts";
@@ -13,6 +16,22 @@ const END_DATE = "2026-09-05";
 const SPECIFICATION_ID = "digitrials-ofh";
 const CONCURRENCY = 5;
 const LETTERS_TTL_HOURS = 12_960; // unused by touchLetter, required by LetterRepositoryConfig
+
+const OUTPUT_DIR = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+  "output",
+);
+
+function outputFilePaths(timestamp: string) {
+  return {
+    updatedIdsFile: path.join(
+      OUTPUT_DIR,
+      `updated-letter-ids-${timestamp}.txt`,
+    ),
+    failedIdsFile: path.join(OUTPUT_DIR, `failed-letter-ids-${timestamp}.txt`),
+  };
+}
 
 function parseDryRunArg(): boolean {
   const arg = process.argv.find((value) => value.startsWith("--dry-run="));
@@ -49,30 +68,29 @@ async function main() {
     lettersTtlHours: LETTERS_TTL_HOURS,
   });
 
+  mkdirSync(OUTPUT_DIR, { recursive: true });
+  const { failedIdsFile, updatedIdsFile } = outputFilePaths(
+    new Date().toISOString().replaceAll(/[:.]/g, "-"),
+  );
+  const updatedIdsStream = createWriteStream(updatedIdsFile);
+  const failedIdsStream = createWriteStream(failedIdsFile);
+
   let matchedCount = 0;
   let updatedCount = 0;
   let errorCount = 0;
 
   async function processLetter(letter: { id: string; supplierId: string }) {
     if (dryRun) {
-      logger.info({
-        description: "DRY RUN — would update letter",
-        id: letter.id,
-        supplierId: letter.supplierId,
-      });
       return;
     }
 
     try {
       await letterRepo.touchLetter(letter.supplierId, letter.id);
       updatedCount += 1;
-      logger.info({
-        description: "Updated letter",
-        id: letter.id,
-        supplierId: letter.supplierId,
-      });
+      updatedIdsStream.write(`${letter.id}\n`);
     } catch (error) {
       errorCount += 1;
+      failedIdsStream.write(`${letter.id}\n`);
       logger.error({
         description: "Failed to update letter",
         id: letter.id,
@@ -113,11 +131,24 @@ async function main() {
     await Promise.all(batch.map((item) => processLetter(item)));
   }
 
+  await closeStream(updatedIdsStream);
+  await closeStream(failedIdsStream);
+
   logger.info({
     description: dryRun ? "DRY RUN complete" : "Run complete",
     matchedCount,
     updatedCount,
     errorCount,
+    updatedIdsFile,
+    failedIdsFile,
+  });
+}
+
+function closeStream(stream: WriteStream): Promise<void> {
+  return new Promise((resolve, reject) => {
+    stream.end((error: Error | null | undefined) =>
+      error ? reject(error) : resolve(),
+    );
   });
 }
 
