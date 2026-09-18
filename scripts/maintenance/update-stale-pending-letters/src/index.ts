@@ -33,7 +33,11 @@ function outputFilePaths(timestamp: string) {
   };
 }
 
-async function logTargetAccount(logger: Logger) {
+function parseDryRunArg(): boolean {
+  return process.argv.includes("--dry-run");
+}
+
+async function logTargetAccount(logger: Logger, dryRun: boolean) {
   const stsClient = new STSClient({});
   const identity = await stsClient.send(new GetCallerIdentityCommand({}));
 
@@ -43,6 +47,7 @@ async function logTargetAccount(logger: Logger) {
     arn: identity.Arn,
     region: await stsClient.config.region(),
     tableName: TABLE_NAME,
+    dryRun,
   });
 
   // Give the operator a window to abort if the logged account/table is wrong
@@ -53,8 +58,9 @@ async function logTargetAccount(logger: Logger) {
 
 async function main() {
   const logger = pino();
+  const dryRun = parseDryRunArg();
 
-  await logTargetAccount(logger);
+  await logTargetAccount(logger, dryRun);
 
   const ddbClient = new DynamoDBClient({});
   const docClient = DynamoDBDocumentClient.from(ddbClient);
@@ -75,19 +81,24 @@ async function main() {
   let errorCount = 0;
 
   async function processLetter(letter: { id: string; supplierId: string }) {
-    try {
-      await letterRepo.touchLetter(letter.supplierId, letter.id);
+    if (dryRun) {
       updatedCount += 1;
       updatedIdsStream.write(`${letter.id}\n`);
-    } catch (error) {
-      errorCount += 1;
-      failedIdsStream.write(`${letter.id}\n`);
-      logger.error({
-        description: "Failed to update letter",
-        id: letter.id,
-        supplierId: letter.supplierId,
-        err: error,
-      });
+    } else {
+      try {
+        await letterRepo.touchLetter(letter.supplierId, letter.id);
+        updatedCount += 1;
+        updatedIdsStream.write(`${letter.id}\n`);
+      } catch (error) {
+        errorCount += 1;
+        failedIdsStream.write(`${letter.id}\n`);
+        logger.error({
+          description: "Failed to update letter",
+          id: letter.id,
+          supplierId: letter.supplierId,
+          err: error,
+        });
+      }
     }
 
     if ((updatedCount + errorCount) % 100 === 0) {
@@ -126,7 +137,7 @@ async function main() {
   await closeStream(failedIdsStream);
 
   logger.info({
-    description: "Run complete",
+    description: dryRun ? "DRY RUN complete" : "Run complete",
     matchedCount,
     updatedCount,
     errorCount,
