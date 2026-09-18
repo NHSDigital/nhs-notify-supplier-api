@@ -18,6 +18,7 @@ import {
 import { calculateSupplierAllocatedFactor } from "../services/supplier-quotas";
 
 import { Deps } from "../config/deps";
+import LogRefs from "../config/log-references";
 import { PreparedEvents } from "./types";
 import SupplierConfigValidationError from "../errors/supplier-config-validation-error";
 
@@ -35,6 +36,7 @@ export async function eligibleSuppliers(
   );
   if (letterVariantSupplierId) {
     deps.logger.info({
+      logRef: LogRefs.FILTERING_ALLOCATIONS.code,
       description: "Filtering allocations for letter variant supplier",
       volumeGroupId: volumeGroup.id,
       letterVariantSupplierId,
@@ -44,8 +46,8 @@ export async function eligibleSuppliers(
     );
     if (!filteredAllocations) {
       deps.logger.warn({
-        description:
-          "No allocations found for specified letter variant supplier",
+        logRef: LogRefs.NO_ALLOCATIONS_FOR_VARIANT_SUPPLIER.code,
+        description: LogRefs.NO_ALLOCATIONS_FOR_VARIANT_SUPPLIER.description,
         volumeGroupId: volumeGroup.id,
         letterVariantSupplierId,
       });
@@ -65,7 +67,8 @@ export async function eligibleSuppliers(
   );
   if (allocationPercentageSum !== 100) {
     deps.logger.warn({
-      description: "Supplier allocations do not sum to 100%",
+      logRef: LogRefs.ALLOCATIONS_DO_NOT_SUM_TO_100.code,
+      description: LogRefs.ALLOCATIONS_DO_NOT_SUM_TO_100.description,
       volumeGroupId: volumeGroup.id,
       allocationPercentageSum,
     });
@@ -133,6 +136,7 @@ export async function filterSuppliersWithCapacity(
       const hasCapacity = allocated < supplier.dailyCapacity;
       if (!hasCapacity) {
         deps.logger.info({
+          logRef: LogRefs.SUPPLIER_CAPACITY_EXCEEDED.code,
           description: "Supplier has exceeded daily capacity",
           supplierId: supplier.id,
           allocated,
@@ -155,7 +159,8 @@ export async function selectSupplierByFactor(
   const supplierAllocationsForPack = supplierAllocations.filter((alloc) => {
     if (alloc.allocationPercentage === 0) {
       deps.logger.error({
-        description: "Supplier allocation has zero percentage",
+        logRef: LogRefs.ZERO_SUPPLIER_ALLOCATION.code,
+        description: LogRefs.ZERO_SUPPLIER_ALLOCATION.description,
         supplierId: alloc.supplier,
         allocationPercentage: alloc.allocationPercentage,
       });
@@ -178,6 +183,7 @@ export async function selectSupplierByFactor(
   }
 
   deps.logger.info({
+    logRef: LogRefs.CALCULATED_SUPPLIER_FACTORS.code,
     description: "Calculated supplier factors for allocation",
     domainId,
     supplierFactors,

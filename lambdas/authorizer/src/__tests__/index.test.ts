@@ -117,6 +117,7 @@ describe("Authorizer Lambda Function", () => {
 
       expect(metricScope).toHaveBeenCalledTimes(1);
       expect(mockedDeps.logger.warn).toHaveBeenCalledWith({
+        logRef: "004-CERTIFICATE-EXPIRY",
         description: "APIM Certificate expiry",
         days: 30,
       });

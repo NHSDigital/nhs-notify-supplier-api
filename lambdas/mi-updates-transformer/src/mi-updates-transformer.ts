@@ -16,6 +16,7 @@ import pino from "pino";
 import { MetricEntry, buildEMFObject } from "@internal/helpers";
 import { mapMIToCloudEvent } from "./mappers/mi-mapper";
 import { Deps } from "./deps";
+import LogRefs from "./log-references";
 
 // SNS PublishBatchCommand supports up to 10 messages per batch
 const BATCH_SIZE = 10;
@@ -34,7 +35,11 @@ function buildMessage(
     Id: event.id,
     Message: JSON.stringify(event),
   };
-  deps.logger.info({ description: "Built message", message });
+  deps.logger.info({
+    logRef: LogRefs.BUILT_MESSAGE.code,
+    description: LogRefs.BUILT_MESSAGE.description,
+    message,
+  });
   return message;
 }
 
@@ -43,7 +48,11 @@ function extractPayload(
   deps: Deps,
 ): DynamoDBRecord {
   const payload = Buffer.from(record.kinesis.data, "base64").toString("utf8");
-  deps.logger.info({ description: "Extracted payload", payload });
+  deps.logger.info({
+    logRef: LogRefs.EXTRACTED_PAYLOAD.code,
+    description: LogRefs.EXTRACTED_PAYLOAD.description,
+    payload,
+  });
   return JSON.parse(payload);
 }
 
@@ -62,13 +71,17 @@ function emitMetrics(logger: pino.Logger, eventTypeCount: Map<string, number>) {
       unit: Unit.Count,
     };
     const emf = buildEMFObject(namespace, dimensions, metric);
-    logger.info(emf);
+    logger.info({ ...emf, logRef: LogRefs.METRIC.code });
   }
 }
 
 export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
   return async (streamEvent: KinesisStreamEvent) => {
-    deps.logger.info({ description: "Received event", streamEvent });
+    deps.logger.info({
+      logRef: LogRefs.RECEIVED_EVENT.code,
+      description: LogRefs.RECEIVED_EVENT.description,
+      streamEvent,
+    });
 
     const cloudEvents: MISubmittedEvent[] = streamEvent.Records.map((record) =>
       extractPayload(record, deps),

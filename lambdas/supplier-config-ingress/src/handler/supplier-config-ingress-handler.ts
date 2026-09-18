@@ -16,6 +16,7 @@ import {
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-config";
 import { MetricEntry, MetricStatus, buildEMFObject } from "@internal/helpers";
 import { Deps } from "../config/deps";
+import LogRefs from "../config/log-references";
 
 const $EventEnvelope = z.object({
   type: z.string(),
@@ -70,7 +71,10 @@ function emitSuccessMetric(
     value: 1,
     unit: Unit.Count,
   };
-  logger.info(buildEMFObject(namespace, dimensions, metric));
+  logger.info({
+    ...buildEMFObject(namespace, dimensions, metric),
+    logRef: LogRefs.SUCCESS_METRIC.code,
+  });
 }
 
 function emitFailureMetric(logger: Deps["logger"], entity: string) {
@@ -81,7 +85,10 @@ function emitFailureMetric(logger: Deps["logger"], entity: string) {
     value: 1,
     unit: Unit.Count,
   };
-  logger.info(buildEMFObject(namespace, dimensions, metric));
+  logger.info({
+    ...buildEMFObject(namespace, dimensions, metric),
+    logRef: LogRefs.FAILURE_METRIC.code,
+  });
 }
 
 export default function createSupplierConfigIngressHandler(deps: Deps) {
@@ -95,15 +102,23 @@ export default function createSupplierConfigIngressHandler(deps: Deps) {
       let entity: string | undefined;
       try {
         logger.info(
-          { messageId: record.messageId, body: record.body },
-          "Processing record",
+          {
+            logRef: LogRefs.PROCESSING_RECORD.code,
+            messageId: record.messageId,
+            body: record.body,
+          },
+          LogRefs.PROCESSING_RECORD.description,
         );
         const parsed = parseSupplierConfigFromRecord(record);
         entity = parsed.entity;
 
         logger.info(
-          { entity, id: parsed.config.id },
-          "Processing supplier config upsert",
+          {
+            logRef: LogRefs.PROCESSING_SUPPLIER_CONFIG_UPSERT.code,
+            entity,
+            id: parsed.config.id,
+          },
+          LogRefs.PROCESSING_SUPPLIER_CONFIG_UPSERT.description,
         );
 
         const result = await supplierConfigRepo.upsertSupplierConfig(
@@ -114,13 +129,22 @@ export default function createSupplierConfigIngressHandler(deps: Deps) {
         emitSuccessMetric(logger, parsed.entity, result);
 
         logger.info(
-          { entity, pk: parsed.config.id, result },
-          "Supplier config upserted",
+          {
+            logRef: LogRefs.SUPPLIER_CONFIG_UPSERTED.code,
+            entity,
+            pk: parsed.config.id,
+            result,
+          },
+          LogRefs.SUPPLIER_CONFIG_UPSERTED.description,
         );
       } catch (error) {
         logger.error(
-          { error, messageId: record.messageId },
-          "Failed to process supplier config record",
+          {
+            logRef: LogRefs.FAILED_TO_PROCESS_SUPPLIER_CONFIG_RECORD.code,
+            error,
+            messageId: record.messageId,
+          },
+          LogRefs.FAILED_TO_PROCESS_SUPPLIER_CONFIG_RECORD.description,
         );
         batchItemFailures.push({ itemIdentifier: record.messageId });
         failedEntities.push(entity ?? "unknown");

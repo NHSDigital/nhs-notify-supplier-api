@@ -6,6 +6,7 @@ const EnvVarsSchema = z.object({
   APIM_SUPPLIER_ID_HEADER: z.string(),
   CLIENT_CERTIFICATE_EXPIRATION_ALERT_DAYS: z.coerce.number().int(),
   PINO_LOG_LEVEL: z.coerce.string().optional(),
+  LOG_REFERENCE: z.string().optional(),
 });
 
 export type EnvVars = z.infer<typeof EnvVarsSchema>;
