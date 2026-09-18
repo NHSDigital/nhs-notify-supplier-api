@@ -35,7 +35,7 @@ module "update_letter_queue" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
-    LOG_REFERENCE = "UPDATE_LETTER"
+    LOG_REFERENCE = "UPD_LTR_QUE"
   })
 }
 
