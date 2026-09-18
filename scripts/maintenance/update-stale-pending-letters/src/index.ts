@@ -33,15 +33,7 @@ function outputFilePaths(timestamp: string) {
   };
 }
 
-function parseDryRunArg(): boolean {
-  const arg = process.argv.find((value) => value.startsWith("--dry-run="));
-  if (!arg) {
-    return true;
-  }
-  return arg.split("=")[1] !== "false";
-}
-
-async function logTargetAccount(logger: Logger, dryRun: boolean) {
+async function logTargetAccount(logger: Logger) {
   const stsClient = new STSClient({});
   const identity = await stsClient.send(new GetCallerIdentityCommand({}));
 
@@ -51,7 +43,6 @@ async function logTargetAccount(logger: Logger, dryRun: boolean) {
     arn: identity.Arn,
     region: await stsClient.config.region(),
     tableName: TABLE_NAME,
-    dryRun,
   });
 
   // Give the operator a window to abort if the logged account/table is wrong
@@ -62,9 +53,8 @@ async function logTargetAccount(logger: Logger, dryRun: boolean) {
 
 async function main() {
   const logger = pino();
-  const dryRun = parseDryRunArg();
 
-  await logTargetAccount(logger, dryRun);
+  await logTargetAccount(logger);
 
   const ddbClient = new DynamoDBClient({});
   const docClient = DynamoDBDocumentClient.from(ddbClient);
@@ -85,10 +75,6 @@ async function main() {
   let errorCount = 0;
 
   async function processLetter(letter: { id: string; supplierId: string }) {
-    if (dryRun) {
-      return;
-    }
-
     try {
       await letterRepo.touchLetter(letter.supplierId, letter.id);
       updatedCount += 1;
@@ -140,7 +126,7 @@ async function main() {
   await closeStream(failedIdsStream);
 
   logger.info({
-    description: dryRun ? "DRY RUN complete" : "Run complete",
+    description: "Run complete",
     matchedCount,
     updatedCount,
     errorCount,
