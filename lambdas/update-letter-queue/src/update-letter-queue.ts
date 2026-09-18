@@ -33,7 +33,7 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
       const ddbRecord = extractPayload(record, deps);
 
       try {
-        if (isNewPendingLetter(ddbRecord)) {
+        if (isPendingLetter(ddbRecord)) {
           const letter = extractNewOrUpdatedLetter(ddbRecord);
           const added = await addPendingLetterToQueue(letter, deps);
           updateDeltas(deltasBySupplierId, letter.supplierId, added);
@@ -135,12 +135,11 @@ function recordProcessing(
   }
 }
 
-function isNewPendingLetter(record: DynamoDBRecord): boolean {
-  const isInsert = record.eventName === "INSERT";
+function isPendingLetter(record: DynamoDBRecord): boolean {
   const newImage = record.dynamodb?.NewImage;
   const isPending = newImage?.status?.S === "PENDING";
 
-  return isInsert && isPending;
+  return isPending;
 }
 
 function isNoLongerPending(record: DynamoDBRecord): boolean {
