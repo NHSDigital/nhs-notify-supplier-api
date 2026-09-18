@@ -53,6 +53,11 @@ async function logTargetAccount(logger: Logger, dryRun: boolean) {
     tableName: TABLE_NAME,
     dryRun,
   });
+
+  // Give the operator a window to abort if the logged account/table is wrong
+  await new Promise((resolve) => {
+    setTimeout(resolve, 5000);
+  });
 }
 
 async function main() {
