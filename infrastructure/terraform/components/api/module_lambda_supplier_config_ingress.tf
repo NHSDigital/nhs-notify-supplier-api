@@ -35,7 +35,7 @@ module "supplier_config_ingress" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
-    LOG_REFERENCE = "SUPPLIER_CONFIG_INGRESS"
+    LOG_REFERENCE = "SUP_CFG_ING"
   })
 }
 
