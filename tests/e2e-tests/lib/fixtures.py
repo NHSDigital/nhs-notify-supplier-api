@@ -39,7 +39,7 @@ def url(api_product_name):
 
     # REF share internal-dev gateway
     elif environment in ["ref"]:
-        return f"https://internal-dev.api.service.nhs.uk/{suffix}"
+        return f"https://ref.api.service.nhs.uk/{suffix}"
 
     # Everything else (dev, test, pr environments, internal-dev)
     else:
