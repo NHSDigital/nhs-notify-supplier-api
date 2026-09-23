@@ -194,7 +194,8 @@ jobs:
             --targetComponent "api" \
             --targetAccountGroup "nhs-notify-supplier-api-dev" \
             --terraformAction "apply" \
-            --overrideRoleName "nhs-main-acct-supplier-api-github-deploy"
+            --overrideRoleName "nhs-main-acct-supplier-api-github-deploy" \
+            --internalRef "feature/CCM-23511"
   populate-config:
     name: "Populate Supplier Config"
     runs-on: ubuntu-latest
