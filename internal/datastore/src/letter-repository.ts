@@ -3,12 +3,20 @@ import {
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
+  QueryCommand,
   UpdateCommand,
   UpdateCommandOutput,
 } from "@aws-sdk/lib-dynamodb";
 import { ConditionalCheckFailedException } from "@aws-sdk/client-dynamodb";
 import { Logger } from "pino";
-import { InsertLetter, Letter, LetterSchema, UpdateLetter } from "./types";
+import z from "zod";
+import {
+  InsertLetter,
+  Letter,
+  LetterSchema,
+  LetterStatusType,
+  UpdateLetter,
+} from "./types";
 import LetterNotFoundError from "./errors/letter-not-found-error";
 import LetterAlreadyExistsError from "./errors/letter-already-exists-error";
 
@@ -20,6 +28,8 @@ export type PagingOptions = Partial<{
 export type LetterRepositoryConfig = {
   lettersTableName: string;
   lettersTtlHours: number;
+  /** Maximum number of items to fetch per DynamoDB page. Defaults to 1000. */
+  queryPageSize?: number;
 };
 
 export class LetterRepository {
@@ -107,6 +117,67 @@ export class LetterRepository {
       throw new LetterNotFoundError(supplierId, letterId);
     }
     return LetterSchema.parse(result.Item);
+  }
+
+  /** Streams letters via the supplierStatus-index GSI, filtered by supplierStatusSk range and specificationId. */
+  async *queryLettersBySupplierStatus(
+    supplierId: string,
+    status: LetterStatusType,
+    startDate: string,
+    endDate: string,
+    specificationId: string,
+  ): AsyncGenerator<Letter> {
+    let lastEvaluatedKey: Record<string, unknown> | undefined;
+
+    do {
+      const result = await this.ddbClient.send(
+        new QueryCommand({
+          TableName: this.config.lettersTableName,
+          IndexName: "supplierStatus-index",
+          KeyConditionExpression:
+            "supplierStatus = :supplierStatus AND supplierStatusSk BETWEEN :startDate AND :endDate",
+          FilterExpression: "specificationId = :specificationId",
+          ExpressionAttributeValues: {
+            ":supplierStatus": `${supplierId}#${status}`,
+            ":startDate": startDate,
+            ":endDate": endDate,
+            ":specificationId": specificationId,
+          },
+          Limit: this.config.queryPageSize ?? 1000,
+          ExclusiveStartKey: lastEvaluatedKey,
+        }),
+      );
+
+      const page = z.array(LetterSchema).parse(result.Items ?? []);
+      yield* page;
+
+      lastEvaluatedKey = result.LastEvaluatedKey;
+    } while (lastEvaluatedKey !== undefined);
+  }
+
+  /** Updates only the updatedAt timestamp, without touching status, ttl or supplierStatus. */
+  async touchLetter(supplierId: string, letterId: string): Promise<void> {
+    try {
+      await this.ddbClient.send(
+        new UpdateCommand({
+          TableName: this.config.lettersTableName,
+          Key: {
+            id: letterId,
+            supplierId,
+          },
+          UpdateExpression: "SET updatedAt = :updatedAt",
+          ConditionExpression: "attribute_exists(id)",
+          ExpressionAttributeValues: {
+            ":updatedAt": new Date().toISOString(),
+          },
+        }),
+      );
+    } catch (error) {
+      if (error instanceof ConditionalCheckFailedException) {
+        throw new LetterNotFoundError(supplierId, letterId);
+      }
+      throw error;
+    }
   }
 
   async updateLetterStatus(

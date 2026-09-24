@@ -136,6 +136,7 @@
     "internal/*",
     "lambdas/*",
     "pact-contracts",
+    "scripts/maintenance/*",
     "scripts/utilities/*",
     "tests",
     "tests/contracts/*"
