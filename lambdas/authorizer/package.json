@@ -1,11 +1,11 @@
 {
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.1107.0",
-    "@aws-sdk/lib-dynamodb": "^3.1107.0",
+    "@aws-sdk/client-dynamodb": "^3.1137.0",
+    "@aws-sdk/lib-dynamodb": "^3.1137.0",
     "@internal/datastore": "*",
     "@internal/helpers": "*",
     "aws-embedded-metrics": "^4.2.1",
-    "aws-lambda": "^1.0.6",
+    "aws-lambda": "^1.0.7",
     "esbuild": "0.28.2",
     "pino": "^10.3.0",
     "zod": "^4.1.11"
