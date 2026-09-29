@@ -10,6 +10,18 @@ updates:
       prefix: "CCM-9336: "
     cooldown:
       default-days: 7
+    groups:
+      patch-and-minor:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      major:
+        patterns:
+          - "*"
+        update-types:
+          - "major"
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -19,6 +31,18 @@ updates:
       prefix: "CCM-9336: "
     cooldown:
       default-days: 7
+    groups:
+      patch-and-minor:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      major:
+        patterns:
+          - "*"
+        update-types:
+          - "major"
 
   - package-ecosystem: "npm"
     directory: "/"
@@ -28,6 +52,18 @@ updates:
       prefix: "CCM-9336: "
     cooldown:
       default-days: 7
+    groups:
+      patch-and-minor:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      major:
+        patterns:
+          - "*"
+        update-types:
+          - "major"
 
 
   - package-ecosystem: "pip"
@@ -38,6 +74,18 @@ updates:
       prefix: "CCM-9336: "
     cooldown:
       default-days: 7
+    groups:
+      patch-and-minor:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      major:
+        patterns:
+          - "*"
+        update-types:
+          - "major"
 
   - package-ecosystem: "terraform"
     directory: "/"
@@ -47,3 +95,15 @@ updates:
       prefix: "CCM-9336: "
     cooldown:
       default-days: 7
+    groups:
+      patch-and-minor:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      major:
+        patterns:
+          - "*"
+        update-types:
+          - "major"
