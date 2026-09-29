@@ -10,17 +10,17 @@ import { LetterRepository, LetterStatusType } from "@internal/datastore";
 
 // --- Hardcoded parameters for this one-off run: change these values directly rather than passing them as args ---
 const TABLE_NAME = "nhs-main-supapi-letters";
-const SUPPLIER_ID = "supplier-placeholder";
-const STATUS = "PENDING";
-const START_DATE = "2026-09-02";
-const END_DATE = "2026-09-05T23:59:59.999Z";
-const SPECIFICATION_ID = "specification-placeholder";
+const SUPPLIER_ID = "psl-integrityconnect";
+const STATUS = "REJECTED";
+const START_DATE = "2026-09-24T00:00:00.000Z";
+const END_DATE = "2026-09-24T23:59:59.999Z";
+const SPECIFICATION_ID = "digitrials-prostateprogress";
 const CONCURRENCY = 5;
 const LETTERS_TTL_HOURS = 12_960; // unused by touchLetter, required by LetterRepositoryConfig
 
 // Switches the per-letter action: bump updatedAt only, or transition to NEW_STATUS
-const ACTION: "TOUCH" | "UPDATE_STATUS" = "TOUCH";
-const NEW_STATUS: LetterStatusType = "FAILED";
+const ACTION: "TOUCH" | "UPDATE_STATUS" = "UPDATE_STATUS";
+const NEW_STATUS: LetterStatusType = "PENDING";
 const REASON_CODE: string | undefined = undefined;
 const REASON_TEXT: string | undefined = undefined;
 
