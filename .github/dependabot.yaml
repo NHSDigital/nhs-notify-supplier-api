@@ -68,7 +68,8 @@ updates:
         update-types:
           - "major"
   - package-ecosystem: "pip"
-    directory: "**/*"
+    directories:
+      - "**/*"
     schedule:
       interval: "daily"
     commit-message:
