@@ -3,7 +3,8 @@ version: 2
 updates:
 
   - package-ecosystem: "docker"
-    directory: "/"
+    directories:
+      - "**/*"
     schedule:
       interval: "daily"
     commit-message:
@@ -45,7 +46,9 @@ updates:
           - "major"
 
   - package-ecosystem: "npm"
-    directory: "/"
+    directories:
+      - "/"
+      - "/sandbox"
     schedule:
       interval: "daily"
     commit-message:
@@ -64,10 +67,9 @@ updates:
           - "*"
         update-types:
           - "major"
-
-
   - package-ecosystem: "pip"
-    directory: "/"
+    directories:
+      - "**/*"
     schedule:
       interval: "daily"
     commit-message:
@@ -88,7 +90,8 @@ updates:
           - "major"
 
   - package-ecosystem: "terraform"
-    directory: "/"
+    directories:
+      - "/infrastructure/terraform/**/*"
     schedule:
       interval: "daily"
     commit-message:
