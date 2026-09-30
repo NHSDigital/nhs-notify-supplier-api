@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@asyncapi/bundler": "^0.6.4",
+    "@asyncapi/bundler": "^1.0.2",
     "zod": "^4.1.11"
   },
   "description": "Schemas for NHS Notify Supplier API events",
