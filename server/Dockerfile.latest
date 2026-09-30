@@ -1,6 +1,6 @@
 # Gets from the latest pre release
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 RUN apt-get update && \
     apt-get install -y \
     jq \
@@ -20,7 +20,7 @@ RUN releases=$(curl https://api.github.com/repos/NHSDigital/nhs-notify-supplier-
     dotnet build --configuration Release && \
     ls -la bin/Release/net8.0
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
 
 WORKDIR /App
 COPY --from=build /src/nhsnotifysupplierserver/bin/Release/net8.0 .
