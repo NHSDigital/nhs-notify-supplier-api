@@ -11,6 +11,7 @@ import {
   ErrorResponse,
   buildApiError,
 } from "../contracts/errors";
+import LogRefs from "../config/log-references";
 
 function codeToTitle(code: ApiErrorCode): ApiErrorTitle {
   switch (code) {
@@ -72,7 +73,12 @@ export function logAndMapToApiError(
   logger: Logger,
 ): ApiError {
   if (error instanceof ValidationError) {
-    logger.info({ description: "Validation error", err: error, correlationId });
+    logger.info({
+      logRef: LogRefs.VALIDATION_ERROR.code,
+      description: LogRefs.VALIDATION_ERROR.description,
+      err: error,
+      correlationId,
+    });
     return mapToApiError(
       ApiErrorCode.InvalidRequest,
       error.detail,
@@ -80,12 +86,18 @@ export function logAndMapToApiError(
     );
   }
   if (error instanceof NotFoundError) {
-    logger.info({ description: "Not found error", err: error, correlationId });
+    logger.info({
+      logRef: LogRefs.NOT_FOUND_ERROR.code,
+      description: LogRefs.NOT_FOUND_ERROR.description,
+      err: error,
+      correlationId,
+    });
     return mapToApiError(ApiErrorCode.NotFound, error.detail, correlationId);
   }
   if (error instanceof Error) {
     logger.error({
-      description: "Internal server error",
+      logRef: LogRefs.INTERNAL_SERVER_ERROR.code,
+      description: LogRefs.INTERNAL_SERVER_ERROR.description,
       err: error,
       correlationId,
     });
@@ -96,7 +108,8 @@ export function logAndMapToApiError(
     );
   }
   logger.error({
-    description: "Internal server error  (non-Error thrown)",
+    logRef: LogRefs.INTERNAL_SERVER_ERROR_NON_ERROR.code,
+    description: LogRefs.INTERNAL_SERVER_ERROR_NON_ERROR.description,
     correlationId,
   });
   return mapToApiError(

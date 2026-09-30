@@ -13,6 +13,7 @@ import { processError } from "../mappers/error-mapper";
 import ValidationError from "../errors/validation-error";
 import { mapToGetLettersResponse } from "../mappers/letter-mapper";
 import type { Deps } from "../config/deps";
+import LogRefs from "../config/log-references";
 
 function validateLimitParamOnly(
   queryStringParameters: APIGatewayProxyEventQueryStringParameters | null,
@@ -23,7 +24,8 @@ function validateLimitParamOnly(
     Object.keys(queryStringParameters).some((key) => key !== "limit")
   ) {
     logger.info({
-      description: "Unexpected query parameter(s) present",
+      logRef: LogRefs.UNEXPECTED_QUERY_PARAMETERS.code,
+      description: LogRefs.UNEXPECTED_QUERY_PARAMETERS.description,
       queryStringParameters,
     });
     throw new ValidationError(ApiErrorDetail.InvalidRequestLimitOnly);
@@ -33,7 +35,8 @@ function validateLimitParamOnly(
 function assertIsNumber(limitNumber: number, logger: Logger) {
   if (Number.isNaN(limitNumber)) {
     logger.info({
-      description: "limit parameter is not a number",
+      logRef: LogRefs.LIMIT_NOT_NUMBER.code,
+      description: LogRefs.LIMIT_NOT_NUMBER.description,
       limitNumber,
     });
     throw new ValidationError(ApiErrorDetail.InvalidRequestLimitNotANumber);
@@ -47,7 +50,8 @@ function assertLimitInRange(
 ) {
   if (limitNumber <= 0 || limitNumber > maxLimit) {
     logger.info({
-      description: "Limit value is invalid",
+      logRef: LogRefs.LIMIT_INVALID.code,
+      description: LogRefs.LIMIT_INVALID.description,
       limitNumber,
     });
     throw new ValidationError(ApiErrorDetail.InvalidRequestLimitNotInRange, {
@@ -117,7 +121,8 @@ export default function createGetLettersHandler(
         const response = mapToGetLettersResponse(letters);
 
         deps.logger.info({
-          description: "Pending letters successfully fetched",
+          logRef: LogRefs.PENDING_LETTERS_FETCHED.code,
+          description: LogRefs.PENDING_LETTERS_FETCHED.description,
           supplierId,
           limitNumber,
           lettersCount: letters.length,

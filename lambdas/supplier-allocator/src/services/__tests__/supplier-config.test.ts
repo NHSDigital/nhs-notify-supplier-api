@@ -283,6 +283,7 @@ describe("supplier-config service", () => {
       await getSupplierDetails(supplierIds, deps);
 
       expect(deps.logger.warn).toHaveBeenCalledWith({
+        logRef: "015-MISMATCH",
         description:
           "Mismatch between supplier allocations and supplier details",
         allocationsCount: 3,
@@ -534,6 +535,7 @@ describe("supplier-config service", () => {
         "No eligible pack specifications found for letter variant id undefined and pack specification ids spec1",
       );
       expect(deps.logger.info).toHaveBeenCalledWith({
+        logRef: "003-FILTER-PACK",
         description:
           "Pack specification filtered out based on pageCount constraints",
         packSpecId: "spec1",
@@ -605,6 +607,7 @@ describe("supplier-config service", () => {
       );
 
       expect(deps.logger.info).toHaveBeenCalledWith({
+        logRef: "003-FILTER-PACK",
         description:
           "Pack specification filtered out based on pageCount constraints",
         packSpecId: "spec1",
@@ -646,6 +649,7 @@ describe("supplier-config service", () => {
       );
 
       expect(deps.logger.info).toHaveBeenCalledWith({
+        logRef: "003-FILTER-PACK",
         description:
           "Pack specification filtered out based on pageCount constraints",
         packSpecId: "spec1",

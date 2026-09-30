@@ -149,6 +149,7 @@ describe("createLetterStatusUpdateHandler", () => {
     );
 
     expect(mockedDeps.logger.error).toHaveBeenCalledWith({
+      logRef: "014-STATUS-ERROR",
       description: "Error processing letter status update",
       err: mockError,
       messageId: "mid-id2",

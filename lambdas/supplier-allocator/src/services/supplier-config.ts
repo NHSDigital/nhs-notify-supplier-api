@@ -8,6 +8,7 @@ import {
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-config";
 
 import { Deps } from "../config/deps";
+import LogRefs from "../config/log-references";
 import { PreparedEvents } from "../handler/types";
 import SupplierConfigValidationError from "../errors/supplier-config-validation-error";
 import RejectedError from "../errors/rejected-error";
@@ -42,7 +43,8 @@ export async function getVolumeGroupDetails(
   }
 
   deps.logger.error({
-    description: "Volume group is not active based on status and dates",
+    logRef: LogRefs.INACTIVE_VOLUME_GROUP.code,
+    description: LogRefs.INACTIVE_VOLUME_GROUP.description,
     groupId,
     status: groupDetails.status,
     startDate: groupDetails.startDate,
@@ -67,8 +69,8 @@ export async function getSupplierAllocationsForVolumeGroup(
     );
     if (filteredAllocations.length === 0) {
       deps.logger.error({
-        description:
-          "No supplier allocations found for variantsupplier id in volume group",
+        logRef: LogRefs.NO_SUPPLIER_ALLOCATIONS.code,
+        description: LogRefs.NO_SUPPLIER_ALLOCATIONS.description,
         groupId,
         supplierId,
       });
@@ -91,7 +93,8 @@ export async function getSupplierDetails(
 
   if (Object.keys(supplierDetails).length === 0) {
     deps.logger.error({
-      description: "No supplier details found for supplier allocations",
+      logRef: LogRefs.NO_SUPPLIER_DETAILS.code,
+      description: LogRefs.NO_SUPPLIER_DETAILS.description,
       supplierIds,
     });
     throw new SupplierConfigValidationError(
@@ -105,7 +108,8 @@ export async function getSupplierDetails(
       (id) => !foundSupplierIds.has(id),
     );
     deps.logger.warn({
-      description: "Mismatch between supplier allocations and supplier details",
+      logRef: LogRefs.SUPPLIER_DETAILS_MISMATCH.code,
+      description: LogRefs.SUPPLIER_DETAILS_MISMATCH.description,
       allocationsCount: supplierIds.length,
       detailsCount: supplierDetails.length,
       missingSuppliers: missingSupplierIds,
@@ -114,7 +118,8 @@ export async function getSupplierDetails(
   const activeSuppliers = supplierDetails.filter((s) => s.status === "PROD");
   if (activeSuppliers.length === 0) {
     deps.logger.error({
-      description: "No active suppliers found for supplier allocations",
+      logRef: LogRefs.NO_ACTIVE_SUPPLIERS.code,
+      description: LogRefs.NO_ACTIVE_SUPPLIERS.description,
       supplierIds,
     });
     throw new SupplierConfigValidationError(
@@ -144,8 +149,8 @@ export async function getPreferredSupplierPacks(
     }
   }
   deps.logger.error({
-    description:
-      "No preferred supplier packs found for pack specification ids and suppliers",
+    logRef: LogRefs.NO_PREFERRED_SUPPLIER_PACKS.code,
+    description: LogRefs.NO_PREFERRED_SUPPLIER_PACKS.description,
     packSpecificationIds,
     supplierIds: suppliers.map((s) => s.id),
   });
@@ -162,7 +167,8 @@ export async function getPackSpecification(
     await deps.supplierConfigRepo.getPackSpecification(packSpecId);
   if (packSpec.status !== "PROD") {
     deps.logger.error({
-      description: "Pack specification is not active based on status",
+      logRef: LogRefs.INACTIVE_PACK_SPECIFICATION.code,
+      description: LogRefs.INACTIVE_PACK_SPECIFICATION.description,
       packSpecId,
       status: packSpec.status,
     });
@@ -306,6 +312,7 @@ export async function filterPacksForLetter(
 
       if (violatedConstraints.length > 0) {
         deps.logger.info({
+          logRef: LogRefs.FILTERED_PACK_SPECIFICATION.code,
           description: `Pack specification filtered out based on pageCount constraints`,
           domainId: letterEvent.data.domainId,
           packSpecId,
@@ -324,7 +331,8 @@ export async function filterPacksForLetter(
 
   if (filteredPackIds.length === 0) {
     deps.logger.error({
-      description: "No eligible pack specifications found for letter",
+      logRef: LogRefs.NO_ELIGIBLE_PACK_SPECIFICATIONS.code,
+      description: LogRefs.NO_ELIGIBLE_PACK_SPECIFICATIONS.description,
       letterVariantId: letterEvent.data.letterVariantId,
       packSpecificationIds,
     });

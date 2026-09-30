@@ -23,6 +23,7 @@ import {
 } from "@internal/helpers";
 import { Logger } from "pino";
 import { Deps } from "../config/deps";
+import LogRefs from "../config/log-references";
 import {
   AllocationDetails,
   PreparedEvents,
@@ -52,7 +53,8 @@ function getOperationFromType(type: string): UpsertOperation {
           await deps.letterRepo.putLetter(letterToInsert);
 
           deps.logger.info({
-            description: "Inserted letter",
+            logRef: LogRefs.INSERTED_LETTER.code,
+            description: LogRefs.INSERTED_LETTER.description,
             eventId: preparedRequest.id,
             letterId: letterToInsert.id,
             supplierId: letterToInsert.supplierId,
@@ -76,7 +78,8 @@ function getOperationFromType(type: string): UpsertOperation {
           );
           if (error instanceof LetterAlreadyExistsError) {
             deps.logger.warn({
-              description: "Letter already exists",
+              logRef: LogRefs.LETTER_ALREADY_EXISTS.code,
+              description: LogRefs.LETTER_ALREADY_EXISTS.description,
               supplierId: letterToInsert.supplierId,
               letterId: letterToInsert.id,
             });
@@ -97,7 +100,8 @@ function getOperationFromType(type: string): UpsertOperation {
       await deps.letterRepo.updateLetterStatus(letterToUpdate);
 
       deps.logger.info({
-        description: "Updated letter",
+        logRef: LogRefs.UPDATED_LETTER.code,
+        description: LogRefs.UPDATED_LETTER.description,
         eventId: supplierEvent.id,
         letterId: letterToUpdate.id,
         supplierId: letterToUpdate.supplierId,
@@ -191,7 +195,10 @@ async function emitIndividualMetric(
     value: 1,
     unit: Unit.Count,
   };
-  logger.info(buildEMFObject(namespace, dimensions, metric));
+  logger.info({
+    ...buildEMFObject(namespace, dimensions, metric),
+    logRef: LogRefs.INDIVIDUAL_METRIC.code,
+  });
 }
 
 function getSupplierIdFromEvent(letterEvent: any): string {
@@ -226,7 +233,8 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
     const tasks = event.Records.map(async (record) => {
       try {
         deps.logger.info({
-          description: "Processing record",
+          logRef: LogRefs.PROCESSING_RECORD.code,
+          description: LogRefs.PROCESSING_RECORD.description,
           messageId: record.messageId,
           message: record.body,
         });
@@ -246,7 +254,8 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
         }
 
         deps.logger.info({
-          description: "Extracted letter event",
+          logRef: LogRefs.EXTRACTED_LETTER_EVENT.code,
+          description: LogRefs.EXTRACTED_LETTER_EVENT.description,
           messageId: record.messageId,
           type: letterEvent.type,
           supplier: allocationDetails?.supplierSpec,
@@ -256,7 +265,8 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
         await processRecordIdempotently(letterEvent, allocationDetails, deps);
       } catch (error) {
         deps.logger.error({
-          description: "Error processing upsert of record",
+          logRef: LogRefs.ERROR_PROCESSING_UPSERT.code,
+          description: LogRefs.ERROR_PROCESSING_UPSERT.description,
           err: error,
           messageId: record.messageId,
           message: record.body,

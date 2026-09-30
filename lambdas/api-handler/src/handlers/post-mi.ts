@@ -11,6 +11,7 @@ import { extractCommonIds } from "../utils/common-ids";
 import { PostMIRequest, PostMIRequestSchema } from "../contracts/mi";
 import { mapToMI } from "../mappers/mi-mapper";
 import { Deps } from "../config/deps";
+import LogRefs from "../config/log-references";
 
 export default function createPostMIHandler(
   deps: Deps,
@@ -59,7 +60,8 @@ export default function createPostMIHandler(
       );
 
       deps.logger.info({
-        description: "Posted management information",
+        logRef: LogRefs.MI_POSTED.code,
+        description: LogRefs.MI_POSTED.description,
         supplierId: commonIds.value.supplierId,
         correlationId: commonIds.value.correlationId,
       });
@@ -72,14 +74,14 @@ export default function createPostMIHandler(
         unit: Unit.Count,
       };
       let emf = buildEMFObject("postMi", dimensions, metric);
-      deps.logger.info(emf);
+      deps.logger.info({ ...emf, logRef: LogRefs.METRIC.code });
 
       // metric displaying the type/number of lineItems posted per supplier
       dimensions.lineItem = postMIRequest.data.attributes.lineItem;
       metric.key = "LineItem per supplier";
       metric.value = postMIRequest.data.attributes.quantity;
       emf = buildEMFObject("postMi", dimensions, metric);
-      deps.logger.info(emf);
+      deps.logger.info({ ...emf, logRef: LogRefs.METRIC.code });
 
       return {
         statusCode: 201,
@@ -100,5 +102,5 @@ function emitErrorMetric(supplierId: string, logger: pino.Logger) {
     unit: Unit.Count,
   };
   const emf = buildEMFObject("postMi", dimensions, metric);
-  logger.info(emf);
+  logger.info({ ...emf, logRef: LogRefs.ERR_METRIC.code });
 }
