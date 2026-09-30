@@ -4,12 +4,7 @@ updates:
 
   - package-ecosystem: "docker"
     directories:
-      - "/sandbox"
-      - "/scripts/devcontainer"
-      - "/src/jekyll-devcontainer/src/.devcontainer"
-      - "/scripts/docker/tests"
-      - "/server"
-      - "/src/server"
+      - "**/*"
     schedule:
       interval: "daily"
     commit-message:
@@ -73,7 +68,7 @@ updates:
         update-types:
           - "major"
   - package-ecosystem: "pip"
-    directory: "/tests/e2e-tests"
+    directory: "**/*"
     schedule:
       interval: "daily"
     commit-message:
