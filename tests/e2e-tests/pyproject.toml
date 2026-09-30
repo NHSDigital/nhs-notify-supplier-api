@@ -13,7 +13,7 @@ pytest-rerunfailures = "16.1"
 pytest-xdist = ">=3.6.1"
 notifications-python-client = ">=10.0.1"
 polling = ">=0.3.2"
-urllib3 = ">=2.6.3,<3"
+urllib3 = ">=2.8,<3"
 
 [build-system]
 requires = [
