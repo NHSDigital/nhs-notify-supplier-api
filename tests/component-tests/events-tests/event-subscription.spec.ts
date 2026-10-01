@@ -97,6 +97,7 @@ test.describe("Event Subscription SNS Tests", () => {
     );
     expect(getLetterResponse.status()).toBe(404);
   });
+  // eslint-disable-next-line sonarjs/assertions-in-tests
   test("Verify that an error is logged for duplicates sent on the sqs queue", async () => {
     const domainId = randomUUID();
     logger.info(`Testing event subscription with domainId: ${domainId}`);
