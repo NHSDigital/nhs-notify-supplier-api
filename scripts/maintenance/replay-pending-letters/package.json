@@ -1,0 +1,20 @@
+{
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1107.0",
+    "@aws-sdk/lib-dynamodb": "^3.1107.0",
+    "esbuild": "0.28.2",
+    "pino": "^10.3.0",
+    "yargs": "^17.7.2"
+  },
+  "name": "nhs-notify-supplier-api-suppliers-replay-pending-letters",
+  "private": true,
+  "scripts": {
+    "replay-pending-letters": "tsx ./src/index.ts",
+    "current-status": "tsx ./src/get-current-status.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test:unit": "echo none",
+    "typecheck": "tsc --noEmit"
+  },
+  "version": "0.0.1"
+}

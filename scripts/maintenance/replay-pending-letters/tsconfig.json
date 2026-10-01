@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {},
+  "extends": "../../../tsconfig.base.json",
+  "include": [
+    "src/**/*",
+    "infra/**/*",
+    "jest.config.ts"
+  ]
+}
