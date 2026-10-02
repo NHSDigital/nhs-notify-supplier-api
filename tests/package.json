@@ -1,23 +1,23 @@
 {
   "author": "",
   "dependencies": {
-    "@aws-sdk/client-api-gateway": "^3.1107.0",
-    "@aws-sdk/client-dynamodb": "^3.1107.0",
-    "@aws-sdk/client-kinesis": "^3.1107.0",
-    "@aws-sdk/client-lambda": "^3.1107.0",
-    "@aws-sdk/client-sns": "^3.1107.0",
-    "@aws-sdk/client-sqs": "^3.1107.0",
-    "@aws-sdk/lib-dynamodb": "^3.1107.0",
+    "@aws-sdk/client-api-gateway": "^3.1138.0",
+    "@aws-sdk/client-dynamodb": "^3.1138.0",
+    "@aws-sdk/client-kinesis": "^3.1138.0",
+    "@aws-sdk/client-lambda": "^3.1138.0",
+    "@aws-sdk/client-sns": "^3.1138.0",
+    "@aws-sdk/client-sqs": "^3.1138.0",
+    "@aws-sdk/lib-dynamodb": "^3.1138.0",
     "@nhsdigital/nhs-notify-event-schemas-letter-rendering": "^2.0.2",
-    "@nhsdigital/notify-digital-letters-consumer-contracts": "^1.0.1",
+    "@nhsdigital/notify-digital-letters-consumer-contracts": "^1.0.3",
     "@pact-foundation/pact": "^17.1.4",
     "@pact-foundation/pact-core": "^20.2.0",
-    "@playwright/test": "^1.62.1",
+    "@playwright/test": "^1.63.0",
     "allure-js-commons": "^3.3.3",
     "dotenv": "^18.0.3",
     "express": "^4.22.2",
     "graphql": "^17.0.2",
-    "graphql-tag": "^2.12.6",
+    "graphql-tag": "^2.12.7",
     "md5": "^2.3.0",
     "nhs-notify-supplier-api-allocate-letter": "^0.0.1",
     "nhs-notify-supplier-api-upsert-letter": "^0.0.1",
@@ -33,7 +33,7 @@
   },
   "description": "",
   "devDependencies": {
-    "@aws-sdk/client-cloudwatch-logs": "^3.1107.0",
+    "@aws-sdk/client-cloudwatch-logs": "^3.1138.0",
     "@babel/core": "^8.0.6",
     "@babel/preset-env": "^8.0.6",
     "babel-jest": "^30.4.1"
@@ -43,7 +43,7 @@
   "main": "index.js",
   "name": "nhs-notify-supplier-api-tests",
   "overrides": {
-    "@playwright/test": "1.62.1",
+    "@playwright/test": "1.63.0",
     "playwright-core": "1.62.1"
   },
   "scripts": {
