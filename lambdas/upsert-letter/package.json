@@ -1,8 +1,8 @@
 {
   "dependencies": {
-    "@aws-lambda-powertools/idempotency": "^2.33.0",
-    "@aws-sdk/client-dynamodb": "^3.1107.0",
-    "@aws-sdk/lib-dynamodb": "^3.1107.0",
+    "@aws-lambda-powertools/idempotency": "^2.35.0",
+    "@aws-sdk/client-dynamodb": "^3.1138.0",
+    "@aws-sdk/lib-dynamodb": "^3.1138.0",
     "@internal/datastore": "*",
     "@internal/helpers": "*",
     "@nhsdigital/nhs-notify-event-schemas-letter-rendering": "2.0.2",
@@ -10,9 +10,9 @@
     "@nhsdigital/nhs-notify-event-schemas-supplier-api": "^1.0.8",
     "@types/aws-lambda": "^8.10.148",
     "aws-embedded-metrics": "^4.2.1",
-    "aws-lambda": "^1.0.6",
+    "aws-lambda": "^1.0.7",
     "esbuild": "0.28.2",
-    "pino": "^10.3.0",
+    "pino": "^10.3.1",
     "zod": "^4.1.11"
   },
   "name": "nhs-notify-supplier-api-upsert-letter",

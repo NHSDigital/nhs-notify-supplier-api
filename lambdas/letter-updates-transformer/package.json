@@ -1,15 +1,15 @@
 {
   "dependencies": {
-    "@aws-sdk/client-sns": "^3.1107.0",
+    "@aws-sdk/client-sns": "^3.1138.0",
     "@aws-sdk/util-dynamodb": "^3.996.0",
     "@internal/datastore": "^0.1.0",
     "@internal/event-builders": "*",
     "@internal/helpers": "^0.1.0",
     "@nhsdigital/nhs-notify-event-schemas-supplier-api": "*",
     "aws-embedded-metrics": "^4.2.1",
-    "aws-lambda": "^1.0.6",
+    "aws-lambda": "^1.0.7",
     "esbuild": "0.28.2",
-    "pino": "^10.3.0",
+    "pino": "^10.3.1",
     "zod": "^4.1.11"
   },
   "name": "nhs-notify-supplier-api-letter-updates-transformer",
