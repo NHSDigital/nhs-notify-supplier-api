@@ -1,9 +1,9 @@
 {
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.1107.0",
-    "@aws-sdk/lib-dynamodb": "^3.1107.0",
+    "@aws-sdk/client-dynamodb": "^3.1138.0",
+    "@aws-sdk/lib-dynamodb": "^3.1138.0",
     "@internal/helpers": "*",
-    "@nhsdigital/nhs-notify-event-schemas-supplier-config": "^1.1.0",
+    "@nhsdigital/nhs-notify-event-schemas-supplier-config": "^1.1.1",
     "pino": "^10.3.1",
     "zod": "^4.1.11",
     "zod-mermaid": "^1.0.9"
@@ -16,7 +16,7 @@
     "diagrams": "tsx src/cli/diagrams.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test:unit": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest",
+    "test:unit": "jest",
     "typecheck": "tsc --noEmit"
   },
   "version": "0.1.0"
