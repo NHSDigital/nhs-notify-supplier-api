@@ -871,6 +871,7 @@ describe("selectSupplierByFactor", () => {
     } as unknown as jest.Mocked<Deps>;
   });
 
+  // eslint-disable-next-line sonarjs/parameterized-tests
   it("should return supplier with lowest factor", async () => {
     const mockSupplierFactors = [
       { supplierId: "supplier-1", factor: 0.5 },

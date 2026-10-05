@@ -201,83 +201,41 @@ describe("API Lambda handler", () => {
     expect(result).toEqual(expectedErrorResponse);
   });
 
-  it("returns error if the limit parameter is negative", async () => {
-    const event = makeApiGwEvent({
-      path: "/letters",
-      queryStringParameters: { limit: "-1" },
-      headers: {
-        "nhsd-supplier-id": "supplier1",
-        "nhsd-correlation-id": "correlationId",
-        "x-request-id": "requestId",
-      },
-    });
-    const context = mockDeep<Context>();
-    const callback = jest.fn();
+  it.each([
+    ["negative", "-1"],
+    ["zero", "0"],
+    ["higher than max limit", "2501"],
+  ])(
+    "returns error if the limit parameter is $description",
+    async (_, limit: string) => {
+      const event = makeApiGwEvent({
+        path: "/letters",
+        queryStringParameters: { limit },
+        headers: {
+          "nhsd-supplier-id": "supplier1",
+          "nhsd-correlation-id": "correlationId",
+          "x-request-id": "requestId",
+        },
+      });
+      const context = mockDeep<Context>();
+      const callback = jest.fn();
 
-    const getLettersHandler = createGetLettersHandler(mockedDeps);
-    const result = await getLettersHandler(event, context, callback);
+      const getLettersHandler = createGetLettersHandler(mockedDeps);
+      const result = await getLettersHandler(event, context, callback);
 
-    expect(mockedProcessError).toHaveBeenCalledWith(
-      new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange, {
-        args: [mockedDeps.env.MAX_LIMIT],
-      }),
-      "correlationId",
-      mockedDeps.logger,
-    );
-    expect(result).toEqual(expectedErrorResponse);
-  });
-
-  it("returns error if the limit parameter is zero", async () => {
-    const event = makeApiGwEvent({
-      path: "/letters",
-      queryStringParameters: { limit: "0" },
-      headers: {
-        "nhsd-supplier-id": "supplier1",
-        "nhsd-correlation-id": "correlationId",
-        "x-request-id": "requestId",
-      },
-    });
-    const context = mockDeep<Context>();
-    const callback = jest.fn();
-
-    const getLettersHandler = createGetLettersHandler(mockedDeps);
-    const result = await getLettersHandler(event, context, callback);
-
-    expect(mockedProcessError).toHaveBeenCalledWith(
-      new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange, {
-        args: [mockedDeps.env.MAX_LIMIT],
-      }),
-      "correlationId",
-      mockedDeps.logger,
-    );
-    expect(result).toEqual(expectedErrorResponse);
-  });
-
-  it("returns error if the limit parameter is higher than max limit", async () => {
-    const event = makeApiGwEvent({
-      path: "/letters",
-      queryStringParameters: { limit: "2501" },
-      headers: {
-        "nhsd-supplier-id": "supplier1",
-        "nhsd-correlation-id": "correlationId",
-        "x-request-id": "requestId",
-      },
-    });
-    const context = mockDeep<Context>();
-    const callback = jest.fn();
-
-    const getLettersHandler = createGetLettersHandler(mockedDeps);
-    const result = await getLettersHandler(event, context, callback);
-
-    expect(mockedProcessError).toHaveBeenCalledWith(
-      new ValidationError(errors.ApiErrorDetail.InvalidRequestLimitNotInRange, {
-        args: [mockedDeps.env.MAX_LIMIT],
-      }),
-      "correlationId",
-      mockedDeps.logger,
-    );
-    expect(result).toEqual(expectedErrorResponse);
-  });
+      expect(mockedProcessError).toHaveBeenCalledWith(
+        new ValidationError(
+          errors.ApiErrorDetail.InvalidRequestLimitNotInRange,
+          {
+            args: [mockedDeps.env.MAX_LIMIT],
+          },
+        ),
+        "correlationId",
+        mockedDeps.logger,
+      );
+      expect(result).toEqual(expectedErrorResponse);
+    },
+  );
 
   it("returns error if unknown parameters are present", async () => {
     const event = makeApiGwEvent({

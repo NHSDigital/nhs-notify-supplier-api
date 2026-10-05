@@ -42,137 +42,47 @@ describe("EventEnvelope schema validation", () => {
   });
 
   describe("superRefine: severity text and number validation", () => {
-    it("should accept TRACE with severitynumber 0", () => {
-      const envelope = {
-        ...baseValidEnvelope,
-        severitytext: "TRACE",
-        severitynumber: 0,
-      };
+    it.each([
+      ["TRACE", 0],
+      ["DEBUG", 1],
+      ["INFO", 2],
+      ["WARN", 3],
+      ["ERROR", 4],
+      ["FATAL", 5],
+    ])(
+      "should accept consistent severitytext and severity number",
+      (severitytext: string, severitynumber: number) => {
+        const envelope = {
+          ...baseValidEnvelope,
+          severitytext,
+          severitynumber,
+        };
 
-      const result = $Envelope.safeParse(envelope);
-      expect(result.success).toBe(true);
-    });
+        const result = $Envelope.safeParse(envelope);
+        expect(result.success).toBe(true);
+      },
+    );
 
-    it("should accept DEBUG with severitynumber 1", () => {
-      const envelope = {
-        ...baseValidEnvelope,
-        severitytext: "DEBUG",
-        severitynumber: 1,
-      };
+    it.each([
+      ["TRACE", 1],
+      ["DEBUG", 2],
+      ["INFO", 1],
+      ["WARN", 2],
+      ["ERROR", 3],
+      ["FATAL", 4],
+    ])(
+      "should reject inconsistent severitytext and severity number",
+      (severitytext: string, severitynumber: number) => {
+        const envelope = {
+          ...baseValidEnvelope,
+          severitytext,
+          severitynumber,
+        };
 
-      const result = $Envelope.safeParse(envelope);
-      expect(result.success).toBe(true);
-    });
-
-    it("should accept INFO with severitynumber 2", () => {
-      const envelope = {
-        ...baseValidEnvelope,
-        severitytext: "INFO",
-        severitynumber: 2,
-      };
-
-      const result = $Envelope.safeParse(envelope);
-      expect(result.success).toBe(true);
-    });
-
-    it("should accept WARN with severitynumber 3", () => {
-      const envelope = {
-        ...baseValidEnvelope,
-        severitytext: "WARN",
-        severitynumber: 3,
-      };
-
-      const result = $Envelope.safeParse(envelope);
-      expect(result.success).toBe(true);
-    });
-
-    it("should accept ERROR with severitynumber 4", () => {
-      const envelope = {
-        ...baseValidEnvelope,
-        severitytext: "ERROR",
-        severitynumber: 4,
-      };
-
-      const result = $Envelope.safeParse(envelope);
-      expect(result.success).toBe(true);
-    });
-
-    it("should accept FATAL with severitynumber 5", () => {
-      const envelope = {
-        ...baseValidEnvelope,
-        severitytext: "FATAL",
-        severitynumber: 5,
-      };
-
-      const result = $Envelope.safeParse(envelope);
-      expect(result.success).toBe(true);
-    });
-
-    it("should reject TRACE with incorrect severitynumber", () => {
-      const envelope = {
-        ...baseValidEnvelope,
-        severitytext: "TRACE",
-        severitynumber: 1,
-      };
-
-      const result = $Envelope.safeParse(envelope);
-      expect(result.success).toBe(false);
-    });
-
-    it("should reject DEBUG with incorrect severitynumber", () => {
-      const envelope = {
-        ...baseValidEnvelope,
-        severitytext: "DEBUG",
-        severitynumber: 2,
-      };
-
-      const result = $Envelope.safeParse(envelope);
-      expect(result.success).toBe(false);
-    });
-
-    it("should reject INFO with incorrect severitynumber", () => {
-      const envelope = {
-        ...baseValidEnvelope,
-        severitytext: "INFO",
-        severitynumber: 1,
-      };
-
-      const result = $Envelope.safeParse(envelope);
-      expect(result.success).toBe(false);
-    });
-
-    it("should reject WARN with incorrect severitynumber", () => {
-      const envelope = {
-        ...baseValidEnvelope,
-        severitytext: "WARN",
-        severitynumber: 2,
-      };
-
-      const result = $Envelope.safeParse(envelope);
-      expect(result.success).toBe(false);
-    });
-
-    it("should reject ERROR with incorrect severitynumber", () => {
-      const envelope = {
-        ...baseValidEnvelope,
-        severitytext: "ERROR",
-        severitynumber: 3,
-      };
-
-      const result = $Envelope.safeParse(envelope);
-      expect(result.success).toBe(false);
-    });
-
-    it("should reject FATAL with incorrect severitynumber", () => {
-      const envelope = {
-        ...baseValidEnvelope,
-        severitytext: "FATAL",
-        severitynumber: 4,
-      };
-
-      const result = $Envelope.safeParse(envelope);
-      expect(result.success).toBe(false);
-    });
+        const result = $Envelope.safeParse(envelope);
+        expect(result.success).toBe(false);
+      },
+    );
 
     it("should reject severitynumber without severitytext", () => {
       const envelope = {
@@ -258,6 +168,7 @@ describe("EventEnvelope schema validation", () => {
       severitytext: "INFO" as const,
     };
 
+    // eslint-disable-next-line sonarjs/parameterized-tests
     it("should accept subject with valid prefix when prefix is required", () => {
       const envelope = {
         ...baseLetterEnvelope,
