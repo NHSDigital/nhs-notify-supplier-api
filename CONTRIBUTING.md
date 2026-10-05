@@ -1,57 +1,31 @@
-<!-- vale off -->
+# Contributing
 
-# Contributing to NHS Notify Supplier API
+This repository provides a reusable starting point for NHS Notify projects.
+Contributions that improve its clarity, quality, and maintainability are welcome.
 
-## Feature Branches
+## Before Opening A Pull Request
 
-All changes to the repo must be created on a feature branch and submitted for peer review as a Pull Request (PR) via GitHub.
+- Keep changes focused and explain the reason for them.
+- Do not commit secrets, credentials, tokens, or personal information.
+- Update relevant configuration and documentation when behaviour changes.
+- Add or update tests where applicable.
+- Check that generated files remain consistent with their source files.
 
-Feature branch names should follow the format below:
+## Validation
 
-```text
-feature/${jira-ticket-number}_${precis-of-branch-purpose}
+Run the checks relevant to your change from the repository root. The standard Make targets include:
+
+```bash
+make config
+make test
 ```
 
-e.g.
+For workflow, YAML, Make, and configuration changes, also validate the edited files and run `git diff --check`.
 
-```text
-feature/CCM-11207_documentation
-```
+## Pull Requests
 
-## Main Branch
-
-You are not permitted to push directly to the remote `main` branch in GitHub.
-
-Changes to `main` when require approval(s) recorded on your PR.
-Required approvers are controlled by the CODEOWNERS file but in summary:
-
-- Infrastructure changes should be reviewed by DevOps team members
-- Workflow/action changes should be reviewed by Maintainers of the repo
-- All other changes should be review by NHS API Development team members
-
-Merges should only take place:
-
-- They are intended for the next release cycle
-- All CI workflows have completed successfully
-
-## Coding Standards
-
-Your PR must follow all agreed coding standards for the project. Terraform and CI/CD standards are listed in sections below.
-
-### GitHooks
-
-GitHooks are available within this repo to help maintain standards and protect against e.g. secrets disclosure
-
-GitHooks **must** be configured and run on commits before pushing to remote. Refer to the developer documentation for more information if required.
-
-## Testing Your Branch
-
-You can test your branch in a dynamic environment prior to merging to `main`. These are created as part of the `cicd-1-pull-request.yaml` workflow, triggered when a PR is created or updated.
-
-## Function Documentation
-
-Each Lambda and internal package has a `README.md` alongside the source describing its purpose, flow, integration points, and peculiarities. These are bundled into the docs site via `docs/generate-includes.sh`.
-
-When making changes to a Lambda or internal package, check whether the corresponding README needs updating. Function documentation is not auto-generated and can become stale if not maintained alongside code changes.
-
-<!-- vale on -->
+- Use a clear, concise title that includes the relevant work item where one exists.
+- Describe what changed and why.
+- Include the validation commands you ran and their results.
+- Call out known limitations, follow-up work, or deployment considerations.
+- Ensure required reviews and CI checks have passed before merging.
