@@ -8,6 +8,7 @@ import { processError } from "../mappers/error-mapper";
 import ValidationError from "../errors/validation-error";
 import { getLetterDataUrl } from "../services/letter-operations";
 import type { Deps } from "../config/deps";
+import LogRefs from "../config/log-references";
 
 export default function createGetLetterDataHandler(
   deps: Deps,
@@ -40,7 +41,8 @@ export default function createGetLetterDataHandler(
         const presignedUrl = await getLetterDataUrl(supplierId, letterId, deps);
 
         deps.logger.info({
-          description: "Generated presigned URL",
+          logRef: LogRefs.PRESIGNED_URL_GENERATED.code,
+          description: LogRefs.PRESIGNED_URL_GENERATED.description,
           supplierId,
           letterId,
           correlationId: commonIds.value.correlationId,

@@ -14,7 +14,10 @@ function createSNSClient(): SNSClient {
 }
 
 export function createDependenciesContainer(): Deps {
-  const log = createLogger({ logLevel: envVars.PINO_LOG_LEVEL });
+  const log = createLogger({
+    logLevel: envVars.PINO_LOG_LEVEL,
+    logReference: envVars.LOG_REFERENCE,
+  });
 
   return {
     snsClient: createSNSClient(),

@@ -202,6 +202,7 @@ describe("letter-updates-transformer Lambda", () => {
 
       expect(mockedDeps.logger.error).toHaveBeenCalledWith(
         expect.objectContaining({
+          logRef: "007-ERROR-EXTRACTING-PAYLOAD",
           description: "Error extracting payload",
           err: expect.any(Error),
           record: expect.objectContaining({
