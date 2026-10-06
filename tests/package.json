@@ -29,7 +29,7 @@
     "ramda": "^0.32.0",
     "randexp": "^0.5.3",
     "undici-types": "^8.11.0",
-    "zod": "^4.1.11"
+    "zod": "^4.6.5"
   },
   "description": "",
   "devDependencies": {
