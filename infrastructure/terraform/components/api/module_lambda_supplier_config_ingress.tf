@@ -1,5 +1,5 @@
 module "supplier_config_ingress" {
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip"
 
   function_name = "supplier-config-ingress"
   description   = "Persist supplier config changes"
@@ -32,6 +32,7 @@ module "supplier_config_ingress" {
   enable_lambda_insights   = false
 
   log_destination_arn       = local.destination_arn
+  odin_log_destination_arn  = local.odin_destination_arn
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {})

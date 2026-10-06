@@ -19,3 +19,11 @@ resource "aws_cloudwatch_log_subscription_filter" "api_gateway" {
   filter_pattern  = ""
   destination_arn = local.csoc_api_gw_log_destination_arn
 }
+
+resource "aws_cloudwatch_log_subscription_filter" "api_gateway_odin" {
+  name            = "${replace(aws_cloudwatch_log_group.api_gateway_access.name, "/", "-")}-odin"
+  role_arn        = local.acct.log_subscription_role_arn
+  log_group_name  = aws_cloudwatch_log_group.api_gateway_access.name
+  filter_pattern  = ""
+  destination_arn = local.odin_destination_arn
+}
