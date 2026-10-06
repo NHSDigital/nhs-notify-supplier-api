@@ -57,7 +57,7 @@ export type QueueMessage = z.infer<typeof QueueMessageSchema>;
 
 export type UpsertOperation = {
   name: "Insert" | "Update";
-  schemas: z.ZodSchema[];
+  schemas: z.ZodType[];
   handler: (
     request: unknown,
     allocationDetails: AllocationDetails,

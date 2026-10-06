@@ -23,14 +23,14 @@ import { z } from "zod";
  */
 // Overload for when a specific ID field is provided
 export function idRef<
-  T extends z.ZodObject<Record<string, z.ZodTypeAny>>,
+  T extends z.ZodObject<Record<string, z.ZodType>>,
   K extends keyof T["shape"] & string,
 >(schema: T, idFieldName: K, entityName?: string): T["shape"][K];
 
 // Overload for when using the default "domainId" field
 export function idRef<
-  T extends z.ZodObject<Record<string, z.ZodTypeAny>> & {
-    shape: { domainId: z.ZodTypeAny };
+  T extends z.ZodObject<Record<string, z.ZodType>> & {
+    shape: { domainId: z.ZodType };
   },
 >(
   schema: T,
@@ -40,7 +40,7 @@ export function idRef<
 
 // Implementation
 export function idRef<
-  T extends z.ZodObject<Record<string, z.ZodTypeAny>>,
+  T extends z.ZodObject<Record<string, z.ZodType>>,
   K extends keyof T["shape"] & string = "domainId",
 >(schema: T, idFieldName?: K, entityName?: string): T["shape"][K] {
   const { shape } = schema;
