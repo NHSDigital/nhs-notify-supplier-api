@@ -1,6 +1,6 @@
 # Multi-stage Dockerfile for .NET 8 Web API
 # Build stage
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 # Copy solution and restore as distinct layers
@@ -16,7 +16,7 @@ COPY . .
 RUN ./build.sh
 
 # Runtime stage
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 COPY --from=build src/host/bin/Release/net8.0/publish .
 
