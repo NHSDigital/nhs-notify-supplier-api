@@ -291,3 +291,8 @@ variable "csoc_destination_account" {
   description = "value of the CSOC destination account, if applicable. If null, CSOC destination account will not be added as a resource in the logging policy"
   default     = "000000000000"
 }
+
+variable "event_source_filter" {
+  type        = list(string)
+  description = "SNS subscription source filter values"
+}
