@@ -48,7 +48,7 @@ jobs:
 
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: "Get the artefacts 1"
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
@@ -131,7 +131,7 @@ jobs:
 
       - name: "Create release and upload assets"
         id: create_release
-        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           tag_name: ${{ inputs.version }}
           name: ${{ inputs.version }}
@@ -190,7 +190,7 @@ jobs:
         shell: bash
 
       - name: "Upload OAS specification release asset"
-        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           tag_name: ${{ inputs.version }}
           files: ./artifacts/api-oas-specification-${{ matrix.apimEnv }}-${{ inputs.version }}.zip
@@ -293,7 +293,7 @@ jobs:
         with:
           path: .
           name: sdk-ts-${{ inputs.version }}
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "24.3"
           registry-url: "https://npm.pkg.github.com"

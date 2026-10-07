@@ -256,7 +256,7 @@ describe("enqueueLetterUpdateRequests function", () => {
 
     expect(firstInput.QueueUrl).toBe(deps.env.QUEUE_URL);
     expect(Array.isArray(firstInput.Entries)).toBe(true);
-    expect(firstInput.Entries.length).toBe(10);
+    expect(firstInput.Entries).toHaveLength(10);
 
     expect(firstInput.Entries[0].Id).toBe("0-0");
     expect(firstInput.Entries[9].Id).toBe("0-9");
@@ -271,7 +271,7 @@ describe("enqueueLetterUpdateRequests function", () => {
     // check last batch had 5 entries
     const thirdCallArg = sqsClientSendMock.mock.calls[2][0];
     const thirdInput = thirdCallArg.input;
-    expect(thirdInput.Entries.length).toBe(5);
+    expect(thirdInput.Entries).toHaveLength(5);
     // ids in third batch should start "2-0"
     expect(thirdInput.Entries[0].Id).toBe("2-0");
   });
