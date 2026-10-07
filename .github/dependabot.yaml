@@ -3,13 +3,26 @@ version: 2
 updates:
 
   - package-ecosystem: "docker"
-    directory: "/"
+    directories:
+      - "**/*"
     schedule:
       interval: "daily"
     commit-message:
       prefix: "CCM-9336: "
     cooldown:
       default-days: 7
+    groups:
+      patch-and-minor:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      major:
+        patterns:
+          - "*"
+        update-types:
+          - "major"
 
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -19,31 +32,81 @@ updates:
       prefix: "CCM-9336: "
     cooldown:
       default-days: 7
+    groups:
+      patch-and-minor:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      major:
+        patterns:
+          - "*"
+        update-types:
+          - "major"
 
   - package-ecosystem: "npm"
-    directory: "/"
+    directories:
+      - "/"
+      - "/sandbox"
     schedule:
       interval: "daily"
     commit-message:
       prefix: "CCM-9336: "
     cooldown:
       default-days: 7
-
-
+    groups:
+      patch-and-minor:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      major:
+        patterns:
+          - "*"
+        update-types:
+          - "major"
   - package-ecosystem: "pip"
-    directory: "/"
+    directories:
+      - "**/*"
     schedule:
       interval: "daily"
     commit-message:
       prefix: "CCM-9336: "
     cooldown:
       default-days: 7
+    groups:
+      patch-and-minor:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      major:
+        patterns:
+          - "*"
+        update-types:
+          - "major"
 
   - package-ecosystem: "terraform"
-    directory: "/"
+    directories:
+      - "/infrastructure/terraform/**/*"
     schedule:
       interval: "daily"
     commit-message:
       prefix: "CCM-9336: "
     cooldown:
       default-days: 7
+    groups:
+      patch-and-minor:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      major:
+        patterns:
+          - "*"
+        update-types:
+          - "major"
