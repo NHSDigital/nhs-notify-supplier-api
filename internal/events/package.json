@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "@asyncapi/bundler": "^1.0.2",
-    "zod": "^4.1.11"
+    "zod": "^4.6.5"
   },
   "description": "Schemas for NHS Notify Supplier API events",
   "license": "MIT",
@@ -36,5 +36,5 @@
     "typecheck": "tsc --noEmit"
   },
   "types": "dist/index.d.ts",
-  "version": "1.0.21"
+  "version": "1.0.22"
 }

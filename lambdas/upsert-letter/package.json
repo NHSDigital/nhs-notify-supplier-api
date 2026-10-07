@@ -8,12 +8,12 @@
     "@nhsdigital/nhs-notify-event-schemas-letter-rendering": "2.0.2",
     "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1": "npm:@nhsdigital/nhs-notify-event-schemas-letter-rendering@^1.1.5",
     "@nhsdigital/nhs-notify-event-schemas-supplier-api": "^1.0.8",
-    "@types/aws-lambda": "^8.10.148",
+    "@types/aws-lambda": "^8.10.164",
     "aws-embedded-metrics": "^4.2.1",
     "aws-lambda": "^1.0.7",
     "esbuild": "0.28.2",
     "pino": "^10.3.1",
-    "zod": "^4.1.11"
+    "zod": "^4.6.5"
   },
   "name": "nhs-notify-supplier-api-upsert-letter",
   "private": true,
