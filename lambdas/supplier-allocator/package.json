@@ -16,7 +16,7 @@
     "date-fns": "^4.4.0",
     "date-fns-tz": "^3.0.0",
     "esbuild": "0.28.2",
-    "pino": "^10.3.1",
+    "pino": "^9.14.0",
     "zod": "^4.6.5"
   },
   "name": "nhs-notify-supplier-api-allocate-letter",
