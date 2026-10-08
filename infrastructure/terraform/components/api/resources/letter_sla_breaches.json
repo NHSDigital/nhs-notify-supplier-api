@@ -1,0 +1,77 @@
+{
+  "Comment": "Identifies letters in breach of SLA for a given date (defaults to today)",
+  "QueryLanguage": "JSONata",
+  "StartAt": "CheckForRunningExecutions",
+  "States": {
+    "AlreadyRunning?": {
+      "Choices": [
+        {
+          "Condition": "{% $count($states.input.Executions) > 1 %}",
+          "Next": "ExitAlreadyRunning"
+        }
+      ],
+      "Default": "PopulateSupplierConfigCache",
+      "Type": "Choice"
+    },
+    "CheckForRunningExecutions": {
+      "Arguments": {
+        "StateMachineArn": "${STATE_MACHINE_ARN}",
+        "StatusFilter": "RUNNING"
+      },
+      "Assign": {
+        "date": "{% $exists($states.context.Execution.Input.date) ? $states.context.Execution.Input.date : $substring($states.context.Execution.StartTime, 0, 10) %}"
+      },
+      "Next": "AlreadyRunning?",
+      "Resource": "arn:aws:states:::aws-sdk:sfn:listExecutions",
+      "Type": "Task"
+    },
+    "ExitAlreadyRunning": {
+      "Type": "Succeed"
+    },
+    "PopulateSamedayBreaches": {
+      "Arguments": {
+        "FunctionName": "${POPULATE_SAMEDAY_BREACHES_FUNCTION_ARN}",
+        "Payload": {
+          "date": "{% $date %}"
+        }
+      },
+      "Next": "PopulateStandardBreaches",
+      "Output": {
+        "populateSamedayBreaches": "{% $states.result.Payload %}",
+        "populateSupplierConfigCache": "{% $states.input.populateSupplierConfigCache %}"
+      },
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Type": "Task"
+    },
+    "PopulateStandardBreaches": {
+      "Arguments": {
+        "FunctionName": "${POPULATE_STANDARD_BREACHES_FUNCTION_ARN}",
+        "Payload": {
+          "date": "{% $date %}"
+        }
+      },
+      "End": true,
+      "Output": {
+        "populateSamedayBreaches": "{% $states.input.populateSamedayBreaches %}",
+        "populateStandardBreaches": "{% $states.result.Payload %}",
+        "populateSupplierConfigCache": "{% $states.input.populateSupplierConfigCache %}"
+      },
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Type": "Task"
+    },
+    "PopulateSupplierConfigCache": {
+      "Arguments": {
+        "FunctionName": "${POPULATE_SUPPLIER_CONFIG_CACHE_FUNCTION_ARN}",
+        "Payload": {
+          "date": "{% $date %}"
+        }
+      },
+      "Next": "PopulateSamedayBreaches",
+      "Output": {
+        "populateSupplierConfigCache": "{% $states.result.Payload %}"
+      },
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Type": "Task"
+    }
+  }
+}

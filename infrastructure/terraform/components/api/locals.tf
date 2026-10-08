@@ -52,4 +52,7 @@ locals {
     var.region,
     var.csoc_destination_account
   )
+
+  letter_sla_breaches_state_machine_name = "${local.csi}-letter-sla-breaches"
+  letter_sla_breaches_state_machine_arn  = "arn:aws:states:${var.region}:${var.aws_account_id}:stateMachine:${local.letter_sla_breaches_state_machine_name}"
 }

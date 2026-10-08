@@ -62,6 +62,7 @@ No requirements.
 | Name | Source | Version |
 | ---- | ------ | ------- |
 | <a name="module_amendment_event_transformer"></a> [amendment\_event\_transformer](#module\_amendment\_event\_transformer) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
+| <a name="module_amendment_event_transformer"></a> [amendment\_event\_transformer](#module\_amendment\_event\_transformer) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
 | <a name="module_amendments_queue"></a> [amendments\_queue](#module\_amendments\_queue) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.1.5/terraform-sqs.zip | n/a |
 | <a name="module_authorizer_lambda"></a> [authorizer\_lambda](#module\_authorizer\_lambda) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
 | <a name="module_ddb_alarms_idempotency"></a> [ddb\_alarms\_idempotency](#module\_ddb\_alarms\_idempotency) | ../../modules/alarms-ddb | n/a |
@@ -83,6 +84,9 @@ No requirements.
 | <a name="module_letter_updates_transformer"></a> [letter\_updates\_transformer](#module\_letter\_updates\_transformer) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
 | <a name="module_mi_updates_transformer"></a> [mi\_updates\_transformer](#module\_mi\_updates\_transformer) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
 | <a name="module_patch_letter"></a> [patch\_letter](#module\_patch\_letter) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
+| <a name="module_populate_sameday_breaches"></a> [populate\_sameday\_breaches](#module\_populate\_sameday\_breaches) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
+| <a name="module_populate_standard_breaches"></a> [populate\_standard\_breaches](#module\_populate\_standard\_breaches) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
+| <a name="module_populate_supplier_config_cache"></a> [populate\_supplier\_config\_cache](#module\_populate\_supplier\_config\_cache) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
 | <a name="module_post_letters"></a> [post\_letters](#module\_post\_letters) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
 | <a name="module_post_mi"></a> [post\_mi](#module\_post\_mi) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
 | <a name="module_s3bucket_test_letters"></a> [s3bucket\_test\_letters](#module\_s3bucket\_test\_letters) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-s3bucket.zip | n/a |
