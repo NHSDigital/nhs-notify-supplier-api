@@ -48,14 +48,14 @@ function getOperationFromType(type: string): UpsertOperation {
           preparedRequest,
           allocationDetails,
         );
-        const { clientId, campaignId, templateId } = preparedRequest.data
+        const { campaignId, clientId, templateId } = preparedRequest.data;
         const dimensions: Record<string, string> = {
           ClientId: clientId || "unknown",
           CampaignId: campaignId || "unknown",
           TemplateId: templateId || "unknown",
           Supplier: letterToInsert.supplierId || "unknown",
           GroupId: letterToInsert.groupId || "unknown",
-          Status: letterToInsert.status || "unknown"
+          Status: letterToInsert.status || "unknown",
         };
         try {
           await deps.letterRepo.putLetter(letterToInsert);
@@ -69,18 +69,10 @@ function getOperationFromType(type: string): UpsertOperation {
             letterToInsert,
           });
           // emit success metric
-          emitIndividualMetric(
-            deps.logger,
-            MetricStatus.Success,
-            dimensions,
-          );
+          emitIndividualMetric(deps.logger, MetricStatus.Success, dimensions);
         } catch (error) {
           // emit failure metric
-          emitIndividualMetric(
-            deps.logger,
-            MetricStatus.Failure,
-            dimensions,
-          );
+          emitIndividualMetric(deps.logger, MetricStatus.Failure, dimensions);
           if (error instanceof LetterAlreadyExistsError) {
             deps.logger.warn({
               description: "Letter already exists",
@@ -103,7 +95,7 @@ function getOperationFromType(type: string): UpsertOperation {
       const letterToUpdate: UpdateLetter = mapToUpdateLetter(supplierEvent);
       const dimensions: Record<string, string> = {
         Supplier: letterToUpdate.supplierId || "unknown",
-        Status: letterToUpdate.status || "unknown"
+        Status: letterToUpdate.status || "unknown",
       };
       await deps.letterRepo.updateLetterStatus(letterToUpdate);
 
@@ -115,11 +107,7 @@ function getOperationFromType(type: string): UpsertOperation {
         letterUpdateRequest: request,
         letterToUpdate,
       });
-      emitIndividualMetric(
-        deps.logger,
-        MetricStatus.Success,
-        dimensions,
-      );
+      emitIndividualMetric(deps.logger, MetricStatus.Success, dimensions);
     },
   };
 }

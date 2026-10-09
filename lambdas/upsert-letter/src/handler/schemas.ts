@@ -11,8 +11,7 @@ import z from "zod";
 import { Deps } from "../config/deps";
 
 export type PreparedEvents =
-  | LetterRequestPreparedEventV2
-  | LetterRequestPreparedEvent;
+  LetterRequestPreparedEventV2 | LetterRequestPreparedEvent;
 
 const SupplierSpecSchema = z.object({
   supplierId: z.string().min(1),
