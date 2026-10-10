@@ -37,7 +37,7 @@ jest.mock("@internal/helpers", () => {
 
 const renderingSchemaVersion: string =
   packageJson.dependencies[
-  "@nhsdigital/nhs-notify-event-schemas-letter-rendering"
+    "@nhsdigital/nhs-notify-event-schemas-letter-rendering"
   ];
 
 function createSQSEvent(records: SQSRecord[]): SQSEvent {
