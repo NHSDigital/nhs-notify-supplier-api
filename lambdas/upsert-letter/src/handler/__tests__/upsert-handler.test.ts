@@ -37,7 +37,7 @@ jest.mock("@internal/helpers", () => {
 
 const renderingSchemaVersion: string =
   packageJson.dependencies[
-    "@nhsdigital/nhs-notify-event-schemas-letter-rendering"
+  "@nhsdigital/nhs-notify-event-schemas-letter-rendering"
   ];
 
 function createSQSEvent(records: SQSRecord[]): SQSEvent {
@@ -312,6 +312,10 @@ describe("createUpsertLetterHandler", () => {
       {
         Supplier: "supplier1",
         GroupId: "client1_campaign1_template1",
+        CampaignId: "campaign1",
+        ClientId: "client1",
+        Status: "PENDING",
+        TemplateId: "template1",
       },
       expect.objectContaining({
         key: MetricStatus.Success,
@@ -488,10 +492,63 @@ describe("createUpsertLetterHandler", () => {
       "upsertLetter",
       {
         Supplier: "unknown",
+        Status: "RETURNED",
+        Client: "unknown",
+        CampaignId: "unknown",
         GroupId: "unknown",
+        TemplateId: "unknown",
       },
       expect.objectContaining({
         key: MetricStatus.Success,
+        value: 1,
+        unit: Unit.Count,
+      }),
+    );
+  });
+
+  test("insert with missing client, campaign and template has metric emitted with 'unknown' dimensions", async () => {
+    const letterEvent = createPreparedV2Event();
+    letterEvent.data.clientId = "";
+    delete letterEvent.data.campaignId;
+    delete letterEvent.data.templateId;
+    const message = {
+      letterEvent,
+      allocationDetails: {
+        supplierSpec: {
+          supplierId: "supplier1",
+          specId: "spec1",
+          priority: 10,
+          billingId: "billing1",
+        },
+        allocationStatus: {
+          status: "PENDING",
+        },
+      },
+    };
+
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("missing-fields", JSON.stringify(message)),
+    ]);
+
+    const result = await createUpsertLetterHandler(mockedDeps)(
+      evt,
+      {} as any,
+      {} as any,
+    );
+
+    expect(result!.batchItemFailures).toEqual([]);
+    expect(buildEMFObject as jest.Mock).toHaveBeenCalledWith(
+      "upsertLetter",
+      {
+        ClientId: "unknown",
+        CampaignId: "unknown",
+        TemplateId: "unknown",
+        Supplier: "supplier1",
+        GroupId: "_unknown_unknown",
+        Status: "PENDING",
+      },
+      expect.objectContaining({
+        key: MetricStatus.Failure,
         value: 1,
         unit: Unit.Count,
       }),
@@ -525,7 +582,11 @@ describe("createUpsertLetterHandler", () => {
       "upsertLetter",
       {
         Supplier: "unknown",
+        Status: "unknown",
+        Client: "unknown",
+        CampaignId: "unknown",
         GroupId: "unknown",
+        TemplateId: "unknown",
       },
       expect.objectContaining({
         key: MetricStatus.Failure,
@@ -624,7 +685,11 @@ describe("createUpsertLetterHandler", () => {
       "upsertLetter",
       {
         Supplier: "unknown",
+        Status: "unknown",
+        Client: "unknown",
+        CampaignId: "unknown",
         GroupId: "unknown",
+        TemplateId: "unknown",
       },
       expect.objectContaining({
         key: MetricStatus.Failure,

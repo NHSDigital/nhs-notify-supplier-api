@@ -53,9 +53,9 @@ function getOperationFromType(type: string): UpsertOperation {
           ClientId: clientId || "unknown",
           CampaignId: campaignId || "unknown",
           TemplateId: templateId || "unknown",
-          Supplier: letterToInsert.supplierId || "unknown",
-          GroupId: letterToInsert.groupId || "unknown",
-          Status: letterToInsert.status || "unknown",
+          Supplier: letterToInsert.supplierId,
+          GroupId: letterToInsert.groupId,
+          Status: letterToInsert.status,
         };
         try {
           await deps.letterRepo.putLetter(letterToInsert);
@@ -95,7 +95,11 @@ function getOperationFromType(type: string): UpsertOperation {
       const letterToUpdate: UpdateLetter = mapToUpdateLetter(supplierEvent);
       const dimensions: Record<string, string> = {
         Supplier: letterToUpdate.supplierId || "unknown",
-        Status: letterToUpdate.status || "unknown",
+        Status: letterToUpdate.status,
+        Client: "unknown",
+        CampaignId: "unknown",
+        GroupId: "unknown",
+        TemplateId: "unknown",
       };
       await deps.letterRepo.updateLetterStatus(letterToUpdate);
 
@@ -258,6 +262,10 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
         const dimensions: Record<string, string> = {
           Supplier: "unknown",
           Status: "unknown",
+          Client: "unknown",
+          CampaignId: "unknown",
+          GroupId: "unknown",
+          TemplateId: "unknown",
         };
         await emitIndividualMetric(
           deps.logger,
