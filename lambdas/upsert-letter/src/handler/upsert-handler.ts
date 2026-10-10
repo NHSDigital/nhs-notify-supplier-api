@@ -48,6 +48,15 @@ function getOperationFromType(type: string): UpsertOperation {
           preparedRequest,
           allocationDetails,
         );
+        const { campaignId, clientId, templateId } = preparedRequest.data;
+        const dimensions: Record<string, string> = {
+          ClientId: clientId || "unknown",
+          CampaignId: campaignId || "unknown",
+          TemplateId: templateId || "unknown",
+          Supplier: letterToInsert.supplierId,
+          GroupId: letterToInsert.groupId,
+          Status: letterToInsert.status,
+        };
         try {
           await deps.letterRepo.putLetter(letterToInsert);
 
@@ -60,20 +69,10 @@ function getOperationFromType(type: string): UpsertOperation {
             letterToInsert,
           });
           // emit success metric
-          emitIndividualMetric(
-            deps.logger,
-            letterToInsert.supplierId,
-            MetricStatus.Success,
-            letterToInsert.groupId,
-          );
+          emitIndividualMetric(deps.logger, MetricStatus.Success, dimensions);
         } catch (error) {
           // emit failure metric
-          emitIndividualMetric(
-            deps.logger,
-            letterToInsert.supplierId,
-            MetricStatus.Failure,
-            letterToInsert.groupId,
-          );
+          emitIndividualMetric(deps.logger, MetricStatus.Failure, dimensions);
           if (error instanceof LetterAlreadyExistsError) {
             deps.logger.warn({
               description: "Letter already exists",
@@ -94,6 +93,14 @@ function getOperationFromType(type: string): UpsertOperation {
     handler: async (request, allocationDetails, deps) => {
       const supplierEvent = request as LetterStatusChangeEvent;
       const letterToUpdate: UpdateLetter = mapToUpdateLetter(supplierEvent);
+      const dimensions: Record<string, string> = {
+        Supplier: letterToUpdate.supplierId || "unknown",
+        Status: letterToUpdate.status,
+        Client: "unknown",
+        CampaignId: "unknown",
+        GroupId: "unknown",
+        TemplateId: "unknown",
+      };
       await deps.letterRepo.updateLetterStatus(letterToUpdate);
 
       deps.logger.info({
@@ -104,11 +111,7 @@ function getOperationFromType(type: string): UpsertOperation {
         letterUpdateRequest: request,
         letterToUpdate,
       });
-      emitIndividualMetric(
-        deps.logger,
-        letterToUpdate.supplierId,
-        MetricStatus.Success,
-      );
+      emitIndividualMetric(deps.logger, MetricStatus.Success, dimensions);
     },
   };
 }
@@ -176,15 +179,10 @@ async function runUpsert(
 
 async function emitIndividualMetric(
   logger: Logger,
-  supplier: string,
   metricKey: MetricStatus,
-  groupId?: string,
+  dimensions: Record<string, string>,
 ) {
   const namespace = process.env.AWS_LAMBDA_FUNCTION_NAME || "upsertLetter";
-  const dimensions: Record<string, string> = {
-    Supplier: supplier || "unknown",
-    GroupId: groupId || "unknown",
-  };
 
   const metric: MetricEntry = {
     key: metricKey,
@@ -261,10 +259,18 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
           messageId: record.messageId,
           message: record.body,
         });
+        const dimensions: Record<string, string> = {
+          Supplier: "unknown",
+          Status: "unknown",
+          Client: "unknown",
+          CampaignId: "unknown",
+          GroupId: "unknown",
+          TemplateId: "unknown",
+        };
         await emitIndividualMetric(
           deps.logger,
-          "unknown",
           MetricStatus.Failure,
+          dimensions,
         );
         batchItemFailures.push({ itemIdentifier: record.messageId });
       }
