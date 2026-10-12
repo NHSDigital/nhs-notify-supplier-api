@@ -6,6 +6,7 @@ function makeDeps(ddbSend: jest.Mock, s3Send: jest.Mock): EntityCacheDeps {
   return {
     ddbClient: { send: ddbSend } as unknown as DynamoDBDocumentClient,
     s3Client: { send: s3Send } as unknown as S3Client,
+    logger: { info: jest.fn() } as unknown as EntityCacheDeps["logger"],
     env: {
       SUPPLIER_CONFIG_TABLE_NAME: "config-table",
       EVENT_CACHE_BUCKET_NAME: "cache-bucket",
@@ -25,9 +26,10 @@ describe("populateEntityCache", () => {
         Items: [{ pk: "ENTITY#supplier", sk: "ID#2" }],
       });
     const s3Send = jest.fn().mockResolvedValue({});
+    const deps = makeDeps(ddbSend, s3Send);
 
     const count = await populateEntityCache(
-      makeDeps(ddbSend, s3Send),
+      deps,
       "supplier",
     );
 
@@ -49,6 +51,24 @@ describe("populateEntityCache", () => {
     const put = s3Send.mock.calls[0][0] as PutObjectCommand;
     expect(put.input.Bucket).toBe("cache-bucket");
     expect(put.input.Key).toBe("supplier_config_cache/supplier.json");
+    expect(deps.logger.info).toHaveBeenCalledWith(
+      { entityType: "supplier" },
+      "Loading supplier config entity",
+    );
+    expect(deps.logger.info).toHaveBeenCalledWith(
+      { entityType: "supplier", itemCount: 2, hasItems: true },
+      "Loaded supplier config entity",
+    );
+    expect(deps.logger.info).toHaveBeenCalledWith(
+      {
+        entityType: "supplier",
+        itemCount: 2,
+        bucket: "cache-bucket",
+        key: "supplier_config_cache/supplier.json",
+        s3Uri: "s3://cache-bucket/supplier_config_cache/supplier.json",
+      },
+      "Created supplier config cache file",
+    );
     expect(
       (put.input.Body as string).split("\n").map((line) => JSON.parse(line)),
     ).toEqual([
@@ -60,9 +80,10 @@ describe("populateEntityCache", () => {
   it("writes an empty file when no rows are returned", async () => {
     const ddbSend = jest.fn().mockResolvedValue({});
     const s3Send = jest.fn().mockResolvedValue({});
+    const deps = makeDeps(ddbSend, s3Send);
 
     const count = await populateEntityCache(
-      makeDeps(ddbSend, s3Send),
+      deps,
       "volume-group",
     );
 
@@ -70,5 +91,9 @@ describe("populateEntityCache", () => {
     const put = s3Send.mock.calls[0][0] as PutObjectCommand;
     expect(put.input.Key).toBe("supplier_config_cache/volume-group.json");
     expect(put.input.Body).toBe("");
+    expect(deps.logger.info).toHaveBeenCalledWith(
+      { entityType: "volume-group", itemCount: 0, hasItems: false },
+      "Loaded supplier config entity",
+    );
   });
 });
