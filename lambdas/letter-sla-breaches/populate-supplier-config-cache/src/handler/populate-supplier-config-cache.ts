@@ -10,12 +10,12 @@ export type PopulateSupplierConfigCacheResult = {
 };
 
 export const ENTITY_TYPES = [
-  "volume-group",
-  "supplier-pack",
   "letter-variant",
   "pack-specification",
-  "supplier-allocation",
   "supplier",
+  "supplier-allocation",
+  "supplier-pack",
+  "volume-group",
 ];
 
 export default function createHandler(deps: EntityCacheDeps) {
