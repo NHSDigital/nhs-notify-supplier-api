@@ -37,4 +37,5 @@ export const PreparedEventSchema = z.discriminatedUnion("type", [
 ]);
 
 export type PreparedEvents =
-  LetterRequestPreparedEventV2 | LetterRequestPreparedEvent;
+  | LetterRequestPreparedEventV2
+  | LetterRequestPreparedEvent;
