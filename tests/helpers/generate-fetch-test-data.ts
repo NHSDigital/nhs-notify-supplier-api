@@ -112,9 +112,7 @@ type FetchLettersWithRetryOptions = {
 };
 
 type GetLettersResponseBody =
-  | GetLettersResponse
-  | ErrorResponse
-  | Record<string, unknown>;
+  GetLettersResponse | ErrorResponse | Record<string, unknown>;
 
 type FetchLettersWithRetryResult = {
   statusCode: number;
@@ -122,9 +120,7 @@ type FetchLettersWithRetryResult = {
 };
 
 type GetMIResponseBody =
-  | GetMIResponse
-  | ErrorResponse
-  | Record<string, unknown>;
+  GetMIResponse | ErrorResponse | Record<string, unknown>;
 
 type FetchMiResult = {
   statusCode: number;
