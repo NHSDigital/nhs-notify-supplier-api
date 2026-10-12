@@ -79,10 +79,7 @@
     },
     "PopulateSupplierConfigCache": {
       "Arguments": {
-        "FunctionName": "${POPULATE_SUPPLIER_CONFIG_CACHE_FUNCTION_ARN}",
-        "Payload": {
-          "date": "{% $date %}"
-        }
+        "FunctionName": "${POPULATE_SUPPLIER_CONFIG_CACHE_FUNCTION_ARN}"
       },
       "Next": "PopulateBreachesInParallel",
       "Output": {

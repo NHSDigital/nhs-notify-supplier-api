@@ -7,10 +7,14 @@ jest.mock("../handler/entity-cache");
 
 describe("populateSupplierConfigCache", () => {
   it("populates the cache once for each entity type and returns success", async () => {
-    const deps = {} as EntityCacheDeps;
+    const deps = { logger: { error: jest.fn() } } as unknown as EntityCacheDeps;
+    jest.mocked(populateEntityCache).mockReset();
+    for (const [index] of ENTITY_TYPES.entries()) {
+      jest.mocked(populateEntityCache).mockResolvedValueOnce(index + 1);
+    }
     const handler = createHandler(deps);
 
-    const result = await handler({ date: "2026-10-08" });
+    const result = await handler();
 
     expect(ENTITY_TYPES).toEqual([
       "volume-group",
@@ -26,7 +30,40 @@ describe("populateSupplierConfigCache", () => {
     }
     expect(result).toEqual({
       status: "SUCCESS",
-      message: "populate-supplier-config-cache invoked successfully",
+      entities: ENTITY_TYPES.map((entity, index) => ({
+        entity,
+        recordsRetrieved: index + 1,
+      })),
     });
+  });
+
+  it("returns failure and counts for successful entities when an entity fails", async () => {
+    const deps = { logger: { error: jest.fn() } } as unknown as EntityCacheDeps;
+    jest
+      .mocked(populateEntityCache)
+      .mockReset()
+      .mockResolvedValueOnce(1)
+      .mockRejectedValueOnce(new Error("query failed"))
+      .mockResolvedValueOnce(3)
+      .mockResolvedValueOnce(4)
+      .mockResolvedValueOnce(5)
+      .mockResolvedValueOnce(6);
+    const handler = createHandler(deps);
+
+    const result = await handler();
+
+    expect(result).toEqual({
+      status: "FAILURE",
+      failureReason:
+        "Failed to populate supplier config cache for: supplier-pack",
+      entities: ENTITY_TYPES.map((entity, index) => ({
+        entity,
+        recordsRetrieved: index === 1 ? 0 : index + 1,
+      })),
+    });
+    expect(deps.logger.error).toHaveBeenCalledWith(
+      { entityType: "supplier-pack", error: expect.any(Error) },
+      "Failed to populate supplier config entity cache",
+    );
   });
 });
