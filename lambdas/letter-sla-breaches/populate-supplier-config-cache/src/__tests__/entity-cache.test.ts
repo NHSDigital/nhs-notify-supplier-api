@@ -28,10 +28,7 @@ describe("populateEntityCache", () => {
     const s3Send = jest.fn().mockResolvedValue({});
     const deps = makeDeps(ddbSend, s3Send);
 
-    const count = await populateEntityCache(
-      deps,
-      "supplier",
-    );
+    const count = await populateEntityCache(deps, "supplier");
 
     expect(count).toBe(2);
     expect(ddbSend).toHaveBeenCalledTimes(2);
@@ -82,10 +79,7 @@ describe("populateEntityCache", () => {
     const s3Send = jest.fn().mockResolvedValue({});
     const deps = makeDeps(ddbSend, s3Send);
 
-    const count = await populateEntityCache(
-      deps,
-      "volume-group",
-    );
+    const count = await populateEntityCache(deps, "volume-group");
 
     expect(count).toBe(0);
     const put = s3Send.mock.calls[0][0] as PutObjectCommand;
