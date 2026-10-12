@@ -17,12 +17,12 @@ describe("populateSupplierConfigCache", () => {
     const result = await handler();
 
     expect(ENTITY_TYPES).toEqual([
-      "volume-group",
-      "supplier-pack",
       "letter-variant",
       "pack-specification",
-      "supplier-allocation",
       "supplier",
+      "supplier-allocation",
+      "supplier-pack",
+      "volume-group",
     ]);
     expect(populateEntityCache).toHaveBeenCalledTimes(ENTITY_TYPES.length);
     for (const entityType of ENTITY_TYPES) {
@@ -55,14 +55,14 @@ describe("populateSupplierConfigCache", () => {
     expect(result).toEqual({
       status: "FAILURE",
       failureReason:
-        "Failed to populate supplier config cache for: supplier-pack",
+        "Failed to populate supplier config cache for: pack-specification",
       entities: ENTITY_TYPES.map((entity, index) => ({
         entity,
         recordsRetrieved: index === 1 ? 0 : index + 1,
       })),
     });
     expect(deps.logger.error).toHaveBeenCalledWith(
-      { entityType: "supplier-pack", error: expect.any(Error) },
+      { entityType: "pack-specification", error: expect.any(Error) },
       "Failed to populate supplier config entity cache",
     );
   });
