@@ -83,7 +83,7 @@ resource "aws_glue_catalog_table" "supplier_config_cache" {
   }
 
   storage_descriptor {
-    location      = "s3://${local.eventsub_event_cache_bucket_name}/supplier_config_cache/${each.key}.json"
+    location      = "s3://${local.eventsub_event_cache_bucket_name}/supplier_config_cache/${each.key}/"
     input_format  = "org.apache.hadoop.mapred.TextInputFormat"
     output_format = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
 

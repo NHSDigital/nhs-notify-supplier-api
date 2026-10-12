@@ -45,7 +45,7 @@ export default async function populateEntityCache(
     "Loaded supplier config entity",
   );
 
-  const key = `${CACHE_FOLDER}/${entityType}.json`;
+  const key = `${CACHE_FOLDER}/${entityType}/records.json`;
   await deps.s3Client.send(
     new PutObjectCommand({
       Bucket: deps.env.EVENT_CACHE_BUCKET_NAME,
