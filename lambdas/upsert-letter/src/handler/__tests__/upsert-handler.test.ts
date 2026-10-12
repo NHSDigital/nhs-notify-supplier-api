@@ -39,7 +39,7 @@ jest.mock("@internal/helpers", () => {
 
 const renderingSchemaVersion: string =
   packageJson.dependencies[
-    "@nhsdigital/nhs-notify-event-schemas-letter-rendering"
+  "@nhsdigital/nhs-notify-event-schemas-letter-rendering"
   ];
 
 function createSQSEvent(records: SQSRecord[]): SQSEvent {
@@ -510,8 +510,21 @@ describe("createUpsertLetterHandler", () => {
 
   test("extracts insert dimensions without allocation details", () => {
     const letterEvent = createPreparedV2Event();
+    const allocationDetails = {
+      supplierSpec: {
+        supplierId: "supplier1",
+        specId: "spec1",
+        priority: 10,
+        billingId: "billing1",
+      },
+      allocationStatus: {
+        status: "PENDING",
+      },
+    };
 
-    expect(extractDimensionsFromLetterEvent(letterEvent)).toEqual({
+    expect(
+      extractDimensionsFromLetterEvent(letterEvent, allocationDetails),
+    ).toEqual({
       Supplier: "unknown",
       Status: "PREPARED",
       ClientId: "client1",
