@@ -28,36 +28,54 @@
     "ExitAlreadyRunning": {
       "Type": "Succeed"
     },
-    "PopulateSamedayBreaches": {
-      "Arguments": {
-        "FunctionName": "${POPULATE_SAMEDAY_BREACHES_FUNCTION_ARN}",
-        "Payload": {
-          "date": "{% $date %}"
+    "PopulateBreachesInParallel": {
+      "Branches": [
+        {
+          "StartAt": "PopulateSamedayBreaches",
+          "States": {
+            "PopulateSamedayBreaches": {
+              "Arguments": {
+                "FunctionName": "${POPULATE_SAMEDAY_BREACHES_FUNCTION_ARN}",
+                "Payload": {
+                  "date": "{% $date %}"
+                }
+              },
+              "End": true,
+              "Output": {
+                "populateSamedayBreaches": "{% $states.result.Payload %}"
+              },
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Type": "Task"
+            }
+          }
+        },
+        {
+          "StartAt": "PopulateStandardBreaches",
+          "States": {
+            "PopulateStandardBreaches": {
+              "Arguments": {
+                "FunctionName": "${POPULATE_STANDARD_BREACHES_FUNCTION_ARN}",
+                "Payload": {
+                  "date": "{% $date %}"
+                }
+              },
+              "End": true,
+              "Output": {
+                "populateStandardBreaches": "{% $states.result.Payload %}"
+              },
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Type": "Task"
+            }
+          }
         }
-      },
-      "Next": "PopulateStandardBreaches",
-      "Output": {
-        "populateSamedayBreaches": "{% $states.result.Payload %}",
-        "populateSupplierConfigCache": "{% $states.input.populateSupplierConfigCache %}"
-      },
-      "Resource": "arn:aws:states:::lambda:invoke",
-      "Type": "Task"
-    },
-    "PopulateStandardBreaches": {
-      "Arguments": {
-        "FunctionName": "${POPULATE_STANDARD_BREACHES_FUNCTION_ARN}",
-        "Payload": {
-          "date": "{% $date %}"
-        }
-      },
+      ],
       "End": true,
       "Output": {
-        "populateSamedayBreaches": "{% $states.input.populateSamedayBreaches %}",
-        "populateStandardBreaches": "{% $states.result.Payload %}",
+        "populateSamedayBreaches": "{% $states.result[0].populateSamedayBreaches %}",
+        "populateStandardBreaches": "{% $states.result[1].populateStandardBreaches %}",
         "populateSupplierConfigCache": "{% $states.input.populateSupplierConfigCache %}"
       },
-      "Resource": "arn:aws:states:::lambda:invoke",
-      "Type": "Task"
+      "Type": "Parallel"
     },
     "PopulateSupplierConfigCache": {
       "Arguments": {
@@ -66,7 +84,7 @@
           "date": "{% $date %}"
         }
       },
-      "Next": "PopulateSamedayBreaches",
+      "Next": "PopulateBreachesInParallel",
       "Output": {
         "populateSupplierConfigCache": "{% $states.result.Payload %}"
       },
