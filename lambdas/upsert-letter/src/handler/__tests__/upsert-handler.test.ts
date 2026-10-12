@@ -39,7 +39,7 @@ jest.mock("@internal/helpers", () => {
 
 const renderingSchemaVersion: string =
   packageJson.dependencies[
-  "@nhsdigital/nhs-notify-event-schemas-letter-rendering"
+    "@nhsdigital/nhs-notify-event-schemas-letter-rendering"
   ];
 
 function createSQSEvent(records: SQSRecord[]): SQSEvent {
@@ -512,7 +512,7 @@ describe("createUpsertLetterHandler", () => {
     const letterEvent = createPreparedV2Event();
     const allocationDetails = {
       supplierSpec: {
-        supplierId: "supplier1",
+        supplierId: "",
         specId: "spec1",
         priority: 10,
         billingId: "billing1",
