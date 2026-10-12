@@ -49,7 +49,9 @@ describe("populateEntityCache", () => {
     const put = s3Send.mock.calls[0][0] as PutObjectCommand;
     expect(put.input.Bucket).toBe("cache-bucket");
     expect(put.input.Key).toBe("supplier_config_cache/supplier.json");
-    expect(JSON.parse(put.input.Body as string)).toEqual([
+    expect(
+      (put.input.Body as string).split("\n").map((line) => JSON.parse(line)),
+    ).toEqual([
       { pk: "ENTITY#supplier", sk: "ID#1" },
       { pk: "ENTITY#supplier", sk: "ID#2" },
     ]);
@@ -67,6 +69,6 @@ describe("populateEntityCache", () => {
     expect(count).toBe(0);
     const put = s3Send.mock.calls[0][0] as PutObjectCommand;
     expect(put.input.Key).toBe("supplier_config_cache/volume-group.json");
-    expect(put.input.Body).toBe("[]");
+    expect(put.input.Body).toBe("");
   });
 });

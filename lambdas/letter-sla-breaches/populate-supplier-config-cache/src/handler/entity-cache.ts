@@ -40,7 +40,7 @@ export default async function populateEntityCache(
     new PutObjectCommand({
       Bucket: deps.env.EVENT_CACHE_BUCKET_NAME,
       Key: `${CACHE_FOLDER}/${entityType}.json`,
-      Body: JSON.stringify(items),
+      Body: items.map((item) => JSON.stringify(item)).join("\n"),
       ContentType: "application/json",
     }),
   );
