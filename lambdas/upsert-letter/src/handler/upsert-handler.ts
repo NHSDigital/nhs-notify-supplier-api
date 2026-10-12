@@ -31,6 +31,15 @@ import {
   UpsertOperation,
 } from "./schemas";
 
+interface UpsertDimensions extends Record<string, string> {
+  Supplier: string;
+  Status: string;
+  ClientId: string;
+  CampaignId: string;
+  GroupId: string;
+  TemplateId: string;
+}
+
 const idempotencyConfig = new IdempotencyConfig({
   eventKeyJmesPath: "id",
 });
@@ -49,7 +58,7 @@ function getOperationFromType(type: string): UpsertOperation {
           allocationDetails,
         );
         const { campaignId, clientId, templateId } = preparedRequest.data;
-        const dimensions: Record<string, string> = {
+        const dimensions: UpsertDimensions = {
           ClientId: clientId || "unknown",
           CampaignId: campaignId || "unknown",
           TemplateId: templateId || "unknown",
@@ -92,14 +101,16 @@ function getOperationFromType(type: string): UpsertOperation {
     schemas: [$LetterStatusChangeEvent],
     handler: async (request, allocationDetails, deps) => {
       const supplierEvent = request as LetterStatusChangeEvent;
+      const groupId = supplierEvent.data?.groupId || "unknown";
+      const [clientId, campaignId, templateId] = groupId.split("-");
       const letterToUpdate: UpdateLetter = mapToUpdateLetter(supplierEvent);
-      const dimensions: Record<string, string> = {
+      const dimensions: UpsertDimensions = {
         Supplier: letterToUpdate.supplierId || "unknown",
         Status: letterToUpdate.status,
-        Client: "unknown",
-        CampaignId: "unknown",
-        GroupId: "unknown",
-        TemplateId: "unknown",
+        ClientId: clientId || "unknown",
+        CampaignId: campaignId || "unknown",
+        GroupId: groupId,
+        TemplateId: templateId || "unknown",
       };
       await deps.letterRepo.updateLetterStatus(letterToUpdate);
 
@@ -113,6 +124,42 @@ function getOperationFromType(type: string): UpsertOperation {
       });
       emitIndividualMetric(deps.logger, MetricStatus.Success, dimensions);
     },
+  };
+}
+
+export function extractDimensionsFromLetterEvent(
+  letterEvent: LetterStatusChangeEvent | PreparedEvents,
+  allocationDetails: AllocationDetails | undefined,
+): UpsertDimensions {
+  const { type } = letterEvent;
+  // Insert type
+  if (
+    type.startsWith("uk.nhs.notify.letter-rendering.letter-request.prepared")
+  ) {
+    const preparedRequest = letterEvent as PreparedEvents;
+    const { campaignId, clientId, status, templateId } = preparedRequest.data;
+    const supplierId = allocationDetails?.supplierSpec.supplierId;
+    const groupId = formatGroupId(clientId, campaignId, templateId);
+    return {
+      Supplier: supplierId || "unknown",
+      Status: status,
+      ClientId: clientId || "unknown",
+      CampaignId: campaignId || "unknown",
+      GroupId: groupId,
+      TemplateId: templateId || "unknown",
+    };
+  }
+  // Update type
+  const changeEvent = letterEvent as LetterStatusChangeEvent;
+  const groupId = changeEvent.data.groupId || "unknown";
+  const [clientId, campaignId, templateId] = groupId.split("-");
+  return {
+    Supplier: changeEvent.data.supplierId || "unknown",
+    Status: changeEvent.data.status,
+    ClientId: clientId || "unknown",
+    CampaignId: campaignId || "unknown",
+    GroupId: groupId,
+    TemplateId: templateId || "unknown",
   };
 }
 
@@ -180,7 +227,7 @@ async function runUpsert(
 async function emitIndividualMetric(
   logger: Logger,
   metricKey: MetricStatus,
-  dimensions: Record<string, string>,
+  dimensions: UpsertDimensions,
 ) {
   const namespace = process.env.AWS_LAMBDA_FUNCTION_NAME || "upsertLetter";
 
@@ -221,6 +268,14 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
   return async (event: SQSEvent, context: Context) => {
     const batchItemFailures: SQSBatchItemFailure[] = [];
 
+    let dimensions: UpsertDimensions = {
+      Supplier: "unknown",
+      Status: "unknown",
+      ClientId: "unknown",
+      CampaignId: "unknown",
+      GroupId: "unknown",
+      TemplateId: "unknown",
+    };
     const tasks = event.Records.map(async (record) => {
       try {
         deps.logger.info({
@@ -251,6 +306,10 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
         });
 
         idempotencyConfig.registerLambdaContext(context);
+        dimensions = extractDimensionsFromLetterEvent(
+          letterEvent,
+          allocationDetails,
+        );
         await processRecordIdempotently(letterEvent, allocationDetails, deps);
       } catch (error) {
         deps.logger.error({
@@ -259,14 +318,6 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
           messageId: record.messageId,
           message: record.body,
         });
-        const dimensions: Record<string, string> = {
-          Supplier: "unknown",
-          Status: "unknown",
-          Client: "unknown",
-          CampaignId: "unknown",
-          GroupId: "unknown",
-          TemplateId: "unknown",
-        };
         await emitIndividualMetric(
           deps.logger,
           MetricStatus.Failure,
