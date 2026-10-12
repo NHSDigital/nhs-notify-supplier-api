@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@aws-sdk/client-api-gateway": "^3.1138.0",
+    "@aws-sdk/client-api-gateway": "^3.1146.0",
     "@aws-sdk/client-lambda": "^3.1138.0",
     "@aws-sdk/client-ssm": "^3.1138.0",
     "@internal/helpers": "^0.1.0",

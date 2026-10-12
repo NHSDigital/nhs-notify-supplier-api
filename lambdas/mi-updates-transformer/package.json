@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@aws-sdk/client-sns": "^3.1138.0",
+    "@aws-sdk/client-sns": "^3.1146.0",
     "@aws-sdk/util-dynamodb": "^3.996.9",
     "@internal/datastore": "^0.1.0",
     "@internal/helpers": "*",

@@ -1,7 +1,7 @@
 {
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.1138.0",
-    "@aws-sdk/lib-dynamodb": "^3.1138.0",
+    "@aws-sdk/client-dynamodb": "^3.1146.0",
+    "@aws-sdk/lib-dynamodb": "^3.1146.0",
     "@internal/datastore": "*",
     "@internal/helpers": "^0.1.0",
     "@nhsdigital/nhs-notify-event-schemas-supplier-config": "^1.1.1",
