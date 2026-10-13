@@ -80,8 +80,6 @@ function getOperationFromType(type: string): UpsertOperation {
           // emit success metric
           emitIndividualMetric(deps.logger, MetricStatus.Success, dimensions);
         } catch (error) {
-          // emit failure metric
-          emitIndividualMetric(deps.logger, MetricStatus.Failure, dimensions);
           if (error instanceof LetterAlreadyExistsError) {
             deps.logger.warn({
               description: "Letter already exists",
