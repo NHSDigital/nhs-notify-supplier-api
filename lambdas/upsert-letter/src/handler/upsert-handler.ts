@@ -86,6 +86,7 @@ function getOperationFromType(type: string): UpsertOperation {
               supplierId: letterToInsert.supplierId,
               letterId: letterToInsert.id,
             });
+            emitIndividualMetric(deps.logger, MetricStatus.Failure, dimensions);
           } else {
             throw error;
           }
