@@ -526,7 +526,7 @@ describe("createUpsertLetterHandler", () => {
       extractDimensionsFromLetterEvent(letterEvent, allocationDetails),
     ).toEqual({
       Supplier: "unknown",
-      Status: "PREPARED",
+      Status: "PENDING",
       ClientId: "client1",
       CampaignId: "campaign1",
       GroupId: "client1-campaign1-template1",

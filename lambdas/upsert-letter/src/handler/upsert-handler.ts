@@ -57,15 +57,10 @@ function getOperationFromType(type: string): UpsertOperation {
           preparedRequest,
           allocationDetails,
         );
-        const { campaignId, clientId, templateId } = preparedRequest.data;
-        const dimensions: UpsertDimensions = {
-          ClientId: clientId || "unknown",
-          CampaignId: campaignId || "unknown",
-          TemplateId: templateId || "unknown",
-          Supplier: letterToInsert.supplierId,
-          GroupId: letterToInsert.groupId,
-          Status: letterToInsert.status,
-        };
+        const dimensions: UpsertDimensions = extractDimensionsFromLetterEvent(
+          request,
+          allocationDetails,
+        );
         try {
           await deps.letterRepo.putLetter(letterToInsert);
 
@@ -100,17 +95,11 @@ function getOperationFromType(type: string): UpsertOperation {
     schemas: [$LetterStatusChangeEvent],
     handler: async (request, allocationDetails, deps) => {
       const supplierEvent = request as LetterStatusChangeEvent;
-      const groupId = supplierEvent.data?.groupId || "unknown";
-      const [clientId, campaignId, templateId] = groupId.split("-");
       const letterToUpdate: UpdateLetter = mapToUpdateLetter(supplierEvent);
-      const dimensions: UpsertDimensions = {
-        Supplier: letterToUpdate.supplierId || "unknown",
-        Status: letterToUpdate.status,
-        ClientId: clientId || "unknown",
-        CampaignId: campaignId || "unknown",
-        GroupId: groupId,
-        TemplateId: templateId || "unknown",
-      };
+      const dimensions: UpsertDimensions = extractDimensionsFromLetterEvent(
+        request,
+        allocationDetails,
+      );
       await deps.letterRepo.updateLetterStatus(letterToUpdate);
 
       deps.logger.info({
@@ -136,8 +125,12 @@ export function extractDimensionsFromLetterEvent(
     type.startsWith("uk.nhs.notify.letter-rendering.letter-request.prepared")
   ) {
     const preparedRequest = letterEvent as PreparedEvents;
-    const { campaignId, clientId, status, templateId } = preparedRequest.data;
+    const { campaignId, clientId, templateId } = preparedRequest.data;
     const supplierId = allocationDetails?.supplierSpec.supplierId;
+    const status =
+      allocationDetails.allocationStatus.status === "REJECTED"
+        ? "REJECTED"
+        : "PENDING";
     const groupId = formatGroupId(clientId, campaignId, templateId);
     return {
       Supplier: supplierId || "unknown",
