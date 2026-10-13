@@ -20,6 +20,23 @@ resource "aws_kinesis_firehose_delivery_stream" "eventpub_parquet" {
     buffering_size     = 128
     buffering_interval = 300
 
+    processing_configuration {
+      enabled = true
+
+      processors {
+        type = "Lambda"
+
+        parameters {
+          parameter_name  = "LambdaArn"
+          parameter_value = "${module.eventpub_parquet_transformer.function_arn}:$LATEST"
+        }
+        parameters {
+          parameter_name  = "RoleArn"
+          parameter_value = aws_iam_role.eventpub_parquet_firehose[0].arn
+        }
+      }
+    }
+
     data_format_conversion_configuration {
       input_format_configuration {
         deserializer {
@@ -134,6 +151,18 @@ data "aws_iam_policy_document" "eventpub_parquet_firehose" {
     ]
 
     resources = [module.kms.key_arn]
+  }
+
+  statement {
+    sid    = "AllowInvokeTransformer"
+    effect = "Allow"
+
+    actions = [
+      "lambda:InvokeFunction",
+      "lambda:GetFunctionConfiguration",
+    ]
+
+    resources = ["${module.eventpub_parquet_transformer.function_arn}:$LATEST"]
   }
 
   statement {

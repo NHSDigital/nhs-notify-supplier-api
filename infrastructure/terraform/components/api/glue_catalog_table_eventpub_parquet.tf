@@ -20,8 +20,12 @@ locals {
     { name = "sampledrate", type = "bigint" },
     { name = "sequence", type = "string" },
     { name = "severitytext", type = "string" },
-    # Union of the letter and MI event payloads
-    { name = "data", type = "struct<domainid:string,origin:struct<domain:string,source:string,subject:string,event:string>,specificationid:string,billingref:string,specificationbillingid:string,supplierid:string,groupid:string,status:string,reasoncode:string,reasontext:string,lineitem:string,timestamp:string,quantity:double,stockremaining:double,createdat:string,updatedat:string>" },
+    { name = "data_json", type = "string" },
+    { name = "domainid", type = "string" },
+    { name = "supplierid", type = "string" },
+    { name = "groupid", type = "string" },
+    { name = "campaignid", type = "string" },
+    { name = "clientid", type = "string" },
   ]
 }
 
