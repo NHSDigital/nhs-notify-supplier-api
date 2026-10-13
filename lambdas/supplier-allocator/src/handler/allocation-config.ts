@@ -37,7 +37,7 @@ export async function eligibleSuppliers(
   if (letterVariantSupplierId) {
     deps.logger.info({
       logRef: LogRefs.FILTERING_ALLOCATIONS.code,
-      description: "Filtering allocations for letter variant supplier",
+      description: LogRefs.FILTERING_ALLOCATIONS.description,
       volumeGroupId: volumeGroup.id,
       letterVariantSupplierId,
     });
@@ -137,7 +137,7 @@ export async function filterSuppliersWithCapacity(
       if (!hasCapacity) {
         deps.logger.info({
           logRef: LogRefs.SUPPLIER_CAPACITY_EXCEEDED.code,
-          description: "Supplier has exceeded daily capacity",
+          description: LogRefs.SUPPLIER_CAPACITY_EXCEEDED.description,
           supplierId: supplier.id,
           allocated,
           dailyCapacity: supplier.dailyCapacity,
@@ -184,7 +184,7 @@ export async function selectSupplierByFactor(
 
   deps.logger.info({
     logRef: LogRefs.CALCULATED_SUPPLIER_FACTORS.code,
-    description: "Calculated supplier factors for allocation",
+    description: LogRefs.CALCULATED_SUPPLIER_FACTORS.description,
     domainId,
     supplierFactors,
   });

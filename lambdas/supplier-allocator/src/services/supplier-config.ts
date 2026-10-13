@@ -313,7 +313,7 @@ export async function filterPacksForLetter(
       if (violatedConstraints.length > 0) {
         deps.logger.info({
           logRef: LogRefs.FILTERED_PACK_SPECIFICATION.code,
-          description: `Pack specification filtered out based on pageCount constraints`,
+          description: LogRefs.FILTERED_PACK_SPECIFICATION.description,
           domainId: letterEvent.data.domainId,
           packSpecId,
           pageCount,
