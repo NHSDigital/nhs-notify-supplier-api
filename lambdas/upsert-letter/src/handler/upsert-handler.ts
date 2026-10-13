@@ -58,7 +58,7 @@ function getOperationFromType(type: string): UpsertOperation {
           allocationDetails,
         );
         const dimensions: UpsertDimensions = extractDimensionsFromLetterEvent(
-          request,
+          request as LetterStatusChangeEvent | PreparedEvents,
           allocationDetails,
         );
         try {
@@ -97,7 +97,7 @@ function getOperationFromType(type: string): UpsertOperation {
       const supplierEvent = request as LetterStatusChangeEvent;
       const letterToUpdate: UpdateLetter = mapToUpdateLetter(supplierEvent);
       const dimensions: UpsertDimensions = extractDimensionsFromLetterEvent(
-        request,
+        request as LetterStatusChangeEvent | PreparedEvents,
         allocationDetails,
       );
       await deps.letterRepo.updateLetterStatus(letterToUpdate);
@@ -128,7 +128,7 @@ export function extractDimensionsFromLetterEvent(
     const { campaignId, clientId, templateId } = preparedRequest.data;
     const supplierId = allocationDetails?.supplierSpec.supplierId;
     const status =
-      allocationDetails.allocationStatus.status === "REJECTED"
+      allocationDetails?.allocationStatus.status === "REJECTED"
         ? "REJECTED"
         : "PENDING";
     const groupId = formatGroupId(clientId, campaignId, templateId);
