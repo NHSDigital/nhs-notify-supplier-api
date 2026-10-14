@@ -34,16 +34,14 @@ export function buildEMFObject(
   metric: MetricEntry,
 ) {
   const namespace = process.env.AWS_LAMBDA_FUNCTION_NAME || functionName;
-  const timeStamp = Date.now();
   return {
-    TimeStamp: timeStamp,
     ...dimensions,
     _aws: {
-      Timestamp: timeStamp,
+      Timestamp: Date.now(),
       CloudWatchMetrics: [
         {
           Namespace: namespace,
-          Dimensions: [[...Object.keys(dimensions), "TimeStamp"]],
+          Dimensions: [Object.keys(dimensions)],
           Metrics: [
             { Name: metric.key, Value: metric.value, Unit: metric.unit },
           ],
