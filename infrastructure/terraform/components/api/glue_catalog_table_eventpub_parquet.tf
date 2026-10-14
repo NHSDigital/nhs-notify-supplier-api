@@ -1,34 +1,3 @@
-locals {
-  eventpub_parquet_enabled = local.event_cache_bucket_name != null
-
-  # Column names must be lowercase; OpenXJsonSerDe matches JSON keys case-insensitively.
-  eventpub_parquet_table_columns = [
-    { name = "specversion", type = "string" },
-    { name = "id", type = "string" },
-    { name = "type", type = "string" },
-    { name = "plane", type = "string" },
-    { name = "dataschema", type = "string" },
-    { name = "dataschemaversion", type = "string" },
-    { name = "source", type = "string" },
-    { name = "subject", type = "string" },
-    { name = "time", type = "string" },
-    { name = "recordedtime", type = "string" },
-    { name = "datacontenttype", type = "string" },
-    { name = "traceparent", type = "string" },
-    { name = "tracestate", type = "string" },
-    { name = "partitionkey", type = "string" },
-    { name = "sampledrate", type = "bigint" },
-    { name = "sequence", type = "string" },
-    { name = "severitytext", type = "string" },
-    { name = "data_json", type = "string" },
-    { name = "domainid", type = "string" },
-    { name = "supplierid", type = "string" },
-    { name = "groupid", type = "string" },
-    { name = "campaignid", type = "string" },
-    { name = "clientid", type = "string" },
-  ]
-}
-
 resource "aws_glue_catalog_table" "eventpub_parquet" {
   count         = local.eventpub_parquet_enabled ? 1 : 0
   name          = "${replace(local.csi, "-", "_")}_eventpub"

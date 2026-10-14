@@ -149,7 +149,8 @@
     "docs",
     "internal/*",
     "lambdas/*",
-    "lambdas/letter-sla-breaches/*",    "pact-contracts",
+    "lambdas/letter-sla-breaches/*",
+    "pact-contracts",
     "scripts/utilities/*",
     "tests",
     "tests/contracts/*"
