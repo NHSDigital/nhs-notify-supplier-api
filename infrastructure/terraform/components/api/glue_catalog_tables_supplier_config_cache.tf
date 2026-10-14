@@ -72,7 +72,7 @@ locals {
 }
 
 resource "aws_glue_catalog_table" "supplier_config_cache" {
-  for_each      = local.eventsub_event_cache_bucket_name != null ? local.supplier_config_cache_table_columns : {}
+  for_each      = local.supplier_config_cache_table_columns
   name          = "${replace(local.csi, "-", "_")}_${replace(each.key, "-", "_")}"
   database_name = aws_glue_catalog_database.supplier.name
   table_type    = "EXTERNAL_TABLE"
@@ -83,7 +83,7 @@ resource "aws_glue_catalog_table" "supplier_config_cache" {
   }
 
   storage_descriptor {
-    location      = "s3://${local.eventsub_event_cache_bucket_name}/supplier_config_cache/${each.key}/"
+    location      = "s3://${module.s3bucket_reporting.bucket}/supplier_config_cache/${each.key}/"
     input_format  = "org.apache.hadoop.mapred.TextInputFormat"
     output_format = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
 
