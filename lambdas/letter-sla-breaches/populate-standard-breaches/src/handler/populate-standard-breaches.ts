@@ -1,3 +1,9 @@
+import {
+  type Deps,
+  runAthenaQuery,
+} from "@internal/letter-sla-breaches-common";
+import buildStandardBreachesQuery from "./standard-breaches-query";
+
 export type PopulateStandardBreachesEvent = {
   date: string;
 };
