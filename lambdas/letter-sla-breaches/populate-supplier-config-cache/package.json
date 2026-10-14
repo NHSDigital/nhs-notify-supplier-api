@@ -5,7 +5,8 @@
     "@aws-sdk/lib-dynamodb": "^3.1138.0",
     "@internal/helpers": "^0.1.0",
     "esbuild": "0.28.2",
-    "pino": "^10.3.1"
+    "pino": "^10.3.1",
+    "zod": "^4.6.5"
   },
   "name": "nhs-notify-supplier-api-populate-supplier-config-cache",
   "private": true,
