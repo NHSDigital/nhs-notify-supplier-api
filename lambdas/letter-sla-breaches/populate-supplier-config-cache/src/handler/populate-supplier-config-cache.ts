@@ -4,10 +4,6 @@ import populateEntityCache, { EntityCacheDeps } from "./entity-cache";
 export type PopulateSupplierConfigCacheResult = {
   status: "SUCCESS" | "FAILURE";
   failureReason?: string;
-  entities: {
-    entity: string;
-    recordsRetrieved: number;
-  }[];
 };
 
 export const ENTITY_TYPES = $SupplierConfigEntity.options;
@@ -43,13 +39,11 @@ export default function createHandler(deps: EntityCacheDeps) {
       return {
         status: "FAILURE",
         failureReason: `Failed to populate supplier config cache for: ${failedEntities.join(", ")}`,
-        entities,
       };
     }
 
     return {
       status: "SUCCESS",
-      entities,
     };
   };
 }
