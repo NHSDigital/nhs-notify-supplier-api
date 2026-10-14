@@ -1,8 +1,12 @@
-import { type AthenaQuery } from "@internal/letter-sla-breaches-common";
+import {
+  type AthenaQuery,
+  buildAthenaDatePredicate,
+} from "@internal/letter-sla-breaches-common";
 
 export default function buildStandardBreachesQuery(
   tableName: string,
   now: Date,
+  daysHistory: number,
 ): AthenaQuery {
   return {
     queryString: `WITH now AS (
@@ -10,8 +14,8 @@ export default function buildStandardBreachesQuery(
 ),
 recent_letter_events AS (
     SELECT domainid, supplierid, status, from_iso8601_timestamp(time) AS event_time
-    FROM nhs_pr731_supapi_eventpub
-    WHERE __year = '2026' AND __month = '10' AND __day IN ('12', '13', '14')
+    FROM ${tableName}
+    WHERE ${buildAthenaDatePredicate(now, daysHistory)}
 ),
 allocated_letters AS (
     SELECT domainid, supplierid

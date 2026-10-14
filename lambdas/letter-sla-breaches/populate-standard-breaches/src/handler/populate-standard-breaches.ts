@@ -21,7 +21,11 @@ export default function createHandler(deps: Deps) {
     try {
       const rows = await runAthenaQuery(
         deps,
-        buildStandardBreachesQuery(deps.env.EVENT_CACHE_TABLE_NAME, new Date()),
+        buildStandardBreachesQuery(
+          deps.env.EVENT_CACHE_TABLE_NAME,
+          new Date(),
+          14,
+        ),
       );
 
       // TODO: CCM-24041 process the query results to populate standard breaches.
