@@ -26,6 +26,7 @@ locals {
     { name = "groupid", type = "string" },
     { name = "campaignid", type = "string" },
     { name = "clientid", type = "string" },
+    { name = "status", type = "string" },
   ]
 
   aws_lambda_functions_dir_path = "../../../../lambdas"

@@ -42,6 +42,7 @@ describe("transformRecord", () => {
       groupid: "g1",
       campaignid: "c1",
       clientid: "cl1",
+      status: "PRINTED",
     });
   });
 
