@@ -1,3 +1,4 @@
+import { $SupplierConfigEntity } from "@internal/datastore";
 import populateEntityCache, { EntityCacheDeps } from "./entity-cache";
 
 export type PopulateSupplierConfigCacheResult = {
@@ -9,14 +10,7 @@ export type PopulateSupplierConfigCacheResult = {
   }[];
 };
 
-export const ENTITY_TYPES = [
-  "letter-variant",
-  "pack-specification",
-  "supplier",
-  "supplier-allocation",
-  "supplier-pack",
-  "volume-group",
-];
+export const ENTITY_TYPES = $SupplierConfigEntity.options;
 
 export default function createHandler(deps: EntityCacheDeps) {
   return async (): Promise<PopulateSupplierConfigCacheResult> => {
