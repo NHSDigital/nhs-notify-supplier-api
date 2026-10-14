@@ -36,14 +36,10 @@ describe("populateSupplierConfigCache", () => {
     }
     expect(result).toEqual({
       status: "SUCCESS",
-      entities: ENTITY_TYPES.map((entity, index) => ({
-        entity,
-        recordsRetrieved: index + 1,
-      })),
     });
   });
 
-  it("returns failure and counts for successful entities when an entity fails", async () => {
+  it("returns failure when an entity fails", async () => {
     const deps = { logger: { error: jest.fn() } } as unknown as EntityCacheDeps;
     jest
       .mocked(populateEntityCache)
@@ -61,10 +57,6 @@ describe("populateSupplierConfigCache", () => {
     expect(result).toEqual({
       status: "FAILURE",
       failureReason: `Failed to populate supplier config cache for: ${ENTITY_TYPES[1]}`,
-      entities: ENTITY_TYPES.map((entity, index) => ({
-        entity,
-        recordsRetrieved: index === 1 ? 0 : index + 1,
-      })),
     });
     expect(deps.logger.error).toHaveBeenCalledWith(
       { entityType: ENTITY_TYPES[1], error: expect.any(Error) },
