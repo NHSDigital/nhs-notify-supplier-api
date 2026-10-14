@@ -32,6 +32,7 @@ export function buildEMFObject(
   functionName: string,
   dimensions: Record<string, string>,
   metric: MetricEntry,
+  dimensionSets?: string[][],
 ) {
   const namespace = process.env.AWS_LAMBDA_FUNCTION_NAME || functionName;
   return {
@@ -41,7 +42,7 @@ export function buildEMFObject(
       CloudWatchMetrics: [
         {
           Namespace: namespace,
-          Dimensions: [Object.keys(dimensions)],
+          Dimensions: dimensionSets || [Object.keys(dimensions)],
           Metrics: [
             { Name: metric.key, Value: metric.value, Unit: metric.unit },
           ],

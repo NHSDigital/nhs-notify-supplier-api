@@ -1,6 +1,14 @@
 {
   "dependencies": {
+    "@date-fns/tz": "^1.4.0",
+    "@internal/helpers": "*",
+    "@internal/letter-sla-breaches-common": "*",
+    "aws-embedded-metrics": "^4.2.1",
+    "date-fns": "^4.4.0",
     "esbuild": "0.28.2"
+  },
+  "devDependencies": {
+    "@internal/sql-test-helpers": "*"
   },
   "name": "nhs-notify-supplier-api-populate-standard-breaches",
   "private": true,

@@ -1,5 +1,6 @@
 module "populate_standard_breaches" {
-  count  = local.eventpub_parquet_enabled ? 1 : 0
+  count = local.eventpub_parquet_enabled ? 1 : 0
+
   source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip"
 
   function_name = "populate_standard_breaches"
@@ -26,7 +27,7 @@ module "populate_standard_breaches" {
   handler_function_name   = "populateStandardBreachesHandler"
   runtime                 = "nodejs22.x"
   memory                  = 128
-  timeout                 = 29
+  timeout                 = 300
   log_level               = var.log_level
 
   force_lambda_code_deploy = var.force_lambda_code_deploy
@@ -37,9 +38,12 @@ module "populate_standard_breaches" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = {
-    ATHENA_WORKGROUP       = aws_athena_workgroup.reporting.name
-    ATHENA_DATABASE        = aws_glue_catalog_database.supplier.name
-    EVENT_CACHE_TABLE_NAME = aws_glue_catalog_table.eventpub_parquet[0].name
+    ATHENA_WORKGROUP       =        aws_athena_workgroup.reporting.name
+    ATHENA_DATABASE               = aws_glue_catalog_database.supplier.name
+    EVENT_CACHE_TABLE_NAME        = aws_glue_catalog_table.eventpub_parquet[0].name
+    PACK_SPECIFICATION_TABLE_NAME = "${replace(local.csi, "-", "_")}_pack_specification"
+    DAYS_TO_LOOK_BACK             = "14"
+    STANDARD_SLA_WORKING_DAYS     = "2"
   }
 }
 
