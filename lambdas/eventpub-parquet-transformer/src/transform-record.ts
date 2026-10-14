@@ -29,6 +29,7 @@ const PROMOTED_DATA_FIELDS = [
   "groupId",
   "campaignId",
   "clientId",
+  "status",
 ] as const;
 
 type Json = Record<string, unknown>;
