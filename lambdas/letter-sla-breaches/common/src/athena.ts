@@ -1,12 +1,19 @@
 import {
+  AthenaClient,
   GetQueryExecutionCommand,
   GetQueryResultsCommand,
   GetQueryResultsCommandOutput,
   QueryExecutionState,
   StartQueryExecutionCommand,
 } from "@aws-sdk/client-athena";
-import { Deps } from "./deps";
+import { Logger } from "pino";
 import LogRefs from "./log-references";
+
+export type AthenaDeps = {
+  athenaClient: AthenaClient;
+  logger: Logger;
+  env: { ATHENA_WORKGROUP: string; ATHENA_DATABASE: string };
+};
 
 export type AthenaQuery = {
   queryString: string;
@@ -26,7 +33,10 @@ const sleep = (ms: number) =>
     setTimeout(resolve, ms);
   });
 
-async function startQuery(deps: Deps, query: AthenaQuery): Promise<string> {
+async function startQuery(
+  deps: AthenaDeps,
+  query: AthenaQuery,
+): Promise<string> {
   const { QueryExecutionId } = await deps.athenaClient.send(
     new StartQueryExecutionCommand({
       QueryString: query.queryString,
@@ -44,7 +54,7 @@ async function startQuery(deps: Deps, query: AthenaQuery): Promise<string> {
 }
 
 async function waitForQuery(
-  deps: Deps,
+  deps: AthenaDeps,
   queryExecutionId: string,
   pollIntervalMs: number,
 ): Promise<void> {
@@ -98,7 +108,7 @@ function toRows(
 }
 
 async function getResults(
-  deps: Deps,
+  deps: AthenaDeps,
   queryExecutionId: string,
 ): Promise<AthenaRow[]> {
   const results: AthenaRow[] = [];
@@ -121,7 +131,7 @@ async function getResults(
 }
 
 export default async function runAthenaQuery(
-  deps: Deps,
+  deps: AthenaDeps,
   query: AthenaQuery,
   options: AthenaQueryOptions = {},
 ): Promise<AthenaRow[]> {

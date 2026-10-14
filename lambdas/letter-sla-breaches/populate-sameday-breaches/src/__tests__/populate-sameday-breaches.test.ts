@@ -1,7 +1,5 @@
-import {
-  type Deps,
-  runAthenaQuery,
-} from "@internal/letter-sla-breaches-common";
+import { runAthenaQuery } from "@internal/letter-sla-breaches-common";
+import { type Deps } from "../handler/deps";
 import createHandler from "../handler/populate-sameday-breaches";
 
 jest.mock("@internal/letter-sla-breaches-common");
