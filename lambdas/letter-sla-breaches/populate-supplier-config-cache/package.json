@@ -1,13 +1,13 @@
 {
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.1138.0",
-    "@aws-sdk/client-s3": "^3.1138.0",
-    "@aws-sdk/lib-dynamodb": "^3.1138.0",
+    "@aws-sdk/client-dynamodb": "catalog:aws",
+    "@aws-sdk/client-s3": "catalog:aws",
+    "@aws-sdk/lib-dynamodb": "catalog:aws",
     "@internal/datastore": "workspace:*",
     "@internal/helpers": "workspace:*",
-    "esbuild": "0.28.2",
-    "pino": "^10.3.1",
-    "zod": "^4.6.5"
+    "esbuild": "catalog:tools",
+    "pino": "catalog:app",
+    "zod": "catalog:app"
   },
   "name": "nhs-notify-supplier-api-populate-supplier-config-cache",
   "private": true,
