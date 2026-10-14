@@ -27,10 +27,6 @@ export default function createHandler(deps: EntityCacheDeps) {
         }
       }),
     );
-    const entities = results.map(({ entity, recordsRetrieved }) => ({
-      entity,
-      recordsRetrieved,
-    }));
     const failedEntities = results
       .filter((result) => result.failed)
       .map((result) => result.entity);

@@ -37,7 +37,7 @@ module "populate_supplier_config_cache" {
 
   lambda_env_vars = {
     SUPPLIER_CONFIG_TABLE_NAME = aws_dynamodb_table.supplier-configuration.name
-    EVENT_CACHE_BUCKET_NAME    = local.eventsub_event_cache_bucket_name
+    EVENT_CACHE_BUCKET_NAME    = module.s3bucket_reporting.bucket
   }
 }
 
@@ -67,6 +67,6 @@ data "aws_iam_policy_document" "populate_supplier_config_cache_lambda" {
     sid       = "AllowWriteSupplierConfigCache"
     effect    = "Allow"
     actions   = ["s3:PutObject"]
-    resources = ["arn:aws:s3:::${local.eventsub_event_cache_bucket_name}/supplier_config_cache/*"]
+    resources = ["${module.s3bucket_reporting.arn}/supplier_config_cache/*"]
   }
 }
