@@ -25,7 +25,7 @@ module "populate_standard_breaches" {
   handler_function_name   = "populateStandardBreachesHandler"
   runtime                 = "nodejs22.x"
   memory                  = 128
-  timeout                 = 29
+  timeout                 = 300
   log_level               = var.log_level
 
   force_lambda_code_deploy = var.force_lambda_code_deploy
@@ -35,7 +35,11 @@ module "populate_standard_breaches" {
   odin_log_destination_arn  = local.odin_destination_arn
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
-  lambda_env_vars = {}
+  lambda_env_vars = {
+    ATHENA_WORKGROUP       = aws_athena_workgroup.letter_sla_breaches.name
+    ATHENA_DATABASE        = aws_glue_catalog_database.supplier.name
+    EVENT_CACHE_TABLE_NAME = local.event_cache_glue_table_name
+  }
 }
 
 data "aws_iam_policy_document" "populate_standard_breaches_lambda" {
@@ -50,6 +54,76 @@ data "aws_iam_policy_document" "populate_standard_breaches_lambda" {
 
     resources = [
       module.kms.key_arn,
+    ]
+  }
+
+  statement {
+    sid    = "AllowAthenaQueries"
+    effect = "Allow"
+
+    actions = [
+      "athena:GetQueryExecution",
+      "athena:GetQueryResults",
+      "athena:StartQueryExecution",
+      "athena:StopQueryExecution",
+    ]
+
+    resources = [
+      aws_athena_workgroup.letter_sla_breaches.arn,
+    ]
+  }
+
+  statement {
+    sid    = "AllowGlueCatalogRead"
+    effect = "Allow"
+
+    actions = [
+      "glue:GetDatabase",
+      "glue:GetPartition",
+      "glue:GetPartitions",
+      "glue:GetTable",
+      "glue:GetTables",
+    ]
+
+    resources = [
+      "arn:aws:glue:${var.region}:${var.aws_account_id}:catalog",
+      aws_glue_catalog_database.supplier.arn,
+      "arn:aws:glue:${var.region}:${var.aws_account_id}:table/${aws_glue_catalog_database.supplier.name}/*",
+    ]
+  }
+
+  statement {
+    sid    = "AllowReadEventCacheBucket"
+    effect = "Allow"
+
+    actions = [
+      "s3:GetBucketLocation",
+      "s3:GetObject",
+      "s3:ListBucket",
+    ]
+
+    resources = [
+      "arn:aws:s3:::${local.event_cache_bucket_name}",
+      "arn:aws:s3:::${local.event_cache_bucket_name}/*",
+    ]
+  }
+
+  statement {
+    sid    = "AllowAthenaQueryResultsBucket"
+    effect = "Allow"
+
+    actions = [
+      "s3:AbortMultipartUpload",
+      "s3:GetBucketLocation",
+      "s3:GetObject",
+      "s3:ListBucket",
+      "s3:ListMultipartUploadParts",
+      "s3:PutObject",
+    ]
+
+    resources = [
+      module.s3bucket_athena_query_results.arn,
+      "${module.s3bucket_athena_query_results.arn}/letter-sla-breaches/*",
     ]
   }
 }

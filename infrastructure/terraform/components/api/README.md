@@ -92,6 +92,7 @@ No requirements.
 | <a name="module_populate_supplier_config_cache"></a> [populate\_supplier\_config\_cache](#module\_populate\_supplier\_config\_cache) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
 | <a name="module_post_letters"></a> [post\_letters](#module\_post\_letters) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
 | <a name="module_post_mi"></a> [post\_mi](#module\_post\_mi) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
+| <a name="module_s3bucket_athena_query_results"></a> [s3bucket\_athena\_query\_results](#module\_s3bucket\_athena\_query\_results) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.0.6/terraform-s3bucket.zip | n/a |
 | <a name="module_s3bucket_reporting"></a> [s3bucket\_reporting](#module\_s3bucket\_reporting) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.6/terraform-s3bucket.zip | n/a |
 | <a name="module_s3bucket_test_letters"></a> [s3bucket\_test\_letters](#module\_s3bucket\_test\_letters) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-s3bucket.zip | n/a |
 | <a name="module_sqs_alarms"></a> [sqs\_alarms](#module\_sqs\_alarms) | ../../modules/alarms-sqs | n/a |
