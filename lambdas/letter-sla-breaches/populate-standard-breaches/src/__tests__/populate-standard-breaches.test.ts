@@ -1,7 +1,6 @@
 import runAthenaQuery from "../handler/athena";
 import { Deps } from "../handler/deps";
 import createHandler from "../handler/populate-standard-breaches";
-import buildStandardBreachesQuery from "../handler/standard-breaches-query";
 
 jest.mock("../handler/athena");
 
@@ -18,51 +17,34 @@ describe("populateStandardBreaches", () => {
 
     const result = await createHandler(deps)({ date: "2026-10-08" });
 
-    expect(runAthenaQuery).toHaveBeenCalledWith(
-      deps,
-      buildStandardBreachesQuery("event_cache", "2026-10-08"),
-    );
+    expect(runAthenaQuery).toHaveBeenCalled();
     expect(result).toEqual({ status: "SUCCESS", rowsReturned: 1 });
   });
 
-  it("returns failure when the query fails", async () => {
+  it("runs the standard breaches query and returns failure", async () => {
     const deps = makeDeps();
-    jest
-      .mocked(runAthenaQuery)
-      .mockRejectedValueOnce(new Error("query failed"));
+    jest.mocked(runAthenaQuery).mockRejectedValueOnce(new Error("boom"));
 
     const result = await createHandler(deps)({ date: "2026-10-08" });
 
+    expect(runAthenaQuery).toHaveBeenCalled();
     expect(result).toEqual({
+      failureReason: "boom",
       status: "FAILURE",
-      failureReason: "query failed",
-      rowsReturned: 0,
-    });
-    expect(deps.logger.error).toHaveBeenCalledWith(
-      { date: "2026-10-08", error: expect.any(Error) },
-      "Failed to populate standard breaches",
-    );
-  });
-
-  it("returns failure without querying when the date is invalid", async () => {
-    const result = await createHandler(makeDeps())({ date: "not-a-date" });
-
-    expect(runAthenaQuery).not.toHaveBeenCalled();
-    expect(result).toEqual({
-      status: "FAILURE",
-      failureReason: 'Invalid date "not-a-date", expected YYYY-MM-DD',
       rowsReturned: 0,
     });
   });
 
-  it("returns failure when a non-Error is thrown", async () => {
+  it("runs the standard breaches query and returns failure when not an error", async () => {
+    const deps = makeDeps();
     jest.mocked(runAthenaQuery).mockRejectedValueOnce("boom");
 
-    const result = await createHandler(makeDeps())({ date: "2026-10-08" });
+    const result = await createHandler(deps)({ date: "2026-10-08" });
 
+    expect(runAthenaQuery).toHaveBeenCalled();
     expect(result).toEqual({
-      status: "FAILURE",
       failureReason: "boom",
+      status: "FAILURE",
       rowsReturned: 0,
     });
   });

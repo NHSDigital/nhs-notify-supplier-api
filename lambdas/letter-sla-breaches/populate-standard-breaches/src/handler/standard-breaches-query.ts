@@ -2,6 +2,7 @@ import { AthenaQuery } from "./athena";
 
 export default function buildStandardBreachesQuery(
   tableName: string,
+  now: Date,
 ): AthenaQuery {
   return {
     queryString: `WITH unpacked AS (
@@ -14,7 +15,8 @@ export default function buildStandardBreachesQuery(
         json_extract_scalar(message, '$.data.groupId')                 AS group_id,
         json_extract_scalar(message, '$.data.reasonCode')              AS reason_code,
         json_extract_scalar(message, '$.data.reasonText')              AS reason_text,
-        from_iso8601_timestamp(json_extract_scalar(message, '$.time')) AS event_time
+        from_iso8601_timestamp(json_extract_scalar(message, '$.time')) AS event_time,
+        from_iso8601_timestamp(?)                                      AS now
     FROM ${tableName}
 ),
 allocated_letters AS (
@@ -22,8 +24,8 @@ allocated_letters AS (
     FROM unpacked
     WHERE status = 'PENDING'
     GROUP BY domain_id, supplier_id
-    HAVING min(event_time) < current_timestamp -
-        CASE WHEN day_of_week(current_timestamp AT TIME ZONE 'Europe/London') <= 2 THEN INTERVAL '96' HOUR ELSE INTERVAL '48' HOUR END
+    HAVING min(event_time) < unpacked.now -
+        CASE WHEN day_of_week(unpacked.now AT TIME ZONE 'Europe/London') <= 2 THEN INTERVAL '96' HOUR ELSE INTERVAL '48' HOUR END
 ),
 completed_letters AS (
     SELECT domain_id, supplier_id
@@ -38,5 +40,6 @@ FROM (
         LEFT JOIN completed_letters cl ON al.domain_id = cl.domain_id WHERE cl.domain_id IS NULL
 )
 GROUP BY supplier_id`,
+    executionParameters: [now.toISOString()],
   };
 }
