@@ -4,8 +4,8 @@ import {
   GetQueryResultsCommand,
   StartQueryExecutionCommand,
 } from "@aws-sdk/client-athena";
-import runAthenaQuery from "../handler/athena";
-import { Deps } from "../handler/deps";
+import runAthenaQuery from "../athena";
+import { type Deps } from "../deps";
 
 const query = { queryString: "SELECT ?", executionParameters: ["'a'"] };
 

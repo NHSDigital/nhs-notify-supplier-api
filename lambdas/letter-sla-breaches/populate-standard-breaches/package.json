@@ -1,9 +1,7 @@
 {
   "dependencies": {
-    "@aws-sdk/client-athena": "^3.1149.0",
-    "@internal/helpers": "^0.1.0",
-    "esbuild": "0.28.2",
-    "pino": "^10.4.0"
+    "@internal/letter-sla-breaches-common": "*",
+    "esbuild": "0.28.2"
   },
   "name": "nhs-notify-supplier-api-populate-standard-breaches",
   "private": true,

@@ -1,45 +1,39 @@
-import { AthenaQuery } from "./athena";
+import { type AthenaQuery } from "@internal/letter-sla-breaches-common";
 
 export default function buildStandardBreachesQuery(
   tableName: string,
   now: Date,
 ): AthenaQuery {
   return {
-    queryString: `WITH unpacked AS (
-    SELECT
-        json_extract_scalar(message, '$.data.domainId')               AS domain_id,
-        json_extract_scalar(message, '$.data.status')                 AS status,
-        json_extract_scalar(message, '$.data.specificationId')         AS specification_id,
-        json_extract_scalar(message, '$.data.billingRef')              AS billing_ref,
-        json_extract_scalar(message, '$.data.supplierId')              AS supplier_id,
-        json_extract_scalar(message, '$.data.groupId')                 AS group_id,
-        json_extract_scalar(message, '$.data.reasonCode')              AS reason_code,
-        json_extract_scalar(message, '$.data.reasonText')              AS reason_text,
-        from_iso8601_timestamp(json_extract_scalar(message, '$.time')) AS event_time,
-        from_iso8601_timestamp(?)                                      AS now
-    FROM ${tableName}
+    queryString: `WITH now AS (
+    SELECT from_iso8601_timestamp('?') AS iso8601
+),
+recent_letter_events AS (
+    SELECT domainid, supplierid, status, from_iso8601_timestamp(time) AS event_time
+    FROM nhs_pr731_supapi_eventpub
+    WHERE __year = '2026' AND __month = '10' AND __day IN ('12', '13', '14')
 ),
 allocated_letters AS (
-    SELECT domain_id, supplier_id
-    FROM unpacked
+    SELECT domainid, supplierid
+    FROM recent_letter_events
     WHERE status = 'PENDING'
-    GROUP BY domain_id, supplier_id
-    HAVING min(event_time) < unpacked.now -
-        CASE WHEN day_of_week(unpacked.now AT TIME ZONE 'Europe/London') <= 2 THEN INTERVAL '96' HOUR ELSE INTERVAL '48' HOUR END
+    GROUP BY domainid, supplierid
+    HAVING min(event_time) < (SELECT iso8601 FROM now) -
+        CASE WHEN day_of_week((SELECT iso8601  AT TIME ZONE 'Europe/London' FROM now)) <= 2 THEN INTERVAL '96' HOUR ELSE INTERVAL '48' HOUR END
 ),
 completed_letters AS (
-    SELECT domain_id, supplier_id
-    FROM unpacked
+    SELECT domainid, supplierid
+    FROM recent_letter_events
     WHERE status in ('REJECTED', 'FAILED', 'CANCELLED', 'FORWARDED', 'DISPATCHED')
-    GROUP BY domain_id, supplier_id
+    GROUP BY domainid, supplierid
 )
-SELECT supplier_id, count(*)
+SELECT supplierid, count(*)
 FROM (
-    SELECT al.domain_id, al.supplier_id
+    SELECT al.domainid, al.supplierid
     FROM allocated_letters al
-        LEFT JOIN completed_letters cl ON al.domain_id = cl.domain_id WHERE cl.domain_id IS NULL
+        LEFT JOIN completed_letters cl ON al.domainid = cl.domainid WHERE cl.domainid IS NULL
 )
-GROUP BY supplier_id`,
+GROUP BY supplierid`,
     executionParameters: [now.toISOString()],
   };
 }

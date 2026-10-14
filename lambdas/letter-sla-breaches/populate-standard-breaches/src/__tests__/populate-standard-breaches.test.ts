@@ -1,8 +1,10 @@
-import runAthenaQuery from "../handler/athena";
-import { Deps } from "../handler/deps";
+import {
+  type Deps,
+  runAthenaQuery,
+} from "@internal/letter-sla-breaches-common";
 import createHandler from "../handler/populate-standard-breaches";
 
-jest.mock("../handler/athena");
+jest.mock("@internal/letter-sla-breaches-common");
 
 const makeDeps = () =>
   ({
