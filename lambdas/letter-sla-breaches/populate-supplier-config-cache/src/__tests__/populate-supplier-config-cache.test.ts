@@ -1,8 +1,21 @@
+import { $SupplierConfigEntity } from "@internal/datastore";
 import populateEntityCache, { EntityCacheDeps } from "../handler/entity-cache";
 import createHandler, {
   ENTITY_TYPES,
 } from "../handler/populate-supplier-config-cache";
 
+jest.mock("@internal/datastore", () => ({
+  $SupplierConfigEntity: {
+    options: [
+      "letter-variant",
+      "volume-group",
+      "supplier-allocation",
+      "supplier",
+      "pack-specification",
+      "supplier-pack",
+    ],
+  },
+}));
 jest.mock("../handler/entity-cache");
 
 describe("populateSupplierConfigCache", () => {
@@ -16,14 +29,7 @@ describe("populateSupplierConfigCache", () => {
 
     const result = await handler();
 
-    expect(ENTITY_TYPES).toEqual([
-      "letter-variant",
-      "pack-specification",
-      "supplier",
-      "supplier-allocation",
-      "supplier-pack",
-      "volume-group",
-    ]);
+    expect(ENTITY_TYPES).toEqual($SupplierConfigEntity.options);
     expect(populateEntityCache).toHaveBeenCalledTimes(ENTITY_TYPES.length);
     for (const entityType of ENTITY_TYPES) {
       expect(populateEntityCache).toHaveBeenCalledWith(deps, entityType);
@@ -54,15 +60,14 @@ describe("populateSupplierConfigCache", () => {
 
     expect(result).toEqual({
       status: "FAILURE",
-      failureReason:
-        "Failed to populate supplier config cache for: pack-specification",
+      failureReason: `Failed to populate supplier config cache for: ${ENTITY_TYPES[1]}`,
       entities: ENTITY_TYPES.map((entity, index) => ({
         entity,
         recordsRetrieved: index === 1 ? 0 : index + 1,
       })),
     });
     expect(deps.logger.error).toHaveBeenCalledWith(
-      { entityType: "pack-specification", error: expect.any(Error) },
+      { entityType: ENTITY_TYPES[1], error: expect.any(Error) },
       "Failed to populate supplier config entity cache",
     );
   });
