@@ -291,3 +291,15 @@ variable "csoc_destination_account" {
   description = "value of the CSOC destination account, if applicable. If null, CSOC destination account will not be added as a resource in the logging policy"
   default     = "000000000000"
 }
+
+variable "reports_data_retention_policy_days" {
+  type        = number
+  description = "Number of days to retain reporting bucket data"
+  default     = 90
+}
+
+variable "reports_data_retention_non_current_days" {
+  type        = number
+  description = "Number of days to retain noncurrent reporting bucket object versions"
+  default     = 14
+}

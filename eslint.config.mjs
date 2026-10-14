@@ -115,6 +115,7 @@ export default defineConfig([
         eslintImportResolverTypescript.createTypeScriptImportResolver({
           project: [
             'lambdas/*/tsconfig.json',
+            'lambdas/*/*/tsconfig.json',
             'tests/tsconfig.json',
             'internal/*/tsconfig.json',
           ],
