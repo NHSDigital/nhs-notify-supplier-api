@@ -6,7 +6,7 @@ export type PopulateSupplierConfigCacheResult = {
   failureReason?: string;
 };
 
-export const ENTITY_TYPES = $SupplierConfigEntity.options;
+const ENTITY_TYPES = $SupplierConfigEntity.options;
 
 export default function createHandler(deps: EntityCacheDeps) {
   return async (): Promise<PopulateSupplierConfigCacheResult> => {
