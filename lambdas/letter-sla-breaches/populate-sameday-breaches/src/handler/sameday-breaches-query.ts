@@ -10,7 +10,7 @@ export default function buildSamedayBreachesQuery(
 ): AthenaQuery {
   return {
     queryString: `WITH now AS (
-    SELECT from_iso8601_timestamp('?') AS iso8601
+    SELECT from_iso8601_timestamp(?) AS iso8601
 ),
 recent_letter_events AS (
     SELECT domainid, supplierid, status, from_iso8601_timestamp(time) AS event_time

@@ -7,7 +7,7 @@ describe("buildSamedayBreachesQuery", () => {
     ).toEqual(
       expect.objectContaining({
         queryString: expect.stringContaining(
-          "(_year = '2026' AND _month = '10' AND _day IN ('08'))",
+          "(__year = '2026' AND __month = '10' AND __day IN ('08'))",
         ),
         executionParameters: ["2026-10-08T00:00:00.000Z"],
       }),
