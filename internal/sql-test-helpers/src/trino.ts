@@ -25,6 +25,37 @@ export type TrinoContext = {
   endpoint: string;
 };
 
+const NODE_READY_TIMEOUT_MS = 60_000;
+const NODE_READY_POLL_MS = 500;
+
+const sleep = (ms: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
+// "SERVER STARTED" is logged before the coordinator has registered its own
+// node as a worker, so early queries can fail with "No nodes available to run
+// query". Wait until a trivial query succeeds before handing out the context.
+async function waitForTrinoNode(context: TrinoContext): Promise<void> {
+  const deadline = Date.now() + NODE_READY_TIMEOUT_MS;
+
+  for (;;) {
+    try {
+      await runTrinoStatement(context, "SELECT 1");
+      return;
+    } catch (error) {
+      const retryable =
+        error instanceof Error && error.message.includes("No nodes available");
+
+      if (!retryable || Date.now() >= deadline) {
+        throw error;
+      }
+    }
+
+    await sleep(NODE_READY_POLL_MS);
+  }
+}
+
 export async function setupTrinoContainer(): Promise<TrinoContext> {
   const container = await new GenericContainer(TRINO_IMAGE)
     .withExposedPorts(TRINO_PORT)
@@ -33,8 +64,16 @@ export async function setupTrinoContainer(): Promise<TrinoContext> {
     .start();
 
   const endpoint = `http://${container.getHost()}:${container.getMappedPort(TRINO_PORT)}`;
+  const context = { container, endpoint };
 
-  return { container, endpoint };
+  try {
+    await waitForTrinoNode(context);
+  } catch (error) {
+    await container.stop();
+    throw error;
+  }
+
+  return context;
 }
 
 async function readTrinoResponse(response: Response): Promise<TrinoResponse> {

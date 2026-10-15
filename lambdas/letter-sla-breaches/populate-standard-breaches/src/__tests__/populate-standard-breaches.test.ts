@@ -20,7 +20,10 @@ describe("populateStandardBreaches", () => {
     const result = await createHandler(deps)({ date: "2026-10-08" });
 
     expect(runAthenaQuery).toHaveBeenCalled();
-    expect(result).toEqual({ status: "SUCCESS", breachCount: "1" });
+    expect(result).toEqual({
+      status: "SUCCESS",
+      breachCounts: JSON.stringify([{ breach_count: "1" }]),
+    });
   });
 
   it("runs the standard breaches query and returns failure", async () => {
@@ -33,7 +36,7 @@ describe("populateStandardBreaches", () => {
     expect(result).toEqual({
       failureReason: "boom",
       status: "FAILURE",
-      breachCount: "0",
+      breachCounts: "-",
     });
   });
 
@@ -47,7 +50,7 @@ describe("populateStandardBreaches", () => {
     expect(result).toEqual({
       failureReason: "boom",
       status: "FAILURE",
-      breachCount: "0",
+      breachCounts: "-",
     });
   });
 });
