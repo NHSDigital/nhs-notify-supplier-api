@@ -76,6 +76,7 @@ describe("LetterQueueRepository", () => {
       expect(pendingLetter.queueSortOrderSk).toBe(
         "10-2026-03-04T13:15:45.000Z",
       );
+      expect(pendingLetter.lastReadTimestamp).toBeUndefined();
       expect(await letterExists(db, "supplier1", "letter1")).toBe(true);
     });
 
@@ -164,9 +165,10 @@ describe("LetterQueueRepository", () => {
     it("filters by visibilityTimestamp", async () => {
       const pendingLetter = createLetter();
       await letterQueueRepository.putLetter(createLetter());
-      await letterQueueRepository.updateVisibilityTimestamp(
+      await letterQueueRepository.updateTimestamps(
         pendingLetter,
         new Date(Date.now() + 600_000),
+        new Date(Date.now()),
       );
 
       const letters = await letterQueueRepository.getLetters("supplier1", 1);
@@ -259,9 +261,10 @@ describe("LetterQueueRepository", () => {
       await letterQueueRepository.putLetter(
         createLetter({ letterId: "fourth-letter" }),
       );
-      await letterQueueRepository.updateVisibilityTimestamp(
+      await letterQueueRepository.updateTimestamps(
         createLetter({ letterId: "second-letter" }),
         new Date(Date.now() + 600_000),
+        new Date(Date.now()),
       );
 
       const letters = await letterQueueRepository.getLetters("supplier1", 3);
@@ -301,23 +304,26 @@ describe("LetterQueueRepository", () => {
     });
   });
 
-  describe("updateVisibilityTimestamp", () => {
-    it("updates the visibilityTimestamp on an existing letter", async () => {
+  describe("updateTimestamps", () => {
+    it("updates the visibilityTimestamp and lastUpdatedTimestamp on an existing letter", async () => {
       const pendingLetter =
         await letterQueueRepository.putLetter(createLetter());
 
-      await letterQueueRepository.updateVisibilityTimestamp(
+      await letterQueueRepository.updateTimestamps(
         pendingLetter,
         new Date("2026-03-04T13:15:45.000Z"),
+        new Date("2026-10-15T10:17:45.000Z"),
       );
 
       const letter = await getLetter(db, "supplier1", "letter1");
       expect(letter?.visibilityTimestamp).toBe("2026-03-04T13:15:45.000Z");
+      expect(letter?.lastReadTimestamp).toBe("2026-10-15T10:17:45.000Z");
     });
 
     it("does nothing when the letter does not exist", async () => {
-      await letterQueueRepository.updateVisibilityTimestamp(
+      await letterQueueRepository.updateTimestamps(
         createLetter(),
+        new Date(),
         new Date(),
       );
 
@@ -334,8 +340,9 @@ describe("LetterQueueRepository", () => {
         },
       );
       await expect(
-        misconfiguredRepository.updateVisibilityTimestamp(
+        misconfiguredRepository.updateTimestamps(
           createLetter(),
+          new Date(),
           new Date(),
         ),
       ).rejects.toThrow("Cannot do operations on a non-existent table");
