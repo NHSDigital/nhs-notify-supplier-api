@@ -7,8 +7,8 @@ settings:
 catalogs:
   app:
     '@asyncapi/bundler':
-      specifier: ^1.0.2
-      version: 1.0.2
+      specifier: ^0.6.4
+      version: 0.6.4
     '@nhsdigital/nhs-notify-event-schemas-letter-rendering':
       specifier: ^2.0.2
       version: 2.0.2
@@ -597,7 +597,7 @@ importers:
     dependencies:
       '@asyncapi/bundler':
         specifier: catalog:app
-        version: 1.0.2
+        version: 0.6.4
       zod:
         specifier: catalog:app
         version: 4.6.5
@@ -1169,21 +1169,11 @@ packages:
     resolution: {integrity: sha512-60vepv88RwcJtSHrD6MjIL6Ta3SOYbgfnkHb+ppAVK+o9mXprRtulx7VlRl3lN3bbvysAfCS7WMVfhUYemB0IQ==}
     engines: {node: '>= 16'}
 
-  '@apidevtools/json-schema-ref-parser@15.5.2':
-    resolution: {integrity: sha512-B+C9Ok0DF/rjANIUHgwcV5/d4C72MB7f2IbKFL8jDGcGq2qn3yr893s8vAn2kbhmyaelAin0JK8EKF9P1+y7aQ==}
-    engines: {node: '>=20'}
-    peerDependencies:
-      '@types/json-schema': ^7.0.15
-
   '@asamuzakjp/css-color@3.2.0':
     resolution: {integrity: sha512-K1A6z8tS3XsmCMM86xoWdn7Fkdn9m6RSVtocUrJYIwZnFVkng/PvkEoWtOWmP+Scc6saYWHWZYbndEEXxl24jw==}
 
   '@asyncapi/bundler@0.6.4':
     resolution: {integrity: sha512-lKZo2FF2TKt4n6Qm8vP/JOEEGE04gdH/D9oHmBt/NfOylMaw8XoFsI+k+IJyzpVMzREjZfxGf9gNzfW0CWRf5g==}
-
-  '@asyncapi/bundler@1.0.2':
-    resolution: {integrity: sha512-GrWhKPRwwSI2U6bOVC6mquzEJWqQoQ+xyCCvw7+gznoMx13KpuLKyX6jEUI/MmaXK3G5piIpuQCMmjcoUmjeiA==}
-    engines: {node: '>=24'}
 
   '@asyncapi/specs@6.11.1':
     resolution: {integrity: sha512-A3WBLqAKGoJ2+6FWFtpjBlCQ1oFCcs4GxF7zsIGvNqp/klGUHjlA3aAcZ9XMMpLGE8zPeYDz2x9FmO6DSuKraQ==}
@@ -7062,12 +7052,6 @@ snapshots:
       '@types/json-schema': 7.0.15
       js-yaml: 4.3.2
 
-  '@apidevtools/json-schema-ref-parser@15.5.2(@types/json-schema@7.0.15)':
-    dependencies:
-      '@types/json-schema': 7.0.15
-      js-yaml: 5.4.3
-      undici: 7.30.0
-
   '@asamuzakjp/css-color@3.2.0':
     dependencies:
       '@csstools/css-calc': 2.1.4(@csstools/css-parser-algorithms@3.0.5(@csstools/css-tokenizer@3.0.4))(@csstools/css-tokenizer@3.0.4)
@@ -7079,14 +7063,6 @@ snapshots:
   '@asyncapi/bundler@0.6.4':
     dependencies:
       '@apidevtools/json-schema-ref-parser': 11.9.3
-      '@types/json-schema': 7.0.15
-      '@ungap/structured-clone': 1.4.0
-      js-yaml: 4.3.2
-      lodash: 4.18.1
-
-  '@asyncapi/bundler@1.0.2':
-    dependencies:
-      '@apidevtools/json-schema-ref-parser': 15.5.2(@types/json-schema@7.0.15)
       '@types/json-schema': 7.0.15
       '@ungap/structured-clone': 1.4.0
       js-yaml: 4.3.2
