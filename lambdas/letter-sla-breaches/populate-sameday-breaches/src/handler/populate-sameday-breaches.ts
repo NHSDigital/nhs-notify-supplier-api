@@ -28,13 +28,17 @@ export default function createHandler(deps: Deps) {
         ),
       );
 
+      const breachCount = String(
+        rows.reduce((total, row) => total + Number(row.breach_count ?? 0), 0),
+      );
+
       // TODO: CCM-24041 process the query results to populate sameday breaches.
       deps.logger.info(
-        { date: event.date, breachCount: rows[0].breach_count },
+        { date: event.date, breachCount },
         "sameday breaches query completed",
       );
 
-      return { status: "SUCCESS", breachCount: rows[0].breach_count! };
+      return { status: "SUCCESS", breachCount };
     } catch (error) {
       deps.logger.error(
         { date: event.date, error },
