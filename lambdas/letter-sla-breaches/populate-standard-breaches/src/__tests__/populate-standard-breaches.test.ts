@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-import populateStandardBreaches from "../handler/populate-standard-breaches";
-=======
 import {
   type Deps,
   runAthenaQuery,
@@ -14,15 +11,43 @@ const makeDeps = () =>
     logger: { info: jest.fn(), error: jest.fn() },
     env: { EVENT_CACHE_TABLE_NAME: "event_cache" },
   }) as unknown as Deps;
->>>>>>> 68020529 (Create common package)
 
 describe("populateStandardBreaches", () => {
-  it("returns a success result", async () => {
-    const result = await populateStandardBreaches({ date: "2026-10-08" });
+  it("runs the standard breaches query and returns success", async () => {
+    const deps = makeDeps();
+    jest.mocked(runAthenaQuery).mockResolvedValueOnce([{ breach_count: "1" }]);
 
+    const result = await createHandler(deps)({ date: "2026-10-08" });
+
+    expect(runAthenaQuery).toHaveBeenCalled();
+    expect(result).toEqual({ status: "SUCCESS", breachCount: "1" });
+  });
+
+  it("runs the standard breaches query and returns failure", async () => {
+    const deps = makeDeps();
+    jest.mocked(runAthenaQuery).mockRejectedValueOnce(new Error("boom"));
+
+    const result = await createHandler(deps)({ date: "2026-10-08" });
+
+    expect(runAthenaQuery).toHaveBeenCalled();
     expect(result).toEqual({
-      status: "SUCCESS",
-      message: "populate-standard-breaches invoked successfully",
+      failureReason: "boom",
+      status: "FAILURE",
+      breachCount: "0",
+    });
+  });
+
+  it("runs the standard breaches query and returns failure when not an error", async () => {
+    const deps = makeDeps();
+    jest.mocked(runAthenaQuery).mockRejectedValueOnce("boom");
+
+    const result = await createHandler(deps)({ date: "2026-10-08" });
+
+    expect(runAthenaQuery).toHaveBeenCalled();
+    expect(result).toEqual({
+      failureReason: "boom",
+      status: "FAILURE",
+      breachCount: "0",
     });
   });
 });

@@ -1,17 +1,21 @@
-import { type AthenaQuery } from "@internal/letter-sla-breaches-common";
+import {
+  type AthenaQuery,
+  buildAthenaDatePredicate,
+} from "@internal/letter-sla-breaches-common";
 
 export default function buildStandardBreachesQuery(
   tableName: string,
   now: Date,
+  daysHistory: number,
 ): AthenaQuery {
   return {
     queryString: `WITH now AS (
-    SELECT from_iso8601_timestamp('?') AS iso8601
+    SELECT from_iso8601_timestamp(?) AS iso8601
 ),
 recent_letter_events AS (
     SELECT domainid, supplierid, status, from_iso8601_timestamp(time) AS event_time
-    FROM nhs_pr731_supapi_eventpub
-    WHERE __year = '2026' AND __month = '10' AND __day IN ('12', '13', '14')
+    FROM ${tableName}
+    WHERE ${buildAthenaDatePredicate(now, daysHistory)}
 ),
 allocated_letters AS (
     SELECT domainid, supplierid
@@ -27,7 +31,7 @@ completed_letters AS (
     WHERE status in ('REJECTED', 'FAILED', 'CANCELLED', 'FORWARDED', 'DISPATCHED')
     GROUP BY domainid, supplierid
 )
-SELECT supplierid, count(*)
+SELECT supplierid, count(*) AS breach_count
 FROM (
     SELECT al.domainid, al.supplierid
     FROM allocated_letters al
