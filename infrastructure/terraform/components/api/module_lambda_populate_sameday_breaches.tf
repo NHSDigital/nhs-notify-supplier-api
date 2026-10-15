@@ -35,7 +35,11 @@ module "populate_sameday_breaches" {
   odin_log_destination_arn  = local.odin_destination_arn
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
-  lambda_env_vars = {}
+  lambda_env_vars = {
+    ATHENA_WORKGROUP       = aws_athena_workgroup.reporting.name
+    ATHENA_DATABASE        = aws_glue_catalog_database.supplier.name
+    EVENT_CACHE_TABLE_NAME = "${replace(local.csi, "-", "_")}_eventpub"
+  }
 }
 
 data "aws_iam_policy_document" "populate_sameday_breaches_lambda" {
@@ -51,5 +55,66 @@ data "aws_iam_policy_document" "populate_sameday_breaches_lambda" {
     resources = [
       module.kms.key_arn,
     ]
+  }
+  statement {
+    sid    = "AllowAthenaQueryExecution"
+    effect = "Allow"
+
+    actions = [
+      "athena:GetQueryExecution",
+      "athena:GetQueryResults",
+      "athena:StartQueryExecution",
+    ]
+
+    resources = [aws_athena_workgroup.reporting.arn]
+  }
+
+  statement {
+    sid    = "AllowGlueCatalogRead"
+    effect = "Allow"
+
+    actions = [
+      "glue:GetDatabase",
+      "glue:GetPartitions",
+      "glue:GetTable",
+    ]
+
+    resources = [
+      "arn:aws:glue:${var.region}:${var.aws_account_id}:catalog",
+      "arn:aws:glue:${var.region}:${var.aws_account_id}:database/${aws_glue_catalog_database.supplier.name}",
+      "arn:aws:glue:${var.region}:${var.aws_account_id}:table/${aws_glue_catalog_database.supplier.name}/*",
+    ]
+  }
+
+  statement {
+    sid    = "AllowReadReportingData"
+    effect = "Allow"
+
+    actions = [
+      "s3:GetBucketLocation",
+      "s3:ListBucket",
+    ]
+
+    resources = [module.s3bucket_reporting.arn]
+  }
+
+  statement {
+    sid       = "AllowReadEventData"
+    effect    = "Allow"
+    actions   = ["s3:GetObject"]
+    resources = ["${module.s3bucket_reporting.arn}/parquet/*"]
+  }
+
+  statement {
+    sid    = "AllowAthenaOutput"
+    effect = "Allow"
+
+    actions = [
+      "s3:AbortMultipartUpload",
+      "s3:GetObject",
+      "s3:PutObject",
+    ]
+
+    resources = ["${module.s3bucket_reporting.arn}/athena-output/*"]
   }
 }
