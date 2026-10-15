@@ -9,28 +9,27 @@ import { type Deps } from "../deps";
 
 const query = { queryString: "SELECT ?", executionParameters: ["'a'"] };
 
-function makeDeps(responses: unknown[]) {
-  const send = jest.fn();
-  for (const response of responses) {
-    send.mockResolvedValueOnce(response);
-  }
-  const deps = {
-    athenaClient: { send } as unknown as AthenaClient,
-    logger: { info: jest.fn(), debug: jest.fn() },
-    env: {
-      ATHENA_WORKGROUP: "workgroup",
-      ATHENA_DATABASE: "database",
-      EVENT_CACHE_TABLE_NAME: "event_cache",
-    },
-  } as unknown as Deps;
-  return { deps, send };
-}
+const deps = {
+  athenaClient: { send: jest.fn() } as unknown as AthenaClient,
+  logger: { info: jest.fn(), debug: jest.fn() },
+  env: {
+    ATHENA_WORKGROUP: "workgroup",
+    ATHENA_DATABASE: "database",
+    EVENT_CACHE_TABLE_NAME: "event_cache",
+  },
+} as unknown as Deps;
 
 const columnInfo = { ColumnInfo: [{ Name: "id" }, { Name: "status" }] };
 
+function mockResolvedValues(fn: any, returnValues: any[]) {
+  for (const value of returnValues) {
+    (fn as jest.Mock).mockResolvedValueOnce(value);
+  }
+}
+
 describe("runAthenaQuery", () => {
   it("starts the query, polls until complete and returns paginated rows", async () => {
-    const { deps, send } = makeDeps([
+    mockResolvedValues(deps.athenaClient.send, [
       { QueryExecutionId: "qid" },
       { QueryExecution: { Status: { State: "QUEUED" } } },
       { QueryExecution: { Status: { State: "RUNNING" } } },
@@ -59,7 +58,9 @@ describe("runAthenaQuery", () => {
       { id: "1", status: "PENDING" },
       { id: "2", status: undefined },
     ]);
-    const commands = send.mock.calls.map(([command]) => command);
+    const commands = (deps.athenaClient.send as jest.Mock).mock.calls.map(
+      ([command]) => command,
+    );
     expect(commands[0]).toBeInstanceOf(StartQueryExecutionCommand);
     expect(commands[0].input).toEqual({
       QueryString: "SELECT ?",
@@ -76,7 +77,7 @@ describe("runAthenaQuery", () => {
   });
 
   it("handles empty result sets and missing metadata", async () => {
-    const { deps } = makeDeps([
+    mockResolvedValues(deps.athenaClient.send, [
       { QueryExecutionId: "qid" },
       { QueryExecution: { Status: { State: "SUCCEEDED" } } },
       {
@@ -90,7 +91,7 @@ describe("runAthenaQuery", () => {
   });
 
   it("handles a response with no result set", async () => {
-    const { deps } = makeDeps([
+    mockResolvedValues(deps.athenaClient.send, [
       { QueryExecutionId: "qid" },
       { QueryExecution: { Status: { State: "SUCCEEDED" } } },
       {},
@@ -101,7 +102,7 @@ describe("runAthenaQuery", () => {
 
   it("uses the default poll interval when none is given", async () => {
     jest.useFakeTimers();
-    const { deps } = makeDeps([
+    mockResolvedValues(deps.athenaClient.send, [
       { QueryExecutionId: "qid" },
       {},
       { QueryExecution: { Status: { State: "SUCCEEDED" } } },
@@ -116,7 +117,7 @@ describe("runAthenaQuery", () => {
   });
 
   it("throws when no query execution id is returned", async () => {
-    const { deps } = makeDeps([{}]);
+    mockResolvedValues(deps.athenaClient.send, [{}]);
 
     await expect(runAthenaQuery(deps, query)).rejects.toThrow(
       "Athena did not return a query execution id",
@@ -126,7 +127,7 @@ describe("runAthenaQuery", () => {
   it.each(["FAILED", "CANCELLED"])(
     "throws when the query is %s",
     async (state) => {
-      const { deps } = makeDeps([
+      mockResolvedValues(deps.athenaClient.send, [
         { QueryExecutionId: "qid" },
         {
           QueryExecution: {
@@ -142,7 +143,7 @@ describe("runAthenaQuery", () => {
   );
 
   it("throws with a default reason when none is given", async () => {
-    const { deps } = makeDeps([
+    mockResolvedValues(deps.athenaClient.send, [
       { QueryExecutionId: "qid" },
       { QueryExecution: { Status: { State: "FAILED" } } },
     ]);

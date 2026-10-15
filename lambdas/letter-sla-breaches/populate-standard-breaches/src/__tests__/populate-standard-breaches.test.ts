@@ -15,12 +15,12 @@ const makeDeps = () =>
 describe("populateStandardBreaches", () => {
   it("runs the standard breaches query and returns success", async () => {
     const deps = makeDeps();
-    jest.mocked(runAthenaQuery).mockResolvedValueOnce([{ date: "2026-10-08" }]);
+    jest.mocked(runAthenaQuery).mockResolvedValueOnce([{ breach_count: "1" }]);
 
     const result = await createHandler(deps)({ date: "2026-10-08" });
 
     expect(runAthenaQuery).toHaveBeenCalled();
-    expect(result).toEqual({ status: "SUCCESS", rowsReturned: 1 });
+    expect(result).toEqual({ status: "SUCCESS", breachCount: "1" });
   });
 
   it("runs the standard breaches query and returns failure", async () => {
@@ -33,7 +33,7 @@ describe("populateStandardBreaches", () => {
     expect(result).toEqual({
       failureReason: "boom",
       status: "FAILURE",
-      rowsReturned: 0,
+      breachCount: "0",
     });
   });
 
@@ -47,7 +47,7 @@ describe("populateStandardBreaches", () => {
     expect(result).toEqual({
       failureReason: "boom",
       status: "FAILURE",
-      rowsReturned: 0,
+      breachCount: "0",
     });
   });
 });

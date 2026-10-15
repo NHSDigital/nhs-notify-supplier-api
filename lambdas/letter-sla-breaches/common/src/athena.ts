@@ -47,7 +47,7 @@ async function waitForQuery(
   queryExecutionId: string,
   pollIntervalMs: number,
 ): Promise<void> {
-  for (;;) {
+  while (true) {
     const { QueryExecution } = await deps.athenaClient.send(
       new GetQueryExecutionCommand({ QueryExecutionId: queryExecutionId }),
     );

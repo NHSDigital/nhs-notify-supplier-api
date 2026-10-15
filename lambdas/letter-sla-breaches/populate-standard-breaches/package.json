@@ -3,6 +3,9 @@
     "@internal/letter-sla-breaches-common": "*",
     "esbuild": "0.28.2"
   },
+  "devDependencies": {
+    "@internal/sql-test-helpers": "*"
+  },
   "name": "nhs-notify-supplier-api-populate-standard-breaches",
   "private": true,
   "scripts": {
