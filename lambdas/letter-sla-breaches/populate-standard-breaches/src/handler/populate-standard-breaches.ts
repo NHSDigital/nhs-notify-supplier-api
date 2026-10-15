@@ -11,7 +11,7 @@ export type PopulateStandardBreachesEvent = {
 export type PopulateStandardBreachesResult = {
   status: "SUCCESS" | "FAILURE";
   failureReason?: string;
-  rowsReturned: number;
+  breachCount: string;
 };
 
 export default function createHandler(deps: Deps) {
@@ -30,11 +30,11 @@ export default function createHandler(deps: Deps) {
 
       // TODO: CCM-24041 process the query results to populate standard breaches.
       deps.logger.info(
-        { date: event.date, rowsReturned: rows.length },
+        { date: event.date, breachCount: rows[0].breach_count },
         "Standard breaches query completed",
       );
 
-      return { status: "SUCCESS", rowsReturned: rows.length };
+      return { status: "SUCCESS", breachCount: rows[0].breach_count! };
     } catch (error) {
       deps.logger.error(
         { date: event.date, error },
@@ -44,7 +44,7 @@ export default function createHandler(deps: Deps) {
       return {
         status: "FAILURE",
         failureReason: error instanceof Error ? error.message : String(error),
-        rowsReturned: 0,
+        breachCount: "0",
       };
     }
   };

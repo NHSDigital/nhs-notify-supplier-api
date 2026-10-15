@@ -10,7 +10,7 @@ export default function buildStandardBreachesQuery(
 ): AthenaQuery {
   return {
     queryString: `WITH now AS (
-    SELECT from_iso8601_timestamp('?') AS iso8601
+    SELECT from_iso8601_timestamp(?) AS iso8601
 ),
 recent_letter_events AS (
     SELECT domainid, supplierid, status, from_iso8601_timestamp(time) AS event_time
@@ -31,7 +31,7 @@ completed_letters AS (
     WHERE status in ('REJECTED', 'FAILED', 'CANCELLED', 'FORWARDED', 'DISPATCHED')
     GROUP BY domainid, supplierid
 )
-SELECT supplierid, count(*)
+SELECT supplierid, count(*) AS breach_count
 FROM (
     SELECT al.domainid, al.supplierid
     FROM allocated_letters al
