@@ -79,6 +79,7 @@
     "generate:html": "docker run --rm --user $(id -u) -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/build/notify-supplier.yml -g html -o /local/sdk/html --skip-validate-spec",
     "generate:python": "docker run --rm --user $(id -u) -v ${PWD}:/local openapitools/openapi-generator-cli generate -i /local/build/notify-supplier.yml -g python -o /local/sdk/python --skip-validate-spec",
     "generate:ts": "./sdk/generate-ts.sh $BUILDVER",
+    "lambda-build": "pnpm -r run --if-present lambda-build",
     "lint": "pnpm -r run lint",
     "lint-oas": "redocly lint specification/api/notify-supplier-phase1.yml",
     "lint:fix": "pnpm -r run lint:fix",
