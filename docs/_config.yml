@@ -124,7 +124,8 @@ include:
   - .version
   - version.json
 exclude:
-  - package-lock.json
+  - pnpm-lock.yaml
+  - pnpm-workspace.yaml
   - package.json
   - Makefile
 #   - .sass-cache/

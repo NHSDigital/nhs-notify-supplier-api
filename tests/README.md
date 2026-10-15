@@ -27,7 +27,7 @@ Test suites that validate the supplier API beyond individual package unit tests.
 - **Sandbox tests**: We need to start the sandbox server from the `/sandbox` folder in the root directory (read /sandbox/README.md for more information).
   - Run locally:
     1. from project's root directory `cd sandbox && npm install && npm start` to start the sandbox server
-    2. from project's root directory `make test-sandbox` or `cd tests && npm install && npm run test:sandbox` to run the tests
+    2. from project's root directory `make test-sandbox` or `pnpm install && pnpm --filter nhs-notify-supplier-api-tests run test:sandbox` to run the tests
   - Run in Pipeline:
     1. You need to deploy the proxies in your Pull Request with the label `deploy-proxy`. This should then build the sandbox server, deploy the artifact and deploy the sandbox proxy via proxygen (you might need to re-run the acceptance tests stage in the pipeline, as the server might take some time to deploy and be unreachable from the tests).
 - **Performance and E2E tests** require AWS credentials, deployed infrastructure, and seeded test data. See `scripts/test-data/` for test data generation and `tests/e2e-tests/README.md` for environment-specific setup.
@@ -42,7 +42,7 @@ Test suites that validate the supplier API beyond individual package unit tests.
 Unit tests:
 
 ```bash
-npm run test:unit
+pnpm run test:unit
 ```
 
 Exceptionally, this workspace doesn't contain any unit tests. See top package file for other workspaces.
@@ -50,15 +50,15 @@ Exceptionally, this workspace doesn't contain any unit tests. See top package fi
 Component, sandbox, and performance tests (from `tests` workspace):
 
 ```bash
-npm run test:component
-npm run test:sandbox
-npm run test:performance
+pnpm run test:component
+pnpm run test:sandbox
+pnpm run test:performance
 ```
 
 Pact tests:
 
 ```bash
-npm run test:pact
+pnpm run test:pact
 make test-contract (from root level Makefile)
 ```
 

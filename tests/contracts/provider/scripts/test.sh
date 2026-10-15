@@ -21,4 +21,4 @@ for PKG in "${CONSUMER_PACKAGES[@]}"; do
   tar -xvzf ".packages/$TGZ_NAME" -C ".contracts/$PKG" --strip-components=1
 done
 
-npx jest --runInBand
+pnpm exec jest --runInBand

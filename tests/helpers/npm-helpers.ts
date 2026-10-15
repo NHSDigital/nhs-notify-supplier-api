@@ -2,7 +2,7 @@ import { spawn } from "node:child_process";
 import path from "node:path";
 
 /**
- * Runs the "create-letter" CLI command via npm.
+ * Runs the "create-letter" CLI command via pnpm.
  *
  * @param options Command-line options for the script.
  */
@@ -33,17 +33,15 @@ export async function runCreateLetter(options: {
     __dirname,
     "../../scripts/utilities/letter-test-data",
   );
-  const cmd = process.platform === "win32" ? "npm.cmd" : "npm";
+  const cmd = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
   const root = path.resolve(workspaceRoot);
 
   // Build arguments array
   const args = [
-    "-w",
+    "--filter",
     String(filter),
-    //  '--filter', String(filter),
     "run",
     "cli",
-    "--",
     "create-letter-batch",
     "--supplier-id",
     supplierId,
@@ -77,7 +75,7 @@ export async function runCreateLetter(options: {
     });
     child.on("close", (code) => {
       if (code !== 0) {
-        reject(new Error(`npm exited with ${code}`));
+        reject(new Error(`pnpm exited with ${code}`));
         return;
       }
 
@@ -112,17 +110,15 @@ export async function createSupplierData(options: {
     __dirname,
     "../../scripts/utilities/supplier-data",
   );
-  const cmd = process.platform === "win32" ? "npm.cmd" : "npm";
+  const cmd = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
   const root = path.resolve(workspaceRoot);
 
   // Build arguments array
   const args = [
-    "-w",
+    "--filter",
     String(filter),
-    //  '--filter', String(filter),
     "run",
     "cli",
-    "--",
     "put-supplier",
     "--id",
     supplierId,
@@ -148,7 +144,7 @@ export async function createSupplierData(options: {
     });
 
     child.on("close", (code) =>
-      code === 0 ? resolve() : reject(new Error(`npm exited with ${code}`)),
+      code === 0 ? resolve() : reject(new Error(`pnpm exited with ${code}`)),
     );
     child.on("error", reject);
   });

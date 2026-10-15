@@ -38,14 +38,14 @@ guard-%:
 		exit 1; \
 	fi
 serve:
-	npm run serve
+	pnpm run serve
 
 lint-oas:
-	npm run lint-oas
+	pnpm run lint-oas
 
 publish-oas:
 	$(MAKE) copy-examples
-	npm run publish-oas
+	pnpm run publish-oas
 
 set-authorization: guard-APIM_ENV
 	SPEC_DIR=./specification/api/components/environments
@@ -80,39 +80,39 @@ build-yml-oas-spec: guard-APIM_ENV
 
 serve-oas:
 	$(MAKE) copy-examples
-	npm run serve-oas
+	pnpm run serve-oas
 
 bundle-oas:
 	$(MAKE) copy-examples
-	npm run bundle-oas
+	pnpm run bundle-oas
 
 generate-sandbox:
 	$(MAKE) build-json-oas-spec APIM_ENV=sandbox
 	# jq --slurpfile status sandbox/HealthcheckEndpoint.json '.paths += $$status[0]' build/notify-supplier.json > tmp.json && mv tmp.json build/notify-supplier.json
 	jq '.security = []' build/notify-supplier.json > tmp.json && mv tmp.json build/notify-supplier.json
-	npm run generate-sandbox
+	pnpm run generate-sandbox
 
 serve-swagger:
-	npm run serve-swagger-docs
+	pnpm run serve-swagger-docs
 
 copy-examples:
 	@scripts/build/copy-examples.sh
 
 config:: _install-dependencies version # Configure development environment (main) @Configuration
-	npm install
+	pnpm install
 	(cd docs && make install && cd ..)
 
 test-component:
-	(cd tests && npm install && npm run test:component)
+	pnpm install && pnpm --filter nhs-notify-supplier-api-tests run test:component
 
 test-sandbox:
-	(cd tests && npm install && npm run test:sandbox)
+	pnpm install && pnpm --filter nhs-notify-supplier-api-tests run test:sandbox
 
 test-performance:
-	(cd tests && npm install && npm run test:performance)
+	pnpm install && pnpm --filter nhs-notify-supplier-api-tests run test:performance
 
 test-contract: # Run provider contract tests @Testing
-	npm run test:contracts --workspace tests/contracts/provider
+	pnpm --filter @sap/contracts-provider run test:contracts
 
 version:
 	rm -f .version

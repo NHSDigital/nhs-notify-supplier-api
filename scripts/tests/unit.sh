@@ -18,9 +18,9 @@ cd "$(git rev-parse --show-toplevel)"
 # tasks in scripts/test.mk.
 
 # run tests
-npm ci
-npm run test:unit --workspaces
+pnpm install --frozen-lockfile
+pnpm run test:unit
 
 # merge coverage reports
 mkdir -p .reports
-TMPDIR="./.reports" ./node_modules/.bin/lcov-result-merger "**/.reports/unit/coverage/lcov.info" ".reports/lcov.info" --ignore "node_modules" --prepend-source-files --prepend-path-fix "../../.."
+TMPDIR="./.reports" ./node_modules/.bin/lcov-result-merger "**/.reports/unit/coverage/lcov.info" ".reports/lcov.info" --ignore "**/node_modules/**" --prepend-source-files --prepend-path-fix "../../.."

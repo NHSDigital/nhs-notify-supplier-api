@@ -1,13 +1,16 @@
 {
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.1138.0",
-    "@aws-sdk/client-s3": "^3.1138.0",
-    "@aws-sdk/lib-dynamodb": "^3.1138.0",
-    "@internal/datastore": "*",
-    "@jest/globals": "^30.4.1",
-    "esbuild": "0.28.2",
-    "pino": "^10.3.1",
-    "yargs": "^18.2.0"
+    "@aws-sdk/client-dynamodb": "catalog:aws",
+    "@aws-sdk/client-s3": "catalog:aws",
+    "@aws-sdk/lib-dynamodb": "catalog:aws",
+    "@internal/datastore": "workspace:*",
+    "@jest/globals": "catalog:test",
+    "esbuild": "catalog:tools",
+    "pino": "catalog:app",
+    "yargs": "catalog:app"
+  },
+  "devDependencies": {
+    "@types/yargs": "catalog:tools"
   },
   "name": "nhs-notify-supplier-api-letter-test-data-utility",
   "private": true,
