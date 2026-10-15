@@ -37,7 +37,7 @@ export default function buildAthenaDatePredicate(
     .map(
       // eslint-disable-next-line sort-destructure-keys/sort-destructure-keys
       ({ year, month, days }) =>
-        `(_year = '${year}' AND _month = '${month}' AND _day IN (${days
+        `(__year = '${year}' AND __month = '${month}' AND __day IN (${days
           .map((day) => `'${day}'`)
           .join(", ")}))`,
     )

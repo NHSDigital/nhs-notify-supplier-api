@@ -54,9 +54,9 @@ describe("buildStandardBreachesQuery", () => {
         supplierid VARCHAR,
         status VARCHAR,
         time VARCHAR,
-        _year VARCHAR,
-        _month VARCHAR,
-        _day VARCHAR
+        __year VARCHAR,
+        __month VARCHAR,
+        __day VARCHAR
       )`,
     );
   });
