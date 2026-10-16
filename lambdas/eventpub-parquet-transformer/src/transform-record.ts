@@ -27,8 +27,6 @@ const PROMOTED_DATA_FIELDS = [
   "domainId",
   "supplierId",
   "groupId",
-  "campaignId",
-  "clientId",
   "status",
 ] as const;
 
@@ -36,6 +34,21 @@ type Json = Record<string, unknown>;
 
 function isObject(value: unknown): value is Json {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+// groupId is "<clientId>-<campaignId>-<templateId>"; missing or blank parts stay undefined
+function parseGroupId(groupId: unknown): {
+  clientId?: string;
+  campaignId?: string;
+} {
+  if (typeof groupId !== "string") {
+    return {};
+  }
+  const [clientId, campaignId] = groupId.split("-");
+  return {
+    clientId: clientId?.trim() || undefined,
+    campaignId: campaignId?.trim() || undefined,
+  };
 }
 
 function flatten(event: Json): Json {
@@ -49,6 +62,9 @@ function flatten(event: Json): Json {
   for (const field of PROMOTED_DATA_FIELDS) {
     flat[field.toLowerCase()] = data[field];
   }
+  const { campaignId, clientId } = parseGroupId(data.groupId);
+  flat.clientid = clientId;
+  flat.campaignid = campaignId;
   return flat;
 }
 

@@ -16,9 +16,7 @@ describe("transformRecord", () => {
     const data = {
       domainId: "d1",
       supplierId: "s1",
-      groupId: "g1",
-      campaignId: "c1",
-      clientId: "cl1",
+      groupId: "cl1-c1-t1",
       status: "PRINTED",
     };
 
@@ -39,11 +37,51 @@ describe("transformRecord", () => {
       data_json: JSON.stringify(data),
       domainid: "d1",
       supplierid: "s1",
-      groupid: "g1",
+      groupid: "cl1-c1-t1",
       campaignid: "c1",
       clientid: "cl1",
       status: "PRINTED",
     });
+  });
+
+  it.each([
+    ["cl1-c1-t1", "cl1", "c1"],
+    ["cl1-c1", "cl1", "c1"],
+    ["cl1", "cl1", undefined],
+    ["cl1--t1", "cl1", undefined],
+    ["-c1-t1", undefined, "c1"],
+    [" - ", undefined, undefined],
+    ["", undefined, undefined],
+    [undefined, undefined, undefined],
+    [123, undefined, undefined],
+  ])(
+    "derives clientid and campaignid from groupId %p",
+    (groupId, clientid, campaignid) => {
+      const out = decode(
+        transformRecord({
+          recordId: "r",
+          data: encode({ id: "e", data: { groupId } }),
+        }).data!,
+      );
+
+      expect(out.clientid).toBe(clientid);
+      expect(out.campaignid).toBe(campaignid);
+    },
+  );
+
+  it("ignores clientId and campaignId properties on the data", () => {
+    const out = decode(
+      transformRecord({
+        recordId: "r",
+        data: encode({
+          id: "e",
+          data: { groupId: "cl1-c1-t1", clientId: "x", campaignId: "y" },
+        }),
+      }).data!,
+    );
+
+    expect(out.clientid).toBe("cl1");
+    expect(out.campaignid).toBe("c1");
   });
 
   it("leaves promoted properties empty when data is missing or not an object", () => {
