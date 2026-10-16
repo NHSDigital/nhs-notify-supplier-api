@@ -19,7 +19,15 @@ export default function createAuthorizerHandler(
     context: Context,
     callback: Callback<APIGatewayAuthorizerResult>,
   ): void => {
-    checkCertificateExpiry(event.requestContext.identity.clientCert, deps);
+    checkCertificateExpiry(
+      event.requestContext.identity.clientCert,
+      deps,
+    ).catch((error) => {
+      deps.logger.error({
+        description: "Error checking certificate expiry",
+        err: error,
+      });
+    });
 
     getSupplier(event.headers, deps)
       .then((supplier: Supplier) => {
