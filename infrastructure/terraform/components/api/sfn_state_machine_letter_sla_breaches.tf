@@ -1,4 +1,6 @@
 resource "aws_sfn_state_machine" "letter_sla_breaches" {
+  count = local.eventpub_parquet_enabled ? 1 : 0
+
   name     = local.letter_sla_breaches_state_machine_name
   role_arn = aws_iam_role.letter_sla_breaches.arn
 
