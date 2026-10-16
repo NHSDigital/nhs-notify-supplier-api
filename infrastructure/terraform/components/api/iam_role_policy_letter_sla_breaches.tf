@@ -21,7 +21,7 @@ data "aws_iam_policy_document" "letter_sla_breaches_policy" {
     resources = [
       module.populate_supplier_config_cache.function_arn,
       module.populate_sameday_breaches.function_arn,
-      module.populate_standard_breaches.function_arn,
+      module.populate_standard_breaches[0].function_arn,
     ]
   }
 }
