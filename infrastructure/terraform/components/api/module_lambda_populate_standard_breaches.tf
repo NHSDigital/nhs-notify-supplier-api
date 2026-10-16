@@ -1,4 +1,6 @@
 module "populate_standard_breaches" {
+  count = local.eventpub_parquet_enabled ? 1 : 0
+
   source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip"
 
   function_name = "populate_standard_breaches"
@@ -38,7 +40,7 @@ module "populate_standard_breaches" {
   lambda_env_vars = {
     ATHENA_WORKGROUP       = aws_athena_workgroup.letter_sla_breaches.name
     ATHENA_DATABASE        = aws_glue_catalog_database.supplier.name
-    EVENT_CACHE_TABLE_NAME = aws_glue_catalog_table.eventpub_parquet.name
+    EVENT_CACHE_TABLE_NAME = aws_glue_catalog_table.eventpub_parquet[0].name
   }
 }
 
