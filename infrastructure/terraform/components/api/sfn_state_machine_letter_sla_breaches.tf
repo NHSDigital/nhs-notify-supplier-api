@@ -2,7 +2,7 @@ resource "aws_sfn_state_machine" "letter_sla_breaches" {
   count = local.eventpub_parquet_enabled ? 1 : 0
 
   name     = local.letter_sla_breaches_state_machine_name
-  role_arn = aws_iam_role.letter_sla_breaches[0].arn
+  role_arn = aws_iam_role.letter_sla_breaches.arn
 
   definition = templatefile("${path.module}/resources/letter_sla_breaches.json", {
     STATE_MACHINE_ARN                           = local.letter_sla_breaches_state_machine_arn
