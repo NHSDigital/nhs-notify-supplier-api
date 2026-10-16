@@ -139,6 +139,25 @@ describe("Authorizer Lambda Function", () => {
 
       expect(metricScope).not.toHaveBeenCalled();
     });
+
+    it("Should log an error when the certificate expiry check fails", async () => {
+      mockEvent.requestContext.identity.clientCert = buildCertWithExpiry(
+        "2025-11-31T14:19:00Z",
+      );
+      const error = new Error("Metrics failure");
+      (metricScope as jest.Mock).mockImplementationOnce(() => async () => {
+        throw error;
+      });
+
+      const handler = createAuthorizerHandler(mockedDeps);
+      handler(mockEvent, mockContext, mockCallback);
+      await new Promise(process.nextTick);
+
+      expect(mockedDeps.logger.error).toHaveBeenCalledWith({
+        description: "Error checking certificate expiry",
+        err: error,
+      });
+    });
   });
 
   describe("Supplier ID lookup", () => {
