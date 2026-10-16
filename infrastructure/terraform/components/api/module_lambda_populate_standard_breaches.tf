@@ -38,7 +38,7 @@ module "populate_standard_breaches" {
   lambda_env_vars = {
     ATHENA_WORKGROUP       = aws_athena_workgroup.letter_sla_breaches.name
     ATHENA_DATABASE        = aws_glue_catalog_database.supplier.name
-    EVENT_CACHE_TABLE_NAME = local.event_cache_glue_table_name
+    EVENT_CACHE_TABLE_NAME = aws_glue_catalog_table.eventpub_parquet.name
   }
 }
 
