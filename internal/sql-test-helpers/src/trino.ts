@@ -23,6 +23,7 @@ type TrinoResponse = {
 export type TrinoContext = {
   container: StartedTestContainer;
   endpoint: string;
+  logs: string[];
 };
 
 const NODE_READY_TIMEOUT_MS = 60_000;
@@ -33,43 +34,39 @@ const sleep = (ms: number) =>
     setTimeout(resolve, ms);
   });
 
-// "SERVER STARTED" is logged before the coordinator has registered its own
-// node as a worker, so early queries can fail with "No nodes available to run
-// query". Wait until a trivial query succeeds before handing out the context.
-async function waitForTrinoNode(context: TrinoContext): Promise<void> {
-  const deadline = Date.now() + NODE_READY_TIMEOUT_MS;
-
-  for (;;) {
-    try {
-      await runTrinoStatement(context, "SELECT 1");
-      return;
-    } catch (error) {
-      const retryable =
-        error instanceof Error && error.message.includes("No nodes available");
-
-      if (!retryable || Date.now() >= deadline) {
-        throw error;
-      }
-    }
-
-    await sleep(NODE_READY_POLL_MS);
-  }
-}
+// Trino can report "No nodes available to run query" when the coordinator has
+// not (or no longer) registered a worker, e.g. just after "SERVER STARTED" or
+// on a loaded CI runner. It is raised before execution starts, so retrying is
+// safe even for non-idempotent statements.
+const isNoNodesError = (error: unknown) =>
+  error instanceof Error && error.message.includes("No nodes available");
 
 export async function setupTrinoContainer(): Promise<TrinoContext> {
-  const container = await new GenericContainer(TRINO_IMAGE)
-    .withExposedPorts(TRINO_PORT)
-    .withWaitStrategy(Wait.forLogMessage("======== SERVER STARTED ========"))
-    .withStartupTimeout(120_000)
-    .start();
-
-  const endpoint = `http://${container.getHost()}:${container.getMappedPort(TRINO_PORT)}`;
-  const context = { container, endpoint };
+  // Buffer logs from the start so they are available even if startup fails.
+  const logs: string[] = [];
+  let container: StartedTestContainer;
 
   try {
-    await waitForTrinoNode(context);
+    container = await new GenericContainer(TRINO_IMAGE)
+      .withExposedPorts(TRINO_PORT)
+      .withWaitStrategy(Wait.forLogMessage("======== SERVER STARTED ========"))
+      .withStartupTimeout(120_000)
+      .withLogConsumer((stream) => {
+        stream.on("data", (chunk) => logs.push(chunk.toString()));
+      })
+      .start();
   } catch (error) {
-    await printContainerLogs(context.container);
+    printLogs(logs);
+    throw error;
+  }
+
+  const endpoint = `http://${container.getHost()}:${container.getMappedPort(TRINO_PORT)}`;
+  const context = { container, endpoint, logs };
+
+  try {
+    await runTrinoStatement(context, "SELECT 1");
+  } catch (error) {
+    printLogs(logs);
     await container.stop();
     throw error;
   }
@@ -77,19 +74,9 @@ export async function setupTrinoContainer(): Promise<TrinoContext> {
   return context;
 }
 
-async function printContainerLogs(container: StartedTestContainer) {
-  try {
-    const stream = await container.logs();
-    const chunks: string[] = [];
-    for await (const chunk of stream) {
-      chunks.push(chunk.toString());
-    }
-    // eslint-disable-next-line no-console
-    console.error(`Trino container logs:\n${chunks.join("")}`);
-  } catch (logError) {
-    // eslint-disable-next-line no-console
-    console.error("Unable to read Trino container logs", logError);
-  }
+function printLogs(logs: string[]) {
+  // eslint-disable-next-line no-console
+  console.error(`Trino container logs:\n${logs.join("")}`);
 }
 
 async function readTrinoResponse(response: Response): Promise<TrinoResponse> {
@@ -119,6 +106,26 @@ function toRow(columns: string[], values: unknown[]): SqlRow {
 
 // Runs a statement via the Trino REST API against the in-memory catalog.
 export async function runTrinoStatement(
+  context: TrinoContext,
+  sql: string,
+): Promise<SqlRow[]> {
+  const deadline = Date.now() + NODE_READY_TIMEOUT_MS;
+
+  for (;;) {
+    try {
+      return await executeTrinoStatement(context, sql);
+    } catch (error) {
+      if (!isNoNodesError(error) || Date.now() >= deadline) {
+        printLogs(context.logs);
+        throw error;
+      }
+    }
+
+    await sleep(NODE_READY_POLL_MS);
+  }
+}
+
+async function executeTrinoStatement(
   context: TrinoContext,
   sql: string,
 ): Promise<SqlRow[]> {
