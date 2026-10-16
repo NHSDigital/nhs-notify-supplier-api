@@ -9,8 +9,8 @@ export default function buildStandardBreachesQuery(
   daysHistory: number,
 ): AthenaQuery {
   return {
-    queryString: `WITH now AS (
-    SELECT from_iso8601_timestamp(?) AS iso8601
+    queryString: `WITH parameters AS (
+    SELECT from_iso8601_timestamp(?) AS now
 ),
 recent_letter_events AS (
     SELECT domainid, supplierid, status, from_iso8601_timestamp(time) AS event_time
@@ -22,7 +22,7 @@ allocated_letters AS (
     FROM recent_letter_events
     WHERE status = 'PENDING'
     GROUP BY domainid, supplierid
-    HAVING min(event_time) < (SELECT iso8601 FROM now) -
+    HAVING min(event_time) < (SELECT now FROM parameters) -
         CASE WHEN day_of_week(min(event_time) AT TIME ZONE 'Europe/London') IN (4, 5, 6) THEN INTERVAL '96' HOUR ELSE INTERVAL '48' HOUR END
 ),
 completed_letters AS (

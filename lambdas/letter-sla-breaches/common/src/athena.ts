@@ -120,7 +120,7 @@ export default async function runAthenaQuery(
   options: AthenaQueryOptions = {},
 ): Promise<AthenaRow[]> {
   const queryExecutionId = await startQuery(deps, query);
-  deps.logger.info({ queryExecutionId }, "Started Athena query");
+  deps.logger.info({ description: "Started Athena query", query });
 
   await waitForQuery(
     deps,
