@@ -296,3 +296,15 @@ variable "event_source_filter" {
   type        = list(string)
   description = "SNS subscription source filter values"
 }
+
+variable "reports_data_retention_policy_days" {
+  type        = number
+  description = "Number of days to retain reporting bucket data"
+  default     = 90
+}
+
+variable "reports_data_retention_non_current_days" {
+  type        = number
+  description = "Number of days to retain noncurrent reporting bucket object versions"
+  default     = 14
+}
