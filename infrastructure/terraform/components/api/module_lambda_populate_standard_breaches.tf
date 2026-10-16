@@ -1,8 +1,3 @@
-moved {
-  from = module.populate_standard_breaches
-  to   = module.populate_standard_breaches[0]
-}
-
 module "populate_standard_breaches" {
   count  = local.eventpub_parquet_enabled ? 1 : 0
   source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip"
