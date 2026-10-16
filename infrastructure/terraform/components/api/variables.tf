@@ -302,6 +302,8 @@ variable "reports_data_retention_non_current_days" {
   type        = number
   description = "Number of days to retain noncurrent reporting bucket object versions"
   default     = 14
+}
+
 variable "event_source_filter" {
   type        = list(string)
   description = "SNS subscription source filter values"
