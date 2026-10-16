@@ -26,7 +26,7 @@ The Supplier API repository contains the following:
 - [src](/src) - Non lambda implementation
 - [tests](/tests) - Higher level component and E2E test suites
 
-The API dependencies are managed through [NPM Workspaces](https://docs.npmjs.com/cli/v7/using-npm/workspaces/)
+The API dependencies are managed through [pnpm workspaces](https://pnpm.io/workspaces)
 
 ## Setup
 

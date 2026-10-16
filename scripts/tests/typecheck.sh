@@ -18,5 +18,5 @@ cd "$(git rev-parse --show-toplevel)"
 # tasks in scripts/test.mk.
 
 # run tests
-npm ci
-npm run typecheck --workspaces
+pnpm install --frozen-lockfile
+pnpm run typecheck

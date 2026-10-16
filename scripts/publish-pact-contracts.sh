@@ -22,4 +22,4 @@ if [[ $local_version == $published_version ]]; then
 fi
 
 echo "Local version is different to the latest published version - publishing new version"
-npm publish ./pact-contracts
+pnpm publish ./pact-contracts --no-git-checks

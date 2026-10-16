@@ -110,7 +110,7 @@ echo "  Status: $STATUS"
 echo "  TTL Hours: $TTL_HOURS"
 echo ""
 
-# Get the directory of this script to run npm from the correct location
+# Get the directory of this script to run pnpm from the correct location
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
@@ -140,8 +140,8 @@ for batch in "${BATCHES[@]}"; do
 
     echo "[$BATCH_COUNTER/$TOTAL_BATCHES] Creating batch with specification-id: $SPEC_ID, group-id: $GROUP_ID-$SUPPLIER_ID"
 
-    # Run the npm command
-    npm run cli -- create-letter-batch \
+    # Run the pnpm command
+    pnpm run cli create-letter-batch \
         --supplier-id "$SUPPLIER_ID" \
         --environment "$ENVIRONMENT" \
         --awsAccountId "$AWS_ACCOUNT_ID" \
