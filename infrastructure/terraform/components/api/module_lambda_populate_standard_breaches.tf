@@ -95,7 +95,7 @@ data "aws_iam_policy_document" "populate_standard_breaches_lambda" {
   }
 
   statement {
-    sid    = "AllowReadEventCacheBucket"
+    sid    = "AllowReadReportingBucket"
     effect = "Allow"
 
     actions = [
@@ -105,8 +105,8 @@ data "aws_iam_policy_document" "populate_standard_breaches_lambda" {
     ]
 
     resources = [
-      "arn:aws:s3:::${local.event_cache_bucket_name}",
-      "arn:aws:s3:::${local.event_cache_bucket_name}/*",
+      "arn:aws:s3:::${local.reporting_bucket_name}",
+      "arn:aws:s3:::${local.reporting_bucket_name}/*",
     ]
   }
 

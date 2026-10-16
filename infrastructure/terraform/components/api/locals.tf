@@ -77,6 +77,7 @@ locals {
 
   event_cache_bucket_name          = lookup(module.eventpub.s3_bucket_event_cache, "bucket", null)
   eventsub_event_cache_bucket_name = lookup(module.eventsub.s3_bucket_event_cache, "bucket", null)
+  reporting_bucket_name            = lookup(module.s3bucket_reporting, "bucket", null)
 
   # The Glue crawler names tables after the crawled bucket, replacing characters that are invalid in table names
   event_cache_glue_table_name = local.event_cache_bucket_name != null ? lower(replace(local.event_cache_bucket_name, "/[^a-zA-Z0-9_]/", "_")) : null
