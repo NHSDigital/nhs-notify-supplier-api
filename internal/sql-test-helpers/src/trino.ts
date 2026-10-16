@@ -69,11 +69,27 @@ export async function setupTrinoContainer(): Promise<TrinoContext> {
   try {
     await waitForTrinoNode(context);
   } catch (error) {
+    await printContainerLogs(context.container);
     await container.stop();
     throw error;
   }
 
   return context;
+}
+
+async function printContainerLogs(container: StartedTestContainer) {
+  try {
+    const stream = await container.logs();
+    const chunks: string[] = [];
+    for await (const chunk of stream) {
+      chunks.push(chunk.toString());
+    }
+    // eslint-disable-next-line no-console
+    console.error(`Trino container logs:\n${chunks.join("")}`);
+  } catch (logError) {
+    // eslint-disable-next-line no-console
+    console.error("Unable to read Trino container logs", logError);
+  }
 }
 
 async function readTrinoResponse(response: Response): Promise<TrinoResponse> {
