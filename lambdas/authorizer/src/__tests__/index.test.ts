@@ -145,9 +145,9 @@ describe("Authorizer Lambda Function", () => {
         "2025-11-31T14:19:00Z",
       );
       const error = new Error("Metrics failure");
-      (metricScope as jest.Mock).mockImplementationOnce(() => async () => {
-        throw error;
-      });
+      (metricScope as jest.Mock).mockImplementationOnce(() =>
+        jest.fn().mockRejectedValue(error),
+      );
 
       const handler = createAuthorizerHandler(mockedDeps);
       handler(mockEvent, mockContext, mockCallback);
