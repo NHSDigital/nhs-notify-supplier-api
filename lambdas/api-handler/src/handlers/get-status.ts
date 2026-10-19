@@ -1,6 +1,7 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { ListBucketsCommand, S3Client } from "@aws-sdk/client-s3";
 import { Deps } from "../config/deps";
+import LogRefs from "../config/log-references";
 
 async function s3HealthCheck(s3Client: S3Client) {
   const command: ListBucketsCommand = new ListBucketsCommand({
@@ -18,7 +19,8 @@ export default function createGetStatusHandler(
       await s3HealthCheck(deps.s3Client);
 
       deps.logger.info({
-        description: "Healthcheck passed",
+        logRef: LogRefs.HEALTHCHECK_PASSED.code,
+        description: LogRefs.HEALTHCHECK_PASSED.description,
       });
 
       return {
@@ -27,8 +29,9 @@ export default function createGetStatusHandler(
       };
     } catch (error) {
       deps.logger.error({
+        logRef: LogRefs.STATUS_ENDPOINT_ERROR.code,
+        description: LogRefs.STATUS_ENDPOINT_ERROR.description,
         err: error,
-        description: "Status endpoint error, services not available",
       });
       return {
         statusCode: 500,

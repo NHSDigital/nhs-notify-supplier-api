@@ -12,6 +12,7 @@ import NotFoundError from "../errors/not-found-error";
 import { UpdateLetterCommand } from "../contracts/letters";
 import { ApiErrorDetail } from "../contracts/errors";
 import { Deps } from "../config/deps";
+import LogRefs from "../config/log-references";
 
 async function getDownloadUrl(
   s3Uri: string,
@@ -148,22 +149,26 @@ export async function enqueueLetterUpdateRequests(
           const result = await deps.sqsClient.send(cmd);
           if (result.Successful && result.Successful.length > 0) {
             deps.logger.info({
-              description: "Enqueued letter updates",
+              logRef: LogRefs.ENQUEUED_LETTER_UPDATES.code,
+              description: LogRefs.ENQUEUED_LETTER_UPDATES.description,
               correlationId,
               messageIds: result.Successful.map((entry) => entry.MessageId),
             });
           }
           if (result.Failed && result.Failed.length > 0) {
             deps.logger.error({
+              logRef: LogRefs.SOME_BATCH_ENTRIES_FAILED.code,
+              description: LogRefs.SOME_BATCH_ENTRIES_FAILED.description,
               failed: result.Failed,
-              description: "Some batch entries failed",
               correlationId,
             });
           }
         } catch (error) {
           deps.logger.error({
+            logRef: LogRefs.ERROR_ENQUEUING_LETTER_STATUS_UPDATES.code,
+            description:
+              LogRefs.ERROR_ENQUEUING_LETTER_STATUS_UPDATES.description,
             err: error,
-            description: "Error enqueuing letter status updates",
             correlationId,
           });
         }

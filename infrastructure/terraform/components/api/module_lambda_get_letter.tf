@@ -35,7 +35,9 @@ module "get_letter" {
   odin_log_destination_arn  = local.odin_destination_arn
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
-  lambda_env_vars = merge(local.common_lambda_env_vars, {})
+  lambda_env_vars = merge(local.common_lambda_env_vars, {
+    LOG_REFERENCE = "GET_LTR"
+  })
 }
 
 data "aws_iam_policy_document" "get_letter_lambda" {

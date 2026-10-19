@@ -2,13 +2,19 @@ import { MI } from "@internal/datastore";
 import { MISubmittedEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
 import { randomBytes, randomUUID } from "node:crypto";
 import { Deps } from "../deps";
+import LogRefs from "../log-references";
 
 export function mapMIToCloudEvent(mi: MI, deps: Deps): MISubmittedEvent {
   const now = new Date().toISOString();
   const eventId = randomUUID();
   const dataschemaversion = "1.1.5";
 
-  deps.logger.info({ description: "Mapping MI to CloudEvent", mi, eventId });
+  deps.logger.info({
+    logRef: LogRefs.MAPPING_MI_TO_CLOUD_EVENT.code,
+    description: LogRefs.MAPPING_MI_TO_CLOUD_EVENT.description,
+    mi,
+    eventId,
+  });
 
   return {
     specversion: "1.0",
