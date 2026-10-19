@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@aws-lambda-powertools/idempotency": "^2.35.0",
+    "@aws-lambda-powertools/idempotency": "^2.36.0",
     "@aws-sdk/client-dynamodb": "^3.1138.0",
     "@aws-sdk/lib-dynamodb": "^3.1138.0",
     "@internal/datastore": "*",
