@@ -40,7 +40,6 @@ rawContent
 relative_url
 repo
 reqs
-satisy
 SDKs?
 sed
 semver

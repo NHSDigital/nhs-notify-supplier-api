@@ -63,12 +63,21 @@ jobs:
           node-version-file: ".tool-versions"
           registry-url: "https://npm.pkg.github.com"
 
+      - name: Get pnpm version
+        id: tool-versions
+        run: echo "pnpm_version=$(awk '$1 == "pnpm" { print $2; exit }' .tool-versions)" >> "$GITHUB_OUTPUT"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
+        with:
+          version: ${{ steps.tool-versions.outputs.pnpm_version }}
+
       - name: check if local version differs from latest published version
         id: check-version
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          published_version=$(npm view @nhsdigital/nhs-notify-event-schemas-supplier-api --json 2>/dev/null | jq -r '.["dist-tags"].latest // "null"')
+          published_version=$(pnpm view @nhsdigital/nhs-notify-event-schemas-supplier-api --json 2>/dev/null | jq -r '.["dist-tags"].latest // "null"')
           echo "Published version: $published_version"
 
           local_version=$(jq -r '.version' internal/events/package.json)

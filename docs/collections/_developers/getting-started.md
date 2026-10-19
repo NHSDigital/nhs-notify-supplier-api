@@ -42,7 +42,7 @@ code .
 
 #### devcontainer
 
-You should use the devcontainer for this repository to satisy pre-requisites and configuration.
+You should use the devcontainer for this repository to satisfy pre-requisites and configuration.
 You can open this using devcontainer plugins or GitHub workspaces
 By default it will run the necessary `make config`, `postcreatecommand.sh`, and `poststartcommand.sh`
 
