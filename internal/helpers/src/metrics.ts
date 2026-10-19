@@ -35,15 +35,13 @@ export function buildEMFObject(
 ) {
   const namespace = process.env.AWS_LAMBDA_FUNCTION_NAME || functionName;
   return {
-    LogGroup: namespace,
-    ServiceName: namespace,
     ...dimensions,
     _aws: {
       Timestamp: Date.now(),
       CloudWatchMetrics: [
         {
           Namespace: namespace,
-          Dimensions: [[...Object.keys(dimensions), "ServiceName", "LogGroup"]],
+          Dimensions: [Object.keys(dimensions)],
           Metrics: [
             { Name: metric.key, Value: metric.value, Unit: metric.unit },
           ],

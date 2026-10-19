@@ -2,7 +2,7 @@
   "data": {
     "billingRef": "1y3q9v1zzzz",
     "domainId": "e9dc9ee9-b2f8-4ef2-8351-73a9a29f8e96_38U220Ghb1WXF8hCK6hL0LGya3Y_38U23YjtnKSZypvaCSb07adMOlq",
-    "groupId": "client_template",
+    "groupId": "client-campaign-template",
     "origin": {
       "domain": "letter-rendering",
       "event": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
