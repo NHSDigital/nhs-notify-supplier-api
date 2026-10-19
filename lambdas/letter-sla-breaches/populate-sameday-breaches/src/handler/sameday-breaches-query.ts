@@ -13,7 +13,7 @@ export default function buildSamedayBreachesQuery(
     SELECT from_iso8601_timestamp(?) AS iso8601
 ),
 recent_letter_events AS (
-    SELECT domainid, supplierid, status, clientid, campaignid, statusfrom_iso8601_timestamp(time) AS event_time
+    SELECT domainid, supplierid, status, clientid, campaignid, from_iso8601_timestamp(time) AS event_time
     FROM ${tableName}
     WHERE ${buildAthenaDatePredicate(now, daysHistory)}
 ),
