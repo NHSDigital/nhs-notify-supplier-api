@@ -9,6 +9,7 @@ import { processError } from "../mappers/error-mapper";
 import { assertNotEmpty } from "../utils/validation";
 import { extractCommonIds } from "../utils/common-ids";
 import { Deps } from "../config/deps";
+import LogRefs from "../config/log-references";
 
 export default function createGetMIHandler(deps: Deps): APIGatewayProxyHandler {
   return async (event) => {
@@ -38,7 +39,8 @@ export default function createGetMIHandler(deps: Deps): APIGatewayProxyHandler {
       const result = await getMIOperation(miId, supplierId, deps.miRepo);
 
       deps.logger.info({
-        description: "Retrieved management information",
+        logRef: LogRefs.MI_RETRIEVED.code,
+        description: LogRefs.MI_RETRIEVED.description,
         supplierId: commonIds.value.supplierId,
         correlationId: commonIds.value.correlationId,
       });
@@ -81,5 +83,5 @@ function emitMetric(
     unit: Unit.Count,
   };
   const emf = buildEMFObject(source, dimensions, metric);
-  logger.info(emf);
+  logger.info({ ...emf, logRef: LogRefs.METRIC.code });
 }

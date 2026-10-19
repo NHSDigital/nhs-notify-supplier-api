@@ -16,15 +16,21 @@ import { mapLetterToCloudEvent } from "@internal/event-builders/src";
 import { Unit } from "aws-embedded-metrics";
 import pino from "pino";
 import { Deps } from "./deps";
+import LogRefs from "./log-references";
 
 // SNS PublishBatchCommand supports up to 10 messages per batch
 const BATCH_SIZE = 10;
 
 export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
   return async (streamEvent: KinesisStreamEvent) => {
-    deps.logger.info({ description: "Received event", streamEvent });
     deps.logger.info({
-      description: "Number of records",
+      logRef: LogRefs.RECEIVED_EVENT.code,
+      description: LogRefs.RECEIVED_EVENT.description,
+      streamEvent,
+    });
+    deps.logger.info({
+      logRef: LogRefs.NUMBER_OF_RECORDS.code,
+      description: LogRefs.NUMBER_OF_RECORDS.description,
       count: streamEvent.Records?.length || 0,
     });
 
@@ -42,7 +48,8 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
       populateEventTypeMap(cloudEvents);
     for (const batch of generateBatches(cloudEvents)) {
       deps.logger.info({
-        description: "Publishing batch",
+        logRef: LogRefs.PUBLISHING_BATCH.code,
+        description: LogRefs.PUBLISHING_BATCH.description,
         size: batch.length,
         letterEvents: batch,
       });
@@ -77,7 +84,7 @@ function emitMetrics(logger: pino.Logger, eventTypeCount: Map<string, number>) {
       unit: Unit.Count,
     };
     const emf = buildEMFObject(namespace, dimensions, metric);
-    logger.info(emf);
+    logger.info({ ...emf, logRef: LogRefs.METRIC.code });
   }
 }
 
@@ -95,7 +102,8 @@ function filterRecord(record: DynamoDBRecord, deps: Deps): boolean {
   }
 
   deps.logger.info({
-    description: "Filtering record",
+    logRef: LogRefs.FILTERING_RECORD.code,
+    description: LogRefs.FILTERING_RECORD.description,
     eventName: record.eventName,
     eventId: record.eventID,
     allowEvent,
@@ -110,20 +118,30 @@ function extractPayload(
 ): DynamoDBRecord {
   try {
     deps.logger.info({
-      description: "Processing Kinesis record",
+      logRef: LogRefs.PROCESSING_KINESIS_RECORD.code,
+      description: LogRefs.PROCESSING_KINESIS_RECORD.description,
       recordId: record.kinesis.sequenceNumber,
     });
 
     // Kinesis data is base64 encoded
     const payload = Buffer.from(record.kinesis.data, "base64").toString("utf8");
-    deps.logger.info({ description: "Decoded payload", payload });
+    deps.logger.info({
+      logRef: LogRefs.DECODED_PAYLOAD.code,
+      description: LogRefs.DECODED_PAYLOAD.description,
+      payload,
+    });
 
     const jsonParsed = JSON.parse(payload);
-    deps.logger.info({ description: "Extracted dynamoDBRecord", jsonParsed });
+    deps.logger.info({
+      logRef: LogRefs.EXTRACTED_DYNAMODB_RECORD.code,
+      description: LogRefs.EXTRACTED_DYNAMODB_RECORD.description,
+      jsonParsed,
+    });
     return jsonParsed;
   } catch (error) {
     deps.logger.error({
-      description: "Error extracting payload",
+      logRef: LogRefs.ERROR_EXTRACTING_PAYLOAD.code,
+      description: LogRefs.ERROR_EXTRACTING_PAYLOAD.description,
       err: error,
       record,
     });

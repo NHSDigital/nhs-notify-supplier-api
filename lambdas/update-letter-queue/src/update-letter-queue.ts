@@ -15,6 +15,7 @@ import {
   LetterSchema,
 } from "@internal/datastore";
 import { Deps } from "./deps";
+import LogRefs from "./log-references";
 
 export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
   return async (streamEvent: KinesisStreamEvent) => {
@@ -23,9 +24,14 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
     // The change in the size of the pending letters queue, keyed by supplier
     const deltasBySupplierId = new Map<string, number>();
 
-    deps.logger.info({ description: "Received event", streamEvent });
     deps.logger.info({
-      description: "Number of records",
+      logRef: LogRefs.RECEIVED_EVENT.code,
+      description: LogRefs.RECEIVED_EVENT.description,
+      streamEvent,
+    });
+    deps.logger.info({
+      logRef: LogRefs.NUMBER_OF_RECORDS.code,
+      description: LogRefs.NUMBER_OF_RECORDS.description,
       count: streamEvent.Records?.length || 0,
     });
 
@@ -46,7 +52,8 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
         }
       } catch (error) {
         deps.logger.error({
-          description: "Error processing ddbRecord",
+          logRef: LogRefs.ERROR_PROCESSING_DDB_RECORD.code,
+          description: LogRefs.ERROR_PROCESSING_DDB_RECORD.description,
           error,
           ddbRecord,
         });
@@ -74,7 +81,8 @@ async function addPendingLetterToQueue(
 
   try {
     deps.logger.info({
-      description: "Persisting pending letter",
+      logRef: LogRefs.PERSISTING_PENDING_LETTER.code,
+      description: LogRefs.PERSISTING_PENDING_LETTER.description,
       pendingLetter,
     });
     await deps.letterQueueRepository.putLetter(pendingLetter);
@@ -82,7 +90,8 @@ async function addPendingLetterToQueue(
   } catch (error) {
     if (error instanceof LetterAlreadyExistsError) {
       deps.logger.warn({
-        description: "Letter already exists",
+        logRef: LogRefs.LETTER_ALREADY_EXISTS.code,
+        description: LogRefs.LETTER_ALREADY_EXISTS.description,
         supplierId: pendingLetter.supplierId,
         letterId: pendingLetter.letterId,
       });
@@ -98,7 +107,8 @@ async function deletePendingLetterFromQueue(
 ): Promise<number> {
   try {
     deps.logger.info({
-      description: "Deleting pending letter",
+      logRef: LogRefs.DELETING_PENDING_LETTER.code,
+      description: LogRefs.DELETING_PENDING_LETTER.description,
       supplierId: letter.supplierId,
       letterId: letter.id,
     });
@@ -107,7 +117,8 @@ async function deletePendingLetterFromQueue(
   } catch (error) {
     if (error instanceof LetterNotFoundError) {
       deps.logger.warn({
-        description: "Letter does not exist",
+        logRef: LogRefs.LETTER_DOES_NOT_EXIST.code,
+        description: LogRefs.LETTER_DOES_NOT_EXIST.description,
         supplierId: letter.supplierId,
         letterId: letter.id,
       });
@@ -124,14 +135,18 @@ function recordProcessing(
   deltasBySupplierId: Map<string, number>,
 ) {
   deps.logger.info({
-    description: "Processing complete",
+    logRef: LogRefs.PROCESSING_COMPLETE.code,
+    description: LogRefs.PROCESSING_COMPLETE.description,
     successCount,
     failureCount,
     totalProcessed: successCount + failureCount,
   });
 
   for (const [supplierId, delta] of deltasBySupplierId) {
-    deps.logger.info(buildMetric(supplierId, delta));
+    deps.logger.info({
+      ...buildMetric(supplierId, delta),
+      logRef: LogRefs.QUEUE_DELTA_METRIC.code,
+    });
   }
 }
 
@@ -157,20 +172,30 @@ function extractPayload(
 ): DynamoDBRecord {
   try {
     deps.logger.info({
-      description: "Processing Kinesis record",
+      logRef: LogRefs.PROCESSING_KINESIS_RECORD.code,
+      description: LogRefs.PROCESSING_KINESIS_RECORD.description,
       recordId: record.kinesis.sequenceNumber,
     });
 
     // Kinesis data is base64 encoded
     const payload = Buffer.from(record.kinesis.data, "base64").toString("utf8");
-    deps.logger.info({ description: "Decoded payload", payload });
+    deps.logger.info({
+      logRef: LogRefs.DECODED_PAYLOAD.code,
+      description: LogRefs.DECODED_PAYLOAD.description,
+      payload,
+    });
 
     const jsonParsed = JSON.parse(payload);
-    deps.logger.info({ description: "Extracted dynamoDBRecord", jsonParsed });
+    deps.logger.info({
+      logRef: LogRefs.EXTRACTED_DYNAMODB_RECORD.code,
+      description: LogRefs.EXTRACTED_DYNAMODB_RECORD.description,
+      jsonParsed,
+    });
     return jsonParsed;
   } catch (error) {
     deps.logger.error({
-      description: "Error extracting payload",
+      logRef: LogRefs.ERROR_EXTRACTING_PAYLOAD.code,
+      description: LogRefs.ERROR_EXTRACTING_PAYLOAD.description,
       err: error,
       eventId: record.eventID,
     });
