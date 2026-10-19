@@ -13,15 +13,15 @@ export default function buildSamedayBreachesQuery(
     SELECT from_iso8601_timestamp(?) AS iso8601
 ),
 recent_letter_events AS (
-    SELECT domainid, supplierid, status, from_iso8601_timestamp(time) AS event_time
+    SELECT domainid, supplierid, status, clientid, campaignid, statusfrom_iso8601_timestamp(time) AS event_time
     FROM ${tableName}
     WHERE ${buildAthenaDatePredicate(now, daysHistory)}
 ),
 allocated_letters AS (
-    SELECT domainid, supplierid
+    SELECT domainid, supplierid, clientid, campaignid
     FROM recent_letter_events
     WHERE status = 'PENDING'
-    GROUP BY domainid, supplierid
+    GROUP BY domainid, supplierid, clientid, campaignid
     HAVING (SELECT iso8601 FROM now) >
         CASE
             WHEN hour(min(event_time) AT TIME ZONE 'Europe/London') >= 16
@@ -30,18 +30,23 @@ allocated_letters AS (
         END
 ),
 completed_letters AS (
-    SELECT domainid, supplierid
+    SELECT domainid, supplierid, clientid, campaignid
     FROM recent_letter_events
     WHERE status in ('REJECTED', 'FAILED', 'CANCELLED', 'FORWARDED', 'DISPATCHED')
-    GROUP BY domainid, supplierid
+    GROUP BY domainid, supplierid, clientid, campaignid
 )
-SELECT supplierid, count(*) AS breach_count
+SELECT supplierid, clientid, campaignid, count(*) AS breach_count
 FROM (
-    SELECT al.domainid, al.supplierid
+    SELECT al.domainid, al.supplierid, al.clientid, al.campaignid
     FROM allocated_letters al
-        LEFT JOIN completed_letters cl ON al.domainid = cl.domainid WHERE cl.domainid IS NULL
+        LEFT JOIN completed_letters cl
+        ON al.domainid = cl.domainid
+        AND al.supplierid = cl.supplierid
+        AND al.clientid = cl.clientid
+        AND al.campaignid = cl.campaignid
+    WHERE cl.domainid IS NULL
 )
-GROUP BY supplierid`,
+GROUP BY supplierid, clientid, campaignid`,
     executionParameters: [now.toISOString()],
   };
 }
