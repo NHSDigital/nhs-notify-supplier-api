@@ -17,8 +17,10 @@ CONSUMER_PACKAGES=(
 
 for PKG in "${CONSUMER_PACKAGES[@]}"; do
   mkdir -p ".contracts/$PKG"
-  TGZ_NAME=$(npm pack "$PKG" --pack-destination .packages)
-  tar -xvzf ".packages/$TGZ_NAME" -C ".contracts/$PKG" --strip-components=1
+  pnpm add --dir .packages --ignore-workspace --ignore-scripts --save-exact "$PKG"
+  PACKAGE_DIR=".packages/node_modules/$PKG"
+  TGZ_PATH=$(cd "$PACKAGE_DIR" && pnpm pack --json --pack-destination "$TESTS_ROOT/.packages" | jq -r '.filename')
+  tar -xvzf "$TGZ_PATH" -C ".contracts/$PKG" --strip-components=1
 done
 
 pnpm exec jest --runInBand
