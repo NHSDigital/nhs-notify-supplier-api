@@ -37,9 +37,10 @@ module "populate_sameday_breaches" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = {
-    ATHENA_WORKGROUP       = aws_athena_workgroup.reporting.name
-    ATHENA_DATABASE        = aws_glue_catalog_database.supplier.name
-    EVENT_CACHE_TABLE_NAME = aws_glue_catalog_table.eventpub_parquet[0].name
+    ATHENA_WORKGROUP              = aws_athena_workgroup.reporting.name
+    ATHENA_DATABASE               = aws_glue_catalog_database.supplier.name
+    EVENT_CACHE_TABLE_NAME        = aws_glue_catalog_table.eventpub_parquet[0].name
+    PACK_SPECIFICATION_TABLE_NAME = aws_glue_catalog_table.supplier_config_cache["pack-specification"].name
   }
 }
 
@@ -100,10 +101,13 @@ data "aws_iam_policy_document" "populate_sameday_breaches_lambda" {
   }
 
   statement {
-    sid       = "AllowReadEventData"
-    effect    = "Allow"
-    actions   = ["s3:GetObject"]
-    resources = ["${module.s3bucket_reporting.arn}/parquet/*"]
+    sid     = "AllowReadEventData"
+    effect  = "Allow"
+    actions = ["s3:GetObject"]
+    resources = [
+      "${module.s3bucket_reporting.arn}/parquet/*",
+      "${module.s3bucket_reporting.arn}/supplier_config_cache/*",
+    ]
   }
 
   statement {

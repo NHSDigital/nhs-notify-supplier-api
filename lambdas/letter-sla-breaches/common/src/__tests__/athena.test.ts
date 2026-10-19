@@ -21,6 +21,7 @@ function makeDeps(responses: unknown[]) {
       ATHENA_WORKGROUP: "workgroup",
       ATHENA_DATABASE: "database",
       EVENT_CACHE_TABLE_NAME: "event_cache",
+      PACK_SPECIFICATION_TABLE_NAME: "pack_specification",
     },
   } as unknown as Deps;
   return { deps, send };

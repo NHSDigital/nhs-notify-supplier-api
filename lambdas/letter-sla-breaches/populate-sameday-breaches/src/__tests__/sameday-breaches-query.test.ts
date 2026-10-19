@@ -3,6 +3,7 @@ import buildSamedayBreachesQuery from "../handler/sameday-breaches-query";
 describe("buildSamedayBreachesQuery", () => {
   const { executionParameters, queryString } = buildSamedayBreachesQuery(
     "event_cache",
+    "pack_specification",
     new Date("2026-10-08"),
     0,
   );
@@ -25,6 +26,21 @@ describe("buildSamedayBreachesQuery", () => {
   });
 
   it.each([
+    [
+      "defines the same day specifications from the pack specification table",
+      [
+        "sameday_pack_specifications AS (",
+        "SELECT id as specificationId FROM pack_specification",
+        "WHERE array_join(assembly.features, ',') like '%SAME_DAY%'",
+      ],
+    ],
+    [
+      "restricts events to letters with a same day specification",
+      [
+        "exists (select sps.specificationId from sameday_pack_specifications sps",
+        "where sps.specificationId = json_extract_scalar(recent_letter_events.data_json, '$.specificationId')",
+      ],
+    ],
     [
       "applies a 24 hour SLA from 16:00 UK time",
       [

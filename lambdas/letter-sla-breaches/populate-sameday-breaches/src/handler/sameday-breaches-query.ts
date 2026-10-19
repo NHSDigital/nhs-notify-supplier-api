@@ -5,6 +5,7 @@ import {
 
 export default function buildSamedayBreachesQuery(
   tableName: string,
+  packSpecificationTableName: string,
   now: Date,
   daysHistory: number,
 ): AthenaQuery {
@@ -13,7 +14,7 @@ export default function buildSamedayBreachesQuery(
     SELECT from_iso8601_timestamp(?) AS iso8601
 ),
 sameday_pack_specifications AS (
-    SELECT id as specificationId FROM nhs_pr742_supapi_pack_specification
+    SELECT id as specificationId FROM ${packSpecificationTableName}
     WHERE array_join(assembly.features, ',') like '%SAME_DAY%'
 ),
 recent_letter_events AS (

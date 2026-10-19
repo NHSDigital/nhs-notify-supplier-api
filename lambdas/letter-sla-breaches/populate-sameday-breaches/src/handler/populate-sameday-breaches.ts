@@ -23,6 +23,7 @@ export default function createHandler(deps: Deps) {
         deps,
         buildSamedayBreachesQuery(
           deps.env.EVENT_CACHE_TABLE_NAME,
+          deps.env.PACK_SPECIFICATION_TABLE_NAME,
           new Date(event.date.slice(0, 10)),
           14,
         ),

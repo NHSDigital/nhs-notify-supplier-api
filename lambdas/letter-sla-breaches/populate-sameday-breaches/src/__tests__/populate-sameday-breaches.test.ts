@@ -9,7 +9,10 @@ jest.mock("@internal/letter-sla-breaches-common");
 const makeDeps = () =>
   ({
     logger: { info: jest.fn(), error: jest.fn() },
-    env: { EVENT_CACHE_TABLE_NAME: "event_cache" },
+    env: {
+      EVENT_CACHE_TABLE_NAME: "event_cache",
+      PACK_SPECIFICATION_TABLE_NAME: "pack_specification",
+    },
   }) as unknown as Deps;
 
 describe("populateSamedayBreaches", () => {

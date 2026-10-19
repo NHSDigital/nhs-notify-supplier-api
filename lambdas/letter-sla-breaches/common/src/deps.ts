@@ -9,6 +9,7 @@ export type Deps = {
     ATHENA_WORKGROUP: string;
     ATHENA_DATABASE: string;
     EVENT_CACHE_TABLE_NAME: string;
+    PACK_SPECIFICATION_TABLE_NAME: string;
   };
 };
 
@@ -20,6 +21,7 @@ export default function createDependenciesContainer(): Deps {
       ATHENA_WORKGROUP: process.env.ATHENA_WORKGROUP!,
       ATHENA_DATABASE: process.env.ATHENA_DATABASE!,
       EVENT_CACHE_TABLE_NAME: process.env.EVENT_CACHE_TABLE_NAME!,
+      PACK_SPECIFICATION_TABLE_NAME: process.env.PACK_SPECIFICATION_TABLE_NAME!,
     },
   };
 }
