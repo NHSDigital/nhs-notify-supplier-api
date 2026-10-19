@@ -12,10 +12,16 @@ export default function buildSamedayBreachesQuery(
     queryString: `WITH now AS (
     SELECT from_iso8601_timestamp(?) AS iso8601
 ),
+sameday_pack_specifications AS (
+    SELECT id as specificationId FROM nhs_pr742_supapi_pack_specification
+    WHERE array_join(assembly.features, ',') like '%SAME_DAY%'
+),
 recent_letter_events AS (
     SELECT domainid, supplierid, status, clientid, campaignid, from_iso8601_timestamp(time) AS event_time
     FROM ${tableName}
     WHERE ${buildAthenaDatePredicate(now, daysHistory)}
+    AND exists (select sps.specificationId from sameday_pack_specifications sps
+                where sps.specificationId = json_extract_scalar(recent_letter_events.data_json, '$.specificationId') )
 ),
 allocated_letters AS (
     SELECT domainid, supplierid, clientid, campaignid
