@@ -9,6 +9,7 @@ import { getLetterById } from "../services/letter-operations";
 import { processError } from "../mappers/error-mapper";
 import { mapToGetLetterResponse } from "../mappers/letter-mapper";
 import { Deps } from "../config/deps";
+import LogRefs from "../config/log-references";
 
 // Get letter data
 export default function createGetLetterHandler(
@@ -48,7 +49,8 @@ export default function createGetLetterHandler(
         const response = mapToGetLetterResponse(letter);
 
         deps.logger.info({
-          description: "Letter successfully fetched by id",
+          logRef: LogRefs.LETTER_FETCHED.code,
+          description: LogRefs.LETTER_FETCHED.description,
           supplierId,
           letterId,
           correlationId: commonIds.value.correlationId,
