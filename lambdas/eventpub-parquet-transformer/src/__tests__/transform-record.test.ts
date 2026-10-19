@@ -18,6 +18,7 @@ describe("transformRecord", () => {
       supplierId: "s1",
       groupId: "cl1-c1-t1",
       status: "PRINTED",
+      specificationId: "spec1",
     };
 
     const out = transformRecord({
@@ -41,6 +42,7 @@ describe("transformRecord", () => {
       campaignid: "c1",
       clientid: "cl1",
       status: "PRINTED",
+      specificationid: "spec1",
     });
   });
 

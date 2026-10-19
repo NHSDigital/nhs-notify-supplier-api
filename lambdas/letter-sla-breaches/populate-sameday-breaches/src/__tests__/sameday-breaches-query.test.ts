@@ -13,7 +13,7 @@ describe("buildSamedayBreachesQuery", () => {
   });
 
   it("selects from the event cache table filtered by the date partitions", () => {
-    expect(queryString).toContain("FROM event_cache");
+    expect(queryString).toContain("FROM event_cache ep");
     expect(queryString).toContain(
       "(__year = '2026' AND __month = '10' AND __day IN ('08'))",
     );
@@ -38,7 +38,7 @@ describe("buildSamedayBreachesQuery", () => {
       "restricts events to letters with a same day specification",
       [
         "exists (select sps.specificationId from sameday_pack_specifications sps",
-        "where sps.specificationId = json_extract_scalar(recent_letter_events.data_json, '$.specificationId')",
+        "where sps.specificationId = ep.specificationid",
       ],
     ],
     [

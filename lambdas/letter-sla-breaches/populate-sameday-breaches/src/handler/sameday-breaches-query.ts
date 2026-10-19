@@ -19,10 +19,10 @@ sameday_pack_specifications AS (
 ),
 recent_letter_events AS (
     SELECT domainid, supplierid, status, clientid, campaignid, from_iso8601_timestamp(time) AS event_time
-    FROM ${tableName}
+    FROM ${tableName} ep
     WHERE ${buildAthenaDatePredicate(now, daysHistory)}
     AND exists (select sps.specificationId from sameday_pack_specifications sps
-                where sps.specificationId = json_extract_scalar(recent_letter_events.data_json, '$.specificationId') )
+                where sps.specificationId = ep.specificationid )
 ),
 allocated_letters AS (
     SELECT domainid, supplierid, clientid, campaignid
