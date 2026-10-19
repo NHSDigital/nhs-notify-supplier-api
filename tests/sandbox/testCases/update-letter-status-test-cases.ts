@@ -16,9 +16,9 @@ export type ApiSandboxUpdateLetterStatusTestData = {
   body?: PatchMessageRequestBody;
   expectedStatus: number;
   expectedResponse?:
-    | PatchMessageResponseBody
-    | SandboxErrorResponse
-    | ErrorMessageBody;
+  | PatchMessageResponseBody
+  | SandboxErrorResponse
+  | ErrorMessageBody;
 };
 
 export const apiSandboxUpdateLetterStatusTestData: ApiSandboxUpdateLetterStatusTestData[] =
@@ -102,12 +102,12 @@ export const apiSandboxUpdateLetterStatusTestData: ApiSandboxUpdateLetterStatusT
       expectedStatus: 400,
       expectedResponse: {
         message:
-          "request.body.data.attributes.status should be equal to one of the allowed values: PENDING, ACCEPTED, REJECTED, PRINTED, ENCLOSED, CANCELLED, DISPATCHED, DELIVERED, FAILED, RETURNED, FORWARDED",
+          "request/body/data/attributes/status must be equal to one of the allowed values: PENDING, ACCEPTED, REJECTED, PRINTED, ENCLOSED, CANCELLED, DISPATCHED, DELIVERED, FAILED, RETURNED, FORWARDED",
         errors: [
           {
-            path: ".body.data.attributes.status",
+            path: "/body/data/attributes/status",
             message:
-              "should be equal to one of the allowed values: PENDING, ACCEPTED, REJECTED, PRINTED, ENCLOSED, CANCELLED, DISPATCHED, DELIVERED, FAILED, RETURNED, FORWARDED",
+              "must be equal to one of the allowed values: PENDING, ACCEPTED, REJECTED, PRINTED, ENCLOSED, CANCELLED, DISPATCHED, DELIVERED, FAILED, RETURNED, FORWARDED",
             errorCode: "enum.openapi.validation",
           },
         ],

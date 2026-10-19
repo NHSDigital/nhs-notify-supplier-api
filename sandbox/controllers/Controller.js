@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const camelCase = require('camelcase');
+const camelCase = require('camelcase').default;
 const config = require('../config');
 const logger = require('../logger');
 
@@ -74,11 +74,10 @@ class Controller {
 
   static collectRequestParams(request) {
     const requestParams = {};
-    if (request.openapi.schema.requestBody !== null) {
+    if (request.openapi.schema.requestBody) {
       const { content } = request.openapi.schema.requestBody;
       if (content['application/vnd.api+json'] !== undefined) {
-        const requestBodyName = camelCase(this.getRequestBodyName(request));
-        requestParams[requestBodyName] = request.body;
+        requestParams.body = request.body;
       } else if (content['multipart/form-data'] !== undefined) {
         Object.keys(content['multipart/form-data'].schema.properties).forEach(
           (property) => {
