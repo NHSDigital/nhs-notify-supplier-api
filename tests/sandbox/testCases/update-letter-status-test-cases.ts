@@ -16,7 +16,9 @@ export type ApiSandboxUpdateLetterStatusTestData = {
   body?: PatchMessageRequestBody;
   expectedStatus: number;
   expectedResponse?:
-    PatchMessageResponseBody | SandboxErrorResponse | ErrorMessageBody;
+    | PatchMessageResponseBody
+    | SandboxErrorResponse
+    | ErrorMessageBody;
 };
 
 export const apiSandboxUpdateLetterStatusTestData: ApiSandboxUpdateLetterStatusTestData[] =
