@@ -29,6 +29,7 @@ This repository documents the Supplier API specification and provides an SDK wit
       - [Prerequisites and Configuration](#prerequisites-and-configuration)
         - [SDKs](#sdks)
     - [Build](#build)
+    - [Unit Testing](#unit-testing)
     - [Documentation](#documentation-1)
     - [GitHub Actions CI/CD](#github-actions-cicd)
       - [CI (Automatic)](#ci-automatic)
@@ -196,4 +197,5 @@ Select a target environment in postman
 Run the collection
 The collections must be kept in sync manually
 
+trigger build
 <!-- vale on -->
