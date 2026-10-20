@@ -18,7 +18,8 @@ locals {
     GET_MI_LAMBDA_ARN          = module.get_mi.function_arn
   })
 
-  destination_arn = "arn:aws:logs:${var.region}:${var.shared_infra_account_id}:destination:nhs-main-obs-firehose-logs"
+  destination_arn      = "arn:aws:logs:${var.region}:${var.shared_infra_account_id}:destination:nhs-main-obs-firehose-logs"
+  odin_destination_arn = "arn:aws:logs:${var.region}:${var.shared_infra_account_id}:destination:nhs-main-obs-odin-firehose-logs"
 
   common_lambda_env_vars = {
     APIM_CORRELATION_HEADER         = "nhsd-correlation-id",

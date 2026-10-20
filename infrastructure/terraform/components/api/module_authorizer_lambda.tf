@@ -1,5 +1,5 @@
 module "authorizer_lambda" {
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.2/terraform-lambda.zip"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip"
 
   aws_account_id = var.aws_account_id
   component      = var.component
@@ -32,6 +32,7 @@ module "authorizer_lambda" {
   force_lambda_code_deploy = var.force_lambda_code_deploy
 
   log_destination_arn       = local.destination_arn
+  odin_log_destination_arn  = local.odin_destination_arn
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = {
@@ -39,6 +40,7 @@ module "authorizer_lambda" {
     CLIENT_CERTIFICATE_EXPIRATION_ALERT_DAYS = 30,
     APIM_SUPPLIER_ID_HEADER                  = "NHSD-Supplier-ID",
     SUPPLIERS_TABLE_NAME                     = aws_dynamodb_table.suppliers.name
+    LOG_REFERENCE                            = "AUTH"
   }
 }
 

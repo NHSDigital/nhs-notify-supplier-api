@@ -92,6 +92,7 @@ describe("Supplier Mock Lambda", () => {
     );
   });
 
+  // eslint-disable-next-line sonarjs/parameterized-tests
   it("uses mapped status when specification id is present in config", async () => {
     const deps = makeDeps(
       Promise.resolve(

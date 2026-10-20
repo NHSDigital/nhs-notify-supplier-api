@@ -34,6 +34,7 @@ No requirements.
 | <a name="input_event_anomaly_band_width"></a> [event\_anomaly\_band\_width](#input\_event\_anomaly\_band\_width) | The width of the anomaly detection band. Higher values (e.g. 4-6) reduce sensitivity and noise, lower values (e.g. 2-3) increase sensitivity. Recommended: 2-4. | `number` | `4` | no |
 | <a name="input_event_anomaly_evaluation_periods"></a> [event\_anomaly\_evaluation\_periods](#input\_event\_anomaly\_evaluation\_periods) | Number of evaluation periods for the anomaly alarm. Each period is defined by event\_anomaly\_period. | `number` | `3` | no |
 | <a name="input_event_anomaly_period"></a> [event\_anomaly\_period](#input\_event\_anomaly\_period) | The period in seconds over which the specified statistic is applied for anomaly detection. Minimum 300 seconds (5 minutes). Recommended: 300-600. | `number` | `300` | no |
+| <a name="input_event_source_filter"></a> [event\_source\_filter](#input\_event\_source\_filter) | SNS subscription source filter values | `list(string)` | n/a | yes |
 | <a name="input_eventpub_control_plane_bus_arn"></a> [eventpub\_control\_plane\_bus\_arn](#input\_eventpub\_control\_plane\_bus\_arn) | ARN of the EventBridge control plane bus for eventpub | `string` | `""` | no |
 | <a name="input_eventpub_data_plane_bus_arn"></a> [eventpub\_data\_plane\_bus\_arn](#input\_eventpub\_data\_plane\_bus\_arn) | ARN of the EventBridge data plane bus for eventpub | `string` | `""` | no |
 | <a name="input_force_destroy"></a> [force\_destroy](#input\_force\_destroy) | Flag to force deletion of S3 buckets | `bool` | `false` | no |
@@ -60,9 +61,9 @@ No requirements.
 
 | Name | Source | Version |
 | ---- | ------ | ------- |
-| <a name="module_amendment_event_transformer"></a> [amendment\_event\_transformer](#module\_amendment\_event\_transformer) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.2/terraform-lambda.zip | n/a |
+| <a name="module_amendment_event_transformer"></a> [amendment\_event\_transformer](#module\_amendment\_event\_transformer) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
 | <a name="module_amendments_queue"></a> [amendments\_queue](#module\_amendments\_queue) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.1.5/terraform-sqs.zip | n/a |
-| <a name="module_authorizer_lambda"></a> [authorizer\_lambda](#module\_authorizer\_lambda) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.2/terraform-lambda.zip | n/a |
+| <a name="module_authorizer_lambda"></a> [authorizer\_lambda](#module\_authorizer\_lambda) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
 | <a name="module_ddb_alarms_idempotency"></a> [ddb\_alarms\_idempotency](#module\_ddb\_alarms\_idempotency) | ../../modules/alarms-ddb | n/a |
 | <a name="module_ddb_alarms_letter_queue"></a> [ddb\_alarms\_letter\_queue](#module\_ddb\_alarms\_letter\_queue) | ../../modules/alarms-ddb | n/a |
 | <a name="module_ddb_alarms_letters"></a> [ddb\_alarms\_letters](#module\_ddb\_alarms\_letters) | ../../modules/alarms-ddb | n/a |
@@ -71,30 +72,30 @@ No requirements.
 | <a name="module_domain_truststore"></a> [domain\_truststore](#module\_domain\_truststore) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.0.6/terraform-s3bucket.zip | n/a |
 | <a name="module_eventpub"></a> [eventpub](#module\_eventpub) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/5.0.6/terraform-eventpub.zip | n/a |
 | <a name="module_eventsub"></a> [eventsub](#module\_eventsub) | ../../modules/eventsub | n/a |
-| <a name="module_get_letter"></a> [get\_letter](#module\_get\_letter) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.2/terraform-lambda.zip | n/a |
-| <a name="module_get_letter_data"></a> [get\_letter\_data](#module\_get\_letter\_data) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.2/terraform-lambda.zip | n/a |
-| <a name="module_get_letters"></a> [get\_letters](#module\_get\_letters) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.2/terraform-lambda.zip | n/a |
-| <a name="module_get_mi"></a> [get\_mi](#module\_get\_mi) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip | n/a |
-| <a name="module_get_status"></a> [get\_status](#module\_get\_status) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.2/terraform-lambda.zip | n/a |
+| <a name="module_get_letter"></a> [get\_letter](#module\_get\_letter) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
+| <a name="module_get_letter_data"></a> [get\_letter\_data](#module\_get\_letter\_data) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
+| <a name="module_get_letters"></a> [get\_letters](#module\_get\_letters) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
+| <a name="module_get_mi"></a> [get\_mi](#module\_get\_mi) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
+| <a name="module_get_status"></a> [get\_status](#module\_get\_status) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
 | <a name="module_kms"></a> [kms](#module\_kms) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-kms.zip | n/a |
 | <a name="module_lambda_alarms"></a> [lambda\_alarms](#module\_lambda\_alarms) | ../../modules/alarms-lambda | n/a |
 | <a name="module_letter_status_updates_queue"></a> [letter\_status\_updates\_queue](#module\_letter\_status\_updates\_queue) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.1.5/terraform-sqs.zip | n/a |
-| <a name="module_letter_updates_transformer"></a> [letter\_updates\_transformer](#module\_letter\_updates\_transformer) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.2/terraform-lambda.zip | n/a |
-| <a name="module_mi_updates_transformer"></a> [mi\_updates\_transformer](#module\_mi\_updates\_transformer) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.2/terraform-lambda.zip | n/a |
-| <a name="module_patch_letter"></a> [patch\_letter](#module\_patch\_letter) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.2/terraform-lambda.zip | n/a |
-| <a name="module_post_letters"></a> [post\_letters](#module\_post\_letters) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.2/terraform-lambda.zip | n/a |
-| <a name="module_post_mi"></a> [post\_mi](#module\_post\_mi) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.2/terraform-lambda.zip | n/a |
+| <a name="module_letter_updates_transformer"></a> [letter\_updates\_transformer](#module\_letter\_updates\_transformer) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
+| <a name="module_mi_updates_transformer"></a> [mi\_updates\_transformer](#module\_mi\_updates\_transformer) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
+| <a name="module_patch_letter"></a> [patch\_letter](#module\_patch\_letter) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
+| <a name="module_post_letters"></a> [post\_letters](#module\_post\_letters) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
+| <a name="module_post_mi"></a> [post\_mi](#module\_post\_mi) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
 | <a name="module_s3bucket_test_letters"></a> [s3bucket\_test\_letters](#module\_s3bucket\_test\_letters) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-s3bucket.zip | n/a |
 | <a name="module_sqs_alarms"></a> [sqs\_alarms](#module\_sqs\_alarms) | ../../modules/alarms-sqs | n/a |
 | <a name="module_sqs_letter_updates"></a> [sqs\_letter\_updates](#module\_sqs\_letter\_updates) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.1.5/terraform-sqs.zip | n/a |
 | <a name="module_sqs_supplier_allocator"></a> [sqs\_supplier\_allocator](#module\_sqs\_supplier\_allocator) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.1.5/terraform-sqs.zip | n/a |
 | <a name="module_sqs_supplier_config"></a> [sqs\_supplier\_config](#module\_sqs\_supplier\_config) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.1.5/terraform-sqs.zip | n/a |
-| <a name="module_supplier_allocator"></a> [supplier\_allocator](#module\_supplier\_allocator) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.2/terraform-lambda.zip | n/a |
-| <a name="module_supplier_config_ingress"></a> [supplier\_config\_ingress](#module\_supplier\_config\_ingress) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip | n/a |
-| <a name="module_supplier_mock"></a> [supplier\_mock](#module\_supplier\_mock) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.5/terraform-lambda.zip | n/a |
+| <a name="module_supplier_allocator"></a> [supplier\_allocator](#module\_supplier\_allocator) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
+| <a name="module_supplier_config_ingress"></a> [supplier\_config\_ingress](#module\_supplier\_config\_ingress) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
+| <a name="module_supplier_mock"></a> [supplier\_mock](#module\_supplier\_mock) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
 | <a name="module_supplier_ssl"></a> [supplier\_ssl](#module\_supplier\_ssl) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-ssl.zip | n/a |
-| <a name="module_update_letter_queue"></a> [update\_letter\_queue](#module\_update\_letter\_queue) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.2/terraform-lambda.zip | n/a |
-| <a name="module_upsert_letter"></a> [upsert\_letter](#module\_upsert\_letter) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.2/terraform-lambda.zip | n/a |
+| <a name="module_update_letter_queue"></a> [update\_letter\_queue](#module\_update\_letter\_queue) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
+| <a name="module_upsert_letter"></a> [upsert\_letter](#module\_upsert\_letter) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
 ## Outputs
 
 | Name | Description |

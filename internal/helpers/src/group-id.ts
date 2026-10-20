@@ -3,5 +3,5 @@ export default function formatGroupId(
   campaignId = "unknown",
   safeTemplateId = "unknown",
 ): string {
-  return `${clientId}_${campaignId}_${safeTemplateId}`;
+  return `${clientId}-${campaignId}-${safeTemplateId}`;
 }

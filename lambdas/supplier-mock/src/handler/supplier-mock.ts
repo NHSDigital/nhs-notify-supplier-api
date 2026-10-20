@@ -1,10 +1,14 @@
 import { InvokeCommand } from "@aws-sdk/client-lambda";
 import { Deps } from "./deps";
 import { SupplierMockConfig } from "./types";
+import LogRefs from "./log-references";
 
 export default function createHandler(deps: Deps) {
   return async () => {
-    deps.logger.info("Starting supplier mock lambda");
+    deps.logger.info(
+      { logRef: LogRefs.STARTING_SUPPLIER_MOCK.code },
+      LogRefs.STARTING_SUPPLIER_MOCK.description,
+    );
     checkDepsAreSet(deps);
     const config = await parseSupplierMockConfig(deps);
     const headers = {
@@ -15,9 +19,10 @@ export default function createHandler(deps: Deps) {
     const letters = await callGetLetters(deps, headers, config.limit);
     deps.logger.info(
       {
+        logRef: LogRefs.FORWARDING_LETTERS_TO_PATCH.code,
         lettersCount: letters.length,
       },
-      "Forwarding letters to patch_letter lambda",
+      LogRefs.FORWARDING_LETTERS_TO_PATCH.description,
     );
     await callPatchLetter(
       deps,
@@ -25,7 +30,10 @@ export default function createHandler(deps: Deps) {
       letters,
       config.specificationIdMapping,
     );
-    deps.logger.info("Finished supplier mock lambda");
+    deps.logger.info(
+      { logRef: LogRefs.FINISHED_SUPPLIER_MOCK.code },
+      LogRefs.FINISHED_SUPPLIER_MOCK.description,
+    );
   };
 }
 
@@ -66,11 +74,12 @@ async function callPatchLetter(
     } catch (error) {
       deps.logger.error(
         {
+          logRef: LogRefs.FAILED_TO_INVOKE_PATCH_LETTER.code,
           error,
           functionName: deps.env.PATCH_LETTER_FUNCTION_NAME,
           letterId: letter.id,
         },
-        "Failed to invoke patch_letter lambda",
+        LogRefs.FAILED_TO_INVOKE_PATCH_LETTER.description,
       );
       throw error;
     }
@@ -82,12 +91,13 @@ async function callPatchLetter(
 
       deps.logger.error(
         {
+          logRef: LogRefs.PATCH_LETTER_FUNCTION_ERROR.code,
           functionName: deps.env.PATCH_LETTER_FUNCTION_NAME,
           letterId: letter.id,
           functionError: patchInvokeResponse.FunctionError,
           payload: patchPayload,
         },
-        "patch_letter lambda returned a function error",
+        LogRefs.PATCH_LETTER_FUNCTION_ERROR.description,
       );
 
       throw new Error(
@@ -115,6 +125,7 @@ async function callGetLetters(
   limitValue: string,
 ): Promise<any[]> {
   deps.logger.info({
+    logRef: LogRefs.CALLING_GET_LETTERS.code,
     message: `about to call getLetters with limit ${limitValue}`,
   });
   let invokeResponse;
@@ -135,12 +146,13 @@ async function callGetLetters(
   } catch (error) {
     deps.logger.error(
       {
+        logRef: LogRefs.FAILED_TO_INVOKE_GET_LETTERS.code,
         error,
         functionName: deps.env.GET_LETTERS_FUNCTION_NAME,
         supplierId: headers["nhsd-supplier-id"],
         limitValue,
       },
-      "Failed to invoke get_letters lambda",
+      LogRefs.FAILED_TO_INVOKE_GET_LETTERS.description,
     );
     throw error;
   }
@@ -171,10 +183,11 @@ async function parseSupplierMockConfig(
 
     deps.logger.info(
       {
+        logRef: LogRefs.PARSED_SUPPLIER_MOCK_CONFIG.code,
         limit,
         supplierId,
       },
-      "Parsed supplier mock config from Parameter Store",
+      LogRefs.PARSED_SUPPLIER_MOCK_CONFIG.description,
     );
 
     return {
@@ -187,10 +200,11 @@ async function parseSupplierMockConfig(
   } catch (error) {
     deps.logger.error(
       {
+        logRef: LogRefs.FAILED_TO_READ_CONFIG.code,
         error,
         parameterName: deps.env.SUPPLIER_MOCK_CONFIG_PARAM_NAME,
       },
-      "Failed to read supplier mock config from Parameter Store",
+      LogRefs.FAILED_TO_READ_CONFIG.description,
     );
     throw error;
   }

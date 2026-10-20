@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // eslint-disable-next-line import-x/prefer-default-export
-export function EventEnvelope<TData extends z.ZodTypeAny>(
+export function EventEnvelope<TData extends z.ZodType>(
   eventName: string,
   resourceName: string,
   data: TData,

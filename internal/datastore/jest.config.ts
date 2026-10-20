@@ -29,7 +29,7 @@ export const baseJestConfig: Config = {
     },
   },
 
-  coveragePathIgnorePatterns: ["/__tests__/"],
+  coveragePathIgnorePatterns: ["/__test__/"],
   transform: { "^.+\\.ts$": "ts-jest" },
   transformIgnorePatterns: [
     "node_modules/(?!(@nhsdigital/nhs-notify-event-schemas-supplier-config)/)",

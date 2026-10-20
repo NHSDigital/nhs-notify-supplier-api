@@ -13,7 +13,9 @@ import {
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
 import { MetricStatus, buildEMFObject } from "@internal/helpers";
 import { Unit } from "aws-embedded-metrics";
-import createUpsertLetterHandler from "../upsert-handler";
+import createUpsertLetterHandler, {
+  extractDimensionsFromLetterEvent,
+} from "../upsert-handler";
 import { Deps } from "../../config/deps";
 import { EnvVars } from "../../config/env";
 import packageJson from "../../../package.json";
@@ -281,7 +283,7 @@ describe("createUpsertLetterHandler", () => {
     expect(insertedV2Letter.billingRef).toBe("spec1");
     expect(insertedV2Letter.url).toBe("s3://letterDataBucket/letter1.pdf");
     expect(insertedV2Letter.status).toBe("PENDING");
-    expect(insertedV2Letter.groupId).toBe("client1_campaign1_template1");
+    expect(insertedV2Letter.groupId).toBe("client1-campaign1-template1");
     expect(insertedV2Letter.source).toBe("/data-plane/letter-rendering/test");
     expect(insertedV2Letter.specificationBillingId).toBe("billing1");
     expect(insertedV2Letter.priority).toBe(10);
@@ -294,7 +296,7 @@ describe("createUpsertLetterHandler", () => {
     expect(insertedV1Letter.billingRef).toBe("spec2");
     expect(insertedV1Letter.url).toBe("s3://letterDataBucket/letter1.pdf");
     expect(insertedV1Letter.status).toBe("PENDING");
-    expect(insertedV1Letter.groupId).toBe("client1_campaign1_template1");
+    expect(insertedV1Letter.groupId).toBe("client1-campaign1-template1");
     expect(insertedV1Letter.source).toBe("/data-plane/letter-rendering/test");
     expect(insertedV1Letter.specificationBillingId).toBe("billing2");
     expect(insertedV1Letter.priority).toBe(10);
@@ -311,7 +313,11 @@ describe("createUpsertLetterHandler", () => {
       "upsertLetter",
       {
         Supplier: "supplier1",
-        GroupId: "client1_campaign1_template1",
+        GroupId: "client1-campaign1-template1",
+        CampaignId: "campaign1",
+        ClientId: "client1",
+        Status: "PENDING",
+        TemplateId: "template1",
       },
       expect.objectContaining({
         key: MetricStatus.Success,
@@ -388,7 +394,7 @@ describe("createUpsertLetterHandler", () => {
     expect(insertedV2Letter.reasonText).toBe(
       "No suppliers available for allocation of V2",
     );
-    expect(insertedV2Letter.groupId).toBe("client1_campaign1_template1");
+    expect(insertedV2Letter.groupId).toBe("client1-campaign1-template1");
     expect(insertedV2Letter.source).toBe("/data-plane/letter-rendering/test");
     expect(insertedV2Letter.specificationBillingId).toBe("unknown");
     expect(insertedV2Letter.priority).toBe(0);
@@ -405,7 +411,7 @@ describe("createUpsertLetterHandler", () => {
     expect(insertedV1Letter.reasonText).toBe(
       "No suppliers available for allocation of V1",
     );
-    expect(insertedV1Letter.groupId).toBe("client1_campaign1_template1");
+    expect(insertedV1Letter.groupId).toBe("client1-campaign1-template1");
     expect(insertedV1Letter.source).toBe("/data-plane/letter-rendering/test");
     expect(insertedV1Letter.specificationBillingId).toBe("unknown");
     expect(insertedV1Letter.priority).toBe(0);
@@ -488,10 +494,134 @@ describe("createUpsertLetterHandler", () => {
       "upsertLetter",
       {
         Supplier: "unknown",
-        GroupId: "unknown",
+        Status: "RETURNED",
+        ClientId: "client_template",
+        CampaignId: "unknown",
+        GroupId: "client_template",
+        TemplateId: "unknown",
       },
       expect.objectContaining({
         key: MetricStatus.Success,
+        value: 1,
+        unit: Unit.Count,
+      }),
+    );
+  });
+
+  test("extracts insert dimensions without allocation details", () => {
+    const letterEvent = createPreparedV2Event();
+    const allocationDetails = {
+      supplierSpec: {
+        supplierId: "",
+        specId: "spec1",
+        priority: 10,
+        billingId: "billing1",
+      },
+      allocationStatus: {
+        status: "PENDING",
+      },
+    };
+
+    expect(
+      extractDimensionsFromLetterEvent(letterEvent, allocationDetails),
+    ).toEqual({
+      Supplier: "unknown",
+      Status: "PENDING",
+      ClientId: "client1",
+      CampaignId: "campaign1",
+      GroupId: "client1-campaign1-template1",
+      TemplateId: "template1",
+    });
+  });
+
+  test("uses unknown update dimensions when group ID is empty or partial", async () => {
+    const emptyGroupEvent = createSupplierStatusChangeEvent();
+    emptyGroupEvent.data.groupId = "";
+    const partialGroupEvent = createSupplierStatusChangeEvent({
+      id: "23f1f09c-a555-4d9b-8405-0b33490bc921",
+    });
+    partialGroupEvent.data.groupId = "-campaign-template";
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("empty-group", JSON.stringify(emptyGroupEvent)),
+      createSqsRecord("partial-group", JSON.stringify(partialGroupEvent)),
+    ]);
+
+    const result = await createUpsertLetterHandler(mockedDeps)(
+      evt,
+      {} as any,
+      {} as any,
+    );
+
+    expect(result!.batchItemFailures).toEqual([]);
+    expect(buildEMFObject as jest.Mock).toHaveBeenCalledWith(
+      "upsertLetter",
+      {
+        Supplier: "supplier1",
+        Status: "RETURNED",
+        ClientId: "unknown",
+        CampaignId: "unknown",
+        GroupId: "unknown",
+        TemplateId: "unknown",
+      },
+      expect.objectContaining({ key: MetricStatus.Success }),
+    );
+    expect(buildEMFObject as jest.Mock).toHaveBeenCalledWith(
+      "upsertLetter",
+      {
+        Supplier: "supplier1",
+        Status: "RETURNED",
+        ClientId: "unknown",
+        CampaignId: "campaign",
+        GroupId: "-campaign-template",
+        TemplateId: "template",
+      },
+      expect.objectContaining({ key: MetricStatus.Success }),
+    );
+  });
+
+  test("insert with missing client, campaign and template has metric emitted with 'unknown' dimensions", async () => {
+    const letterEvent = createPreparedV2Event();
+    letterEvent.data.clientId = "";
+    delete letterEvent.data.campaignId;
+    delete letterEvent.data.templateId;
+    const message = {
+      letterEvent,
+      allocationDetails: {
+        supplierSpec: {
+          supplierId: "supplier1",
+          specId: "spec1",
+          priority: 10,
+          billingId: "billing1",
+        },
+        allocationStatus: {
+          status: "PENDING",
+        },
+      },
+    };
+
+    const evt: SQSEvent = createSQSEvent([
+      createSqsRecord("missing-fields", JSON.stringify(message)),
+    ]);
+
+    const result = await createUpsertLetterHandler(mockedDeps)(
+      evt,
+      {} as any,
+      {} as any,
+    );
+
+    expect(result!.batchItemFailures).toEqual([]);
+    expect(buildEMFObject as jest.Mock).toHaveBeenCalledWith(
+      "upsertLetter",
+      {
+        ClientId: "unknown",
+        CampaignId: "unknown",
+        TemplateId: "unknown",
+        Supplier: "supplier1",
+        GroupId: "-unknown-unknown",
+        Status: "PENDING",
+      },
+      expect.objectContaining({
+        key: MetricStatus.Failure,
         value: 1,
         unit: Unit.Count,
       }),
@@ -525,7 +655,11 @@ describe("createUpsertLetterHandler", () => {
       "upsertLetter",
       {
         Supplier: "unknown",
+        Status: "unknown",
+        ClientId: "unknown",
+        CampaignId: "unknown",
         GroupId: "unknown",
+        TemplateId: "unknown",
       },
       expect.objectContaining({
         key: MetricStatus.Failure,
@@ -624,7 +758,11 @@ describe("createUpsertLetterHandler", () => {
       "upsertLetter",
       {
         Supplier: "unknown",
+        Status: "unknown",
+        ClientId: "unknown",
+        CampaignId: "unknown",
         GroupId: "unknown",
+        TemplateId: "unknown",
       },
       expect.objectContaining({
         key: MetricStatus.Failure,

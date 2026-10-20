@@ -10,6 +10,7 @@ import {
 import { MetricsLogger, metricScope } from "aws-embedded-metrics";
 import { Supplier } from "@internal/datastore";
 import { Deps } from "./deps";
+import LogRefs from "./log-references";
 
 export default function createAuthorizerHandler(
   deps: Deps,
@@ -19,12 +20,21 @@ export default function createAuthorizerHandler(
     context: Context,
     callback: Callback<APIGatewayAuthorizerResult>,
   ): void => {
-    checkCertificateExpiry(event.requestContext.identity.clientCert, deps);
+    checkCertificateExpiry(
+      event.requestContext.identity.clientCert,
+      deps,
+    ).catch((error) => {
+      deps.logger.error({
+        description: "Error checking certificate expiry",
+        err: error,
+      });
+    });
 
     getSupplier(event.headers, deps)
       .then((supplier: Supplier) => {
         deps.logger.info({
-          description: "Allowed event",
+          logRef: LogRefs.ALLOWED_EVENT.code,
+          description: LogRefs.ALLOWED_EVENT.description,
           methodArn: event.methodArn,
           supplierId: supplier.id,
         });
@@ -32,7 +42,8 @@ export default function createAuthorizerHandler(
       })
       .catch((error) => {
         deps.logger.warn({
-          description: "Denied event",
+          logRef: LogRefs.DENIED_EVENT.code,
+          description: LogRefs.DENIED_EVENT.description,
           err: error,
           methodArn: event.methodArn,
         });
@@ -106,7 +117,8 @@ async function checkCertificateExpiry(
   deps: Deps,
 ): Promise<void> {
   deps.logger.info({
-    description: "Client certificate details",
+    logRef: LogRefs.CLIENT_CERTIFICATE_DETAILS.code,
+    description: LogRefs.CLIENT_CERTIFICATE_DETAILS.description,
     issuerDN: certificate?.issuerDN || "-",
     subjectDN: certificate?.subjectDN || "-",
     validity: certificate?.validity || "-",
@@ -122,7 +134,8 @@ async function checkCertificateExpiry(
   if (expiry <= deps.env.CLIENT_CERTIFICATE_EXPIRATION_ALERT_DAYS) {
     await metricScope((metrics: MetricsLogger) => async () => {
       deps.logger.warn({
-        description: "APIM Certificate expiry",
+        logRef: LogRefs.APIM_CERTIFICATE_EXPIRY.code,
+        description: LogRefs.APIM_CERTIFICATE_EXPIRY.description,
         days: expiry,
       });
       metrics.setNamespace(

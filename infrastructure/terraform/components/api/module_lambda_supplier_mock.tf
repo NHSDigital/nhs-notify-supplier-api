@@ -1,5 +1,5 @@
 module "supplier_mock" {
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/4.0.5/terraform-lambda.zip"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip"
   count  = var.deploy_supplier_mock_scheduler ? 1 : 0
 
   function_name = "supplier_mock"
@@ -33,6 +33,7 @@ module "supplier_mock" {
   enable_lambda_insights   = false
 
   log_destination_arn       = local.destination_arn
+  odin_log_destination_arn  = local.odin_destination_arn
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = merge(local.common_lambda_env_vars, {
@@ -40,6 +41,7 @@ module "supplier_mock" {
     GET_LETTERS_FUNCTION_NAME       = module.get_letters.function_name
     PATCH_LETTER_FUNCTION_NAME      = module.patch_letter.function_name
     SUPPLIER_MOCK_CONFIG_PARAM_NAME = aws_ssm_parameter.supplier_mock_config[0].name
+    LOG_REFERENCE                   = "SUP_MCK"
   })
 }
 
