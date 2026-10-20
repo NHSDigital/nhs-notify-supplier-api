@@ -197,5 +197,4 @@ Select a target environment in postman
 Run the collection
 The collections must be kept in sync manually
 
-trigger build
 <!-- vale on -->
