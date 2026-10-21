@@ -1,7 +1,7 @@
 {
   "dependencies": {
-    "@internal/helpers": "^0.1.0",
-    "@internal/letter-sla-breaches-common": "*",
+    "@internal/helpers": "workspace:*",
+    "@internal/letter-sla-breaches-common": "workspace:*",
     "aws-embedded-metrics": "^4.2.1",
     "esbuild": "0.28.2"
   },
