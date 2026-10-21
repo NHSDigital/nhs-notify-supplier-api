@@ -2,6 +2,8 @@ import {
   type Deps,
   runAthenaQuery,
 } from "@internal/letter-sla-breaches-common";
+import { Unit } from "aws-embedded-metrics";
+import { buildEMFObject } from "@internal/helpers";
 import buildSamedayBreachesQuery from "./sameday-breaches-query";
 
 export type PopulatesamedayBreachesEvent = {
@@ -29,11 +31,27 @@ export default function createHandler(deps: Deps) {
         ),
       );
 
+      for (const row of rows) {
+        const emfObject = buildEMFObject(
+          "",
+          {
+            SupplierId: row.supplierid!,
+            ClientId: row.clientid!,
+            CampaignId: row.campaignid!,
+          },
+          {
+            key: "SameDayBreachCount",
+            value: Number.parseInt(row.breach_count!, 10),
+            unit: Unit.Count,
+          },
+        );
+        deps.logger.info(emfObject);
+      }
+
       const breachCount = String(
         rows.reduce((total, row) => total + Number(row.breach_count ?? 0), 0),
       );
 
-      // TODO: CCM-24041 process the query results to populate sameday breaches.
       deps.logger.info(
         { date: event.date, breachCount },
         "sameday breaches query completed",

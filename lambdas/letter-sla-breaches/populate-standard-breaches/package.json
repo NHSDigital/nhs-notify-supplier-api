@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "@internal/letter-sla-breaches-common": "*",
     "esbuild": "0.28.2"
   },
   "name": "nhs-notify-supplier-api-populate-standard-breaches",

@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@internal/letter-sla-breaches-common": "*",
+    "aws-embedded-metrics": "^4.2.1",
     "esbuild": "0.28.2"
   },
   "name": "nhs-notify-supplier-api-populate-sameday-breaches",
