@@ -57,11 +57,11 @@ export const apiSandboxCreateMiTestData: ApiSandboxMiRequestTestCase[] = [
     expectedStatus: 400,
     expectedResponse: {
       message:
-        'request.body.data.attributes.timestamp should match format "date-time"',
+        'request/body/data/attributes/timestamp must match format "date-time"',
       errors: [
         {
-          path: ".body.data.attributes.timestamp",
-          message: 'should match format "date-time"',
+          path: "/body/data/attributes/timestamp",
+          message: 'must match format "date-time"',
           errorCode: "format.openapi.validation",
         },
       ],
