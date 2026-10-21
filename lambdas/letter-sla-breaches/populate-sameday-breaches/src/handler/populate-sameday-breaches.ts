@@ -40,7 +40,7 @@ export default function createHandler(deps: Deps) {
             CampaignId: row.campaignid!,
           },
           {
-            key: "SameDayBreachCount",
+            key: "SamedayBreachCount",
             value: Number.parseInt(row.breach_count!, 10),
             unit: Unit.Count,
           },
