@@ -25,14 +25,15 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { FlatCompat } from '@eslint/eslintrc';
 import { globSync } from 'glob';
+import { parse as parseYaml } from 'yaml';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const rootPackageJson = JSON.parse(
-  readFileSync(new URL('./package.json', import.meta.url), 'utf8'),
+const workspaceConfig = parseYaml(
+  readFileSync(new URL('./pnpm-workspace.yaml', import.meta.url), 'utf8'),
 );
-const workspacePatterns = rootPackageJson.workspaces ?? [];
+const workspacePatterns = workspaceConfig.packages ?? [];
 const workspacePackageDirs = workspacePatterns.flatMap((pattern) =>
   globSync(`${pattern}/package.json`, {
     cwd: __dirname,

@@ -1,7 +1,7 @@
 {
   "dependencies": {
-    "@asyncapi/bundler": "^1.0.2",
-    "zod": "^4.6.5"
+    "@asyncapi/bundler": "catalog:app",
+    "zod": "catalog:app"
   },
   "description": "Schemas for NHS Notify Supplier API events",
   "license": "MIT",
@@ -20,21 +20,21 @@
     "dev": "ts-node src/index.ts",
     "gen:asyncapi": "mkdir -p ./dist/asyncapi && ts-node src/cli/bundle-asyncapi.ts",
     "gen:jsonschema": "ts-node src/cli/generate-json.ts",
-    "lint": "npm run lint:node && npm run lint:schema",
+    "lint": "pnpm run lint:node && pnpm run lint:schema",
     "lint:fix": "eslint . --fix",
     "lint:node": "eslint .",
     "lint:schema": "spectral lint ./schemas/supplier-api.yaml",
-    "prebuild": "rm -rf dist && npm run gen:asyncapi",
-    "pregen:asyncapi": "npm run gen:jsonschema",
+    "prebuild": "rm -rf dist && pnpm run gen:asyncapi",
+    "pregen:asyncapi": "pnpm run gen:jsonschema",
     "pregen:jsonschema": "rm -rf ./schemas/events/*.json",
-    "prelint:schema": "npm run gen:jsonschema",
-    "prepublishOnly": "npm run build",
-    "pretest:unit": "npm run gen:jsonschema",
+    "prelint:schema": "pnpm run gen:jsonschema",
+    "prepublishOnly": "pnpm run build",
+    "pretest:unit": "pnpm run gen:jsonschema",
     "start": "node dist/index.js",
-    "test": "npm run test:unit",
+    "test": "pnpm run test:unit",
     "test:unit": "jest",
     "typecheck": "tsc --noEmit"
   },
   "types": "dist/index.d.ts",
-  "version": "1.0.23"
+  "version": "1.0.24"
 }

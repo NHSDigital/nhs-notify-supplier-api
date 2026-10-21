@@ -12,8 +12,8 @@ $ROOT_DIR/scripts/set-github-token.sh
 
 echo "Completed."
 
-npm ci
+pnpm install --frozen-lockfile
 
-npm run generate-dependencies --workspaces --if-present
+pnpm run generate-dependencies
 
-npm run lambda-build --workspaces --if-present
+pnpm run lambda-build

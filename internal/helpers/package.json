@@ -1,9 +1,9 @@
 {
   "dependencies": {
-    "@nhsdigital/nhs-notify-event-schemas-supplier-api": "*",
-    "aws-embedded-metrics": "^4.2.1",
-    "pino": "^10.3.1",
-    "zod": "^4.6.5"
+    "@nhsdigital/nhs-notify-event-schemas-supplier-api": "workspace:*",
+    "aws-embedded-metrics": "catalog:aws",
+    "pino": "catalog:app",
+    "zod": "catalog:app"
   },
   "description": "Common helper utilities for NHS Notify Supplier API",
   "license": "MIT",

@@ -10,7 +10,7 @@ const baseJestConfig = {
     ],
   },
   transformIgnorePatterns: [
-    "node_modules/(?!(@nhsdigital/nhs-notify-event-schemas-supplier-config)/)",
+    String.raw`node_modules/(?!(?:\.pnpm/@nhsdigital\+nhs-notify-event-schemas-supplier-config@|@nhsdigital/nhs-notify-event-schemas-supplier-config/))`,
   ],
 
   // Automatically clear mock calls, instances, contexts and results before every test

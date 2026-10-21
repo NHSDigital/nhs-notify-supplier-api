@@ -7,8 +7,8 @@ cd "$(git rev-parse --show-toplevel)"
 # run tests
 cd tests
 TEST_EXIT_CODE=0
-npm ci
-npm run test:component || TEST_EXIT_CODE=$?
+pnpm install --frozen-lockfile
+pnpm run test:component || TEST_EXIT_CODE=$?
 echo "TEST_EXIT_CODE=$TEST_EXIT_CODE"
 
 mkdir ../acceptance-test-report
