@@ -66,13 +66,13 @@ describe("populateSamedayBreaches", () => {
         SupplierId: "supplier-a",
         ClientId: "client-a",
         CampaignId: "campaign-a",
-        SameDayBreachCount: 2,
+        SamedayBreachCount: 2,
         _aws: expect.objectContaining({
           CloudWatchMetrics: [
             expect.objectContaining({
               Dimensions: [["SupplierId", "ClientId", "CampaignId"]],
               Metrics: [
-                { Name: "SameDayBreachCount", Value: 2, Unit: "Count" },
+                { Name: "SamedayBreachCount", Value: 2, Unit: "Count" },
               ],
             }),
           ],
@@ -85,13 +85,13 @@ describe("populateSamedayBreaches", () => {
         SupplierId: "supplier-b",
         ClientId: "client-b",
         CampaignId: "campaign-b",
-        SameDayBreachCount: 3,
+        SamedayBreachCount: 3,
         _aws: expect.objectContaining({
           CloudWatchMetrics: [
             expect.objectContaining({
               Dimensions: [["SupplierId", "ClientId", "CampaignId"]],
               Metrics: [
-                { Name: "SameDayBreachCount", Value: 3, Unit: "Count" },
+                { Name: "SamedayBreachCount", Value: 3, Unit: "Count" },
               ],
             }),
           ],

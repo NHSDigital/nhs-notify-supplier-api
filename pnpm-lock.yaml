@@ -695,6 +695,15 @@ importers:
         specifier: catalog:app
         version: 4.6.5
 
+  lambdas/eventpub-parquet-transformer:
+    dependencies:
+      aws-lambda:
+        specifier: ^1.0.7
+        version: 1.0.7
+      esbuild:
+        specifier: 0.28.2
+        version: 0.28.2
+
   lambdas/letter-updates-transformer:
     dependencies:
       '@aws-sdk/client-sns':
