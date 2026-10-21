@@ -11,16 +11,16 @@ cd "$(git rev-parse --show-toplevel)"
 #
 #   rails test:unit
 #   python manage.py test
-#   npm run test
+#   pnpm run test
 #
 # or whatever is appropriate to your project. You should *only* run your fast
 # tests from here. If you want to run other test suites, see the predefined
 # tasks in scripts/test.mk.
 
 # run tests
-npm ci
-npm run test:unit --workspaces
+pnpm install --frozen-lockfile
+pnpm run test:unit
 
 # merge coverage reports
 mkdir -p .reports
-TMPDIR="./.reports" ./node_modules/.bin/lcov-result-merger "**/.reports/unit/coverage/lcov.info" ".reports/lcov.info" --ignore "node_modules" --prepend-source-files --prepend-path-fix "../../.."
+TMPDIR="./.reports" ./node_modules/.bin/lcov-result-merger "**/.reports/unit/coverage/lcov.info" ".reports/lcov.info" --ignore "**/node_modules/**" --prepend-source-files --prepend-path-fix "../../.."

@@ -1,28 +1,28 @@
 {
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.1138.0",
-    "@aws-sdk/lib-dynamodb": "^3.1138.0",
-    "@aws-sdk/util-dynamodb": "^3.996.9",
-    "@internal/datastore": "^0.1.0",
-    "@internal/helpers": "^0.1.0",
-    "aws-embedded-metrics": "^4.2.1",
-    "aws-lambda": "^1.0.7",
-    "esbuild": "0.28.2",
-    "pino": "^10.3.1",
-    "zod": "^4.6.5"
+    "@aws-sdk/client-dynamodb": "catalog:aws",
+    "@aws-sdk/lib-dynamodb": "catalog:aws",
+    "@aws-sdk/util-dynamodb": "catalog:aws",
+    "@internal/datastore": "workspace:*",
+    "@internal/helpers": "workspace:*",
+    "aws-embedded-metrics": "catalog:aws",
+    "aws-lambda": "catalog:aws",
+    "esbuild": "catalog:tools",
+    "pino": "catalog:app",
+    "zod": "catalog:app"
   },
   "devDependencies": {
-    "@tsconfig/node22": "^22.0.6",
-    "@types/aws-lambda": "^8.10.164",
-    "@types/jest": "^30.0.0",
-    "jest": "^30.5.2",
-    "jest-mock-extended": "^4.0.0",
-    "ts-jest": "^29.4.13"
+    "@tsconfig/node22": "catalog:tools",
+    "@types/aws-lambda": "catalog:tools",
+    "@types/jest": "catalog:test",
+    "jest": "catalog:test",
+    "jest-mock-extended": "catalog:test",
+    "ts-jest": "catalog:test"
   },
   "name": "nhs-notify-supplier-api-update-letter-queue",
   "private": true,
   "scripts": {
-    "lambda-build": "rm -rf dist && npx esbuild --bundle --minify --sourcemap --target=es2020 --platform=node --loader:.node=file --entry-names=[name] --outdir=dist src/index.ts",
+    "lambda-build": "rm -rf dist && pnpm exec esbuild --bundle --minify --sourcemap --target=es2020 --platform=node --loader:.node=file --entry-names=[name] --outdir=dist src/index.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test:unit": "jest",
