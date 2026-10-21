@@ -50,13 +50,19 @@ export const getPendingLetters = async (
   const CONCURRENCY = 5;
 
   const pendingLetters = await letterQueueRepo.getLetters(supplierId, limit);
-  const timestamp = new Date(Date.now() + visibilityTimeout * 1000);
+  const now = Date.now();
+  const visibilityTimestamp = new Date(now + visibilityTimeout * 1000);
+  const lastReadTimestamp = new Date(now);
 
   for (let i = 0; i < pendingLetters.length; i += CONCURRENCY) {
     const window = pendingLetters.slice(i, i + CONCURRENCY);
     await Promise.all(
       window.map((letter) =>
-        letterQueueRepo.updateVisibilityTimestamp(letter, timestamp),
+        letterQueueRepo.updateTimestamps(
+          letter,
+          visibilityTimestamp,
+          lastReadTimestamp,
+        ),
       ),
     );
   }

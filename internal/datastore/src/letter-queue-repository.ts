@@ -127,9 +127,10 @@ export default class LetterQueueRepository {
     return letters.slice(0, limit);
   }
 
-  async updateVisibilityTimestamp(
+  async updateTimestamps(
     pendingLetter: PendingLetterBase,
-    timestamp: Date,
+    visibilityTimestamp: Date,
+    lastReadTimestamp: Date,
   ): Promise<void> {
     try {
       await this.ddbClient.send(
@@ -139,10 +140,12 @@ export default class LetterQueueRepository {
             supplierId: pendingLetter.supplierId,
             letterId: pendingLetter.letterId,
           },
-          UpdateExpression: "SET visibilityTimestamp = :ts",
+          UpdateExpression:
+            "SET visibilityTimestamp = :visibilityTs, lastReadTimestamp = :lastReadTs",
           ConditionExpression: "attribute_exists(letterId)",
           ExpressionAttributeValues: {
-            ":ts": timestamp.toISOString(),
+            ":visibilityTs": visibilityTimestamp.toISOString(),
+            ":lastReadTs": lastReadTimestamp.toISOString(),
           },
         }),
       );
