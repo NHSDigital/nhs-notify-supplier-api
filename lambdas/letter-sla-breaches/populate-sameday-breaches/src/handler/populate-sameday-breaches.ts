@@ -53,6 +53,19 @@ export default function createHandler(deps: Deps) {
         rows.reduce((total, row) => total + Number(row.breach_count ?? 0), 0),
       );
 
+      // Published every run, including 0, so the alarm clears once breaches are resolved
+      deps.logger.info(
+        buildEMFObject(
+          "",
+          {},
+          {
+            key: "SamedayBreachTotal",
+            value: Number(breachCount),
+            unit: Unit.Count,
+          },
+        ),
+      );
+
       deps.logger.info(
         { date: event.date, breachCount },
         "sameday breaches query completed",

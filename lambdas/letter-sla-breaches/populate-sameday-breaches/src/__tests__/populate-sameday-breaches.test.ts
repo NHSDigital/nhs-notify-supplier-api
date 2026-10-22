@@ -100,8 +100,36 @@ describe("populateSamedayBreaches", () => {
     );
     expect(deps.logger.info).toHaveBeenNthCalledWith(
       3,
+      expect.objectContaining({
+        SamedayBreachTotal: 5,
+        _aws: expect.objectContaining({
+          CloudWatchMetrics: [
+            expect.objectContaining({
+              Dimensions: [[]],
+              Metrics: [
+                { Name: "SamedayBreachTotal", Value: 5, Unit: "Count" },
+              ],
+            }),
+          ],
+        }),
+      }),
+    );
+    expect(deps.logger.info).toHaveBeenNthCalledWith(
+      4,
       { date: "2026-10-08", breachCount: "5" },
       "sameday breaches query completed",
+    );
+  });
+
+  it("publishes a zero breach total when there are no breaches", async () => {
+    const deps = makeDeps();
+    jest.mocked(runAthenaQuery).mockResolvedValueOnce([]);
+
+    await createHandler(deps)({ date: "2026-10-08" });
+
+    expect(deps.logger.info).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ SamedayBreachTotal: 0 }),
     );
   });
 
