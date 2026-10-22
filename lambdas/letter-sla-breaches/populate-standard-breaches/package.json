@@ -1,14 +1,13 @@
 {
   "dependencies": {
-    "@date-fns/tz": "^1.4.0",
-    "@internal/helpers": "*",
-    "@internal/letter-sla-breaches-common": "*",
-    "aws-embedded-metrics": "^4.2.1",
-    "date-fns": "^4.4.0",
-    "esbuild": "0.28.2"
+    "@date-fns/tz": "catalog:app",
+    "@internal/helpers": "workspace:*",
+    "@internal/letter-sla-breaches-common": "workspace:*",
+    "aws-embedded-metrics": "catalog:aws",
+    "date-fns": "catalog:app"
   },
   "devDependencies": {
-    "@internal/sql-test-helpers": "*"
+    "@internal/sql-test-helpers": "workspace:*"
   },
   "name": "nhs-notify-supplier-api-populate-standard-breaches",
   "private": true,

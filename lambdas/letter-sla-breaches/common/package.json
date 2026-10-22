@@ -1,9 +1,9 @@
 {
   "dependencies": {
-    "@aws-sdk/client-athena": "^3.1149.0",
+    "@aws-sdk/client-athena": "catalog:aws",
     "@internal/helpers": "workspace:*",
-    "pino": "^10.4.0",
-    "zod": "^4.6.5"
+    "pino": "catalog:app",
+    "zod": "catalog:app"
   },
   "description": "Common utilities for letter SLA breach lambdas",
   "license": "MIT",

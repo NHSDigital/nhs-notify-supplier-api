@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "testcontainers": "^12.2.0"
+    "testcontainers": "catalog:test"
   },
   "description": "Test-only helpers for running SQL queries against containerised databases",
   "license": "MIT",

@@ -19,7 +19,7 @@ Add the package as a **devDependency** of the consuming workspace and import it 
 
 ```json
 "devDependencies": {
-  "@internal/sql-test-helpers": "*"
+  "@internal/sql-test-helpers": "workspace:*"
 }
 ```
 
