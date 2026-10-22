@@ -2,6 +2,7 @@ packages:
   - "docs"
   - "internal/*"
   - "lambdas/*"
+  - "lambdas/letter-sla-breaches/*"
   - "pact-contracts"
   - "scripts/utilities/*"
   - "tests"
@@ -27,6 +28,7 @@ catalogs:
     "@nhsdigital/nhs-notify-event-schemas-supplier-config": "^1.1.1"
     date-fns: "^4.4.0"
     date-fns-tz: "^3.0.0"
+    "@date-fns/tz": "^1.4.0"
     dotenv: "^18.0.3"
     express: "^4.22.2"
     graphql: "^17.0.2"
@@ -44,6 +46,7 @@ catalogs:
   aws:
     "@aws-lambda-powertools/idempotency": "^2.36.0"
     "@aws-sdk/client-api-gateway": "^3.1138.0"
+    "@aws-sdk/client-athena": "^3.1138.0"
     "@aws-sdk/client-cloudwatch-logs": "^3.1138.0"
     "@aws-sdk/client-dynamodb": "^3.1138.0"
     "@aws-sdk/client-kinesis": "^3.1138.0"
