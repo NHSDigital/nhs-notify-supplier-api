@@ -32,12 +32,13 @@ export default function createHandler(deps: Deps) {
       );
 
       for (const row of rows) {
+        // CloudWatch drops EMF metrics whose declared dimensions are missing or empty
         const emfObject = buildEMFObject(
           "",
           {
-            SupplierId: row.supplierid!,
-            ClientId: row.clientid!,
-            CampaignId: row.campaignid!,
+            SupplierId: row.supplierid || "unknown",
+            ClientId: row.clientid || "unknown",
+            CampaignId: row.campaignid || "unknown",
           },
           {
             key: "SamedayBreachCount",

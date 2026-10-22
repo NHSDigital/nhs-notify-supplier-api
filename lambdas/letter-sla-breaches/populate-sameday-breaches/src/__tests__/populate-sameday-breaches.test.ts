@@ -105,6 +105,27 @@ describe("populateSamedayBreaches", () => {
     );
   });
 
+  it("defaults missing EMF dimension values so the metric is still published", async () => {
+    const deps = makeDeps();
+    jest
+      .mocked(runAthenaQuery)
+      .mockResolvedValueOnce([
+        { supplierid: "supplier-a", clientid: "", breach_count: "4" },
+      ]);
+
+    await createHandler(deps)({ date: "2026-10-08" });
+
+    expect(deps.logger.info).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        SupplierId: "supplier-a",
+        ClientId: "unknown",
+        CampaignId: "unknown",
+        SamedayBreachCount: 4,
+      }),
+    );
+  });
+
   it("builds the query from the date component of the event date", async () => {
     const deps = makeDeps();
     jest.mocked(runAthenaQuery).mockResolvedValueOnce([]);
