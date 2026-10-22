@@ -1,5 +1,5 @@
 resource "aws_cloudwatch_metric_alarm" "sameday_breaches" {
-  count = local.alarms_enabled && local.eventpub_parquet_enabled ? 1 : 0
+  count = local.eventpub_parquet_enabled ? 1 : 0
 
   alarm_name        = "${local.csi}-sameday-breaches"
   alarm_description = "RELIABILITY: Letters have breached the same-day SLA"
