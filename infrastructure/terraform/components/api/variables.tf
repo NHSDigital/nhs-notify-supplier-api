@@ -256,6 +256,12 @@ variable "supplier_mock_schedule_expression" {
   default     = "rate(1 minute)"
 }
 
+variable "enable_letter_sla_breaches_scheduler" {
+  type        = bool
+  description = "Enable the hourly EventBridge Scheduler trigger for the letter SLA breaches state machine"
+  default     = false
+}
+
 variable "enable_event_anomaly_detection" {
   type        = bool
   description = "Enable CloudWatch anomaly detection alarm for SNS message  Detects abnormal drops or spikes in event publishing volume."
