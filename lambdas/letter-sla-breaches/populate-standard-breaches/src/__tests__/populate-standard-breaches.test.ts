@@ -63,7 +63,7 @@ describe("populateStandardBreaches", () => {
           CloudWatchMetrics: [
             {
               Namespace: "populate-standard-breaches",
-              Dimensions: [["SupplierId"]],
+              Dimensions: [[], ["SupplierId"]],
               Metrics: [
                 expect.objectContaining({
                   Name: "BreachCount",
@@ -84,7 +84,7 @@ describe("populateStandardBreaches", () => {
           CloudWatchMetrics: [
             {
               Namespace: "populate-standard-breaches",
-              Dimensions: [["SupplierId"]],
+              Dimensions: [[], ["SupplierId"]],
               Metrics: [
                 expect.objectContaining({
                   Name: "BreachCount",
