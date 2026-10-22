@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
 
 WORKDIR /App
 COPY csharp-server/src/nhsnotifysupplierserver/bin/Release/net8.0 .
