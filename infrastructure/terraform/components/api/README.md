@@ -28,6 +28,7 @@ No requirements.
 | <a name="input_enable_backups"></a> [enable\_backups](#input\_enable\_backups) | Enable backups | `bool` | `false` | no |
 | <a name="input_enable_event_anomaly_detection"></a> [enable\_event\_anomaly\_detection](#input\_enable\_event\_anomaly\_detection) | Enable CloudWatch anomaly detection alarm for SNS message  Detects abnormal drops or spikes in event publishing volume. | `bool` | `false` | no |
 | <a name="input_enable_event_cache"></a> [enable\_event\_cache](#input\_enable\_event\_cache) | Enable caching of events to an S3 bucket | `bool` | `true` | no |
+| <a name="input_enable_letter_sla_breaches_scheduler"></a> [enable\_letter\_sla\_breaches\_scheduler](#input\_enable\_letter\_sla\_breaches\_scheduler) | Enable the hourly EventBridge Scheduler trigger for the letter SLA breaches state machine | `bool` | `false` | no |
 | <a name="input_enable_sns_delivery_logging"></a> [enable\_sns\_delivery\_logging](#input\_enable\_sns\_delivery\_logging) | Enable SNS Delivery Failure Notifications | `bool` | `true` | no |
 | <a name="input_enable_supplier_mock_scheduler"></a> [enable\_supplier\_mock\_scheduler](#input\_enable\_supplier\_mock\_scheduler) | Enable EventBridge Scheduler trigger for supplier mock lambda | `bool` | `false` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | The name of the tfscaffold environment | `string` | n/a | yes |
@@ -54,6 +55,8 @@ No requirements.
 | <a name="input_parent_acct_environment"></a> [parent\_acct\_environment](#input\_parent\_acct\_environment) | Name of the environment responsible for the acct resources used, affects things like DNS zone. Useful for named dev environments | `string` | `"main"` | no |
 | <a name="input_project"></a> [project](#input\_project) | The name of the tfscaffold project | `string` | n/a | yes |
 | <a name="input_region"></a> [region](#input\_region) | The AWS Region | `string` | n/a | yes |
+| <a name="input_reports_data_retention_non_current_days"></a> [reports\_data\_retention\_non\_current\_days](#input\_reports\_data\_retention\_non\_current\_days) | Number of days to retain noncurrent reporting bucket object versions | `number` | `14` | no |
+| <a name="input_reports_data_retention_policy_days"></a> [reports\_data\_retention\_policy\_days](#input\_reports\_data\_retention\_policy\_days) | Number of days to retain reporting bucket data | `number` | `90` | no |
 | <a name="input_shared_infra_account_id"></a> [shared\_infra\_account\_id](#input\_shared\_infra\_account\_id) | The AWS Account ID of the shared infrastructure account | `string` | `"000000000000"` | no |
 | <a name="input_sns_success_logging_sample_percent"></a> [sns\_success\_logging\_sample\_percent](#input\_sns\_success\_logging\_sample\_percent) | Enable SNS Delivery Successful Sample Percentage | `number` | `0` | no |
 | <a name="input_supplier_mock_schedule_expression"></a> [supplier\_mock\_schedule\_expression](#input\_supplier\_mock\_schedule\_expression) | Schedule expression for supplier mock scheduler | `string` | `"rate(1 minute)"` | no |
@@ -71,6 +74,7 @@ No requirements.
 | <a name="module_ddb_alarms_suppliers"></a> [ddb\_alarms\_suppliers](#module\_ddb\_alarms\_suppliers) | ../../modules/alarms-ddb | n/a |
 | <a name="module_domain_truststore"></a> [domain\_truststore](#module\_domain\_truststore) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.0.6/terraform-s3bucket.zip | n/a |
 | <a name="module_eventpub"></a> [eventpub](#module\_eventpub) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/5.0.6/terraform-eventpub.zip | n/a |
+| <a name="module_eventpub_parquet_transformer"></a> [eventpub\_parquet\_transformer](#module\_eventpub\_parquet\_transformer) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
 | <a name="module_eventsub"></a> [eventsub](#module\_eventsub) | ../../modules/eventsub | n/a |
 | <a name="module_get_letter"></a> [get\_letter](#module\_get\_letter) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
 | <a name="module_get_letter_data"></a> [get\_letter\_data](#module\_get\_letter\_data) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
@@ -83,8 +87,12 @@ No requirements.
 | <a name="module_letter_updates_transformer"></a> [letter\_updates\_transformer](#module\_letter\_updates\_transformer) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
 | <a name="module_mi_updates_transformer"></a> [mi\_updates\_transformer](#module\_mi\_updates\_transformer) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
 | <a name="module_patch_letter"></a> [patch\_letter](#module\_patch\_letter) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
+| <a name="module_populate_sameday_breaches"></a> [populate\_sameday\_breaches](#module\_populate\_sameday\_breaches) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
+| <a name="module_populate_standard_breaches"></a> [populate\_standard\_breaches](#module\_populate\_standard\_breaches) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
+| <a name="module_populate_supplier_config_cache"></a> [populate\_supplier\_config\_cache](#module\_populate\_supplier\_config\_cache) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
 | <a name="module_post_letters"></a> [post\_letters](#module\_post\_letters) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
 | <a name="module_post_mi"></a> [post\_mi](#module\_post\_mi) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
+| <a name="module_s3bucket_reporting"></a> [s3bucket\_reporting](#module\_s3bucket\_reporting) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.6/terraform-s3bucket.zip | n/a |
 | <a name="module_s3bucket_test_letters"></a> [s3bucket\_test\_letters](#module\_s3bucket\_test\_letters) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-s3bucket.zip | n/a |
 | <a name="module_sqs_alarms"></a> [sqs\_alarms](#module\_sqs\_alarms) | ../../modules/alarms-sqs | n/a |
 | <a name="module_sqs_letter_updates"></a> [sqs\_letter\_updates](#module\_sqs\_letter\_updates) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.1.5/terraform-sqs.zip | n/a |

@@ -24,6 +24,7 @@ cp ./lambdas/upsert-letter/README.md ./docs/_includes/components/generated/readm
 cp ./lambdas/update-letter-queue/README.md ./docs/_includes/components/generated/readmes/lambda-update-letter-queue.md
 cp ./lambdas/letter-updates-transformer/README.md ./docs/_includes/components/generated/readmes/lambda-letter-updates-transformer.md
 cp ./lambdas/mi-updates-transformer/README.md ./docs/_includes/components/generated/readmes/lambda-mi-updates-transformer.md
+cp ./lambdas/eventpub-parquet-transformer/README.md ./docs/_includes/components/generated/readmes/lambda-eventpub-parquet-transformer.md
 cp ./lambdas/supplier-config-ingress/README.md ./docs/_includes/components/generated/readmes/lambda-supplier-config-ingress.md
 
 # Function documentation (internal packages)

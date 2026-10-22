@@ -1,0 +1,19 @@
+{
+  "dependencies": {
+    "@aws-sdk/client-athena": "^3.1149.0",
+    "@internal/helpers": "workspace:*",
+    "pino": "^10.4.0"
+  },
+  "description": "Common utilities for letter SLA breach lambdas",
+  "license": "MIT",
+  "main": "src/index.ts",
+  "name": "@internal/letter-sla-breaches-common",
+  "private": true,
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test:unit": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "version": "0.0.1"
+}
