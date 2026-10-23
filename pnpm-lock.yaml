@@ -67,9 +67,6 @@ catalogs:
       specifier: ^1.0.9
       version: 1.3.0
   aws:
-    '@aws-lambda-powertools/idempotency':
-      specifier: ^2.36.0
-      version: 2.36.0
     '@aws-sdk/client-api-gateway':
       specifier: ^3.1138.0
       version: 3.1149.0
@@ -767,7 +764,7 @@ importers:
   lambdas/supplier-allocator:
     dependencies:
       '@aws-lambda-powertools/idempotency':
-        specifier: catalog:aws
+        specifier: ^2.33.0
         version: 2.36.0(@aws-sdk/client-dynamodb@3.1149.0)(@aws-sdk/lib-dynamodb@3.1149.0(@aws-sdk/client-dynamodb@3.1149.0))
       '@aws-sdk/client-dynamodb':
         specifier: catalog:aws
@@ -939,7 +936,7 @@ importers:
   lambdas/upsert-letter:
     dependencies:
       '@aws-lambda-powertools/idempotency':
-        specifier: catalog:aws
+        specifier: ^2.33.0
         version: 2.36.0(@aws-sdk/client-dynamodb@3.1149.0)(@aws-sdk/lib-dynamodb@3.1149.0(@aws-sdk/client-dynamodb@3.1149.0))
       '@aws-sdk/client-dynamodb':
         specifier: catalog:aws
