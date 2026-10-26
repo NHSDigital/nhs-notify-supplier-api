@@ -39,7 +39,7 @@ catalogs:
     randexp: "^0.5.3"
     undici-types: "^8.11.0"
     yargs: "^18.2.0"
-    zod: "^4.6.5"
+    zod: "^4.6.6"
     zod-mermaid: "^1.0.9"
   aws:
     "@aws-lambda-powertools/idempotency": "^2.36.0"
