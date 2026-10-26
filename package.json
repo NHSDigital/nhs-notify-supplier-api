@@ -92,6 +92,16 @@
     "test:unit": "pnpm -r run test:unit",
     "typecheck": "pnpm -r run typecheck"
   },
+  "workspaces": [
+    "docs",
+    "internal/*",
+    "lambdas/*",
+    "lambdas/letter-sla-breaches/*",
+    "pact-contracts",
+    "scripts/utilities/*",
+    "tests",
+    "tests/contracts/*"
+  ],
   "dependencies": {
     "@nhsdigital/nhs-notify-event-schemas-letter-rendering": "catalog:app",
     "@nhsdigital/notify-digital-letters-consumer-contracts": "catalog:test",

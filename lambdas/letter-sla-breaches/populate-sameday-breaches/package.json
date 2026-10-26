@@ -1,0 +1,18 @@
+{
+  "dependencies": {
+    "@internal/helpers": "workspace:*",
+    "@internal/letter-sla-breaches-common": "workspace:*",
+    "aws-embedded-metrics": "^4.2.1",
+    "esbuild": "0.28.2"
+  },
+  "name": "nhs-notify-supplier-api-populate-sameday-breaches",
+  "private": true,
+  "scripts": {
+    "lambda-build": "rm -rf dist && npx esbuild --bundle --minify --sourcemap --target=es2020 --platform=node --loader:.node=file --entry-names=[name] --outdir=dist src/index.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test:unit": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "version": "0.0.1"
+}

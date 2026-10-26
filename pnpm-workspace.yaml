@@ -2,6 +2,7 @@ packages:
   - "docs"
   - "internal/*"
   - "lambdas/*"
+  - "lambdas/letter-sla-breaches/*"
   - "pact-contracts"
   - "scripts/utilities/*"
   - "tests"
