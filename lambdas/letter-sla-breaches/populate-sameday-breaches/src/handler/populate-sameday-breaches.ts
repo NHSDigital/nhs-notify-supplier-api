@@ -16,6 +16,14 @@ export type PopulatesamedayBreachesResult = {
   breachCount: string;
 };
 
+function parseEventDate(date: string): Date {
+  const [datePart, timePart, ...remainingParts] = date.split(" ");
+  const isAthenaTimestamp =
+    timePart && remainingParts.length === 0 && !date.includes("T");
+
+  return new Date(isAthenaTimestamp ? `${datePart}T${timePart}Z` : date);
+}
+
 export default function createHandler(deps: Deps) {
   return async (
     event: PopulatesamedayBreachesEvent,
@@ -26,7 +34,7 @@ export default function createHandler(deps: Deps) {
         buildSamedayBreachesQuery(
           deps.env.EVENT_CACHE_TABLE_NAME,
           deps.env.PACK_SPECIFICATION_TABLE_NAME,
-          new Date(event.date.slice(0, 10)),
+          parseEventDate(event.date),
           14,
         ),
       );

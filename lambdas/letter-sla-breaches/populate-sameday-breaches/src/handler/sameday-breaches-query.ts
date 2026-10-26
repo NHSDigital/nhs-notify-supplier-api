@@ -29,11 +29,11 @@ allocated_letters AS (
     FROM recent_letter_events
     WHERE status = 'PENDING'
     GROUP BY domainid, supplierid, clientid, campaignid
-    HAVING (SELECT iso8601 FROM now) >
+    HAVING (SELECT iso8601 FROM now) >=
         CASE
-            WHEN hour(min(event_time) AT TIME ZONE 'Europe/London') >= 16
-                THEN min(event_time) + INTERVAL '24' HOUR
-            ELSE date_trunc('day', min(event_time) AT TIME ZONE 'Europe/London') + INTERVAL '1' DAY
+            WHEN CAST(min(event_time) AT TIME ZONE 'Europe/London' AS TIME) > TIME '15:00:00'
+                THEN date_trunc('day', min(event_time) AT TIME ZONE 'Europe/London') + INTERVAL '1' DAY + INTERVAL '23' HOUR + INTERVAL '59' MINUTE
+            ELSE date_trunc('day', min(event_time) AT TIME ZONE 'Europe/London') + INTERVAL '23' HOUR + INTERVAL '59' MINUTE
         END
 ),
 completed_letters AS (

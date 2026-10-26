@@ -154,7 +154,7 @@ describe("populateSamedayBreaches", () => {
     );
   });
 
-  it("builds the query from the date component of the event date", async () => {
+  it("preserves the time in an ISO event date", async () => {
     const deps = makeDeps();
     jest.mocked(runAthenaQuery).mockResolvedValueOnce([]);
 
@@ -163,7 +163,21 @@ describe("populateSamedayBreaches", () => {
     expect(runAthenaQuery).toHaveBeenCalledWith(
       deps,
       expect.objectContaining({
-        executionParameters: ["2026-10-08T00:00:00.000Z"],
+        executionParameters: ["2026-10-08T15:30:00.000Z"],
+      }),
+    );
+  });
+
+  it("parses an Athena timestamp as UTC", async () => {
+    const deps = makeDeps();
+    jest.mocked(runAthenaQuery).mockResolvedValueOnce([]);
+
+    await createHandler(deps)({ date: "2026-10-08 15:30:00.000" });
+
+    expect(runAthenaQuery).toHaveBeenCalledWith(
+      deps,
+      expect.objectContaining({
+        executionParameters: ["2026-10-08T15:30:00.000Z"],
       }),
     );
   });

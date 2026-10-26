@@ -42,17 +42,21 @@ describe("buildSamedayBreachesQuery", () => {
       ],
     ],
     [
-      "applies a 24 hour SLA from 16:00 UK time",
+      "applies a next-day end-of-day SLA after 15:00 UK time",
       [
-        "WHEN hour(min(event_time) AT TIME ZONE 'Europe/London') >= 16",
-        "THEN min(event_time) + INTERVAL '24' HOUR",
+        "WHEN CAST(min(event_time) AT TIME ZONE 'Europe/London' AS TIME) > TIME '15:00:00'",
+        "THEN date_trunc('day', min(event_time) AT TIME ZONE 'Europe/London') + INTERVAL '1' DAY + INTERVAL '23' HOUR + INTERVAL '59' MINUTE",
       ],
     ],
     [
-      "applies an end of day SLA before 16:00 UK time",
+      "applies an end-of-day SLA at or before 15:00 UK time",
       [
-        "ELSE date_trunc('day', min(event_time) AT TIME ZONE 'Europe/London') + INTERVAL '1' DAY",
+        "ELSE date_trunc('day', min(event_time) AT TIME ZONE 'Europe/London') + INTERVAL '23' HOUR + INTERVAL '59' MINUTE",
       ],
+    ],
+    [
+      "treats letters as breached when now reaches the SLA target",
+      ["HAVING (SELECT iso8601 FROM now) >="],
     ],
     ["only treats pending letters as allocated", ["WHERE status = 'PENDING'"]],
     [
