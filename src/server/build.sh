@@ -29,10 +29,10 @@ build(){
   cp ../.version .
   echo "Root Dir:"
   ls -la
-  echo "Cleaning..."
-  dotnet clean
   echo "Restoring..."
   dotnet restore /p:Version=${TEST_NUGET_VERSION}
+  echo "Cleaning..."
+  dotnet clean
   echo "Building..."
   dotnet build --no-restore --configuration Release /p:Version=${TEST_NUGET_VERSION}
   echo "Publishing..."
@@ -41,10 +41,10 @@ build(){
   dotnet pack --configuration Release /p:Version=${TEST_NUGET_VERSION} --no-build
   echo "Release Dir :"
   ls -la bin/Release
-  echo "net8.0 Dir :"
-  ls -la bin/Release/net8.0
+  echo "net10.0 Dir :"
+  ls -la bin/Release/net10.0
   echo "publish Dir :"
-  ls -la bin/Release/net8.0/publish
+  ls -la bin/Release/net10.0/publish
   cd ..
 }
 

@@ -1,4 +1,4 @@
-# Multi-stage Dockerfile for .NET 8 Web API
+# Multi-stage Dockerfile for .NET 10 Web API
 # Build stage
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
@@ -18,7 +18,7 @@ RUN ./build.sh
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
-COPY --from=build src/host/bin/Release/net8.0/publish .
+COPY --from=build src/host/bin/Release/net10.0/publish .
 
 # Expose port (change if your app uses a different port)
 EXPOSE 8080

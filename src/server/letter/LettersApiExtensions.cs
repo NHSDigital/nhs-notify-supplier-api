@@ -35,7 +35,6 @@ public static class LettersApiExtensions
       return all;
     })
     .WithName("GetLetter")
-    .WithOpenApi()
     .WithTags("LetterApi");
 
     app.MapPost("/letter", ([FromBody] LetterRequestBody body, [FromServices] ConcurrentDictionary<string, LetterResponseBody> letters) =>
@@ -46,7 +45,6 @@ public static class LettersApiExtensions
 
     })
     .WithName("PostLetter")
-    .WithOpenApi()
     .WithTags("LetterApi");
 
     app.MapGet("/letter/{id}", (string id, [FromServices] ConcurrentDictionary<string, LetterResponseBody> letters) =>
@@ -54,7 +52,6 @@ public static class LettersApiExtensions
       return letters.GetValueOrDefault(id);
     })
     .WithName("GetLetterId")
-    .WithOpenApi()
     .WithTags("LetterApi");
 
     app.MapPatch("/letter/{id}", (string id, [FromBody] LetterRequestBody body, [FromServices] ConcurrentDictionary<string, LetterResponseBody> letters) =>
@@ -64,9 +61,8 @@ public static class LettersApiExtensions
       letters.Remove(id, out _);
       letters.TryAdd(id, letter);
     })
-
     .WithName("PostLetterId")
-    .WithOpenApi()
+    .WithName("PostLetterId")
     .WithTags("LetterApi");
   }
 }
