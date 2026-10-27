@@ -11,7 +11,7 @@ import {
   PublishBatchRequestEntry,
 } from "@aws-sdk/client-sns";
 import { LetterStatusChangeEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
-import { MetricEntry, MetricStatus, buildEMFObject } from "@internal/helpers";
+import { MetricEntry, buildEMFObject } from "@internal/helpers";
 import { Letter, LetterSchema } from "@internal/datastore";
 import { mapLetterToCloudEvent } from "@internal/event-builders/src";
 import { Unit } from "aws-embedded-metrics";
@@ -30,14 +30,14 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
     );
 
     const cloudEvents: LetterStatusChangeEvent[] = ddbRecords
-      .filter((record) => filterRecord(record, deps))
+      .filter((record) => filterRecord(record))
       .map((element) => extractNewLetter(element))
       .map((element) => mapLetterToCloudEvent(element, deps.env.EVENT_SOURCE));
 
     const eventTypeCount: Map<string, number> =
       populateEventTypeMap(cloudEvents);
     for (const batch of generateBatches(cloudEvents)) {
-      const response:PublishBatchCommandOutput = await deps.snsClient.send(
+      const response: PublishBatchCommandOutput = await deps.snsClient.send(
         new PublishBatchCommand({
           TopicArn: deps.env.EVENTPUB_SNS_TOPIC_ARN,
           PublishBatchRequestEntries: batch.map((element, index) =>
@@ -90,7 +90,7 @@ function emitMetrics(logger: pino.Logger, eventTypeCount: Map<string, number>) {
   }
 }
 
-function filterRecord(record: DynamoDBRecord, deps: Deps): boolean {
+function filterRecord(record: DynamoDBRecord): boolean {
   let allowEvent = false;
   if (record.eventName === "INSERT") {
     allowEvent = true;

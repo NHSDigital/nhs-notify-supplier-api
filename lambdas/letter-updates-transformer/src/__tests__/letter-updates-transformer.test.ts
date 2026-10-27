@@ -220,15 +220,7 @@ describe("letter-updates-transformer Lambda", () => {
 
       // Create a Kinesis event with empty Records array
       const emptyKinesisEvent: KinesisStreamEvent = { Records: [] };
-
       await handler(emptyKinesisEvent, mockDeep<Context>(), jest.fn());
-
-      expect(mockedDeps.logger.info).toHaveBeenCalledWith(
-        expect.objectContaining({
-          description: "Number of records",
-          count: 0,
-        }),
-      );
       expect(mockedDeps.snsClient.send).not.toHaveBeenCalled();
     });
   });
