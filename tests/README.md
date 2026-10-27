@@ -30,7 +30,12 @@ Test suites that validate the supplier API beyond individual package unit tests.
     2. from project's root directory `make test-sandbox` or `pnpm install && pnpm --filter nhs-notify-supplier-api-tests run test:sandbox` to run the tests
   - Run in Pipeline:
     1. You need to deploy the proxies in your Pull Request with the label `deploy-proxy`. This should then build the sandbox server, deploy the artifact and deploy the sandbox proxy via proxygen (you might need to re-run the acceptance tests stage in the pipeline, as the server might take some time to deploy and be unreachable from the tests).
-- **Performance and E2E tests** require AWS credentials, deployed infrastructure, and seeded test data. See `scripts/test-data/` for test data generation and `tests/e2e-tests/README.md` for environment-specific setup.
+- **Performance test** require AWS credentials and deployed infrastructure.
+  1. Deploy a dynamic environment (can be achieved by creating a Pull Request). Take a note of the environment e.g. pr1234.
+  2. In the root level create an `.env` file and setup the `GITHUB_TOKEN`, `TARGET_ENVIRONMENT`, `TARGET_ACCOUNT_GROUP`, `API_ENVIRONMENT` variables. (use `.env.template` as a guide)
+  3. Source the env file by running `set -a` -> `source .env` -> `set +a`
+  4. Login to your AWS account by running `aws sso login` in the terminal
+- **E2E tests** require AWS credentials, deployed infrastructure and require seeded test data. See `scripts/test-data/` for test data generation and `tests/e2e-tests/README.md` for environment-specific setup.
   1. Deploy a dynamic environment (can be achieved by creating a Pull Request). Take a note of the environment e.g. pr1234.
   2. Build proxies in the dynamic environment by setting the label `deploy_proxy` (ask a member of the team if you need help)
   3. In the root level create an `.env` file and setup the `GITHUB_TOKEN`, `TARGET_ENVIRONMENT`, `TARGET_ACCOUNT_GROUP`, `PROXY_NAME`, `API_ENVIRONMENT`, `NON_PROD_API_KEY`, `STATUS_ENDPOINT_API_KEY` & `NON_PROD_PRIVATE_KEY` variables. (use `.env.template` as a guide)

@@ -38,6 +38,7 @@ const mockedDeps: jest.Mocked<Deps> = {
 describe("letter-updates-transformer Lambda", () => {
   beforeEach(() => {
     jest.useFakeTimers();
+    (mockedDeps.snsClient.send as jest.Mock).mockResolvedValue({});
   });
 
   afterEach(() => {
@@ -319,6 +320,23 @@ describe("letter-updates-transformer Lambda", () => {
           }),
         }),
       );
+    });
+
+    it("throws when SNS reports failed entries so Kinesis retries", async () => {
+      (mockedDeps.snsClient.send as jest.Mock).mockResolvedValueOnce({
+        Failed: [{ Id: "1-0", Code: "InternalError", SenderFault: false }],
+      });
+      const handler = createHandler(mockedDeps);
+      const testData = generateKinesisEvent([
+        generateModifyRecord(
+          generateLetter("ACCEPTED"),
+          generateLetter("PRINTED"),
+        ),
+      ]);
+
+      await expect(
+        handler(testData, mockDeep<Context>(), jest.fn()),
+      ).rejects.toThrow("SNS PublishBatch failed for 1 entries");
     });
   });
 });
