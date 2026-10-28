@@ -1,4 +1,4 @@
-FROM node:22.22.0-alpine3.23
+FROM node:26.12.0-alpine3.23
 
 ENV npm_config_cache=.npm
 
