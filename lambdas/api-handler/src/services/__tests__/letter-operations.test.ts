@@ -71,7 +71,7 @@ describe("getPendingLetters", () => {
           groupId: "g1",
         },
       ]),
-      updateVisibilityTimestamp: jest.fn(),
+      updateTimestamps: jest.fn(),
     };
     const result = await getPendingLetters(
       "supplier1",
@@ -80,15 +80,17 @@ describe("getPendingLetters", () => {
       600,
     );
     expect(mockRepo.getLetters).toHaveBeenCalledWith("supplier1", 10);
-    expect(mockRepo.updateVisibilityTimestamp).toHaveBeenNthCalledWith(
+    expect(mockRepo.updateTimestamps).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({ supplierId: "supplier1", letterId: "id1" }),
       new Date("2026-03-04T13:25:45.000Z"),
+      new Date("2026-03-04T13:15:45.000Z"),
     );
-    expect(mockRepo.updateVisibilityTimestamp).toHaveBeenNthCalledWith(
+    expect(mockRepo.updateTimestamps).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({ supplierId: "supplier1", letterId: "id2" }),
       new Date("2026-03-04T13:25:45.000Z"),
+      new Date("2026-03-04T13:15:45.000Z"),
     );
     expect(result).toEqual([
       { id: "id1", status: "PENDING", specificationId: "s1", groupId: "g1" },

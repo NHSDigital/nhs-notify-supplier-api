@@ -23,12 +23,11 @@ def create_test_data(count: int = 10) -> list[str]:
     aws_account_id = resolve_aws_account_id()
 
     cmd = [
-        "npm",
-        "-w",
+        "pnpm",
+        "--filter",
         _CLI_WORKSPACE,
         "run",
         "cli",
-        "--",
         "create-letter-batch",
         "--supplier-id", SUPPLIER,
         "--environment", environment,

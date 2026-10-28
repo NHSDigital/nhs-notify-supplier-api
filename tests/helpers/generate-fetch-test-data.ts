@@ -39,6 +39,7 @@ export const PendingLetterSchema = z.object({
   letterId: z.string(),
   queueTimestamp: z.string(),
   visibilityTimestamp: z.string(),
+  lastReadTimestamp: z.string().optional(),
   queueSortOrderSk: z.string().describe("Secondary index SK"),
   priority: z.int().min(0).max(99).optional(),
 });

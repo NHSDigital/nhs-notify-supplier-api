@@ -29,6 +29,8 @@ infrastructure/terraform/components/
 lambdas/example-lambda/
 package-lock.json
 package.json
+pnpm-lock.yaml
+pnpm-workspace.yaml
 scripts/**/examples/
 scripts/terraform/terraform.mk
 src/.vscode/

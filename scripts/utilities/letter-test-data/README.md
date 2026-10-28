@@ -9,7 +9,7 @@ Log in the desired AWS account and then run the command below. You may need to s
 Note that the AWS account ID is required in order to resolve the bucket name.
 
 ```bash
-npm run cli -- create-letter \
+pnpm run cli create-letter \
   --supplier-id supplier-id \
   --environment pr147 \
   --awsAccountId 820178564574 \
@@ -21,7 +21,7 @@ npm run cli -- create-letter \
 ```
 
 ```bash
-npm run cli -- create-letter-batch \
+pnpm run cli create-letter-batch \
   --supplier-id supplier-id \
   --environment main \
   --awsAccountId 820178564574 \
