@@ -6,7 +6,7 @@ locals {
     Stage   = aws_api_gateway_stage.main.stage_name
   }
 
-  lambda_alarm_targets = {
+  lambda_alarm_targets = merge({
     authorizer_lambda           = module.authorizer_lambda.function_name
     get_letter                  = module.get_letter.function_name
     get_letters                 = module.get_letters.function_name
@@ -23,7 +23,10 @@ locals {
     mi_updates_transformer      = module.mi_updates_transformer.function_name
     supplier_allocator          = module.supplier_allocator.function_name
     supplier_config_ingress     = module.supplier_config_ingress.function_name
-  }
+    },
+    length(module.populate_standard_breaches) > 0 ? {
+      populate_standard_breaches = module.populate_standard_breaches[0].function_name
+  } : {})
 
   sqs_alarm_targets = {
     sqs_letter_updates          = module.sqs_letter_updates.sqs_queue_name

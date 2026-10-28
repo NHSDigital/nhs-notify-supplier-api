@@ -1,5 +1,6 @@
 resource "aws_iam_role_policy" "letter_sla_breaches" {
-  count  = local.eventpub_parquet_enabled ? 1 : 0
+  count = local.eventpub_parquet_enabled ? 1 : 0
+
   name   = "${local.csi}-letter-sla-breaches-sfn"
   role   = aws_iam_role.letter_sla_breaches[0].id
   policy = data.aws_iam_policy_document.letter_sla_breaches_policy[0].json
