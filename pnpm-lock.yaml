@@ -757,6 +757,9 @@ importers:
       '@aws-sdk/client-athena':
         specifier: catalog:aws
         version: 3.1152.0
+      '@aws-sdk/client-s3':
+        specifier: catalog:aws
+        version: 3.1149.0
       '@date-fns/tz':
         specifier: catalog:app
         version: 1.5.0

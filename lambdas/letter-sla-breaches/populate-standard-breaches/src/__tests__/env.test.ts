@@ -13,6 +13,7 @@ describe("createDependenciesContainer", () => {
       DAYS_TO_LOOK_BACK: "14",
       STANDARD_SLA_WORKING_DAYS: "2",
       BANK_HOLIDAY_JSON_URL: "https://www.gov.uk/bank-holidays.json",
+      BANK_HOLIDAY_CACHE_BUCKET_NAME: "reporting-bucket",
     };
   });
 

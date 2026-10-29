@@ -35,8 +35,10 @@ describe("populateStandardBreaches", () => {
     jest.mocked(runAthenaQuery).mockResolvedValue([]);
     jest.mocked(fetchBankHolidays).mockResolvedValue([]);
 
-    await createHandler(makeDeps())({ date: "2026-10-08" });
+    const deps = makeDeps();
+    await createHandler(deps)({ date: "2026-10-08" });
 
+    expect(fetchBankHolidays).toHaveBeenCalledWith(deps);
     expect(buildStandardBreachesQuery).toHaveBeenCalledWith(
       "event_cache",
       "pack_specification",
