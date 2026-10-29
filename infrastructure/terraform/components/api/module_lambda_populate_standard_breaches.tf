@@ -44,6 +44,7 @@ module "populate_standard_breaches" {
     PACK_SPECIFICATION_TABLE_NAME = "${replace(local.csi, "-", "_")}_pack_specification"
     DAYS_TO_LOOK_BACK             = "14"
     STANDARD_SLA_WORKING_DAYS     = "2"
+    BANK_HOLIDAY_JSON_URL         = "https://www.gov.uk/bank-holidays.json"
   }
 }
 

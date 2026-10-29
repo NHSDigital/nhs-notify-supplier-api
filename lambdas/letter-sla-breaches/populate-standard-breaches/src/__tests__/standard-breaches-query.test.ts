@@ -221,6 +221,7 @@ describe("buildStandardBreachesQuery", () => {
         now,
         2,
         14,
+        [],
       ),
     );
 
@@ -312,6 +313,7 @@ describe("buildStandardBreachesQuery", () => {
             day,
             2,
             14,
+            [],
           ),
         ),
       ),
@@ -375,6 +377,7 @@ describe("buildStandardBreachesQuery", () => {
         now,
         2,
         14,
+        [],
       ),
     );
 
@@ -402,6 +405,7 @@ describe("buildStandardBreachesQuery", () => {
         now,
         2,
         14,
+        [],
       ),
     );
 

@@ -3,9 +3,11 @@ import { Unit } from "aws-embedded-metrics";
 import { type Deps } from "../handler/deps";
 import buildStandardBreachesQuery from "../handler/standard-breaches-query";
 import createHandler from "../handler/populate-standard-breaches";
+import fetchBankHolidays from "../handler/bank-holidays";
 
 jest.mock("@internal/letter-sla-breaches-common");
 jest.mock("../handler/standard-breaches-query");
+jest.mock("../handler/bank-holidays");
 
 const makeDeps = () =>
   ({
@@ -31,6 +33,7 @@ describe("populateStandardBreaches", () => {
 
   it("passes the configured SLA days and look-back to the query", async () => {
     jest.mocked(runAthenaQuery).mockResolvedValue([]);
+    jest.mocked(fetchBankHolidays).mockResolvedValue([]);
 
     await createHandler(makeDeps())({ date: "2026-10-08" });
 
@@ -40,6 +43,7 @@ describe("populateStandardBreaches", () => {
       new Date("2026-10-08"),
       3,
       10,
+      [],
     );
   });
 

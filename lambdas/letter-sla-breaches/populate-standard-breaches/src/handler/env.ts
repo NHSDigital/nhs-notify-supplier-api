@@ -7,6 +7,7 @@ const EnvVarsSchema = z.object({
   PACK_SPECIFICATION_TABLE_NAME: z.string(),
   DAYS_TO_LOOK_BACK: z.coerce.number().int().positive(),
   STANDARD_SLA_WORKING_DAYS: z.coerce.number().int().positive(),
+  BANK_HOLIDAY_JSON_URL: z.url(),
   PINO_LOG_LEVEL: z.string().optional(),
 });
 
