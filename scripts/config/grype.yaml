@@ -17,7 +17,7 @@ ignore:
   - vulnerability: GHSA-vfmq-68hx-4jfw # TODO: CCM-23605
   - vulnerability: GHSA-xgmm-8j9v-c9wx # TODO: CCM-23605
   - vulnerability: GHSA-vfj7-8cjw-p6xm # TODO: CCM-24511 Braces 3.0.3 contains a AI assessed CVE the provider says doesnt exist
-
+  - vulnerability: GHSA-6v38-4h7w-rj9h # TODO: assign it to a ticket or fix as part of this ticket.
 #   # This is the full set of supported rule fields:
 #   - vulnerability: CVE-2008-4318
 #     fix-state: unknown
