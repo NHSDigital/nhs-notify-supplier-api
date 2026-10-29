@@ -38,7 +38,7 @@ Test suites that validate the supplier API beyond individual package unit tests.
 - **E2E tests** require AWS credentials, deployed infrastructure and require seeded test data. See `scripts/test-data/` for test data generation and `tests/e2e-tests/README.md` for environment-specific setup.
   1. Deploy a dynamic environment (can be achieved by creating a Pull Request). Take a note of the environment e.g. pr1234.
   2. Build proxies in the dynamic environment by setting the label `deploy_proxy` (ask a member of the team if you need help)
-  3. In the root level create an `.env` file and setup the `GITHUB_TOKEN`, `TARGET_ENVIRONMENT`, `TARGET_ACCOUNT_GROUP`, `PROXY_NAME`, `API_ENVIRONMENT`, `NON_PROD_API_KEY`, `STATUS_ENDPOINT_API_KEY` & `NON_PROD_PRIVATE_KEY` variables. (use `.env.template` as a guide)
+  3. In the root level create an `.env` file and setup the `GITHUB_TOKEN`, `TARGET_ENVIRONMENT`, `TARGET_ACCOUNT_GROUP`, `PROXY_NAME`, `API_ENVIRONMENT`, `NON_PROD_API_KEY`, `NON_PROD_SECONDARY_API_KEY`, `STATUS_ENDPOINT_API_KEY` & `NON_PROD_PRIVATE_KEY` variables. (use `/.env.template` and `/tests/e2e-tests/README.md` as a guide)
   4. Source the env file by running `set -a` -> `source .env` -> `set +a`
   5. Login to your AWS account by running `aws sso login` in the terminal
 
