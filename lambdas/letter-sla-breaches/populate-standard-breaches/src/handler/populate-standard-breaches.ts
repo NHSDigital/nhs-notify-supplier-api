@@ -4,6 +4,7 @@ import { buildEMFObject } from "@internal/helpers";
 import { type Deps } from "./deps";
 import buildStandardBreachesQuery from "./standard-breaches-query";
 import LogRefs from "../log-references";
+import fetchBankHolidays from "./bank-holidays";
 
 export type PopulateStandardBreachesEvent = {
   date: string;
@@ -11,13 +12,19 @@ export type PopulateStandardBreachesEvent = {
 
 export default function createHandler(deps: Deps) {
   return async (event: PopulateStandardBreachesEvent): Promise<void> => {
+    const bankHolidays = await fetchBankHolidays(
+      deps.env.BANK_HOLIDAY_JSON_URL,
+      deps.s3Cache,
+    );
     const sql = buildStandardBreachesQuery(
       deps.env.EVENT_CACHE_TABLE_NAME,
       deps.env.PACK_SPECIFICATION_TABLE_NAME,
       new Date(event.date),
       deps.env.STANDARD_SLA_WORKING_DAYS,
       deps.env.DAYS_TO_LOOK_BACK,
+      bankHolidays,
     );
+    deps.logger.info({ description: "Generated query", sql });
     const rows = await runAthenaQuery(deps, sql);
 
     // Calculate and log total for the benefit of the alarm - that way the alarm will clear when the breaches query returns
