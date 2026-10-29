@@ -81,7 +81,7 @@ class AuthenticationCache():
             # PR environments (and the status endpoint) use AAL0 - authentication is the API key passed directly
             return Secret(api_key, auth_type="apikey")
 
-        _, latest_token_expiry = self.tokens.get(env, (None, 0))
+        _, latest_token_expiry = self.tokens.get((env, supplier_id), (None, 0))
 
         # Generate new token if latest token will expire in 15 seconds
         if (env, supplier_id) not in self.tokens or latest_token_expiry < int(time()) + 15:
