@@ -58,7 +58,7 @@ describe("populateStandardBreaches", () => {
     await createHandler(deps)({ date: "2026-10-08" });
 
     expect(deps.logger.info as jest.Mock).toHaveBeenNthCalledWith(
-      1,
+      2,
       expect.objectContaining({
         _aws: expect.objectContaining({
           CloudWatchMetrics: [
@@ -79,7 +79,7 @@ describe("populateStandardBreaches", () => {
     );
 
     expect(deps.logger.info as jest.Mock).toHaveBeenNthCalledWith(
-      2,
+      3,
       expect.objectContaining({
         SupplierId: "supplier1",
         _aws: expect.objectContaining({
@@ -100,7 +100,7 @@ describe("populateStandardBreaches", () => {
       }),
     );
     expect(deps.logger.info as jest.Mock).toHaveBeenNthCalledWith(
-      3,
+      4,
       expect.objectContaining({
         SupplierId: "supplier2",
         _aws: expect.objectContaining({

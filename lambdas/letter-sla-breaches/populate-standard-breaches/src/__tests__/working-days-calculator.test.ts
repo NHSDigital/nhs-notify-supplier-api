@@ -42,6 +42,6 @@ describe("working-days-calculator", () => {
         atZoneEuropeLondon("2026-12-28"),
       ]);
       expect(result.getTime()).toBe(atZoneEuropeLondon("2026-12-23").getTime());
-    })
+    });
   });
 });
