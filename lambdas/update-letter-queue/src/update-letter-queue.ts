@@ -24,21 +24,16 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
     // The change in the size of the pending letters queue, keyed by supplier
     const deltasBySupplierId = new Map<string, number>();
 
-    deps.logger.info({
+    deps.logger.debug({
       logRef: LogRefs.RECEIVED_EVENT.code,
       description: LogRefs.RECEIVED_EVENT.description,
       streamEvent,
     });
-    deps.logger.info({
-      logRef: LogRefs.NUMBER_OF_RECORDS.code,
-      description: LogRefs.NUMBER_OF_RECORDS.description,
-      count: streamEvent.Records?.length || 0,
-    });
 
     for (const record of streamEvent.Records) {
-      const ddbRecord = extractPayload(record, deps);
-
       try {
+        const ddbRecord = extractPayload(record, deps);
+
         if (isPendingLetter(ddbRecord)) {
           const letter = extractNewOrUpdatedLetter(ddbRecord);
           const added = await addPendingLetterToQueue(letter, deps);
@@ -55,9 +50,15 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
           logRef: LogRefs.ERROR_PROCESSING_DDB_RECORD.code,
           description: LogRefs.ERROR_PROCESSING_DDB_RECORD.description,
           error,
-          ddbRecord,
+          record,
         });
-        recordProcessing(deps, successCount, 1, deltasBySupplierId);
+        recordProcessing(
+          deps,
+          successCount,
+          1,
+          deltasBySupplierId,
+          streamEvent.Records.length,
+        );
         // If we get a failure, return immediately without processing the remaining records. Since we are
         // working with a Kinesis stream, AWS will retry from the point of failure and no records will be lost.
         // See https://docs.aws.amazon.com/lambda/latest/dg/example_serverless_Kinesis_Lambda_batch_item_failures_section.html
@@ -68,7 +69,13 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
         };
       }
     }
-    recordProcessing(deps, successCount, 0, deltasBySupplierId);
+    recordProcessing(
+      deps,
+      successCount,
+      0,
+      deltasBySupplierId,
+      streamEvent.Records.length,
+    );
     return { batchItemFailures: [] };
   };
 }
@@ -133,13 +140,15 @@ function recordProcessing(
   successCount: number,
   failureCount: number,
   deltasBySupplierId: Map<string, number>,
+  totalCount: number,
 ) {
   deps.logger.info({
     logRef: LogRefs.PROCESSING_COMPLETE.code,
     description: LogRefs.PROCESSING_COMPLETE.description,
     successCount,
     failureCount,
-    totalProcessed: successCount + failureCount,
+    processedCount: successCount + failureCount,
+    totalCount,
   });
 
   for (const [supplierId, delta] of deltasBySupplierId) {
@@ -171,7 +180,7 @@ function extractPayload(
   deps: Deps,
 ): DynamoDBRecord {
   try {
-    deps.logger.info({
+    deps.logger.debug({
       logRef: LogRefs.PROCESSING_KINESIS_RECORD.code,
       description: LogRefs.PROCESSING_KINESIS_RECORD.description,
       recordId: record.kinesis.sequenceNumber,
@@ -179,14 +188,16 @@ function extractPayload(
 
     // Kinesis data is base64 encoded
     const payload = Buffer.from(record.kinesis.data, "base64").toString("utf8");
-    deps.logger.info({
+
+    deps.logger.debug({
       logRef: LogRefs.DECODED_PAYLOAD.code,
       description: LogRefs.DECODED_PAYLOAD.description,
       payload,
     });
 
     const jsonParsed = JSON.parse(payload);
-    deps.logger.info({
+
+    deps.logger.debug({
       logRef: LogRefs.EXTRACTED_DYNAMODB_RECORD.code,
       description: LogRefs.EXTRACTED_DYNAMODB_RECORD.description,
       jsonParsed,

@@ -24,6 +24,7 @@ const mockedDeps: jest.Mocked<Deps> = {
     deleteLetter: jest.fn(),
   } as unknown as LetterQueueRepository,
   logger: {
+    debug: jest.fn(),
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
@@ -133,6 +134,31 @@ describe("update-letter-queue Lambda", () => {
 
       expect(mockedDeps.letterQueueRepository.putLetter).not.toHaveBeenCalled();
       expect(result.batchItemFailures).toEqual([]);
+      expect(mockedDeps.logger.info).toHaveBeenCalledWith(
+        expect.objectContaining({
+          processedCount: 0,
+          totalCount: 0,
+        }),
+      );
+    });
+
+    it("reports the batch size even when no letters are queued", async () => {
+      const handler = createHandler(mockedDeps);
+      const testData = generateKinesisEvent([
+        generateInsertRecord(generateLetter("ACCEPTED")),
+      ]);
+
+      const result = await handler(testData, mockDeep<Context>(), jest.fn());
+
+      expect(result.batchItemFailures).toEqual([]);
+      expect(mockedDeps.logger.info).toHaveBeenCalledWith(
+        expect.objectContaining({
+          successCount: 0,
+          failureCount: 0,
+          processedCount: 0,
+          totalCount: 1,
+        }),
+      );
     });
   });
 
@@ -204,7 +230,7 @@ describe("update-letter-queue Lambda", () => {
       expect(result.batchItemFailures).toEqual([]);
     });
 
-    it("throws error when Kinesis payload cannot be parsed as JSON", async () => {
+    it("reports a partial batch failure when a Kinesis payload is invalid JSON", async () => {
       const handler = createHandler(mockedDeps);
       const invalidJsonPayload = "not valid json {{{";
       const testData = {
@@ -216,17 +242,33 @@ describe("update-letter-queue Lambda", () => {
             },
             eventID: "event-123",
           },
+          {
+            kinesis: {
+              sequenceNumber: "seq-124",
+              data: Buffer.from(
+                JSON.stringify(generateInsertRecord(generateLetter("PENDING"))),
+              ).toString("base64"),
+            },
+          },
         ],
       } as unknown as KinesisStreamEvent;
 
-      await expect(
-        handler(testData, mockDeep<Context>(), jest.fn()),
-      ).rejects.toThrow();
+      const result = await handler(testData, mockDeep<Context>(), jest.fn());
 
+      expect(result.batchItemFailures).toEqual([{ itemIdentifier: "seq-123" }]);
+      expect(mockedDeps.letterQueueRepository.putLetter).not.toHaveBeenCalled();
       expect(mockedDeps.logger.error).toHaveBeenCalledWith(
         expect.objectContaining({
           description: "Error extracting payload",
           eventId: "event-123",
+        }),
+      );
+      expect(mockedDeps.logger.info).toHaveBeenCalledWith(
+        expect.objectContaining({
+          successCount: 0,
+          failureCount: 1,
+          processedCount: 1,
+          totalCount: 2,
         }),
       );
     });
