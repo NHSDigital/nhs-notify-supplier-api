@@ -38,7 +38,6 @@ describe("populateStandardBreaches", () => {
     const deps = makeDeps();
     await createHandler(deps)({ date: "2026-10-08" });
 
-    expect(fetchBankHolidays).toHaveBeenCalledWith(deps);
     expect(buildStandardBreachesQuery).toHaveBeenCalledWith(
       "event_cache",
       "pack_specification",

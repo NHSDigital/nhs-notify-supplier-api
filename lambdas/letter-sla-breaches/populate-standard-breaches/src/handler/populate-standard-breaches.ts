@@ -11,7 +11,10 @@ export type PopulateStandardBreachesEvent = {
 
 export default function createHandler(deps: Deps) {
   return async (event: PopulateStandardBreachesEvent): Promise<void> => {
-    const bankHolidays = await fetchBankHolidays(deps);
+    const bankHolidays = await fetchBankHolidays(
+      deps.env.BANK_HOLIDAY_JSON_URL,
+      deps.s3Cache,
+    );
     const sql = buildStandardBreachesQuery(
       deps.env.EVENT_CACHE_TABLE_NAME,
       deps.env.PACK_SPECIFICATION_TABLE_NAME,
