@@ -35,6 +35,10 @@ const LogRefs = {
     code: "009-METRIC",
     description: "Metric",
   },
+  ERROR_PUBLISHING_BATCH: {
+    code: "010-ERROR-PUBLISHING-BATCH",
+    description: "Error publishing batch to SNS",
+  },
 };
 
 export default LogRefs;

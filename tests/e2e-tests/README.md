@@ -13,7 +13,7 @@ Available values for `PROXY_NAME` include:
 - `nhs-notify-supplier--internal-dev--nhs-notify-supplier`
 - `nhs-notify-supplier--internal-dev--nhs-notify-supplier-PR-<num>`
 
-## Set Target Environment (only needed for your PR, defaults to main)
+## Set Target Environment (only needed for your PR, defaults to main) in the format <pr123>
 
 ```shell
 export TARGET_ENVIRONMENT=your-pr
