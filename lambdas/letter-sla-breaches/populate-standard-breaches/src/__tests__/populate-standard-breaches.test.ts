@@ -3,9 +3,11 @@ import { Unit } from "aws-embedded-metrics";
 import { type Deps } from "../handler/deps";
 import buildStandardBreachesQuery from "../handler/standard-breaches-query";
 import createHandler from "../handler/populate-standard-breaches";
+import fetchBankHolidays from "../handler/bank-holidays";
 
 jest.mock("@internal/letter-sla-breaches-common");
 jest.mock("../handler/standard-breaches-query");
+jest.mock("../handler/bank-holidays");
 
 const makeDeps = () =>
   ({
@@ -31,8 +33,10 @@ describe("populateStandardBreaches", () => {
 
   it("passes the configured SLA days and look-back to the query", async () => {
     jest.mocked(runAthenaQuery).mockResolvedValue([]);
+    jest.mocked(fetchBankHolidays).mockResolvedValue([]);
 
-    await createHandler(makeDeps())({ date: "2026-10-08" });
+    const deps = makeDeps();
+    await createHandler(deps)({ date: "2026-10-08" });
 
     expect(buildStandardBreachesQuery).toHaveBeenCalledWith(
       "event_cache",
@@ -40,6 +44,7 @@ describe("populateStandardBreaches", () => {
       new Date("2026-10-08"),
       3,
       10,
+      [],
     );
   });
 
@@ -54,7 +59,7 @@ describe("populateStandardBreaches", () => {
     await createHandler(deps)({ date: "2026-10-08" });
 
     expect(deps.logger.info as jest.Mock).toHaveBeenNthCalledWith(
-      1,
+      2,
       expect.objectContaining({
         _aws: expect.objectContaining({
           CloudWatchMetrics: [
@@ -75,7 +80,7 @@ describe("populateStandardBreaches", () => {
     );
 
     expect(deps.logger.info as jest.Mock).toHaveBeenNthCalledWith(
-      2,
+      3,
       expect.objectContaining({
         SupplierId: "supplier1",
         _aws: expect.objectContaining({
@@ -96,7 +101,7 @@ describe("populateStandardBreaches", () => {
       }),
     );
     expect(deps.logger.info as jest.Mock).toHaveBeenNthCalledWith(
-      3,
+      4,
       expect.objectContaining({
         SupplierId: "supplier2",
         _aws: expect.objectContaining({

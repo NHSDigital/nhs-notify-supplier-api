@@ -38,12 +38,14 @@ module "populate_standard_breaches" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = {
-    ATHENA_WORKGROUP              = aws_athena_workgroup.reporting.name
-    ATHENA_DATABASE               = aws_glue_catalog_database.supplier.name
-    EVENT_CACHE_TABLE_NAME        = aws_glue_catalog_table.eventpub_parquet[0].name
-    PACK_SPECIFICATION_TABLE_NAME = "${replace(local.csi, "-", "_")}_pack_specification"
-    DAYS_TO_LOOK_BACK             = "14"
-    STANDARD_SLA_WORKING_DAYS     = "2"
+    ATHENA_WORKGROUP               = aws_athena_workgroup.reporting.name
+    ATHENA_DATABASE                = aws_glue_catalog_database.supplier.name
+    EVENT_CACHE_TABLE_NAME         = aws_glue_catalog_table.eventpub_parquet[0].name
+    PACK_SPECIFICATION_TABLE_NAME  = "${replace(local.csi, "-", "_")}_pack_specification"
+    DAYS_TO_LOOK_BACK              = "14"
+    STANDARD_SLA_WORKING_DAYS      = "2"
+    BANK_HOLIDAY_JSON_URL          = "https://www.gov.uk/bank-holidays.json"
+    BANK_HOLIDAY_CACHE_BUCKET_NAME = module.s3bucket_reporting.bucket
   }
 }
 
@@ -111,6 +113,18 @@ data "aws_iam_policy_document" "populate_standard_breaches_lambda" {
       "${module.s3bucket_reporting.arn}/parquet/*",
       "${module.s3bucket_reporting.arn}/supplier_config_cache/*",
     ]
+  }
+
+  statement {
+    sid    = "AllowBankHolidayCache"
+    effect = "Allow"
+
+    actions = [
+      "s3:GetObject",
+      "s3:PutObject",
+    ]
+
+    resources = ["${module.s3bucket_reporting.arn}/bank_holiday_cache/*"]
   }
 
   statement {
