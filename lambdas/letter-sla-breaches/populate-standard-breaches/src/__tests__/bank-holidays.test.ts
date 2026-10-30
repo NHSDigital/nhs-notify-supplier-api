@@ -51,15 +51,9 @@ describe("fetchBankHolidays", () => {
     }),
   ) as jest.Mock;
 
-
-
   it("fetches and parses English bank holidays from gov.uk", async () => {
     const results = await fetchBankHolidays("dummy-url", s3Cache);
-    expect(results).toEqual([
-      new Date("2026-12-25"),
-      new Date("2026-12-28"),
-      new Date("2027-01-01"),
-    ]);
+    expect(results).toEqual(["2026-12-25", "2026-12-28", "2027-01-01"]);
   });
 
   it("handles error responses", async () => {

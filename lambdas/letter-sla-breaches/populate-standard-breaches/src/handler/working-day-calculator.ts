@@ -1,9 +1,9 @@
-import { subDays } from "date-fns";
+import { format, subDays } from "date-fns";
 
 export default function subtractWorkingDays(
   today: Date,
   daysToSubtract: number,
-  bankHolidays: Date[],
+  bankHolidays: string[],
 ): Date {
   if (daysToSubtract === 0) {
     return today;
@@ -21,10 +21,10 @@ function* previousDays(today: Date) {
     yield day;
   }
 }
-function isWorkingDay(date: Date, bankHolidays: Date[]) {
+function isWorkingDay(date: Date, bankHolidays: string[]) {
   return (
     date.getDay() !== 0 &&
     date.getDay() !== 6 &&
-    !bankHolidays.some((holiday: Date) => date.getTime() === holiday.getTime())
+    !bankHolidays.includes(format(date, "yyyy-MM-dd"))
   );
 }

@@ -37,11 +37,11 @@ describe("working-days-calculator", () => {
     });
 
     it("takes bank holidays into effect", () => {
-      const result = subtractWorkingDays(atZoneEuropeLondon("2026-12-29"), 2, [
-        atZoneEuropeLondon("2026-12-25"),
-        atZoneEuropeLondon("2026-12-28"),
+      const result = subtractWorkingDays(atZoneEuropeLondon("2026-04-07"), 2, [
+        "2026-04-06",
+        "2026-04-03",
       ]);
-      expect(result.getTime()).toBe(atZoneEuropeLondon("2026-12-23").getTime());
+      expect(result.getTime()).toBe(atZoneEuropeLondon("2026-04-01").getTime());
     });
   });
 });

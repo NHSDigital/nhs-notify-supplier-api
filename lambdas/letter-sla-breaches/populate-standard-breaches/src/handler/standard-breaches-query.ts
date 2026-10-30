@@ -12,7 +12,7 @@ export default function buildStandardBreachesQuery(
   now: Date,
   slaWorkingDays: number,
   daysToLookBack: number,
-  bankHolidays: Date[],
+  bankHolidays: string[],
 ): AthenaQuery {
   const nowEuropeLondon = new TZDate(now, "Europe/London");
   const slaCutOff = subtractWorkingDays(
