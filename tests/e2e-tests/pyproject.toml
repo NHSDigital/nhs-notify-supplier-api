@@ -15,6 +15,7 @@ pytest-xdist = ">=3.6.1"
 notifications-python-client = ">=10.0.1"
 polling = ">=0.3.2"
 urllib3 = ">=2.8,<3"
+authlib = ">1.9.0"
 
 [build-system]
 requires = [
