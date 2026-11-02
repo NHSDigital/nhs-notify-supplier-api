@@ -174,24 +174,112 @@ describe("update-letter-queue Lambda", () => {
       expect(result.batchItemFailures).toEqual([{ itemIdentifier: "seq-0" }]);
     });
 
-    it("returns on the first failure", async () => {
+    it("waits for the batch and retries from the earliest failed record", async () => {
       const handler = createHandler(mockedDeps);
       const newLetter1 = generateLetter("PENDING", { id: "1" });
       const newLetter2 = generateLetter("PENDING", { id: "2" });
+      let rejectFirst: (error: Error) => void = jest.fn();
+      const firstWrite = new Promise<void>((_resolve, reject) => {
+        rejectFirst = reject;
+      });
       (mockedDeps.letterQueueRepository.putLetter as jest.Mock)
-        .mockRejectedValueOnce({})
-        .mockResolvedValueOnce({});
+        .mockImplementationOnce(() => firstWrite)
+        .mockRejectedValueOnce(new Error("second write failed"));
 
       const testData = generateKinesisEvent([
         generateInsertRecord(newLetter1),
         generateInsertRecord(newLetter2),
       ]);
-      const result = await handler(testData, mockDeep<Context>(), jest.fn());
+      const pendingResult = handler(testData, mockDeep<Context>(), jest.fn());
 
       expect(mockedDeps.letterQueueRepository.putLetter).toHaveBeenCalledTimes(
-        1,
+        2,
       );
+      rejectFirst(new Error("first write failed"));
+      const result = await pendingResult;
+
       expect(result.batchItemFailures).toEqual([{ itemIdentifier: "seq-0" }]);
+      expect(mockedDeps.logger.info).toHaveBeenCalledWith(
+        expect.objectContaining({
+          successCount: 0,
+          failureCount: 2,
+          totalCount: 2,
+        }),
+      );
+    });
+
+    it("serializes updates for the same letter without blocking other letters", async () => {
+      const handler = createHandler(mockedDeps);
+      let finishInsert: () => void = jest.fn();
+      const insert = new Promise<void>((resolve) => {
+        finishInsert = resolve;
+      });
+      (mockedDeps.letterQueueRepository.putLetter as jest.Mock)
+        .mockImplementationOnce(() => insert)
+        .mockResolvedValueOnce({});
+
+      const testData = generateKinesisEvent([
+        generateInsertRecord(generateLetter("PENDING", { id: "1" })),
+        generateModifyRecord(
+          generateLetter("PENDING", { id: "1" }),
+          generateLetter("ACCEPTED", { id: "1" }),
+        ),
+        generateInsertRecord(generateLetter("PENDING", { id: "2" })),
+      ]);
+      const pendingResult = handler(testData, mockDeep<Context>(), jest.fn());
+
+      expect(mockedDeps.letterQueueRepository.putLetter).toHaveBeenCalledTimes(
+        2,
+      );
+      expect(
+        mockedDeps.letterQueueRepository.deleteLetter,
+      ).not.toHaveBeenCalled();
+      finishInsert();
+      const result = await pendingResult;
+
+      expect(
+        mockedDeps.letterQueueRepository.deleteLetter,
+      ).toHaveBeenCalledWith("supplier1", "1");
+      expect(result.batchItemFailures).toEqual([]);
+      assertQueueDeltaMetricLogged("supplier1", 1);
+    });
+
+    it("skips later records for a letter whose earlier write failed", async () => {
+      const handler = createHandler(mockedDeps);
+      (
+        mockedDeps.letterQueueRepository.putLetter as jest.Mock
+      ).mockRejectedValue(new Error("DynamoDB error"));
+      const testData = generateKinesisEvent([
+        generateInsertRecord(generateLetter("PENDING", { id: "1" })),
+        generateModifyRecord(
+          generateLetter("PENDING", { id: "1" }),
+          generateLetter("ACCEPTED", { id: "1" }),
+        ),
+      ]);
+
+      const result = await handler(testData, mockDeep<Context>(), jest.fn());
+
+      expect(
+        mockedDeps.letterQueueRepository.deleteLetter,
+      ).not.toHaveBeenCalled();
+      expect(result.batchItemFailures).toEqual([{ itemIdentifier: "seq-0" }]);
+      expect(mockedDeps.logger.error).toHaveBeenCalledTimes(1);
+      expect(mockedDeps.logger.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          recordId: "seq-0",
+          supplierId: "supplier1",
+          letterId: "1",
+        }),
+      );
+      expect(mockedDeps.logger.info).toHaveBeenCalledWith(
+        expect.objectContaining({
+          successCount: 0,
+          failureCount: 1,
+          processedCount: 1,
+          totalCount: 2,
+        }),
+      );
+      assertQueueDeltaMetricNotLogged();
     });
 
     it("does not treat a replayed insert as a failure", async () => {
@@ -230,11 +318,19 @@ describe("update-letter-queue Lambda", () => {
       expect(result.batchItemFailures).toEqual([]);
     });
 
-    it("reports a partial batch failure when a Kinesis payload is invalid JSON", async () => {
+    it("defers every record after an invalid JSON payload to the retry", async () => {
       const handler = createHandler(mockedDeps);
       const invalidJsonPayload = "not valid json {{{";
       const testData = {
         Records: [
+          {
+            kinesis: {
+              sequenceNumber: "seq-122",
+              data: encodeRecord(
+                generateInsertRecord(generateLetter("PENDING", { id: "1" })),
+              ),
+            },
+          },
           {
             kinesis: {
               sequenceNumber: "seq-123",
@@ -245,9 +341,9 @@ describe("update-letter-queue Lambda", () => {
           {
             kinesis: {
               sequenceNumber: "seq-124",
-              data: Buffer.from(
-                JSON.stringify(generateInsertRecord(generateLetter("PENDING"))),
-              ).toString("base64"),
+              data: encodeRecord(
+                generateInsertRecord(generateLetter("PENDING", { id: "2" })),
+              ),
             },
           },
         ],
@@ -256,19 +352,26 @@ describe("update-letter-queue Lambda", () => {
       const result = await handler(testData, mockDeep<Context>(), jest.fn());
 
       expect(result.batchItemFailures).toEqual([{ itemIdentifier: "seq-123" }]);
-      expect(mockedDeps.letterQueueRepository.putLetter).not.toHaveBeenCalled();
+      expect(mockedDeps.letterQueueRepository.putLetter).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(mockedDeps.letterQueueRepository.putLetter).toHaveBeenCalledWith(
+        expect.objectContaining({ letterId: "1" }),
+      );
+      expect(mockedDeps.logger.error).toHaveBeenCalledTimes(1);
       expect(mockedDeps.logger.error).toHaveBeenCalledWith(
         expect.objectContaining({
           description: "Error extracting payload",
           eventId: "event-123",
+          recordId: "seq-123",
         }),
       );
       expect(mockedDeps.logger.info).toHaveBeenCalledWith(
         expect.objectContaining({
-          successCount: 0,
+          successCount: 1,
           failureCount: 1,
-          processedCount: 1,
-          totalCount: 2,
+          processedCount: 2,
+          totalCount: 3,
         }),
       );
     });
@@ -293,7 +396,6 @@ describe("update-letter-queue Lambda", () => {
       assertQueueDeltaMetricLogged("supplier1", 1);
     });
 
-    // eslint-disable-next-line jest/expect-expect
     it("breaks the metric down by supplier", async () => {
       const handler = createHandler(mockedDeps);
       const oldLetter1 = generateLetter("PENDING", { id: "1" });
@@ -313,6 +415,15 @@ describe("update-letter-queue Lambda", () => {
 
       assertQueueDeltaMetricLogged("supplier1", 0);
       assertQueueDeltaMetricLogged("supplier2", 1);
+      // supplier1's delete and insert cancel out in the metric but are still two writes.
+      expect(mockedDeps.logger.info).toHaveBeenCalledWith(
+        expect.objectContaining({
+          successCount: 3,
+          failureCount: 0,
+          processedCount: 3,
+          totalCount: 3,
+        }),
+      );
     });
 
     // eslint-disable-next-line jest/expect-expect
@@ -422,6 +533,10 @@ describe("update-letter-queue Lambda", () => {
     });
   });
 });
+
+function encodeRecord(record: DynamoDBRecord): string {
+  return Buffer.from(JSON.stringify(record)).toString("base64");
+}
 
 function generateKinesisEvent(letterEvents: object[]): KinesisStreamEvent {
   const records = letterEvents
