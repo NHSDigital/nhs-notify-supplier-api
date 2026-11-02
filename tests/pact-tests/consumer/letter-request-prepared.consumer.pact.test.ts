@@ -1,4 +1,4 @@
-/* eslint-disable security/detect-unsafe-regex, sonarjs/slow-regex */
+/* eslint-disable security/detect-unsafe-regex */
 import path from "node:path";
 import {
   MatchersV3,

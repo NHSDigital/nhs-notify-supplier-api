@@ -36,7 +36,6 @@ public static class DataApiExtensions
       return all;
     })
     .WithName("GetData")
-    .WithOpenApi()
     .WithTags(TagName);
 
     app.MapPost("/data", ([FromBody] DataRequestBody body, [FromServices] ConcurrentDictionary<string, DataRequestBody> data) =>
@@ -47,7 +46,6 @@ public static class DataApiExtensions
 
     })
     .WithName("PostData")
-    .WithOpenApi()
     .WithTags(TagName);
 
     app.MapGet("/data/{id}", (string id, [FromServices] ConcurrentDictionary<string, DataRequestBody> data) =>
@@ -55,7 +53,6 @@ public static class DataApiExtensions
       return data.GetValueOrDefault(id);
     })
     .WithName("GetDataId")
-    .WithOpenApi()
     .WithTags(TagName);
 
     app.MapPatch("/data/{id}", (string id, [FromBody] DataRequestBody body, [FromServices] ConcurrentDictionary<string, DataRequestBody> data) =>
@@ -65,9 +62,8 @@ public static class DataApiExtensions
       data.Remove(id, out _);
       data.TryAdd(id, d);
     })
-
     .WithName("PostDataId")
-    .WithOpenApi()
+    .WithName("PostDataId")
     .WithTags(TagName);
   }
 }

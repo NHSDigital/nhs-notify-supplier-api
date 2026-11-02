@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-published_version=$(npm view @nhsdigital/notify-supplier-api-consumer-contracts --json 2>/dev/null | jq -r '.["dist-tags"].latest')
+published_version=$(pnpm view @nhsdigital/notify-supplier-api-consumer-contracts --json 2>/dev/null | jq -r '.["dist-tags"].latest')
 
 set -euo pipefail
 
@@ -22,4 +22,4 @@ if [[ $local_version == $published_version ]]; then
 fi
 
 echo "Local version is different to the latest published version - publishing new version"
-npm publish ./pact-contracts
+pnpm publish ./pact-contracts --no-git-checks

@@ -74,11 +74,11 @@ export const apiSandboxGetLettersRequestTestData: ApiSandboxGetLettersRequestTes
       header: sandBoxHeader,
       expectedStatus: 400,
       expectedResponse: {
-        message: "request.query.limit should be number",
+        message: "request/query/limit must be number",
         errors: [
           {
-            path: ".query.limit",
-            message: "should be number",
+            path: "/query/limit",
+            message: "must be number",
             errorCode: "type.openapi.validation",
           },
         ],
@@ -91,11 +91,11 @@ export const apiSandboxGetLettersRequestTestData: ApiSandboxGetLettersRequestTes
       header: NoRequestIdHeaders,
       expectedStatus: 400,
       expectedResponse: {
-        message: "request.headers should have required property 'x-request-id'",
+        message: "request/headers must have required property 'x-request-id'",
         errors: [
           {
-            path: ".headers.x-request-id",
-            message: "should have required property 'x-request-id'",
+            path: "/headers/x-request-id",
+            message: "must have required property 'x-request-id'",
             errorCode: "required.openapi.validation",
           },
         ],

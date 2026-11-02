@@ -14,6 +14,7 @@ import { assertNotEmpty } from "../utils/validation";
 import { extractCommonIds } from "../utils/common-ids";
 import { mapToUpdateCommand } from "../mappers/letter-mapper";
 import type { Deps } from "../config/deps";
+import LogRefs from "../config/log-references";
 
 export default function createPatchLetterHandler(
   deps: Deps,
@@ -67,7 +68,8 @@ export default function createPatchLetterHandler(
         }
 
         deps.logger.info({
-          description: "Received patch letter request",
+          logRef: LogRefs.PATCH_LETTER_RECEIVED.code,
+          description: LogRefs.PATCH_LETTER_RECEIVED.description,
           supplierId: commonIds.value.supplierId,
           letterId,
           attributes: patchLetterRequest.data.attributes,

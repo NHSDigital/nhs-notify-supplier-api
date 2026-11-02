@@ -26,7 +26,7 @@ The Supplier API repository contains the following:
 - [src](/src) - Non lambda implementation
 - [tests](/tests) - Higher level component and E2E test suites
 
-The API dependencies are managed through [NPM Workspaces](https://docs.npmjs.com/cli/v7/using-npm/workspaces/)
+The API dependencies are managed through [pnpm workspaces](https://pnpm.io/workspaces)
 
 ## Setup
 
@@ -42,7 +42,7 @@ code .
 
 #### devcontainer
 
-You should use the devcontainer for this repository to satisy pre-requisites and configuration.
+You should use the devcontainer for this repository to satisfy pre-requisites and configuration.
 You can open this using devcontainer plugins or GitHub workspaces
 By default it will run the necessary `make config`, `postcreatecommand.sh`, and `poststartcommand.sh`
 

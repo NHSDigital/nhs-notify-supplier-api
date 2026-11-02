@@ -117,6 +117,7 @@ describe("Authorizer Lambda Function", () => {
 
       expect(metricScope).toHaveBeenCalledTimes(1);
       expect(mockedDeps.logger.warn).toHaveBeenCalledWith({
+        logRef: "004-CERTIFICATE-EXPIRY",
         description: "APIM Certificate expiry",
         days: 30,
       });
@@ -138,6 +139,25 @@ describe("Authorizer Lambda Function", () => {
       await new Promise(process.nextTick);
 
       expect(metricScope).not.toHaveBeenCalled();
+    });
+
+    it("Should log an error when the certificate expiry check fails", async () => {
+      mockEvent.requestContext.identity.clientCert = buildCertWithExpiry(
+        "2025-11-31T14:19:00Z",
+      );
+      const error = new Error("Metrics failure");
+      (metricScope as jest.Mock).mockImplementationOnce(() =>
+        jest.fn().mockRejectedValue(error),
+      );
+
+      const handler = createAuthorizerHandler(mockedDeps);
+      handler(mockEvent, mockContext, mockCallback);
+      await new Promise(process.nextTick);
+
+      expect(mockedDeps.logger.error).toHaveBeenCalledWith({
+        description: "Error checking certificate expiry",
+        err: error,
+      });
     });
   });
 

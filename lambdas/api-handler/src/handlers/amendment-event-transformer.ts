@@ -10,6 +10,7 @@ import {
   UpdateLetterCommandSchema,
 } from "../contracts/letters";
 import { Deps } from "../config/deps";
+import LogRefs from "../config/log-references";
 
 export default function createTransformAmendmentEventHandler(
   deps: Deps,
@@ -37,7 +38,8 @@ export default function createTransformAmendmentEventHandler(
           buildSnsCommand(letterEvent, deps.env.SNS_TOPIC_ARN),
         );
         deps.logger.info({
-          description: "Sent letter status update via topic",
+          logRef: LogRefs.LETTER_STATUS_UPDATE_SENT.code,
+          description: LogRefs.LETTER_STATUS_UPDATE_SENT.description,
           letterId: updateLetterCommand.id,
           messageId: message.messageId,
           correlationId: message.messageAttributes.CorrelationId.stringValue,
@@ -49,7 +51,8 @@ export default function createTransformAmendmentEventHandler(
         );
       } catch (error) {
         deps.logger.error({
-          description: "Error processing letter status update",
+          logRef: LogRefs.LETTER_STATUS_UPDATE_ERROR.code,
+          description: LogRefs.LETTER_STATUS_UPDATE_ERROR.description,
           err: error,
           messageId: message.messageId,
           correlationId: message.messageAttributes.CorrelationId.stringValue,
@@ -90,7 +93,7 @@ function emitSuccessMetrics(
     unit: Unit.Count,
   };
   const emf = buildEMFObject("amendment-event-transformer", dimensions, metric);
-  logger.info(emf);
+  logger.info({ ...emf, logRef: LogRefs.METRIC.code });
 }
 
 function emitFailedItems(
@@ -111,6 +114,6 @@ function emitFailedItems(
       dimensions,
       metric,
     );
-    logger.info(emf);
+    logger.info({ ...emf, logRef: LogRefs.ERR_METRIC.code });
   }
 }

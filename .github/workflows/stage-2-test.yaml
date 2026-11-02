@@ -49,26 +49,13 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Setup NodeJS
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: ${{ inputs.nodejs_version }}
-          registry-url: "https://npm.pkg.github.com"
-      - name: "Cache node_modules"
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: |
-            **/node_modules
-          key: ${{ runner.os }}-node-${{ inputs.nodejs_version }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
       - name: "Repo setup"
         uses: ./.github/actions/node-install
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Generate dependencies"
         run: |
-          npm run generate-dependencies --workspaces --if-present
+          pnpm run generate-dependencies
           git diff --exit-code
   test-unit:
     name: "Unit tests"
@@ -79,26 +66,13 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Setup NodeJS
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: ${{ inputs.nodejs_version }}
-          registry-url: "https://npm.pkg.github.com"
-      - name: "Cache node_modules"
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: |
-            **/node_modules
-          key: ${{ runner.os }}-node-${{ inputs.nodejs_version }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
       - name: "Repo setup"
         uses: ./.github/actions/node-install
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Generate dependencies"
         run: |
-          npm run generate-dependencies --workspaces --if-present
+          pnpm run generate-dependencies
       - name: "Run unit test suite"
         run: |
           make test-unit
@@ -126,22 +100,14 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: "Cache node_modules"
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: |
-            **/node_modules
-          key: ${{ runner.os }}-node-${{ inputs.nodejs_version }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
       - name: "Repo setup"
         uses: ./.github/actions/node-install
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Generate dependencies"
-        run: npm run generate-dependencies --workspaces --if-present
+        run: pnpm run generate-dependencies
       - name: "Run PACT tests"
-        run: npm run test:pact --workspace tests
+        run: pnpm --filter nhs-notify-supplier-api-tests run test:pact
       - name: Publish Pact Contracts
         run: ./scripts/publish-pact-contracts.sh
   test-lint:
@@ -153,26 +119,13 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Setup NodeJS
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: ${{ inputs.nodejs_version }}
-          registry-url: "https://npm.pkg.github.com"
-      - name: "Cache node_modules"
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: |
-            **/node_modules
-          key: ${{ runner.os }}-node-${{ inputs.nodejs_version }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
       - name: "Repo setup"
         uses: ./.github/actions/node-install
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Generate dependencies"
         run: |
-          npm run generate-dependencies --workspaces --if-present
+          pnpm run generate-dependencies
       - name: "Run linting"
         run: |
           make test-lint
@@ -185,26 +138,13 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Setup NodeJS
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: ${{ inputs.nodejs_version }}
-          registry-url: "https://npm.pkg.github.com"
-      - name: "Cache node_modules"
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: |
-            **/node_modules
-          key: ${{ runner.os }}-node-${{ inputs.nodejs_version }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-${{ inputs.nodejs_version }}-
       - name: "Repo setup"
         uses: ./.github/actions/node-install
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Generate dependencies"
         run: |
-          npm run generate-dependencies --workspaces --if-present
+          pnpm run generate-dependencies
       - name: "Run typecheck"
         run: |
           make test-typecheck

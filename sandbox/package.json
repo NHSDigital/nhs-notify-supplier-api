@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "body-parser": "^2.3.0",
+    "body-parser": "^2.4.0",
     "camelcase": "^9.0.0",
     "cookie-parser": "^1.4.4",
     "cors": "^2.8.5",
@@ -22,11 +22,6 @@
     "eslint-plugin-import": "^2.17.2",
     "mocha": "^12.0.2"
   },
-  "overrides": {
-    "eslint-config-airbnb-base": {
-        "eslint": "^9.27.0"
-    }
-  },
   "eslintConfig": {
     "env": {
       "node": true
@@ -39,6 +34,11 @@
   "license": "Unlicense",
   "main": "index.js",
   "name": "nhs-notify-supplier-api",
+  "overrides": {
+    "eslint-config-airbnb-base": {
+      "eslint": "$eslint"
+    }
+  },
   "private": true,
   "scripts": {
     "prestart": "npm install",

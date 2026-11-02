@@ -9,7 +9,7 @@ Log in the desired AWS account and then run the command below. You may need to s
 Note that the AWS account ID is required in order to resolve the bucket name.
 
 ```bash
-npm run cli -- put-supplier \
+pnpm run cli put-supplier \
   --id supplier-id \
   --name supplier \
   --apimId supplier-apim-id \
@@ -18,13 +18,13 @@ npm run cli -- put-supplier \
 ```
 
 ```bash
-npm run cli -- get-supplier-by-id \
+pnpm run cli get-supplier-by-id \
   --id supplier-id \
   --environment main \
 ```
 
 ```bash
-npm run cli -- get-supplier-by-apim-id \
+pnpm run cli get-supplier-by-apim-id \
   --apimId apim-supplier-id
   --environment main \
 ```

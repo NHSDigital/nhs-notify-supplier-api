@@ -107,7 +107,7 @@ test.describe("Letter Queue Tests", () => {
     await pollUpsertLetterLogForWarning("Letter already exists", letterId);
   });
 
-  test("Verify if VisibilityTimeStamp is updated when Get /letters endpoint is called and subsequent calls returns no data until VisibilityTimeStamp is reached", async ({
+  test("Verify if TimeStamps are updated when Get /letters endpoint is called and subsequent calls returns no data until VisibilityTimeStamp is reached", async ({
     request,
   }) => {
     const letterId = randomUUID();
@@ -125,6 +125,7 @@ test.describe("Letter Queue Tests", () => {
     expect(letters).toHaveLength(1);
     const letter = letters[0];
     expect(letter.visibilityTimestamp).toBe(letter.queueTimestamp);
+    expect(letter.lastReadTimestamp).toBeUndefined();
     logger.info(
       "Visibility timestamp is same as queue timestamp before calling Get /letters endpoint",
     );
@@ -155,10 +156,23 @@ test.describe("Letter Queue Tests", () => {
       lettersAfterGet[0].visibilityTimestamp,
     ).getTime();
 
+    if (lettersAfterGet[0].lastReadTimestamp === undefined) {
+      throw new Error(
+        "Expected lastReadTimestamp to be set after Get /letters",
+      );
+    }
+    const lastReadTimestampAfterGet = new Date(
+      lettersAfterGet[0].lastReadTimestamp,
+    ).getTime();
+
     // Verify visibility was pushed forward by at least the configured timeout
     expect(
       visibilityTimestampAfterGet - visibilityTimestampBeforeGet,
     ).toBeGreaterThanOrEqual(VISIBILITY_TIMEOUT_SECONDS * 1000);
+    // Verify that lastReadTimestamp is set correctly
+    expect(lastReadTimestampAfterGet).toEqual(
+      visibilityTimestampAfterGet - VISIBILITY_TIMEOUT_SECONDS * 1000,
+    );
 
     const { responseBody: secondResponseBody, statusCode: secondStatusCode } =
       await getLettersWithRetry(request, baseUrl, headers, {
