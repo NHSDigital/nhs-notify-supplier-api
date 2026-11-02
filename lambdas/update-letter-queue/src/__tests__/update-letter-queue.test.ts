@@ -16,6 +16,7 @@ import { Unit } from "aws-embedded-metrics";
 import { Deps } from "../deps";
 import createHandler from "../update-letter-queue";
 import { EnvVars } from "../env";
+import LogRefs from "../log-references";
 import { LetterStatus } from "../../../api-handler/src/contracts/letters";
 
 const mockedDeps: jest.Mocked<Deps> = {
@@ -297,6 +298,13 @@ describe("update-letter-queue Lambda", () => {
       const result = await handler(testData, mockDeep<Context>(), jest.fn());
 
       expect(result.batchItemFailures).toEqual([]);
+      expect(mockedDeps.logger.info).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logRef: LogRefs.LETTER_ALREADY_EXISTS.code,
+          supplierId: "supplier1",
+          letterId: "1",
+        }),
+      );
     });
 
     it("does not treat a replayed delete as a failure", async () => {
@@ -316,6 +324,13 @@ describe("update-letter-queue Lambda", () => {
       const result = await handler(testData, mockDeep<Context>(), jest.fn());
 
       expect(result.batchItemFailures).toEqual([]);
+      expect(mockedDeps.logger.info).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logRef: LogRefs.LETTER_DOES_NOT_EXIST.code,
+          supplierId: "supplier1",
+          letterId: "1",
+        }),
+      );
     });
 
     it("defers every record after an invalid JSON payload to the retry", async () => {

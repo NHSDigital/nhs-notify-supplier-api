@@ -175,7 +175,7 @@ async function addPendingLetterToQueue(
     return 1;
   } catch (error) {
     if (error instanceof LetterAlreadyExistsError) {
-      deps.logger.warn({
+      deps.logger.info({
         logRef: LogRefs.LETTER_ALREADY_EXISTS.code,
         description: LogRefs.LETTER_ALREADY_EXISTS.description,
         supplierId: pendingLetter.supplierId,
@@ -202,7 +202,7 @@ async function deletePendingLetterFromQueue(
     return 1;
   } catch (error) {
     if (error instanceof LetterNotFoundError) {
-      deps.logger.warn({
+      deps.logger.info({
         logRef: LogRefs.LETTER_DOES_NOT_EXIST.code,
         description: LogRefs.LETTER_DOES_NOT_EXIST.description,
         supplierId: letter.supplierId,
