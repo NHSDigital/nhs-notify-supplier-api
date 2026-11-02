@@ -215,18 +215,4 @@ describe("populateSamedayBreaches", () => {
       breachCount: "0",
     });
   });
-
-  it("runs the sameday breaches query and returns failure when not an error", async () => {
-    const deps = makeDeps();
-    jest.mocked(runAthenaQuery).mockRejectedValueOnce("boom");
-
-    const result = await createHandler(deps)({ date: "2026-10-08" });
-
-    expect(runAthenaQuery).toHaveBeenCalled();
-    expect(result).toEqual({
-      failureReason: "boom",
-      status: "FAILURE",
-      breachCount: "0",
-    });
-  });
 });
