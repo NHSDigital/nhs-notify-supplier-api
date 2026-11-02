@@ -90,6 +90,7 @@ No requirements.
 | <a name="module_populate_sameday_breaches"></a> [populate\_sameday\_breaches](#module\_populate\_sameday\_breaches) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
 | <a name="module_populate_standard_breaches"></a> [populate\_standard\_breaches](#module\_populate\_standard\_breaches) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
 | <a name="module_populate_supplier_config_cache"></a> [populate\_supplier\_config\_cache](#module\_populate\_supplier\_config\_cache) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
+| <a name="module_populate_unallocated_breaches"></a> [populate\_unallocated\_breaches](#module\_populate\_unallocated\_breaches) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
 | <a name="module_post_letters"></a> [post\_letters](#module\_post\_letters) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
 | <a name="module_post_mi"></a> [post\_mi](#module\_post\_mi) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.5/terraform-lambda.zip | n/a |
 | <a name="module_s3bucket_reporting"></a> [s3bucket\_reporting](#module\_s3bucket\_reporting) | https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.0.6/terraform-s3bucket.zip | n/a |
