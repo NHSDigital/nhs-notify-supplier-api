@@ -258,7 +258,7 @@ variable "supplier_mock_schedule_expression" {
 
 variable "enable_letter_sla_breaches_scheduler" {
   type        = bool
-  description = "Enable the hourly EventBridge Scheduler trigger for the letter SLA breaches state machine"
+  description = "Enable the daily 07:00 Europe/London EventBridge Scheduler trigger for the letter SLA breaches state machine"
   default     = false
 }
 
