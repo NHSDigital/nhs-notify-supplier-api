@@ -215,4 +215,17 @@ describe("populateSamedayBreaches", () => {
       breachCount: "0",
     });
   });
+
+  it("converts a non-Error query failure to a string", async () => {
+    const deps = makeDeps();
+    jest.mocked(runAthenaQuery).mockRejectedValueOnce("query failed");
+
+    const result = await createHandler(deps)({ date: "2026-10-08" });
+
+    expect(result).toEqual({
+      failureReason: "query failed",
+      status: "FAILURE",
+      breachCount: "0",
+    });
+  });
 });
