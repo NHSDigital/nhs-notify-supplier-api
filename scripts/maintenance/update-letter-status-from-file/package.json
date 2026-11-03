@@ -1,0 +1,18 @@
+{
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "catalog:aws",
+    "@aws-sdk/client-sts": "catalog:aws",
+    "@aws-sdk/lib-dynamodb": "catalog:aws",
+    "@internal/datastore": "workspace:*",
+    "pino": "catalog:app"
+  },
+  "name": "nhs-notify-supplier-api-update-letter-status-from-file",
+  "private": true,
+  "scripts": {
+    "cli": "tsx ./src/index.ts",
+    "lint": "eslint .",
+    "test:unit": "echo \"Update letter status from file script has no unit tests\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "version": "0.0.1"
+}
