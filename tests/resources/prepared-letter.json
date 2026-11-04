@@ -1,10 +1,10 @@
 {
   "data": {
-    "campaignId": "campaign_456",
-    "clientId": "testClientId",
+    "campaignId": "campaign1",
+    "clientId": "client1",
     "createdAt": "2025-08-28T08:45:00.000Z",
     "domainId": "letter1",
-    "letterVariantId": "notify-standard",
+    "letterVariantId": "client1-campaign1",
     "pageCount": 2,
     "requestId": "0o5Fs0EELR0fUjHjbCnEtdUwQe3",
     "requestItemId": "0o5Fs0EELR0fUjHjbCnEtdUwQe4",
@@ -23,7 +23,7 @@
   "recordedtime": "2025-08-28T08:45:00.000Z",
   "severitynumber": 2,
   "severitytext": "INFO",
-  "source": "/data-plane/letter-rendering/prod/render-pdf",
+  "source": "/data-plane/letter-rendering/test",
   "specversion": "1.0",
   "subject": "client/00f3b388-bbe9-41c9-9e76-052d37ee8988/letter-request/0o5Fs0EELR0fUjHjbCnEtdUwQe4_0o5Fs0EELR0fUjHjbCnEtdUwQe5",
   "time": "2025-08-28T08:45:00.000Z",
