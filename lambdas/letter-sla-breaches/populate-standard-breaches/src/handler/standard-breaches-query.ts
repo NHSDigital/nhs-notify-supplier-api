@@ -22,15 +22,15 @@ export default function buildStandardBreachesQuery(
     SELECT from_iso8601_timestamp(?) AS sla_cutoff
 ),
 recent_letter_events AS (
-    SELECT domainid, supplierid, specificationid, status, from_iso8601_timestamp(time) AS event_time
+    SELECT domainid, supplierid, specificationid, status, campaignid, clientid, from_iso8601_timestamp(time) AS event_time
     FROM ${eventsTableName}
     WHERE ${buildAthenaDatePredicate(now, daysToLookBack)}
 ),
 allocated_letters AS (
-    SELECT domainid, supplierid, specificationid
+    SELECT domainid, supplierid, specificationid, campaignid, clientid
     FROM recent_letter_events
     WHERE status = 'PENDING'
-    GROUP BY domainid, supplierid, specificationid
+    GROUP BY domainid, supplierid, specificationid, campaignid, clientid
     HAVING min(event_time) < (select sla_cutoff from parameters)
 ),
 completed_letters AS (
@@ -39,17 +39,14 @@ completed_letters AS (
     WHERE status in ('REJECTED', 'FAILED', 'CANCELLED', 'FORWARDED', 'DISPATCHED', 'RETURNED', 'DELIVERED')
     GROUP BY domainid, supplierid
 )
-SELECT supplierid, count(*) AS breach_count
-FROM (
-  SELECT domainid, supplierid
-  FROM allocated_letters
-  WHERE domainid NOT IN (SELECT domainid FROM completed_letters)
-  AND cardinality(array_intersect(
-    (SELECT COALESCE(assembly.features, ARRAY[]) FROM ${packSpecificationTableName} spec WHERE spec.id = specificationid),
-    ARRAY['SAME_DAY', 'BRAILLE', 'AUDIO']
-  )) = 0
-)
-GROUP BY supplierid`,
+SELECT supplierid, campaignid, clientid, count(*) AS breach_count
+FROM allocated_letters
+WHERE domainid NOT IN (SELECT domainid FROM completed_letters)
+AND cardinality(array_intersect(
+  (SELECT COALESCE(assembly.features, ARRAY[]) FROM ${packSpecificationTableName} spec WHERE spec.id = specificationid),
+  ARRAY['SAME_DAY', 'BRAILLE', 'AUDIO']
+)) = 0
+GROUP BY supplierid, campaignid, clientid`,
     executionParameters: [`'${slaCutOff.toISOString()}'`],
   };
 }

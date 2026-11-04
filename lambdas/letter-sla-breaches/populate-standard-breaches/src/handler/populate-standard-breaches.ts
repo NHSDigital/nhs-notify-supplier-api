@@ -40,7 +40,11 @@ export default function createHandler(deps: Deps) {
     for (const row of rows) {
       const emfObject = buildEMFObject(
         "",
-        { SupplierId: row.supplierid! },
+        {
+          SupplierId: row.supplierid || "unknown",
+          ClientId: row.clientid || "unknown",
+          CampaignId: row.campaignid || "unknown",
+        },
         {
           key: "StandardBreachCount",
           value: Number(row.breach_count!),

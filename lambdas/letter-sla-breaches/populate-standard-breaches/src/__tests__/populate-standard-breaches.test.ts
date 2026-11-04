@@ -43,11 +43,33 @@ describe("populateStandardBreaches", () => {
     );
   });
 
-  it("runs the standard breaches query and logs total and per-supplier metrics", async () => {
+  it("runs the standard breaches query and logs metrics", async () => {
     const deps = makeDeps();
     jest.mocked(runAthenaQuery).mockResolvedValue([
-      { supplierid: "supplier1", breach_count: "10" },
-      { supplierid: "supplier2", breach_count: "5" },
+      {
+        supplierid: "supplier1",
+        clientid: "client1",
+        campaignid: "campaign1",
+        breach_count: "10",
+      },
+      {
+        supplierid: "supplier2",
+        clientid: "client1",
+        campaignid: "campaign1",
+        breach_count: "5",
+      },
+      {
+        supplierid: "supplier1",
+        clientid: "client2",
+        campaignid: "campaign1",
+        breach_count: "9",
+      },
+      {
+        supplierid: "supplier2",
+        clientid: "client1",
+        campaignid: "campaign2",
+        breach_count: "6",
+      },
     ]);
     process.env.AWS_LAMBDA_FUNCTION_NAME = "populate-standard-breaches";
 
@@ -70,7 +92,7 @@ describe("populateStandardBreaches", () => {
             },
           ],
         }),
-        StandardBreachTotal: 15,
+        StandardBreachTotal: 30,
       }),
     );
 
@@ -78,11 +100,13 @@ describe("populateStandardBreaches", () => {
       2,
       expect.objectContaining({
         SupplierId: "supplier1",
+        ClientId: "client1",
+        CampaignId: "campaign1",
         _aws: expect.objectContaining({
           CloudWatchMetrics: [
             {
               Namespace: "populate-standard-breaches",
-              Dimensions: [["SupplierId"]],
+              Dimensions: [["SupplierId", "ClientId", "CampaignId"]],
               Metrics: [
                 expect.objectContaining({
                   Name: "StandardBreachCount",
@@ -99,11 +123,13 @@ describe("populateStandardBreaches", () => {
       3,
       expect.objectContaining({
         SupplierId: "supplier2",
+        ClientId: "client1",
+        CampaignId: "campaign1",
         _aws: expect.objectContaining({
           CloudWatchMetrics: [
             {
               Namespace: "populate-standard-breaches",
-              Dimensions: [["SupplierId"]],
+              Dimensions: [["SupplierId", "ClientId", "CampaignId"]],
               Metrics: [
                 expect.objectContaining({
                   Name: "StandardBreachCount",
@@ -114,6 +140,52 @@ describe("populateStandardBreaches", () => {
           ],
         }),
         StandardBreachCount: 5,
+      }),
+    );
+    expect(deps.logger.info as jest.Mock).toHaveBeenNthCalledWith(
+      4,
+      expect.objectContaining({
+        SupplierId: "supplier1",
+        ClientId: "client2",
+        CampaignId: "campaign1",
+        _aws: expect.objectContaining({
+          CloudWatchMetrics: [
+            {
+              Namespace: "populate-standard-breaches",
+              Dimensions: [["SupplierId", "ClientId", "CampaignId"]],
+              Metrics: [
+                expect.objectContaining({
+                  Name: "StandardBreachCount",
+                  Unit: Unit.Count,
+                }),
+              ],
+            },
+          ],
+        }),
+        StandardBreachCount: 9,
+      }),
+    );
+    expect(deps.logger.info as jest.Mock).toHaveBeenNthCalledWith(
+      5,
+      expect.objectContaining({
+        SupplierId: "supplier2",
+        ClientId: "client1",
+        CampaignId: "campaign2",
+        _aws: expect.objectContaining({
+          CloudWatchMetrics: [
+            {
+              Namespace: "populate-standard-breaches",
+              Dimensions: [["SupplierId", "ClientId", "CampaignId"]],
+              Metrics: [
+                expect.objectContaining({
+                  Name: "StandardBreachCount",
+                  Unit: Unit.Count,
+                }),
+              ],
+            },
+          ],
+        }),
+        StandardBreachCount: 6,
       }),
     );
   });

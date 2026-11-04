@@ -13,17 +13,31 @@ type LetterEvent = {
   status: string;
   supplierid: string;
   time: string;
+  campaignid?: string;
+  clientid?: string;
 };
 
 const EVENT_TABLE_NAME = "event_cache";
 const PACK_SPECIFICATION_TABLE_NAME = "pack_specification";
+const DEFAULT_CAMPAIGN_ID = "campaign-a";
+const DEFAULT_CLIENT_ID = "client-a";
 
 async function insertEvents(context: TrinoContext, events: LetterEvent[]) {
   const values = events
-    .map(({ domainid, specificationid, status, supplierid, time }) => {
-      const [year, month, day] = time.slice(0, 10).split("-");
-      return `('${domainid}', '${specificationid}', '${status}', '${supplierid}', '${time}', '${year}', '${month}', '${day}')`;
-    })
+    .map(
+      ({
+        campaignid = DEFAULT_CAMPAIGN_ID,
+        clientid = DEFAULT_CLIENT_ID,
+        domainid,
+        specificationid,
+        status,
+        supplierid,
+        time,
+      }) => {
+        const [year, month, day] = time.slice(0, 10).split("-");
+        return `('${domainid}', '${specificationid}', '${status}', '${supplierid}', '${time}', '${campaignid}', '${clientid}', '${year}', '${month}', '${day}')`;
+      },
+    )
     .join(",\n");
 
   await runTrinoStatement(
@@ -62,9 +76,12 @@ function atZoneEuropeLondon(dateTime: string) {
   );
 }
 
-function sortBySupplier(rows: Record<string, string | undefined>[]) {
-  return rows.toSorted((a, b) =>
-    (a.supplierid ?? "").localeCompare(b.supplierid ?? ""),
+function sort(rows: Record<string, string | undefined>[]) {
+  return rows.toSorted(
+    (a, b) =>
+      (a.supplierid ?? "").localeCompare(b.supplierid ?? "") ||
+      (a.campaignid ?? "").localeCompare(b.campaignid ?? "") ||
+      (a.clientid ?? "").localeCompare(b.clientid ?? ""),
   );
 }
 
@@ -107,6 +124,8 @@ describe("buildStandardBreachesQuery", () => {
         status VARCHAR,
         supplierid VARCHAR,
         time VARCHAR,
+        campaignid VARCHAR,
+        clientid VARCHAR,
         __year VARCHAR,
         __month VARCHAR,
         __day VARCHAR
@@ -171,6 +190,8 @@ describe("buildStandardBreachesQuery", () => {
         specificationid: "standard",
         status: "PENDING",
         time: "2026-10-12T11:00:00.000Z",
+        campaignid: "campaign-b",
+        clientid: "client-b",
       },
       {
         domainid: "letter-5",
@@ -178,6 +199,8 @@ describe("buildStandardBreachesQuery", () => {
         specificationid: "standard",
         status: "PENDING",
         time: "2026-10-13T11:00:00.000Z",
+        campaignid: "campaign-b",
+        clientid: "client-b",
       },
       // Not a breach: each terminal status completes the letter
       ...[
@@ -224,9 +247,25 @@ describe("buildStandardBreachesQuery", () => {
       ),
     );
 
-    expect(sortBySupplier(rows)).toEqual([
-      { supplierid: "supplier-a", breach_count: "1" },
-      { supplierid: "supplier-b", breach_count: "2" },
+    expect(sort(rows)).toEqual([
+      {
+        supplierid: "supplier-a",
+        campaignid: DEFAULT_CAMPAIGN_ID,
+        clientid: DEFAULT_CLIENT_ID,
+        breach_count: "1",
+      },
+      {
+        supplierid: "supplier-b",
+        campaignid: DEFAULT_CAMPAIGN_ID,
+        clientid: DEFAULT_CLIENT_ID,
+        breach_count: "1",
+      },
+      {
+        supplierid: "supplier-b",
+        campaignid: "campaign-b",
+        clientid: "client-b",
+        breach_count: "1",
+      },
     ]);
   });
 
@@ -318,25 +357,60 @@ describe("buildStandardBreachesQuery", () => {
     );
     expect(rowsBefore2400OnFriday).toHaveLength(0);
     expect(rowsAfter2400OnFriday).toEqual([
-      { supplierid: "supplier-a", breach_count: "1" },
+      {
+        supplierid: "supplier-a",
+        campaignid: DEFAULT_CAMPAIGN_ID,
+        clientid: DEFAULT_CLIENT_ID,
+        breach_count: "1",
+      },
     ]);
     expect(rowsAfter2400OnSaturday).toEqual([
-      { supplierid: "supplier-a", breach_count: "1" },
+      {
+        supplierid: "supplier-a",
+        campaignid: DEFAULT_CAMPAIGN_ID,
+        clientid: DEFAULT_CLIENT_ID,
+        breach_count: "1",
+      },
     ]);
     expect(rowsAfter2400OnSunday).toEqual([
-      { supplierid: "supplier-a", breach_count: "1" },
+      {
+        supplierid: "supplier-a",
+        campaignid: DEFAULT_CAMPAIGN_ID,
+        clientid: DEFAULT_CLIENT_ID,
+        breach_count: "1",
+      },
     ]);
     expect(rowsBefore2400OnMonday).toEqual([
-      { supplierid: "supplier-a", breach_count: "1" },
+      {
+        supplierid: "supplier-a",
+        campaignid: DEFAULT_CAMPAIGN_ID,
+        clientid: DEFAULT_CLIENT_ID,
+        breach_count: "1",
+      },
     ]);
     expect(rowsAfter2400OnMonday).toEqual([
-      { supplierid: "supplier-a", breach_count: "2" },
+      {
+        supplierid: "supplier-a",
+        campaignid: DEFAULT_CAMPAIGN_ID,
+        clientid: DEFAULT_CLIENT_ID,
+        breach_count: "2",
+      },
     ]);
     expect(rowsBefore2400OnTuesday).toEqual([
-      { supplierid: "supplier-a", breach_count: "2" },
+      {
+        supplierid: "supplier-a",
+        campaignid: DEFAULT_CAMPAIGN_ID,
+        clientid: DEFAULT_CLIENT_ID,
+        breach_count: "2",
+      },
     ]);
     expect(rowsAfter2400OnTuesday).toEqual([
-      { supplierid: "supplier-a", breach_count: "5" },
+      {
+        supplierid: "supplier-a",
+        campaignid: DEFAULT_CAMPAIGN_ID,
+        clientid: DEFAULT_CLIENT_ID,
+        breach_count: "5",
+      },
     ]);
   });
 
@@ -405,6 +479,13 @@ describe("buildStandardBreachesQuery", () => {
       ),
     );
 
-    expect(rows).toEqual([{ supplierid: "supplier-a", breach_count: "1" }]);
+    expect(rows).toEqual([
+      {
+        supplierid: "supplier-a",
+        campaignid: DEFAULT_CAMPAIGN_ID,
+        clientid: DEFAULT_CLIENT_ID,
+        breach_count: "1",
+      },
+    ]);
   });
 });
