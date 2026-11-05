@@ -1,4 +1,3 @@
-<!-- vale off -->
 # NHS Notify Supplier API
 
 [![1. CI/CD pull request](https://github.com/NHSDigital/nhs-notify-supplier-api/actions/workflows/cicd-1-pull-request.yaml/badge.svg)](https://github.com/NHSDigital/nhs-notify-supplier-api/actions/workflows/cicd-1-pull-request.yaml)
@@ -104,7 +103,6 @@ New developers of the NHS Notify Supplier API should understand the below.
     # Authenticate to GitHub Packages for github.com
     //npm.pkg.github.com/:_authToken=<Insert your Github PAT (Personal Access Token)>
 
-
     # Package is scoped under @org, set registry for that scope
     @nhsdigital:registry=https://npm.pkg.github.com
    ```
@@ -196,5 +194,3 @@ Import the files into postman
 Select a target environment in postman
 Run the collection
 The collections must be kept in sync manually
-
-<!-- vale on -->

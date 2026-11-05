@@ -1,5 +1,3 @@
-<!-- vale off -->
-
 # Upsert Letter Lambda
 
 ## Purpose
@@ -28,5 +26,3 @@ Consumes allocation and status-change messages from SQS and persists them to the
 - **Update deduplication** uses a separate mechanism: `LetterRepository.updateLetterStatus` includes a DynamoDB condition expression checking `eventId` to skip already-processed updates (returns `undefined` rather than throwing).
 - Idempotency keys on event `id` mean SQS retries for the same event are safe for both insert and update paths.
 - The `billingRef` field in the letter record is set to `allocationDetails.supplierSpec.specId` (the pack specification ID), while `specificationBillingId` is set to `allocationDetails.supplierSpec.billingId`.
-
-<!-- vale on -->

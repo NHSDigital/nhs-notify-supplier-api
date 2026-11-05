@@ -1,5 +1,3 @@
-<!-- vale off -->
-
 # Authorizer Lambda
 
 ## Purpose
@@ -28,5 +26,3 @@ API Gateway "REQUEST authorizer" that maps an APIM application identity to an in
 - Disabled suppliers are explicitly denied even if the APIM ID lookup succeeds.
 - Certificate expiry checking is fire-and-forget; it does not affect the Allow/Deny decision.
 - The `principalId` in the Allow policy is the **internal supplier ID** (not the APIM application supplier ID), so all downstream Lambdas receive the resolved identity via `event.requestContext.authorizer.principalId`.
-
-<!-- vale on -->
