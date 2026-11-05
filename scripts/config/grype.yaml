@@ -4,7 +4,6 @@ AWSTemplateFormatVersion: "2010-09-09"
 
 ignore:
   - vulnerability: GHSA-vfj7-8cjw-p6xm # TODO: CCM-24511 Braces 3.0.3 contains a AI assessed CVE the provider says doesnt exist
-
 #   # This is the full set of supported rule fields:
 #   - vulnerability: CVE-2008-4318
 #     fix-state: unknown

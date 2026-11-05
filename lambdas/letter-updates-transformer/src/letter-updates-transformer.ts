@@ -7,6 +7,7 @@ import {
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import {
   PublishBatchCommand,
+  PublishBatchCommandOutput,
   PublishBatchRequestEntry,
 } from "@aws-sdk/client-sns";
 import { LetterStatusChangeEvent } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src";
@@ -23,37 +24,20 @@ const BATCH_SIZE = 10;
 
 export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
   return async (streamEvent: KinesisStreamEvent) => {
-    deps.logger.info({
-      logRef: LogRefs.RECEIVED_EVENT.code,
-      description: LogRefs.RECEIVED_EVENT.description,
-      streamEvent,
-    });
-    deps.logger.info({
-      logRef: LogRefs.NUMBER_OF_RECORDS.code,
-      description: LogRefs.NUMBER_OF_RECORDS.description,
-      count: streamEvent.Records?.length || 0,
-    });
-
     // Ensure logging by extracting all records first
     const ddbRecords: DynamoDBRecord[] = streamEvent.Records.map((record) =>
       extractPayload(record, deps),
     );
 
     const cloudEvents: LetterStatusChangeEvent[] = ddbRecords
-      .filter((record) => filterRecord(record, deps))
+      .filter((record) => filterRecord(record))
       .map((element) => extractNewLetter(element))
       .map((element) => mapLetterToCloudEvent(element, deps.env.EVENT_SOURCE));
 
     const eventTypeCount: Map<string, number> =
       populateEventTypeMap(cloudEvents);
     for (const batch of generateBatches(cloudEvents)) {
-      deps.logger.info({
-        logRef: LogRefs.PUBLISHING_BATCH.code,
-        description: LogRefs.PUBLISHING_BATCH.description,
-        size: batch.length,
-        letterEvents: batch,
-      });
-      await deps.snsClient.send(
+      const response: PublishBatchCommandOutput = await deps.snsClient.send(
         new PublishBatchCommand({
           TopicArn: deps.env.EVENTPUB_SNS_TOPIC_ARN,
           PublishBatchRequestEntries: batch.map((element, index) =>
@@ -61,8 +45,26 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
           ),
         }),
       );
+
+      // PublishBatch returns 200 with a Failed list, so throw to make Kinesis retry
+      const failed = response.Failed ?? [];
+      if (failed.length > 0) {
+        deps.logger.error({
+          logRef: LogRefs.ERROR_PUBLISHING_BATCH.code,
+          description: LogRefs.ERROR_PUBLISHING_BATCH.description,
+          failedCount: failed.length,
+          failed,
+        });
+        throw new Error(`SNS PublishBatch failed for ${failed.length} entries`);
+      }
     }
     emitMetrics(deps.logger, eventTypeCount);
+    deps.logger.info({
+      logRef: LogRefs.NUMBER_OF_RECORDS.code,
+      description: LogRefs.NUMBER_OF_RECORDS.description,
+      total: streamEvent.Records?.length || 0,
+      passed: cloudEvents.length,
+    });
   };
 }
 
@@ -88,7 +90,7 @@ function emitMetrics(logger: pino.Logger, eventTypeCount: Map<string, number>) {
   }
 }
 
-function filterRecord(record: DynamoDBRecord, deps: Deps): boolean {
+function filterRecord(record: DynamoDBRecord): boolean {
   let allowEvent = false;
   if (record.eventName === "INSERT") {
     allowEvent = true;
@@ -101,14 +103,6 @@ function filterRecord(record: DynamoDBRecord, deps: Deps): boolean {
     allowEvent = true;
   }
 
-  deps.logger.info({
-    logRef: LogRefs.FILTERING_RECORD.code,
-    description: LogRefs.FILTERING_RECORD.description,
-    eventName: record.eventName,
-    eventId: record.eventID,
-    allowEvent,
-  });
-
   return allowEvent;
 }
 
@@ -117,26 +111,9 @@ function extractPayload(
   deps: Deps,
 ): DynamoDBRecord {
   try {
-    deps.logger.info({
-      logRef: LogRefs.PROCESSING_KINESIS_RECORD.code,
-      description: LogRefs.PROCESSING_KINESIS_RECORD.description,
-      recordId: record.kinesis.sequenceNumber,
-    });
-
     // Kinesis data is base64 encoded
     const payload = Buffer.from(record.kinesis.data, "base64").toString("utf8");
-    deps.logger.info({
-      logRef: LogRefs.DECODED_PAYLOAD.code,
-      description: LogRefs.DECODED_PAYLOAD.description,
-      payload,
-    });
-
     const jsonParsed = JSON.parse(payload);
-    deps.logger.info({
-      logRef: LogRefs.EXTRACTED_DYNAMODB_RECORD.code,
-      description: LogRefs.EXTRACTED_DYNAMODB_RECORD.description,
-      jsonParsed,
-    });
     return jsonParsed;
   } catch (error) {
     deps.logger.error({
