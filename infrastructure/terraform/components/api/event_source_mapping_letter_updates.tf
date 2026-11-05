@@ -4,6 +4,7 @@ resource "aws_lambda_event_source_mapping" "letter_updates_transformer_kinesis" 
   starting_position                  = "LATEST"
   batch_size                         = 10
   maximum_batching_window_in_seconds = 1
+  bisect_batch_on_function_error     = true
 
   depends_on = [
     module.letter_updates_transformer # ensures updates transformer exists
