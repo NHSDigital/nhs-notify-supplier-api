@@ -147,10 +147,10 @@ export async function runParameterisedQueryOnTrino(
 ): Promise<SqlRow[]> {
   const escapedQuery = query.queryString.replaceAll("'", "''");
   const parameters = query.executionParameters ?? [];
-  const using =
-    parameters.length > 0
-      ? ` USING ${parameters.map((parameter) => `'${parameter.replaceAll("'", "''")}'`).join(", ")}`
-      : "";
+  const literals = parameters
+    .map((parameter) => `'${parameter.replaceAll("'", "''")}'`)
+    .join(", ");
+  const using = parameters.length > 0 ? ` USING ${literals}` : "";
 
   return runTrinoStatement(
     context,
