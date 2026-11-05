@@ -28,7 +28,7 @@
   - Use `scripts/test-data` to generate and upload test letters to S3. Example command:
 
     ```bash
-    npm run cli -- create-letter --supplier-id ... --environment ... --awsAccountId ... --letter-id ... --group-id ... --specification-id ... --status PENDING
+    pnpm run cli create-letter --supplier-id ... --environment ... --awsAccountId ... --letter-id ... --group-id ... --specification-id ... --status PENDING
     ```
 
 ## Integration Points

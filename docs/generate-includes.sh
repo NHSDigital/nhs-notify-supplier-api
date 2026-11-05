@@ -9,7 +9,7 @@ mkdir -p ./docs/_includes/components/generated
 # Database mermaid diagrams
 # NOTE: This also regenerates internal/datastore/src/types.md as a side effect.
 # Review any changes to that file before committing.
-npm run -w internal/datastore diagrams
+pnpm --filter @internal/datastore run diagrams
 cp ./internal/datastore/src/types.md ./docs/_includes/components/generated/types.md
 
 #Contributing file

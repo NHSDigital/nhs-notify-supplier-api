@@ -109,7 +109,7 @@ New developers of the NHS Notify Supplier API should understand the below.
     @nhsdigital:registry=https://npm.pkg.github.com
    ```
 
-- Install `node` (to run `npm install` and build the project)
+- Install `node` and `pnpm` (to run `pnpm install` and build the project)
 - Install `aws cli` to be able to connect to AWS (needed for some tests)
 - If AWS CLI calls are blocked by a firewall (e.g. Zscaler), you need to add the custom certificates in the location `/scripts/devcontainer/custom-ca-certs`
 - Install `docker` or `Rancher` for containerisation
@@ -154,7 +154,7 @@ These are generated using [https://hub.docker.com/r/openapitools/openapi-generat
 Run unit tests from the repository root:
 
 ```bash
-npm run test:unit
+pnpm run test:unit
 ```
 
 ### Documentation

@@ -1,7 +1,7 @@
 {
   "dependencies": {
-    "@internal/datastore": "*",
-    "@nhsdigital/nhs-notify-event-schemas-supplier-api": "*"
+    "@internal/datastore": "workspace:*",
+    "@nhsdigital/nhs-notify-event-schemas-supplier-api": "workspace:*"
   },
   "devDependencies": {},
   "main": "dist/index.js",

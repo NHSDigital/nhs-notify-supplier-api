@@ -27,7 +27,7 @@ export const baseJestConfig: Config = {
   coveragePathIgnorePatterns: ["/__tests__/"],
   transform: { "^.+\\.ts$": "ts-jest" },
   transformIgnorePatterns: [
-    "node_modules/(?!(@nhsdigital/nhs-notify-event-schemas-supplier-config)/)",
+    String.raw`node_modules/(?!(?:\.pnpm/@nhsdigital\+nhs-notify-event-schemas-supplier-config@|@nhsdigital/nhs-notify-event-schemas-supplier-config/))`,
   ],
   testPathIgnorePatterns: [".build"],
   testMatch: ["**/?(*.)+(spec|test).[jt]s?(x)"],
