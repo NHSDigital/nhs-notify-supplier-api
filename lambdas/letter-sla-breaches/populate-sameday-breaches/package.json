@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@aws-sdk/client-athena": "catalog:aws",
     "@date-fns/tz": "catalog:app",
     "@internal/helpers": "workspace:*",
     "@internal/letter-sla-breaches-common": "workspace:*",
