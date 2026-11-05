@@ -47,6 +47,6 @@ AND cardinality(array_intersect(
   ARRAY['SAME_DAY', 'BRAILLE', 'AUDIO']
 )) = 0
 GROUP BY supplierid, campaignid, clientid`,
-    executionParameters: [`'${slaCutOff.toISOString()}'`],
+    executionParameters: [slaCutOff.toISOString()],
   };
 }
