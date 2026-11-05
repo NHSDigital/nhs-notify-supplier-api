@@ -154,43 +154,35 @@ describe("populateSamedayBreaches", () => {
     );
   });
 
-  it("preserves the time in an ISO event date", async () => {
+  it.each([
+    ["2026-10-08", "2026-10-08T00:00:00.000Z"],
+    ["2026-10-08T15:30:00.000Z", "2026-10-08T15:30:00.000Z"],
+    ["2026-10-08T15:30:00Z", "2026-10-08T15:30:00.000Z"],
+  ])(
+    "parses supported event date %s as UTC",
+    async (eventDate, expectedDate) => {
+      const deps = makeDeps();
+      jest.mocked(runAthenaQuery).mockResolvedValueOnce([]);
+
+      await createHandler(deps)({ date: eventDate });
+
+      expect(runAthenaQuery).toHaveBeenCalledWith(
+        deps,
+        expect.objectContaining({
+          executionParameters: [expectedDate],
+        }),
+      );
+    },
+  );
+
+  it("throws when the event date is invalid", async () => {
     const deps = makeDeps();
-    jest.mocked(runAthenaQuery).mockResolvedValueOnce([]);
 
-    await createHandler(deps)({ date: "2026-10-08T15:30:00.000Z" });
-
-    expect(runAthenaQuery).toHaveBeenCalledWith(
-      deps,
-      expect.objectContaining({
-        executionParameters: ["2026-10-08T15:30:00.000Z"],
-      }),
+    await expect(createHandler(deps)({ date: "not-a-date" })).rejects.toThrow(
+      "Invalid event date: not-a-date",
     );
-  });
-
-  it("parses an Athena timestamp as UTC", async () => {
-    const deps = makeDeps();
-    jest.mocked(runAthenaQuery).mockResolvedValueOnce([]);
-
-    await createHandler(deps)({ date: "2026-10-08 15:30:00.000" });
-
-    expect(runAthenaQuery).toHaveBeenCalledWith(
-      deps,
-      expect.objectContaining({
-        executionParameters: ["2026-10-08T15:30:00.000Z"],
-      }),
-    );
-  });
-
-  it("returns failure when the event date is invalid", async () => {
-    const deps = makeDeps();
-
-    const result = await createHandler(deps)({ date: "not-a-date" });
 
     expect(runAthenaQuery).not.toHaveBeenCalled();
-    expect(result).toEqual(
-      expect.objectContaining({ status: "FAILURE", breachCount: "0" }),
-    );
   });
 
   it("returns a zero breach count when the query returns no rows", async () => {
@@ -202,30 +194,33 @@ describe("populateSamedayBreaches", () => {
     expect(result).toEqual({ status: "SUCCESS", breachCount: "0" });
   });
 
-  it("runs the sameday breaches query and returns failure", async () => {
+  it("logs and rethrows a query error", async () => {
     const deps = makeDeps();
-    jest.mocked(runAthenaQuery).mockRejectedValueOnce(new Error("boom"));
+    const error = new Error("boom");
+    jest.mocked(runAthenaQuery).mockRejectedValueOnce(error);
 
-    const result = await createHandler(deps)({ date: "2026-10-08" });
+    await expect(createHandler(deps)({ date: "2026-10-08" })).rejects.toBe(
+      error,
+    );
 
     expect(runAthenaQuery).toHaveBeenCalled();
-    expect(result).toEqual({
-      failureReason: "boom",
-      status: "FAILURE",
-      breachCount: "0",
-    });
+    expect(deps.logger.error).toHaveBeenCalledWith(
+      { date: "2026-10-08", error },
+      "Failed to populate sameday breaches",
+    );
   });
 
-  it("converts a non-Error query failure to a string", async () => {
+  it("logs and rethrows a non-Error query failure", async () => {
     const deps = makeDeps();
     jest.mocked(runAthenaQuery).mockRejectedValueOnce("query failed");
 
-    const result = await createHandler(deps)({ date: "2026-10-08" });
+    await expect(createHandler(deps)({ date: "2026-10-08" })).rejects.toBe(
+      "query failed",
+    );
 
-    expect(result).toEqual({
-      failureReason: "query failed",
-      status: "FAILURE",
-      breachCount: "0",
-    });
+    expect(deps.logger.error).toHaveBeenCalledWith(
+      { date: "2026-10-08", error: "query failed" },
+      "Failed to populate sameday breaches",
+    );
   });
 });

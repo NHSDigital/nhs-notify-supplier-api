@@ -19,7 +19,7 @@
         "StatusFilter": "RUNNING"
       },
       "Assign": {
-        "date": "{% $exists($states.context.Execution.Input.date) ? $states.context.Execution.Input.date : $substring($states.context.Execution.StartTime, 0, 10) %}"
+        "date": "{% $exists($states.context.Execution.Input.date) ? $states.context.Execution.Input.date : $states.context.Execution.StartTime %}"
       },
       "Next": "AlreadyRunning?",
       "Resource": "arn:aws:states:::aws-sdk:sfn:listExecutions",

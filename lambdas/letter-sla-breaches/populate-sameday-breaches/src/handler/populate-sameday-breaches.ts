@@ -11,30 +11,26 @@ export type PopulatesamedayBreachesEvent = {
 };
 
 export type PopulatesamedayBreachesResult = {
-  status: "SUCCESS" | "FAILURE";
-  failureReason?: string;
+  status: "SUCCESS";
   breachCount: string;
 };
-
-function parseEventDate(date: string): Date {
-  const [datePart, timePart, ...remainingParts] = date.split(" ");
-  const isAthenaTimestamp =
-    timePart && remainingParts.length === 0 && !date.includes("T");
-
-  return new Date(isAthenaTimestamp ? `${datePart}T${timePart}Z` : date);
-}
 
 export default function createHandler(deps: Deps) {
   return async (
     event: PopulatesamedayBreachesEvent,
   ): Promise<PopulatesamedayBreachesResult> => {
+    const eventDate = new Date(event.date);
+    if (Number.isNaN(eventDate.getTime())) {
+      throw new TypeError(`Invalid event date: ${event.date}`);
+    }
+
     try {
       const rows = await runAthenaQuery(
         deps,
         buildSamedayBreachesQuery(
           deps.env.EVENT_CACHE_TABLE_NAME,
           deps.env.PACK_SPECIFICATION_TABLE_NAME,
-          parseEventDate(event.date),
+          eventDate,
           14,
         ),
       );
@@ -86,11 +82,7 @@ export default function createHandler(deps: Deps) {
         "Failed to populate sameday breaches",
       );
 
-      return {
-        status: "FAILURE",
-        failureReason: error instanceof Error ? error.message : String(error),
-        breachCount: "0",
-      };
+      throw error;
     }
   };
 }
