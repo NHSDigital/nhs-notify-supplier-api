@@ -1,36 +1,53 @@
-name: 'pnpm install and setup'
-description: 'Setup node, authenticate github package repository and perform clean pnpm install'
+name: 'Node.js and pnpm setup'
+description: 'Install locked Node.js, authenticate GitHub Packages, and install dependencies with pnpm'
 
 inputs:
   GITHUB_TOKEN:
     description: "Token for access to github package registry"
     required: true
+  install_dependencies:
+    description: "Install repository dependencies after configuring Node.js and pnpm"
+    required: false
+    default: "true"
 
 runs:
   using: 'composite'
   steps:
 
+    - name: Setup mise
+      uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+      with:
+        install: false
+        cache: true
+
     - name: Get tool versions
-      id: get-tool-versions
+      id: versions
       shell: bash
       run: |
-        echo "nodejs_version=$(awk '$1 == "nodejs" { print $2; exit }' .tool-versions)" >> "$GITHUB_OUTPUT"
-        echo "pnpm_version=$(awk '$1 == "pnpm" { print $2; exit }' .tool-versions)" >> "$GITHUB_OUTPUT"
+        echo "node=$(mise config get tools.node --file mise.toml)" >> "$GITHUB_OUTPUT"
+        echo "pnpm=$(mise config get tools.pnpm --file mise.toml)" >> "$GITHUB_OUTPUT"
+
+    - name: Install locked Node.js
+      shell: bash
+      env:
+        MISE_OVERRIDE_TOOL_VERSIONS_FILENAMES: none
+      run: mise --locked install node
 
     - name: 'Setup pnpm'
-      uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
+      uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
       with:
-        version: ${{ steps.get-tool-versions.outputs.pnpm_version }}
+        version: ${{ steps.versions.outputs.pnpm }}
 
     - name: 'Use Node.js'
       uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
       with:
-        node-version-file: '.tool-versions'
+        node-version: ${{ steps.versions.outputs.node }}
         registry-url: 'https://npm.pkg.github.com'
         scope: '@nhsdigital'
         cache: 'pnpm'
 
     - name: 'Install dependencies'
+      if: inputs.install_dependencies == 'true'
       shell: bash
       env:
         NODE_AUTH_TOKEN: ${{ inputs.GITHUB_TOKEN }}

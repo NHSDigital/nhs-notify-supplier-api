@@ -1,20 +1,3 @@
-act 0.2.86
-gitleaks 8.30.1
-jq 1.8.1
-nodejs 22.22.0
-pnpm 11.5.0
-pre-commit 4.5.1
-python 3.12.16
-terraform 1.14.8
-syft 1.39.0
-grype 0.104.3
-poetry 2.3.2
-java openjdk-25.0.1
-
-# ==============================================================================
-# The section below is reserved for Docker image versions.
-
-# TODO: Move this section - consider using a different file for the repository template dependencies.
 # docker/ghcr.io/anchore/grype v0.110.0@sha256:af65fbc0c664691067788fe95ff88760b435543e45595eb2ca6f102fc476fbe1  # SEE: https://github.com/anchore/grype/pkgs/container/grype
 # docker/ghcr.io/anchore/syft v1.42.3@sha256:5999d209a342e55e9edf70bf8930fb5b86d8f2a783fa401178372c50e21b1d36 # SEE: https://github.com/anchore/syft/pkgs/container/syft
 # docker/ghcr.io/gitleaks/gitleaks v8.30.0@sha256:691af3c7c5a48b16f187ce3446d5f194838f91238f27270ed36eef6359a574d9 # SEE: https://github.com/gitleaks/gitleaks/pkgs/container/gitleaks

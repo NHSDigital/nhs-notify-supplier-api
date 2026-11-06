@@ -399,12 +399,13 @@ fi;
 pushd "${component_path}";
 readonly component_name=$(basename ${component_path});
 
-# install terraform
-# verify terraform version matches .tool-versions
+# Install the Terraform version pinned in this component's mise configuration.
 echo ${PWD}
-tool_version=$(grep "terraform " .tool-versions | cut -d ' ' -f 2)
-asdf plugin add terraform && asdf install terraform "${tool_version}"
-current_version=$(terraform --version | head -n 1 | cut -d 'v' -f 2)
+tool_version=$(mise config get tools.terraform --file mise.toml)
+MISE_OVERRIDE_TOOL_VERSIONS_FILENAMES=none mise --locked install terraform
+terraform_bin=$(MISE_OVERRIDE_TOOL_VERSIONS_FILENAMES=none mise which terraform)
+export PATH="$(dirname "${terraform_bin}"):${PATH}"
+current_version=$("${terraform_bin}" --version | head -n 1 | cut -d 'v' -f 2)
 
 if [ -z "${current_version}" ] || [ "${current_version}" != "${tool_version}" ]; then
   error_and_die "Terraform version mismatch. Expected: ${tool_version}, Actual: ${current_version}"

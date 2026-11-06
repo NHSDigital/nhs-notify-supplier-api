@@ -16,9 +16,6 @@ inputs:
     description: "Whether to build the sandbox OAS spec"
     required: false
     default: false
-  nodejs_version:
-    description: "Unused - Node.js is now read from .tool-versions. Retained so existing callers keep working."
-    required: false
   NODE_AUTH_TOKEN:
     description: "Token for access to github package registry"
     required: true
