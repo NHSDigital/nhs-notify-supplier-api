@@ -217,4 +217,26 @@ describe("populateStandardBreaches", () => {
       }),
     );
   });
+
+  it("uses unknown dimensions when the query omits identifiers", async () => {
+    const deps = makeDeps();
+    jest.mocked(runAthenaQuery).mockResolvedValue([
+      {
+        breach_count: "1",
+      },
+    ]);
+    process.env.AWS_LAMBDA_FUNCTION_NAME = "populate-standard-breaches";
+
+    await createHandler(deps)({ date: "2026-10-08" });
+
+    expect(deps.logger.info as jest.Mock).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        SupplierId: "unknown",
+        ClientId: "unknown",
+        CampaignId: "unknown",
+        StandardBreachCount: 1,
+      }),
+    );
+  });
 });

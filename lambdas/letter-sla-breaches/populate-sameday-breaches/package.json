@@ -7,7 +7,8 @@
     "aws-embedded-metrics": "^4.2.1",
     "date-fns": "catalog:app",
     "esbuild": "0.28.2",
-    "pino": "catalog:app"
+    "pino": "catalog:app",
+    "zod": "catalog:app"
   },
   "devDependencies": {
     "@internal/sql-test-helpers": "workspace:*"
