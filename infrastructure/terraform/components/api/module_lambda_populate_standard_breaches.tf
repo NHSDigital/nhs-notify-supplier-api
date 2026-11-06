@@ -26,7 +26,7 @@ module "populate_standard_breaches" {
   handler_function_name   = "populateStandardBreachesHandler"
   runtime                 = "nodejs22.x"
   memory                  = 128
-  timeout                 = 29
+  timeout                 = 300
   log_level               = var.log_level
 
   force_lambda_code_deploy = var.force_lambda_code_deploy
@@ -37,9 +37,12 @@ module "populate_standard_breaches" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = {
-    ATHENA_WORKGROUP       = aws_athena_workgroup.reporting.name
-    ATHENA_DATABASE        = aws_glue_catalog_database.supplier.name
-    EVENT_CACHE_TABLE_NAME = aws_glue_catalog_table.eventpub_parquet[0].name
+    ATHENA_WORKGROUP              = aws_athena_workgroup.reporting.name
+    ATHENA_DATABASE               = aws_glue_catalog_database.supplier.name
+    EVENT_CACHE_TABLE_NAME        = aws_glue_catalog_table.eventpub_parquet[0].name
+    PACK_SPECIFICATION_TABLE_NAME = "${replace(local.csi, "-", "_")}_pack_specification"
+    DAYS_TO_LOOK_BACK             = "14"
+    STANDARD_SLA_WORKING_DAYS     = "2"
   }
 }
 
@@ -100,10 +103,13 @@ data "aws_iam_policy_document" "populate_standard_breaches_lambda" {
   }
 
   statement {
-    sid       = "AllowReadEventData"
-    effect    = "Allow"
-    actions   = ["s3:GetObject"]
-    resources = ["${module.s3bucket_reporting.arn}/parquet/*"]
+    sid     = "AllowReadEventData"
+    effect  = "Allow"
+    actions = ["s3:GetObject"]
+    resources = [
+      "${module.s3bucket_reporting.arn}/parquet/*",
+      "${module.s3bucket_reporting.arn}/supplier_config_cache/*",
+    ]
   }
 
   statement {
