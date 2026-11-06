@@ -55,7 +55,7 @@ Agent guidance:
 - When adding repo-wide scripts, keep names consistent with existing patterns (e.g. `lint`, `lint:fix`, `typecheck`, `test:unit`, `lambda-build`) and prefer `pnpm -r run` fan-out.
 - Pass script arguments directly (`pnpm run cli create-letter --id x`), not after `--`; pnpm forwards the `--` to the script.
 - Do not publish from the root. If adding a new workspace intended for publication, mark that workspace package as `private: false` and keep the root as private.
-- Validate changes by running the repo pre-commit hooks: `make githooks-run`.
+- Validate changes by running the repository hooks: `make githooks-run`.
 
 Success criteria for changes affecting the root `package.json`:
 
@@ -92,11 +92,10 @@ When proposing a change, agents should:
 - Keep code formatted and idiomatic (Terraform, TypeScript, Bash, YAML).
 - Stick to existing patterns where available (for example `utils/logger`, composite actions under `.github/actions`).
 - Use available information on best practices within the specific area of the codebase.
-- **Always** run local pre-commit hooks from the repo root with:
+- **Always** run local hooks from the repo root with:
 
   ```sh
-    pre-commit run \
-    --config scripts/config/pre-commit.yaml
+  prek run --config scripts/config/pre-commit.yaml
   ```
 
   to catch formatting and basic lint issues. Domain specific checks will be defined in appropriate nested AGENTS.md files.

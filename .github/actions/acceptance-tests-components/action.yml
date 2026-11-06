@@ -74,12 +74,6 @@ runs:
       with:
         name: terraform-output-${{ inputs.targetComponent }}
 
-    - name: Get Node version
-      id: nodejs_version
-      shell: bash
-      run: |
-        echo "nodejs_version=$(grep "^nodejs\s" .tool-versions | cut -f2 -d' ')" >> $GITHUB_OUTPUT
-
     - name: Set sandbox URL
       if: ${{ inputs.testType == 'sandbox' }}
       shell: bash
