@@ -1,5 +1,3 @@
-<!-- vale off -->
-
 # @nhsdigital/nhs-notify-event-schemas-supplier-api
 
 ## Purpose
@@ -29,5 +27,3 @@ Defines the Zod schemas and TypeScript types for all CloudEvents produced and co
 - **Outbound lifecycle publication uses the same event shape.** `letter-updates-transformer` emits `LetterStatusChangeEvent` on letter INSERT and on `status`/`reasonCode` updates, which are then routed to downstream subscribers.
 - **Must remain free of internal dependencies.** Since this package is published externally, it cannot import from `@internal/datastore`, `@internal/helpers`, or any other internal workspace package. All types are self-contained.
 - **Schema version alignment**: the `dataschemaversion` in CloudEvents is derived from this package's `package.json` version, so bumping the package version directly affects the schema version in all emitted events. There's a GH workflow related to this.
-
-<!-- vale on -->
