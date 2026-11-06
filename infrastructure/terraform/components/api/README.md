@@ -1,6 +1,5 @@
 <!-- BEGIN_TF_DOCS -->
 <!-- markdownlint-disable -->
-<!-- vale off -->
 
 ## Requirements
 
@@ -102,6 +101,5 @@ No requirements.
 | ---- | ----------- |
 | <a name="output_api_urll"></a> [api\_urll](#output\_api\_urll) | n/a |
 | <a name="output_deployment"></a> [deployment](#output\_deployment) | Deployment details used for post-deployment scripts |
-<!-- vale on -->
 <!-- markdownlint-enable -->
 <!-- END_TF_DOCS -->

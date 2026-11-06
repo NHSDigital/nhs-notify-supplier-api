@@ -1,5 +1,3 @@
-<!-- vale off -->
-
 # Tests
 
 ## Purpose
@@ -87,5 +85,3 @@ E2E tests (require AWS credentials and environment configuration):
 ```bash
 make .e2e-tests (from root level Makefile)
 ```
-
-<!-- vale on -->

@@ -1,5 +1,3 @@
-<!-- vale off -->
-
 # acceptance
 
 ---
@@ -646,5 +644,3 @@ Once you pass this stage, we'll confirm your readiness for going live.
 | Returned to production facility    | Letter dispatched but returned by the postal partner.                                                     | a) PENDING → ACCEPTED → PRINTED → ENCLOSED → DISPATCHED → RETURNED (letter undeliverable)<br>b) PENDING → ACCEPTED → PRINTED → ENCLOSED → DISPATCHED → DELIVERED → RETURNED                                                        |
 
 PRINTED, ENCLOSED and DELIVERED are optional statuses. Suppliers that do not support these can directly progress from ACCEPTED to DISPATCHED.
-
-<!-- vale on -->
