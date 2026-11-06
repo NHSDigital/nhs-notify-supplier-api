@@ -4,5 +4,8 @@
 scripts/config/.repository-template-sync-ignore
 scripts/config/.repository-template-sync-merge
 scripts/config/pre-commit.yaml
-.tool-versions
+mise.toml
+mise.lock
+.docker-versions
+.github/actions/node-install/action.yaml
 .gitignore

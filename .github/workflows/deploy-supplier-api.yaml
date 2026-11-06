@@ -241,11 +241,6 @@ jobs:
           client-id: ${{ secrets.APP_CLIENT_ID }}
           private-key: ${{ secrets.APP_PEM_FILE }}
 
-      - name: Resolve nodejs version
-        id: toolversions
-        run: echo "nodejs_version=$(grep '^nodejs\s' .tool-versions | cut -f2 -d' ')" >>
-          "$GITHUB_OUTPUT"
-
       - name: Build OAS spec for non-release source
         if: ${{ needs.validate.outputs.is_release == 'false' }}
         uses: ./.github/actions/build-oas-spec
@@ -253,7 +248,6 @@ jobs:
           version: ${{ needs.validate.outputs.build_artifact_version }}
           apimEnv: ${{ needs.validate.outputs.apim_environment }}
           buildSandbox: ${{ inputs.build_sandbox }}
-          nodejs_version: ${{ steps.toolversions.outputs.nodejs_version }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Deploy proxy

@@ -56,9 +56,6 @@
     }
   },
   "features": {
-    "ghcr.io/azutake/devcontainer-features/go-packages-install:0": {
-      "PACKAGES": "github.com/asdf-vm/asdf/cmd/asdf@v0.18.0"
-    },
     "ghcr.io/devcontainers-extra/features/zsh-plugins:0": {
       "omzPlugins": "https://github.com/zsh-users/zsh-autosuggestions.git https://github.com/zsh-users/zsh-syntax-highlighting.git",
       "plugins": "zsh-autosuggestions zsh-syntax-highlighting"
