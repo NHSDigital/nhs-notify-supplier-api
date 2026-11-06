@@ -1,4 +1,35 @@
 locals {
+  eventpub_parquet_enabled = local.event_cache_bucket_name != null
+
+  # Column names must be lowercase; OpenXJsonSerDe matches JSON keys case-insensitively.
+  eventpub_parquet_table_columns = [
+    { name = "specversion", type = "string" },
+    { name = "id", type = "string" },
+    { name = "type", type = "string" },
+    { name = "plane", type = "string" },
+    { name = "dataschema", type = "string" },
+    { name = "dataschemaversion", type = "string" },
+    { name = "source", type = "string" },
+    { name = "subject", type = "string" },
+    { name = "time", type = "string" },
+    { name = "recordedtime", type = "string" },
+    { name = "datacontenttype", type = "string" },
+    { name = "traceparent", type = "string" },
+    { name = "tracestate", type = "string" },
+    { name = "partitionkey", type = "string" },
+    { name = "sampledrate", type = "bigint" },
+    { name = "sequence", type = "string" },
+    { name = "severitytext", type = "string" },
+    { name = "data_json", type = "string" },
+    { name = "domainid", type = "string" },
+    { name = "supplierid", type = "string" },
+    { name = "groupid", type = "string" },
+    { name = "campaignid", type = "string" },
+    { name = "clientid", type = "string" },
+    { name = "status", type = "string" },
+    { name = "specificationid", type = "string" },
+  ]
+
   aws_lambda_functions_dir_path = "../../../../lambdas"
   root_domain_name              = "${var.environment}.${local.acct.route53_zone_names["supplier-api"]}" # e.g. [main|dev|abxy0].supplier-api.[dev|nonprod|prod].nhsnotify.national.nhs.uk
   root_domain_id                = local.acct.route53_zone_ids["supplier-api"]
@@ -52,4 +83,7 @@ locals {
     var.region,
     var.csoc_destination_account
   )
+
+  letter_sla_breaches_state_machine_name = "${local.csi}-letter-sla-breaches"
+  letter_sla_breaches_state_machine_arn  = "arn:aws:states:${var.region}:${var.aws_account_id}:stateMachine:${local.letter_sla_breaches_state_machine_name}"
 }
