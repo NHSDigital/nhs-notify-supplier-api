@@ -9,7 +9,10 @@ export default function createDependenciesContainer(): EntityCacheDeps {
   return {
     ddbClient: DynamoDBDocumentClient.from(new DynamoDBClient()),
     s3Client: new S3Client(),
-    logger: createLogger({ logLevel: envVars.PINO_LOG_LEVEL }),
+    logger: createLogger({
+      logLevel: envVars.PINO_LOG_LEVEL,
+      logReference: envVars.LOG_REFERENCE,
+    }),
     env: {
       SUPPLIER_CONFIG_TABLE_NAME: envVars.SUPPLIER_CONFIG_TABLE_NAME,
       EVENT_CACHE_BUCKET_NAME: envVars.EVENT_CACHE_BUCKET_NAME,

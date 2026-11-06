@@ -710,12 +710,21 @@ importers:
 
   lambdas/eventpub-parquet-transformer:
     dependencies:
+      '@internal/helpers':
+        specifier: workspace:*
+        version: link:../../internal/helpers
       aws-lambda:
         specifier: ^1.0.7
         version: 1.0.7
       esbuild:
         specifier: 0.28.2
         version: 0.28.2
+      pino:
+        specifier: catalog:app
+        version: 10.4.0
+      zod:
+        specifier: ^4.6.6
+        version: 4.6.7
 
   lambdas/letter-sla-breaches/common:
     dependencies:

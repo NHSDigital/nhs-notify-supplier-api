@@ -1,7 +1,10 @@
 {
   "dependencies": {
+    "@internal/helpers": "workspace:*",
     "aws-lambda": "^1.0.7",
-    "esbuild": "0.28.2"
+    "esbuild": "0.28.2",
+    "pino": "catalog:app",
+    "zod": "catalog:app"
   },
   "name": "nhs-notify-supplier-api-eventpub-parquet-transformer",
   "private": true,

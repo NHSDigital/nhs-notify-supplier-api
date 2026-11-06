@@ -4,6 +4,7 @@ import {
 } from "@internal/letter-sla-breaches-common";
 import { Unit } from "aws-embedded-metrics";
 import { buildEMFObject } from "@internal/helpers";
+import LogRefs from "../log-references";
 import buildSamedayBreachesQuery from "./sameday-breaches-query";
 
 export type PopulatesamedayBreachesEvent = {
@@ -50,7 +51,10 @@ export default function createHandler(deps: Deps) {
             unit: Unit.Count,
           },
         );
-        deps.logger.info(emfObject);
+        deps.logger.info({
+          ...emfObject,
+          logRef: LogRefs.BREACH_COUNT_METRIC.code,
+        });
       }
 
       const breachCount = String(
@@ -58,8 +62,8 @@ export default function createHandler(deps: Deps) {
       );
 
       // Published every run, including 0, so the alarm clears once breaches are resolved
-      deps.logger.info(
-        buildEMFObject(
+      deps.logger.info({
+        ...buildEMFObject(
           "",
           {},
           {
@@ -68,19 +72,24 @@ export default function createHandler(deps: Deps) {
             unit: Unit.Count,
           },
         ),
-      );
+        logRef: LogRefs.BREACH_TOTAL_METRIC.code,
+      });
 
-      deps.logger.info(
-        { date: event.date, breachCount },
-        "sameday breaches query completed",
-      );
+      deps.logger.info({
+        logRef: LogRefs.QUERY_COMPLETED.code,
+        description: LogRefs.QUERY_COMPLETED.description,
+        date: event.date,
+        breachCount,
+      });
 
       return { status: "SUCCESS", breachCount };
     } catch (error) {
-      deps.logger.error(
-        { date: event.date, error },
-        "Failed to populate sameday breaches",
-      );
+      deps.logger.error({
+        logRef: LogRefs.POPULATE_FAILED.code,
+        description: LogRefs.POPULATE_FAILED.description,
+        date: event.date,
+        error,
+      });
 
       throw error;
     }

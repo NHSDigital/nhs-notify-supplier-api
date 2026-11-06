@@ -38,6 +38,7 @@ module "populate_supplier_config_cache" {
   lambda_env_vars = {
     SUPPLIER_CONFIG_TABLE_NAME = aws_dynamodb_table.supplier-configuration.name
     EVENT_CACHE_BUCKET_NAME    = module.s3bucket_reporting.bucket
+    LOG_REFERENCE              = "POP_SUP_CFG"
   }
 }
 

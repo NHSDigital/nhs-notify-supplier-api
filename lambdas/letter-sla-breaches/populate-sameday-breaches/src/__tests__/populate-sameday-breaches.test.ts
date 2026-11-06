@@ -63,6 +63,7 @@ describe("populateSamedayBreaches", () => {
     expect(deps.logger.info).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
+        logRef: "001-BREACH-COUNT-METRIC",
         SupplierId: "supplier-a",
         ClientId: "client-a",
         CampaignId: "campaign-a",
@@ -82,6 +83,7 @@ describe("populateSamedayBreaches", () => {
     expect(deps.logger.info).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
+        logRef: "001-BREACH-COUNT-METRIC",
         SupplierId: "supplier-b",
         ClientId: "client-b",
         CampaignId: "campaign-b",
@@ -101,6 +103,7 @@ describe("populateSamedayBreaches", () => {
     expect(deps.logger.info).toHaveBeenNthCalledWith(
       3,
       expect.objectContaining({
+        logRef: "002-BREACH-TOTAL-METRIC",
         SamedayBreachTotal: 5,
         _aws: expect.objectContaining({
           CloudWatchMetrics: [
@@ -114,11 +117,12 @@ describe("populateSamedayBreaches", () => {
         }),
       }),
     );
-    expect(deps.logger.info).toHaveBeenNthCalledWith(
-      4,
-      { date: "2026-10-08", breachCount: "5" },
-      "sameday breaches query completed",
-    );
+    expect(deps.logger.info).toHaveBeenNthCalledWith(4, {
+      logRef: "003-QUERY-COMPLETED",
+      description: "Sameday breaches query completed",
+      date: "2026-10-08",
+      breachCount: "5",
+    });
   });
 
   it("publishes a zero breach total when there are no breaches", async () => {
@@ -204,10 +208,12 @@ describe("populateSamedayBreaches", () => {
     );
 
     expect(runAthenaQuery).toHaveBeenCalled();
-    expect(deps.logger.error).toHaveBeenCalledWith(
-      { date: "2026-10-08", error },
-      "Failed to populate sameday breaches",
-    );
+    expect(deps.logger.error).toHaveBeenCalledWith({
+      logRef: "004-POPULATE-FAILED",
+      description: "Failed to populate sameday breaches",
+      date: "2026-10-08",
+      error,
+    });
   });
 
   it("logs and rethrows a non-Error query failure", async () => {
@@ -218,9 +224,11 @@ describe("populateSamedayBreaches", () => {
       "query failed",
     );
 
-    expect(deps.logger.error).toHaveBeenCalledWith(
-      { date: "2026-10-08", error: "query failed" },
-      "Failed to populate sameday breaches",
-    );
+    expect(deps.logger.error).toHaveBeenCalledWith({
+      logRef: "004-POPULATE-FAILED",
+      description: "Failed to populate sameday breaches",
+      date: "2026-10-08",
+      error: "query failed",
+    });
   });
 });

@@ -4,6 +4,7 @@ const EnvVarsSchema = z.object({
   SUPPLIER_CONFIG_TABLE_NAME: z.string(),
   EVENT_CACHE_BUCKET_NAME: z.string(),
   PINO_LOG_LEVEL: z.string().optional(),
+  LOG_REFERENCE: z.string().optional(),
 });
 
 export type EnvVars = z.infer<typeof EnvVarsSchema>;

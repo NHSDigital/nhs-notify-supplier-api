@@ -13,10 +13,15 @@ export type Deps = {
   };
 };
 
-export default function createDependenciesContainer(): Deps {
+export default function createDependenciesContainer(
+  logReference?: string,
+): Deps {
   return {
     athenaClient: new AthenaClient(),
-    logger: createLogger({ logLevel: process.env.PINO_LOG_LEVEL }),
+    logger: createLogger({
+      logLevel: process.env.PINO_LOG_LEVEL,
+      logReference,
+    }),
     env: {
       ATHENA_WORKGROUP: process.env.ATHENA_WORKGROUP!,
       ATHENA_DATABASE: process.env.ATHENA_DATABASE!,
