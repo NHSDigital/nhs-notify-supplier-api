@@ -733,7 +733,7 @@ importers:
     dependencies:
       '@aws-sdk/client-athena':
         specifier: catalog:aws
-        version: 3.1152.0
+        version: 3.1161.0
       '@date-fns/tz':
         specifier: catalog:app
         version: 1.5.0
