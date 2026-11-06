@@ -52,7 +52,7 @@ class AuthenticationCache():
 
             private_key = os.environ["NON_PROD_PRIVATE_KEY"]
             url = "https://ref.api.service.nhs.uk/oauth2/token"
-            kid = "internal-dev-test-1"
+            kid = "ref-test-1"
         elif env == "int":
             if (supplier_id == SECONDARY_SUPPLIER):
                 api_key = os.environ["INTEGRATION_SECONDARY_API_KEY"]
@@ -61,7 +61,7 @@ class AuthenticationCache():
 
             private_key = os.environ.get("INTEGRATION_PRIVATE_KEY")
             url = "https://int.api.service.nhs.uk/oauth2/token"
-            kid = "internal-dev-test-1"
+            kid = "int-test-1"
         elif env == "prod":
             if (supplier_id == SECONDARY_SUPPLIER):
                 api_key = os.environ.get("PRODUCTION_SECONDARY_API_KEY")
