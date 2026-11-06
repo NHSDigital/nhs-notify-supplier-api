@@ -4,7 +4,7 @@ jq 1.8.1
 nodejs 22.22.0
 pnpm 11.5.0
 pre-commit 4.5.1
-python 3.12.16
+python 3.15.2
 terraform 1.14.8
 syft 1.39.0
 grype 0.104.3
