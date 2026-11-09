@@ -48,6 +48,26 @@ describe("populateStandardBreaches", () => {
     );
   });
 
+  it("logs the error and falls back to no bank holidays when fetching them fails", async () => {
+    const error = new Error("fetch failed");
+    jest.mocked(fetchBankHolidays).mockRejectedValue(error);
+    jest.mocked(runAthenaQuery).mockResolvedValue([]);
+
+    const deps = makeDeps();
+    await createHandler(deps)({ date: "2026-10-08" });
+
+    expect(deps.logger.error).toHaveBeenCalledWith({ error });
+    expect(buildStandardBreachesQuery).toHaveBeenCalledWith(
+      "event_cache",
+      "pack_specification",
+      new Date("2026-10-08"),
+      3,
+      10,
+      [],
+    );
+    expect(runAthenaQuery).toHaveBeenCalled();
+  });
+
   it("runs the standard breaches query and logs metrics", async () => {
     const deps = makeDeps();
     jest.mocked(runAthenaQuery).mockResolvedValue([
@@ -148,7 +168,7 @@ describe("populateStandardBreaches", () => {
       }),
     );
     expect(deps.logger.info as jest.Mock).toHaveBeenNthCalledWith(
-      4,
+      5,
       expect.objectContaining({
         SupplierId: "supplier1",
         ClientId: "client2",
@@ -171,7 +191,7 @@ describe("populateStandardBreaches", () => {
       }),
     );
     expect(deps.logger.info as jest.Mock).toHaveBeenNthCalledWith(
-      5,
+      6,
       expect.objectContaining({
         SupplierId: "supplier2",
         ClientId: "client1",
@@ -235,7 +255,7 @@ describe("populateStandardBreaches", () => {
     await createHandler(deps)({ date: "2026-10-08" });
 
     expect(deps.logger.info as jest.Mock).toHaveBeenNthCalledWith(
-      2,
+      3,
       expect.objectContaining({
         SupplierId: "unknown",
         ClientId: "unknown",

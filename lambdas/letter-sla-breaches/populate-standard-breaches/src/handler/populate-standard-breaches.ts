@@ -1,6 +1,7 @@
 import { runAthenaQuery } from "@internal/letter-sla-breaches-common";
 import { Unit } from "aws-embedded-metrics";
 import { buildEMFObject } from "@internal/helpers";
+import { subDays } from "date-fns";
 import { type Deps } from "./deps";
 import buildStandardBreachesQuery from "./standard-breaches-query";
 import LogRefs from "../log-references";
@@ -12,10 +13,20 @@ export type PopulateStandardBreachesEvent = {
 
 export default function createHandler(deps: Deps) {
   return async (event: PopulateStandardBreachesEvent): Promise<void> => {
-    const bankHolidays = await fetchBankHolidays(
-      deps.env.BANK_HOLIDAY_JSON_URL,
-      deps.s3Cache,
-    );
+    let bankHolidays: string[];
+    const cutOffDate = subDays(new Date(), deps.env.DAYS_TO_LOOK_BACK);
+    try {
+      bankHolidays = await fetchBankHolidays(
+        deps.env.BANK_HOLIDAY_JSON_URL,
+        deps.s3Cache,
+        cutOffDate,
+      );
+    } catch (error) {
+      // Fall back to ignoring bank holidays. It may result in false positives, but better than ignoring breaches
+      // altogether.
+      deps.logger.error({ error });
+      bankHolidays = [];
+    }
     const sql = buildStandardBreachesQuery(
       deps.env.EVENT_CACHE_TABLE_NAME,
       deps.env.PACK_SPECIFICATION_TABLE_NAME,

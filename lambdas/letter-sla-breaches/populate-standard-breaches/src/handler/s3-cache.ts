@@ -5,24 +5,24 @@ import {
   S3Client,
 } from "@aws-sdk/client-s3";
 import pino from "pino";
+import { ZodType } from "zod";
 
-type JsonFetchFunction = () => Promise<unknown>;
-
-const CACHE_KEY = "bank_holiday_cache/cache";
-
-export default class S3Cache {
+type JsonFetchFunction<T> = () => Promise<T>;
+export default class S3Cache<T> {
   constructor(
     private s3Client: S3Client,
     private s3Bucket: string,
     private logger: pino.Logger,
+    private cacheKey: string,
+    private schema: ZodType<T>,
   ) {}
 
-  private async writeCache(json: unknown): Promise<void> {
+  private async writeCache(json: T): Promise<void> {
     try {
       await this.s3Client.send(
         new PutObjectCommand({
           Bucket: this.s3Bucket,
-          Key: CACHE_KEY,
+          Key: this.cacheKey,
           Body: JSON.stringify(json),
           ContentType: "application/json",
         }),
@@ -36,19 +36,19 @@ export default class S3Cache {
     }
   }
 
-  private async readCache(): Promise<unknown | undefined> {
+  private async readCache(): Promise<T | undefined> {
     try {
       const response = await this.s3Client.send(
         new GetObjectCommand({
           Bucket: this.s3Bucket,
-          Key: CACHE_KEY,
+          Key: this.cacheKey,
         }),
       );
       const body = await response.Body?.transformToString();
       if (!body) {
         return undefined;
       }
-      return JSON.parse(body);
+      return this.schema.parse(JSON.parse(body));
     } catch (error) {
       if (error instanceof NoSuchKey) {
         return undefined;
@@ -57,9 +57,9 @@ export default class S3Cache {
     }
   }
 
-  public cacheJson(fetchFunction: JsonFetchFunction): JsonFetchFunction {
+  public cacheJson(fetchFunction: JsonFetchFunction<T>): JsonFetchFunction<T> {
     return async () => {
-      let json: unknown;
+      let json: T | undefined;
       try {
         json = await fetchFunction();
         await this.writeCache(json);
