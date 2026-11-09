@@ -1,32 +1,30 @@
-import { z } from "zod";
+import { $BankHolidays, BankHolidays } from "../types";
 import S3Cache from "./s3-cache";
 
-const BankHolidaysSchema = z.object({
-  "england-and-wales": z.object({
-    events: z.array(
-      z.object({
-        date: z.iso.date(),
-      }),
-    ),
-  }),
-});
-
-async function fetchFromUrl(url: string) {
+async function fetchFromUrl(url: string, cutOffDate: Date) {
   const response = await fetch(url, { signal: AbortSignal.timeout(10_000) });
   if (!response.ok) {
     throw new Error(`Response status: ${response.status}`);
   }
   const json = await response.json();
-  return json;
+  const bankHolidays = $BankHolidays.parse(json);
+  return {
+    "england-and-wales": {
+      events: bankHolidays["england-and-wales"].events.filter(
+        (event) => event.date > cutOffDate.toISOString(),
+      ),
+    },
+  };
 }
 
 export default async function fetchBankHolidays(
   url: string,
-  s3Cache: S3Cache,
+  s3Cache: S3Cache<BankHolidays>,
+  cutOffDate: Date,
 ): Promise<string[]> {
-  const fetchWithCaching = s3Cache.cacheJson(async () => fetchFromUrl(url));
-  const json = await fetchWithCaching();
-  return BankHolidaysSchema.parse(json)["england-and-wales"].events.map(
-    (event) => event.date,
+  const fetchWithCaching = s3Cache.cacheJson(async () =>
+    fetchFromUrl(url, cutOffDate),
   );
+  const bankHolidays = await fetchWithCaching();
+  return bankHolidays["england-and-wales"].events.map((event) => event.date);
 }

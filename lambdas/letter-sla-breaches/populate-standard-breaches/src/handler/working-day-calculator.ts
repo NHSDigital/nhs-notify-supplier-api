@@ -8,19 +8,21 @@ export default function subtractWorkingDays(
   if (daysToSubtract === 0) {
     return today;
   }
-  return previousDays(today)
-    .filter((day) => isWorkingDay(day, bankHolidays))
-    .drop(daysToSubtract - 1)
-    .next().value!;
+  if (daysToSubtract < 0) {
+    throw new RangeError("daysToSubtract must not be negative");
+  }
+
+  let day = today;
+  let remaining = daysToSubtract;
+  while (remaining > 0) {
+    day = subDays(day, 1);
+    if (isWorkingDay(day, bankHolidays)) {
+      remaining -= 1;
+    }
+  }
+  return day;
 }
 
-function* previousDays(today: Date) {
-  let day = today;
-  while (true) {
-    day = subDays(day, 1);
-    yield day;
-  }
-}
 function isWorkingDay(date: Date, bankHolidays: string[]) {
   return (
     date.getDay() !== 0 &&

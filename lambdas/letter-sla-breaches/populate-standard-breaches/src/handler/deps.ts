@@ -4,10 +4,11 @@ import { createLogger } from "@internal/helpers";
 import { Logger } from "pino";
 import { type EnvVars, parseEnvVars } from "./env";
 import S3Cache from "./s3-cache";
+import { $BankHolidays, BankHolidays } from "../types";
 
 export type Deps = {
   athenaClient: AthenaClient;
-  s3Cache: S3Cache;
+  s3Cache: S3Cache<BankHolidays>;
   logger: Logger;
   env: EnvVars;
 };
@@ -16,8 +17,14 @@ function createS3Cache(
   s3Client: S3Client,
   env: EnvVars,
   logger: Logger,
-): S3Cache {
-  return new S3Cache(s3Client, env.BANK_HOLIDAY_CACHE_BUCKET_NAME, logger);
+): S3Cache<BankHolidays> {
+  return new S3Cache(
+    s3Client,
+    env.BANK_HOLIDAY_CACHE_BUCKET_NAME,
+    logger,
+    "bank_holiday_cache/cache",
+    $BankHolidays,
+  );
 }
 
 export default function createDependenciesContainer(): Deps {

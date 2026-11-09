@@ -1,9 +1,10 @@
 import fetchBankHolidays from "../handler/bank-holidays";
 import S3Cache from "../handler/s3-cache";
+import { BankHolidays } from "../types";
 
 const s3Cache = {
   cacheJson: (fetchFunction: () => Promise<unknown>) => fetchFunction,
-} as unknown as S3Cache;
+} as unknown as S3Cache<BankHolidays>;
 
 describe("fetchBankHolidays", () => {
   const mockJson = {
@@ -52,18 +53,30 @@ describe("fetchBankHolidays", () => {
   ) as jest.Mock;
 
   it("fetches and parses English bank holidays from gov.uk", async () => {
-    const results = await fetchBankHolidays("dummy-url", s3Cache);
+    const results = await fetchBankHolidays(
+      "dummy-url",
+      s3Cache,
+      new Date("2026-11-11"),
+    );
     expect(results).toEqual(["2026-12-25", "2026-12-28", "2027-01-01"]);
   });
 
+  it("filters out bank holdidays before the cutoff date", async () => {
+    const results = await fetchBankHolidays(
+      "dummy-url",
+      s3Cache,
+      new Date("2026-12-26"),
+    );
+    expect(results).toEqual(["2026-12-28", "2027-01-01"]);
+  });
   it("handles error responses", async () => {
     jest.mocked(globalThis.fetch).mockResolvedValue({
       ok: false,
       status: 404,
     } as any);
 
-    await expect(fetchBankHolidays("dummy-url", s3Cache)).rejects.toEqual(
-      new Error("Response status: 404"),
-    );
+    await expect(
+      fetchBankHolidays("dummy-url", s3Cache, new Date("2026-11-11")),
+    ).rejects.toEqual(new Error("Response status: 404"));
   });
 });
