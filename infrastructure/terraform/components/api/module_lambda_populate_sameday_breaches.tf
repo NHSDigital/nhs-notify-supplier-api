@@ -41,6 +41,7 @@ module "populate_sameday_breaches" {
     ATHENA_DATABASE               = aws_glue_catalog_database.supplier.name
     EVENT_CACHE_TABLE_NAME        = aws_glue_catalog_table.eventpub_parquet[0].name
     PACK_SPECIFICATION_TABLE_NAME = aws_glue_catalog_table.supplier_config_cache["pack-specification"].name
+    LOG_REFERENCE                 = "POP_SAM_BCH"
   }
 }
 

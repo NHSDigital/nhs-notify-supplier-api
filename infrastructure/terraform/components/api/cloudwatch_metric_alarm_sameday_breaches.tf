@@ -12,7 +12,7 @@ resource "aws_cloudwatch_metric_alarm" "sameday_breaches" {
   evaluation_periods  = 1
   threshold           = 0
   comparison_operator = "GreaterThanThreshold"
-  # The total is only published hourly; hold the last state between runs
+  # The total is only published once a day at 7am; hold the last state between runs
   treat_missing_data = "ignore"
 
   actions_enabled           = false

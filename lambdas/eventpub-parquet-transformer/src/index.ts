@@ -1,7 +1,5 @@
-import { FirehoseTransformationHandler } from "aws-lambda";
-import transformRecord from "./transform-record";
+import { createDependenciesContainer } from "./deps";
+import createHandler from "./handler";
 
 // eslint-disable-next-line import-x/prefer-default-export
-export const handler: FirehoseTransformationHandler = async (event) => ({
-  records: event.records.map((record) => transformRecord(record)),
-});
+export const handler = createHandler(createDependenciesContainer());

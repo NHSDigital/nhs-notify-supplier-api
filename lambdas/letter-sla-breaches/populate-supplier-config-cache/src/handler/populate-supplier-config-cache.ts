@@ -1,4 +1,5 @@
 import { $SupplierConfigEntity } from "@internal/datastore";
+import LogRefs from "../log-references";
 import populateEntityCache, { EntityCacheDeps } from "./entity-cache";
 
 export type PopulateSupplierConfigCacheResult = {
@@ -19,10 +20,12 @@ export default function createHandler(deps: EntityCacheDeps) {
             failed: false,
           };
         } catch (error) {
-          deps.logger.error(
-            { entityType, error },
-            "Failed to populate supplier config entity cache",
-          );
+          deps.logger.error({
+            logRef: LogRefs.POPULATE_ENTITY_FAILED.code,
+            description: LogRefs.POPULATE_ENTITY_FAILED.description,
+            entityType,
+            error,
+          });
           return { entity: entityType, recordsRetrieved: 0, failed: true };
         }
       }),

@@ -31,5 +31,7 @@ module "eventpub_parquet_transformer" {
   odin_log_destination_arn  = local.odin_destination_arn
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
-  lambda_env_vars = local.common_lambda_env_vars
+  lambda_env_vars = merge(local.common_lambda_env_vars, {
+    LOG_REFERENCE = "PUB_PQT_TFM"
+  })
 }

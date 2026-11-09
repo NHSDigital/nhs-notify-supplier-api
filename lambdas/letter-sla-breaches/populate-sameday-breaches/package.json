@@ -1,9 +1,15 @@
 {
   "dependencies": {
+    "@date-fns/tz": "catalog:app",
     "@internal/helpers": "workspace:*",
     "@internal/letter-sla-breaches-common": "workspace:*",
     "aws-embedded-metrics": "^4.2.1",
-    "esbuild": "0.28.2"
+    "date-fns": "catalog:app",
+    "esbuild": "0.28.2",
+    "pino": "catalog:app"
+  },
+  "devDependencies": {
+    "@internal/sql-test-helpers": "workspace:*"
   },
   "name": "nhs-notify-supplier-api-populate-sameday-breaches",
   "private": true,

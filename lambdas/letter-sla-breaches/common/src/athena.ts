@@ -6,6 +6,7 @@ import {
   StartQueryExecutionCommand,
 } from "@aws-sdk/client-athena";
 import { Deps } from "./deps";
+import LogRefs from "./log-references";
 
 export type AthenaQuery = {
   queryString: string;
@@ -64,7 +65,12 @@ async function waitForQuery(
         );
       }
       default: {
-        deps.logger.debug({ queryExecutionId, state }, "Waiting for query");
+        deps.logger.debug({
+          logRef: LogRefs.ATHENA_QUERY_WAITING.code,
+          description: LogRefs.ATHENA_QUERY_WAITING.description,
+          queryExecutionId,
+          state,
+        });
         await sleep(pollIntervalMs);
       }
     }
@@ -120,7 +126,11 @@ export default async function runAthenaQuery(
   options: AthenaQueryOptions = {},
 ): Promise<AthenaRow[]> {
   const queryExecutionId = await startQuery(deps, query);
-  deps.logger.info({ queryExecutionId }, "Started Athena query");
+  deps.logger.info({
+    logRef: LogRefs.ATHENA_QUERY_STARTED.code,
+    description: LogRefs.ATHENA_QUERY_STARTED.description,
+    queryExecutionId,
+  });
 
   await waitForQuery(
     deps,

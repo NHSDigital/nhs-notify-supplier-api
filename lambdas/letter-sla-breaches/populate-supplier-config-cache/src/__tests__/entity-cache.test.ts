@@ -48,24 +48,27 @@ describe("populateEntityCache", () => {
     const put = s3Send.mock.calls[0][0] as PutObjectCommand;
     expect(put.input.Bucket).toBe("cache-bucket");
     expect(put.input.Key).toBe("supplier_config_cache/supplier/records.json");
-    expect(deps.logger.info).toHaveBeenCalledWith(
-      { entityType: "supplier" },
-      "Loading supplier config entity",
-    );
-    expect(deps.logger.info).toHaveBeenCalledWith(
-      { entityType: "supplier", itemCount: 2, hasItems: true },
-      "Loaded supplier config entity",
-    );
-    expect(deps.logger.info).toHaveBeenCalledWith(
-      {
-        entityType: "supplier",
-        itemCount: 2,
-        bucket: "cache-bucket",
-        key: "supplier_config_cache/supplier/records.json",
-        s3Uri: "s3://cache-bucket/supplier_config_cache/supplier/records.json",
-      },
-      "Created supplier config cache file",
-    );
+    expect(deps.logger.info).toHaveBeenCalledWith({
+      logRef: "001-LOADING-ENTITY",
+      description: "Loading supplier config entity",
+      entityType: "supplier",
+    });
+    expect(deps.logger.info).toHaveBeenCalledWith({
+      logRef: "002-LOADED-ENTITY",
+      description: "Loaded supplier config entity",
+      entityType: "supplier",
+      itemCount: 2,
+      hasItems: true,
+    });
+    expect(deps.logger.info).toHaveBeenCalledWith({
+      logRef: "003-CACHE-FILE-CREATED",
+      description: "Created supplier config cache file",
+      entityType: "supplier",
+      itemCount: 2,
+      bucket: "cache-bucket",
+      key: "supplier_config_cache/supplier/records.json",
+      s3Uri: "s3://cache-bucket/supplier_config_cache/supplier/records.json",
+    });
     expect(
       (put.input.Body as string).split("\n").map((line) => JSON.parse(line)),
     ).toEqual([
@@ -87,9 +90,12 @@ describe("populateEntityCache", () => {
       "supplier_config_cache/volume-group/records.json",
     );
     expect(put.input.Body).toBe("");
-    expect(deps.logger.info).toHaveBeenCalledWith(
-      { entityType: "volume-group", itemCount: 0, hasItems: false },
-      "Loaded supplier config entity",
-    );
+    expect(deps.logger.info).toHaveBeenCalledWith({
+      logRef: "002-LOADED-ENTITY",
+      description: "Loaded supplier config entity",
+      entityType: "volume-group",
+      itemCount: 0,
+      hasItems: false,
+    });
   });
 });

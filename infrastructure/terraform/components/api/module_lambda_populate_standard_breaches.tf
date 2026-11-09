@@ -40,6 +40,7 @@ module "populate_standard_breaches" {
     ATHENA_WORKGROUP       = aws_athena_workgroup.reporting.name
     ATHENA_DATABASE        = aws_glue_catalog_database.supplier.name
     EVENT_CACHE_TABLE_NAME = aws_glue_catalog_table.eventpub_parquet[0].name
+    LOG_REFERENCE          = "POP_STD_BCH"
   }
 }
 

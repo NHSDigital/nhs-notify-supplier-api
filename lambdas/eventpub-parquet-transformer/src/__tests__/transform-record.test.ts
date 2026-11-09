@@ -1,5 +1,7 @@
 import { FirehoseTransformationEvent } from "aws-lambda";
+import { Logger } from "pino";
 import { handler } from "..";
+import createHandler from "../handler";
 import transformRecord from "../transform-record";
 
 const encode = (value: unknown) =>
@@ -114,19 +116,43 @@ describe("transformRecord", () => {
 });
 
 describe("handler", () => {
-  it("transforms every record in the batch", async () => {
-    const event = {
-      records: [
-        { recordId: "1", data: encode({ id: "a" }) },
-        { recordId: "2", data: encode("bad") },
-      ],
-    } as unknown as FirehoseTransformationEvent;
+  const event = {
+    records: [
+      { recordId: "1", data: encode({ id: "a" }) },
+      { recordId: "2", data: encode("bad") },
+    ],
+  } as unknown as FirehoseTransformationEvent;
 
+  it("transforms every record in the batch", async () => {
     const res = await handler(event, {} as never, () => {});
 
     expect(res!.records.map((r) => r.result)).toEqual([
       "Ok",
       "ProcessingFailed",
     ]);
+  });
+
+  it("logs failed records and a batch summary", async () => {
+    const logger = { info: jest.fn(), warn: jest.fn() };
+    const createdHandler = createHandler({
+      logger: logger as unknown as Logger,
+    });
+
+    await createdHandler(event, {} as never, () => {});
+
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        logRef: "001-RECORD-FAILED",
+        recordId: "2",
+      }),
+    );
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.objectContaining({
+        logRef: "002-BATCH-COMPLETE",
+        recordCount: 2,
+        failedCount: 1,
+      }),
+    );
   });
 });

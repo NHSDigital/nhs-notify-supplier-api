@@ -15,7 +15,7 @@ export default function buildSamedayBreachesQuery(
 ),
 sameday_pack_specifications AS (
     SELECT id as specificationId FROM ${packSpecificationTableName}
-    WHERE array_join(assembly.features, ',') like '%SAME_DAY%'
+    WHERE contains(assembly.features, 'SAME_DAY')
 ),
 recent_letter_events AS (
     SELECT domainid, supplierid, status, clientid, campaignid, from_iso8601_timestamp(time) AS event_time
@@ -31,15 +31,15 @@ allocated_letters AS (
     GROUP BY domainid, supplierid, clientid, campaignid
     HAVING (SELECT iso8601 FROM now) >=
         CASE
-            WHEN CAST(min(event_time) AT TIME ZONE 'Europe/London' AS TIME) > TIME '15:00:00'
-                THEN date_trunc('day', min(event_time) AT TIME ZONE 'Europe/London') + INTERVAL '1' DAY + INTERVAL '23' HOUR + INTERVAL '59' MINUTE
-            ELSE date_trunc('day', min(event_time) AT TIME ZONE 'Europe/London') + INTERVAL '23' HOUR + INTERVAL '59' MINUTE
+            WHEN CAST(min(event_time) AT TIME ZONE 'Europe/London' AS TIME) >= TIME '15:00:00'
+                THEN date_trunc('day', min(event_time) AT TIME ZONE 'Europe/London') + INTERVAL '2' DAY
+            ELSE date_trunc('day', min(event_time) AT TIME ZONE 'Europe/London') + INTERVAL '1' DAY
         END
 ),
 completed_letters AS (
     SELECT domainid, supplierid, clientid, campaignid
     FROM recent_letter_events
-    WHERE status in ('REJECTED', 'FAILED', 'CANCELLED', 'FORWARDED', 'DISPATCHED')
+    WHERE status in ('REJECTED', 'FAILED', 'CANCELLED', 'FORWARDED', 'DISPATCHED', 'RETURNED','DELIVERED')
     GROUP BY domainid, supplierid, clientid, campaignid
 )
 SELECT supplierid, clientid, campaignid, count(*) AS breach_count

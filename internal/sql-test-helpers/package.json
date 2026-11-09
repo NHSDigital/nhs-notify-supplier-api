@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "testcontainers": "catalog:test"
+  },
+  "description": "Test-only helpers for running SQL queries against containerised databases",
+  "license": "MIT",
+  "main": "src/index.ts",
+  "name": "@internal/sql-test-helpers",
+  "private": true,
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test:unit": "echo \"Test helpers package has no unit tests\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "version": "0.1.0"
+}

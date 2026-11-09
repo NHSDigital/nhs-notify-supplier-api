@@ -9,6 +9,7 @@ import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { DatastoreConfig } from "../config";
 
 export async function setupDynamoDBContainer() {
+  // Pre-pulled in CI by .github/workflows/stage-2-test.yaml; keep in sync.
   const container = await new GenericContainer("amazon/dynamodb-local")
     .withExposedPorts(8000)
     .start();

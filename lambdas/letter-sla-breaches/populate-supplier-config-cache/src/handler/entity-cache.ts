@@ -5,6 +5,7 @@ import {
   QueryCommandOutput,
 } from "@aws-sdk/lib-dynamodb";
 import { Logger } from "pino";
+import LogRefs from "../log-references";
 
 export type EntityCacheDeps = {
   ddbClient: DynamoDBDocumentClient;
@@ -22,7 +23,11 @@ export default async function populateEntityCache(
   deps: EntityCacheDeps,
   entityType: string,
 ): Promise<number> {
-  deps.logger.info({ entityType }, "Loading supplier config entity");
+  deps.logger.info({
+    logRef: LogRefs.LOADING_ENTITY.code,
+    description: LogRefs.LOADING_ENTITY.description,
+    entityType,
+  });
 
   const items: Record<string, unknown>[] = [];
   let exclusiveStartKey: QueryCommandOutput["LastEvaluatedKey"];
@@ -40,10 +45,13 @@ export default async function populateEntityCache(
     exclusiveStartKey = page.LastEvaluatedKey;
   } while (exclusiveStartKey);
 
-  deps.logger.info(
-    { entityType, itemCount: items.length, hasItems: items.length > 0 },
-    "Loaded supplier config entity",
-  );
+  deps.logger.info({
+    logRef: LogRefs.LOADED_ENTITY.code,
+    description: LogRefs.LOADED_ENTITY.description,
+    entityType,
+    itemCount: items.length,
+    hasItems: items.length > 0,
+  });
 
   const key = `${CACHE_FOLDER}/${entityType}/records.json`;
   await deps.s3Client.send(
@@ -55,16 +63,15 @@ export default async function populateEntityCache(
     }),
   );
 
-  deps.logger.info(
-    {
-      entityType,
-      itemCount: items.length,
-      bucket: deps.env.EVENT_CACHE_BUCKET_NAME,
-      key,
-      s3Uri: `s3://${deps.env.EVENT_CACHE_BUCKET_NAME}/${key}`,
-    },
-    "Created supplier config cache file",
-  );
+  deps.logger.info({
+    logRef: LogRefs.CACHE_FILE_CREATED.code,
+    description: LogRefs.CACHE_FILE_CREATED.description,
+    entityType,
+    itemCount: items.length,
+    bucket: deps.env.EVENT_CACHE_BUCKET_NAME,
+    key,
+    s3Uri: `s3://${deps.env.EVENT_CACHE_BUCKET_NAME}/${key}`,
+  });
 
   return items.length;
 }

@@ -19,6 +19,7 @@ describe("lambdaEnv", () => {
     process.env.SUPPLIER_CONFIG_TABLE_NAME = "supplier-config-table";
     process.env.EVENT_CACHE_BUCKET_NAME = "event-cache-bucket";
     process.env.PINO_LOG_LEVEL = "debug";
+    process.env.LOG_REFERENCE = "POP_SUP_CFG";
 
     const { envVars } = require("../handler/env");
 
@@ -26,6 +27,7 @@ describe("lambdaEnv", () => {
       SUPPLIER_CONFIG_TABLE_NAME: "supplier-config-table",
       EVENT_CACHE_BUCKET_NAME: "event-cache-bucket",
       PINO_LOG_LEVEL: "debug",
+      LOG_REFERENCE: "POP_SUP_CFG",
     });
   });
 

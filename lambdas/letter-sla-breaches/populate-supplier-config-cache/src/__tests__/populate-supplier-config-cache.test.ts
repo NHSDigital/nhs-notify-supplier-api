@@ -58,9 +58,11 @@ describe("populateSupplierConfigCache", () => {
       status: "FAILURE",
       failureReason: `Failed to populate supplier config cache for: ${entityTypes[1]}`,
     });
-    expect(deps.logger.error).toHaveBeenCalledWith(
-      { entityType: entityTypes[1], error: expect.any(Error) },
-      "Failed to populate supplier config entity cache",
-    );
+    expect(deps.logger.error).toHaveBeenCalledWith({
+      logRef: "004-POPULATE-ENTITY-FAILED",
+      description: "Failed to populate supplier config entity cache",
+      entityType: entityTypes[1],
+      error: expect.any(Error),
+    });
   });
 });
