@@ -112,6 +112,31 @@ data "aws_iam_policy_document" "populate_unallocated_breaches_lambda" {
   }
 
   statement {
+    sid    = "AllowListEventCacheBuckets"
+    effect = "Allow"
+
+    actions = [
+      "s3:GetBucketLocation",
+      "s3:ListBucket",
+    ]
+
+    resources = [
+      "arn:aws:s3:::${local.event_cache_bucket_name}",
+      "arn:aws:s3:::${local.eventsub_event_cache_bucket_name}",
+    ]
+  }
+
+  statement {
+    sid     = "AllowReadEventCacheData"
+    effect  = "Allow"
+    actions = ["s3:GetObject"]
+    resources = [
+      "arn:aws:s3:::${local.event_cache_bucket_name}/*",
+      "arn:aws:s3:::${local.eventsub_event_cache_bucket_name}/*",
+    ]
+  }
+
+  statement {
     sid    = "AllowAthenaOutput"
     effect = "Allow"
 
