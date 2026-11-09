@@ -5,6 +5,9 @@
     "aws-embedded-metrics": "^4.2.1",
     "esbuild": "0.28.2"
   },
+  "devDependencies": {
+    "@internal/sql-test-helpers": "workspace:*"
+  },
   "name": "nhs-notify-supplier-api-populate-unallocated-breaches",
   "private": true,
   "scripts": {

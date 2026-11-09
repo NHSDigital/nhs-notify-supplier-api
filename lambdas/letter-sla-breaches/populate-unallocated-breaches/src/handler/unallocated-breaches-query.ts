@@ -1,11 +1,8 @@
-import {
-  type AthenaQuery,
-  buildAthenaDatePredicate,
-} from "@internal/letter-sla-breaches-common";
+import { type AthenaQuery } from "@internal/letter-sla-breaches-common";
 
 export default function buildUnallocatedBreachesQuery(
-  tableName: string,
-  packSpecificationTableName: string,
+  subTableName: string,
+  pubTableName: string,
   now: Date,
   daysHistory: number,
 ): AthenaQuery {
@@ -13,47 +10,30 @@ export default function buildUnallocatedBreachesQuery(
     queryString: `WITH now AS (
     SELECT from_iso8601_timestamp(?) AS iso8601
 ),
-sameday_pack_specifications AS (
-    SELECT id as specificationId FROM ${packSpecificationTableName}
-    WHERE array_join(assembly.features, ',') like '%SAME_DAY%'
+unpack_sub AS (
+    SELECT
+        json_extract_scalar(message, '$.data.domainId')        AS domainid,
+        json_extract_scalar(message, '$.data.supplierId')      AS supplierid,
+        json_extract_scalar(message, '$.data.clientId')        AS clientid,
+        json_extract_scalar(message, '$.data.campaignId')      AS campaignid
+    FROM ${subTableName}
+    WHERE from_iso8601_timestamp(timestamp) >= date_add(
+        'day',
+        -CAST(? AS integer),
+        (SELECT iso8601 FROM now)
+    )
 ),
-recent_letter_events AS (
-    SELECT domainid, supplierid, status, clientid, campaignid, from_iso8601_timestamp(time) AS event_time
-    FROM ${tableName} ep
-    WHERE ${buildAthenaDatePredicate(now, daysHistory)}
-    AND exists (select sps.specificationId from sameday_pack_specifications sps
-                where sps.specificationId = ep.specificationid )
-),
-allocated_letters AS (
-    SELECT domainid, supplierid, clientid, campaignid
-    FROM recent_letter_events
-    WHERE status = 'PENDING'
-    GROUP BY domainid, supplierid, clientid, campaignid
-    HAVING (SELECT iso8601 FROM now) >=
-        CASE
-            WHEN CAST(min(event_time) AT TIME ZONE 'Europe/London' AS TIME) > TIME '15:00:00'
-                THEN date_trunc('day', min(event_time) AT TIME ZONE 'Europe/London') + INTERVAL '1' DAY + INTERVAL '23' HOUR + INTERVAL '59' MINUTE
-            ELSE date_trunc('day', min(event_time) AT TIME ZONE 'Europe/London') + INTERVAL '23' HOUR + INTERVAL '59' MINUTE
-        END
-),
-completed_letters AS (
-    SELECT domainid, supplierid, clientid, campaignid
-    FROM recent_letter_events
-    WHERE status in ('REJECTED', 'FAILED', 'CANCELLED', 'FORWARDED', 'DISPATCHED')
-    GROUP BY domainid, supplierid, clientid, campaignid
+unpack_pub AS (
+    SELECT
+        json_extract_scalar(message, '$.data.domainId')       AS domainid
+    FROM ${pubTableName}
+    WHERE json_extract_scalar(message,'$.data.status') = 'PENDING'
 )
-SELECT supplierid, clientid, campaignid, count(*) AS breach_count
-FROM (
-    SELECT al.domainid, al.supplierid, al.clientid, al.campaignid
-    FROM allocated_letters al
-        LEFT JOIN completed_letters cl
-        ON al.domainid = cl.domainid
-        AND al.supplierid = cl.supplierid
-        AND al.clientid = cl.clientid
-        AND al.campaignid = cl.campaignid
-    WHERE cl.domainid IS NULL
-)
-GROUP BY supplierid, clientid, campaignid`,
-    executionParameters: [now.toISOString()],
+SELECT s.supplierid, s.clientid, s.campaignid, count(*) AS breach_count
+FROM unpack_sub s
+LEFT JOIN unpack_pub p ON s.domainid = p.domainid
+WHERE p.domainid IS NULL
+GROUP BY s.supplierid, s.clientid, s.campaignid`,
+    executionParameters: [now.toISOString(), String(daysHistory)],
   };
 }

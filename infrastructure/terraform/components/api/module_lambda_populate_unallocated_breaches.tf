@@ -37,10 +37,11 @@ module "populate_unallocated_breaches" {
   log_subscription_role_arn = local.acct.log_subscription_role_arn
 
   lambda_env_vars = {
-    ATHENA_WORKGROUP              = aws_athena_workgroup.reporting.name
-    ATHENA_DATABASE               = aws_glue_catalog_database.supplier.name
-    EVENT_CACHE_TABLE_NAME        = aws_glue_catalog_table.eventpub_parquet[0].name
-    PACK_SPECIFICATION_TABLE_NAME = aws_glue_catalog_table.supplier_config_cache["pack-specification"].name
+    ATHENA_WORKGROUP = aws_athena_workgroup.reporting.name
+    ATHENA_DATABASE  = aws_glue_catalog_database.supplier.name
+    # The Glue crawler names each table after its S3 bucket, with hyphens replaced by underscores
+    SUBSCRIPTION_TABLE_NAME = replace(local.eventsub_event_cache_bucket_name, "-", "_")
+    PUBLICATION_TABLE_NAME  = replace(local.event_cache_bucket_name, "-", "_")
   }
 }
 

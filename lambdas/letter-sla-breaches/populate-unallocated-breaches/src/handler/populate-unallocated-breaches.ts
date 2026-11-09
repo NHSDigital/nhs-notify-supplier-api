@@ -32,8 +32,8 @@ export default function createHandler(deps: Deps) {
       const rows = await runAthenaQuery(
         deps,
         buildUnallocatedBreachesQuery(
-          deps.env.EVENT_CACHE_TABLE_NAME,
-          deps.env.PACK_SPECIFICATION_TABLE_NAME,
+          deps.env.SUBSCRIPTION_TABLE_NAME,
+          deps.env.PUBLICATION_TABLE_NAME,
           parseEventDate(event.date),
           14,
         ),
