@@ -14,7 +14,10 @@ export default function createDependenciesContainer(): Deps {
 
   return {
     athenaClient: new AthenaClient(),
-    logger: createLogger({ logLevel: env.PINO_LOG_LEVEL }),
+    logger: createLogger({
+      logLevel: env.PINO_LOG_LEVEL,
+      logReference: env.EVENT_CACHE_TABLE_NAME,
+    }),
     env,
   };
 }

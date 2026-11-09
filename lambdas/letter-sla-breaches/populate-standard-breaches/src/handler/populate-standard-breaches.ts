@@ -3,6 +3,7 @@ import { Unit } from "aws-embedded-metrics";
 import { buildEMFObject } from "@internal/helpers";
 import { type Deps } from "./deps";
 import buildStandardBreachesQuery from "./standard-breaches-query";
+import LogRefs from "../log-references";
 
 export type PopulateStandardBreachesEvent = {
   date: string;
@@ -25,8 +26,8 @@ export default function createHandler(deps: Deps) {
     const totalBreaches = rows
       .map((row) => Number(row.breach_count!))
       .reduce((a, b) => a + b, 0);
-    deps.logger.info(
-      buildEMFObject(
+    deps.logger.info({
+      ...buildEMFObject(
         "",
         {},
         {
@@ -35,7 +36,8 @@ export default function createHandler(deps: Deps) {
           unit: Unit.Count,
         },
       ),
-    );
+      logRef: LogRefs.BREACH_TOTAL_METRIC.code,
+    });
 
     for (const row of rows) {
       const emfObject = buildEMFObject(
@@ -51,7 +53,7 @@ export default function createHandler(deps: Deps) {
           unit: Unit.Count,
         },
       );
-      deps.logger.info(emfObject);
+      deps.logger.info({ ...emfObject, logRef: LogRefs.BREACH_COUNT_METRIC });
     }
   };
 }

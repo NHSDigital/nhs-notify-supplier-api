@@ -6,6 +6,7 @@ const EnvVarsSchema = z.object({
   EVENT_CACHE_TABLE_NAME: z.string(),
   PACK_SPECIFICATION_TABLE_NAME: z.string(),
   PINO_LOG_LEVEL: z.string().optional(),
+  LOG_REFERENCE: z.string().optional(),
 });
 
 export type EnvVars = z.infer<typeof EnvVarsSchema>;

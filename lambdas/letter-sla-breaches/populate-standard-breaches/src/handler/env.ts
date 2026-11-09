@@ -8,6 +8,7 @@ const EnvVarsSchema = z.object({
   DAYS_TO_LOOK_BACK: z.coerce.number().int().positive(),
   STANDARD_SLA_WORKING_DAYS: z.coerce.number().int().positive(),
   PINO_LOG_LEVEL: z.string().optional(),
+  LOG_REFERENCE: z.string().optional(),
 });
 
 export type EnvVars = z.infer<typeof EnvVarsSchema>;
