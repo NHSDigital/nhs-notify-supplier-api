@@ -1,4 +1,4 @@
-mport { z } from "zod";
+import { z } from "zod";
 
 const EnvVarsSchema = z.object({
   ATHENA_WORKGROUP: z.string(),
