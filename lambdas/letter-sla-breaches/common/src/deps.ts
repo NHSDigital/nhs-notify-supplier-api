@@ -2,6 +2,15 @@ import { AthenaClient } from "@aws-sdk/client-athena";
 import { createLogger } from "@internal/helpers";
 import { Logger } from "pino";
 
+export type AthenaDeps = {
+  athenaClient: AthenaClient;
+  logger: Logger;
+  env: {
+    ATHENA_WORKGROUP: string;
+    ATHENA_DATABASE: string;
+  };
+};
+
 export type Deps = {
   athenaClient: AthenaClient;
   logger: Logger;
