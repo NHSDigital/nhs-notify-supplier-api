@@ -302,7 +302,7 @@ describe("update-letter-queue Lambda", () => {
           logRef: LogRefs.INVALID_LETTER_DROPPED.code,
           recordId: "seq-0",
           invalidFields: undefined,
-          error: expect.objectContaining({
+          err: expect.objectContaining({
             message: "Unsupported type passed: X",
           }),
         }),
@@ -398,6 +398,7 @@ describe("update-letter-queue Lambda", () => {
           recordId: "seq-0",
           supplierId: "supplier1",
           letterId: "1",
+          err: expect.objectContaining({ message: "DynamoDB error" }),
         }),
       );
       assertSummaryLogged({

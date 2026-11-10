@@ -41,6 +41,7 @@ type Outcome = "succeeded" | "failed" | "skipped" | "dropped";
 type RecordResult = {
   sequenceNumber: string;
   outcome: Outcome;
+  // delta and supplierId are only set when a queue write was attempted.
   delta: number;
   supplierId?: string;
 };
@@ -128,7 +129,7 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
           deps.logger.error({
             logRef: LogRefs.ERROR_PROCESSING_DDB_RECORD.code,
             description: LogRefs.ERROR_PROCESSING_DDB_RECORD.description,
-            error,
+            err: error,
             recordId: sequenceNumber,
             supplierId,
             letterId,
@@ -339,7 +340,7 @@ function parseNewImage<T extends z.ZodType>(
               ({ message, path }) => `${path.join(".")}: ${message}`,
             )
           : undefined,
-      error,
+      err: error,
       recordId: sequenceNumber,
       // null rather than undefined so a missing value still appears in the log.
       supplierId: newImage?.supplierId?.S ?? null,
