@@ -15,6 +15,7 @@ Maintains the pending letter queue DynamoDB table as a projection of the main le
 3. Records that match neither condition are ignored (REMOVE events, MODIFY with no PENDING transition, inserts with non-PENDING status such as REJECTED).
 4. Successful queue additions/removals are counted, and the net queue delta is emitted as a CloudWatch EMF `QueueDelta` metric per `supplierId`.
 5. After all tasks settle, the handler reports the earliest failed Kinesis sequence number in `batchItemFailures` so the shard retries from that point. Later records for that same letter are deferred to the retry; independent letters may already have been processed.
+6. Records that can never be processed are dropped rather than retried (see below), so they cannot block the shard.
 
 ## Key Integration Points
 
@@ -28,7 +29,11 @@ Maintains the pending letter queue DynamoDB table as a projection of the main le
 - **Updates to a PENDING letter**: a MODIFY that leaves the letter PENDING attempts an insert, which is a no-op if the letter is already queued. The existing queue entry is not updated.
 - **REJECTED letters are never queued.** Letters inserted with status REJECTED (from a failed supplier allocation) are INSERT events but with `status != PENDING`, so `isPendingLetter` returns false and they are not added to the queue.
 - **Partial-batch retry**: the event source mapping retries from the earliest failed record, so later records already processed for other letters are processed again. The conditional writes make those repeats no-ops.
-- **Undecodable records**: if a record's payload cannot be decoded its letter is unknown, so every later record in the batch is deferred to the retry rather than risk applying a later change for the same letter first.
+- **Only the fields used are validated**: an insert parses `supplierId`, `id`, `specificationId`, `groupId`, `priority` and `sha256Hash`; a delete parses only `supplierId` and `id`. Changes to other letter fields, such as a new required field that older letters lack, do not affect this Lambda.
+- **Failures that are retried vs dropped**:
+  - A queue write error (for example DynamoDB throttling) is reported in `batchItemFailures` and retried.
+  - A payload that cannot be decoded, or a letter missing a field this Lambda needs, can never succeed on retry. It is logged at ERROR (`013-ERROR-EXTRACTING-PAYLOAD` or `014-INVALID-LETTER-DROPPED`, with `recordId` and `supplierId`/`letterId`; for an invalid letter the IDs are `null` when missing, and `invalidFields` lists each failing field and why), counted as `droppedCount` in the summary log, and not retried. Later records for the same letter are still processed.
+  - A dropped record's queue change is lost. The queue entry for that letter may be missing or stale (until its TTL) until the letter changes again.
 - **Queue entry expiry**: queue entries have a TTL of `letter_queue_ttl_hours` (default 168 hours).
 - Queue entries use a composite `queueSortOrderSk` (zero-padded priority + ISO timestamp) to enable priority-ordered retrieval by the API handler's `GET /letters` endpoint.
 

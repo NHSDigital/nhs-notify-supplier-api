@@ -7,9 +7,9 @@ import {
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 import { Unit } from "aws-embedded-metrics";
 import { buildEMFObject } from "@internal/helpers";
+import { z } from "zod";
 import {
   InsertPendingLetter,
-  Letter,
   LetterAlreadyExistsError,
   LetterNotFoundError,
   LetterSchema,
@@ -17,11 +17,30 @@ import {
 import { Deps } from "./deps";
 import LogRefs from "./log-references";
 
-// skipped: an earlier record this one depends on failed, so it is left for the Kinesis retry.
+// Only the letter fields this Lambda uses, so a change to any other letter field
+// (e.g. a new required field missing from older letters) cannot make a record fail.
+const QueueKeySchema = LetterSchema.pick({ supplierId: true, id: true });
+const PendingLetterSourceSchema = LetterSchema.pick({
+  supplierId: true,
+  id: true,
+  specificationId: true,
+  groupId: true,
+  priority: true,
+  sha256Hash: true,
+});
+type QueueKey = z.infer<typeof QueueKeySchema>;
+type PendingLetterSource = z.infer<typeof PendingLetterSourceSchema>;
+
+// succeeded: done, including no-ops.
+// failed: a write error that may be transient, so Kinesis retries from this record.
+// skipped: an earlier record for the same letter failed, so this one is retried with it.
+// dropped: the record can never be processed (undecodable or invalid letter data),
+//   so it is logged as an ERROR and not retried, to avoid blocking the shard.
+type Outcome = "succeeded" | "failed" | "skipped" | "dropped";
+
 type RecordResult = {
   sequenceNumber: string;
-  failed: boolean;
-  skipped: boolean;
+  outcome: Outcome;
   delta: number;
   supplierId?: string;
 };
@@ -37,20 +56,14 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
     // Records are processed concurrently across letters but in order within a letter.
     // Maps each letter to its latest task, resolving to whether later records may proceed.
     const tasksByLetter = new Map<string, Promise<boolean>>();
-    // The letter of an undecodable record is unknown, so every later record is
-    // deferred to the retry in case it belongs to the same letter.
-    let undecodableRecordSeen = false;
     const tasks = streamEvent.Records.map((record): Promise<RecordResult> => {
       const { sequenceNumber } = record.kinesis;
-      if (undecodableRecordSeen) {
-        return Promise.resolve(skippedResult(sequenceNumber));
-      }
       let ddbRecord: DynamoDBRecord;
       try {
         ddbRecord = extractPayload(record, deps);
       } catch {
-        undecodableRecordSeen = true;
-        return Promise.resolve(failedResult(sequenceNumber));
+        // Already logged as an ERROR; retrying can never decode it.
+        return Promise.resolve(result(sequenceNumber, "dropped"));
       }
 
       // REMOVE events only have an OldImage.
@@ -69,33 +82,48 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
         // Skip if the previous task for this letter failed or was skipped, so writes
         // are never applied out of order. Kinesis retries them from the earliest failure.
         if (previous && !(await previous)) {
-          return skippedResult(sequenceNumber);
+          return result(sequenceNumber, "skipped");
         }
 
         try {
           if (isPendingLetter(ddbRecord)) {
-            const letter = extractNewOrUpdatedLetter(ddbRecord);
-            const added = await addPendingLetterToQueue(letter, deps);
-            return {
+            const letter = parseNewImage(
+              ddbRecord,
+              PendingLetterSourceSchema,
               sequenceNumber,
-              failed: false,
-              skipped: false,
-              delta: added,
-              supplierId: letter.supplierId,
-            };
+              deps,
+            );
+            if (letter === undefined) {
+              return result(sequenceNumber, "dropped");
+            }
+            const added = await addPendingLetterToQueue(letter, deps);
+            return result(
+              sequenceNumber,
+              "succeeded",
+              added,
+              letter.supplierId,
+            );
           }
           if (isNoLongerPending(ddbRecord)) {
-            const letter = extractNewOrUpdatedLetter(ddbRecord);
-            const deleted = await deletePendingLetterFromQueue(letter, deps);
-            return {
+            // Removing a letter queue entry only needs its keys.
+            const letter = parseNewImage(
+              ddbRecord,
+              QueueKeySchema,
               sequenceNumber,
-              failed: false,
-              skipped: false,
-              delta: -deleted,
-              supplierId: letter.supplierId,
-            };
+              deps,
+            );
+            if (letter === undefined) {
+              return result(sequenceNumber, "dropped");
+            }
+            const deleted = await deletePendingLetterFromQueue(letter, deps);
+            return result(
+              sequenceNumber,
+              "succeeded",
+              -deleted,
+              letter.supplierId,
+            );
           }
-          return { sequenceNumber, failed: false, skipped: false, delta: 0 };
+          return result(sequenceNumber, "succeeded");
         } catch (error) {
           deps.logger.error({
             logRef: LogRefs.ERROR_PROCESSING_DDB_RECORD.code,
@@ -105,14 +133,17 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
             supplierId,
             letterId,
           });
-          return failedResult(sequenceNumber);
+          return result(sequenceNumber, "failed");
         }
       })();
       if (key !== undefined) {
         // Becomes the "previous" task for the next record of this letter.
+        // A dropped record will never be retried, so later records must not wait for it.
         tasksByLetter.set(
           key,
-          task.then(({ failed, skipped }) => !failed && !skipped),
+          task.then(
+            ({ outcome }) => outcome === "succeeded" || outcome === "dropped",
+          ),
         );
       }
       return task;
@@ -123,26 +154,28 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
     const deltasBySupplierId = new Map<string, number>();
     let successCount = 0;
     let failureCount = 0;
-    for (const result of results) {
-      if (result.failed) {
+    let droppedCount = 0;
+    for (const { delta, outcome, supplierId } of results) {
+      if (outcome === "failed") {
         failureCount += 1;
-      } else if (result.supplierId !== undefined) {
+      } else if (outcome === "dropped") {
+        droppedCount += 1;
+      } else if (supplierId !== undefined) {
         // Each insert or delete changes the queue by one, so |delta| is the write count.
-        successCount += Math.abs(result.delta);
-        updateDeltas(deltasBySupplierId, result.supplierId, result.delta);
+        successCount += Math.abs(delta);
+        updateDeltas(deltasBySupplierId, supplierId, delta);
       }
     }
     recordProcessing(
       deps,
-      successCount,
-      failureCount,
+      { successCount, failureCount, droppedCount },
       deltasBySupplierId,
       streamEvent.Records.length,
     );
     // Report only the earliest failure: Kinesis retries from that record onwards,
     // which includes skipped records. Replayed records that already succeeded are
     // safe because queue inserts and deletes are conditional writes.
-    const firstFailure = results.find((result) => result.failed);
+    const firstFailure = results.find(({ outcome }) => outcome === "failed");
     return {
       batchItemFailures: firstFailure
         ? [{ itemIdentifier: firstFailure.sequenceNumber }]
@@ -151,16 +184,19 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
   };
 }
 
-function failedResult(sequenceNumber: string): RecordResult {
-  return { sequenceNumber, failed: true, skipped: false, delta: 0 };
-}
-
-function skippedResult(sequenceNumber: string): RecordResult {
-  return { sequenceNumber, failed: false, skipped: true, delta: 0 };
+function result(
+  sequenceNumber: string,
+  outcome: Outcome,
+  delta = 0,
+  supplierId?: string,
+): RecordResult {
+  return supplierId === undefined
+    ? { sequenceNumber, outcome, delta }
+    : { sequenceNumber, outcome, delta, supplierId };
 }
 
 async function addPendingLetterToQueue(
-  letter: Letter,
+  letter: PendingLetterSource,
   deps: Deps,
 ): Promise<number> {
   const pendingLetter = mapLetterToPendingLetter(letter);
@@ -188,7 +224,7 @@ async function addPendingLetterToQueue(
 }
 
 async function deletePendingLetterFromQueue(
-  letter: Letter,
+  letter: QueueKey,
   deps: Deps,
 ): Promise<number> {
   try {
@@ -216,8 +252,11 @@ async function deletePendingLetterFromQueue(
 
 function recordProcessing(
   deps: Deps,
-  successCount: number,
-  failureCount: number,
+  {
+    droppedCount,
+    failureCount,
+    successCount,
+  }: { successCount: number; failureCount: number; droppedCount: number },
   deltasBySupplierId: Map<string, number>,
   totalCount: number,
 ) {
@@ -226,6 +265,7 @@ function recordProcessing(
     description: LogRefs.PROCESSING_COMPLETE.description,
     successCount,
     failureCount,
+    droppedCount,
     processedCount: successCount + failureCount,
     totalCount,
   });
@@ -294,12 +334,40 @@ function extractPayload(
   }
 }
 
-function extractNewOrUpdatedLetter(record: DynamoDBRecord): Letter {
-  const newImage = record.dynamodb?.NewImage;
-  return LetterSchema.parse(unmarshall(newImage as any));
+function parseNewImage<T extends z.ZodType>(
+  record: DynamoDBRecord,
+  schema: T,
+  sequenceNumber: string,
+  deps: Deps,
+): z.infer<T> | undefined {
+  try {
+    return schema.parse(unmarshall(record.dynamodb?.NewImage as any));
+  } catch (error) {
+    const newImage = record.dynamodb?.NewImage;
+    deps.logger.error({
+      logRef: LogRefs.INVALID_LETTER_DROPPED.code,
+      description: LogRefs.INVALID_LETTER_DROPPED.description,
+      // Which fields failed and why (e.g. "supplierId: Invalid input: expected string,
+      // received undefined"). Zod issues do not include the field values.
+      invalidFields:
+        error instanceof z.ZodError
+          ? error.issues.map(
+              ({ message, path }) => `${path.join(".")}: ${message}`,
+            )
+          : undefined,
+      error,
+      recordId: sequenceNumber,
+      // null rather than undefined so a missing value still appears in the log.
+      supplierId: newImage?.supplierId?.S ?? null,
+      letterId: newImage?.id?.S ?? null,
+    });
+    return undefined;
+  }
 }
 
-function mapLetterToPendingLetter(letter: Letter): InsertPendingLetter {
+function mapLetterToPendingLetter(
+  letter: PendingLetterSource,
+): InsertPendingLetter {
   return {
     supplierId: letter.supplierId,
     letterId: letter.id,

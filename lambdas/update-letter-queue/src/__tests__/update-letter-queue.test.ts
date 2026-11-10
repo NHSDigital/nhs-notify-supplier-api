@@ -164,15 +164,155 @@ describe("update-letter-queue Lambda", () => {
   });
 
   describe("Error handling", () => {
-    it("rejects invalid letter data", async () => {
+    it("drops a pending letter that has no specificationId or groupId, without retrying it", async () => {
       const handler = createHandler(mockedDeps);
-      const newLetter = { id: "1", status: "PENDING" } as Letter;
+      // The queue entry needs specificationId and groupId, so this letter can never be queued.
+      const newLetter = omitField(
+        omitField(generateLetter("PENDING"), "specificationId"),
+        "groupId",
+      );
 
       const testData = generateKinesisEvent([generateInsertRecord(newLetter)]);
       const result = await handler(testData, mockDeep<Context>(), jest.fn());
 
       expect(mockedDeps.letterQueueRepository.putLetter).not.toHaveBeenCalled();
-      expect(result.batchItemFailures).toEqual([{ itemIdentifier: "seq-0" }]);
+      expect(result.batchItemFailures).toEqual([]);
+      expect(mockedDeps.logger.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logRef: LogRefs.INVALID_LETTER_DROPPED.code,
+          recordId: "seq-0",
+          supplierId: "supplier1",
+          letterId: "1",
+          invalidFields: [
+            expect.stringMatching(/^specificationId: /),
+            expect.stringMatching(/^groupId: /),
+          ],
+        }),
+      );
+      expect(mockedDeps.logger.info).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logRef: LogRefs.PROCESSING_COMPLETE.code,
+          failureCount: 0,
+          droppedCount: 1,
+        }),
+      );
+    });
+
+    it("queues a pending letter that lacks fields the queue does not use", async () => {
+      const handler = createHandler(mockedDeps);
+      const newLetter = omitField(generateLetter("PENDING"), "billingRef");
+
+      const testData = generateKinesisEvent([generateInsertRecord(newLetter)]);
+      const result = await handler(testData, mockDeep<Context>(), jest.fn());
+
+      expect(mockedDeps.letterQueueRepository.putLetter).toHaveBeenCalledWith(
+        expect.objectContaining({ supplierId: "supplier1", letterId: "1" }),
+      );
+      expect(result.batchItemFailures).toEqual([]);
+    });
+
+    it("removes a letter from the queue using only its key fields", async () => {
+      const handler = createHandler(mockedDeps);
+      const oldLetter = generateLetter("PENDING");
+      const newLetter = omitField(
+        generateLetter("ACCEPTED"),
+        "specificationId",
+      );
+
+      const testData = generateKinesisEvent([
+        generateModifyRecord(oldLetter, newLetter),
+      ]);
+      const result = await handler(testData, mockDeep<Context>(), jest.fn());
+
+      expect(
+        mockedDeps.letterQueueRepository.deleteLetter,
+      ).toHaveBeenCalledWith("supplier1", "1");
+      expect(result.batchItemFailures).toEqual([]);
+    });
+
+    it.each([
+      { field: "supplierId", supplierId: null, letterId: "1" },
+      { field: "id", supplierId: "supplier1", letterId: null },
+    ] as const)(
+      "drops a removal when the letter has no $field, because it is part of the queue key",
+      async ({ field, letterId, supplierId }) => {
+        const handler = createHandler(mockedDeps);
+        const testData = generateKinesisEvent([
+          generateModifyRecord(
+            generateLetter("PENDING"),
+            omitField(generateLetter("ACCEPTED"), field),
+          ),
+        ]);
+
+        const result = await handler(testData, mockDeep<Context>(), jest.fn());
+
+        expect(
+          mockedDeps.letterQueueRepository.deleteLetter,
+        ).not.toHaveBeenCalled();
+        expect(result.batchItemFailures).toEqual([]);
+        expect(mockedDeps.logger.error).toHaveBeenCalledWith(
+          expect.objectContaining({
+            logRef: LogRefs.INVALID_LETTER_DROPPED.code,
+            recordId: "seq-0",
+            supplierId,
+            letterId,
+            invalidFields: [expect.stringContaining(`${field}: `)],
+          }),
+        );
+      },
+    );
+
+    it("still processes later records for a letter after dropping its invalid record", async () => {
+      const handler = createHandler(mockedDeps);
+      const testData = generateKinesisEvent([
+        // Invalid: no specificationId, so it cannot be queued and is dropped.
+        generateInsertRecord(
+          omitField(generateLetter("PENDING"), "specificationId"),
+        ),
+        // Same letter: the removal only needs supplierId and id, so it runs.
+        generateModifyRecord(
+          generateLetter("PENDING"),
+          generateLetter("ACCEPTED"),
+        ),
+      ]);
+
+      const result = await handler(testData, mockDeep<Context>(), jest.fn());
+
+      expect(mockedDeps.letterQueueRepository.putLetter).not.toHaveBeenCalled();
+      expect(
+        mockedDeps.letterQueueRepository.deleteLetter,
+      ).toHaveBeenCalledWith("supplier1", "1");
+      expect(result.batchItemFailures).toEqual([]);
+      expect(mockedDeps.logger.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logRef: LogRefs.INVALID_LETTER_DROPPED.code,
+          recordId: "seq-0",
+          invalidFields: [expect.stringMatching(/^specificationId: /)],
+        }),
+      );
+    });
+
+    it("drops a letter whose image cannot be converted from DynamoDB format", async () => {
+      const handler = createHandler(mockedDeps);
+      const insertRecord = generateInsertRecord(generateLetter("PENDING"));
+      // "X" is not a DynamoDB attribute type, so unmarshall throws a non-zod error.
+      insertRecord.dynamodb!.NewImage!.groupId = { X: "?" } as never;
+
+      const testData = generateKinesisEvent([insertRecord]);
+      const result = await handler(testData, mockDeep<Context>(), jest.fn());
+
+      expect(mockedDeps.letterQueueRepository.putLetter).not.toHaveBeenCalled();
+      expect(result.batchItemFailures).toEqual([]);
+      expect(mockedDeps.logger.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logRef: LogRefs.INVALID_LETTER_DROPPED.code,
+          recordId: "seq-0",
+          invalidFields: undefined,
+          error: expect.objectContaining({
+            message: "Unsupported type passed: X",
+          }),
+        }),
+      );
     });
 
     it("waits for the batch and retries from the earliest failed record", async () => {
@@ -333,7 +473,7 @@ describe("update-letter-queue Lambda", () => {
       );
     });
 
-    it("defers every record after an invalid JSON payload to the retry", async () => {
+    it("drops an invalid JSON payload and processes the rest of the batch", async () => {
       const handler = createHandler(mockedDeps);
       const invalidJsonPayload = "not valid json {{{";
       const testData = {
@@ -366,12 +506,15 @@ describe("update-letter-queue Lambda", () => {
 
       const result = await handler(testData, mockDeep<Context>(), jest.fn());
 
-      expect(result.batchItemFailures).toEqual([{ itemIdentifier: "seq-123" }]);
+      expect(result.batchItemFailures).toEqual([]);
       expect(mockedDeps.letterQueueRepository.putLetter).toHaveBeenCalledTimes(
-        1,
+        2,
       );
       expect(mockedDeps.letterQueueRepository.putLetter).toHaveBeenCalledWith(
         expect.objectContaining({ letterId: "1" }),
+      );
+      expect(mockedDeps.letterQueueRepository.putLetter).toHaveBeenCalledWith(
+        expect.objectContaining({ letterId: "2" }),
       );
       expect(mockedDeps.logger.error).toHaveBeenCalledTimes(1);
       expect(mockedDeps.logger.error).toHaveBeenCalledWith(
@@ -383,9 +526,9 @@ describe("update-letter-queue Lambda", () => {
       );
       expect(mockedDeps.logger.info).toHaveBeenCalledWith(
         expect.objectContaining({
-          successCount: 1,
-          failureCount: 1,
-          processedCount: 2,
+          successCount: 2,
+          failureCount: 0,
+          droppedCount: 1,
           totalCount: 3,
         }),
       );
@@ -548,6 +691,13 @@ describe("update-letter-queue Lambda", () => {
     });
   });
 });
+
+// Simulates a stored letter that predates (or lacks) a schema field.
+function omitField(letter: Letter, field: keyof Letter): Letter {
+  return Object.fromEntries(
+    Object.entries(letter).filter(([key]) => key !== field),
+  ) as Letter;
+}
 
 function encodeRecord(record: DynamoDBRecord): string {
   return Buffer.from(JSON.stringify(record)).toString("base64");

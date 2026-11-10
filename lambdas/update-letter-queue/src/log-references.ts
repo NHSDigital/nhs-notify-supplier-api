@@ -51,6 +51,10 @@ const LogRefs = {
     code: "013-ERROR-EXTRACTING-PAYLOAD",
     description: "Error extracting payload",
   },
+  INVALID_LETTER_DROPPED: {
+    code: "014-INVALID-LETTER-DROPPED",
+    description: "Invalid letter data, record dropped",
+  },
 };
 
 export default LogRefs;
