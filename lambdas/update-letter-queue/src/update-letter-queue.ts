@@ -152,26 +152,12 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
     // Results are in the same order as Records.
     const results = await Promise.all(tasks);
     const deltasBySupplierId = new Map<string, number>();
-    let successCount = 0;
-    let failureCount = 0;
-    let droppedCount = 0;
     for (const { delta, outcome, supplierId } of results) {
-      if (outcome === "failed") {
-        failureCount += 1;
-      } else if (outcome === "dropped") {
-        droppedCount += 1;
-      } else if (supplierId !== undefined) {
-        // Each insert or delete changes the queue by one, so |delta| is the write count.
-        successCount += Math.abs(delta);
+      if (outcome === "succeeded" && supplierId !== undefined) {
         updateDeltas(deltasBySupplierId, supplierId, delta);
       }
     }
-    recordProcessing(
-      deps,
-      { successCount, failureCount, droppedCount },
-      deltasBySupplierId,
-      streamEvent.Records.length,
-    );
+    recordProcessing(deps, results, deltasBySupplierId);
     // Report only the earliest failure: Kinesis retries from that record onwards,
     // which includes skipped records. Replayed records that already succeeded are
     // safe because queue inserts and deletes are conditional writes.
@@ -253,22 +239,19 @@ async function deletePendingLetterFromQueue(
 
 function recordProcessing(
   deps: Deps,
-  {
-    droppedCount,
-    failureCount,
-    successCount,
-  }: { successCount: number; failureCount: number; droppedCount: number },
+  results: RecordResult[],
   deltasBySupplierId: Map<string, number>,
-  totalCount: number,
 ) {
+  const count = (outcome: Outcome) =>
+    results.filter((r) => r.outcome === outcome).length;
   deps.logger.info({
     logRef: LogRefs.PROCESSING_COMPLETE.code,
     description: LogRefs.PROCESSING_COMPLETE.description,
-    successCount,
-    failureCount,
-    droppedCount,
-    processedCount: successCount + failureCount,
-    totalCount,
+    successCount: count("succeeded"),
+    failureCount: count("failed"),
+    skippedAfterFailureCount: count("skipped"),
+    droppedCount: count("dropped"),
+    totalCount: results.length,
   });
 
   for (const [supplierId, delta] of deltasBySupplierId) {

@@ -147,12 +147,7 @@ describe("update-letter-queue Lambda", () => {
 
       expect(mockedDeps.letterQueueRepository.putLetter).not.toHaveBeenCalled();
       expect(result.batchItemFailures).toEqual([]);
-      expect(mockedDeps.logger.info).toHaveBeenCalledWith(
-        expect.objectContaining({
-          processedCount: 0,
-          totalCount: 0,
-        }),
-      );
+      assertSummaryLogged({ totalCount: 0 });
     });
 
     it("reports the batch size even when no letters are queued", async () => {
@@ -164,14 +159,7 @@ describe("update-letter-queue Lambda", () => {
       const result = await handler(testData, mockDeep<Context>(), jest.fn());
 
       expect(result.batchItemFailures).toEqual([]);
-      expect(mockedDeps.logger.info).toHaveBeenCalledWith(
-        expect.objectContaining({
-          successCount: 0,
-          failureCount: 0,
-          processedCount: 0,
-          totalCount: 1,
-        }),
-      );
+      assertSummaryLogged({ successCount: 1, totalCount: 1 });
     });
   });
 
@@ -201,13 +189,7 @@ describe("update-letter-queue Lambda", () => {
           ],
         }),
       );
-      expect(mockedDeps.logger.info).toHaveBeenCalledWith(
-        expect.objectContaining({
-          logRef: LogRefs.PROCESSING_COMPLETE.code,
-          failureCount: 0,
-          droppedCount: 1,
-        }),
-      );
+      assertSummaryLogged({ droppedCount: 1, totalCount: 1 });
     });
 
     it("queues a pending letter that lacks fields the queue does not use", async () => {
@@ -352,13 +334,7 @@ describe("update-letter-queue Lambda", () => {
       const result = await pendingResult;
 
       expect(result.batchItemFailures).toEqual([{ itemIdentifier: "seq-0" }]);
-      expect(mockedDeps.logger.info).toHaveBeenCalledWith(
-        expect.objectContaining({
-          successCount: 0,
-          failureCount: 2,
-          totalCount: 2,
-        }),
-      );
+      assertSummaryLogged({ failureCount: 2, totalCount: 2 });
     });
 
     it("serializes updates for the same letter without blocking other letters", async () => {
@@ -424,14 +400,11 @@ describe("update-letter-queue Lambda", () => {
           letterId: "1",
         }),
       );
-      expect(mockedDeps.logger.info).toHaveBeenCalledWith(
-        expect.objectContaining({
-          successCount: 0,
-          failureCount: 1,
-          processedCount: 1,
-          totalCount: 2,
-        }),
-      );
+      assertSummaryLogged({
+        failureCount: 1,
+        skippedAfterFailureCount: 1,
+        totalCount: 2,
+      });
       assertQueueDeltaMetricNotLogged();
     });
 
@@ -463,6 +436,7 @@ describe("update-letter-queue Lambda", () => {
           letterId: "1",
         }),
       );
+      assertSummaryLogged({ successCount: 2, totalCount: 2 });
     });
 
     it("does not treat a replayed delete as a failure", async () => {
@@ -542,14 +516,7 @@ describe("update-letter-queue Lambda", () => {
           recordId: "seq-123",
         }),
       );
-      expect(mockedDeps.logger.info).toHaveBeenCalledWith(
-        expect.objectContaining({
-          successCount: 2,
-          failureCount: 0,
-          droppedCount: 1,
-          totalCount: 3,
-        }),
-      );
+      assertSummaryLogged({ successCount: 2, droppedCount: 1, totalCount: 3 });
     });
   });
 
@@ -572,6 +539,7 @@ describe("update-letter-queue Lambda", () => {
       assertQueueDeltaMetricLogged("supplier1", 1);
     });
 
+    // eslint-disable-next-line jest/expect-expect
     it("breaks the metric down by supplier", async () => {
       const handler = createHandler(mockedDeps);
       const oldLetter1 = generateLetter("PENDING", { id: "1" });
@@ -591,15 +559,23 @@ describe("update-letter-queue Lambda", () => {
 
       assertQueueDeltaMetricLogged("supplier1", 0);
       assertQueueDeltaMetricLogged("supplier2", 1);
-      // supplier1's delete and insert cancel out in the metric but are still two writes.
-      expect(mockedDeps.logger.info).toHaveBeenCalledWith(
-        expect.objectContaining({
-          successCount: 3,
-          failureCount: 0,
-          processedCount: 3,
-          totalCount: 3,
-        }),
-      );
+      // supplier1's delete and insert cancel out in the metric but are both successes.
+      assertSummaryLogged({ successCount: 3, totalCount: 3 });
+    });
+
+    // eslint-disable-next-line jest/expect-expect
+    it("logs a zero delta for a supplier whose only queue writes were replays", async () => {
+      const handler = createHandler(mockedDeps);
+      (
+        mockedDeps.letterQueueRepository.putLetter as jest.Mock
+      ).mockRejectedValueOnce(new LetterAlreadyExistsError("supplier1", "1"));
+
+      const testData = generateKinesisEvent([
+        generateInsertRecord(generateLetter("PENDING")),
+      ]);
+      await handler(testData, mockDeep<Context>(), jest.fn());
+
+      assertQueueDeltaMetricLogged("supplier1", 0);
     });
 
     // eslint-disable-next-line jest/expect-expect
@@ -761,6 +737,27 @@ function mapToImage(oldLetter: Letter) {
       typeof value === "string" ? { S: value } : { N: String(value) },
     ]),
   );
+}
+
+type SummaryCounts = {
+  successCount?: number;
+  failureCount?: number;
+  skippedAfterFailureCount?: number;
+  droppedCount?: number;
+  totalCount: number;
+};
+
+// Checks the whole summary line; counts not given are expected to be 0.
+function assertSummaryLogged(counts: SummaryCounts) {
+  expect(mockedDeps.logger.info).toHaveBeenCalledWith({
+    logRef: LogRefs.PROCESSING_COMPLETE.code,
+    description: LogRefs.PROCESSING_COMPLETE.description,
+    successCount: 0,
+    failureCount: 0,
+    skippedAfterFailureCount: 0,
+    droppedCount: 0,
+    ...counts,
+  });
 }
 
 function assertQueueDeltaMetricLogged(supplierId: string, delta: number) {

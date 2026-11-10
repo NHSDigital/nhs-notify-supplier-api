@@ -11,7 +11,7 @@ Maintains the pending letter queue DynamoDB table as a projection of the main le
    - **`isPendingLetter`**: `NewImage.status = PENDING` (an INSERT, or a MODIFY that leaves the letter PENDING). The letter is added to the queue table via `LetterQueueRepository.putLetter`; if it is already queued this is a no-op.
    - **`isNoLongerPending`**: the record is a MODIFY where `OldImage.status = PENDING` and `NewImage.status != PENDING`. The letter is removed from the queue table via `LetterQueueRepository.deleteLetter`.
 3. Records that match neither condition are ignored (REMOVE events, MODIFY with no PENDING transition, inserts with non-PENDING status such as REJECTED).
-4. Successful queue additions/removals are counted, and the net queue delta is emitted as a CloudWatch EMF `QueueDelta` metric per `supplierId`.
+4. Each record ends with exactly one outcome (see below). A per-batch summary log counts records by outcome, and the net queue change (additions minus removals) is emitted as a CloudWatch EMF `QueueDelta` metric per `supplierId`.
 5. After all tasks settle, the handler reports the earliest failed Kinesis sequence number in `batchItemFailures` so the shard retries from that point. Later records for that same letter are deferred to the retry; independent letters may already have been processed.
 6. Records that can never be processed are dropped rather than retried (see below), so they cannot block the shard.
 
@@ -33,5 +33,14 @@ Maintains the pending letter queue DynamoDB table as a projection of the main le
   - A payload that cannot be decoded, or a letter missing a field this Lambda needs, can never succeed on retry. It is logged at ERROR (`013-ERROR-EXTRACTING-PAYLOAD` or `014-INVALID-LETTER-DROPPED`, with `recordId` and `supplierId`/`letterId`; for an invalid letter the IDs are `null` when missing, and `invalidFields` lists each failing field and why), counted as `droppedCount` in the summary log, and not retried. Later records for the same letter are still processed.
   - A dropped record's queue change is lost. The queue entry for that letter may be missing or stale (until its TTL) until the letter changes again.
 - **Logging at INFO**: one line per queue outcome (`004-LETTER-ADDED`, `006-LETTER-REMOVED`, or the `005`/`007` no-ops), with `supplierId` and `letterId` only, plus one `008-COMPLETE` summary and one `009-METRIC` per supplier per batch. Records that don't touch the queue log nothing at INFO. Decoded payloads and full events are logged at DEBUG only.
+- **Summary counts** (`008-COMPLETE`): every record is counted once, so the counts add up to `totalCount` (the number of records in the invocation, which is not always the configured batch size).
+
+  | Count | Meaning |
+  | --- | --- |
+  | `successCount` | Processed: added to or removed from the queue, or no change needed (not a PENDING transition, or a replay). Per-letter detail is in the `004`–`007` INFO logs; the net change is the `QueueDelta` metric |
+  | `failureCount` | Write error; one ERROR log each, and Kinesis retries from the earliest |
+  | `skippedAfterFailureCount` | Only non-zero when a letter's write failed: later records for that same letter in the batch are not attempted, and are retried with it |
+  | `droppedCount` | Undecodable or invalid letter data; logged at ERROR and not retried |
+
 - **Queue entry expiry**: queue entries have a TTL of `letter_queue_ttl_hours` (default 168 hours).
 - Queue entries use a composite `queueSortOrderSk` (zero-padded priority + ISO timestamp) to enable priority-ordered retrieval by the API handler's `GET /letters` endpoint.
