@@ -42,6 +42,7 @@ module "populate_unallocated_breaches" {
     # The Glue crawler names each table after its S3 bucket, with hyphens replaced by underscores
     SUBSCRIPTION_TABLE_NAME = replace(local.eventsub_event_cache_bucket_name, "-", "_")
     PUBLICATION_TABLE_NAME  = replace(local.event_cache_bucket_name, "-", "_")
+    LOG_REFERENCE           = "POP_UNA_BCH"
   }
 }
 

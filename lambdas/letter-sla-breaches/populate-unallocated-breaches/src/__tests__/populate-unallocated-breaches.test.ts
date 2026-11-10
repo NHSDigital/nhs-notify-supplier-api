@@ -58,6 +58,8 @@ describe("populateUnallocatedBreaches", () => {
     expect(deps.logger.info).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
+        logRef: "001-BREACH-COUNT-METRIC",
+        description: "Unallocated breach count metric",
         SupplierId: "supplier-a",
         ClientId: "client-a",
         CampaignId: "campaign-a",
@@ -67,15 +69,28 @@ describe("populateUnallocatedBreaches", () => {
     expect(deps.logger.info).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
+        logRef: "001-BREACH-COUNT-METRIC",
+        description: "Unallocated breach count metric",
         SupplierId: "supplier-b",
         ClientId: "unknown",
         CampaignId: "unknown",
         UnallocatedBreachCount: 3,
       }),
     );
-    expect(deps.logger.info).toHaveBeenCalledWith(
-      expect.objectContaining({ UnallocatedBreachTotal: 5 }),
+    expect(deps.logger.info).toHaveBeenNthCalledWith(
+      5,
+      expect.objectContaining({
+        logRef: "002-BREACH-TOTAL-METRIC",
+        description: "Unallocated breach total metric",
+        UnallocatedBreachTotal: 5,
+      }),
     );
+    expect(deps.logger.info).toHaveBeenNthCalledWith(6, {
+      logRef: "003-QUERY-COMPLETED",
+      description: "Unallocated breaches query completed",
+      date: "2026-10-08",
+      breachCount: "5",
+    });
   });
 
   it.each([
@@ -93,21 +108,35 @@ describe("populateUnallocatedBreaches", () => {
     );
   });
 
-  it("returns a failure result when the query errors", async () => {
+  it("logs and rethrows a query error", async () => {
     const deps = makeDeps();
-    jest.mocked(runAthenaQuery).mockRejectedValueOnce(new Error("boom"));
-    jest.mocked(runAthenaQuery).mockRejectedValueOnce("not an error");
+    const error = new Error("boom");
+    jest.mocked(runAthenaQuery).mockRejectedValueOnce(error);
 
-    await expect(createHandler(deps)({ date: "2026-10-08" })).resolves.toEqual({
-      status: "FAILURE",
-      failureReason: "boom",
-      breachCount: "0",
+    await expect(createHandler(deps)({ date: "2026-10-08" })).rejects.toBe(
+      error,
+    );
+    expect(deps.logger.error).toHaveBeenCalledWith({
+      logRef: "004-POPULATE-FAILED",
+      description: "Failed to populate unallocated breaches",
+      date: "2026-10-08",
+      error,
     });
-    await expect(createHandler(deps)({ date: "2026-10-08" })).resolves.toEqual({
-      status: "FAILURE",
-      failureReason: "not an error",
-      breachCount: "0",
+  });
+
+  it("logs and rethrows a non-Error query failure", async () => {
+    const deps = makeDeps();
+    jest.mocked(runAthenaQuery).mockRejectedValueOnce("query failed");
+
+    await expect(createHandler(deps)({ date: "2026-10-08" })).rejects.toBe(
+      "query failed",
+    );
+
+    expect(deps.logger.error).toHaveBeenCalledWith({
+      logRef: "004-POPULATE-FAILED",
+      description: "Failed to populate unallocated breaches",
+      date: "2026-10-08",
+      error: "query failed",
     });
-    expect(deps.logger.error).toHaveBeenCalledTimes(2);
   });
 });
