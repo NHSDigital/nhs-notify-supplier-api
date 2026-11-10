@@ -34,6 +34,7 @@ Maintains the pending letter queue DynamoDB table as a projection of the main le
   - A queue write error (for example DynamoDB throttling) is reported in `batchItemFailures` and retried.
   - A payload that cannot be decoded, or a letter missing a field this Lambda needs, can never succeed on retry. It is logged at ERROR (`013-ERROR-EXTRACTING-PAYLOAD` or `014-INVALID-LETTER-DROPPED`, with `recordId` and `supplierId`/`letterId`; for an invalid letter the IDs are `null` when missing, and `invalidFields` lists each failing field and why), counted as `droppedCount` in the summary log, and not retried. Later records for the same letter are still processed.
   - A dropped record's queue change is lost. The queue entry for that letter may be missing or stale (until its TTL) until the letter changes again.
+- **Logging at INFO**: one line per queue outcome (`004-LETTER-ADDED`, `006-LETTER-REMOVED`, or the `005`/`007` no-ops), with `supplierId` and `letterId` only, plus one `008-COMPLETE` summary and one `009-METRIC` per supplier per batch. Records that don't touch the queue log nothing at INFO. Decoded payloads and full events are logged at DEBUG only.
 - **Queue entry expiry**: queue entries have a TTL of `letter_queue_ttl_hours` (default 168 hours).
 - Queue entries use a composite `queueSortOrderSk` (zero-padded priority + ISO timestamp) to enable priority-ordered retrieval by the API handler's `GET /letters` endpoint.
 

@@ -202,12 +202,13 @@ async function addPendingLetterToQueue(
   const pendingLetter = mapLetterToPendingLetter(letter);
 
   try {
-    deps.logger.info({
-      logRef: LogRefs.PERSISTING_PENDING_LETTER.code,
-      description: LogRefs.PERSISTING_PENDING_LETTER.description,
-      pendingLetter,
-    });
     await deps.letterQueueRepository.putLetter(pendingLetter);
+    deps.logger.info({
+      logRef: LogRefs.LETTER_ADDED_TO_QUEUE.code,
+      description: LogRefs.LETTER_ADDED_TO_QUEUE.description,
+      supplierId: pendingLetter.supplierId,
+      letterId: pendingLetter.letterId,
+    });
     return 1;
   } catch (error) {
     if (error instanceof LetterAlreadyExistsError) {
@@ -228,13 +229,13 @@ async function deletePendingLetterFromQueue(
   deps: Deps,
 ): Promise<number> {
   try {
+    await deps.letterQueueRepository.deleteLetter(letter.supplierId, letter.id);
     deps.logger.info({
-      logRef: LogRefs.DELETING_PENDING_LETTER.code,
-      description: LogRefs.DELETING_PENDING_LETTER.description,
+      logRef: LogRefs.LETTER_REMOVED_FROM_QUEUE.code,
+      description: LogRefs.LETTER_REMOVED_FROM_QUEUE.description,
       supplierId: letter.supplierId,
       letterId: letter.id,
     });
-    await deps.letterQueueRepository.deleteLetter(letter.supplierId, letter.id);
     return 1;
   } catch (error) {
     if (error instanceof LetterNotFoundError) {

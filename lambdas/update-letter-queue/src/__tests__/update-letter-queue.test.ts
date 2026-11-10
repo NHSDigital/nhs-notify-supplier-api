@@ -82,6 +82,12 @@ describe("update-letter-queue Lambda", () => {
         priority: 2,
       });
       expect(result.batchItemFailures).toEqual([]);
+      expect(mockedDeps.logger.info).toHaveBeenCalledWith({
+        logRef: LogRefs.LETTER_ADDED_TO_QUEUE.code,
+        description: LogRefs.LETTER_ADDED_TO_QUEUE.description,
+        supplierId: "supplier1",
+        letterId: "1",
+      });
     });
 
     it("deletes letters that are no longer pending", async () => {
@@ -98,6 +104,12 @@ describe("update-letter-queue Lambda", () => {
         mockedDeps.letterQueueRepository.deleteLetter,
       ).toHaveBeenCalledWith("supplier1", "1");
       expect(result.batchItemFailures).toEqual([]);
+      expect(mockedDeps.logger.info).toHaveBeenCalledWith({
+        logRef: LogRefs.LETTER_REMOVED_FROM_QUEUE.code,
+        description: LogRefs.LETTER_REMOVED_FROM_QUEUE.description,
+        supplierId: "supplier1",
+        letterId: "1",
+      });
     });
 
     it("does not publish non-PENDING letters", async () => {
@@ -442,6 +454,12 @@ describe("update-letter-queue Lambda", () => {
         expect.objectContaining({
           logRef: LogRefs.LETTER_ALREADY_EXISTS.code,
           supplierId: "supplier1",
+          letterId: "1",
+        }),
+      );
+      expect(mockedDeps.logger.info).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          logRef: LogRefs.LETTER_ADDED_TO_QUEUE.code,
           letterId: "1",
         }),
       );
