@@ -3,8 +3,8 @@ import { z } from "zod";
 const EnvVarsSchema = z.object({
   ATHENA_WORKGROUP: z.string(),
   ATHENA_DATABASE: z.string(),
-  EVENT_CACHE_TABLE_NAME: z.string(),
-  PACK_SPECIFICATION_TABLE_NAME: z.string(),
+  SUBSCRIPTION_TABLE_NAME: z.string(),
+  PUBLICATION_TABLE_NAME: z.string(),
   PINO_LOG_LEVEL: z.string().optional(),
   LOG_REFERENCE: z.string().optional(),
 });
