@@ -1,5 +1,3 @@
-<!-- vale off -->
-
 # Update Letter Queue Lambda
 
 ## Purpose
@@ -37,5 +35,3 @@ Maintains the pending letter queue DynamoDB table as a projection of the main le
 - **Logging at INFO**: one line per queue outcome (`004-LETTER-ADDED`, `006-LETTER-REMOVED`, or the `005`/`007` no-ops), with `supplierId` and `letterId` only, plus one `008-COMPLETE` summary and one `009-METRIC` per supplier per batch. Records that don't touch the queue log nothing at INFO. Decoded payloads and full events are logged at DEBUG only.
 - **Queue entry expiry**: queue entries have a TTL of `letter_queue_ttl_hours` (default 168 hours).
 - Queue entries use a composite `queueSortOrderSk` (zero-padded priority + ISO timestamp) to enable priority-ordered retrieval by the API handler's `GET /letters` endpoint.
-
-<!-- vale on -->
