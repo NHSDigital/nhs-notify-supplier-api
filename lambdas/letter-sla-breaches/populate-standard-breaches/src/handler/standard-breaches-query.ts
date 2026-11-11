@@ -2,8 +2,9 @@ import {
   type AthenaQuery,
   buildAthenaDatePredicate,
 } from "@internal/letter-sla-breaches-common";
-import { startOfDay, subBusinessDays } from "date-fns";
+import { startOfDay } from "date-fns";
 import { TZDate } from "@date-fns/tz";
+import subtractWorkingDays from "./working-day-calculator";
 
 export default function buildStandardBreachesQuery(
   eventsTableName: string,
@@ -11,11 +12,13 @@ export default function buildStandardBreachesQuery(
   now: Date,
   slaWorkingDays: number,
   daysToLookBack: number,
+  bankHolidays: string[],
 ): AthenaQuery {
   const nowEuropeLondon = new TZDate(now, "Europe/London");
-  const slaCutOff = subBusinessDays(
+  const slaCutOff = subtractWorkingDays(
     startOfDay(nowEuropeLondon),
     slaWorkingDays,
+    bankHolidays,
   );
   return {
     queryString: `WITH parameters AS (
