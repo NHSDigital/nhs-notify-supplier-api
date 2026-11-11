@@ -8,7 +8,7 @@
     "@aws-sdk/client-sns": "^3.1107.0",
     "@aws-sdk/client-sqs": "^3.1107.0",
     "@aws-sdk/lib-dynamodb": "^3.1107.0",
-    "@nhsdigital/nhs-notify-event-schemas-letter-rendering": "^2.0.2",
+    "@nhsdigital/nhs-notify-event-schemas-letter-rendering": "^2.0.3",
     "@nhsdigital/notify-digital-letters-consumer-contracts": "^1.0.1",
     "@pact-foundation/pact": "^16.5.0",
     "@pact-foundation/pact-core": "^19.2.0",
