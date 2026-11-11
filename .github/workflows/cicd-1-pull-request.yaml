@@ -6,6 +6,18 @@ on:
   push: ## Only trigger on pushes to main branch to prevent unnecessary runs on feature branches, as the pull_request trigger will handle PR events.
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish release artefacts (e.g. for a hotfix branch). Leave unticked to only run the pipeline."
+        type: boolean
+        required: false
+        default: false
+      version_override:
+        description: "Optional version/tag to use instead of the computed one (e.g. 1.3.5-hotfix.1). Include a '-' to create a pre-release."
+        type: string
+        required: false
+        default: ""
   pull_request:
     types: [opened, reopened, synchronize]
     branches:
@@ -40,10 +52,13 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: "Set CI/CD variables"
         id: variables
+        env:
+          VERSION_OVERRIDE: ${{ github.event_name == 'workflow_dispatch' && inputs.version_override || '' }}
         run: |
           datetime=$(date -u +'%Y-%m-%dT%H:%M:%S%z')
           BUILD_DATETIME=$datetime make version-create-effective-file dir=.
           version=$(head -n 1 .version 2> /dev/null || echo unknown)
+          if [[ -n "$VERSION_OVERRIDE" ]]; then version="$VERSION_OVERRIDE"; fi
           echo "build_datetime_london=$(TZ=Europe/London date --date=$datetime +'%Y-%m-%dT%H:%M:%S%z')" >> $GITHUB_OUTPUT
           echo "build_datetime=$datetime" >> $GITHUB_OUTPUT
           echo "build_timestamp=$(date --date=$datetime -u +'%Y%m%d%H%M%S')" >> $GITHUB_OUTPUT
@@ -159,7 +174,7 @@ jobs:
     name: "Build stage"
     needs: [metadata, test-stage]
     uses: ./.github/workflows/stage-3-build.yaml
-    if: needs.metadata.outputs.does_pull_request_exist == 'true' || (github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'reopened')) || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    if: needs.metadata.outputs.does_pull_request_exist == 'true' || (github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'reopened')) || (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
     with:
       build_datetime: "${{ needs.metadata.outputs.build_datetime }}"
       build_timestamp: "${{ needs.metadata.outputs.build_timestamp }}"
@@ -175,7 +190,7 @@ jobs:
     name: "Acceptance stage"
     needs: [metadata, build-stage]
     uses: ./.github/workflows/stage-4-acceptance.yaml
-    if: needs.metadata.outputs.does_pull_request_exist == 'true' || (github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'reopened')) || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    if: needs.metadata.outputs.does_pull_request_exist == 'true' || (github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'reopened')) || (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
     with:
       build_datetime: "${{ needs.metadata.outputs.build_datetime }}"
       build_timestamp: "${{ needs.metadata.outputs.build_timestamp }}"
@@ -191,7 +206,7 @@ jobs:
     name: "Publish stage"
     needs: [metadata, acceptance-stage]
     uses: ./.github/workflows/stage-5-publish.yaml
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.publish)
     with:
       build_datetime: "${{ needs.metadata.outputs.build_datetime }}"
       build_timestamp: "${{ needs.metadata.outputs.build_timestamp }}"
