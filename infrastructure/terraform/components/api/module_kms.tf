@@ -1,5 +1,10 @@
 module "kms" {
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.1.0/terraform-kms.zip"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.26/terraform-kms.zip"
+
+  providers = {
+    aws           = aws
+    aws.us-east-1 = aws.us-east-1
+  }
 
   aws_account_id = var.aws_account_id
   component      = var.component

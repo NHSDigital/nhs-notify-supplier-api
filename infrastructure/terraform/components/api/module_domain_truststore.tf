@@ -1,5 +1,5 @@
 module "domain_truststore" {
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.1.0/terraform-s3bucket.zip"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/3.0.6/terraform-s3bucket.zip"
 
   name           = "truststore"
   aws_account_id = var.aws_account_id

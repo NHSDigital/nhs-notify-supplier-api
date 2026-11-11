@@ -1,5 +1,5 @@
 module "supplier_config_ingress" {
-  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/6.1.0/terraform-lambda.zip"
+  source = "https://github.com/NHSDigital/nhs-notify-shared-modules/releases/download/v2.0.29/terraform-lambda.zip"
 
   function_name = "supplier-config-ingress"
   description   = "Persist supplier config changes"
