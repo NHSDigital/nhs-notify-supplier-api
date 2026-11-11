@@ -26,7 +26,7 @@ module "populate_unallocated_breaches" {
   handler_function_name   = "populateUnallocatedBreachesHandler"
   runtime                 = "nodejs22.x"
   memory                  = 128
-  timeout                 = 29
+  timeout                 = 300
   log_level               = var.log_level
 
   force_lambda_code_deploy = var.force_lambda_code_deploy
