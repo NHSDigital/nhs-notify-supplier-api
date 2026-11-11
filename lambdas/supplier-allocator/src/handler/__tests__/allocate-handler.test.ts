@@ -15,13 +15,9 @@ import * as supplierQuotas from "../../services/supplier-quotas";
 import * as allocationConfig from "../allocation-config";
 import { Deps } from "../../config/deps";
 import SupplierConfigValidationError from "../../errors/supplier-config-validation-error";
-import packageJson from "../../../package.json";
 import RejectedError from "../../errors/rejected-error";
 
-const renderingSchemaVersion: string =
-  packageJson.dependencies[
-    "@nhsdigital/nhs-notify-event-schemas-letter-rendering"
-  ];
+const renderingSchemaVersion = "2.0.3";
 
 jest.mock("../../services/supplier-config");
 jest.mock("../../services/supplier-quotas");

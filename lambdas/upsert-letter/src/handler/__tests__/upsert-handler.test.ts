@@ -16,7 +16,6 @@ import { Unit } from "aws-embedded-metrics";
 import createUpsertLetterHandler from "../upsert-handler";
 import { Deps } from "../../config/deps";
 import { EnvVars } from "../../config/env";
-import packageJson from "../../../package.json";
 
 jest.mock("@aws-lambda-powertools/idempotency", () => {
   const original = jest.requireActual("@aws-lambda-powertools/idempotency");
@@ -35,10 +34,7 @@ jest.mock("@internal/helpers", () => {
   };
 });
 
-const renderingSchemaVersion: string =
-  packageJson.dependencies[
-    "@nhsdigital/nhs-notify-event-schemas-letter-rendering"
-  ];
+const renderingSchemaVersion = "2.0.3";
 
 function createSQSEvent(records: SQSRecord[]): SQSEvent {
   return {

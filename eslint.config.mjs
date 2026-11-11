@@ -279,7 +279,9 @@ export default defineConfig([
       'no-plusplus': [2, { allowForLoopAfterthoughts: true }],
       'unicorn/prefer-top-level-await': 0,
       'import-x/no-relative-packages': 0,
-      'no-relative-import-paths/no-relative-import-paths': 0
+      'no-relative-import-paths/no-relative-import-paths': 0,
+      // For hotfix only
+      'sonarjs/deprecation': 0,
     },
   },
 ]);
