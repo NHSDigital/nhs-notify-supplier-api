@@ -69,6 +69,8 @@
     "flatted": "^3.4.0",
     "undici": "^7.29.0",
     "uuid": "^14.0.0",
+    "basic-ftp": "^6.2.6",
+    "compression": "^1.8.2",
     "pretty-format": {
       "react-is": "19.0.0"
     },
