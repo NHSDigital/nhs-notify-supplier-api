@@ -9,6 +9,8 @@ source "https://rubygems.org"
 # Happy Jekylling!
 gem "jekyll", "~> 4.4"
 gem "activesupport", "8.0.5.2" # gitleaks:allow - gem version, not an IPv4 address
+# minitest 6 pulls in prism, which requires Ruby >= 3.3; CI uses Ruby 3.2
+gem "minitest", "< 6"
 # This is the default theme for new Jekyll sites. You may change this to anything you like.
 gem "minima", "~> 2.5"
 # If you want to use GitHub Pages, remove the "gem "jekyll"" above and
