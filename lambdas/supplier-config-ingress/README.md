@@ -1,5 +1,3 @@
-<!-- vale off -->
-
 # Supplier Config Ingress Lambda
 
 ## Purpose
@@ -37,5 +35,3 @@ Consumes supplier-config events from SQS and upserts supplier configuration enti
 - Upsert uses DynamoDB `UpdateItem` and returns whether a record was created or updated based on previous item existence.
 - Only records that fail parsing or upsert are retried because of `ReportBatchItemFailures` semantics.
 - Unknown or malformed event types are reported with failure metrics using `entity=unknown`.
-
-<!-- vale on -->

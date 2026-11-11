@@ -6,10 +6,8 @@ pnpm 11.5.0
 pre-commit 4.5.1
 python 3.15.2
 terraform 1.14.8
-terraform-docs 0.24.0
 syft 1.39.0
 grype 0.104.3
-vale 3.14.1
 poetry 2.3.2
 java openjdk-25.0.1
 
@@ -25,7 +23,6 @@ java openjdk-25.0.1
 # docker/ghcr.io/nhs-england-tools/github-runner-image 20230909-321fd1e-rt@sha256:ce4fd6035dc450a50d3cbafb4986d60e77cb49a71ab60a053bb1b9518139a646 # SEE: https://github.com/nhs-england-tools/github-runner-image/pkgs/container/github-runner-image
 # docker/hadolint/hadolint 2.14.0-alpine@sha256:7aba693c1442eb31c0b015c129697cb3b6cb7da589d85c7562f9deb435a6657c # SEE: https://hub.docker.com/r/hadolint/hadolint/tags
 # docker/hashicorp/terraform 1.14.8@sha256:42ecfb253183ec823646dd7859c5652039669409b44daa72abf57112e622849a # SEE: https://hub.docker.com/r/hashicorp/terraform/tags
-# docker/jdkato/vale v3.14.1@sha256:e10e0fd59ac94fcb1ebaea37cafd4e7d5c737cd0bc170a84386dbd21c1144a34 # SEE: https://hub.docker.com/r/jdkato/vale/tags
 # docker/koalaman/shellcheck latest@sha256:3ec6239ae73eaf9c5a4c5d1c050d99d8c9bd98b43e49c997ac05a209daaaedf0 # SEE: https://hub.docker.com/r/koalaman/shellcheck/tags
 # docker/mstruebing/editorconfig-checker v3.6.1@sha256:af556694c3eb0a16b598efbe84c1171d40dfb779fdac6f01b89baedde065556f # SEE: https://hub.docker.com/r/mstruebing/editorconfig-checker/tags
 # docker/openapitools/openapi-generator-cli v7.12.0@sha256:338dc617d26fb4a515891dee8a5c345ad302e191c6010c6a1f77ed6f6ff7476a # SEE: https://hub.docker.com/r/openapitools/openapi-generator-cli/tags
