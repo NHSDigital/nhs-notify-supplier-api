@@ -4,6 +4,7 @@ import { type Deps } from "../handler/deps";
 import buildStandardBreachesQuery from "../handler/standard-breaches-query";
 import createHandler from "../handler/populate-standard-breaches";
 import fetchBankHolidays from "../handler/bank-holidays";
+import { string } from "zod";
 
 jest.mock("@internal/letter-sla-breaches-common");
 jest.mock("../handler/standard-breaches-query");
@@ -56,7 +57,10 @@ describe("populateStandardBreaches", () => {
     const deps = makeDeps();
     await createHandler(deps)({ date: "2026-10-08" });
 
-    expect(deps.logger.error).toHaveBeenCalledWith({ error });
+    expect(deps.logger.error).toHaveBeenCalledWith({
+      description: expect.any(String),
+      err: error,
+    });
     expect(buildStandardBreachesQuery).toHaveBeenCalledWith(
       "event_cache",
       "pack_specification",
