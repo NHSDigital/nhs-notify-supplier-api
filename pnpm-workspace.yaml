@@ -100,7 +100,7 @@ catalogs:
     chai-as-promised: "^8.0.2"
     jest: "^30.5.2"
     jest-environment-jsdom: "^30.5.2"
-    jest-html-reporter: "^4.4.2"
+    jest-html-reporter: "^4.4.3"
     jest-mock-extended: "^4.0.0"
     lcov-result-merger: "^6.0.0"
     mocha: "^12.0.2"
@@ -108,7 +108,7 @@ catalogs:
     playwright: "^1.62.1"
     playwright-core: "^1.62.1"
     testcontainers: "^12.2.0"
-    ts-jest: "^29.4.13"
+    ts-jest: "^29.4.15"
   tools:
     "@openapitools/openapi-generator-cli": "^2.41.0"
     "@redocly/cli": "^2.54.2"
