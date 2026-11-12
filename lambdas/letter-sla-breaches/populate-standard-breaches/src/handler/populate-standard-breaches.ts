@@ -13,8 +13,9 @@ export type PopulateStandardBreachesEvent = {
 
 export default function createHandler(deps: Deps) {
   return async (event: PopulateStandardBreachesEvent): Promise<void> => {
+    const now = new Date(event.date);
     let bankHolidays: string[];
-    const cutOffDate = subDays(new Date(), deps.env.DAYS_TO_LOOK_BACK);
+    const cutOffDate = subDays(now, deps.env.DAYS_TO_LOOK_BACK);
     try {
       bankHolidays = await fetchBankHolidays(
         deps.env.BANK_HOLIDAY_JSON_URL,
@@ -24,13 +25,17 @@ export default function createHandler(deps: Deps) {
     } catch (error) {
       // Fall back to ignoring bank holidays. It may result in false positives, but better than ignoring breaches
       // altogether.
-      deps.logger.error({ error });
+      deps.logger.error({
+        err: error,
+        description:
+          "Failed to load bank holidays; falling back to weekends only",
+      });
       bankHolidays = [];
     }
     const sql = buildStandardBreachesQuery(
       deps.env.EVENT_CACHE_TABLE_NAME,
       deps.env.PACK_SPECIFICATION_TABLE_NAME,
-      new Date(event.date),
+      now,
       deps.env.STANDARD_SLA_WORKING_DAYS,
       deps.env.DAYS_TO_LOOK_BACK,
       bankHolidays,

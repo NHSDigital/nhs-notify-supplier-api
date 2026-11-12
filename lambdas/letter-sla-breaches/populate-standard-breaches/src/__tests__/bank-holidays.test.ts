@@ -61,7 +61,7 @@ describe("fetchBankHolidays", () => {
     expect(results).toEqual(["2026-12-25", "2026-12-28", "2027-01-01"]);
   });
 
-  it("filters out bank holdidays before the cutoff date", async () => {
+  it("filters out bank holidays before the cutoff date", async () => {
     const results = await fetchBankHolidays(
       "dummy-url",
       s3Cache,
