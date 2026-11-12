@@ -29,6 +29,9 @@ locals {
     } : {},
     length(module.populate_sameday_breaches) > 0 ? {
       populate_sameday_breaches = module.populate_sameday_breaches[0].function_name
+    } : {},
+    length(module.populate_unallocated_breaches) > 0 ? {
+      populate_unallocated_breaches = module.populate_unallocated_breaches[0].function_name
   } : {})
 
   sqs_alarm_targets = {
