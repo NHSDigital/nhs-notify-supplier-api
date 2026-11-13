@@ -131,8 +131,10 @@ ${VERBOSE}.SILENT: \
 # E2E Test commands #
 #####################
 
-# https://pytest-xdist.readthedocs.io/en/stable/known-limitations.html#output-stdout-and-stderr-from-workers means pytest won't print to stdout even with -s
-PYTEST_WORKERS := 4 # set to 0 to see stdout/stderr when debugging e2e tests
+# https://pytest-xdist.readthedocs.io/en/stable/known-limitations.html#output-stdout-and-stderr-from-workers
+# above means pytest won't print to stdout even with -s
+# set to 0 to see stdout/stderr when debugging e2e tests
+PYTEST_WORKERS := 4
 
 TEST_CMD := APIGEE_ACCESS_TOKEN="$(APIGEE_ACCESS_TOKEN)" \
 	STATUS_ENDPOINT_API_KEY="$(STATUS_ENDPOINT_API_KEY)" \
@@ -149,7 +151,7 @@ TEST_CMD := APIGEE_ACCESS_TOKEN="$(APIGEE_ACCESS_TOKEN)" \
 	--only-rerun 'AssertionError: Unexpected 502' \
 	--junitxml=test-report.xml
 
-.internal-dev-test:
+.e2e-tests:
 	@cd tests/e2e-tests && \
 	$(TEST_CMD) \
 	api \
