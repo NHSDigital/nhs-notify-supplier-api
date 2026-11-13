@@ -16,6 +16,7 @@ import { Unit } from "aws-embedded-metrics";
 import { Deps } from "../deps";
 import createHandler from "../update-letter-queue";
 import { EnvVars } from "../env";
+import LogRefs from "../log-references";
 import { LetterStatus } from "../../../api-handler/src/contracts/letters";
 
 const mockedDeps: jest.Mocked<Deps> = {
@@ -24,6 +25,7 @@ const mockedDeps: jest.Mocked<Deps> = {
     deleteLetter: jest.fn(),
   } as unknown as LetterQueueRepository,
   logger: {
+    debug: jest.fn(),
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
@@ -80,6 +82,12 @@ describe("update-letter-queue Lambda", () => {
         priority: 2,
       });
       expect(result.batchItemFailures).toEqual([]);
+      expect(mockedDeps.logger.info).toHaveBeenCalledWith({
+        logRef: LogRefs.LETTER_ADDED_TO_QUEUE.code,
+        description: LogRefs.LETTER_ADDED_TO_QUEUE.description,
+        supplierId: "supplier1",
+        letterId: "1",
+      });
     });
 
     it("deletes letters that are no longer pending", async () => {
@@ -96,6 +104,12 @@ describe("update-letter-queue Lambda", () => {
         mockedDeps.letterQueueRepository.deleteLetter,
       ).toHaveBeenCalledWith("supplier1", "1");
       expect(result.batchItemFailures).toEqual([]);
+      expect(mockedDeps.logger.info).toHaveBeenCalledWith({
+        logRef: LogRefs.LETTER_REMOVED_FROM_QUEUE.code,
+        description: LogRefs.LETTER_REMOVED_FROM_QUEUE.description,
+        supplierId: "supplier1",
+        letterId: "1",
+      });
     });
 
     it("does not publish non-PENDING letters", async () => {
@@ -133,39 +147,266 @@ describe("update-letter-queue Lambda", () => {
 
       expect(mockedDeps.letterQueueRepository.putLetter).not.toHaveBeenCalled();
       expect(result.batchItemFailures).toEqual([]);
+      assertSummaryLogged({ totalCount: 0 });
+    });
+
+    it("reports the batch size even when no letters are queued", async () => {
+      const handler = createHandler(mockedDeps);
+      const testData = generateKinesisEvent([
+        generateInsertRecord(generateLetter("ACCEPTED")),
+      ]);
+
+      const result = await handler(testData, mockDeep<Context>(), jest.fn());
+
+      expect(result.batchItemFailures).toEqual([]);
+      assertSummaryLogged({ successCount: 1, totalCount: 1 });
     });
   });
 
   describe("Error handling", () => {
-    it("rejects invalid letter data", async () => {
+    it("drops a pending letter that has no specificationId or groupId, without retrying it", async () => {
       const handler = createHandler(mockedDeps);
-      const newLetter = { id: "1", status: "PENDING" } as Letter;
+      // The queue entry needs specificationId and groupId, so this letter can never be queued.
+      const newLetter = omitField(
+        omitField(generateLetter("PENDING"), "specificationId"),
+        "groupId",
+      );
 
       const testData = generateKinesisEvent([generateInsertRecord(newLetter)]);
       const result = await handler(testData, mockDeep<Context>(), jest.fn());
 
       expect(mockedDeps.letterQueueRepository.putLetter).not.toHaveBeenCalled();
-      expect(result.batchItemFailures).toEqual([{ itemIdentifier: "seq-0" }]);
+      expect(result.batchItemFailures).toEqual([]);
+      expect(mockedDeps.logger.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logRef: LogRefs.INVALID_LETTER_DROPPED.code,
+          recordId: "seq-0",
+          supplierId: "supplier1",
+          letterId: "1",
+          invalidFields: [
+            expect.stringMatching(/^specificationId: /),
+            expect.stringMatching(/^groupId: /),
+          ],
+        }),
+      );
+      assertSummaryLogged({ droppedCount: 1, totalCount: 1 });
     });
 
-    it("returns on the first failure", async () => {
+    it("queues a pending letter that lacks fields the queue does not use", async () => {
+      const handler = createHandler(mockedDeps);
+      const newLetter = omitField(generateLetter("PENDING"), "billingRef");
+
+      const testData = generateKinesisEvent([generateInsertRecord(newLetter)]);
+      const result = await handler(testData, mockDeep<Context>(), jest.fn());
+
+      expect(mockedDeps.letterQueueRepository.putLetter).toHaveBeenCalledWith(
+        expect.objectContaining({ supplierId: "supplier1", letterId: "1" }),
+      );
+      expect(result.batchItemFailures).toEqual([]);
+    });
+
+    it("removes a letter from the queue using only its key fields", async () => {
+      const handler = createHandler(mockedDeps);
+      const oldLetter = generateLetter("PENDING");
+      const newLetter = omitField(
+        generateLetter("ACCEPTED"),
+        "specificationId",
+      );
+
+      const testData = generateKinesisEvent([
+        generateModifyRecord(oldLetter, newLetter),
+      ]);
+      const result = await handler(testData, mockDeep<Context>(), jest.fn());
+
+      expect(
+        mockedDeps.letterQueueRepository.deleteLetter,
+      ).toHaveBeenCalledWith("supplier1", "1");
+      expect(result.batchItemFailures).toEqual([]);
+    });
+
+    it.each([
+      { field: "supplierId", supplierId: null, letterId: "1" },
+      { field: "id", supplierId: "supplier1", letterId: null },
+    ] as const)(
+      "drops a removal when the letter has no $field, because it is part of the queue key",
+      async ({ field, letterId, supplierId }) => {
+        const handler = createHandler(mockedDeps);
+        const testData = generateKinesisEvent([
+          generateModifyRecord(
+            generateLetter("PENDING"),
+            omitField(generateLetter("ACCEPTED"), field),
+          ),
+        ]);
+
+        const result = await handler(testData, mockDeep<Context>(), jest.fn());
+
+        expect(
+          mockedDeps.letterQueueRepository.deleteLetter,
+        ).not.toHaveBeenCalled();
+        expect(result.batchItemFailures).toEqual([]);
+        expect(mockedDeps.logger.error).toHaveBeenCalledWith(
+          expect.objectContaining({
+            logRef: LogRefs.INVALID_LETTER_DROPPED.code,
+            recordId: "seq-0",
+            supplierId,
+            letterId,
+            invalidFields: [expect.stringContaining(`${field}: `)],
+          }),
+        );
+      },
+    );
+
+    it("still processes later records for a letter after dropping its invalid record", async () => {
+      const handler = createHandler(mockedDeps);
+      const testData = generateKinesisEvent([
+        // Invalid: no specificationId, so it cannot be queued and is dropped.
+        generateInsertRecord(
+          omitField(generateLetter("PENDING"), "specificationId"),
+        ),
+        // Same letter: the removal only needs supplierId and id, so it runs.
+        generateModifyRecord(
+          generateLetter("PENDING"),
+          generateLetter("ACCEPTED"),
+        ),
+      ]);
+
+      const result = await handler(testData, mockDeep<Context>(), jest.fn());
+
+      expect(mockedDeps.letterQueueRepository.putLetter).not.toHaveBeenCalled();
+      expect(
+        mockedDeps.letterQueueRepository.deleteLetter,
+      ).toHaveBeenCalledWith("supplier1", "1");
+      expect(result.batchItemFailures).toEqual([]);
+      expect(mockedDeps.logger.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logRef: LogRefs.INVALID_LETTER_DROPPED.code,
+          recordId: "seq-0",
+          invalidFields: [expect.stringMatching(/^specificationId: /)],
+        }),
+      );
+    });
+
+    it("drops a letter whose image cannot be converted from DynamoDB format", async () => {
+      const handler = createHandler(mockedDeps);
+      const insertRecord = generateInsertRecord(generateLetter("PENDING"));
+      // "X" is not a DynamoDB attribute type, so unmarshall throws a non-zod error.
+      insertRecord.dynamodb!.NewImage!.groupId = { X: "?" } as never;
+
+      const testData = generateKinesisEvent([insertRecord]);
+      const result = await handler(testData, mockDeep<Context>(), jest.fn());
+
+      expect(mockedDeps.letterQueueRepository.putLetter).not.toHaveBeenCalled();
+      expect(result.batchItemFailures).toEqual([]);
+      expect(mockedDeps.logger.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logRef: LogRefs.INVALID_LETTER_DROPPED.code,
+          recordId: "seq-0",
+          invalidFields: undefined,
+          err: expect.objectContaining({
+            message: "Unsupported type passed: X",
+          }),
+        }),
+      );
+    });
+
+    it("waits for the batch and retries from the earliest failed record", async () => {
       const handler = createHandler(mockedDeps);
       const newLetter1 = generateLetter("PENDING", { id: "1" });
       const newLetter2 = generateLetter("PENDING", { id: "2" });
+      let rejectFirst: (error: Error) => void = jest.fn();
+      const firstWrite = new Promise<void>((_resolve, reject) => {
+        rejectFirst = reject;
+      });
       (mockedDeps.letterQueueRepository.putLetter as jest.Mock)
-        .mockRejectedValueOnce({})
-        .mockResolvedValueOnce({});
+        .mockImplementationOnce(() => firstWrite)
+        .mockRejectedValueOnce(new Error("second write failed"));
 
       const testData = generateKinesisEvent([
         generateInsertRecord(newLetter1),
         generateInsertRecord(newLetter2),
       ]);
-      const result = await handler(testData, mockDeep<Context>(), jest.fn());
+      const pendingResult = handler(testData, mockDeep<Context>(), jest.fn());
 
       expect(mockedDeps.letterQueueRepository.putLetter).toHaveBeenCalledTimes(
-        1,
+        2,
       );
+      rejectFirst(new Error("first write failed"));
+      const result = await pendingResult;
+
       expect(result.batchItemFailures).toEqual([{ itemIdentifier: "seq-0" }]);
+      assertSummaryLogged({ failureCount: 2, totalCount: 2 });
+    });
+
+    it("serializes updates for the same letter without blocking other letters", async () => {
+      const handler = createHandler(mockedDeps);
+      let finishInsert: () => void = jest.fn();
+      const insert = new Promise<void>((resolve) => {
+        finishInsert = resolve;
+      });
+      (mockedDeps.letterQueueRepository.putLetter as jest.Mock)
+        .mockImplementationOnce(() => insert)
+        .mockResolvedValueOnce({});
+
+      const testData = generateKinesisEvent([
+        generateInsertRecord(generateLetter("PENDING", { id: "1" })),
+        generateModifyRecord(
+          generateLetter("PENDING", { id: "1" }),
+          generateLetter("ACCEPTED", { id: "1" }),
+        ),
+        generateInsertRecord(generateLetter("PENDING", { id: "2" })),
+      ]);
+      const pendingResult = handler(testData, mockDeep<Context>(), jest.fn());
+
+      expect(mockedDeps.letterQueueRepository.putLetter).toHaveBeenCalledTimes(
+        2,
+      );
+      expect(
+        mockedDeps.letterQueueRepository.deleteLetter,
+      ).not.toHaveBeenCalled();
+      finishInsert();
+      const result = await pendingResult;
+
+      expect(
+        mockedDeps.letterQueueRepository.deleteLetter,
+      ).toHaveBeenCalledWith("supplier1", "1");
+      expect(result.batchItemFailures).toEqual([]);
+      assertQueueDeltaMetricLogged("supplier1", 1);
+    });
+
+    it("skips later records for a letter whose earlier write failed", async () => {
+      const handler = createHandler(mockedDeps);
+      (
+        mockedDeps.letterQueueRepository.putLetter as jest.Mock
+      ).mockRejectedValue(new Error("DynamoDB error"));
+      const testData = generateKinesisEvent([
+        generateInsertRecord(generateLetter("PENDING", { id: "1" })),
+        generateModifyRecord(
+          generateLetter("PENDING", { id: "1" }),
+          generateLetter("ACCEPTED", { id: "1" }),
+        ),
+      ]);
+
+      const result = await handler(testData, mockDeep<Context>(), jest.fn());
+
+      expect(
+        mockedDeps.letterQueueRepository.deleteLetter,
+      ).not.toHaveBeenCalled();
+      expect(result.batchItemFailures).toEqual([{ itemIdentifier: "seq-0" }]);
+      expect(mockedDeps.logger.error).toHaveBeenCalledTimes(1);
+      expect(mockedDeps.logger.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          recordId: "seq-0",
+          supplierId: "supplier1",
+          letterId: "1",
+          err: expect.objectContaining({ message: "DynamoDB error" }),
+        }),
+      );
+      assertSummaryLogged({
+        failureCount: 1,
+        skippedAfterFailureCount: 1,
+        totalCount: 2,
+      });
+      assertQueueDeltaMetricNotLogged();
     });
 
     it("does not treat a replayed insert as a failure", async () => {
@@ -183,6 +424,20 @@ describe("update-letter-queue Lambda", () => {
       const result = await handler(testData, mockDeep<Context>(), jest.fn());
 
       expect(result.batchItemFailures).toEqual([]);
+      expect(mockedDeps.logger.info).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logRef: LogRefs.LETTER_ALREADY_EXISTS.code,
+          supplierId: "supplier1",
+          letterId: "1",
+        }),
+      );
+      expect(mockedDeps.logger.info).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          logRef: LogRefs.LETTER_ADDED_TO_QUEUE.code,
+          letterId: "1",
+        }),
+      );
+      assertSummaryLogged({ successCount: 2, totalCount: 2 });
     });
 
     it("does not treat a replayed delete as a failure", async () => {
@@ -202,13 +457,28 @@ describe("update-letter-queue Lambda", () => {
       const result = await handler(testData, mockDeep<Context>(), jest.fn());
 
       expect(result.batchItemFailures).toEqual([]);
+      expect(mockedDeps.logger.info).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logRef: LogRefs.LETTER_DOES_NOT_EXIST.code,
+          supplierId: "supplier1",
+          letterId: "1",
+        }),
+      );
     });
 
-    it("throws error when Kinesis payload cannot be parsed as JSON", async () => {
+    it("drops an invalid JSON payload and processes the rest of the batch", async () => {
       const handler = createHandler(mockedDeps);
       const invalidJsonPayload = "not valid json {{{";
       const testData = {
         Records: [
+          {
+            kinesis: {
+              sequenceNumber: "seq-122",
+              data: encodeRecord(
+                generateInsertRecord(generateLetter("PENDING", { id: "1" })),
+              ),
+            },
+          },
           {
             kinesis: {
               sequenceNumber: "seq-123",
@@ -216,19 +486,38 @@ describe("update-letter-queue Lambda", () => {
             },
             eventID: "event-123",
           },
+          {
+            kinesis: {
+              sequenceNumber: "seq-124",
+              data: encodeRecord(
+                generateInsertRecord(generateLetter("PENDING", { id: "2" })),
+              ),
+            },
+          },
         ],
       } as unknown as KinesisStreamEvent;
 
-      await expect(
-        handler(testData, mockDeep<Context>(), jest.fn()),
-      ).rejects.toThrow();
+      const result = await handler(testData, mockDeep<Context>(), jest.fn());
 
+      expect(result.batchItemFailures).toEqual([]);
+      expect(mockedDeps.letterQueueRepository.putLetter).toHaveBeenCalledTimes(
+        2,
+      );
+      expect(mockedDeps.letterQueueRepository.putLetter).toHaveBeenCalledWith(
+        expect.objectContaining({ letterId: "1" }),
+      );
+      expect(mockedDeps.letterQueueRepository.putLetter).toHaveBeenCalledWith(
+        expect.objectContaining({ letterId: "2" }),
+      );
+      expect(mockedDeps.logger.error).toHaveBeenCalledTimes(1);
       expect(mockedDeps.logger.error).toHaveBeenCalledWith(
         expect.objectContaining({
           description: "Error extracting payload",
           eventId: "event-123",
+          recordId: "seq-123",
         }),
       );
+      assertSummaryLogged({ successCount: 2, droppedCount: 1, totalCount: 3 });
     });
   });
 
@@ -271,6 +560,23 @@ describe("update-letter-queue Lambda", () => {
 
       assertQueueDeltaMetricLogged("supplier1", 0);
       assertQueueDeltaMetricLogged("supplier2", 1);
+      // supplier1's delete and insert cancel out in the metric but are both successes.
+      assertSummaryLogged({ successCount: 3, totalCount: 3 });
+    });
+
+    // eslint-disable-next-line jest/expect-expect
+    it("logs a zero delta for a supplier whose only queue writes were replays", async () => {
+      const handler = createHandler(mockedDeps);
+      (
+        mockedDeps.letterQueueRepository.putLetter as jest.Mock
+      ).mockRejectedValueOnce(new LetterAlreadyExistsError("supplier1", "1"));
+
+      const testData = generateKinesisEvent([
+        generateInsertRecord(generateLetter("PENDING")),
+      ]);
+      await handler(testData, mockDeep<Context>(), jest.fn());
+
+      assertQueueDeltaMetricLogged("supplier1", 0);
     });
 
     // eslint-disable-next-line jest/expect-expect
@@ -381,6 +687,17 @@ describe("update-letter-queue Lambda", () => {
   });
 });
 
+// Simulates a stored letter that predates (or lacks) a schema field.
+function omitField(letter: Letter, field: keyof Letter): Letter {
+  return Object.fromEntries(
+    Object.entries(letter).filter(([key]) => key !== field),
+  ) as Letter;
+}
+
+function encodeRecord(record: DynamoDBRecord): string {
+  return Buffer.from(JSON.stringify(record)).toString("base64");
+}
+
 function generateKinesisEvent(letterEvents: object[]): KinesisStreamEvent {
   const records = letterEvents
     .map((letter) => Buffer.from(JSON.stringify(letter)).toString("base64"))
@@ -421,6 +738,27 @@ function mapToImage(oldLetter: Letter) {
       typeof value === "string" ? { S: value } : { N: String(value) },
     ]),
   );
+}
+
+type SummaryCounts = {
+  successCount?: number;
+  failureCount?: number;
+  skippedAfterFailureCount?: number;
+  droppedCount?: number;
+  totalCount: number;
+};
+
+// Checks the whole summary line; counts not given are expected to be 0.
+function assertSummaryLogged(counts: SummaryCounts) {
+  expect(mockedDeps.logger.info).toHaveBeenCalledWith({
+    logRef: LogRefs.PROCESSING_COMPLETE.code,
+    description: LogRefs.PROCESSING_COMPLETE.description,
+    successCount: 0,
+    failureCount: 0,
+    skippedAfterFailureCount: 0,
+    droppedCount: 0,
+    ...counts,
+  });
 }
 
 function assertQueueDeltaMetricLogged(supplierId: string, delta: number) {
