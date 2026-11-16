@@ -16,7 +16,7 @@ Test suites that validate the supplier API beyond individual package unit tests.
 
 ## Prerequisites
 
-Allocator component tests use `PROD` letter variants for successful allocation and downstream validation scenarios. The letter-variant tests create isolated temporary variants with statuses `DRAFT`, `INT`, and `DISABLED`, verify the inactive-variant log and DLQ delivery, and delete the temporary configuration afterwards.
+Component global setup sets all shared letter variants in `AllocationTestVariantMap` to `PROD` before tests run, including the default prepared-event variant. It preserves the remaining configuration and fails if a required variant has not been seeded. The letter-variant tests create isolated temporary variants with statuses `DRAFT`, `INT`, and `DISABLED`, verify the inactive-variant log and DLQ delivery, and delete the temporary configuration afterwards.
 
 Run the allocation suite against a deployed environment with the updated supplier configuration fixtures:
 

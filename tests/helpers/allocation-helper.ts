@@ -148,6 +148,30 @@ const getSupplierQuotasTableName = (): string =>
 
 const getAllocationDate = (): string => new Date().toISOString().slice(0, 10);
 
+export async function setupAllocationTestVariants(): Promise<void> {
+  for (const variantId of Object.keys(AllocationTestVariantMap)) {
+    await docClient.send(
+      new UpdateCommand({
+        TableName: getSupplierConfigTableName(),
+        Key: {
+          pk: "ENTITY#letter-variant",
+          sk: `ID#${variantId}`,
+        },
+        UpdateExpression: "SET #status = :status, updatedAt = :now",
+        ExpressionAttributeNames: {
+          "#status": "status",
+        },
+        ExpressionAttributeValues: {
+          ":status": "PROD",
+          ":now": new Date().toISOString(),
+        },
+        ConditionExpression: "attribute_exists(pk) AND attribute_exists(sk)",
+      }),
+    );
+    logger.info(`Set allocation test letter variant ${variantId} to PROD`);
+  }
+}
+
 export async function getAllocationLogForDomainId(
   domainId: string,
 ): Promise<SupplierAllocatorLog> {
