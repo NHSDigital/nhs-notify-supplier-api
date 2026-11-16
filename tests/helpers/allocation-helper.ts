@@ -148,8 +148,10 @@ const getSupplierQuotasTableName = (): string =>
 
 const getAllocationDate = (): string => new Date().toISOString().slice(0, 10);
 
-export async function setupAllocationTestVariants(): Promise<void> {
-  for (const variantId of Object.keys(AllocationTestVariantMap)) {
+export async function setupAllocationTestVariants(
+  variantIds: string[] = Object.keys(AllocationTestVariantMap),
+): Promise<void> {
+  for (const variantId of new Set(variantIds)) {
     await docClient.send(
       new UpdateCommand({
         TableName: getSupplierConfigTableName(),

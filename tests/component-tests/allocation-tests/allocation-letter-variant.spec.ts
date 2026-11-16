@@ -37,7 +37,7 @@ test.describe("Letter Variant Tests", () => {
 
         const inactiveVariantLog = await getAllocationLog<{
           description: string;
-          logRef: string;
+          log_reference: string;
           variantId: string;
           status: string;
         }>("Letter variant is not active based on status", {
@@ -45,7 +45,7 @@ test.describe("Letter Variant Tests", () => {
           extraPatterns: [variantId],
         });
         expect(inactiveVariantLog).toMatchObject({
-          logRef: "027-INACTIVE-LETTER-VARIANT",
+          log_reference: expect.stringContaining("027-INACTIVE-LETTER-VARIANT"),
           variantId,
           status,
         });

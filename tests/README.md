@@ -18,6 +18,8 @@ Test suites that validate the supplier API beyond individual package unit tests.
 
 Component global setup sets all shared letter variants in `AllocationTestVariantMap` to `PROD` before tests run, including the default prepared-event variant. It preserves the remaining configuration and fails if a required variant has not been seeded. The letter-variant tests create isolated temporary variants with statuses `DRAFT`, `INT`, and `DISABLED`, verify the inactive-variant log and DLQ delivery, and delete the temporary configuration afterwards.
 
+The urgent-letter-priority suite also sets its urgency 9 and 10 variants to `PROD` in its setup. Non-`PROD` variant tests expect successful DLQ delivery and assert the logger's emitted `log_reference` field; these are passing negative tests, not expected test failures.
+
 Run the allocation suite against a deployed environment with the updated supplier configuration fixtures:
 
 ```bash
