@@ -1,5 +1,6 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
+  DeleteCommand,
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
@@ -103,6 +104,7 @@ export type FetchedSupplierLog = {
 
 type LetterVariantConfig = {
   id: string;
+  status: "DRAFT" | "INT" | "PROD" | "DISABLED";
   packSpecificationIds: string[];
   constraints: {
     blackCoveragePercentage: Record<string, number>;
@@ -201,6 +203,42 @@ export async function getLetterVariantConfigFromDb(
   }
 
   return Item as LetterVariantConfig;
+}
+
+export async function seedTestLetterVariant(
+  sourceVariantId: string,
+  variantId: string,
+  status: LetterVariantConfig["status"],
+): Promise<void> {
+  const sourceVariant = await getLetterVariantConfigFromDb(sourceVariantId);
+
+  await docClient.send(
+    new PutCommand({
+      TableName: getSupplierConfigTableName(),
+      Item: {
+        ...sourceVariant,
+        pk: "ENTITY#letter-variant",
+        sk: `ID#${variantId}`,
+        id: variantId,
+        status,
+      },
+      ConditionExpression: "attribute_not_exists(pk)",
+    }),
+  );
+}
+
+export async function deleteTestLetterVariant(
+  variantId: string,
+): Promise<void> {
+  await docClient.send(
+    new DeleteCommand({
+      TableName: getSupplierConfigTableName(),
+      Key: {
+        pk: "ENTITY#letter-variant",
+        sk: `ID#${variantId}`,
+      },
+    }),
+  );
 }
 
 export async function getLetterDailyAllocationFromDb(

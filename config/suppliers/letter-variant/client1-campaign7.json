@@ -32,7 +32,7 @@
     "notify-c5-colour"
   ],
   "priority": 50,
-  "status": "INT",
+  "status": "PROD",
   "type": "STANDARD",
   "volumeGroupId": "volumeGroup-test3"
 }
