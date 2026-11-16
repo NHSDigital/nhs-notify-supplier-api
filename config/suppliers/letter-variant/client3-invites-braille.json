@@ -25,7 +25,7 @@
     "client3-invites-braille"
   ],
   "priority": 10,
-  "status": "INT",
+  "status": "PROD",
   "type": "BRAILLE",
   "volumeGroupId": "volumeGroup-test3"
 }

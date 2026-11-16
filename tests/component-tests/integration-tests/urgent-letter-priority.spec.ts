@@ -10,7 +10,6 @@ import {
 } from "tests/helpers/urgent-letter-priority-helper";
 import { createValidRequestHeaders } from "tests/constants/request-headers";
 import { supplierDataSetup } from "tests/helpers/suppliers-setup-helper";
-import { setupAllocationTestVariants } from "tests/helpers/allocation-helper";
 import { logger } from "tests/helpers/pino-logger";
 import {
   getLettersWithRetry,
@@ -22,10 +21,6 @@ let baseUrl: string;
 test.beforeAll(async () => {
   baseUrl = await getRestApiGatewayBaseUrl();
   await supplierDataSetup(supplier);
-  await setupAllocationTestVariants([
-    ...getVariantsWithUrgency(9),
-    ...getVariantsWithUrgency(10),
-  ]);
 });
 
 test.describe("Urgent Letter Priority Tests", () => {

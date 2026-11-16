@@ -1,6 +1,5 @@
 import { logger } from "tests/helpers/pino-logger";
 import { supplierDataSetup } from "tests/helpers/suppliers-setup-helper";
-import { setupAllocationTestVariants } from "tests/helpers/allocation-helper";
 import { SUPPLIERID } from "../constants/api-constants";
 
 async function globalSetup() {
@@ -10,7 +9,6 @@ async function globalSetup() {
 
   // check supplier exists
   await supplierDataSetup(SUPPLIERID);
-  await setupAllocationTestVariants();
 
   logger.info("");
   logger.info("*** GLOBAL SETUP COMPLETE ***");

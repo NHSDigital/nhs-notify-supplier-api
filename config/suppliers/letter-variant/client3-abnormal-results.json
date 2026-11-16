@@ -25,7 +25,7 @@
     "client3-abnormal-results"
   ],
   "priority": 9,
-  "status": "INT",
+  "status": "PROD",
   "type": "STANDARD",
   "volumeGroupId": "volumeGroup-test3"
 }
