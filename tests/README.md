@@ -16,6 +16,14 @@ Test suites that validate the supplier API beyond individual package unit tests.
 
 ## Prerequisites
 
+Allocator component tests use `PROD` letter variants for successful allocation and downstream validation scenarios. The letter-variant tests create isolated temporary variants with statuses `DRAFT`, `INT`, and `DISABLED`, verify the inactive-variant log and DLQ delivery, and delete the temporary configuration afterwards.
+
+Run the allocation suite against a deployed environment with the updated supplier configuration fixtures:
+
+```bash
+pnpm --filter nhs-notify-supplier-api-tests run test:component --project=allocation-tests
+```
+
 - **Unit and Pact tests**: There are no prerequisites as they run locally with no external dependencies.
 - **Component tests** require a running AWS login and a deployed environment:
   1. Deploy a dynamic environment (can be achieved by creating a Pull Request). Take a note of the environment e.g. pr1234

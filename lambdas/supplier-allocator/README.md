@@ -27,6 +27,7 @@ Consumes `LetterRequestPrepared` events (v1 and v2) from an SQS queue, chooses a
 ## Nuances and Peculiarities
 
 - **`SupplierConfigValidationError`  and `MissingSupplierConfigError` are treated as terminal for retries.** The handler sends the original message directly to the allocator DLQ and acknowledges the source record.
+- **Only `PROD` letter variants can be allocated.** Variant retrieval rejects statuses `DRAFT`, `INT`, and `DISABLED` with a logged `SupplierConfigValidationError`, sending the original record to the allocator DLQ without producing an allocation. This follows the status checks for volume groups, suppliers, and pack specifications. If sending to the DLQ fails, the source record is returned in `batchItemFailures` for retry.
 - **Otherwise failed allocations produce REJECTED letters, not dropped messages.** If no valid supplier packs are found, the handler sends a message to the upsert queue with `allocationStatus.status = "REJECTED"` and `supplierId = "unknown"`.
 - **All other failures retain normal retry semantics.** Records that fail for non-supplier-config-related reasons are returned in `batchItemFailures` and retried according to queue configuration.
 - **The factor algorithm is a running weighted average across the lifetime of the system, not per-batch.** The `overallAllocation` table accumulates counts since deployment. A supplier that handled a disproportionate share yesterday will have a high factor today and be deprioritised, allowing others to catch up to their target percentage.

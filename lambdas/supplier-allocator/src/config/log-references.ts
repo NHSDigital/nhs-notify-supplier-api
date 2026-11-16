@@ -106,6 +106,10 @@ const LogRefs = {
     code: "026-NO-ELIGIBLE-PACKS",
     description: "No eligible pack specifications found for letter",
   },
+  INACTIVE_LETTER_VARIANT: {
+    code: "027-INACTIVE-LETTER-VARIANT",
+    description: "Letter variant is not active based on status",
+  },
 };
 
 export default LogRefs;
