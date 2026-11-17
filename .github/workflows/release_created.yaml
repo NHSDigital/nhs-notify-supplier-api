@@ -15,6 +15,9 @@ permissions:
 
 jobs:
   deploy:
+    strategy:
+      matrix:
+        target_environment: [main, nft]
     uses: ./.github/workflows/deploy-supplier-api.yaml
     secrets: inherit
     with:
@@ -24,3 +27,4 @@ jobs:
       backend_account_group: nonprod
       deploy_proxy: true
       apim_environment: int
+      target_environment: ${{ matrix.target_environment }}

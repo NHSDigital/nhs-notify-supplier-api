@@ -38,6 +38,11 @@ on:
         type: boolean
         required: false
         default: false
+      target_environment:
+        description: "Target environment (main, nft). Used to deploy the nft environment to non-prod. Defaults to main"
+        type: string
+        required: false
+        default: "main"
 
 permissions:
   id-token: write
@@ -54,7 +59,6 @@ jobs:
       is_release: ${{ steps.validate.outputs.is_release }}
       build_artifact_version: ${{ steps.validate.outputs.build_artifact_version }}
       target_account_group: ${{ steps.validate.outputs.target_account_group }}
-      target_environment: ${{ steps.validate.outputs.target_environment }}
       apim_environment: ${{ steps.validate.outputs.apim_environment }}
     steps:
       - name: Validate inputs and resolve source
@@ -189,8 +193,7 @@ jobs:
           echo "is_release=$is_release" >> "$GITHUB_OUTPUT"
           echo "build_artifact_version=$build_artifact_version" >> "$GITHUB_OUTPUT"
           echo "target_account_group=$target_account_group" >> "$GITHUB_OUTPUT"
-          # For static envs we want to deploy to main
-          echo "target_environment=main" >> "$GITHUB_OUTPUT"
+          # for nonprod we also want to deploy the nft environment
           echo "apim_environment=$apim_environment" >> "$GITHUB_OUTPUT"
 
   deploy-backend:
@@ -218,7 +221,7 @@ jobs:
           bash .github/scripts/dispatch_internal_repo_workflow.sh \
             --releaseVersion "${{ needs.validate.outputs.release_version }}" \
             --targetWorkflow "dispatch-deploy-static-notify-supplier-api-env.yaml" \
-            --targetEnvironment "${{ needs.validate.outputs.target_environment }}" \
+            --targetEnvironment "${{ inputs.target_environment }}" \
             --targetAccountGroup "${{ needs.validate.outputs.target_account_group }}" \
             --targetComponent "api" \
             --terraformAction "apply"
@@ -257,15 +260,15 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Deploy proxy
+        if: ${{ inputs.target_environment == 'main' }}
         env:
           PROXYGEN_API_NAME: nhs-notify-supplier
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         uses: ./.github/actions/build-proxies
         with:
-          environment: ${{ needs.validate.outputs.target_environment }}
+          environment: ${{ inputs.target_environment }}
           apimEnv: ${{ needs.validate.outputs.apim_environment }}
           runId: "${{ github.run_id }}"
           releaseVersion: ${{ needs.validate.outputs.release_version }}
           isRelease: ${{ needs.validate.outputs.is_release }}
-          buildSandbox: ${{ inputs.build_sandbox }}
           version: ${{ needs.validate.outputs.build_artifact_version }}
