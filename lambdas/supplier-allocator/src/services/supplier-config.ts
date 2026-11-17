@@ -9,7 +9,7 @@ import {
 
 import { Deps } from "../config/deps";
 import LogRefs from "../config/log-references";
-import { MinimumLetterEvent } from "../handler/types";
+import { MinimumLetterEvent } from "../../../common/types";
 import SupplierConfigValidationError from "../errors/supplier-config-validation-error";
 import RejectedError from "../errors/rejected-error";
 
