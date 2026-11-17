@@ -1,6 +1,4 @@
-import z from "zod";
 import { AllocationDetails } from "../../../common/types";
-
 
 export type SupplierDetails = {
   allocationDetails: AllocationDetails;
