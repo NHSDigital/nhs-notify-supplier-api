@@ -60,6 +60,7 @@ jobs:
       build_artifact_version: ${{ steps.validate.outputs.build_artifact_version }}
       target_account_group: ${{ steps.validate.outputs.target_account_group }}
       apim_environment: ${{ steps.validate.outputs.apim_environment }}
+      overrides: ${{ steps.validate.outputs.overrides }}
     steps:
       - name: Validate inputs and resolve source
         id: validate
@@ -117,6 +118,14 @@ jobs:
             exit 1
           fi
 
+          # --- Deploy supplier mock in NFT environment ---
+
+          overrides=""
+          if [[ "$target_environment" == "nft" ]]; then
+            overrides="deploy_supplier_mock_scheduler=true"
+          fi
+
+          
           # --- Cross-validation (only when deploying both) ---
 
           if [[ "$deploy_backend" == "true" && "$deploy_proxy" == "true" ]]; then
@@ -195,6 +204,7 @@ jobs:
           echo "target_account_group=$target_account_group" >> "$GITHUB_OUTPUT"
           # for nonprod we also want to deploy the nft environment
           echo "apim_environment=$apim_environment" >> "$GITHUB_OUTPUT"
+          echo "overrides=$overrides" >> $GITHUB_OUTPUT
 
   deploy-backend:
     name: Deploy backend
@@ -224,11 +234,12 @@ jobs:
             --targetEnvironment "${{ inputs.target_environment }}" \
             --targetAccountGroup "${{ needs.validate.outputs.target_account_group }}" \
             --targetComponent "api" \
-            --terraformAction "apply"
+            --terraformAction "apply" \ 
+            --overrides "${{ needs.validate.outputs.overrides }}"
 
   deploy-proxy:
     name: Deploy proxy
-    if: ${{ inputs.deploy_proxy && !failure() && !cancelled() }}
+    if: ${{ inputs.deploy_proxy && !failure() && !cancelled() && inputs.target_environment == 'main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: [ validate, deploy-backend ]
@@ -260,7 +271,6 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Deploy proxy
-        if: ${{ inputs.target_environment == 'main' }}
         env:
           PROXYGEN_API_NAME: nhs-notify-supplier
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
