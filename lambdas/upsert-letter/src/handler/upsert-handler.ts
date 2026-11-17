@@ -1,5 +1,4 @@
 import { Context, SQSBatchItemFailure, SQSEvent, SQSHandler } from "aws-lambda";
-import { $LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
 import {
   InsertLetter,
   LetterAlreadyExistsError,
@@ -9,7 +8,6 @@ import {
   $LetterStatusChangeEvent,
   LetterStatusChangeEvent,
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
-import { $LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import { Unit } from "aws-embedded-metrics";
 import {
   IdempotencyConfig,
@@ -24,13 +22,12 @@ import {
 import { Logger } from "pino";
 import { Deps } from "../config/deps";
 import LogRefs from "../config/log-references";
+import { QueueMessage, QueueMessageSchema, UpsertOperation } from "./schemas";
 import {
+  $MinimumLetterEvent,
   AllocationDetails,
-  PreparedEvents,
-  QueueMessage,
-  QueueMessageSchema,
-  UpsertOperation,
-} from "./schemas";
+  MinimumLetterEvent,
+} from "../../../common/types";
 
 interface UpsertDimensions extends Record<string, string> {
   Supplier: string;
@@ -51,15 +48,15 @@ function getOperationFromType(type: string): UpsertOperation {
   ) {
     return {
       name: "Insert",
-      schemas: [$LetterRequestPreparedEventV2, $LetterRequestPreparedEvent],
+      schema: $MinimumLetterEvent,
       handler: async (request, allocationDetails, deps) => {
-        const preparedRequest = request as PreparedEvents;
+        const preparedRequest = request as MinimumLetterEvent;
         const letterToInsert: InsertLetter = mapToInsertLetter(
           preparedRequest,
           allocationDetails,
         );
         const dimensions: UpsertDimensions = extractDimensionsFromLetterEvent(
-          request as LetterStatusChangeEvent | PreparedEvents,
+          request as LetterStatusChangeEvent | MinimumLetterEvent,
           allocationDetails,
         );
         try {
@@ -95,12 +92,12 @@ function getOperationFromType(type: string): UpsertOperation {
   // if it's not an insert type, it must be an update as we've already parsed the message, but we want to have a separate operation for better logging and metrics
   return {
     name: "Update",
-    schemas: [$LetterStatusChangeEvent],
+    schema: $LetterStatusChangeEvent,
     handler: async (request, allocationDetails, deps) => {
       const supplierEvent = request as LetterStatusChangeEvent;
       const letterToUpdate: UpdateLetter = mapToUpdateLetter(supplierEvent);
       const dimensions: UpsertDimensions = extractDimensionsFromLetterEvent(
-        request as LetterStatusChangeEvent | PreparedEvents,
+        request as LetterStatusChangeEvent | MinimumLetterEvent,
         allocationDetails,
       );
       await deps.letterRepo.updateLetterStatus(letterToUpdate);
@@ -120,7 +117,7 @@ function getOperationFromType(type: string): UpsertOperation {
 }
 
 export function extractDimensionsFromLetterEvent(
-  letterEvent: LetterStatusChangeEvent | PreparedEvents,
+  letterEvent: LetterStatusChangeEvent | MinimumLetterEvent,
   allocationDetails: AllocationDetails | undefined,
 ): UpsertDimensions {
   const { type } = letterEvent;
@@ -128,7 +125,7 @@ export function extractDimensionsFromLetterEvent(
   if (
     type.startsWith("uk.nhs.notify.letter-rendering.letter-request.prepared")
   ) {
-    const preparedRequest = letterEvent as PreparedEvents;
+    const preparedRequest = letterEvent as MinimumLetterEvent;
     const { campaignId, clientId, templateId } = preparedRequest.data;
     const supplierId = allocationDetails?.supplierSpec.supplierId;
     const status =
@@ -160,7 +157,7 @@ export function extractDimensionsFromLetterEvent(
 }
 
 function mapToInsertLetter(
-  upsertRequest: PreparedEvents,
+  upsertRequest: MinimumLetterEvent,
   allocationDetails: AllocationDetails,
 ): InsertLetter {
   const now = new Date().toISOString();
@@ -211,13 +208,8 @@ async function runUpsert(
   allocationDetails: AllocationDetails,
   deps: Deps,
 ) {
-  for (const schema of operation.schemas) {
-    const r = schema.safeParse(letterEvent);
-    if (r.success) {
-      await operation.handler(r.data, allocationDetails, deps);
-      return;
-    }
-  }
+  const r = operation.schema.safeParse(letterEvent);
+  await operation.handler(r.data, allocationDetails, deps);
 }
 
 async function emitIndividualMetric(
@@ -287,7 +279,7 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
 
         const queueMessage: QueueMessage = parseQueueMessage(sqsMessage);
 
-        let letterEvent: LetterStatusChangeEvent | PreparedEvents;
+        let letterEvent: LetterStatusChangeEvent | MinimumLetterEvent;
         let allocationDetails: AllocationDetails | undefined;
 
         if ("letterEvent" in queueMessage) {
@@ -336,7 +328,7 @@ export default function createUpsertLetterHandler(deps: Deps): SQSHandler {
 }
 
 async function processRecord(
-  letterEvent: LetterStatusChangeEvent | PreparedEvents,
+  letterEvent: LetterStatusChangeEvent | MinimumLetterEvent,
   allocationDetails: AllocationDetails | undefined,
   deps: Deps,
 ) {

@@ -271,6 +271,7 @@ describe("createUpsertLetterHandler", () => {
 
     expect(result).toBeDefined();
     if (!result) throw new Error("expected BatchResponse, got void");
+
     expect(result.batchItemFailures).toHaveLength(0);
 
     expect(mockedDeps.letterRepo.putLetter).toHaveBeenCalledTimes(2);
