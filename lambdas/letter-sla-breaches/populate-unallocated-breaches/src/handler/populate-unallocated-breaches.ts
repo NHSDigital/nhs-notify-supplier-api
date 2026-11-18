@@ -15,25 +15,23 @@ export type PopulateUnallocatedBreachesResult = {
   breachCount: string;
 };
 
-function parseEventDate(date: string): Date {
-  const [datePart, timePart, ...remainingParts] = date.split(" ");
-  const isAthenaTimestamp =
-    timePart && remainingParts.length === 0 && !date.includes("T");
-
-  return new Date(isAthenaTimestamp ? `${datePart}T${timePart}Z` : date);
-}
-
 export default function createHandler(deps: Deps) {
   return async (
     event: PopulateUnallocatedBreachesEvent,
   ): Promise<PopulateUnallocatedBreachesResult> => {
+    const eventDate = new Date(event.date);
+    if (Number.isNaN(eventDate.getTime())) {
+      throw new TypeError(`Invalid event date: ${event.date}`);
+    }
+    eventDate.setTime(eventDate.getTime() - 60 * 60 * 1000);
+
     try {
       const rows = await runAthenaQuery(
         deps,
         buildUnallocatedBreachesQuery(
           deps.env.SUBSCRIPTION_TABLE_NAME,
           deps.env.PUBLICATION_TABLE_NAME,
-          parseEventDate(event.date),
+          eventDate,
           14,
         ),
       );

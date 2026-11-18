@@ -24,7 +24,7 @@ describe("populateUnallocatedBreaches", () => {
       deps,
       expect.objectContaining({
         queryString: expect.stringContaining("FROM subscription_events"),
-        executionParameters: ["2026-10-08T00:00:00.000Z", "14"],
+        executionParameters: ["2026-10-07T23:00:00.000Z", "14"],
       }),
     );
     expect(runAthenaQuery).toHaveBeenCalledWith(
@@ -92,19 +92,22 @@ describe("populateUnallocatedBreaches", () => {
   });
 
   it.each([
-    ["2026-10-08 15:30:00.000", "2026-10-08T15:30:00.000Z"],
-    ["2026-10-08T15:30:00Z", "2026-10-08T15:30:00.000Z"],
-  ])("parses event date %s as UTC", async (eventDate, expected) => {
-    const deps = makeDeps();
-    jest.mocked(runAthenaQuery).mockResolvedValueOnce([]);
+    ["2026-10-08 15:30:00.000", "2026-10-08T14:30:00.000Z"],
+    ["2026-10-08T15:30:00Z", "2026-10-08T14:30:00.000Z"],
+  ])(
+    "applies a one-hour grace period to event date %s",
+    async (eventDate, expected) => {
+      const deps = makeDeps();
+      jest.mocked(runAthenaQuery).mockResolvedValueOnce([]);
 
-    await createHandler(deps)({ date: eventDate });
+      await createHandler(deps)({ date: eventDate });
 
-    expect(runAthenaQuery).toHaveBeenCalledWith(
-      deps,
-      expect.objectContaining({ executionParameters: [expected, "14"] }),
-    );
-  });
+      expect(runAthenaQuery).toHaveBeenCalledWith(
+        deps,
+        expect.objectContaining({ executionParameters: [expected, "14"] }),
+      );
+    },
+  );
 
   it("logs and rethrows a query error", async () => {
     const deps = makeDeps();
