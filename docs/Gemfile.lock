@@ -1,7 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (7.2.3.1)
+    activesupport (8.0.5.2)
       base64
       benchmark (>= 0.3)
       bigdecimal
@@ -10,14 +10,15 @@ GEM
       drb
       i18n (>= 1.6, < 2)
       logger (>= 1.4.2)
-      minitest (>= 5.1, < 6)
+      minitest (>= 5.1)
       securerandom (>= 0.3)
       tzinfo (~> 2.0, >= 2.0.5)
+      uri (>= 0.13.1)
     addressable (2.9.0)
       public_suffix (>= 2.0.2, < 8.0)
     base64 (0.3.0)
     benchmark (0.5.0)
-    bigdecimal (4.0.1)
+    bigdecimal (4.1.3)
     cgi (0.5.1)
     colorator (1.1.0)
     concurrent-ruby (1.3.8)
@@ -30,7 +31,6 @@ GEM
     erb (4.0.4.1)
       cgi (>= 0.3.3)
     eventmachine (1.2.7)
-    ffi (1.17.2)
     ffi (1.17.2-aarch64-linux-gnu)
     ffi (1.17.2-arm64-darwin)
     ffi (1.17.2-x86_64-linux-gnu)
@@ -49,7 +49,7 @@ GEM
       activesupport (>= 2)
       nokogiri (>= 1.4)
     http_parser.rb (0.8.0)
-    i18n (1.14.8)
+    i18n (1.15.2)
       concurrent-ruby (~> 1.0)
     jekyll (4.4.1)
       addressable (~> 2.4)
@@ -138,6 +138,7 @@ GEM
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.6.0)
+    uri (1.1.2)
     webrick (1.8.2)
 
 PLATFORMS
@@ -146,6 +147,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  activesupport (= 8.0.5.2)
   http_parser.rb (~> 0.6.0)
   jekyll (~> 4.4)
   jekyll-drawio
@@ -153,6 +155,7 @@ DEPENDENCIES
   jemoji
   just-the-docs
   minima (~> 2.5)
+  minitest (< 6)
   tzinfo (>= 1, < 3)
   tzinfo-data
   wdm (~> 0.1.1)
