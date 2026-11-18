@@ -28,6 +28,7 @@ export const $MinimumLetterEvent = z.object({
   type: z.string(),
   source: z.string(),
   subject: z.string(),
+  status: z.literal("PREPARED").optional(),
   data: z.object({
     letterVariantId: z.string(),
     domainId: z.string(),
