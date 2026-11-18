@@ -4,77 +4,84 @@ import {
 } from "@aws-sdk/client-sns";
 import { expect, test } from "@playwright/test";
 import { snsClient } from "tests/helpers/aws-sns-helper";
-import { retrieveKinesisRecordsAtTimestamp } from "tests/helpers/aws-kinesis-helper";
 import { logger } from "tests/helpers/pino-logger";
 import { AWS_ACCOUNT_ID, envName } from "tests/constants/api-constants";
 import { randomUUID } from "node:crypto";
 import PREPARED_LETTER from "../../resources/prepared-letter.json";
 
-test.describe("Performance test checking how long it takes letter requests from the EventSub SNS to reach the Letters Database ", () => {
-  test("send 2500 letter requests", async () => {
-    const MESSAGES_TO_SEND = 2500;
-    const FIVE_MINUTES = 1000 * 60 * 5;
+test.describe("Performance test publishing letter requests to EventSub SNS", () => {
+  test("send 250_000 letter requests", async () => {
+    const MESSAGES_TO_SEND = 250_000;
     const BATCH_SIZE = 10;
+    const CONCURRENT_BATCHES = 10;
     const SNS_ARN = `arn:aws:sns:eu-west-2:${AWS_ACCOUNT_ID}:nhs-${envName}-supapi-eventsub`;
-    const KINESIS_STREAM_ARN = `arn:aws:kinesis:eu-west-2:${AWS_ACCOUNT_ID}:stream/nhs-${envName}-supapi-letter-change-stream`;
-    test.setTimeout(FIVE_MINUTES);
+    test.setTimeout(60 * 60 * 1000);
     const startTime = Date.now();
+    const runId = randomUUID();
 
     logger.info(
-      `about to sent ${MESSAGES_TO_SEND} messages in batches of ${BATCH_SIZE}`,
+      `about to send ${MESSAGES_TO_SEND} messages in batches of ${BATCH_SIZE}, ${CONCURRENT_BATCHES} batches at a time`,
     );
-    let batch: PublishBatchRequestEntry[] = [];
-    for (let i = 1; i <= MESSAGES_TO_SEND; i++) {
-      const id = `performance-test-letter${i}-${startTime}`;
-      const eventId = randomUUID();
-      const message = JSON.stringify({
-        ...PREPARED_LETTER,
-        id: eventId,
-        data: { ...PREPARED_LETTER.data, domainId: id },
-      });
-      batch.push({ Id: id, Message: message });
-
-      if (batch.length === BATCH_SIZE) {
-        logger.info(`sending batch number ${i / BATCH_SIZE}`);
-        await snsClient.send(
-          new PublishBatchCommand({
-            PublishBatchRequestEntries: batch,
-            TopicArn: SNS_ARN,
-          }),
+    let published = 0;
+    for (let first = 1; first <= MESSAGES_TO_SEND; ) {
+      const pending: Promise<number>[] = [];
+      for (
+        let n = 0;
+        n < CONCURRENT_BATCHES && first <= MESSAGES_TO_SEND;
+        n++
+      ) {
+        const batch: PublishBatchRequestEntry[] = [];
+        for (
+          let i = 0;
+          i < BATCH_SIZE && first <= MESSAGES_TO_SEND;
+          i++, first++
+        ) {
+          const id = `performance-test-letter${first}-${runId}`;
+          const message = JSON.stringify({
+            ...PREPARED_LETTER,
+            id: randomUUID(),
+            data: { ...PREPARED_LETTER.data, domainId: id },
+          });
+          batch.push({ Id: id, Message: message });
+        }
+        pending.push(
+          snsClient
+            .send(
+              new PublishBatchCommand({
+                PublishBatchRequestEntries: batch,
+                TopicArn: SNS_ARN,
+              }),
+            )
+            .then((response) => {
+              if (response.Failed?.length) {
+                throw new Error(
+                  `SNS failed to publish batch entries: ${JSON.stringify(response.Failed)}`,
+                );
+              }
+              const successful = response.Successful?.length ?? 0;
+              if (successful !== batch.length) {
+                throw new Error(
+                  `SNS confirmed ${successful} of ${batch.length} batch entries`,
+                );
+              }
+              return successful;
+            }),
         );
-        batch = [];
+      }
+      const results = await Promise.allSettled(pending);
+      for (const result of results) {
+        if (result.status === "rejected") {
+          throw result.reason;
+        }
+        published += result.value;
+      }
+      if ((first - 1) % (BATCH_SIZE * 100) === 0 || first > MESSAGES_TO_SEND) {
+        logger.info(`published ${published} messages`);
       }
     }
 
-    const pollInterval = 2 * 1000; // 2 seconds
-    let recordsRetrieved = 0;
-    logger.info("waiting for records to appear in Kinesis data stream");
-    while (recordsRetrieved < MESSAGES_TO_SEND) {
-      recordsRetrieved = await retrieveKinesisRecordsAtTimestamp(
-        KINESIS_STREAM_ARN,
-        startTime,
-      );
-      logger.info(`records retrieved: ${recordsRetrieved}`);
-      if (recordsRetrieved >= MESSAGES_TO_SEND) {
-        break;
-      } else {
-        logger.info(
-          `waiting for ${pollInterval / 1000} seconds before polling again`,
-        );
-        await sleep(pollInterval);
-      }
-    }
-
-    expect(recordsRetrieved).toBeGreaterThanOrEqual(MESSAGES_TO_SEND);
-
+    expect(published).toBe(MESSAGES_TO_SEND);
     const endTime = Date.now();
-    logger.info(`final number of records retrieved: ${recordsRetrieved}`);
     logger.info(`FINAL TEST TIME WAS: ${(endTime - startTime) / 1000} seconds`);
   });
 });
-
-function sleep(timeInMs: number) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, timeInMs);
-  });
-}

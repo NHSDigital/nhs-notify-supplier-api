@@ -48,7 +48,13 @@ Unit tests:
 pnpm run test:unit
 ```
 
-Exceptionally, this workspace doesn't contain any unit tests. See top package file for other workspaces.
+This workspace's mocked performance-test checks can be run locally with:
+
+```bash
+pnpm exec jest --config tests/jest.config.ts --runInBand --moduleNameMapper '{"^tests/(.*)$":"<rootDir>/$1"}' tests/performance/testCases/send-prepared-letter-request.test.ts
+```
+
+Run this command from the repository root.
 
 Component, sandbox, and performance tests (from `tests` workspace):
 
@@ -57,6 +63,13 @@ pnpm run test:component
 pnpm run test:sandbox
 pnpm run test:performance
 ```
+
+The performance test publishes 250,000 letters in concurrent SNS batches, with
+a one-hour timeout. It only checks that SNS accepted the messages, not that
+they were processed. It changes the upsert Lambda's letter TTL to one hour
+during the run and restores the original configuration afterwards. Queued
+messages processed after restoration will use the original TTL; check the
+environment and clean up test data as needed.
 
 Pact tests:
 
