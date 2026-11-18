@@ -434,6 +434,7 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
           letterVariantId: letterEvent.data.letterVariantId,
           source: letterEvent.source,
           type: letterEvent.type,
+          status: letterEvent.data.status,
         });
 
         idempotencyConfig.registerLambdaContext(context);
