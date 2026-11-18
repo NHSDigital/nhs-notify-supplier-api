@@ -13,6 +13,7 @@ import {
 } from "@nhsdigital/nhs-notify-event-schemas-supplier-api/src/events/letter-events";
 import { MetricStatus, buildEMFObject } from "@internal/helpers";
 import { Unit } from "aws-embedded-metrics";
+import { $MinimumLetterEvent } from "../../../../common/types";
 import createUpsertLetterHandler, {
   extractDimensionsFromLetterEvent,
 } from "../upsert-handler";
@@ -510,7 +511,7 @@ describe("createUpsertLetterHandler", () => {
   });
 
   test("extracts insert dimensions without allocation details", () => {
-    const letterEvent = createPreparedV2Event();
+    const letterEvent = $MinimumLetterEvent.parse(createPreparedV2Event());
     const allocationDetails = {
       supplierSpec: {
         supplierId: "",
