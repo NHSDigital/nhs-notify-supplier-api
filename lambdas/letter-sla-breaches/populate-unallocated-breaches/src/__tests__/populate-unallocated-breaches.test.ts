@@ -14,6 +14,14 @@ const makeDeps = () =>
   }) as unknown as Deps;
 
 describe("populateUnallocatedBreaches", () => {
+  it("rejects an invalid event date", async () => {
+    const deps = makeDeps();
+
+    await expect(
+      createHandler(deps)({ date: "not-a-date" }),
+    ).rejects.toThrow("Invalid event date: not-a-date");
+  });
+
   it("passes the subscription and publication tables to the query", async () => {
     const deps = makeDeps();
     jest.mocked(runAthenaQuery).mockResolvedValueOnce([]);
