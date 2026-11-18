@@ -39,7 +39,7 @@ export default function createHandler(deps: Deps) {
       for (const row of rows) {
         // CloudWatch drops EMF metrics whose declared dimensions are missing or empty
         const emfObject = buildEMFObject(
-          "",
+          "populate-unallocated-breaches",
           {
             SupplierId: row.supplierid || "unknown",
             ClientId: row.clientid || "unknown",
@@ -65,7 +65,7 @@ export default function createHandler(deps: Deps) {
       // Published every run, including 0, so the alarm clears once breaches are resolved
       deps.logger.info({
         ...buildEMFObject(
-          "",
+          "populated-unallocated-breaches",
           {},
           {
             key: "UnallocatedBreachTotal",
