@@ -1,5 +1,3 @@
-<!-- vale off -->
-
 # @internal/datastore
 
 ## Purpose
@@ -28,4 +26,3 @@ Shared data-access layer providing DynamoDB repository implementations, domain t
 
 - The **letter queue table** is a separate DynamoDB table from the main letters table. It acts as a priority queue projection, maintained by the `update-letter-queue` Lambda from Kinesis stream events.
 - `LetterQueueRepository` implements a **visibility timeout** pattern: each returned letter's `visibilityTimestamp` is updated so subsequent queries within the timeout window skip it, preventing duplicate dispatch.
-<!-- vale on -->

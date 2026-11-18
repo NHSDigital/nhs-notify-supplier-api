@@ -1,5 +1,3 @@
-<!-- vale off -->
-
 # Supplier Configuration
 
 ## Purpose
@@ -35,5 +33,3 @@ When the `supplier-allocator` Lambda processes a `LetterRequestPreparedEvent`:
 - `status: "PROD"` is required at multiple levels (supplier, volume group, allocation) for an allocation to be active.
 - Volume groups have `startDate` (and optional `endDate`) fields. Allocations are only valid when the current date falls within this range (evaluated in London timezone).
 - Supplier `dailyCapacity` is tracked separately in `SUPPLIER_QUOTAS_TABLE` and resets at midnight London time. It is not stored in these config files.
-
-<!-- vale on -->

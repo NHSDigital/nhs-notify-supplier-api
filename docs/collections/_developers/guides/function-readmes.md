@@ -1,5 +1,3 @@
-<!-- vale off -->
-
 # function-readmes
 
 ---
@@ -128,5 +126,3 @@ Supplier config event (SNS, type prefix uk.nhs.notify.supplier-config)
 ## Supplier Configuration
 
 {% include components/generated/readmes/config-suppliers.md %}
-
-<!-- vale on -->

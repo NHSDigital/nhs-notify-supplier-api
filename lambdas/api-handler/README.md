@@ -1,5 +1,3 @@
-<!-- vale off -->
-
 # API Handler Lambdas
 
 ## Purpose
@@ -44,5 +42,3 @@ Each export in `src/index.ts` maps to a separate API Gateway route:
 - `POST /letters` enforces a duplicate letter ID check within a single request and a configurable max batch size (`MAX_LIMIT`).
 - `transformAmendmentEvent` is an SQS-triggered handler bundled in the same Lambda package, not an API Gateway route. It bridges the async status update flow by looking up current letter state before publishing the event.
 - Error responses are centralised through `processError` in the error mapper to produce a consistent JSON:API error shape across all endpoints.
-
-<!-- vale on -->

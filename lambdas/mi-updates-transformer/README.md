@@ -1,5 +1,3 @@
-<!-- vale off -->
-
 # MI Updates Transformer Lambda
 
 ## Purpose
@@ -26,5 +24,3 @@ Publishes `MISubmittedEvent` CloudEvents to SNS whenever new management informat
 - Only INSERT events produce CloudEvents. MI records are immutable once written, so MODIFY and REMOVE are not expected in normal operation and are silently discarded.
 - The handler structure mirrors `letter-updates-transformer` closely (same batching, decoding, and metrics patterns), but the filter is simpler (INSERT-only vs. status-change detection).
 - The `mapMIToCloudEvent` mapper is local to this package (`src/mappers/mi-mapper.ts`) rather than shared in `@internal/event-builders`, since MI events have a different domain structure.
-
-<!-- vale on -->
