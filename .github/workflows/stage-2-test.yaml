@@ -64,6 +64,14 @@ jobs:
     env:
       NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
+      # Pull testcontainers images in the background so the download overlaps
+      # the setup steps. Keep these references in sync with the images used in
+      # internal/datastore/src/__test__/db.ts and
+      # internal/sql-test-helpers/src/trino.ts.
+      - name: "Pre-pull test container images"
+        run: |
+          docker pull amazon/dynamodb-local > /dev/null 2>&1 &
+          docker pull trinodb/trino:476 > /dev/null 2>&1 &
       - name: "Checkout code"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: "Repo setup"
