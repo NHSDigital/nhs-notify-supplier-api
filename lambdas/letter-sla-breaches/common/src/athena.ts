@@ -1,12 +1,19 @@
 import {
+  AthenaClient,
   GetQueryExecutionCommand,
   GetQueryResultsCommand,
   GetQueryResultsCommandOutput,
   QueryExecutionState,
   StartQueryExecutionCommand,
 } from "@aws-sdk/client-athena";
-import type { AthenaDeps } from "./deps";
+import { Logger } from "pino";
 import LogRefs from "./log-references";
+
+export type AthenaDeps = {
+  athenaClient: AthenaClient;
+  logger: Logger;
+  env: { ATHENA_WORKGROUP: string; ATHENA_DATABASE: string };
+};
 
 export type AthenaQuery = {
   queryString: string;
