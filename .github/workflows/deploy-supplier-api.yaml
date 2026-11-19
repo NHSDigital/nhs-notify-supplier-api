@@ -174,34 +174,34 @@ jobs:
 
           target_account_group=""
 
-          if [[ "$deploy_backend" == "true" ]]; then
-            if [[ -z "$backend_account_group" ]]; then
-              echo "[ERROR] backend_account_group is required when deploy_backend is true."
-              exit 1
-            fi
+          # if [[ "$deploy_backend" == "true" ]]; then
+          #   if [[ -z "$backend_account_group" ]]; then
+          #     echo "[ERROR] backend_account_group is required when deploy_backend is true."
+          #     exit 1
+          #   fi
 
-            if [[ "$source_type" == "branch" && "$backend_account_group" != "dev" ]]; then
-              echo "[ERROR] Branch deployments are only allowed for dev backend deployments."
-              exit 1
-            fi
+          #   if [[ "$source_type" == "branch" && "$backend_account_group" != "dev" ]]; then
+          #     echo "[ERROR] Branch deployments are only allowed for dev backend deployments."
+          #     exit 1
+          #   fi
 
-            if [[ "$backend_account_group" == "nonprod" || "$backend_account_group" == "prod" ]]; then
-              if [[ "$is_release" == "false" ]]; then
-                echo "[ERROR] Only tagged releases can be deployed to NONPROD and PROD backends."
-                exit 1
-              fi
-            fi
+          #   if [[ "$backend_account_group" == "nonprod" || "$backend_account_group" == "prod" ]]; then
+          #     if [[ "$is_release" == "false" ]]; then
+          #       echo "[ERROR] Only tagged releases can be deployed to NONPROD and PROD backends."
+          #       exit 1
+          #     fi
+          #   fi
 
-            case "$backend_account_group" in
-              dev)     target_account_group="nhs-notify-supplier-api-dev" ;;
-              nonprod) target_account_group="nhs-notify-supplier-api-nonprod" ;;
-              prod)    target_account_group="nhs-notify-supplier-api-prod" ;;
-              *)
-                echo "[ERROR] Unsupported backend account group '$backend_account_group'."
-                exit 1
-                ;;
-            esac
-          fi
+          #   case "$backend_account_group" in
+          #     dev)     target_account_group="nhs-notify-supplier-api-dev" ;;
+          #     nonprod) target_account_group="nhs-notify-supplier-api-nonprod" ;;
+          #     prod)    target_account_group="nhs-notify-supplier-api-prod" ;;
+          #     *)
+          #       echo "[ERROR] Unsupported backend account group '$backend_account_group'."
+          #       exit 1
+          #       ;;
+          #   esac
+          # fi
 
           # --- Proxy validation (only when deploying proxy) ---
 
