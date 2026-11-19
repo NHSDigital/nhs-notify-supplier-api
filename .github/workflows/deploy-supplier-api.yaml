@@ -1,6 +1,46 @@
 name: Deploy Supplier API
 
 on:
+  workflow_dispatch:
+    inputs:
+      source_type:
+        description: "Deployment source type (release, branch)"
+        type: string
+        required: true
+      source_value:
+        description: "Release tag or branch name"
+        type: string
+        required: true
+      deploy_backend:
+        description: "Deploy backend infrastructure"
+        type: boolean
+        required: false
+        default: false
+      backend_account_group:
+        description: "Target backend account group (dev, nonprod, prod). Required when deploy_backend is true."
+        type: string
+        required: false
+        default: ""
+      deploy_proxy:
+        description: "Deploy APIM proxy"
+        type: boolean
+        required: false
+        default: false
+      apim_environment:
+        description: "Target APIM environment (internal-dev, int, prod). Required when deploy_proxy is true."
+        type: string
+        required: false
+        default: ""
+      build_sandbox:
+        description: "Build sandbox container"
+        type: boolean
+        required: false
+        default: false
+      target_environment:
+        description: "Target environment (main, nft). Used to deploy the nft environment to non-prod. Defaults to main"
+        type: string
+        required: false
+        default: "main"
   workflow_call:
     inputs:
       source_type:
