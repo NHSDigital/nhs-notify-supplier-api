@@ -113,7 +113,7 @@ catalogs:
     "@openapitools/openapi-generator-cli": "^2.41.0"
     "@redocly/cli": "^2.54.2"
     "@stoplight/spectral-cli": "^6.16.3"
-    "@tsconfig/node22": "^22.0.6"
+    "@tsconfig/node22": "^22.0.7"
     "@types/aws-lambda": "^8.10.164"
     "@types/node": "^26.6.2"
     "@types/yargs": "^17.0.35"
