@@ -56,10 +56,24 @@ runs:
       with:
         GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 
-    - name: Install poetry and e2e test dependencies
+    - name: Setup mise
+      if: ${{ steps.check_proxy_deployed.outputs.proxy_deployed == 'true' }}
+      uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+      with:
+        install: false
+        cache: true
+
+    - name: Install locked Python and Poetry
+      if: ${{ steps.check_proxy_deployed.outputs.proxy_deployed == 'true' }}
+      shell: bash
+      env:
+        MISE_OVERRIDE_TOOL_VERSIONS_FILENAMES: none
+      run: mise --locked install python poetry uv
+
+    - name: Install E2E test dependencies
+      if: ${{ steps.check_proxy_deployed.outputs.proxy_deployed == 'true' }}
       shell: bash
       run: |
-        pipx install poetry
         cd tests/e2e-tests && poetry install
 
     - name: Run tests

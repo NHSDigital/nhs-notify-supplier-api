@@ -6,7 +6,7 @@ ls -la ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}
 
 cat ~/.zshrc
 source ~/.zshrc
-echo 'asdf setup complete'
+echo 'mise setup complete'
 
 make config
 echo 'make config complete'
