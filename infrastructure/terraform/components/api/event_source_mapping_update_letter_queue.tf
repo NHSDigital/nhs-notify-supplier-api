@@ -4,6 +4,9 @@ resource "aws_lambda_event_source_mapping" "update_letter_queue_kinesis" {
   starting_position                  = "LATEST"
   batch_size                         = 10
   maximum_batching_window_in_seconds = 1
+  function_response_types = [
+    "ReportBatchItemFailures"
+  ]
 
   depends_on = [
     module.update_letter_queue # ensures update letter queue lambda exists
