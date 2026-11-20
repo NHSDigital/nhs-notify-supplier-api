@@ -144,6 +144,41 @@ describe("buildSamedayBreachesQuery", () => {
     );
   });
 
+  it("applies the same-day filter to the previous month when the lookback crosses a month boundary", async () => {
+    const now = new Date("2026-11-01T07:00:00.000Z");
+    const pendingEvent = {
+      supplierid: "supplier-a",
+      clientid: "client-a",
+      campaignid: "campaign-a",
+      status: "PENDING",
+      time: "2026-10-31T10:00:00.000Z",
+    };
+
+    await insertEvents(context, [
+      { ...pendingEvent, domainid: "letter-1", specificationid: "same_day" },
+      { ...pendingEvent, domainid: "letter-2", specificationid: "standard" },
+    ]);
+
+    const rows = await runParameterisedQueryOnTrino(
+      context,
+      buildSamedayBreachesQuery(
+        EVENT_TABLE_NAME,
+        PACK_SPECIFICATION_TABLE_NAME,
+        now,
+        14,
+      ),
+    );
+
+    expect(rows).toEqual([
+      {
+        supplierid: "supplier-a",
+        clientid: "client-a",
+        campaignid: "campaign-a",
+        breach_count: "1",
+      },
+    ]);
+  });
+
   it("counts letters per supplier where the SLA has been breached", async () => {
     // After 2400 BST on Wednesday (i.e. early on Thursday)
     const now = new Date("2026-10-15T01:01:00.000Z");

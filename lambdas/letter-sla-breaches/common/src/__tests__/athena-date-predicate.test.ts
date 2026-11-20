@@ -15,12 +15,12 @@ describe("buildAthenaDatePredicate", () => {
     );
   });
 
-  it("creates separate predicates when the date range crosses a month", () => {
+  it("groups month predicates so additional filters apply to every month", () => {
     expect(
       buildAthenaDatePredicate(new Date("2026-11-01T00:00:00.000Z"), 2),
     ).toBe(
-      "(__year = '2026' AND __month = '10' AND __day IN ('30', '31'))\n" +
-        "   OR (__year = '2026' AND __month = '11' AND __day IN ('01'))",
+      "((__year = '2026' AND __month = '10' AND __day IN ('30', '31'))\n" +
+        "   OR (__year = '2026' AND __month = '11' AND __day IN ('01')))",
     );
   });
 
@@ -28,8 +28,8 @@ describe("buildAthenaDatePredicate", () => {
     expect(
       buildAthenaDatePredicate(new Date("2026-01-01T00:00:00.000Z"), 1),
     ).toBe(
-      "(__year = '2025' AND __month = '12' AND __day IN ('31'))\n" +
-        "   OR (__year = '2026' AND __month = '01' AND __day IN ('01'))",
+      "((__year = '2025' AND __month = '12' AND __day IN ('31'))\n" +
+        "   OR (__year = '2026' AND __month = '01' AND __day IN ('01')))",
     );
   });
 
@@ -37,8 +37,8 @@ describe("buildAthenaDatePredicate", () => {
     expect(
       buildAthenaDatePredicate(new Date("2024-03-01T00:00:00.000Z"), 2),
     ).toBe(
-      "(__year = '2024' AND __month = '02' AND __day IN ('28', '29'))\n" +
-        "   OR (__year = '2024' AND __month = '03' AND __day IN ('01'))",
+      "((__year = '2024' AND __month = '02' AND __day IN ('28', '29'))\n" +
+        "   OR (__year = '2024' AND __month = '03' AND __day IN ('01')))",
     );
   });
 

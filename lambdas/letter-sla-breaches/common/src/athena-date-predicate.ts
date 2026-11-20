@@ -33,13 +33,13 @@ export default function buildAthenaDatePredicate(
     currentDate.setUTCDate(currentDate.getUTCDate() + 1);
   }
 
-  return groups
-    .map(
-      // eslint-disable-next-line sort-destructure-keys/sort-destructure-keys
-      ({ year, month, days }) =>
-        `(__year = '${year}' AND __month = '${month}' AND __day IN (${days
-          .map((day) => `'${day}'`)
-          .join(", ")}))`,
-    )
-    .join("\n   OR ");
+  const monthPredicates = groups.map(
+    // eslint-disable-next-line sort-destructure-keys/sort-destructure-keys
+    ({ year, month, days }) =>
+      `(__year = '${year}' AND __month = '${month}' AND __day IN (${days
+        .map((day) => `'${day}'`)
+        .join(", ")}))`,
+  );
+  const predicate = monthPredicates.join("\n   OR ");
+  return monthPredicates.length > 1 ? `(${predicate})` : predicate;
 }

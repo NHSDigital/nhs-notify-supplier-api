@@ -1,11 +1,9 @@
-import {
-  type Deps,
-  runAthenaQuery,
-} from "@internal/letter-sla-breaches-common";
+import { runAthenaQuery } from "@internal/letter-sla-breaches-common";
 import { Unit } from "aws-embedded-metrics";
 import { buildEMFObject } from "@internal/helpers";
 import LogRefs from "../log-references";
 import buildSamedayBreachesQuery from "./sameday-breaches-query";
+import { type Deps } from "./deps";
 
 export type PopulatesamedayBreachesEvent = {
   date: string;

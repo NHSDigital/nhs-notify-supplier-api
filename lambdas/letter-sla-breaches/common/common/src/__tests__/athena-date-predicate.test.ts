@@ -1,3 +1,4 @@
+
 import buildAthenaDatePredicate from "../athena-date-predicate";
 
 describe("buildAthenaDatePredicate", () => {
