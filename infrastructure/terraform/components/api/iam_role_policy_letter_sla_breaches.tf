@@ -23,6 +23,7 @@ data "aws_iam_policy_document" "letter_sla_breaches_policy" {
       module.populate_supplier_config_cache.function_arn,
       module.populate_sameday_breaches[0].function_arn,
       module.populate_standard_breaches[0].function_arn,
+      module.populate_unallocated_breaches[0].function_arn,
     ]
   }
 }
