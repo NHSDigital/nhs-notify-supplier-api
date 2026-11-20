@@ -281,7 +281,12 @@ function _replace-image-latest-by-specific-version() {
       line=$(echo "$line" | sed "s/^#\s*//; s/\s*#.*$//" | sed "s;docker/;;")
       name=$(echo "$line" | awk '{print $1}')
       version=$(echo "$line" | awk '{print $2}')
-      sed -i "s;\(FROM .*\)${name}:latest;\1${name}:${version};g" "$dockerfile"
+      if [[ "$version" == *@* ]]; then
+        version="@${version#*@}"
+      else
+        version=":${version}"
+      fi
+      sed -i "s;\(FROM .*\)${name}:latest;\1${name}${version};g" "$dockerfile"
       done < <({ grep " docker/" "$versions_file" || true; grep -v " docker/" "$versions_file" | grep -v "^#" || true; })
     fi
   done < <(_get-docker-versions-files)

@@ -82,7 +82,7 @@ function test-docker-image-from-signature() {
   # Act
   DOCKER_VERSIONS="$DOCKER_VERSIONS" _replace-image-latest-by-specific-version
   # Assert
-  grep -q "FROM python:.*-alpine.*@sha256:.*" Dockerfile.effective && return 0 || return 1
+  grep -q "FROM python@sha256:.*" Dockerfile.effective && return 0 || return 1
 }
 
 function test-docker-legacy-tool-versions() {
@@ -94,7 +94,7 @@ function test-docker-legacy-tool-versions() {
   cp .tool-versions.test "$test_dir/.tool-versions"
 
   TOOL_VERSIONS="$test_dir/.tool-versions" dir="$test_dir" _replace-image-latest-by-specific-version
-  grep -q "FROM python:3.11.4-alpine3.18@sha256:" "$test_dir/Dockerfile.effective" || {
+  grep -q "FROM python@sha256:0135ae6442d1269379860b361760ad2cf6ab7c403d21935a8015b48d5bf78a86" "$test_dir/Dockerfile.effective" || {
     rm -rf "$test_dir"
     return 1
   }
@@ -102,7 +102,7 @@ function test-docker-legacy-tool-versions() {
   printf '%s\n' '# docker/python 3.12.0-alpine@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' > "$test_dir/.docker-versions"
   cp Dockerfile "$test_dir/Dockerfile.effective"
   TOOL_VERSIONS="$test_dir/.tool-versions" dir="$test_dir" _replace-image-latest-by-specific-version
-  grep -q "FROM python:3.12.0-alpine@sha256:aaaaaaaa" "$test_dir/Dockerfile.effective"
+  grep -q "FROM python@sha256:aaaaaaaa" "$test_dir/Dockerfile.effective"
   local result=$?
   rm -rf "$test_dir"
   return "$result"
@@ -126,6 +126,7 @@ function test-docker-no-matching-docker-version() {
     case "$1" in
       images) printf 'REPOSITORY TAG\n' ;;
       pull) return 0 ;;
+      *) return 1 ;;
     esac
   }
   local image_version

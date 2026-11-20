@@ -108,35 +108,12 @@ New developers of the NHS Notify Supplier API should understand the below.
    ```
 
 - Install `node` and `pnpm` (to run `pnpm install` and build the project)
-- Install and activate [mise](https://mise.jdx.dev/), then run `mise install` to install the versions pinned in `mise.toml` and `mise.lock`.
+- Follow [PLAT-KOP-027 - Local Setup for Mise Prek](https://nhsd-confluence.digital.nhs.uk/spaces/RIS/pages/1559872281/PLAT-KOP-027+-+Local+Setup+for+Mise+Prek), then run `make config` from the repository root. Run `make githooks-run` to run the repository hooks manually.
 - Install `aws cli` to be able to connect to AWS (needed for some tests)
 - If AWS CLI calls are blocked by a firewall (e.g. Zscaler), you need to add the custom certificates in the location `/scripts/devcontainer/custom-ca-certs`
 - Install `docker` or `Rancher` for containerisation
   - You should open in a devcontainer or a Github workspaces. (In VSCode -> Open Command Palet -> "Dev containers: rebuild without cache and reopen in container")
   - By default it will run `make config` when the container is first setup
-
-  Keep asdf installed while legacy repositories still require it. Personal shell configuration is user-managed. Zsh users who work across both migrated and legacy repositories can optionally add this manager switch to their own `~/.zshrc`:
-
-  ```zsh
-  function activate() {
-    case "$1" in
-      mise)
-        path=("${path[@]:#$HOME/.asdf/shims}")
-        eval "$(mise activate zsh)"
-        ;;
-      asdf)
-        mise deactivate
-        path=("$HOME/.asdf/shims" "${path[@]:#$HOME/.asdf/shims}")
-        source "$HOME/.asdf/asdf.sh"
-        ;;
-      *)
-        print -u2 "Usage: activate mise|asdf"
-        return 2
-        ;;
-    esac
-    rehash
-  }
-  ```
 
 ##### SDKs
 
