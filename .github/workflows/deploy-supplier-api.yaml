@@ -39,7 +39,7 @@ on:
         required: false
         default: false
       target_environment:
-        description: "Target environment (main, nft). Used to deploy the nft environment to non-prod. Defaults to main"
+        description: "Target environment (main, nft). Use nft to deploy the nft environment to non-prod. Otherwise defaults to main"
         type: string
         required: false
         default: "main"
