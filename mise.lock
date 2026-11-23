@@ -108,10 +108,10 @@ url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/433138829"
 provenance = "github-attestations"
 
 [[tools.poetry]]
-version = "2.3.2"
+version = "2.3.3"
 backend = "pypi:poetry"
-specifiers = ["2.3.2"]
-uv = { path = ".mise/locks/poetry/2.3.2~e35518a4", digest = "sha256:1c6fe06e401fffa79e9513b6663d97b2852e09fe210a816327ffec43584d9734" }
+specifiers = ["2.3.3"]
+uv = { path = ".mise/locks/poetry/2.3.3~e35518a4", digest = "sha256:bb437f514615d0f8c2881f3857632117b62f48c31964f98e2eda4891c93cdcc4" }
 
 [tools.poetry.options]
 python = "3.12"
