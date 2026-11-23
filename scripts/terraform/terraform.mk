@@ -118,11 +118,6 @@ terraform-validate-all: # Validate all Terraform components @Quality
 		fi; \
 	done
 
-# TODO - Re-visit Trivy usage https://nhsd-jira.digital.nhs.uk/browse/CCM-15549
-# terraform-sec: # Run Trivy IaC security scanning on Terraform code @Quality
-# 	# Example: make terraform-sec
-# 	# ./scripts/terraform/trivy-scan.sh --mode iac infrastructure/terraform
-
 # ==============================================================================
 # Cleanup
 
@@ -138,7 +133,7 @@ clean:: # Remove Terraform build artifacts and cache @Operations
 # ==============================================================================
 # Installation
 
-terraform-install: # Install Terraform using asdf @Installation
+terraform-install: # Install Terraform using mise @Installation
 	# Example: make terraform-install
 	make _install-dependency name="terraform"
 

@@ -56,7 +56,7 @@ Here are some key features built into this repository's Terraform module:
   - [`terraform.mk`](../../scripts/terraform/terraform.mk): Customised implementation of the Terraform routines loaded by the `scripts/init.mk` file
   - [`terraform.sh`](../../scripts/terraform/terraform.sh): Terraform command wrapper
 - Configuration
-  - [`.tool-versions`](../../.tool-versions): Stores Terraform version to be used
+  - [`mise.toml`](../../mise.toml): Pins Terraform; `mise.lock` records verified downloads
 - Code quality gates
   - [`lint-terraform/action.yaml`](../../.github/actions/lint-terraform/action.yaml): GitHub action
   - [`check-terraform-format.sh`](../../scripts/githooks/check-terraform-format.sh): Git hook

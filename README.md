@@ -108,6 +108,7 @@ New developers of the NHS Notify Supplier API should understand the below.
    ```
 
 - Install `node` and `pnpm` (to run `pnpm install` and build the project)
+- Follow [PLAT-KOP-027 - Local Setup for Mise Prek](https://nhsd-confluence.digital.nhs.uk/spaces/RIS/pages/1559872281/PLAT-KOP-027+-+Local+Setup+for+Mise+Prek), then run `make config` from the repository root. Run `make githooks-run` to run the repository hooks manually.
 - Install `aws cli` to be able to connect to AWS (needed for some tests)
 - If AWS CLI calls are blocked by a firewall (e.g. Zscaler), you need to add the custom certificates in the location `/scripts/devcontainer/custom-ca-certs`
 - Install `docker` or `Rancher` for containerisation
