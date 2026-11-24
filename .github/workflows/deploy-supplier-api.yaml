@@ -199,7 +199,6 @@ jobs:
             exit 1
           fi
 
-          
           # --- Outputs ---
 
           echo "release_version=$release_version" >> "$GITHUB_OUTPUT"
