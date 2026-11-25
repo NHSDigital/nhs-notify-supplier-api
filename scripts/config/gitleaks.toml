@@ -23,6 +23,7 @@ paths = [
   '''poetry.lock''',
   '''yarn.lock''',
   '''Gemfile.lock''',
+  '''uv.lock''',
 ]
 
 # Exclude Chrome version in user agent
