@@ -237,7 +237,8 @@ jobs:
             --targetEnvironment "${{ needs.validate.outputs.target_environment }}" \
             --targetAccountGroup "${{ needs.validate.outputs.target_account_group }}" \
             --targetComponent "api" \
-            --terraformAction "apply"
+            --terraformAction "apply" \
+            --internalRef "pr1209"
 
   deploy-proxy:
     name: Deploy proxy
