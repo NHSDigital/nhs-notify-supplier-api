@@ -34,7 +34,7 @@ jobs:
         with:
           fetch-depth: 0 # Full history is needed to scan all commits
       - name: "Scan secrets"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/scan-secrets@a818108235ee15a5f49bcecf62f4732b94246f67 # 6.1.0
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/scan-secrets@2e0301db0642a6e9278c3e758164636d85654e7a # 6.2.0
   validate-action-pins:
     name: "Validate action SHA pins"
     runs-on: ubuntu-latest
@@ -43,7 +43,7 @@ jobs:
       - name: "Checkout code"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: "Validate action SHA pins"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/validate-action-pins@a818108235ee15a5f49bcecf62f4732b94246f67 # 6.1.0
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/validate-action-pins@2e0301db0642a6e9278c3e758164636d85654e7a # 6.2.0
   check-file-format:
     name: "Check file format"
     runs-on: ubuntu-latest
@@ -54,7 +54,7 @@ jobs:
         with:
           fetch-depth: 0 # Full history is needed to compare branches
       - name: "Check file format"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-file-format@a818108235ee15a5f49bcecf62f4732b94246f67 # 6.1.0
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-file-format@2e0301db0642a6e9278c3e758164636d85654e7a # 6.2.0
   check-markdown-format:
     name: "Check Markdown format"
     runs-on: ubuntu-latest
@@ -65,7 +65,7 @@ jobs:
         with:
           fetch-depth: 0 # Full history is needed to compare branches
       - name: "Check Markdown format"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-markdown-format@a818108235ee15a5f49bcecf62f4732b94246f67 # 6.1.0
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-markdown-format@2e0301db0642a6e9278c3e758164636d85654e7a # 6.2.0
   check-todo-usage:
     name: "Check TODO usage"
     runs-on: ubuntu-latest
@@ -76,7 +76,7 @@ jobs:
         with:
           fetch-depth: 0 # Full history is needed to compare branches
       - name: "Check TODO usage"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-todo-usage@a818108235ee15a5f49bcecf62f4732b94246f67 # 6.1.0
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-todo-usage@2e0301db0642a6e9278c3e758164636d85654e7a # 6.2.0
   detect-terraform-changes:
     name: "Detect Terraform Changes"
     runs-on: ubuntu-latest
@@ -118,7 +118,7 @@ jobs:
         env:
           MISE_OVERRIDE_TOOL_VERSIONS_FILENAMES: none
       - name: "Lint Terraform"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/lint-terraform@a818108235ee15a5f49bcecf62f4732b94246f67 # 6.1.0
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/lint-terraform@2e0301db0642a6e9278c3e758164636d85654e7a # 6.2.0
   count-lines-of-code:
     name: "Count lines of code"
     runs-on: ubuntu-latest
@@ -130,7 +130,7 @@ jobs:
       - name: "Checkout code"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: "Count lines of code"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/create-lines-of-code-report@a818108235ee15a5f49bcecf62f4732b94246f67 # 6.1.0
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/create-lines-of-code-report@2e0301db0642a6e9278c3e758164636d85654e7a # 6.2.0
         with:
           build_datetime: "${{ inputs.build_datetime }}"
           build_timestamp: "${{ inputs.build_timestamp }}"
@@ -150,7 +150,7 @@ jobs:
       - name: "Checkout code"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: "Scan dependencies"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/scan-dependencies@a818108235ee15a5f49bcecf62f4732b94246f67 # 6.1.0
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/scan-dependencies@2e0301db0642a6e9278c3e758164636d85654e7a # 6.2.0
         with:
           build_datetime: "${{ inputs.build_datetime }}"
           build_timestamp: "${{ inputs.build_timestamp }}"

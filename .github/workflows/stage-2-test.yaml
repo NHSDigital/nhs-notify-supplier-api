@@ -65,14 +65,14 @@ jobs:
         run: |
           make test-unit
       - name: "Save the result of fast test suite"
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: unit-tests
           path: "**/.reports/unit"
           include-hidden-files: true
         if: always()
       - name: "Save the result of code coverage"
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: code-coverage-report
           path: ".reports/lcov.info"
@@ -164,11 +164,11 @@ jobs:
         with:
           fetch-depth: 0 # Full history is needed to improving relevancy of reporting
       - name: "Download coverage report for SONAR"
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: code-coverage-report
       - name: "Perform static analysis"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/perform-static-analysis@a818108235ee15a5f49bcecf62f4732b94246f67 # 6.1.0
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/perform-static-analysis@2e0301db0642a6e9278c3e758164636d85654e7a # 6.2.0
         with:
           sonar_organisation_key: "${{ vars.SONAR_ORGANISATION_KEY }}"
           sonar_project_key: "${{ vars.SONAR_PROJECT_KEY }}"
