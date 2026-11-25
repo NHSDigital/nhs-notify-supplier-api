@@ -39,7 +39,7 @@ on:
         required: false
         default: false
       target_environment:
-        description: "Target environment (main, nft). Used to deploy the nft environment to non-prod. Defaults to main"
+        description: "Target environment (main, nft). Use nft to deploy the nft environment to non-prod. Otherwise defaults to main"
         type: string
         required: false
         default: "main"
@@ -75,6 +75,7 @@ jobs:
           source_value="${{ inputs.source_value }}"
           deploy_backend="${{ inputs.deploy_backend }}"
           deploy_proxy="${{ inputs.deploy_proxy }}"
+          target_environment="${{ inputs.target_environment }}"
 
           # --- Shared source validation ---
 
@@ -187,13 +188,24 @@ jobs:
             build_artifact_version="nonrelease-$source_type-$source_value"
           fi
 
+          # --- Target environment validation ---
+          if [[ $target_environment != "nft" && $target_environment != "main" ]]; then
+            echo "[ERROR] Unsupported target environment '$target_environment'. Only 'nft' and 'main' are supported."
+            exit 1
+          fi
+          if [[ "$target_environment" == "nft" && $backend_account_group != "nonprod" ]]; then
+            echo "[ERROR] target environment '$target_environment' is only allowed for nonprod backend account group."
+            exit 1
+          fi
+
           # --- Outputs ---
 
           echo "release_version=$release_version" >> "$GITHUB_OUTPUT"
           echo "is_release=$is_release" >> "$GITHUB_OUTPUT"
           echo "build_artifact_version=$build_artifact_version" >> "$GITHUB_OUTPUT"
           echo "target_account_group=$target_account_group" >> "$GITHUB_OUTPUT"
-          # for nonprod we also want to deploy the nft environment
+          # For static envs we want to deploy to main
+          echo "target_environment=$target_environment" >> "$GITHUB_OUTPUT"
           echo "apim_environment=$apim_environment" >> "$GITHUB_OUTPUT"
 
   deploy-backend:
@@ -245,11 +257,6 @@ jobs:
           client-id: ${{ secrets.APP_CLIENT_ID }}
           private-key: ${{ secrets.APP_PEM_FILE }}
 
-      - name: Resolve nodejs version
-        id: toolversions
-        run: echo "nodejs_version=$(grep '^nodejs\s' .tool-versions | cut -f2 -d' ')" >>
-          "$GITHUB_OUTPUT"
-
       - name: Build OAS spec for non-release source
         if: ${{ needs.validate.outputs.is_release == 'false' }}
         uses: ./.github/actions/build-oas-spec
@@ -257,7 +264,6 @@ jobs:
           version: ${{ needs.validate.outputs.build_artifact_version }}
           apimEnv: ${{ needs.validate.outputs.apim_environment }}
           buildSandbox: ${{ inputs.build_sandbox }}
-          nodejs_version: ${{ steps.toolversions.outputs.nodejs_version }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Deploy proxy

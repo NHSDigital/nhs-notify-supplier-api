@@ -35,12 +35,6 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Resolve nodejs version
-        id: toolversions
-        run:
-          echo "nodejs_version=$(grep '^nodejs\s' .tool-versions | cut -f2 -d' ')" >>
-          "$GITHUB_OUTPUT"
-
       - name: "Check if pull request exists for this branch and set
           ENVIRONMENT/APIM_ENV"
         id: pr_exists
@@ -76,7 +70,6 @@ jobs:
           version: "pr${{ steps.pr_exists.outputs.pr_number }}"
           apimEnv: "${{ env.APIM_ENV }}"
           buildSandbox: ${{ inputs.build_sandbox }}
-          nodejs_version: ${{ steps.toolversions.outputs.nodejs_version }}
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Deploy proxy

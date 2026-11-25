@@ -1,0 +1,8 @@
+[settings]
+lockfile = true
+lockfile_platforms = ["linux-x64", "macos-arm64"]
+disable_backends = ["asdf", "vfox"]
+minimum_release_age = "7d"
+
+[tools]
+terraform = "1.14.8"
