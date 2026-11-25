@@ -217,11 +217,11 @@ jobs:
     needs: validate
     steps:
       - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
 
       - name: "Generate GitHub App token for nhs-notify-internal access"
         id: app-token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        uses: actions/create-github-app-token@v3.2.0
         with:
           repositories: nhs-notify-internal
           client-id: ${{ secrets.APP_CLIENT_ID }}
@@ -247,11 +247,11 @@ jobs:
     needs: [ validate, deploy-backend ]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
 
       - name: "Generate GitHub App token for nhs-notify-internal access"
         id: app-token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        uses: actions/create-github-app-token@v3.2.0
         with:
           repositories: nhs-notify-internal
           client-id: ${{ secrets.APP_CLIENT_ID }}
@@ -259,7 +259,7 @@ jobs:
 
       - name: Build OAS spec for non-release source
         if: ${{ needs.validate.outputs.is_release == 'false' }}
-        uses: ./.github/actions/build-oas-spec
+        uses: $/.github/actions/build-oas-spec
         with:
           version: ${{ needs.validate.outputs.build_artifact_version }}
           apimEnv: ${{ needs.validate.outputs.apim_environment }}
@@ -270,7 +270,7 @@ jobs:
         env:
           PROXYGEN_API_NAME: nhs-notify-supplier
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        uses: ./.github/actions/build-proxies
+        uses: $/.github/actions/build-proxies
         with:
           environment: ${{ needs.validate.outputs.target_environment }}
           apimEnv: ${{ needs.validate.outputs.apim_environment }}
