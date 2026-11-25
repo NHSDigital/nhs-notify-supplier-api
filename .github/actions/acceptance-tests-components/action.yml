@@ -65,7 +65,7 @@ runs:
         fi
 
     - name: Repo setup
-      uses: $/.github/actions/node-install
+      uses: ./.github/actions/node-install
       with:
         GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 
