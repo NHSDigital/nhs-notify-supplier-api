@@ -164,7 +164,7 @@ jobs:
         with:
           fetch-depth: 0 # Full history is needed to improving relevancy of reporting
       - name: "Download coverage report for SONAR"
-        uses: actions/download-artifact@v8.0.1
+        uses: actions/download-artifact@v8.0.2
         with:
           name: code-coverage-report
       - name: "Perform static analysis"

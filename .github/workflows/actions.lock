@@ -12,7 +12,7 @@ workflows:
         - 'actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd'
         - 'actions/checkout@v7.0.1'
         - 'actions/create-github-app-token@v3.2.0'
-        - 'actions/download-artifact@v8.0.1'
+        - 'actions/download-artifact@v8.0.2'
         - 'actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e'
         - 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
         - 'jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c'
@@ -23,7 +23,7 @@ workflows:
         - 'actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd'
         - 'actions/checkout@v7.0.1'
         - 'actions/create-github-app-token@v3.2.0'
-        - 'actions/download-artifact@v8.0.1'
+        - 'actions/download-artifact@v8.0.2'
         - 'actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e'
         - 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
         - 'jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c'
@@ -54,7 +54,7 @@ workflows:
         - 'pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413'
     '.github/workflows/stage-2-test.yaml':
         - 'actions/checkout@v7.0.1'
-        - 'actions/download-artifact@v8.0.1'
+        - 'actions/download-artifact@v8.0.2'
         - 'actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e'
         - 'actions/upload-artifact@v7.0.1'
         - 'jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c'
@@ -65,7 +65,7 @@ workflows:
         - 'actions/checkout@v7.0.1'
         - 'actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d'
         - 'actions/create-github-app-token@v3.2.0'
-        - 'actions/download-artifact@v8.0.1'
+        - 'actions/download-artifact@v8.0.2'
         - 'actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e'
         - 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
         - 'actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9'
@@ -77,7 +77,7 @@ workflows:
         - 'actions/create-github-app-token@v3.2.0'
     '.github/workflows/stage-5-publish.yaml':
         - 'actions/checkout@v7.0.1'
-        - 'actions/download-artifact@v8.0.1'
+        - 'actions/download-artifact@v8.0.2'
         - 'actions/setup-node@v6.4.0'
         - 'jdx/mise-action@v4.3.0'
         - 'softprops/action-gh-release@v3.0.3'
@@ -102,9 +102,9 @@ dependencies:
         commit: 'sha1-bcd2ba49218906704ab6c1aa796996da409d3eb1'
         owner_id: 44036562
         repo_id: 642580244
-    'actions/download-artifact@v8.0.1':
-        ref: 'v8.0.1'
-        commit: 'sha1-3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c'
+    'actions/download-artifact@v8.0.2':
+        ref: 'v8.0.2'
+        commit: 'sha1-9000827ccba6bdab643e8b6fd33ac0654aef8333'
         owner_id: 44036562
         repo_id: 192626254
     'actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e':

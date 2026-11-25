@@ -38,7 +38,7 @@ runs:
 
   steps:
     - name: Download Sandbox OAS Spec artifact from workflow
-      uses: actions/download-artifact@v8.0.1
+      uses: actions/download-artifact@v8.0.2
       with:
         name: api-oas-specification-internal-dev-sandbox${{ inputs.version != '' && format('-{0}', inputs.version) || '' }}
         path: ./build-sandbox

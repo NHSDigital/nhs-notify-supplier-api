@@ -70,7 +70,7 @@ runs:
         GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 
     - name: Fetch terraform output
-      uses: actions/download-artifact@v8.0.1
+      uses: actions/download-artifact@v8.0.2
       with:
         name: terraform-output-${{ inputs.targetComponent }}
 
