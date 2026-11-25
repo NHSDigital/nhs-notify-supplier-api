@@ -25,7 +25,7 @@ runs:
 
     - name: Run components tests (sandbox and component tests)
       if: ${{ inputs.testType != 'e2e' }}
-      uses: $/.github/actions/acceptance-tests-components
+      uses: ./.github/actions/acceptance-tests-components
       with:
         testType: ${{ inputs.testType }}
         targetEnvironment: ${{ inputs.targetEnvironment }}
@@ -34,7 +34,7 @@ runs:
 
     - name: Run e2e tests
       if: ${{ inputs.testType == 'e2e' }}
-      uses: $/.github/actions/acceptance-tests-e2e
+      uses: ./.github/actions/acceptance-tests-e2e
       with:
         targetEnvironment: ${{ inputs.targetEnvironment }}
         targetAccountGroup: ${{ inputs.targetAccountGroup }}
