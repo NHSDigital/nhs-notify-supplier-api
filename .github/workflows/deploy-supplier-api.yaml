@@ -59,6 +59,7 @@ jobs:
       is_release: ${{ steps.validate.outputs.is_release }}
       build_artifact_version: ${{ steps.validate.outputs.build_artifact_version }}
       target_account_group: ${{ steps.validate.outputs.target_account_group }}
+      target_environment: ${{ steps.validate.outputs.target_environment }}
       apim_environment: ${{ steps.validate.outputs.apim_environment }}
     steps:
       - name: Validate inputs and resolve source
@@ -233,11 +234,10 @@ jobs:
           bash .github/scripts/dispatch_internal_repo_workflow.sh \
             --releaseVersion "${{ needs.validate.outputs.release_version }}" \
             --targetWorkflow "dispatch-deploy-static-notify-supplier-api-env.yaml" \
-            --targetEnvironment "${{ inputs.target_environment }}" \
+            --targetEnvironment "${{ needs.validate.outputs.target_environment }}" \
             --targetAccountGroup "${{ needs.validate.outputs.target_account_group }}" \
             --targetComponent "api" \
-            --terraformAction "apply" \
-            --internalRef "pr1209"
+            --terraformAction "apply"
 
   deploy-proxy:
     name: Deploy proxy
@@ -272,9 +272,10 @@ jobs:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         uses: ./.github/actions/build-proxies
         with:
-          environment: ${{ inputs.target_environment }}
+          environment: ${{ needs.validate.outputs.target_environment }}
           apimEnv: ${{ needs.validate.outputs.apim_environment }}
           runId: "${{ github.run_id }}"
           releaseVersion: ${{ needs.validate.outputs.release_version }}
           isRelease: ${{ needs.validate.outputs.is_release }}
+          buildSandbox: ${{ inputs.build_sandbox }}
           version: ${{ needs.validate.outputs.build_artifact_version }}
