@@ -238,7 +238,7 @@ jobs:
             --targetAccountGroup "${{ needs.validate.outputs.target_account_group }}" \
             --targetComponent "api" \
             --terraformAction "apply" \
-            --internalRef "pr1209"
+            --internalRef "feature/CCM-25897_supplier_api_nft_environment"
 
   deploy-proxy:
     name: Deploy proxy
