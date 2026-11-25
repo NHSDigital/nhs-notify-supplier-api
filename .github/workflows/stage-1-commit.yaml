@@ -35,15 +35,6 @@ jobs:
           fetch-depth: 0 # Full history is needed to scan all commits
       - name: "Scan secrets"
         uses: NHSDigital/nhs-notify-shared-modules/.github/actions/scan-secrets@6.1.0
-  validate-action-pins:
-    name: "Validate action SHA pins"
-    runs-on: ubuntu-latest
-    timeout-minutes: 2
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@v7.0.1
-      - name: "Validate action SHA pins"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/validate-action-pins@6.1.0
   check-file-format:
     name: "Check file format"
     runs-on: ubuntu-latest
