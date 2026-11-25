@@ -52,7 +52,7 @@ runs:
 
     - name: Repo setup
       if: ${{ steps.check_proxy_deployed.outputs.proxy_deployed == 'true' }}
-      uses: ./.github/actions/node-install
+      uses: $/.github/actions/node-install
       with:
         GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
 

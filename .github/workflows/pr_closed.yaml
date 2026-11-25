@@ -56,9 +56,9 @@ jobs:
       packages: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
       - name: Setup Node.js and pnpm from mise
-        uses: ./.github/actions/node-install
+        uses: $/.github/actions/node-install
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           install_dependencies: "false"
@@ -92,9 +92,9 @@ jobs:
       packages: read
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
       - name: "Repo setup"
-        uses: ./.github/actions/node-install
+        uses: $/.github/actions/node-install
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: "Run provider contract tests"
@@ -115,9 +115,9 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
       - name: Repo setup
-        uses: ./.github/actions/node-install
+        uses: $/.github/actions/node-install
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
