@@ -1,8 +1,4 @@
 const LogRefs = {
-  RECEIVED_EVENT: {
-    code: "001-RECEIVED-EVENT",
-    description: "Received event",
-  },
   NUMBER_OF_RECORDS: {
     code: "002-RECORDS",
     description: "Number of records",
@@ -34,18 +30,6 @@ const LogRefs = {
   QUEUE_DELTA_METRIC: {
     code: "009-METRIC",
     description: "Queue delta metric",
-  },
-  PROCESSING_KINESIS_RECORD: {
-    code: "010-PROCESSING-RECORD",
-    description: "Processing Kinesis record",
-  },
-  DECODED_PAYLOAD: {
-    code: "011-DECODED",
-    description: "Decoded payload",
-  },
-  EXTRACTED_DYNAMODB_RECORD: {
-    code: "012-DYNAMODB-RECORD",
-    description: "Extracted dynamoDBRecord",
   },
   ERROR_EXTRACTING_PAYLOAD: {
     code: "013-ERROR-EXTRACTING-PAYLOAD",

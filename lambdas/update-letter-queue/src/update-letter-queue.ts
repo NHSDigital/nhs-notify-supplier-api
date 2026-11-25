@@ -25,11 +25,6 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
     const deltasBySupplierId = new Map<string, number>();
 
     deps.logger.info({
-      logRef: LogRefs.RECEIVED_EVENT.code,
-      description: LogRefs.RECEIVED_EVENT.description,
-      streamEvent,
-    });
-    deps.logger.info({
       logRef: LogRefs.NUMBER_OF_RECORDS.code,
       description: LogRefs.NUMBER_OF_RECORDS.description,
       count: streamEvent.Records?.length || 0,
@@ -55,7 +50,8 @@ export default function createHandler(deps: Deps): Handler<KinesisStreamEvent> {
           logRef: LogRefs.ERROR_PROCESSING_DDB_RECORD.code,
           description: LogRefs.ERROR_PROCESSING_DDB_RECORD.description,
           error,
-          ddbRecord,
+          recordId: record.kinesis.sequenceNumber,
+          eventName: ddbRecord.eventName,
         });
         recordProcessing(deps, successCount, 1, deltasBySupplierId);
         // If we get a failure, return immediately without processing the remaining records. Since we are
@@ -171,33 +167,16 @@ function extractPayload(
   deps: Deps,
 ): DynamoDBRecord {
   try {
-    deps.logger.info({
-      logRef: LogRefs.PROCESSING_KINESIS_RECORD.code,
-      description: LogRefs.PROCESSING_KINESIS_RECORD.description,
-      recordId: record.kinesis.sequenceNumber,
-    });
-
     // Kinesis data is base64 encoded
     const payload = Buffer.from(record.kinesis.data, "base64").toString("utf8");
-    deps.logger.info({
-      logRef: LogRefs.DECODED_PAYLOAD.code,
-      description: LogRefs.DECODED_PAYLOAD.description,
-      payload,
-    });
-
-    const jsonParsed = JSON.parse(payload);
-    deps.logger.info({
-      logRef: LogRefs.EXTRACTED_DYNAMODB_RECORD.code,
-      description: LogRefs.EXTRACTED_DYNAMODB_RECORD.description,
-      jsonParsed,
-    });
-    return jsonParsed;
+    return JSON.parse(payload);
   } catch (error) {
     deps.logger.error({
       logRef: LogRefs.ERROR_EXTRACTING_PAYLOAD.code,
       description: LogRefs.ERROR_EXTRACTING_PAYLOAD.description,
       err: error,
       eventId: record.eventID,
+      recordId: record.kinesis.sequenceNumber,
     });
     throw error;
   }

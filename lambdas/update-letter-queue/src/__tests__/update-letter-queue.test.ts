@@ -148,6 +148,29 @@ describe("update-letter-queue Lambda", () => {
       expect(result.batchItemFailures).toEqual([{ itemIdentifier: "seq-0" }]);
     });
 
+    it("logs only record identifiers when a record fails", async () => {
+      const handler = createHandler(mockedDeps);
+      (
+        mockedDeps.letterQueueRepository.putLetter as jest.Mock
+      ).mockRejectedValue(new Error("DynamoDB error"));
+
+      const testData = generateKinesisEvent([
+        generateInsertRecord(generateLetter("PENDING")),
+      ]);
+      await handler(testData, mockDeep<Context>(), jest.fn());
+
+      expect(mockedDeps.logger.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          description: "Error processing ddbRecord",
+          recordId: "seq-0",
+          eventName: "INSERT",
+        }),
+      );
+      expect(mockedDeps.logger.error).not.toHaveBeenCalledWith(
+        expect.objectContaining({ ddbRecord: expect.anything() }),
+      );
+    });
+
     it("returns on the first failure", async () => {
       const handler = createHandler(mockedDeps);
       const newLetter1 = generateLetter("PENDING", { id: "1" });
