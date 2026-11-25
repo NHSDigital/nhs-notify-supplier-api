@@ -15,7 +15,7 @@ workflows:
         - 'actions/download-artifact@v8.0.2'
         - 'actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e'
         - 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
-        - 'jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c'
+        - 'jdx/mise-action@v4.3.0'
         - 'pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413'
     '.github/workflows/deploy-static-env-backend-only.yaml': []
     '.github/workflows/deploy-static-env-proxy-only.yaml': []
@@ -26,12 +26,12 @@ workflows:
         - 'actions/download-artifact@v8.0.2'
         - 'actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e'
         - 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
-        - 'jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c'
+        - 'jdx/mise-action@v4.3.0'
         - 'pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413'
     '.github/workflows/pr_closed.yaml':
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e'
-        - 'jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c'
+        - 'jdx/mise-action@v4.3.0'
         - 'pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413'
     '.github/workflows/pr_destroy_dynamic_env.yaml':
         - 'actions/checkout@v7.0.1'
@@ -49,7 +49,7 @@ workflows:
     '.github/workflows/stage-1-commit.yaml':
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e'
-        - 'jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c'
+        - 'jdx/mise-action@v4.3.0'
         - 'nhsdigital/nhs-notify-shared-modules@6.1.0'
         - 'pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413'
     '.github/workflows/stage-2-test.yaml':
@@ -57,7 +57,7 @@ workflows:
         - 'actions/download-artifact@v8.0.2'
         - 'actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e'
         - 'actions/upload-artifact@v7.0.1'
-        - 'jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c'
+        - 'jdx/mise-action@v4.3.0'
         - 'nhsdigital/nhs-notify-shared-modules@6.1.0'
         - 'pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413'
     '.github/workflows/stage-3-build.yaml':
@@ -69,7 +69,7 @@ workflows:
         - 'actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e'
         - 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'
         - 'actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9'
-        - 'jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c'
+        - 'jdx/mise-action@v4.3.0'
         - 'pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413'
         - 'ruby/setup-ruby@7372622e62b60b3cb750dcd2b9e32c247ffec26a'
     '.github/workflows/stage-4-acceptance.yaml':
@@ -149,11 +149,6 @@ dependencies:
         commit: 'sha1-2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2'
         owner_id: 9919
         repo_id: 259445878
-    'jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c':
-        ref: 'v4.3.0'
-        commit: 'sha1-c2a87611a18de5b3828c5652fe268e992400cb5c'
-        owner_id: 216188
-        repo_id: 738284564
     'jdx/mise-action@v4.3.0':
         ref: 'v4.3.0'
         commit: 'sha1-c2a87611a18de5b3828c5652fe268e992400cb5c'
