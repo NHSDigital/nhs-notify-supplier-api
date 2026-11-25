@@ -34,7 +34,7 @@ runs:
       run: mise --locked install node
 
     - name: 'Setup pnpm'
-      uses: pnpm/action-setup@v6.0.8
+      uses: pnpm/action-setup@v6.1.1
       with:
         version: ${{ steps.versions.outputs.pnpm }}
 
