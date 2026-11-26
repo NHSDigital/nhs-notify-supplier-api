@@ -32,7 +32,8 @@ locals {
     } : {},
     length(module.populate_unallocated_breaches) > 0 ? {
       populate_unallocated_breaches = module.populate_unallocated_breaches[0].function_name
-  } : {})
+    } : {}
+  )
 
   sqs_alarm_targets = {
     sqs_letter_updates          = module.sqs_letter_updates.sqs_queue_name

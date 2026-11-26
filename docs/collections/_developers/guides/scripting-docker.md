@@ -43,7 +43,7 @@ Here are some key features built into this repository's Docker module:
 - Implements the most common Docker routines for efficient container management, e.g. build, test and push
 - Utilises `sha256` digests for robust image versioning and to enhance security posture
 - Enables pull-image-once retrieval based on its digest to optimise performance (Docker does not store `sha256` digests locally)
-- Consolidates image versions in a unified `.tool-versions` file for easier dependency management
+- Consolidates image versions in `.docker-versions`, falling back to `.tool-versions` while repositories migrate
 - Optimises the build process specifically for the `amd64` architecture for consistency
 - Applies automatic image versioning according to a predefined pattern for artefact publishing and deployment
 - Incorporates metadata through `Dockerfile` labels for enhanced documentation and to conform to standards
@@ -60,7 +60,7 @@ Here are some key features built into this repository's Docker module:
   - [`dgoss.sh`](../../scripts/docker/dgoss.sh): Docker image spec test framework
   - [`dockerfile-linter.sh`](../../scripts/docker/dockerfile-linter.sh): `Dockerfile` linter
 - Configuration
-  - [`.tool-versions`](../../.tool-versions): Stores Docker image versions
+  - [`.docker-versions`](../../.docker-versions): Stores Docker image versions; legacy `.tool-versions` remains a fallback during migration
   - [`hadolint.yaml`](../../scripts/config/hadolint.yaml): `Dockerfile` linter configuration file
   - [`Dockerfile.metadata`](../../scripts/docker/Dockerfile.metadata): Labels added to image definition as specified by the spec
 - Test suite
@@ -119,7 +119,7 @@ Here is a step-by-step guide:
    FROM cypress/browsers:latest
    ```
 
-2. Add the following entry to the `.tool-versions` file. This will be used to replace the `latest` version placeholder in the `Dockerfile`.
+2. Add the following entry to the `.docker-versions` file. This will be used to replace the `latest` version placeholder in the `Dockerfile`.
 
    ```text
    # docker/cypress/browsers node-20.5.0-chrome-114.0.5735.133-1-ff-114.0.2-edge-114.0.1823.51-1@sha256:8b899d0292e700c80629d13a98ae309295e719f5b4f9aa50a98c6cdd2b6c5215
@@ -166,7 +166,7 @@ Here is a step-by-step guide:
 - `infrastructure/images/cypress/Dockerfile`
 - `infrastructure/images/cypress/Dockerfile.effective`
 - `infrastructure/images/cypress/VERSION`
-- `.tool-versions`
+- `.docker-versions`
 
 ## Conventions
 
@@ -200,7 +200,7 @@ In this case, the image is automatically tagged as `20230601`, `20230601-123abcd
 > [!NOTE]<br>
 > The preferred pattern for versioning is `${yyyy}${mm}${dd}${HH}${MM}` or/and `${yyyy}${mm}${dd}-${hash}` for projects with a cadence of multiple deployments per day. This is compatible with the [Calendar Versioning / CalVer](https://calver.org/) convention.
 
-Base image versions are maintained in the [.tool-versions](../../.tool-versions) file located in the project's top-level directory. The format is as follows:
+Base image versions are maintained in the [.docker-versions](../../.docker-versions) file located in the project's top-level directory. During migration, Docker helpers fall back to `.tool-versions` when no `.docker-versions` entry matches. Explicit `DOCKER_VERSIONS` or legacy `TOOL_VERSIONS` paths are also supported, checking a paired file when present. The format is as follows:
 
 ```text
 # docker/image/name 1.0.0@sha256:1234567890...abcdef
@@ -208,7 +208,7 @@ Base image versions are maintained in the [.tool-versions](../../.tool-versions)
 
 This method facilitates dependency management through a single file. The `docker-build` function will replace any instance of `FROM image/name:latest` with `FROM image/name:1.0.0@sha256:1234567890...abcdef`. Additionally, the [Dockerfile.metadata](../../scripts/docker/Dockerfile.metadata) file will be appended to the end of the `Dockerfile.effective` created by the process.
 
-The reason we do this is so that the deployment version is source-controlled, but the tooling does not interfere with using a more recent Docker image during local development before the new version can be added to the `.tool-versions` file. It also serves as a clean way of templating Docker image definition.
+The reason we do this is so that the deployment version is source-controlled, but the tooling does not interfere with using a more recent Docker image during local development before the new version can be added to the `.docker-versions` file. It also serves as a clean way of templating Docker image definition.
 
 ### Variables
 
