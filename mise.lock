@@ -111,10 +111,25 @@ provenance = "github-attestations"
 version = "2.3.3"
 backend = "pypi:poetry"
 specifiers = ["2.3.3"]
-uv = { path = ".mise/locks/poetry/2.3.3~e35518a4", digest = "sha256:bb437f514615d0f8c2881f3857632117b62f48c31964f98e2eda4891c93cdcc4" }
+uv = { path = ".mise/locks/poetry/2.3.3~1c1aa9eb", digest = "sha256:deebea0b62f9930ed5244d509cf675bd0148482f24d97b4d270f54590574af3c" }
 
 [tools.poetry.options]
-python = "3.12"
+python = "3.12.16"
+
+[[tools.pre-commit]]
+version = "4.5.1"
+backend = "aqua:pre-commit/pre-commit"
+specifiers = ["4.5.1"]
+
+[tools.pre-commit."platforms.linux-x64"]
+checksum = "sha256:19d00ba35cbf9c04dc3736cd8bb641e8633f3eddd4cedde71809574ae68a2cd1"
+url = "https://github.com/pre-commit/pre-commit/releases/download/v4.5.1/pre-commit-4.5.1.pyz"
+url_api = "https://api.github.com/repos/pre-commit/pre-commit/releases/assets/329503374"
+
+[tools.pre-commit."platforms.macos-arm64"]
+checksum = "sha256:19d00ba35cbf9c04dc3736cd8bb641e8633f3eddd4cedde71809574ae68a2cd1"
+url = "https://github.com/pre-commit/pre-commit/releases/download/v4.5.1/pre-commit-4.5.1.pyz"
+url_api = "https://api.github.com/repos/pre-commit/pre-commit/releases/assets/329503374"
 
 [[tools.prek]]
 version = "0.5.7"
@@ -136,19 +151,16 @@ provenance = "github-attestations"
 [[tools.python]]
 version = "3.12.16"
 backend = "core:python"
-specifiers = [
-    "3.12",
-    "3.12.16",
-]
+specifiers = ["3.12.16"]
 
 [tools.python."platforms.linux-x64"]
-checksum = "sha256:ce4f6d0a6cfdb3bed6e44c2f9affd85943c76a42e25ad3a259002f31d6fb8a20"
-url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261026/cpython-3.12.16+20261026-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz"
+checksum = "sha256:7e1adaea26c959d13aa1120be1ae62a1ea1bb52adcb382679fffe9217e22adff"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261124/cpython-3.12.16+20261124-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz"
 provenance = "github-attestations"
 
 [tools.python."platforms.macos-arm64"]
-checksum = "sha256:353d5f1b4fd2715e7053f12f068435d5bbad16b91e057006b5d01e0925709a7e"
-url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261026/cpython-3.12.16+20261026-aarch64-apple-darwin-install_only_stripped.tar.gz"
+checksum = "sha256:9d6d9d0d85feda3f9cb4eb3e048f0fed21ed280feda087927eaa4fbc7124826f"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261124/cpython-3.12.16+20261124-aarch64-apple-darwin-install_only_stripped.tar.gz"
 provenance = "github-attestations"
 
 [[tools.syft]]
