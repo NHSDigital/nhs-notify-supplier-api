@@ -134,7 +134,7 @@ jobs:
 
           # --- Backend validation (only when deploying backend) ---
 
-          target_account_group="${{ inputs.target_environment }}"
+          target_account_group=""
 
           # if [[ "$deploy_backend" == "true" ]]; then
           #   if [[ -z "$backend_account_group" ]]; then
@@ -154,15 +154,17 @@ jobs:
           #     fi
           #   fi
 
-          #   case "$backend_account_group" in
-          #     dev)     target_account_group="nhs-notify-supplier-api-dev" ;;
-          #     nonprod) target_account_group="nhs-notify-supplier-api-nonprod" ;;
-          #     prod)    target_account_group="nhs-notify-supplier-api-prod" ;;
-          #     *)
-          #       echo "[ERROR] Unsupported backend account group '$backend_account_group'."
-          #       exit 1
-          #       ;;
-          #   esac
+          echo "Setting target_account_group"
+            case "$backend_account_group" in
+              dev)     target_account_group="nhs-notify-supplier-api-dev" ;;
+              nonprod) target_account_group="nhs-notify-supplier-api-nonprod" ;;
+              prod)    target_account_group="nhs-notify-supplier-api-prod" ;;
+              *)
+                echo "[ERROR] Unsupported backend account group '$backend_account_group'."
+                exit 1
+                ;;
+            esac
+            echo "target_account_group set to '$target_account_group'"
           # fi
 
           # --- Proxy validation (only when deploying proxy) ---
