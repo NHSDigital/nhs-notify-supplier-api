@@ -105,8 +105,8 @@ catalogs:
     lcov-result-merger: "^6.0.0"
     mocha: "^12.0.3"
     openapi-response-validator: "^12.1.3"
-    playwright: "^1.62.1"
-    playwright-core: "^1.62.1"
+    playwright: "^1.65.1"
+    playwright-core: "^1.65.1"
     testcontainers: "^12.2.2"
     ts-jest: "^29.4.15"
   tools:
