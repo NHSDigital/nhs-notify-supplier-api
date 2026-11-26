@@ -20,6 +20,7 @@ regexes = [
 paths = [
   '''.terraform.lock.hcl''',
   '''(^|/)mise\.lock$''',
+  '''(^|/).mise/locks/''',
   '''poetry.lock''',
   '''yarn.lock''',
   '''Gemfile.lock''',
