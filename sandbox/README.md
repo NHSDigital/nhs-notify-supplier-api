@@ -25,6 +25,16 @@ A standalone Express mock server for Supplier API integration testing, allowing 
 - No authentication is enforced; the authorization behaviour is not simulated.
 - The OpenAPI spec in `sandbox/api/` may diverge from `specification/api/` if not kept in sync during spec updates.
 
+## Generating
+
+```bash
+make generate-sandbox
+```
+
+- This generates a basic sandbox from the OAS spec into /sandbox-staging. DO NOT copy this wholesale to /sandbox, there is custom code (particularly in services) that should not be overwritten.
+- Compare the generated code with the existing code and update only what is necessary.
+- The generated code in sandbox-staging will have a README file detailing the expressjs server that is created.
+
 ## Running
 
 ```bash
@@ -37,3 +47,7 @@ Or via Docker:
 docker build -t supplier-api-sandbox sandbox/
 docker run -p 9000:9000 supplier-api-sandbox
 ```
+
+## Deploying
+
+- To deploy the sandbox for internal-dev environments, use the [Deploy dynamic PR environment proxy](https://github.com/NHSDigital/nhs-notify-supplier-api/actions/workflows/deploy-dynamic-env-proxy.yaml) workflow
