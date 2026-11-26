@@ -22,6 +22,12 @@ checksum = "sha256:ab8bf7f63bc497be008e25a775be0bb168ff84b26823c7d89592856a84f3f
 url = "https://github.com/nektos/act/releases/download/v0.2.86/act_Darwin_arm64.tar.gz"
 url_api = "https://api.github.com/repos/nektos/act/releases/assets/381301548"
 
+[tools.act."platforms.macos-x64"]
+checksum = "sha256:fecb71483e6799388788454b3cfa13658e52b706d7389a4cd772cb6d160b87ef"
+checksum_source = "mise-versions"
+url = "https://github.com/nektos/act/releases/download/v0.2.86/act_Darwin_x86_64.tar.gz"
+url_api = "https://api.github.com/repos/nektos/act/releases/assets/381301584"
+
 [[tools.gitleaks]]
 version = "8.30.1"
 backend = "aqua:gitleaks/gitleaks"
@@ -41,6 +47,12 @@ url_api = "https://api.github.com/repos/gitleaks/gitleaks/releases/assets/378332
 checksum = "sha256:b40ab0ae55c505963e365f271a8d3846efbc170aa17f2607f13df610a9aeb6a5"
 url = "https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_darwin_arm64.tar.gz"
 url_api = "https://api.github.com/repos/gitleaks/gitleaks/releases/assets/378332059"
+
+[tools.gitleaks."platforms.macos-x64"]
+checksum = "sha256:dfe101a4db2255fc85120ac7f3d25e4342c3c20cf749f2c20a18081af1952709"
+checksum_source = "mise-versions"
+url = "https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_darwin_x64.tar.gz"
+url_api = "https://api.github.com/repos/gitleaks/gitleaks/releases/assets/378332053"
 
 [[tools.grype]]
 version = "0.104.3"
@@ -62,6 +74,12 @@ checksum = "sha256:a2fd4ac95d7c4b2ff65da2e7cecb08d826e0cac6e3e2646aee8989558d9d3
 url = "https://github.com/anchore/grype/releases/download/v0.104.3/grype_0.104.3_darwin_arm64.tar.gz"
 url_api = "https://api.github.com/repos/anchore/grype/releases/assets/331919084"
 
+[tools.grype."platforms.macos-x64"]
+checksum = "sha256:ecc940eeda844fedf5175aa055bd3efa0a9479f2c41b56efd689bdb918413ffa"
+checksum_source = "mise-versions"
+url = "https://github.com/anchore/grype/releases/download/v0.104.3/grype_0.104.3_darwin_amd64.tar.gz"
+url_api = "https://api.github.com/repos/anchore/grype/releases/assets/331919086"
+
 [[tools.java]]
 version = "openjdk-25.0.1"
 backend = "core:java"
@@ -78,6 +96,10 @@ url = "https://download.java.net/java/GA/jdk25.0.1/2fbf10d8c78e40bd87641c4347050
 [tools.java."platforms.macos-arm64"]
 checksum = "sha256:9175d602f3be2ffa241eb01d24ba4541e29a4dfa2095d4bdc1c9eb4bf4d56705"
 url = "https://download.java.net/java/GA/jdk25.0.1/2fbf10d8c78e40bd87641c434705079d/8/GPL/openjdk-25.0.1_macos-aarch64_bin.tar.gz"
+
+[tools.java."platforms.macos-x64"]
+checksum = "sha256:906fec42291d1f01b4cbd419eece8ff8872dbde1e74bb22e6a98ee0322a22bcb"
+url = "https://download.java.net/java/GA/jdk25.0.1/2fbf10d8c78e40bd87641c434705079d/8/GPL/openjdk-25.0.1_macos-x64_bin.tar.gz"
 
 [[tools.jq]]
 version = "1.8.1"
@@ -102,6 +124,12 @@ url = "https://github.com/jqlang/jq/releases/download/jq-1.8.1/jq-macos-arm64"
 url_api = "https://api.github.com/repos/jqlang/jq/releases/assets/268981506"
 provenance = "github-attestations"
 
+[tools.jq."platforms.macos-x64"]
+checksum = "sha256:e80dbe0d2a2597e3c11c404f03337b981d74b4a8504b70586c354b7697a7c27f"
+url = "https://github.com/jqlang/jq/releases/download/jq-1.8.1/jq-macos-amd64"
+url_api = "https://api.github.com/repos/jqlang/jq/releases/assets/268981505"
+provenance = "github-attestations"
+
 [[tools.node]]
 version = "22.22.0"
 backend = "core:node"
@@ -119,10 +147,15 @@ url = "https://nodejs.org/dist/v22.22.0/node-v22.22.0-linux-x64.tar.gz"
 checksum = "sha256:5ed4db0fcf1eaf84d91ad12462631d73bf4576c1377e192d222e48026a902640"
 url = "https://nodejs.org/dist/v22.22.0/node-v22.22.0-darwin-arm64.tar.gz"
 
+[tools.node."platforms.macos-x64"]
+checksum = "sha256:5ea50c9d6dea3dfa3abb66b2656f7a4e1c8cef23432b558d45fb538c7b5dedce"
+url = "https://nodejs.org/dist/v22.22.0/node-v22.22.0-darwin-x64.tar.gz"
+
 [[tools.pnpm]]
 version = "11.5.0"
 backend = "aqua:pnpm/pnpm"
 specifiers = ["11.5.0"]
+unsupported_platforms = ["macos-x64"]
 
 [tools.pnpm."platforms.linux-arm64"]
 checksum = "sha256:f817841be043e2be465cb8b8c7ddd19dcedf3120214783dc473a6da7f8c84da9"
@@ -150,6 +183,29 @@ specifiers = ["2.3.3"]
 [tools.poetry.options]
 python = "3.12"
 
+[[tools.pre-commit]]
+version = "4.5.1"
+backend = "aqua:pre-commit/pre-commit"
+specifiers = ["4.5.1"]
+
+[tools.pre-commit."platforms.linux-x64"]
+checksum = "sha256:19d00ba35cbf9c04dc3736cd8bb641e8633f3eddd4cedde71809574ae68a2cd1"
+checksum_source = "mise-versions"
+url = "https://github.com/pre-commit/pre-commit/releases/download/v4.5.1/pre-commit-4.5.1.pyz"
+url_api = "https://api.github.com/repos/pre-commit/pre-commit/releases/assets/329503374"
+
+[tools.pre-commit."platforms.macos-arm64"]
+checksum = "sha256:19d00ba35cbf9c04dc3736cd8bb641e8633f3eddd4cedde71809574ae68a2cd1"
+checksum_source = "mise-versions"
+url = "https://github.com/pre-commit/pre-commit/releases/download/v4.5.1/pre-commit-4.5.1.pyz"
+url_api = "https://api.github.com/repos/pre-commit/pre-commit/releases/assets/329503374"
+
+[tools.pre-commit."platforms.macos-x64"]
+checksum = "sha256:19d00ba35cbf9c04dc3736cd8bb641e8633f3eddd4cedde71809574ae68a2cd1"
+checksum_source = "mise-versions"
+url = "https://github.com/pre-commit/pre-commit/releases/download/v4.5.1/pre-commit-4.5.1.pyz"
+url_api = "https://api.github.com/repos/pre-commit/pre-commit/releases/assets/329503374"
+
 [[tools.prek]]
 version = "0.5.7"
 backend = "aqua:j178/prek"
@@ -173,13 +229,36 @@ url = "https://github.com/j178/prek/releases/download/v0.5.7/prek-aarch64-apple-
 url_api = "https://api.github.com/repos/j178/prek/releases/assets/660929480"
 provenance = "github-attestations"
 
+[tools.prek."platforms.macos-x64"]
+checksum = "sha256:12b65c6685fc44ff9130c0bf5dcb01be69c0c81d9a0709553fd369c3b2010815"
+url = "https://github.com/j178/prek/releases/download/v0.5.7/prek-x86_64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/j178/prek/releases/assets/660929524"
+provenance = "github-attestations"
+
+[[tools.python]]
+version = "3.15.2"
+backend = "core:python"
+specifiers = ["3.15.2"]
+
+[tools.python."platforms.linux-x64"]
+checksum = "sha256:18c56e105ba7713602536f49976c69d14d73cea7d32cfe2cb68eb8a79568de47"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261123/cpython-3.15.2+20261123-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz"
+provenance = "github-attestations"
+
+[tools.python."platforms.macos-arm64"]
+checksum = "sha256:1ca8e6395dfd98cfb83c2193b5a33637a9b48304b98d4df4f2711e3f144806d1"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261123/cpython-3.15.2+20261123-aarch64-apple-darwin-install_only_stripped.tar.gz"
+provenance = "github-attestations"
+
+[tools.python."platforms.macos-x64"]
+checksum = "sha256:cc6648bc7c4a993fd9ee8d384decde0081e66f574a98dd26931d9812a86a778e"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261123/cpython-3.15.2+20261123-x86_64-apple-darwin-install_only_stripped.tar.gz"
+provenance = "github-attestations"
+
 [[tools.python]]
 version = "3.12.16"
 backend = "core:python"
-specifiers = [
-    "3.12",
-    "3.12.16",
-]
+specifiers = ["3.12"]
 
 [tools.python."platforms.linux-arm64"]
 checksum = "sha256:b6a41defec4975d94b4ff1950236e7383e5c02ba40ea48c9ec33c66087a35aab"
@@ -194,6 +273,11 @@ provenance = "github-attestations"
 [tools.python."platforms.macos-arm64"]
 checksum = "sha256:353d5f1b4fd2715e7053f12f068435d5bbad16b91e057006b5d01e0925709a7e"
 url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261026/cpython-3.12.16+20261026-aarch64-apple-darwin-install_only_stripped.tar.gz"
+provenance = "github-attestations"
+
+[tools.python."platforms.macos-x64"]
+checksum = "sha256:da628e539cebac13f43a3dc42dd99826aeab254387d3bc43478a73267a362713"
+url = "https://github.com/astral-sh/python-build-standalone/releases/download/20261123/cpython-3.12.16+20261123-x86_64-apple-darwin-install_only_stripped.tar.gz"
 provenance = "github-attestations"
 
 [[tools.syft]]
@@ -216,6 +300,12 @@ checksum = "sha256:fe99f5d9d76c48752a53c3e5f3d4044652623daa623c0da4b1b501bf4fc6c
 url = "https://github.com/anchore/syft/releases/download/v1.39.0/syft_1.39.0_darwin_arm64.tar.gz"
 url_api = "https://api.github.com/repos/anchore/syft/releases/assets/331876319"
 
+[tools.syft."platforms.macos-x64"]
+checksum = "sha256:ef28d9a8b09070ec2b04e1e97240eebc66c4e6e78433757a8943cd4867476af6"
+checksum_source = "mise-versions"
+url = "https://github.com/anchore/syft/releases/download/v1.39.0/syft_1.39.0_darwin_amd64.tar.gz"
+url_api = "https://api.github.com/repos/anchore/syft/releases/assets/331876320"
+
 [[tools.terraform]]
 version = "1.14.8"
 backend = "aqua:hashicorp/terraform"
@@ -232,6 +322,10 @@ url = "https://releases.hashicorp.com/terraform/1.14.8/terraform_1.14.8_linux_am
 [tools.terraform."platforms.macos-arm64"]
 checksum = "sha256:5593670a2d42323847bfb216db17c73a44df201a62f7587928bae16adeabba23"
 url = "https://releases.hashicorp.com/terraform/1.14.8/terraform_1.14.8_darwin_arm64.zip"
+
+[tools.terraform."platforms.macos-x64"]
+checksum = "sha256:26dd7593d22e9d99ec09380f0869718f649be7b7f954d888611335e6a84961f8"
+url = "https://releases.hashicorp.com/terraform/1.14.8/terraform_1.14.8_darwin_amd64.zip"
 
 [[tools.uv]]
 version = "0.13.5"
@@ -254,4 +348,10 @@ provenance = "github-attestations"
 checksum = "sha256:743f85035a1996ecb350659e01cd9faea9709829be09b1b4b03c73eaf3c9cd73"
 url = "https://github.com/astral-sh/uv/releases/download/0.13.5/uv-aarch64-apple-darwin.tar.gz"
 url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/664335803"
+provenance = "github-attestations"
+
+[tools.uv."platforms.macos-x64"]
+checksum = "sha256:b0f52b0e3945b4107d89024ea38e625683011fbfc05a0d98f9fa2d6dcee28c66"
+url = "https://github.com/astral-sh/uv/releases/download/0.13.5/uv-x86_64-apple-darwin.tar.gz"
+url_api = "https://api.github.com/repos/astral-sh/uv/releases/assets/664335993"
 provenance = "github-attestations"
