@@ -14,7 +14,7 @@ permissions:
   packages: read
 
 jobs:
-  deploy:
+  deploy main:
     uses: ./.github/workflows/deploy-supplier-api.yaml
     secrets: inherit
     with:
@@ -24,3 +24,15 @@ jobs:
       backend_account_group: nonprod
       deploy_proxy: true
       apim_environment: int
+      target_environment: main
+
+  deploy nft:
+    uses: ./.github/workflows/deploy-supplier-api.yaml
+    secrets: inherit
+    with:
+      source_type: release
+      source_value: ${{ github.event.release.tag_name }}
+      deploy_backend: true
+      backend_account_group: nonprod
+      apim_environment: int
+      target_environment: nft
