@@ -134,7 +134,7 @@ jobs:
 
           # --- Backend validation (only when deploying backend) ---
 
-          target_account_group=""
+          target_account_group="${{ inputs.target_environment }}"
 
           # if [[ "$deploy_backend" == "true" ]]; then
           #   if [[ -z "$backend_account_group" ]]; then
