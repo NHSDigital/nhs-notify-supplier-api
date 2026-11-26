@@ -24,7 +24,6 @@ url_api = "https://api.github.com/repos/nektos/act/releases/assets/381301548"
 
 [tools.act."platforms.macos-x64"]
 checksum = "sha256:fecb71483e6799388788454b3cfa13658e52b706d7389a4cd772cb6d160b87ef"
-checksum_source = "mise-versions"
 url = "https://github.com/nektos/act/releases/download/v0.2.86/act_Darwin_x86_64.tar.gz"
 url_api = "https://api.github.com/repos/nektos/act/releases/assets/381301584"
 
@@ -50,7 +49,6 @@ url_api = "https://api.github.com/repos/gitleaks/gitleaks/releases/assets/378332
 
 [tools.gitleaks."platforms.macos-x64"]
 checksum = "sha256:dfe101a4db2255fc85120ac7f3d25e4342c3c20cf749f2c20a18081af1952709"
-checksum_source = "mise-versions"
 url = "https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_darwin_x64.tar.gz"
 url_api = "https://api.github.com/repos/gitleaks/gitleaks/releases/assets/378332053"
 
@@ -76,7 +74,6 @@ url_api = "https://api.github.com/repos/anchore/grype/releases/assets/331919084"
 
 [tools.grype."platforms.macos-x64"]
 checksum = "sha256:ecc940eeda844fedf5175aa055bd3efa0a9479f2c41b56efd689bdb918413ffa"
-checksum_source = "mise-versions"
 url = "https://github.com/anchore/grype/releases/download/v0.104.3/grype_0.104.3_darwin_amd64.tar.gz"
 url_api = "https://api.github.com/repos/anchore/grype/releases/assets/331919086"
 
@@ -155,7 +152,6 @@ url = "https://nodejs.org/dist/v22.22.0/node-v22.22.0-darwin-x64.tar.gz"
 version = "11.5.0"
 backend = "aqua:pnpm/pnpm"
 specifiers = ["11.5.0"]
-unsupported_platforms = ["macos-x64"]
 
 [tools.pnpm."platforms.linux-arm64"]
 checksum = "sha256:f817841be043e2be465cb8b8c7ddd19dcedf3120214783dc473a6da7f8c84da9"
@@ -179,6 +175,7 @@ provenance = "github-attestations"
 version = "2.3.3"
 backend = "pypi:poetry"
 specifiers = ["2.3.3"]
+uv = { path = ".mise/locks/poetry/2.3.3~e35518a4", digest = "sha256:4f44a164718ae942c7f82dfa3849011e2a3c42e26493ef5eaa9ef5a6e7726145" }
 
 [tools.poetry.options]
 python = "3.12"
@@ -190,19 +187,16 @@ specifiers = ["4.5.1"]
 
 [tools.pre-commit."platforms.linux-x64"]
 checksum = "sha256:19d00ba35cbf9c04dc3736cd8bb641e8633f3eddd4cedde71809574ae68a2cd1"
-checksum_source = "mise-versions"
 url = "https://github.com/pre-commit/pre-commit/releases/download/v4.5.1/pre-commit-4.5.1.pyz"
 url_api = "https://api.github.com/repos/pre-commit/pre-commit/releases/assets/329503374"
 
 [tools.pre-commit."platforms.macos-arm64"]
 checksum = "sha256:19d00ba35cbf9c04dc3736cd8bb641e8633f3eddd4cedde71809574ae68a2cd1"
-checksum_source = "mise-versions"
 url = "https://github.com/pre-commit/pre-commit/releases/download/v4.5.1/pre-commit-4.5.1.pyz"
 url_api = "https://api.github.com/repos/pre-commit/pre-commit/releases/assets/329503374"
 
 [tools.pre-commit."platforms.macos-x64"]
 checksum = "sha256:19d00ba35cbf9c04dc3736cd8bb641e8633f3eddd4cedde71809574ae68a2cd1"
-checksum_source = "mise-versions"
 url = "https://github.com/pre-commit/pre-commit/releases/download/v4.5.1/pre-commit-4.5.1.pyz"
 url_api = "https://api.github.com/repos/pre-commit/pre-commit/releases/assets/329503374"
 
@@ -302,7 +296,6 @@ url_api = "https://api.github.com/repos/anchore/syft/releases/assets/331876319"
 
 [tools.syft."platforms.macos-x64"]
 checksum = "sha256:ef28d9a8b09070ec2b04e1e97240eebc66c4e6e78433757a8943cd4867476af6"
-checksum_source = "mise-versions"
 url = "https://github.com/anchore/syft/releases/download/v1.39.0/syft_1.39.0_darwin_amd64.tar.gz"
 url_api = "https://api.github.com/repos/anchore/syft/releases/assets/331876320"
 
