@@ -4,7 +4,6 @@ import { type Deps } from "../handler/deps";
 import buildStandardBreachesQuery from "../handler/standard-breaches-query";
 import createHandler from "../handler/populate-standard-breaches";
 import fetchBankHolidays from "../handler/bank-holidays";
-import { string } from "zod";
 
 jest.mock("@internal/letter-sla-breaches-common");
 jest.mock("../handler/standard-breaches-query");
@@ -105,7 +104,7 @@ describe("populateStandardBreaches", () => {
     await createHandler(deps)({ date: "2026-10-08" });
 
     expect(deps.logger.info as jest.Mock).toHaveBeenNthCalledWith(
-      2,
+      1,
       expect.objectContaining({
         _aws: expect.objectContaining({
           CloudWatchMetrics: [
@@ -126,7 +125,7 @@ describe("populateStandardBreaches", () => {
     );
 
     expect(deps.logger.info as jest.Mock).toHaveBeenNthCalledWith(
-      3,
+      2,
       expect.objectContaining({
         SupplierId: "supplier1",
         ClientId: "client1",
@@ -149,7 +148,7 @@ describe("populateStandardBreaches", () => {
       }),
     );
     expect(deps.logger.info as jest.Mock).toHaveBeenNthCalledWith(
-      4,
+      3,
       expect.objectContaining({
         SupplierId: "supplier2",
         ClientId: "client1",
@@ -172,7 +171,7 @@ describe("populateStandardBreaches", () => {
       }),
     );
     expect(deps.logger.info as jest.Mock).toHaveBeenNthCalledWith(
-      5,
+      4,
       expect.objectContaining({
         SupplierId: "supplier1",
         ClientId: "client2",
@@ -195,7 +194,7 @@ describe("populateStandardBreaches", () => {
       }),
     );
     expect(deps.logger.info as jest.Mock).toHaveBeenNthCalledWith(
-      6,
+      5,
       expect.objectContaining({
         SupplierId: "supplier2",
         ClientId: "client1",
@@ -259,7 +258,7 @@ describe("populateStandardBreaches", () => {
     await createHandler(deps)({ date: "2026-10-08" });
 
     expect(deps.logger.info as jest.Mock).toHaveBeenNthCalledWith(
-      3,
+      2,
       expect.objectContaining({
         SupplierId: "unknown",
         ClientId: "unknown",
