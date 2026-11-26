@@ -159,7 +159,7 @@ jobs:
         run: echo "environment_name=${{ inputs.pr_number != '' && format('pr{0}', inputs.pr_number) || 'main' }}" >> $GITHUB_OUTPUT
       - name: "Generate GitHub App token for nhs-notify-internal access"
         id: app-token
-        uses: actions/create-github-app-token@v3.2.0
+        uses: actions/create-github-app-token@v3.4.0
         with:
           repositories: nhs-notify-internal
           client-id: ${{ secrets.APP_CLIENT_ID }}
@@ -194,7 +194,7 @@ jobs:
         run: echo "environment_name=${{ inputs.pr_number != '' && format('pr{0}', inputs.pr_number) || 'main' }}" >> $GITHUB_OUTPUT
       - name: "Generate GitHub App token for nhs-notify-internal access"
         id: app-token
-        uses: actions/create-github-app-token@v3.2.0
+        uses: actions/create-github-app-token@v3.4.0
         with:
           repositories: nhs-notify-internal
           client-id: ${{ secrets.APP_CLIENT_ID }}
@@ -227,7 +227,7 @@ jobs:
         uses: actions/checkout@v7.0.1
       - name: "Generate GitHub App token for nhs-notify-internal access"
         id: app-token
-        uses: actions/create-github-app-token@v3.2.0
+        uses: actions/create-github-app-token@v3.4.0
         with:
           repositories: nhs-notify-internal
           client-id: ${{ secrets.APP_CLIENT_ID }}
