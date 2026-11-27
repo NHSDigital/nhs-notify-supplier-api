@@ -48,6 +48,14 @@ on:
         type: boolean
         required: false
         default: false
+      target_environment:
+        description: "Target environment (main, nft)"
+        type: choice
+        required: false
+        default: main
+        options:
+          - nft
+          - main
 
 run-name: >-
   Deploy ${{ inputs.deploy_backend && format('backend={0}',
@@ -72,3 +80,4 @@ jobs:
       deploy_backend: ${{ inputs.deploy_backend }}
       deploy_proxy: ${{ inputs.deploy_proxy }}
       build_sandbox: ${{ inputs.build_sandbox }}
+      target_environment: ${{ inputs.target_environment }}
