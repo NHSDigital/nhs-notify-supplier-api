@@ -33,3 +33,9 @@ Note:  The NON_PROD_API_KEY should be for the Supplier1 app in APIGEE, while the
 be for the TestSupplier1 app.
 
 The values have been redacted here but you can obtain them from another team member, or check [.env.template](/.env.template) for more information on how to set them up.
+
+## Test Data and Flakiness
+
+- e2e requests go through the Apigee proxy, so the supplier is always the one registered for the app (`supplier1`). That is the same supplier the component tests use, in the same environment.
+- `get_pending_letter_ids` seeds letters with the letter-test-data CLI, then waits for each one through `GET /letters/{id}`. Don't use `GET /letters` to find seeded letters: it returns at most `limit` letters out of the whole supplier backlog and hides every letter it returns for the visibility timeout.
+- Each test sends a unique `X-Request-ID`. When a request returns a 5xx, `ErrorHandler.handle_retry` prints the request id, response headers and body. Use these to trace the failure in Apigee when nothing shows up in the lambda's CloudWatch logs. Only 429, 502 and 504 are retried.
