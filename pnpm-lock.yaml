@@ -1245,6 +1245,9 @@ importers:
       md5:
         specifier: catalog:app
         version: 2.3.0
+      nhs-notify-supplier-api:
+        specifier: workspace:*
+        version: link:..
       nhs-notify-supplier-api-allocate-letter:
         specifier: workspace:*
         version: link:../lambdas/supplier-allocator

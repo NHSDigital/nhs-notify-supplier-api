@@ -38,7 +38,8 @@ import {
 } from "./allocation-config";
 import { Deps } from "../config/deps";
 import LogRefs from "../config/log-references";
-import { PreparedEventSchema, PreparedEvents, SupplierDetails } from "./types";
+import { $MinimumLetterEvent, MinimumLetterEvent } from "../../../common/types";
+import { SupplierDetails } from "./types";
 import SupplierConfigValidationError from "../errors/supplier-config-validation-error";
 import RejectedError from "../errors/rejected-error";
 
@@ -46,14 +47,23 @@ const idempotencyConfig = new IdempotencyConfig({
   eventKeyJmesPath: "data.domainId",
 });
 
-function parseQueueMessage(queueMessage: string): PreparedEvents {
-  const result = PreparedEventSchema.safeParse(queueMessage);
+function parseQueueMessage(queueMessage: string): MinimumLetterEvent {
+  const result = $MinimumLetterEvent.safeParse(queueMessage);
 
   if (!result.success) {
     throw new Error(
       `Message did not match an expected schema: ${JSON.stringify(
         result.error.issues,
       )}`,
+    );
+  }
+  if (
+    !result.data.type.startsWith(
+      "uk.nhs.notify.letter-rendering.letter-request.prepared",
+    )
+  ) {
+    throw new Error(
+      `Message type ${result.data.type} is not a letter request prepared event`,
     );
   }
   return result.data;
@@ -88,7 +98,7 @@ function buildSupplierDetails(
 }
 
 async function getSupplierFromConfig(
-  letterEvent: PreparedEvents,
+  letterEvent: MinimumLetterEvent,
   deps: Deps,
 ): Promise<SupplierDetails> {
   const letterVariant: LetterVariant = await getVariantDetails(
@@ -230,7 +240,7 @@ function emitMetrics(
 }
 
 function emitDataMetrics(
-  letterEvent: PreparedEvents,
+  letterEvent: MinimumLetterEvent,
   supplier: string,
   metricKey: string,
   deps: Deps,
@@ -297,7 +307,7 @@ type SupplierAllocationResult = {
 };
 
 async function processSupplierAllocation(
-  letterEvent: PreparedEvents,
+  letterEvent: MinimumLetterEvent,
   deps: Deps,
   perAllocationSuccess: AllocationMetrics,
   volumeGroupAllocations: VolumeGroupAllocation,
@@ -384,7 +394,7 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
     volumeGroupAllocations: VolumeGroupAllocation,
   ) => {
     return makeIdempotent(
-      (letterEvent: PreparedEvents, depsInner: Deps) =>
+      (letterEvent: MinimumLetterEvent, depsInner: Deps) =>
         processSupplierAllocation(
           letterEvent,
           depsInner,
@@ -415,7 +425,7 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
       try {
         const sqsMessage = JSON.parse(record.body);
 
-        const letterEvent: PreparedEvents = parseQueueMessage(sqsMessage);
+        const letterEvent: MinimumLetterEvent = parseQueueMessage(sqsMessage);
         deps.logger.info({
           logRef: LogRefs.EXTRACT_EVENT.code,
           description: LogRefs.EXTRACT_EVENT.description,
@@ -424,6 +434,7 @@ export default function createSupplierAllocatorHandler(deps: Deps): SQSHandler {
           letterVariantId: letterEvent.data.letterVariantId,
           source: letterEvent.source,
           type: letterEvent.type,
+          status: letterEvent.data.status,
         });
 
         idempotencyConfig.registerLambdaContext(context);
