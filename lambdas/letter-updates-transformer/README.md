@@ -1,5 +1,3 @@
-<!-- vale off -->
-
 # Letter Updates Transformer Lambda
 
 ## Purpose
@@ -28,5 +26,3 @@ Publishes `LetterStatusChangeEvent` CloudEvents to SNS whenever a letter's statu
 - **REJECTED letters do emit events.** A letter inserted with status REJECTED will match the INSERT filter and produce a `letter.REJECTED` CloudEvent. Downstream consumers will see it immediately.
 - The `dataschemaversion` in each CloudEvent is dynamically set from the `@nhsdigital/nhs-notify-event-schemas-supplier-api` package version, ensuring schema version alignment with the published package.
 - Metrics are aggregated by event type string (e.g., `letter.PENDING`) so operational dashboards can monitor the frequency of each transition.
-
-<!-- vale on -->

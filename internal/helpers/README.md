@@ -1,5 +1,3 @@
-<!-- vale off -->
-
 # @internal/helpers
 
 ## Purpose
@@ -23,5 +21,3 @@ Central shared utility package providing logging, CloudWatch metrics, environmen
 ## Nuances and Peculiarities
 
 - Changes to this package affect the runtime behaviour of all lambdas. Keep interfaces stable and changes backward-compatible.
-
-<!-- vale on -->

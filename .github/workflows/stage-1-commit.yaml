@@ -18,18 +18,6 @@ on:
         description: "Build epoch, set by the CI/CD pipeline workflow"
         required: true
         type: string
-      nodejs_version:
-        description: "Node.js version, set by the CI/CD pipeline workflow"
-        required: true
-        type: string
-      python_version:
-        description: "Python version, set by the CI/CD pipeline workflow"
-        required: true
-        type: string
-      terraform_version:
-        description: "Terraform version, set by the CI/CD pipeline workflow"
-        required: true
-        type: string
       version:
         description: "Version of the software, set by the CI/CD pipeline workflow"
         required: true
@@ -42,88 +30,44 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0 # Full history is needed to scan all commits
       - name: "Scan secrets"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/scan-secrets@6.0.4 # NOSONAR - githubactions:S7637 - internally controlled repo, pinned by tag
-  validate-action-pins:
-    name: "Validate action SHA pins"
-    runs-on: ubuntu-latest
-    timeout-minutes: 2
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: "Validate action SHA pins"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/validate-action-pins@6.0.4 # NOSONAR - githubactions:S7637 - internally controlled repo, pinned by tag
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/scan-secrets@6.1.0
   check-file-format:
     name: "Check file format"
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0 # Full history is needed to compare branches
       - name: "Check file format"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-file-format@6.0.4 # NOSONAR - githubactions:S7637 - internally controlled repo, pinned by tag
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-file-format@6.1.0
   check-markdown-format:
     name: "Check Markdown format"
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0 # Full history is needed to compare branches
       - name: "Check Markdown format"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-markdown-format@6.0.4 # NOSONAR - githubactions:S7637 - internally controlled repo, pinned by tag
-  terraform-docs:
-    name: "Run terraform-docs"
-    runs-on: ubuntu-latest
-    needs: detect-terraform-changes
-    if: needs.detect-terraform-changes.outputs.terraform_changed == 'true'
-    permissions:
-      contents: write
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0 # Full history is needed to compare branches
-      - name: "Check to see if Terraform Docs are up-to-date"
-        run: |
-          make terraform-docs
-      - name: "Stage changes"
-        run: |
-          git add infrastructure/terraform/**/*.md
-      - name: "Check for changes in Terraform Docs"
-        run: |
-          if git diff --cached --name-only | grep -qE '\.md$'; then
-            echo "Markdown files have changed. Please run 'make terraform-docs' and commit the changes."
-            exit 1
-          fi
-  check-english-usage:
-    name: "Check English usage"
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0 # Full history is needed to compare branches
-      - name: "Check English usage"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-english-usage@6.0.4 # NOSONAR - githubactions:S7637 - internally controlled repo, pinned by tag
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-markdown-format@6.1.0
   check-todo-usage:
     name: "Check TODO usage"
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0 # Full history is needed to compare branches
       - name: "Check TODO usage"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-todo-usage@6.0.4 # NOSONAR - githubactions:S7637 - internally controlled repo, pinned by tag
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/check-todo-usage@6.1.0
   detect-terraform-changes:
     name: "Detect Terraform Changes"
     runs-on: ubuntu-latest
@@ -131,7 +75,7 @@ jobs:
       terraform_changed: ${{ steps.check.outputs.terraform_changed }}
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
       - name: "Check for Terraform changes"
         id: check
         run: |
@@ -154,11 +98,18 @@ jobs:
     if: needs.detect-terraform-changes.outputs.terraform_changed == 'true'
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: "Setup ASDF"
-        uses: asdf-vm/actions/setup@b7bcd026f18772e44fe1026d729e1611cc435d47 # v4.0.1
+        uses: actions/checkout@v7.0.1
+      - name: "Setup mise"
+        uses: jdx/mise-action@v4.3.0
+        with:
+          install: false
+          cache: true
+      - name: "Install locked Terraform"
+        run: mise --locked install terraform
+        env:
+          MISE_OVERRIDE_TOOL_VERSIONS_FILENAMES: none
       - name: "Lint Terraform"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/lint-terraform@6.0.4 # NOSONAR - githubactions:S7637 - internally controlled repo, pinned by tag
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/lint-terraform@6.1.0
   count-lines-of-code:
     name: "Count lines of code"
     runs-on: ubuntu-latest
@@ -168,9 +119,9 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
       - name: "Count lines of code"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/create-lines-of-code-report@6.0.4 # NOSONAR - githubactions:S7637 - internally controlled repo, pinned by tag
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/create-lines-of-code-report@6.1.0
         with:
           build_datetime: "${{ inputs.build_datetime }}"
           build_timestamp: "${{ inputs.build_timestamp }}"
@@ -188,9 +139,9 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
       - name: "Scan dependencies"
-        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/scan-dependencies@6.0.4 # NOSONAR - githubactions:S7637 - internally controlled repo, pinned by tag
+        uses: NHSDigital/nhs-notify-shared-modules/.github/actions/scan-dependencies@6.1.0
         with:
           build_datetime: "${{ inputs.build_datetime }}"
           build_timestamp: "${{ inputs.build_timestamp }}"
@@ -210,7 +161,7 @@ jobs:
 
     steps:
       - name: "Checkout code"
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
 
@@ -245,7 +196,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
       - name: Check schema versions
         run: |
           source scripts/is_valid_increment.sh
@@ -273,21 +224,12 @@ jobs:
       packages: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Setup NodeJS
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/checkout@v7.0.1
+      - name: Setup Node.js and pnpm from mise
+        uses: $/.github/actions/node-install
         with:
-          node-version: ${{ inputs.nodejs_version }}
-          registry-url: "https://npm.pkg.github.com"
-
-      - name: Get pnpm version
-        id: tool-versions
-        run: echo "pnpm_version=$(awk '$1 == "pnpm" { print $2; exit }' .tool-versions)" >> "$GITHUB_OUTPUT"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093 # v6.0.8
-        with:
-          version: ${{ steps.tool-versions.outputs.pnpm_version }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          install_dependencies: "false"
 
       - name: check if local version differs from latest published version
         id: check-version

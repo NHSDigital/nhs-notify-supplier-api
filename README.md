@@ -1,4 +1,3 @@
-<!-- vale off -->
 # NHS Notify Supplier API
 
 [![1. CI/CD pull request](https://github.com/NHSDigital/nhs-notify-supplier-api/actions/workflows/cicd-1-pull-request.yaml/badge.svg)](https://github.com/NHSDigital/nhs-notify-supplier-api/actions/workflows/cicd-1-pull-request.yaml)
@@ -104,12 +103,12 @@ New developers of the NHS Notify Supplier API should understand the below.
     # Authenticate to GitHub Packages for github.com
     //npm.pkg.github.com/:_authToken=<Insert your Github PAT (Personal Access Token)>
 
-
     # Package is scoped under @org, set registry for that scope
     @nhsdigital:registry=https://npm.pkg.github.com
    ```
 
 - Install `node` and `pnpm` (to run `pnpm install` and build the project)
+- Follow [PLAT-KOP-027 - Local Setup for Mise Prek](https://nhsd-confluence.digital.nhs.uk/spaces/RIS/pages/1559872281/PLAT-KOP-027+-+Local+Setup+for+Mise+Prek), then run `make config` from the repository root. Run `make githooks-run` to run the repository hooks manually.
 - Install `aws cli` to be able to connect to AWS (needed for some tests)
 - If AWS CLI calls are blocked by a firewall (e.g. Zscaler), you need to add the custom certificates in the location `/scripts/devcontainer/custom-ca-certs`
 - Install `docker` or `Rancher` for containerisation
@@ -196,5 +195,3 @@ Import the files into postman
 Select a target environment in postman
 Run the collection
 The collections must be kept in sync manually
-
-<!-- vale on -->

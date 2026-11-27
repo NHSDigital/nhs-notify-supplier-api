@@ -1,5 +1,3 @@
-<!-- vale off -->
-
 # Supplier Mock
 
 ## Purpose
@@ -30,5 +28,3 @@ As mentioned above the `limit`, `supplierId` and `specification_id_mapping` defa
 | limit                    | string | 100                                     |
 | supplier_id              | string | TestSupplier1                           |
 | specification_id_mapping | map    | {"test-specification-id-1 = "ACCEPTED"} |
-
-<!-- vale on -->
