@@ -278,8 +278,8 @@ catalogs:
       specifier: ^6.16.3
       version: 6.17.0
     '@tsconfig/node22':
-      specifier: ^22.0.6
-      version: 22.0.6
+      specifier: ^22.0.7
+      version: 22.0.7
     '@types/aws-lambda':
       specifier: ^8.10.164
       version: 8.10.164
@@ -409,7 +409,7 @@ importers:
         version: 5.10.0(eslint@9.39.5)
       '@tsconfig/node22':
         specifier: catalog:tools
-        version: 22.0.6
+        version: 22.0.7
       '@types/aws-lambda':
         specifier: catalog:tools
         version: 8.10.164
@@ -544,7 +544,7 @@ importers:
         version: 12.2.0
       ts-jest:
         specifier: catalog:test
-        version: 29.4.14(@babel/core@8.0.7)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@8.0.7))(esbuild@0.28.2)(jest-util@30.5.1)(jest@30.5.2(@types/node@26.6.5)(ts-node@10.9.2(@types/node@26.6.5)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.14(@babel/core@7.29.7)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.7))(esbuild@0.28.2)(jest-util@30.5.1)(jest@30.5.2(@types/node@26.6.5)(ts-node@10.9.2(@types/node@26.6.5)(typescript@5.9.3)))(typescript@5.9.3)
       ts-node:
         specifier: catalog:tools
         version: 10.9.2(@types/node@26.6.5)(typescript@5.9.3)
@@ -1029,7 +1029,7 @@ importers:
     devDependencies:
       '@tsconfig/node22':
         specifier: catalog:tools
-        version: 22.0.6
+        version: 22.0.7
       '@types/aws-lambda':
         specifier: catalog:tools
         version: 8.10.164
@@ -3081,8 +3081,8 @@ packages:
   '@tsconfig/node16@1.0.4':
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
 
-  '@tsconfig/node22@22.0.6':
-    resolution: {integrity: sha512-/5thavHAnWDZwH2H6eEn/T8pBEBhtuKaWGMslsj82kJfvzQgOgEMK7X4goBbIUjgVtAzPTtM9Ml64LA0uxO6Iw==}
+  '@tsconfig/node22@22.0.7':
+    resolution: {integrity: sha512-xnYM5q+HTeLm+jRBIB7Mu61OyOmNpgzPmJuhwPODSyITDPIWVK2TXxn/+O5fJ4n/P0u/gPsgSyPw/Dl3Cz/L4g==}
 
   '@tybys/wasm-util@0.10.4':
     resolution: {integrity: sha512-W3c4gRigFS0T/Ma4qIYF3GDAc5AQdHb1yL5znJT1Zv1YaD9Kitx656wBjvr19qbiosmZT8lWDM5BEMynUqX65A==}
@@ -9723,7 +9723,7 @@ snapshots:
 
   '@tsconfig/node16@1.0.4': {}
 
-  '@tsconfig/node22@22.0.6': {}
+  '@tsconfig/node22@22.0.7': {}
 
   '@tybys/wasm-util@0.10.4':
     dependencies:
