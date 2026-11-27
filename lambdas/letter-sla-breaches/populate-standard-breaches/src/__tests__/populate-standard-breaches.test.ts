@@ -3,9 +3,11 @@ import { Unit } from "aws-embedded-metrics";
 import { type Deps } from "../handler/deps";
 import buildStandardBreachesQuery from "../handler/standard-breaches-query";
 import createHandler from "../handler/populate-standard-breaches";
+import fetchBankHolidays from "../handler/bank-holidays";
 
 jest.mock("@internal/letter-sla-breaches-common");
 jest.mock("../handler/standard-breaches-query");
+jest.mock("../handler/bank-holidays");
 
 const makeDeps = () =>
   ({
@@ -31,8 +33,10 @@ describe("populateStandardBreaches", () => {
 
   it("passes the configured SLA days and look-back to the query", async () => {
     jest.mocked(runAthenaQuery).mockResolvedValue([]);
+    jest.mocked(fetchBankHolidays).mockResolvedValue([]);
 
-    await createHandler(makeDeps())({ date: "2026-10-08" });
+    const deps = makeDeps();
+    await createHandler(deps)({ date: "2026-10-08" });
 
     expect(buildStandardBreachesQuery).toHaveBeenCalledWith(
       "event_cache",
@@ -40,7 +44,31 @@ describe("populateStandardBreaches", () => {
       new Date("2026-10-08"),
       3,
       10,
+      [],
     );
+  });
+
+  it("logs the error and falls back to no bank holidays when fetching them fails", async () => {
+    const error = new Error("fetch failed");
+    jest.mocked(fetchBankHolidays).mockRejectedValue(error);
+    jest.mocked(runAthenaQuery).mockResolvedValue([]);
+
+    const deps = makeDeps();
+    await createHandler(deps)({ date: "2026-10-08" });
+
+    expect(deps.logger.error).toHaveBeenCalledWith({
+      description: expect.any(String),
+      err: error,
+    });
+    expect(buildStandardBreachesQuery).toHaveBeenCalledWith(
+      "event_cache",
+      "pack_specification",
+      new Date("2026-10-08"),
+      3,
+      10,
+      [],
+    );
+    expect(runAthenaQuery).toHaveBeenCalled();
   });
 
   it("runs the standard breaches query and logs metrics", async () => {
