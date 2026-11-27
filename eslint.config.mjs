@@ -81,7 +81,6 @@ export default defineConfig([
   tseslint.configs.strictTypeChecked,
   tseslint.configs.stylisticTypeChecked,
   airbnbConfigs.base.typescript,
-  airbnbPlugins.typescriptEslint,
 
   {
     ignores: ['**/*.json'],

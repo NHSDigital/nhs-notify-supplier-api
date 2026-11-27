@@ -3,7 +3,7 @@ import {
   AllocatedLetterSchema,
 } from "nhs-notify-supplier-api-upsert-letter/src/handler/schemas";
 import { randomUUID } from "node:crypto";
-import { expect } from "playwright/test";
+import { expect } from "@playwright/test";
 import { pollSupplierAllocatorLogForResolvedSpec } from "./aws-cloudwatch-helper";
 import { createPreparedV1Event } from "./event-fixtures";
 import { logger } from "./pino-logger";

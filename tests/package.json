@@ -47,10 +47,6 @@
   "license": "ISC",
   "main": "index.js",
   "name": "nhs-notify-supplier-api-tests",
-  "overrides": {
-    "@playwright/test": "1.63.0",
-    "playwright-core": "1.62.1"
-  },
   "scripts": {
     "clean": "rimraf $(pwd)/target",
     "lint": "eslint .",

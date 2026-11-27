@@ -42,12 +42,6 @@ jest.setTimeout(30_000);
 describe("SupplierQuotasRepository", () => {
   let dbContext: DBContext;
   let repository: SupplierQuotasRepository;
-  let mockDdbClient: {
-    send: jest.Mock;
-    config: any;
-    destroy: jest.Mock;
-    middlewareStack: any;
-  };
 
   // Database tests can take longer, especially with setup and teardown
   beforeAll(async () => {
@@ -59,22 +53,10 @@ describe("SupplierQuotasRepository", () => {
     repository = new SupplierQuotasRepository(dbContext.docClient, {
       supplierQuotasTableName: dbContext.config.supplierQuotasTableName,
     });
-    // Initialize mockDdbClient for tests that need it
-    mockDdbClient = {
-      send: jest.fn(),
-      config: {},
-      destroy: jest.fn(),
-      middlewareStack: {
-        clone: jest.fn(),
-        use: jest.fn(),
-        remove: jest.fn(),
-        removeByTag: jest.fn(),
-        concat: jest.fn(),
-      },
-    };
   });
 
   afterEach(async () => {
+    jest.restoreAllMocks();
     await deleteTables(dbContext);
     jest.useRealTimers();
   });
@@ -165,15 +147,12 @@ describe("SupplierQuotasRepository", () => {
     const supplierId = "supplier-123";
     const newAllocation = 50;
 
-    // Mock the ddbClient to throw a generic error
-    mockDdbClient.send.mockRejectedValue(new Error("Generic error"));
-
-    const repoWithMockedClient = new SupplierQuotasRepository(mockDdbClient, {
-      supplierQuotasTableName: dbContext.config.supplierQuotasTableName,
-    });
+    jest
+      .spyOn(dbContext.docClient, "send")
+      .mockImplementation(() => Promise.reject(new Error("Generic error")));
 
     await expect(
-      repoWithMockedClient.updateOverallAllocation(
+      repository.updateOverallAllocation(
         volumeGroupId,
         supplierId,
         newAllocation,
@@ -186,32 +165,32 @@ describe("SupplierQuotasRepository", () => {
     const supplierId = "supplier-123";
     const newAllocation = 50;
 
-    // Mock the ddbClient to throw a validation e first call and throw ConditionalCheckFailedException on the second call and then succeed on the third call
-    mockDdbClient.send
-      .mockRejectedValueOnce(
-        Object.assign(new Error("Validation error"), {
-          name: "ValidationException",
-        }),
+    const sendSpy = jest.spyOn(dbContext.docClient, "send");
+    sendSpy
+      .mockImplementationOnce(() =>
+        Promise.reject(
+          Object.assign(new Error("Validation error"), {
+            name: "ValidationException",
+          }),
+        ),
       )
-      .mockRejectedValueOnce(
-        Object.assign(new Error("ConditionalCheckFailedException"), {
-          name: "ConditionalCheckFailedException",
-        }),
+      .mockImplementationOnce(() =>
+        Promise.reject(
+          Object.assign(new Error("ConditionalCheckFailedException"), {
+            name: "ConditionalCheckFailedException",
+          }),
+        ),
       )
-      .mockResolvedValue({}); // Succeed on the third call
+      .mockImplementation(() => Promise.resolve({}));
 
-    const repoWithMockedClient = new SupplierQuotasRepository(mockDdbClient, {
-      supplierQuotasTableName: dbContext.config.supplierQuotasTableName,
-    });
-
-    await repoWithMockedClient.updateOverallAllocation(
+    await repository.updateOverallAllocation(
       volumeGroupId,
       supplierId,
       newAllocation,
     );
 
-    expect(mockDdbClient.send).toHaveBeenCalledTimes(3);
-    expect(mockDdbClient.send).toHaveBeenNthCalledWith(
+    expect(sendSpy).toHaveBeenCalledTimes(3);
+    expect(sendSpy).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
         input: expect.objectContaining({
@@ -219,7 +198,7 @@ describe("SupplierQuotasRepository", () => {
         }),
       }),
     );
-    expect(mockDdbClient.send).toHaveBeenNthCalledWith(
+    expect(sendSpy).toHaveBeenNthCalledWith(
       3,
       expect.objectContaining({
         input: expect.objectContaining({
@@ -234,21 +213,19 @@ describe("SupplierQuotasRepository", () => {
     const supplierId = "supplier-123";
     const newAllocation = 50;
 
-    // Mock the ddbClient to throw a generic error
-    mockDdbClient.send
-      .mockRejectedValueOnce(
-        Object.assign(new Error("Validation error"), {
-          name: "ValidationException",
-        }),
+    jest
+      .spyOn(dbContext.docClient, "send")
+      .mockImplementationOnce(() =>
+        Promise.reject(
+          Object.assign(new Error("Validation error"), {
+            name: "ValidationException",
+          }),
+        ),
       )
-      .mockRejectedValueOnce(new Error("Generic error")); // Throw a generic error on the second call
-
-    const repoWithMockedClient = new SupplierQuotasRepository(mockDdbClient, {
-      supplierQuotasTableName: dbContext.config.supplierQuotasTableName,
-    });
+      .mockImplementationOnce(() => Promise.reject(new Error("Generic error")));
 
     await expect(
-      repoWithMockedClient.updateOverallAllocation(
+      repository.updateOverallAllocation(
         volumeGroupId,
         supplierId,
         newAllocation,
@@ -324,19 +301,12 @@ describe("SupplierQuotasRepository", () => {
     const supplierId = "supplier-123";
     const newAllocation = 25;
 
-    // Mock the ddbClient to throw a generic error
-    mockDdbClient.send.mockRejectedValue(new Error("Generic error"));
-
-    const repoWithMockedClient = new SupplierQuotasRepository(mockDdbClient, {
-      supplierQuotasTableName: dbContext.config.supplierQuotasTableName,
-    });
+    jest
+      .spyOn(dbContext.docClient, "send")
+      .mockImplementation(() => Promise.reject(new Error("Generic error")));
 
     await expect(
-      repoWithMockedClient.updateDailyAllocation(
-        date,
-        supplierId,
-        newAllocation,
-      ),
+      repository.updateDailyAllocation(date, supplierId, newAllocation),
     ).rejects.toThrow("Generic error");
   });
 
@@ -345,32 +315,28 @@ describe("SupplierQuotasRepository", () => {
     const supplierId = "supplier-123";
     const newAllocation = 25;
 
-    // Mock the ddbClient to throw a validation e first call and throw ConditionalCheckFailedException on the second call and then succeed on the third call
-    mockDdbClient.send
-      .mockRejectedValueOnce(
-        Object.assign(new Error("Validation error"), {
-          name: "ValidationException",
-        }),
+    const sendSpy = jest.spyOn(dbContext.docClient, "send");
+    sendSpy
+      .mockImplementationOnce(() =>
+        Promise.reject(
+          Object.assign(new Error("Validation error"), {
+            name: "ValidationException",
+          }),
+        ),
       )
-      .mockRejectedValueOnce(
-        Object.assign(new Error("ConditionalCheckFailedException"), {
-          name: "ConditionalCheckFailedException",
-        }),
+      .mockImplementationOnce(() =>
+        Promise.reject(
+          Object.assign(new Error("ConditionalCheckFailedException"), {
+            name: "ConditionalCheckFailedException",
+          }),
+        ),
       )
-      .mockResolvedValue({}); // Succeed on the third call
+      .mockImplementation(() => Promise.resolve({}));
 
-    const repoWithMockedClient = new SupplierQuotasRepository(mockDdbClient, {
-      supplierQuotasTableName: dbContext.config.supplierQuotasTableName,
-    });
+    await repository.updateDailyAllocation(date, supplierId, newAllocation);
 
-    await repoWithMockedClient.updateDailyAllocation(
-      date,
-      supplierId,
-      newAllocation,
-    );
-
-    expect(mockDdbClient.send).toHaveBeenCalledTimes(3);
-    expect(mockDdbClient.send).toHaveBeenNthCalledWith(
+    expect(sendSpy).toHaveBeenCalledTimes(3);
+    expect(sendSpy).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
         input: expect.objectContaining({
@@ -378,7 +344,7 @@ describe("SupplierQuotasRepository", () => {
         }),
       }),
     );
-    expect(mockDdbClient.send).toHaveBeenNthCalledWith(
+    expect(sendSpy).toHaveBeenNthCalledWith(
       3,
       expect.objectContaining({
         input: expect.objectContaining({
@@ -393,25 +359,19 @@ describe("SupplierQuotasRepository", () => {
     const supplierId = "supplier-123";
     const newAllocation = 25;
 
-    // Mock the ddbClient to throw a generic error
-    mockDdbClient.send
-      .mockRejectedValueOnce(
-        Object.assign(new Error("Validation error"), {
-          name: "ValidationException",
-        }),
+    jest
+      .spyOn(dbContext.docClient, "send")
+      .mockImplementationOnce(() =>
+        Promise.reject(
+          Object.assign(new Error("Validation error"), {
+            name: "ValidationException",
+          }),
+        ),
       )
-      .mockRejectedValueOnce(new Error("Generic error")); // Throw a generic error on the second call
-
-    const repoWithMockedClient = new SupplierQuotasRepository(mockDdbClient, {
-      supplierQuotasTableName: dbContext.config.supplierQuotasTableName,
-    });
+      .mockImplementationOnce(() => Promise.reject(new Error("Generic error")));
 
     await expect(
-      repoWithMockedClient.updateDailyAllocation(
-        date,
-        supplierId,
-        newAllocation,
-      ),
+      repository.updateDailyAllocation(date, supplierId, newAllocation),
     ).rejects.toThrow("Generic error");
   });
 });
