@@ -11,7 +11,7 @@ Each time the mock is called it will call `getLetters` once with for the **suppl
 
 ## How to deploy the supapi-supplier-mock schedule
 
-The AWS EventBridge Schedule that calls the supplier-mock lambda is created by the terraform file **/infrastructure/terraform/components/api/scheduler_supplier_mock.tf**, however, by default it's not deployed as it's not needed by every dynamic environment.
+The AWS EventBridge Schedule that calls the supplier-mock lambda is created by the terraform file **/infrastructure/terraform/components/api/scheduler_schedule_supplier_mock.tf**, however, by default it's not deployed as it's not needed by every dynamic environment.
 If you need to deploy the schedule in your environment you need to set the variable `deploy_supplier_mock_scheduler = true` in the file **/infrastructure/terraform/components/api/variables.tf**.
 
 ## How to run the lambda

@@ -136,25 +136,24 @@ jobs:
 
           target_account_group=""
 
-          # if [[ "$deploy_backend" == "true" ]]; then
-          #   if [[ -z "$backend_account_group" ]]; then
-          #     echo "[ERROR] backend_account_group is required when deploy_backend is true."
-          #     exit 1
-          #   fi
+          if [[ "$deploy_backend" == "true" ]]; then
+            if [[ -z "$backend_account_group" ]]; then
+              echo "[ERROR] backend_account_group is required when deploy_backend is true."
+              exit 1
+            fi
 
-          #   if [[ "$source_type" == "branch" && "$backend_account_group" != "dev" ]]; then
-          #     echo "[ERROR] Branch deployments are only allowed for dev backend deployments."
-          #     exit 1
-          #   fi
+            if [[ "$source_type" == "branch" && "$backend_account_group" != "dev" ]]; then
+              echo "[ERROR] Branch deployments are only allowed for dev backend deployments."
+              exit 1
+            fi
 
-          #   if [[ "$backend_account_group" == "nonprod" || "$backend_account_group" == "prod" ]]; then
-          #     if [[ "$is_release" == "false" ]]; then
-          #       echo "[ERROR] Only tagged releases can be deployed to NONPROD and PROD backends."
-          #       exit 1
-          #     fi
-          #   fi
+            if [[ "$backend_account_group" == "nonprod" || "$backend_account_group" == "prod" ]]; then
+              if [[ "$is_release" == "false" ]]; then
+                echo "[ERROR] Only tagged releases can be deployed to NONPROD and PROD backends."
+                exit 1
+              fi
+            fi
 
-          echo "Setting target_account_group"
             case "$backend_account_group" in
               dev)     target_account_group="nhs-notify-supplier-api-dev" ;;
               nonprod) target_account_group="nhs-notify-supplier-api-nonprod" ;;
@@ -164,8 +163,7 @@ jobs:
                 exit 1
                 ;;
             esac
-            echo "target_account_group set to '$target_account_group'"
-          # fi
+          fi
 
           # --- Proxy validation (only when deploying proxy) ---
 
@@ -239,9 +237,7 @@ jobs:
             --targetEnvironment "${{ needs.validate.outputs.target_environment }}" \
             --targetAccountGroup "${{ needs.validate.outputs.target_account_group }}" \
             --targetComponent "api" \
-            --terraformAction "apply" \
-            --internalRef "feature/CCM-25897_supplier_api_nft_environment"
-
+            --terraformAction "apply" 
   deploy-proxy:
     name: Deploy proxy
     if: ${{ inputs.deploy_proxy && !failure() && !cancelled() }}
