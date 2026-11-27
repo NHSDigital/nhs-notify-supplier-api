@@ -179,17 +179,17 @@ url = "https://github.com/anchore/syft/releases/download/v1.39.0/syft_1.39.0_dar
 url_api = "https://api.github.com/repos/anchore/syft/releases/assets/331876319"
 
 [[tools.terraform]]
-version = "1.14.8"
+version = "1.14.9"
 backend = "aqua:hashicorp/terraform"
-specifiers = ["1.14.8"]
+specifiers = ["1.14.9"]
 
 [tools.terraform."platforms.linux-x64"]
-checksum = "sha256:56a5d12f47cbc1c6bedb8f5426ae7d5df984d1929572c24b56f4c82e9f9bf709"
-url = "https://releases.hashicorp.com/terraform/1.14.8/terraform_1.14.8_linux_amd64.zip"
+checksum = "sha256:2e5cffc20a0b48a67a76268723bd5a10b8666f69b2aa4f04906e206726bedd63"
+url = "https://releases.hashicorp.com/terraform/1.14.9/terraform_1.14.9_linux_amd64.zip"
 
 [tools.terraform."platforms.macos-arm64"]
-checksum = "sha256:5593670a2d42323847bfb216db17c73a44df201a62f7587928bae16adeabba23"
-url = "https://releases.hashicorp.com/terraform/1.14.8/terraform_1.14.8_darwin_arm64.zip"
+checksum = "sha256:5bc0b11b7a63c8984a41d82523356df46f7833c2e9651a39a7f8919422de5cde"
+url = "https://releases.hashicorp.com/terraform/1.14.9/terraform_1.14.9_darwin_arm64.zip"
 
 [[tools.uv]]
 version = "0.13.5"

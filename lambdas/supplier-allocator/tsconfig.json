@@ -8,6 +8,7 @@
   "extends": "../../tsconfig.base.json",
   "include": [
     "src/**/*",
-    "jest.config.ts"
+    "jest.config.ts",
+    "../common/**/*.ts"
   ]
 }
