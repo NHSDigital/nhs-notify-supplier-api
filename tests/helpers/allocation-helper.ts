@@ -144,7 +144,17 @@ const getSupplierQuotasTableName = (): string =>
   process.env.SUPPLIER_QUOTAS_TABLE_NAME ??
   `nhs-${envName}-supapi-supplier-quotas`;
 
-const getAllocationDate = (): string => new Date().toISOString().slice(0, 10);
+// Must match the supplier allocator, which keys daily allocations by the Europe/London date
+export const getAllocationDate = (): string =>
+  new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London" }).format(
+    new Date(),
+  );
+
+function isConditionalCheckFailed(error: unknown): boolean {
+  return (
+    error instanceof Error && error.name === "ConditionalCheckFailedException"
+  );
+}
 
 export async function getAllocationLogForDomainId(
   domainId: string,
@@ -316,7 +326,18 @@ export async function getOrSeedLetterDailyAllocationFromDb(
   try {
     return await getLetterDailyAllocationFromDb(allocationDate);
   } catch {
-    return seedLetterDailyAllocation(defaultAllocations, allocationDate);
+    try {
+      return await seedLetterDailyAllocation(
+        defaultAllocations,
+        allocationDate,
+      );
+    } catch (error) {
+      // Another test or the allocator created the row between our read and write
+      if (isConditionalCheckFailed(error)) {
+        return getLetterDailyAllocationFromDb(allocationDate);
+      }
+      throw error;
+    }
   }
 }
 
@@ -327,7 +348,15 @@ export async function getOrSeedOverallAllocationFromDb(
   try {
     return await getOverallAllocationFromDb(volumeGroupId);
   } catch {
-    return seedOverallAllocation(defaultAllocations, volumeGroupId);
+    try {
+      return await seedOverallAllocation(defaultAllocations, volumeGroupId);
+    } catch (error) {
+      // Another test or the allocator created the row between our read and write
+      if (isConditionalCheckFailed(error)) {
+        return getOverallAllocationFromDb(volumeGroupId);
+      }
+      throw error;
+    }
   }
 }
 
@@ -364,6 +393,31 @@ export async function updateSupplierDailyAllocation(
         ":id": `ID#${allocationDate}`,
         ":date": allocationDate,
         ":now": now,
+      },
+    }),
+  );
+}
+
+// Relative restore: unlike an absolute SET, it keeps increments the allocator made while the test ran
+export async function adjustSupplierDailyAllocation(
+  supplierId: string,
+  delta: number,
+  allocationDate: string = getAllocationDate(),
+): Promise<void> {
+  await docClient.send(
+    new UpdateCommand({
+      TableName: getSupplierQuotasTableName(),
+      Key: {
+        pk: "ENTITY#daily-allocation",
+        sk: `ID#${allocationDate}`,
+      },
+      UpdateExpression:
+        "SET allocations.#supplierId = if_not_exists(allocations.#supplierId, :zero) + :delta, updatedAt = :now",
+      ExpressionAttributeNames: { "#supplierId": supplierId },
+      ExpressionAttributeValues: {
+        ":delta": delta,
+        ":zero": 0,
+        ":now": new Date().toISOString(),
       },
     }),
   );

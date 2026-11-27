@@ -5,7 +5,7 @@ import time
 import json
 import requests
 from lib.constants import SUPPLIER, resolve_aws_account_id
-from lib.errorhandler import ErrorHandler
+from lib.errorhandler import ErrorHandler, describe_response
 
 
 _REPO_ROOT = pathlib.Path(__file__).resolve().parents[3]
@@ -70,42 +70,43 @@ def get_pending_letter_ids(
     headers: dict,
     letters_endpoint: str,
     limit: int = 1,
-    timeout_s: int = 20,
+    timeout_s: int = 60,
     interval_s: int = 2,
-    retries: int = 5,
 ) -> list:
-    """Injects the given number of pending letters as test data, then waits for them to become
-    visible via the getLetters endpoint.
+    """Seeds the given number of PENDING letters, then waits until each one is readable via
+    GET /letters/{id} for the supplier registered in the Apigee App.
 
-    Because the getLetters endpoint increases the visibility timeout, if it is called immediately again before the letter's visibility timeout expires, the same letter will not be returned in the response.
-
-    Retries to account for other tests running in parallel stealing the letters.
+    GET /letters/{id} is used rather than GET /letters because the list endpoint only returns
+    up to `limit` letters from the supplier's whole queue backlog and hides every letter it returns
+    for the visibility timeout. Under a large backlog or with parallel tests it may never return the
+    newly seeded letters.
 
     Returns a list of letter ID strings.
 
-    Raises TimeoutError if the expected number of pending letters do not appear within the timeout period.
+    Raises TimeoutError if the seeded letters are not readable as PENDING within the timeout period.
     """
-
-    for _ in range(retries):
-        letterIds = create_test_data(limit)
-        deadline = time.monotonic() + timeout_s
-        data = []
-        while time.monotonic() < deadline:
-            # Retrieves letters based on the supplier registered in the Apigee App
-            response = requests.get(
-                f"{url}{letters_endpoint}", headers=headers
-            )
+    letter_ids = create_test_data(limit)
+    pending_ids = set(letter_ids)
+    deadline = time.monotonic() + timeout_s
+    while time.monotonic() < deadline:
+        for letter_id in sorted(pending_ids):
+            response = requests.get(f"{url}{letters_endpoint}/{letter_id}", headers=headers)
             ErrorHandler.handle_retry(response)
-            response.raise_for_status()
-            data.extend(response.json().get("data", []))
-            idsFound = [ item.get("id") for item in data ]
-            if set(letterIds).issubset(idsFound):
-                print(f"Found all created letter IDs: {letterIds}")
-                return letterIds
-            print(f"Expected letter IDs {letterIds} not found in response. Retrying in {interval_s} seconds...")
-            time.sleep(interval_s)
+            if response.status_code == 200:
+                status = response.json().get("data", {}).get("attributes", {}).get("status")
+                if status == "PENDING":
+                    pending_ids.discard(letter_id)
+            elif response.status_code != 404:
+                raise AssertionError(
+                    f"Unexpected response while waiting for seeded letter:\n{describe_response(response)}"
+                )
+        if not pending_ids:
+            print(f"All seeded letter IDs are PENDING: {letter_ids}")
+            return letter_ids
+        print(f"Seeded letter IDs {sorted(pending_ids)} not PENDING yet. Retrying in {interval_s} seconds...")
+        time.sleep(interval_s)
 
     raise TimeoutError(
-        f"Timed out after {retries} retries waiting for {limit} PENDING letter(s) at "
-        f"{url}{letters_endpoint}"
+        f"Timed out after {timeout_s}s waiting for seeded letter(s) {sorted(pending_ids)} to be PENDING at "
+        f"{url}{letters_endpoint}/{{id}}"
     )

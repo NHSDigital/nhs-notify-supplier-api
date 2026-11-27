@@ -1,4 +1,5 @@
 import {
+  ChangeMessageVisibilityBatchCommand,
   DeleteMessageCommand,
   Message,
   ReceiveMessageCommand,
@@ -10,7 +11,16 @@ import {
   AWS_REGION,
   envName,
 } from "tests/constants/api-constants";
-import { setTimeout } from "node:timers/promises";
+import { setTimeout as sleep } from "node:timers/promises";
+import { logger } from "tests/helpers/pino-logger";
+
+const POLL_TIMEOUT_MS = 120_000;
+const POLL_INTERVAL_MS = 500;
+// Keeps received messages hidden while one iteration's parallel receives run, so together they
+// return up to 50 distinct messages. Non-matching messages are released straight afterwards.
+const RECEIVE_VISIBILITY_TIMEOUT_SECONDS = 30;
+// Receives issued per iteration, each returning up to 10 messages.
+const PARALLEL_RECEIVES = 5;
 
 function messageMatchesDomainId(message: Message, domainId: string): boolean {
   if (!message.Body) {
@@ -25,38 +35,43 @@ function messageMatchesDomainId(message: Message, domainId: string): boolean {
   }
 }
 
-async function doPoll(
+async function deleteMessage(
   client: SQSClient,
   queueUrl: string,
-  domainId: string,
-  options: { abortSignal: AbortSignal },
+  message: Message,
 ) {
-  let matchingMessage;
-  do {
-    const response = await client.send(
-      new ReceiveMessageCommand({
-        QueueUrl: queueUrl,
-        VisibilityTimeout: 0,
-        WaitTimeSeconds: 5,
-      }),
-      options,
-    );
+  await client.send(
+    new DeleteMessageCommand({
+      QueueUrl: queueUrl,
+      ReceiptHandle: message.ReceiptHandle,
+    }),
+  );
+}
 
-    matchingMessage = (response.Messages || []).find((message) =>
-      messageMatchesDomainId(message, domainId),
-    );
-  } while (!matchingMessage && !options.abortSignal.aborted);
-
-  if (matchingMessage) {
+// Several specs poll the same DLQ in parallel, so a message one poller holds is invisible to the
+// others. Releasing non-matching messages immediately stops pollers hiding each other's messages.
+async function releaseMessages(
+  client: SQSClient,
+  queueUrl: string,
+  messages: Message[],
+) {
+  if (messages.length === 0) {
+    return;
+  }
+  try {
     await client.send(
-      new DeleteMessageCommand({
+      new ChangeMessageVisibilityBatchCommand({
         QueueUrl: queueUrl,
-        ReceiptHandle: matchingMessage.ReceiptHandle,
+        Entries: messages.map((message, index) => ({
+          Id: String(index),
+          ReceiptHandle: message.ReceiptHandle,
+          VisibilityTimeout: 0,
+        })),
       }),
-      options,
     );
-  } else {
-    throw new Error("Timed out polling queue");
+  } catch (error) {
+    // Not fatal: unreleased messages become visible again after the receive visibility timeout.
+    logger.warn({ error }, `Failed to release messages on ${queueUrl}`);
   }
 }
 
@@ -66,22 +81,55 @@ export async function pollQueueForLetterEvent(
 ) {
   const queueUrl = `https://sqs.${AWS_REGION}.amazonaws.com/${AWS_ACCOUNT_ID}/nhs-${envName}-supapi-${queueName}`;
   const client = new SQSClient({ region: AWS_REGION });
+  const deadline = Date.now() + POLL_TIMEOUT_MS;
+  let scanned = 0;
 
-  const cancelTimeout = new AbortController();
-  const cancelPolling = new AbortController();
+  while (Date.now() < deadline) {
+    const responses = await Promise.all(
+      Array.from({ length: PARALLEL_RECEIVES }, () =>
+        client.send(
+          new ReceiveMessageCommand({
+            QueueUrl: queueUrl,
+            MaxNumberOfMessages: 10,
+            VisibilityTimeout: RECEIVE_VISIBILITY_TIMEOUT_SECONDS,
+            WaitTimeSeconds: 1,
+          }),
+        ),
+      ),
+    );
+    const messages = responses.flatMap((response) => response.Messages ?? []);
+    scanned += messages.length;
 
-  const timeoutPromise = setTimeout(60_000, undefined, {
-    signal: cancelTimeout.signal,
-  }).then(() => {
-    cancelPolling.abort();
-    throw new Error("Timed out polling queue");
-  });
+    const matchingMessage = messages.find((message) =>
+      messageMatchesDomainId(message, domainId),
+    );
 
-  const pollPromise = doPoll(client, queueUrl, domainId, {
-    abortSignal: cancelPolling.signal,
-  }).finally(() => {
-    cancelTimeout.abort();
-  });
+    // Each response holds at most 10 messages, the ChangeMessageVisibilityBatch limit.
+    await Promise.all(
+      responses.map((response) =>
+        releaseMessages(
+          client,
+          queueUrl,
+          (response.Messages ?? []).filter(
+            (message) => message !== matchingMessage,
+          ),
+        ),
+      ),
+    );
 
-  await Promise.race([timeoutPromise, pollPromise]);
+    if (matchingMessage) {
+      // Only delete the message this test produced; the DLQ is shared with other producers
+      await deleteMessage(client, queueUrl, matchingMessage);
+      logger.info(
+        `Found message for domainId ${domainId} on ${queueName} after scanning ${scanned} message(s)`,
+      );
+      return;
+    }
+
+    await sleep(POLL_INTERVAL_MS);
+  }
+
+  throw new Error(
+    `Timed out polling ${queueName} for domainId ${domainId} after scanning ${scanned} message(s). Check the DLQ backlog size.`,
+  );
 }

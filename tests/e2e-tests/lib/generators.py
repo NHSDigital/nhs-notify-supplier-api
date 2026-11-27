@@ -1,3 +1,6 @@
+import uuid
+
+
 class Generators:
     @staticmethod
     def generate_valid_create_message_body(environment="sandbox"):
@@ -19,7 +22,8 @@ class Generators:
             auth_header = {"Authorization": auth.value}
         return {
             **auth_header,
-            "X-Request-ID":"123e4567-e89b-12d3-a456-426614174000",
+            # Unique per test so a failing request can be traced in Apigee and CloudWatch logs
+            "X-Request-ID": str(uuid.uuid4()),
         }
 
     @staticmethod

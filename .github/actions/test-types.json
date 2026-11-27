@@ -1,5 +1,4 @@
 [
-  "component",
-  "e2e",
+  "component-then-e2e",
   "sandbox"
 ]

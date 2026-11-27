@@ -111,9 +111,6 @@ test-sandbox:
 test-performance:
 	pnpm install && pnpm --filter nhs-notify-supplier-api-tests run test:performance
 
-test-contract: # Run provider contract tests @Testing
-	pnpm --filter @sap/contracts-provider run test:contracts
-
 version:
 	rm -f .version
 	make version-create-effective-file dir=.

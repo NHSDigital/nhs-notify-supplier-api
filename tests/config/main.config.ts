@@ -10,15 +10,18 @@ const localConfig: PlaywrightTestConfig = {
   reporter: getReporters("api-test"),
   projects: [
     {
-      name: "integration-tests",
-      testDir: path.resolve(__dirname, "../component-tests/integration-tests"),
+      // Specs that call GET /letters as supplier1. GET /letters hides every letter it returns for
+      // VISIBILITY_TIMEOUT_SECONDS, so these specs run one at a time to avoid hiding each other's letters.
+      name: "letter-list-tests",
+      testDir: path.resolve(__dirname, "../component-tests/letter-list-tests"),
       testMatch: "**/*.spec.ts",
+      fullyParallel: false,
+      workers: 1,
     },
     {
       name: "apiGateway-tests",
       testDir: path.resolve(__dirname, "../component-tests/apiGateway-tests"),
       testMatch: "**/*.spec.ts",
-      dependencies: ["integration-tests"],
     },
     {
       name: "events-tests",
@@ -32,10 +35,17 @@ const localConfig: PlaywrightTestConfig = {
       testMatch: "**/*.spec.ts",
     },
     {
-      name: "letterQueue-tests", // Needs to run last as tests visibility timeout and can impact other tests if run before them
-      testDir: path.resolve(__dirname, "../component-tests/letterQueue-tests"),
+      // Specs that overwrite or assert exact supplier-quotas counters. They run one at a time,
+      // after every other project that sends events to the allocator.
+      name: "allocation-serial-tests",
+      testDir: path.resolve(
+        __dirname,
+        "../component-tests/allocation-serial-tests",
+      ),
       testMatch: "**/*.spec.ts",
-      dependencies: ["events-tests"],
+      fullyParallel: false,
+      workers: 1,
+      dependencies: ["allocation-tests", "events-tests"],
     },
   ],
 };
