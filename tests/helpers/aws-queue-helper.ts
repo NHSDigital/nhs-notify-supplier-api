@@ -4,7 +4,7 @@ import {
   ReceiveMessageCommand,
   SQSClient,
 } from "@aws-sdk/client-sqs";
-import { PreparedEventSchema } from "lambdas/supplier-allocator/src/handler/types";
+import { $MinimumLetterEvent } from "lambdas/common/types";
 import {
   AWS_ACCOUNT_ID,
   AWS_REGION,
@@ -17,7 +17,7 @@ function messageMatchesDomainId(message: Message, domainId: string): boolean {
     return false;
   }
   try {
-    const letterEvent = PreparedEventSchema.parse(JSON.parse(message.Body));
+    const letterEvent = $MinimumLetterEvent.parse(JSON.parse(message.Body));
     return letterEvent.data.domainId === domainId;
   } catch {
     // Allow for (and ignore) malformed messages on DLQ

@@ -17,6 +17,7 @@ import { Deps } from "../../config/deps";
 import SupplierConfigValidationError from "../../errors/supplier-config-validation-error";
 import packageJson from "../../../package.json";
 import RejectedError from "../../errors/rejected-error";
+import { $MinimumLetterEvent } from "../../../../common/types";
 
 const renderingSchemaVersion: string =
   packageJson.dependencies[
@@ -233,6 +234,8 @@ describe("createSupplierAllocatorHandler", () => {
       createSqsRecord("msg1", JSON.stringify(preparedEvent)),
     ]);
 
+    const minimumEvent = $MinimumLetterEvent.parse(preparedEvent);
+
     setupDefaultMocks();
 
     const handler = createSupplierAllocatorHandler(mockedDeps);
@@ -248,7 +251,7 @@ describe("createSupplierAllocatorHandler", () => {
     expect(sendCall).toBeInstanceOf(SendMessageCommand);
 
     const messageBody = JSON.parse(sendCall.input.MessageBody);
-    expect(messageBody.letterEvent).toEqual(preparedEvent);
+    expect(messageBody.letterEvent).toEqual(minimumEvent);
     expect(messageBody.allocationDetails.supplierSpec).toEqual({
       supplierId: "supplier1",
       specId: "spec1",
@@ -269,6 +272,8 @@ describe("createSupplierAllocatorHandler", () => {
       createSqsRecord("msg1", JSON.stringify(preparedEvent)),
     ]);
 
+    const minimumEvent = $MinimumLetterEvent.parse(preparedEvent);
+
     setupDefaultMocks();
 
     const handler = createSupplierAllocatorHandler(mockedDeps);
@@ -284,7 +289,7 @@ describe("createSupplierAllocatorHandler", () => {
     expect(sendCall).toBeInstanceOf(SendMessageCommand);
 
     const messageBody = JSON.parse(sendCall.input.MessageBody);
-    expect(messageBody.letterEvent).toEqual(preparedEvent);
+    expect(messageBody.letterEvent).toEqual(minimumEvent);
     expect(messageBody.allocationDetails.supplierSpec).toEqual({
       supplierId: "supplier1",
       specId: "spec1",
@@ -617,6 +622,7 @@ describe("createSupplierAllocatorHandler", () => {
     const evt: SQSEvent = createSQSEvent([
       createSqsRecord("msg1", JSON.stringify(preparedEvent)),
     ]);
+    const minimumEvent = $MinimumLetterEvent.parse(preparedEvent);
 
     setupDefaultMocks();
     (allocationConfig.preferredSupplierPack as jest.Mock).mockRejectedValueOnce(
@@ -638,7 +644,7 @@ describe("createSupplierAllocatorHandler", () => {
     expect(sendCall).toBeInstanceOf(SendMessageCommand);
 
     const messageBody = JSON.parse(sendCall.input.MessageBody);
-    expect(messageBody.letterEvent).toEqual(preparedEvent);
+    expect(messageBody.letterEvent).toEqual(minimumEvent);
     expect(messageBody.allocationDetails.supplierSpec).toEqual({
       supplierId: "unknown",
       specId: "unknown",
