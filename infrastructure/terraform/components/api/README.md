@@ -28,6 +28,7 @@ No requirements.
 | <a name="input_enable_event_anomaly_detection"></a> [enable\_event\_anomaly\_detection](#input\_enable\_event\_anomaly\_detection) | Enable CloudWatch anomaly detection alarm for SNS message  Detects abnormal drops or spikes in event publishing volume. | `bool` | `false` | no |
 | <a name="input_enable_event_cache"></a> [enable\_event\_cache](#input\_enable\_event\_cache) | Enable caching of events to an S3 bucket | `bool` | `true` | no |
 | <a name="input_enable_letter_sla_breaches_scheduler"></a> [enable\_letter\_sla\_breaches\_scheduler](#input\_enable\_letter\_sla\_breaches\_scheduler) | Enable the daily 07:00 Europe/London EventBridge Scheduler trigger for the letter SLA breaches state machine | `bool` | `false` | no |
+| <a name="input_enable_letter_sla_breaches_scheduler"></a> [enable\_letter\_sla\_breaches\_scheduler](#input\_enable\_letter\_sla\_breaches\_scheduler) | Enable the daily 07:00 Europe/London EventBridge Scheduler trigger for the letter SLA breaches state machine | `bool` | `false` | no |
 | <a name="input_enable_sns_delivery_logging"></a> [enable\_sns\_delivery\_logging](#input\_enable\_sns\_delivery\_logging) | Enable SNS Delivery Failure Notifications | `bool` | `true` | no |
 | <a name="input_enable_supplier_mock_scheduler"></a> [enable\_supplier\_mock\_scheduler](#input\_enable\_supplier\_mock\_scheduler) | Enable EventBridge Scheduler trigger for supplier mock lambda | `bool` | `false` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | The name of the tfscaffold environment | `string` | n/a | yes |
@@ -54,6 +55,8 @@ No requirements.
 | <a name="input_parent_acct_environment"></a> [parent\_acct\_environment](#input\_parent\_acct\_environment) | Name of the environment responsible for the acct resources used, affects things like DNS zone. Useful for named dev environments | `string` | `"main"` | no |
 | <a name="input_project"></a> [project](#input\_project) | The name of the tfscaffold project | `string` | n/a | yes |
 | <a name="input_region"></a> [region](#input\_region) | The AWS Region | `string` | n/a | yes |
+| <a name="input_reports_data_retention_non_current_days"></a> [reports\_data\_retention\_non\_current\_days](#input\_reports\_data\_retention\_non\_current\_days) | Number of days to retain noncurrent reporting bucket object versions | `number` | `14` | no |
+| <a name="input_reports_data_retention_policy_days"></a> [reports\_data\_retention\_policy\_days](#input\_reports\_data\_retention\_policy\_days) | Number of days to retain reporting bucket data | `number` | `90` | no |
 | <a name="input_reports_data_retention_non_current_days"></a> [reports\_data\_retention\_non\_current\_days](#input\_reports\_data\_retention\_non\_current\_days) | Number of days to retain noncurrent reporting bucket object versions | `number` | `14` | no |
 | <a name="input_reports_data_retention_policy_days"></a> [reports\_data\_retention\_policy\_days](#input\_reports\_data\_retention\_policy\_days) | Number of days to retain reporting bucket data | `number` | `90` | no |
 | <a name="input_shared_infra_account_id"></a> [shared\_infra\_account\_id](#input\_shared\_infra\_account\_id) | The AWS Account ID of the shared infrastructure account | `string` | `"000000000000"` | no |

@@ -67,13 +67,33 @@
               "Type": "Task"
             }
           }
+        },
+        {
+          "StartAt": "PopulateUnallocatedBreaches",
+          "States": {
+            "PopulateUnallocatedBreaches": {
+              "Arguments": {
+                "FunctionName": "${POPULATE_UNALLOCATED_BREACHES_FUNCTION_ARN}",
+                "Payload": {
+                  "date": "{% $date %}"
+                }
+              },
+              "End": true,
+              "Output": {
+                "populateUnallocatedBreaches": "{% $states.result.Payload %}"
+              },
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Type": "Task"
+            }
+          }
         }
       ],
       "End": true,
       "Output": {
         "populateSamedayBreaches": "{% $states.result[0].populateSamedayBreaches %}",
         "populateStandardBreaches": "{% $states.result[1].populateStandardBreaches %}",
-        "populateSupplierConfigCache": "{% $states.input.populateSupplierConfigCache %}"
+        "populateSupplierConfigCache": "{% $states.input.populateSupplierConfigCache %}",
+        "populateUnallocatedBreaches": "{% $states.result[2].populateUnallocatedBreaches %}"
       },
       "Type": "Parallel"
     },
