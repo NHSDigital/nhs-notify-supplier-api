@@ -10,6 +10,20 @@ const sleep = (ms: number) =>
     setTimeout(resolve, ms);
   });
 
+// FilterLogEvents has a low account-wide TPS quota, and many Playwright workers
+// poll it at once. Share one client so the adaptive retry rate limiter applies
+// across all polls in a worker.
+const cloudWatchLogsClient = new CloudWatchLogsClient({
+  region: AWS_REGION,
+  retryMode: "adaptive",
+  maxAttempts: 6,
+});
+
+const isThrottlingError = (error: unknown): boolean =>
+  error instanceof Error &&
+  (error.name === "ThrottlingException" ||
+    error.name === "TooManyRequestsException");
+
 async function pollLambdaLog(
   lambdaName: string,
   filterPatterns: string[],
@@ -20,22 +34,37 @@ async function pollLambdaLog(
   const queryStartTimeMs = startTimeMs ?? Date.now() - 5 * 60_000;
   const timeoutMs = 120_000;
 
-  const client = new CloudWatchLogsClient({ region: AWS_REGION });
   const logGroupName = `/aws/lambda/nhs-${envName}-supapi-${lambdaName}`;
   const deadline = Date.now() + timeoutMs;
 
-  while (Date.now() < deadline) {
-    const response = await client.send(
-      new FilterLogEventsCommand({
-        logGroupName,
-        startTime: queryStartTimeMs,
-        interleaved: true,
-        limit: 100,
-        filterPattern: filterPatterns.join(" "),
-      }),
-    );
+  // Returns null when throttled so the caller keeps polling until the deadline.
+  const filterEvents = async () => {
+    try {
+      const response = await cloudWatchLogsClient.send(
+        new FilterLogEventsCommand({
+          logGroupName,
+          startTime: queryStartTimeMs,
+          interleaved: true,
+          limit: 100,
+          filterPattern: filterPatterns.join(" "),
+        }),
+      );
+      return response.events ?? [];
+    } catch (error) {
+      if (!isThrottlingError(error)) {
+        throw error;
+      }
+      logger.warn(
+        `FilterLogEvents throttled for ${logGroupName}; retrying until deadline`,
+      );
+      return null;
+    }
+  };
 
-    const foundEvent = (response.events ?? []).find((event) => {
+  while (Date.now() < deadline) {
+    const events = await filterEvents();
+
+    const foundEvent = (events ?? []).find((event) => {
       const message = event.message ?? "";
       return extraPatterns
         ? extraPatterns.some((pattern) => message.includes(pattern))
@@ -46,7 +75,7 @@ async function pollLambdaLog(
       return foundEvent.message;
     }
 
-    await sleep(intervalMs);
+    await sleep(events ? intervalMs : intervalMs * 2);
   }
 
   throw new Error(`Timed out waiting for resolved log in ${logGroupName}`);
