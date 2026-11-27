@@ -1,6 +1,16 @@
 {
   "dependencies": {
-    "esbuild": "0.28.2"
+    "@aws-sdk/client-athena": "catalog:aws",
+    "@date-fns/tz": "catalog:app",
+    "@internal/helpers": "workspace:*",
+    "@internal/letter-sla-breaches-common": "workspace:*",
+    "aws-embedded-metrics": "catalog:aws",
+    "date-fns": "catalog:app",
+    "pino": "catalog:app",
+    "zod": "catalog:app"
+  },
+  "devDependencies": {
+    "@internal/sql-test-helpers": "workspace:*"
   },
   "name": "nhs-notify-supplier-api-populate-standard-breaches",
   "private": true,
