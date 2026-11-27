@@ -9,6 +9,7 @@ import {
   getVolumeGroupDetails,
 } from "../supplier-config";
 import { Deps } from "../../config/deps";
+import LogRefs from "../../config/log-references";
 
 function makeDeps(overrides: Partial<Deps> = {}): Deps {
   const logger = {
@@ -55,8 +56,9 @@ describe("supplier-config service", () => {
   afterEach(() => jest.resetAllMocks());
 
   describe("getVariantDetails", () => {
-    it("returns variant details for valid id", async () => {
-      const variant = { id: "v1", volumeGroupId: "g1" } as any;
+    it("returns variant details with status PROD", async () => {
+      const status = "PROD";
+      const variant = { id: "v1", volumeGroupId: "g1", status };
       const deps = makeDeps();
       deps.supplierConfigRepo.getLetterVariant = jest
         .fn()
@@ -65,7 +67,30 @@ describe("supplier-config service", () => {
       const result = await getVariantDetails("v1", deps);
 
       expect(result).toBe(variant);
+      expect(deps.logger.error).not.toHaveBeenCalled();
     });
+
+    it.each(["DRAFT", "INT", "DISABLED"])(
+      "rejects a letter variant with status %s",
+      async (status) => {
+        const variant = { id: "v1", volumeGroupId: "g1", status };
+        const deps = makeDeps();
+        deps.supplierConfigRepo.getLetterVariant = jest
+          .fn()
+          .mockResolvedValue(variant);
+
+        await expectSupplierConfigValidationError(
+          getVariantDetails("v1", deps),
+          "Letter variant with id v1 is not active",
+        );
+        expect(deps.logger.error).toHaveBeenCalledWith({
+          logRef: LogRefs.INACTIVE_LETTER_VARIANT.code,
+          description: LogRefs.INACTIVE_LETTER_VARIANT.description,
+          variantId: "v1",
+          status,
+        });
+      },
+    );
 
     it("returns undefined when not found", async () => {
       const variant = undefined;

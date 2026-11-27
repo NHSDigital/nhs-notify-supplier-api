@@ -28,7 +28,7 @@
     "notify-c5-colour"
   ],
   "priority": 99,
-  "status": "INT",
+  "status": "PROD",
   "supplierId": "supplier1",
   "type": "STANDARD",
   "volumeGroupId": "volumeGroup-test1"

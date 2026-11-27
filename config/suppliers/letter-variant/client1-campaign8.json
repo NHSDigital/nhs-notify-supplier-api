@@ -32,7 +32,7 @@
     "client1-campaign8"
   ],
   "priority": 7,
-  "status": "INT",
+  "status": "PROD",
   "type": "STANDARD",
   "volumeGroupId": "volumeGroup-test3"
 }

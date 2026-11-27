@@ -19,6 +19,19 @@ export async function getVariantDetails(
 ): Promise<LetterVariant> {
   const variantDetails: LetterVariant =
     await deps.supplierConfigRepo.getLetterVariant(variantId);
+
+  if (variantDetails && variantDetails.status !== "PROD") {
+    deps.logger.error({
+      logRef: LogRefs.INACTIVE_LETTER_VARIANT.code,
+      description: LogRefs.INACTIVE_LETTER_VARIANT.description,
+      variantId,
+      status: variantDetails.status,
+    });
+    throw new SupplierConfigValidationError(
+      `Letter variant with id ${variantId} is not active`,
+    );
+  }
+
   return variantDetails;
 }
 

@@ -1,5 +1,5 @@
 import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
-import { SQSEvent, SQSRecord } from "aws-lambda";
+import { Context, SQSEvent, SQSRecord } from "aws-lambda";
 import pino from "pino";
 import { LetterRequestPreparedEventV2 } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering";
 import { LetterRequestPreparedEvent } from "@nhsdigital/nhs-notify-event-schemas-letter-rendering-v1";
@@ -17,6 +17,7 @@ import { Deps } from "../../config/deps";
 import SupplierConfigValidationError from "../../errors/supplier-config-validation-error";
 import packageJson from "../../../package.json";
 import RejectedError from "../../errors/rejected-error";
+import LogRefs from "../../config/log-references";
 
 const renderingSchemaVersion: string =
   packageJson.dependencies[
@@ -653,6 +654,80 @@ describe("createSupplierAllocatorHandler", () => {
   });
 
   describe("Dead letter queue", () => {
+    it.each([
+      ["DRAFT", createPreparedV1Event],
+      ["INT", createPreparedV1Event],
+      ["DISABLED", createPreparedV1Event],
+      ["DRAFT", createPreparedV2Event],
+      ["INT", createPreparedV2Event],
+      ["DISABLED", createPreparedV2Event],
+    ] as const)(
+      "places the original record on the DLQ when the letter variant status is %s (%#)",
+      async (status, createPreparedEvent) => {
+        const body = JSON.stringify(createPreparedEvent());
+        const evt = createSQSEvent([createSqsRecord("msg1", body)]);
+
+        setupDefaultMocks();
+        jest
+          .mocked(supplierConfig.getVariantDetails)
+          .mockImplementationOnce(
+            jest.requireActual<typeof supplierConfig>(
+              "../../services/supplier-config",
+            ).getVariantDetails,
+          );
+        jest
+          .mocked(mockedDeps.supplierConfigRepo.getLetterVariant)
+          .mockResolvedValueOnce({
+            id: "lv1",
+            name: "Letter variant",
+            type: "STANDARD",
+            volumeGroupId: "g1",
+            status,
+            priority: 1,
+            packSpecificationIds: ["spec1"],
+          });
+
+        const handler = createSupplierAllocatorHandler(mockedDeps);
+        const result = await handler(evt, {} as Context, jest.fn());
+        if (!result) throw new Error("expected BatchResponse, got void");
+
+        expect(result.batchItemFailures).toEqual([]);
+        expect(mockedDeps.sqsClient.send).toHaveBeenCalledTimes(1);
+        expect(mockedDeps.sqsClient.send).toHaveBeenCalledWith(
+          expect.objectContaining({
+            input: {
+              QueueUrl: "https://sqs.test.queue/supplier-allocator-dlq",
+              MessageBody: body,
+            },
+          }),
+        );
+        expect(supplierConfig.getVolumeGroupDetails).not.toHaveBeenCalled();
+        expect(supplierQuotas.updateSupplierAllocation).not.toHaveBeenCalled();
+        expect(mockedDeps.logger.error).toHaveBeenCalledWith({
+          logRef: LogRefs.INACTIVE_LETTER_VARIANT.code,
+          description: LogRefs.INACTIVE_LETTER_VARIANT.description,
+          variantId: "lv1",
+          status,
+        });
+        expect(mockedDeps.logger.error).toHaveBeenCalledWith(
+          expect.objectContaining({
+            logRef: LogRefs.ERROR_PROCESSING_ALLOCATION.code,
+            err: new SupplierConfigValidationError(
+              "Letter variant with id lv1 is not active",
+            ),
+            messageId: "msg1",
+            message: body,
+          }),
+        );
+        expect(mockedDeps.logger.info).toHaveBeenCalledWith(
+          expect.objectContaining({
+            logRef: LogRefs.SENDING_DLQ_MESSAGE.code,
+            messageId: "msg1",
+          }),
+        );
+      },
+    );
+
     it("places the record on the DLQ when no suppliers are found for pack specification", async () => {
       const preparedEvent = createPreparedV2Event();
       const evt: SQSEvent = createSQSEvent([

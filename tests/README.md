@@ -16,6 +16,16 @@ Test suites that validate the supplier API beyond individual package unit tests.
 
 ## Prerequisites
 
+Shared variants used by allocation and urgent-letter-priority component tests have status `PROD` in `config/suppliers/letter-variant/`. Deploy and seed these fixtures before running the tests; test setup does not overwrite shared variant statuses. The letter-variant tests create isolated temporary variants with statuses `DRAFT`, `INT`, and `DISABLED`, verify the inactive-variant log and DLQ delivery, and delete the temporary configuration afterwards.
+
+Non-`PROD` variant tests expect successful DLQ delivery and assert the logger's emitted `log_reference` field; these are passing negative tests, not expected test failures.
+
+Run the allocation suite against a deployed environment with the updated supplier configuration fixtures:
+
+```bash
+pnpm --filter nhs-notify-supplier-api-tests run test:component --project=allocation-tests
+```
+
 - **Unit and Pact tests**: There are no prerequisites as they run locally with no external dependencies.
 - **Component tests** require a running AWS login and a deployed environment:
   1. Deploy a dynamic environment (can be achieved by creating a Pull Request). Take a note of the environment e.g. pr1234
