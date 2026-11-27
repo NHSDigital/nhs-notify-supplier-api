@@ -70,3 +70,15 @@ E2E tests (require AWS credentials and environment configuration):
 ```bash
 make .internal-dev-test (from root level Makefile)
 ```
+
+## Writing Component Tests Against Shared State
+
+All suites run against the same deployed environment, and most tests use `supplier1`. In CI, `.github/actions/test-types.json` lists `component-then-e2e`, so the component and e2e suites run one after the other in one job. Sandbox tests run in parallel because they don't touch AWS state. To keep the suites stable:
+
+- **`GET /letters` changes state.** Every letter it returns is hidden for the visibility timeout (10s on dev), and a call returns at most `limit` letters out of the whole supplier backlog. Don't assume a single call returns the letters your test created. Prefer `GET /letters/{id}` to wait for a letter, or retry until one response contains everything you need (see `getLetterIdsContainingAll`). Specs that call the list endpoint belong in `component-tests/letter-list-tests/`, a Playwright project that runs one spec at a time so they don't hide each other's letters. Never assert that `GET /letters` returns nothing; assert on your own letter IDs instead.
+- **Supplier quotas are shared counters.** The allocator updates the daily and per-volume-group allocation rows in the supplier-quotas table. Tests that overwrite those counters, or assert exact totals, belong in `component-tests/allocation-serial-tests/`. That Playwright project runs with one worker after `allocation-tests` and `events-tests`. Always restore counters in `finally`, with a relative change (`adjustSupplierDailyAllocation`) rather than an absolute value.
+- **The `supplier-allocator-dlq` queue is shared.** On `main` it also collects events from other teams' environments, so it can hold thousands of messages. `pollQueueForLetterEvent` checks up to 50 messages per round and puts non-matching ones straight back, so parallel specs don't hide each other's messages. It deletes only the message the test produced. SQS can't search, so a backlog of thousands of messages can still make these tests time out.
+- **Clean up letters you create.** A PENDING letter stays in the supplier's letter queue until its 7-day TTL and is returned by every later `GET /letters` call. Call `acceptTestLetters` in a `finally` block or `afterEach`. It PATCHes the letters to ACCEPTED, which removes them from the queue, and it never fails the test.
+- **Allocation dates use Europe/London.** Use `getAllocationDate()` rather than `new Date().toISOString()`.
+
+<!-- TODO: CCM-12345 Only the letter-list-tests specs clean up so far. The events-tests and allocation-tests specs still leave supplier1 letters PENDING; add acceptTestLetters to them. -->
