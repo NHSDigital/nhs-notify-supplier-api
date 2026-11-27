@@ -32,6 +32,19 @@ const localConfig: PlaywrightTestConfig = {
       testMatch: "**/*.spec.ts",
     },
     {
+      // Specs that overwrite or assert exact supplier-quotas counters. They run one at a time,
+      // after every other project that sends events to the allocator.
+      name: "allocation-serial-tests",
+      testDir: path.resolve(
+        __dirname,
+        "../component-tests/allocation-serial-tests",
+      ),
+      testMatch: "**/*.spec.ts",
+      fullyParallel: false,
+      workers: 1,
+      dependencies: ["allocation-tests", "events-tests"],
+    },
+    {
       name: "letterQueue-tests", // Needs to run last as tests visibility timeout and can impact other tests if run before them
       testDir: path.resolve(__dirname, "../component-tests/letterQueue-tests"),
       testMatch: "**/*.spec.ts",

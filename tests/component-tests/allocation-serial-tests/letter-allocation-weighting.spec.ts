@@ -116,10 +116,20 @@ test.describe("Allocator Weighting Tests", () => {
         )?.factor,
       );
 
+      // allocations are persisted at the end of the allocator batch, after the log line we waited for
+      await expect
+        .poll(
+          async () => {
+            const { allocations } =
+              await getOverallAllocationFromDb(volGroupId);
+            return allocations.supplier4;
+          },
+          { timeout: 30_000 },
+        )
+        .toBe(101);
       const updatedOverallAllocation =
         await getOverallAllocationFromDb(volGroupId);
       expect(updatedOverallAllocation.allocations.supplier3).toBe(900);
-      expect(updatedOverallAllocation.allocations.supplier4).toBe(101);
       expect(supplierFactorLog.description).toBe(
         "Calculated supplier factors for allocation",
       );
