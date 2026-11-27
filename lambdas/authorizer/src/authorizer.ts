@@ -3,24 +3,17 @@ import {
   APIGatewayEventClientCertificate,
   APIGatewayRequestAuthorizerEvent,
   APIGatewayRequestAuthorizerEventHeaders,
-  APIGatewayRequestAuthorizerHandler,
-  Callback,
-  Context,
 } from "aws-lambda";
 import { MetricsLogger, metricScope } from "aws-embedded-metrics";
 import { Supplier } from "@internal/datastore";
 import { Deps } from "./deps";
 import LogRefs from "./log-references";
 
-export default function createAuthorizerHandler(
-  deps: Deps,
-): APIGatewayRequestAuthorizerHandler {
-  return (
+export default function createAuthorizerHandler(deps: Deps) {
+  return async (
     event: APIGatewayRequestAuthorizerEvent,
-    context: Context,
-    callback: Callback<APIGatewayAuthorizerResult>,
-  ): void => {
-    checkCertificateExpiry(
+  ): Promise<APIGatewayAuthorizerResult> => {
+    await checkCertificateExpiry(
       event.requestContext.identity.clientCert,
       deps,
     ).catch((error) => {
@@ -30,25 +23,26 @@ export default function createAuthorizerHandler(
       });
     });
 
-    getSupplier(event.headers, deps)
-      .then((supplier: Supplier) => {
-        deps.logger.info({
-          logRef: LogRefs.ALLOWED_EVENT.code,
-          description: LogRefs.ALLOWED_EVENT.description,
-          methodArn: event.methodArn,
-          supplierId: supplier.id,
-        });
-        callback(null, generateAllow(event.methodArn, supplier.id));
-      })
-      .catch((error) => {
-        deps.logger.warn({
-          logRef: LogRefs.DENIED_EVENT.code,
-          description: LogRefs.DENIED_EVENT.description,
-          err: error,
-          methodArn: event.methodArn,
-        });
-        callback(null, generateDeny(event.methodArn));
+    let authResult: APIGatewayAuthorizerResult;
+    try {
+      const supplier = await getSupplier(event.headers, deps);
+      deps.logger.info({
+        logRef: LogRefs.ALLOWED_EVENT.code,
+        description: LogRefs.ALLOWED_EVENT.description,
+        methodArn: event.methodArn,
+        supplierId: supplier.id,
       });
+      authResult = generateAllow(event.methodArn, supplier.id);
+    } catch (error) {
+      deps.logger.warn({
+        logRef: LogRefs.DENIED_EVENT.code,
+        description: LogRefs.DENIED_EVENT.description,
+        err: error,
+        methodArn: event.methodArn,
+      });
+      authResult = generateDeny(event.methodArn);
+    }
+    return authResult;
   };
 }
 
