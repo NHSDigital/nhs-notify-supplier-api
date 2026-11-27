@@ -1,6 +1,5 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
-  DeleteCommand,
   DynamoDBDocumentClient,
   GetCommand,
   QueryCommand,
@@ -299,20 +298,6 @@ export async function waitForLetterStatus(
     `Timed out waiting for letter ${id} to reach status ${status} for supplier ${supplierId}.`,
   );
 }
-
-export const deleteLettersBySupplier = async (
-  supplierId: string,
-  id: string,
-) => {
-  const resp = await docClient.send(
-    new DeleteCommand({
-      TableName: LETTERSTABLENAME,
-      Key: { id, supplierId },
-      ReturnValues: "ALL_OLD",
-    }),
-  );
-  return resp.Attributes;
-};
 
 export async function checkSupplierExists(
   supplierId: string,
