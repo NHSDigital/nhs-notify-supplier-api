@@ -21,8 +21,7 @@ API Gateway "REQUEST authorizer" that maps an APIM application identity to an in
 
 ## Nuances and Peculiarities
 
-- The handler uses the **callback pattern** because API Gateway REQUEST authorizers require it, not async return.
 - Header matching is case-insensitive (`headerName.toLowerCase()`) to handle inconsistencies in header casing.
 - Disabled suppliers are explicitly denied even if the APIM ID lookup succeeds.
-- Certificate expiry checking is fire-and-forget; it does not affect the Allow/Deny decision.
+- Certificate expiry checking does not affect the Allow/Deny decision.
 - The `principalId` in the Allow policy is the **internal supplier ID** (not the APIM application supplier ID), so all downstream Lambdas receive the resolved identity via `event.requestContext.authorizer.principalId`.

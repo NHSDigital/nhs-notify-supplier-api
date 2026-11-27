@@ -1,8 +1,6 @@
 import {
   APIGatewayEventClientCertificate,
   APIGatewayRequestAuthorizerEvent,
-  Callback,
-  Context,
 } from "aws-lambda";
 import { metricScope } from "aws-embedded-metrics";
 import pino from "pino";
@@ -56,8 +54,6 @@ const buildCertWithExpiry = (
 
 describe("Authorizer Lambda Function", () => {
   let mockEvent: APIGatewayRequestAuthorizerEvent;
-  let mockContext: Context;
-  let mockCallback: jest.MockedFunction<Callback>;
 
   beforeEach(() => {
     mockEvent = {
@@ -68,9 +64,6 @@ describe("Authorizer Lambda Function", () => {
       pathParameters: {},
       requestContext: { identity: { clientCert: null } },
     } as APIGatewayRequestAuthorizerEvent;
-
-    mockContext = {} as Context;
-    mockCallback = jest.fn();
   });
 
   describe("Certificate expiry check", () => {
@@ -96,8 +89,7 @@ describe("Authorizer Lambda Function", () => {
       mockEvent.requestContext.identity.clientCert = null;
 
       const handler = createAuthorizerHandler(mockedDeps);
-      handler(mockEvent, mockContext, mockCallback);
-      await new Promise(process.nextTick);
+      await handler(mockEvent);
 
       expect(metricScope).not.toHaveBeenCalled();
     });
@@ -108,8 +100,7 @@ describe("Authorizer Lambda Function", () => {
       );
 
       const handler = createAuthorizerHandler(mockedDeps);
-      handler(mockEvent, mockContext, mockCallback);
-      await new Promise(process.nextTick);
+      await handler(mockEvent);
 
       const metricsMock = jest.requireMock(
         "aws-embedded-metrics",
@@ -135,8 +126,7 @@ describe("Authorizer Lambda Function", () => {
       );
 
       const handler = createAuthorizerHandler(mockedDeps);
-      handler(mockEvent, mockContext, mockCallback);
-      await new Promise(process.nextTick);
+      await handler(mockEvent);
 
       expect(metricScope).not.toHaveBeenCalled();
     });
@@ -151,8 +141,7 @@ describe("Authorizer Lambda Function", () => {
       );
 
       const handler = createAuthorizerHandler(mockedDeps);
-      handler(mockEvent, mockContext, mockCallback);
-      await new Promise(process.nextTick);
+      await handler(mockEvent);
 
       expect(mockedDeps.logger.error).toHaveBeenCalledWith({
         description: "Error checking certificate expiry",
@@ -166,11 +155,9 @@ describe("Authorizer Lambda Function", () => {
       mockEvent.headers = null;
 
       const handler = createAuthorizerHandler(mockedDeps);
-      handler(mockEvent, mockContext, mockCallback);
-      await new Promise(process.nextTick);
+      const result = await handler(mockEvent);
 
-      expect(mockCallback).toHaveBeenCalledWith(
-        null,
+      expect(result).toEqual(
         expect.objectContaining({
           policyDocument: expect.objectContaining({
             Statement: [
@@ -187,11 +174,9 @@ describe("Authorizer Lambda Function", () => {
       mockEvent.headers = { "x-apim-correlation-id": "correlation-id" };
 
       const handler = createAuthorizerHandler(mockedDeps);
-      handler(mockEvent, mockContext, mockCallback);
-      await new Promise(process.nextTick);
+      const result = await handler(mockEvent);
 
-      expect(mockCallback).toHaveBeenCalledWith(
-        null,
+      expect(result).toEqual(
         expect.objectContaining({
           policyDocument: expect.objectContaining({
             Statement: [
@@ -211,11 +196,9 @@ describe("Authorizer Lambda Function", () => {
       ).mockRejectedValue(new Error("Supplier not found"));
 
       const handler = createAuthorizerHandler(mockedDeps);
-      handler(mockEvent, mockContext, mockCallback);
-      await new Promise(process.nextTick);
+      const result = await handler(mockEvent);
 
-      expect(mockCallback).toHaveBeenCalledWith(
-        null,
+      expect(result).toEqual(
         expect.objectContaining({
           policyDocument: expect.objectContaining({
             Statement: [
@@ -240,11 +223,9 @@ describe("Authorizer Lambda Function", () => {
       });
 
       const handler = createAuthorizerHandler(mockedDeps);
-      handler(mockEvent, mockContext, mockCallback);
-      await new Promise(process.nextTick);
+      const result = await handler(mockEvent);
 
-      expect(mockCallback).toHaveBeenCalledWith(
-        null,
+      expect(result).toEqual(
         expect.objectContaining({
           policyDocument: expect.objectContaining({
             Statement: [
@@ -270,11 +251,9 @@ describe("Authorizer Lambda Function", () => {
       });
 
       const handler = createAuthorizerHandler(mockedDeps);
-      handler(mockEvent, mockContext, mockCallback);
-      await new Promise(process.nextTick);
+      const result = await handler(mockEvent);
 
-      expect(mockCallback).toHaveBeenCalledWith(
-        null,
+      expect(result).toEqual(
         expect.objectContaining({
           policyDocument: expect.objectContaining({
             Statement: [
@@ -301,11 +280,9 @@ describe("Authorizer Lambda Function", () => {
     });
 
     const handler = createAuthorizerHandler(mockedDeps);
-    handler(mockEvent, mockContext, mockCallback);
-    await new Promise(process.nextTick);
+    const result = await handler(mockEvent);
 
-    expect(mockCallback).toHaveBeenCalledWith(
-      null,
+    expect(result).toEqual(
       expect.objectContaining({
         policyDocument: expect.objectContaining({
           Statement: [
