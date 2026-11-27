@@ -23,6 +23,7 @@
     "graphql": "catalog:app",
     "graphql-tag": "catalog:app",
     "md5": "catalog:app",
+    "nhs-notify-supplier-api": "workspace:*",
     "nhs-notify-supplier-api-allocate-letter": "workspace:*",
     "nhs-notify-supplier-api-upsert-letter": "workspace:*",
     "openapi-response-validator": "catalog:test",

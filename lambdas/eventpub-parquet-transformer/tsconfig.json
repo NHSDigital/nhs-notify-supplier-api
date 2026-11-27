@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true
+  },
+  "extends": "../../tsconfig.base.json",
+  "include": [
+    "src/**/*",
+    "jest.config.ts"
+  ]
+}

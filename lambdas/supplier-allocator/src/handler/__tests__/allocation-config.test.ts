@@ -241,7 +241,10 @@ describe("eligibleSuppliers", () => {
 });
 
 describe("preferredSupplierPack", () => {
-  let mockLetterEvent: LetterRequestPreparedEventV2;
+  type MockLetterEvent = LetterRequestPreparedEventV2 & {
+    data: { status: "PREPARED" };
+  };
+  let mockLetterEvent: MockLetterEvent;
   let mockPackSpecificationIds: string[];
   let mockDeps: jest.Mocked<Deps>;
   let mockSuppliers: Supplier[];
@@ -252,7 +255,8 @@ describe("preferredSupplierPack", () => {
     mockLetterEvent = {
       letterid: "letter-1",
       specification: "spec-1",
-    } as unknown as LetterRequestPreparedEventV2;
+      data: { status: "PREPARED" },
+    } as unknown as MockLetterEvent;
 
     mockSuppliers = [
       {

@@ -19,7 +19,7 @@ import { calculateSupplierAllocatedFactor } from "../services/supplier-quotas";
 
 import { Deps } from "../config/deps";
 import LogRefs from "../config/log-references";
-import { PreparedEvents } from "./types";
+import { MinimumLetterEvent } from "../../../common/types";
 import SupplierConfigValidationError from "../errors/supplier-config-validation-error";
 
 export async function eligibleSuppliers(
@@ -80,7 +80,7 @@ export async function eligibleSuppliers(
 }
 
 export async function preferredSupplierPack(
-  letterEvent: PreparedEvents,
+  letterEvent: MinimumLetterEvent,
   suppliers: Supplier[],
   packSpecificationIds: string[],
   deps: Deps,
