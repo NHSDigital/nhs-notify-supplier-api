@@ -3,7 +3,10 @@ description: "Run acceptance tests for this repo"
 
 inputs:
   testType:
-    description: Type of test to run
+    description: >-
+      Type of test to run: component, e2e, sandbox, or component-then-e2e. component-then-e2e
+      runs both suites in one job, one after the other, because they share supplier1 state in
+      the same environment. It is the value listed in test-types.json.
     required: true
 
   targetEnvironment:
@@ -18,6 +21,13 @@ inputs:
     description: Name of the component under test
     required: true
 
+  shard:
+    description: >-
+      Shard passed by the nhs-notify-internal test workflow. Ignored: the suites share
+      supplier1 state and run allocation tests serially, so they are not split across shards.
+    required: false
+    default: ""
+
 runs:
   using: "composite"
 
@@ -27,13 +37,14 @@ runs:
       if: ${{ inputs.testType != 'e2e' }}
       uses: ./.github/actions/acceptance-tests-components
       with:
-        testType: ${{ inputs.testType }}
+        testType: ${{ inputs.testType == 'component-then-e2e' && 'component' || inputs.testType }}
         targetEnvironment: ${{ inputs.targetEnvironment }}
         targetComponent: ${{ inputs.targetComponent }}
         targetAccountGroup: ${{ inputs.targetAccountGroup }}
 
+    # Runs even if the component tests failed, so both results are always reported.
     - name: Run e2e tests
-      if: ${{ inputs.testType == 'e2e' }}
+      if: ${{ !cancelled() && (inputs.testType == 'e2e' || inputs.testType == 'component-then-e2e') }}
       uses: ./.github/actions/acceptance-tests-e2e
       with:
         targetEnvironment: ${{ inputs.targetEnvironment }}
