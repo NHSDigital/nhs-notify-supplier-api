@@ -151,10 +151,7 @@ provenance = "github-attestations"
 [[tools.python]]
 version = "3.12.16"
 backend = "core:python"
-specifiers = [
-    "3.12",
-    "3.12.16",
-]
+specifiers = ["3.12.16"]
 
 [tools.python."platforms.linux-x64"]
 checksum = "sha256:7e1adaea26c959d13aa1120be1ae62a1ea1bb52adcb382679fffe9217e22adff"
@@ -184,7 +181,7 @@ url_api = "https://api.github.com/repos/anchore/syft/releases/assets/331876319"
 [[tools.terraform]]
 version = "1.14.9"
 backend = "aqua:hashicorp/terraform"
-specifiers = ["1.14.8"]
+specifiers = ["1.14.9"]
 
 [tools.terraform."platforms.linux-x64"]
 checksum = "sha256:2e5cffc20a0b48a67a76268723bd5a10b8666f69b2aa4f04906e206726bedd63"
