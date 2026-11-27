@@ -11,17 +11,17 @@ const LogRefs = {
     code: "003-DDB-ERROR",
     description: "Error processing ddbRecord",
   },
-  PERSISTING_PENDING_LETTER: {
-    code: "004-PERSISTING-LETTER",
-    description: "Persisting pending letter",
+  LETTER_ADDED_TO_QUEUE: {
+    code: "004-LETTER-ADDED",
+    description: "Letter added to queue",
   },
   LETTER_ALREADY_EXISTS: {
     code: "005-LETTER-EXISTS",
     description: "Letter already exists",
   },
-  DELETING_PENDING_LETTER: {
-    code: "006-DELETING-LETTER",
-    description: "Deleting pending letter",
+  LETTER_REMOVED_FROM_QUEUE: {
+    code: "006-LETTER-REMOVED",
+    description: "Letter removed from queue",
   },
   LETTER_DOES_NOT_EXIST: {
     code: "007-LETTER-NOT-EXIST",
@@ -50,6 +50,10 @@ const LogRefs = {
   ERROR_EXTRACTING_PAYLOAD: {
     code: "013-ERROR-EXTRACTING-PAYLOAD",
     description: "Error extracting payload",
+  },
+  INVALID_LETTER_DROPPED: {
+    code: "014-INVALID-LETTER-DROPPED",
+    description: "Invalid letter data, record dropped",
   },
 };
 
