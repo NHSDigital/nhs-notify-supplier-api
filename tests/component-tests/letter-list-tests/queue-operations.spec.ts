@@ -12,6 +12,7 @@ import {
   supplierIdFromSupplierAllocatorLog,
 } from "tests/helpers/aws-cloudwatch-helper";
 import getRestApiGatewayBaseUrl from "tests/helpers/aws-gateway-helper";
+import { acceptTestLetters } from "tests/helpers/poll-for-letters-helper";
 import {
   SUPPLIER_LETTERS,
   VISIBILITY_TIMEOUT_SECONDS,
@@ -31,8 +32,19 @@ import {
 
 let baseUrl: string;
 
+let lettersToCleanUp: { supplierId: string; letterId: string }[] = [];
+
 test.beforeAll(async () => {
   baseUrl = await getRestApiGatewayBaseUrl();
+});
+
+test.afterEach(async ({ request }) => {
+  await Promise.all(
+    lettersToCleanUp.map(({ letterId, supplierId }) =>
+      acceptTestLetters(request, supplierId, [letterId], baseUrl),
+    ),
+  );
+  lettersToCleanUp = [];
 });
 
 test.describe("Letter Queue Tests", () => {
@@ -93,6 +105,7 @@ test.describe("Letter Queue Tests", () => {
       `Sending batch event with ${eventBatch.length} events ${letterId}`,
     );
     await sendSqsEventBatch(eventBatch.map((event) => JSON.stringify(event)));
+    lettersToCleanUp.push({ supplierId: "supplier1", letterId });
 
     logger.info(
       `Verifying duplicate queue inserts are ignored for the batch of events with same letterId ${letterId}`,
@@ -107,7 +120,7 @@ test.describe("Letter Queue Tests", () => {
     await pollUpsertLetterLogForWarning("Letter already exists", letterId);
   });
 
-  test("Verify if TimeStamps are updated when Get /letters endpoint is called and subsequent calls returns no data until VisibilityTimeStamp is reached", async ({
+  test("Verify if TimeStamps are updated when Get /letters endpoint is called and subsequent calls do not return the letter until VisibilityTimeStamp is reached", async ({
     request,
   }) => {
     const letterId = randomUUID();
@@ -118,6 +131,7 @@ test.describe("Letter Queue Tests", () => {
     expect(response.MessageId).toBeTruthy();
 
     const supplierId = await supplierIdFromSupplierAllocatorLog(letterId);
+    lettersToCleanUp.push({ supplierId, letterId });
 
     await supplierDataSetup(supplierId);
 
@@ -183,6 +197,7 @@ test.describe("Letter Queue Tests", () => {
     if (!isGetLettersResponse(secondResponseBody)) {
       throw new Error("Expected GetLettersResponse body for 200 status");
     }
-    expect(secondResponseBody.data).toHaveLength(0);
+    // Other tests create supplier1 letters concurrently, so only assert that this letter is hidden.
+    expect(secondResponseBody.data.map((l) => l.id)).not.toContain(letterId);
   });
 });

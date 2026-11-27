@@ -50,3 +50,39 @@ export async function pollForLetterStatus(
     `Max attempts reached while polling for letter status for domainId: ${domainId}`,
   );
 }
+
+/**
+ * Best-effort clean-up: moves test letters out of PENDING so they leave the supplier's letter queue
+ * and stop appearing in later GET /letters calls. Failures are logged, not thrown, so clean-up
+ * never fails a test. Each update also emits a normal supplier status event.
+ */
+export async function acceptTestLetters(
+  request: APIRequestContext,
+  supplierId: string,
+  letterIds: string[],
+  baseUrl: string,
+): Promise<void> {
+  const headers = createValidRequestHeaders(supplierId);
+  await Promise.all(
+    letterIds.map(async (id) => {
+      try {
+        const response = await request.patch(
+          `${baseUrl}/${SUPPLIER_LETTERS}/${id}`,
+          {
+            headers,
+            data: {
+              data: { type: "Letter", id, attributes: { status: "ACCEPTED" } },
+            },
+          },
+        );
+        if (response.status() !== 202) {
+          logger.warn(
+            `Clean-up: PATCH ${id} to ACCEPTED returned ${response.status()}`,
+          );
+        }
+      } catch (error) {
+        logger.warn({ error }, `Clean-up: PATCH ${id} to ACCEPTED failed`);
+      }
+    }),
+  );
+}
